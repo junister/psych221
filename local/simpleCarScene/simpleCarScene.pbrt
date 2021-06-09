@@ -1,0 +1,30 @@
+# PBRT file created with piWrite on 2021/6/3 20:2:17.82 
+# PBRT version = 3 
+
+LookAt 0.000000 1.500000 7.000000 0.000000 0.500000 0.000000 0.000000 1.000000 0.000000 
+
+# camera 
+Camera "perspective" 
+  "float fov" [45.000000] 
+
+# sampler 
+Sampler "halton" 
+  "integer pixelsamples" [8] 
+
+# film 
+Film "image" 
+  "integer xresolution" [640] 
+  "integer yresolution" [300] 
+  "float diagonal" [10.000000] 
+
+# integrator 
+Integrator "path" 
+  "integer maxdepth" [3] 
+
+WorldBegin 
+Include "simpleCarScene_materials.pbrt" 
+ 
+Include "simpleCarScene_geometry.pbrt" 
+ 
+Include "simpleCarScene_lights.pbrt" 
+WorldEnd 

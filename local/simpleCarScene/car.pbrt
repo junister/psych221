@@ -1,0 +1,30 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 0.987247646 -0.00599148404 -0.159079328 0 8.67361738e-19 0.99929148 -0.0376368165 0 0.159192115 0.0371568576 0.986548126 0 1.41040564 -0.949361145 6.55578661 1  ]
+Camera "perspective" 
+        "float fov" [ 31.4172764 ] 
+        "float focaldistance" [ 2000 ] 
+        "float lensradius" [ 0 ] 
+Sampler "halton" 
+        "integer pixelsamples" [ 16 ] 
+Film "image" 
+        "integer xresolution" [ 1280 ] 
+        "integer yresolution" [ 720 ] 
+        "string filename" [ "car.exr" ] 
+Integrator "directlighting" 
+        "integer maxdepth" [ 5 ] 
+        "string strategy" [ "all" ] 
+
+
+WorldBegin
+
+# Default Material
+Material "uber" 
+        "float index" [ 1.33299994 ] 
+        "rgb Kd" [ 0.0936064422 0.109744944 0.12801072 ] 
+LightSource "distant" 
+        "point from" [ 0 0 0 ] 
+        "point to" [ 0.101859622 -0.0363543704 0.994134247 ] 
+        "rgb L" [ 0.924361646 0.919552028 0.91512543 ] 
+Include "car_materials.pbrt"
+Include "car_geometry.pbrt"
+WorldEnd

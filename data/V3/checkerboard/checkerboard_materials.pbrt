@@ -1,0 +1,2 @@
+Texture "checks" "spectrum" "checkerboard" "float uscale" [8] "float vscale" [8] "rgb tex1" [.01 .01 .01] "rgb tex2" [.99 .99 .99]
+MakeNamedMaterial "board" "string type" "matte" "texture Kd" "checks"

@@ -1,0 +1,8 @@
+# Exported by piLightWrite on 2021/6/3 20:2:17.86 
+AttributeBegin 
+Rotate 0.000 0 0 1 
+Rotate 45.000 0 1 0 
+Rotate -90.000 1 0 0 
+LightSource "infinite" "rgb L" [1             1             1] "string mapname" "probe_16-30_latlongmap.exr" 
+AttributeEnd 
+
