@@ -1,8 +1,0 @@
-# Exported by piMaterialWrite on 2021/6/9 15:35:59.01 
-Texture "rgb:textures/Wood02_col2" "spectrum" "imagemap" "string filename" "textures/Wood02_col2.png"
-MakeNamedMaterial "Material.008" "string type" "coateddiffuse" "rgb reflectance" [0.8000 0.8000 0.8000] "float roughness" [0.0000]
-MakeNamedMaterial "Metal" "string type" "coateddiffuse" "rgb reflectance" [0.5760 0.5760 0.5760] "float roughness" [0.0000]
-MakeNamedMaterial "Porcelain" "string type" "coateddiffuse" "rgb reflectance" [0.0153 0.0153 0.0153] "float roughness" [0.0000]
-MakeNamedMaterial "Rubber" "string type" "coateddiffuse" "rgb reflectance" [0.0095 0.0095 0.0095] "float roughness" [0.0000]
-MakeNamedMaterial "Stone" "string type" "coateddiffuse" "rgb reflectance" [0.0196 0.0196 0.0196] "float roughness" [0.0000] "string normalmap" "textures/Metal13_nrm.png"
-MakeNamedMaterial "Wood" "string type" "coateddiffuse" "texture reflectance" "rgb:textures/Wood02_col2" "float roughness" [0.0000] "string normalmap" "textures/Wood02_nrm.png"
