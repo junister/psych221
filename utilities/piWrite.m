@@ -555,10 +555,18 @@ for ofns = outerFields'
                 end
             elseif(strcmp(currType,'integer'))
                 lineFormat = '  "%s %s" [%i] \n';
+            elseif (strcmp(currType,'bool'))
+                lineFormat = '  "%s %s" %s \n';
             end
             
-            fprintf(fileID,lineFormat,...
-                currType,ifn,currValue);          
+            if ~islogical(currValue)
+                fprintf(fileID,lineFormat,...
+                    currType,ifn,currValue);
+            else
+                logicalStr = {'false', 'true'};
+                fprintf(fileID,lineFormat,...
+                    currType,ifn,logicalStr{currValue+1});
+            end
         end
     end
     
@@ -627,16 +635,21 @@ end
 % Insert the Include lines as the last three before  WorldEnd. 
 for ii = 1:length(thisR.world)
     currLine = thisR.world{ii};    
-    if piContains(currLine, 'WorldEnd') && isempty(lineLights)
-        % Insert the lights file.
-        fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
-    end
     
     fprintf(fileID,'%s \n',currLine);
     
     if piContains(currLine,'WorldBegin') && isempty(lineMaterials)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
+    end
+    
+    if piContains(currLine,'WorldBegin') && isempty(lineGeometry)
+        % Insert the materials file
+        fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
+    end
+    if piContains(currLine, 'WorldBegin') && isempty(lineLights)
+        % Insert the lights file.
+        fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
     end
 end
 

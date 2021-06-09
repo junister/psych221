@@ -99,6 +99,8 @@ if true
             [~, ~, e] = fileparts(val); % Check extension
             if isequal(e, '.spd')
                 material.(pName).type = 'spectrum';
+            elseif isequal(e, '.png') % not sure whether other type of files are supported
+                material.(pName).type = 'string';
             else
                 material.(pName).type = 'texture';
             end

@@ -1,14 +1,16 @@
 function string = piNum2String(num)
-
+string = '';
 % Convert a number to a string
-if isinteger(num)
-    % Adding num(:)' to avoid dimension mismatch
-    string = int2str(num(:)');
-else
-    % using %.5f is much slower than simply asking for precision
-    %formatSpec = '%.5f ';
-    formatSpec = 7; % 7 significant digits
-    string = num2str(num, formatSpec);
+for ii = 1:numel(num)
+    if isinteger(num(ii))
+        % Adding num(:)' to avoid dimension mismatch
+        string = [string, ' ', int2str(num(ii)')];
+    else
+        % using %.5f is much slower than simply asking for precision
+        %formatSpec = '%.5f ';
+        formatSpec = 7; % 7 significant digits
+        string = [string,' ', num2str(num(ii), formatSpec)];
+    end
 end
 %{
 % Comment this out for reference. If the faster code is correct, we will 

@@ -51,26 +51,27 @@ if find(piContains(keyWords, 'Shape '))
             
             if find(piContains(keyWords, 'filename'))
                 shape.filename = piParameterGet(txt, 'string filename');
-                %                 shape.filename = keyWords{find(piContains(keyWords, 'filename')) + 2};
             end
+            
             if find(piContains(keyWords, 'integer indices'))
                 shape.integerindices = uint64(piParameterGet(txt, 'integer indices'));
-                % Convert it to integer format
-                %                 shape.integerindices = keyWords{find(piContains(keyWords, 'integer indices')) + 1};
             end
-            if find(piContains(keyWords, 'point P'))
-                shape.pointp = piParameterGet(txt, 'point P');
-                %                 shape.pointp = keyWords{find(piContains(keyWords, 'point P')) + 1};
+            
+            if find(piContains(keyWords, 'integer faceIndices'))
+                shape.integerindices = uint64(piParameterGet(txt, 'integer faceIndices'));
             end
-            if find(piContains(keyWords, 'float uv'))
-                % If file extension is ply, don't do this. 
+            
+            if find(piContains(keyWords, 'point3 P'))
+                shape.point3p = piParameterGet(txt, 'point3 P');
+            end
+            if find(piContains(keyWords, 'point2 uv'))
                 ext = '';
                 if ~isempty(shape.filename)
                     [~, ~, ext] = fileparts(shape.filename);
                 end
                 if isequal(ext, '.ply')
                 else
-                    shape.floatuv = piParameterGet(txt, 'float uv');
+                    shape.floatuv = piParameterGet(txt, 'point2 uv');
                     % shape.floatuv = keyWords{find(piContains(keyWords, 'float uv')) + 1};
                 end
             end
@@ -81,7 +82,7 @@ if find(piContains(keyWords, 'Shape '))
             end
             % to add
             % float/texture alpha
-            % float/texture shadowalpha
+            % emission filename
         case 'heightfield'
             % todo
         case 'loopsubdiv'
@@ -97,7 +98,7 @@ function s = shapeCreate
     s.meshshape = '';
     s.filename='';
     s.integerindices = '';
-    s.pointp = '';
+    s.point3p = '';
     s.floatuv = '';
     s.normaln = '';
     s.height = '';

@@ -1,0 +1,138 @@
+# Exported by piGeometryWrite on 2021/6/9 15:35:59.006536 
+  
+ObjectBegin "001_mesh_00001_O"
+NamedMaterial "Stone"
+Shape "plymesh" "string filename" "mesh_00001.ply" 
+ObjectEnd
+
+ObjectBegin "002_mesh_00002_O"
+NamedMaterial "Rubber"
+Shape "plymesh" "string filename" "mesh_00002.ply" 
+ObjectEnd
+
+ObjectBegin "003_mesh_00003_O"
+NamedMaterial "Porcelain"
+Shape "plymesh" "string filename" "mesh_00003.ply" 
+ObjectEnd
+
+ObjectBegin "004_mesh_00004_O"
+NamedMaterial "Wood"
+Shape "plymesh" "string filename" "mesh_00004.ply" 
+ObjectEnd
+
+ObjectBegin "001_mesh_00005_O"
+NamedMaterial "Stone"
+Shape "plymesh" "string filename" "mesh_00005.ply" 
+ObjectEnd
+
+ObjectBegin "002_mesh_00006_O"
+NamedMaterial "Rubber"
+Shape "plymesh" "string filename" "mesh_00006.ply" 
+ObjectEnd
+
+ObjectBegin "003_mesh_00007_O"
+NamedMaterial "Porcelain"
+Shape "plymesh" "string filename" "mesh_00007.ply" 
+ObjectEnd
+
+ObjectBegin "004_mesh_00008_O"
+NamedMaterial "Wood"
+Shape "plymesh" "string filename" "mesh_00008.ply" 
+ObjectEnd
+
+ObjectBegin "001_Material.008_O"
+NamedMaterial "Material.008"
+Include "scene/PBRT/pbrt-geometry/001_Material.008_O.pbrt" 
+ObjectEnd
+
+ObjectBegin "001_mesh_00009_O"
+NamedMaterial "Stone"
+Shape "plymesh" "string filename" "mesh_00009.ply" 
+ObjectEnd
+
+ObjectBegin "002_mesh_00010_O"
+NamedMaterial "Rubber"
+Shape "plymesh" "string filename" "mesh_00010.ply" 
+ObjectEnd
+
+ObjectBegin "003_mesh_00011_O"
+NamedMaterial "Wood"
+Shape "plymesh" "string filename" "mesh_00011.ply" 
+ObjectEnd
+
+ObjectBegin "004_mesh_00012_O"
+NamedMaterial "Metal"
+Shape "plymesh" "string filename" "mesh_00012.ply" 
+ObjectEnd
+
+AttributeBegin
+    #ObjectName _B:Vector(0.00000, 0.00000, 0.00000)
+    Translate 6.38926 5.47484 16.49640
+    Rotate 0.00000 0.00000 0.00000 1.00000
+    Rotate -0.00000 0.00000 1.00000 0.00000
+    Rotate -90.00001 1.00000 0.00000 0.00000
+    Scale 100.00000 100.00000 100.00000
+    AttributeBegin
+        ObjectInstance "001_mesh_00001_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "002_mesh_00002_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "003_mesh_00003_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "004_mesh_00004_O"
+    AttributeEnd
+AttributeEnd
+AttributeBegin
+    #ObjectName _B:Vector(0.00000, 0.00000, 0.00000)
+    Translate -8.17807 5.47484 11.66560
+    Rotate 0.00000 0.00000 0.00000 1.00000
+    Rotate -0.00000 0.00000 1.00000 0.00000
+    Rotate -90.00001 1.00000 0.00000 0.00000
+    Scale 100.00000 100.00000 100.00000
+    AttributeBegin
+        ObjectInstance "001_mesh_00005_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "002_mesh_00006_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "003_mesh_00007_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "004_mesh_00008_O"
+    AttributeEnd
+AttributeEnd
+AttributeBegin
+    #ObjectName _B:Vector(0.00000, 0.00000, 0.00000)
+    Translate 1.36535 0.00000 -7.49833
+    Rotate 0.00000 0.00000 0.00000 1.00000
+    Rotate -0.00000 0.00000 1.00000 0.00000
+    Rotate -90.00001 1.00000 0.00000 0.00000
+    Scale 64.04920 64.04920 64.04920
+    AttributeBegin
+        ObjectInstance "001_Material.008_O"
+    AttributeEnd
+AttributeEnd
+AttributeBegin
+    #ObjectName _B:Vector(0.00000, 0.00000, 0.00000)
+    Translate -0.40985 10.66980 -9.38572
+    Rotate -0.00000 0.00000 0.00000 1.00000
+    Rotate 23.38465 0.00000 1.00000 0.00000
+    Rotate -90.00001 1.00000 0.00000 0.00000
+    Scale 100.00000 100.00000 100.00000
+    AttributeBegin
+        ObjectInstance "001_mesh_00009_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "002_mesh_00010_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "003_mesh_00011_O"
+    AttributeEnd
+    AttributeBegin
+        ObjectInstance "004_mesh_00012_O"
+    AttributeEnd
+AttributeEnd

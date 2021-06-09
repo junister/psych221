@@ -1,0 +1,5 @@
+# Exported by piLightWrite on 2021/6/9 15:35:58.99 
+AttributeBegin 
+LightSource "infinite" "blackbody L" [ 6000 1] 
+AttributeEnd 
+

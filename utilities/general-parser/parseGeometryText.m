@@ -197,9 +197,9 @@ while i <= length(txt)
                             
                             resObject.name = sprintf('%s_O', n);
                         elseif ~isempty(mat)
-                            if ~isempty(mat.name)
-                                warning('An object has been created with its material name: %s', mat.name)
-                                resObject.name = sprintf('%s_O', mat.name);
+                            if ~isempty(mat.namedmaterial)
+                                warning('An object has been created with its material name: %s', mat.namedmaterial)
+                                resObject.name = sprintf('%s_O', mat.namedmaterial);
                             else
                                 warning('An object has been created with its material type: %s', mat.type)
                                 resObject.name = sprintf('%s_O', mat.type);

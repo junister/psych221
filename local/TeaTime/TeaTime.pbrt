@@ -1,0 +1,25 @@
+# PBRT file created with piWrite on 2021/6/9 15:35:58.98 
+# PBRT version = 3 
+
+Scale -1.00 1.00 1.00 
+
+LookAt 196.456360 24.649572 3.373366 96.551850 20.505333 1.989971 -0.041439 0.999141 -0.000561 
+
+# camera 
+Camera "perspective" 
+  "float fov" [16.551785] 
+
+# film 
+Film "gbuffer" 
+  "integer yresolution" [512] 
+  "integer xresolution" [512] 
+  "float diagonal" [10.000000] 
+  "bool saveRadiance" true 
+  "bool savePosition" true 
+
+WorldBegin 
+Include "TeaTime_materials.pbrt" 
+ 
+Include "TeaTime_geometry.pbrt" 
+ 
+Include "TeaTime_lights.pbrt" 
