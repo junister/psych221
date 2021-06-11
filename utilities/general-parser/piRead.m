@@ -101,7 +101,8 @@ thisR.camera = piParseOptions(options, 'Camera');
 thisR.sampler = piParseOptions(options,'Sampler');
 % Extract film block
 thisR.film    = piParseOptions(options,'Film');
-
+% always use 'gbuffer' for multispectral
+thisR.film.subtype = 'gbuffer';
 % Patch up the filmStruct to match the recipe requirements
 if(isfield(thisR.film,'filename'))
     % Remove the filename since it inteferes with the outfile name.
