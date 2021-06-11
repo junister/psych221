@@ -25,7 +25,9 @@ for ss = 3:2:numel(thisLine)
     keyTypeName = strsplit(thisLine{ss}, ' ');
     keyType = ieParamFormat(keyTypeName{1});
     keyName = ieParamFormat(keyTypeName{2});
-    
+    if piContains(keyName,'.')
+        keyName = strrep(keyName,'.','');
+    end
     % Some corner cases
     % "index" should be replaced with "eta"
     switch keyName
