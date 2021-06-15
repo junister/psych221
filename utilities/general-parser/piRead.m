@@ -184,8 +184,8 @@ if any(piContains(world,'Include')) && ...
     
     % Read material and texture
     [materialLists, textureList] = parseMaterialTexture(materialLinesFormatted);
-    fprintf('Read %d materials.\n', numel(materialLists));
-    fprintf('Read %d textures.\n', numel(textureList));
+    fprintf('Read %d materials.\n', materialLists.Count);
+    fprintf('Read %d textures.\n', textureList.Count);
     
     % If exporter is Copy, don't parse the geometry.
     if isequal(exporter, 'Copy')

@@ -121,11 +121,11 @@ if pbrtText && ~isempty(val) &&...
                     txt = sprintf(' "%s L" %s', lght.spd.type, lightSpectrum);
             end
         case 'from'
-            txt = sprintf(' "point from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
+            txt = sprintf(' "point3 from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'to'
-            txt = sprintf(' "point to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
+            txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'mapname'
-            txt = sprintf(' "string mapname" "%s"', val);
+            txt = sprintf(' "string filename" "%s"', val);
         case 'fov'
             txt = sprintf(' "float fov" [%.4f]', val);
         case 'nsamples'
@@ -177,6 +177,8 @@ if pbrtText && ~isempty(val) &&...
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
             end
+        case 'power'
+            txt = sprintf(' "float power" [%.4f]',val);
     end
 end
 

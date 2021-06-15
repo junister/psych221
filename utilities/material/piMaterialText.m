@@ -44,8 +44,7 @@ for ii=1:numel(matParams)
          end
          if piContains(matParams{ii}, 'conductor') || ...
                  piContains(matParams{ii}, 'interface')
-             % luckily both keywords have 9 letters.
-             matParams{ii} = [matParams{1}(1:9),'.',matParams{1}(10:end)];
+             matParams{ii} = strrep(matParams{ii}, '_','.');
          end
          if ischar(thisVal)
              thisText = sprintf(' "%s %s" "%s" ',...

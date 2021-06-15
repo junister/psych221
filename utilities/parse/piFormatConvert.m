@@ -1,14 +1,19 @@
 function [newlines] = piFormatConvert(txtLines)
 % Format txtlines into a standard format.
-nn=1;
+nn=1;ii=1;
 % remove empty cells
+txtLines = txtLines(~cellfun('isempty',txtLines));
+tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
+txtLines = regexprep(txtLines, '\t', ' ');
+% deal with special case
+idxList = find(strcmp(txtLines,']'));
+for idx = 1:numel(idxList)
+    txtLines{idxList(idx)-1} = strcat(txtLines{idxList(idx)-1},txtLines{idxList(idx)});
+    txtLines{idxList(idx)} = [];
+end
 txtLines = txtLines(~cellfun('isempty',txtLines));
 nLines = numel(txtLines);
 newlines = cell(nLines, 1);
-
-ii=1;
-tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
-txtLines = regexprep(txtLines, '\t', ' ');
 while ii <= nLines
     thisLine = txtLines{ii};
     if length(thisLine) >= length('Shape')

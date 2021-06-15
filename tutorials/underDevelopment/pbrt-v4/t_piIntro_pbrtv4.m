@@ -4,31 +4,39 @@
 
 %%
 %{
-./pbrt --toply /Users/zhenyi/git_repo/dev/iset3d/data/V4/teapot-set/TeaTime.pbrt > /Users/zhenyi/git_repo/dev/iset3d/local/formatted/teapot-set/TeaTime.pbrt
+./pbrt --toply /Users/zhenyi/git_repo/dev/iset3d-v4/data/V4/colorChecker/colorChecker.pbrt > /Users/zhenyi/git_repo/dev/iset3d-v4/local/formatted/colorChecker/colorChecker.pbrt
 %}
-
-sceneName = 'TeaTime';
-formatted_fname = '/Users/zhenyi/git_repo/dev/iset3d/local/formatted/teapot-set/TeaTime.pbrt';
+ieInit;
+%%
+sceneName = 'testV4';
+% formatted_fname = '/Users/zhenyi/git_repo/dev/iset3d/local/formatted/teapot-set/TeaTime.pbrt';
+formatted_fname = '/Users/zhenyi/git_repo/dev/iset3d-v4/data/V4/colorChecker/colorChecker.pbrt';
 
 % Read the reformatted car recipe
-recipeV4 = piRead(formatted_fname);
+thisR = piRead(formatted_fname);
 
-recipeV4.set('film resolution',[512 512]);
-%% this part goes into piRender- render type
-recipeV4.film.saveRadiance.type = 'bool';
-recipeV4.film.saveRadiance.value  = true;
+thisR.set('film resolution',[512 512]);
+%% set render type
+thisR.film.saveRadiance.type = 'bool';
+thisR.film.saveRadiance.value  = true;
 
-recipeV4.film.savePosition.type = 'bool';
-recipeV4.film.savePosition.value  = false;
+thisR.film.savePosition.type = 'bool';
+thisR.film.savePosition.value  = false;
+
+% thisR.film.saveRadianceasBasis.type = 'bool';
+% thisR.film.savebasis.value  = false;
 %% write the data out
-piWrite(recipeV4);
+piWrite(thisR);
 %% render the scene (modify piRender later)
+outputDir  = thisR.get('output dir');
+currDir    = pwd;
+cd(outputDir);
 pbrtEXE    = '/Users/zhenyi/git_repo/PBRT_code/pbrt_zhenyi/pbrt_gpu/pbrt-v4/build/pbrt';
-outputDir  = recipeV4.get('output dir');
 outputFile = fullfile(outputDir, [sceneName,'.exr']);
-renderCmd  = [pbrtEXE, ' ',recipeV4.outputFile,' --outfile ',outputFile];
+renderCmd  = [pbrtEXE, ' ',thisR.outputFile,' --outfile ',outputFile];
 system(renderCmd)
-% read data
+cd(pwd);
+%% read data
 wave     = 400:10:700;
 energy   = piReadEXR(outputFile);
 photons  = Energy2Quanta(wave,energy);
