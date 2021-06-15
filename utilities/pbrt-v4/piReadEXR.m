@@ -43,10 +43,18 @@ size = double(data.size);
 
 switch dataType
     case "radiance"
+        data = exrinfo(filename);
+        NSpectrumSamples = numel(find(piContains(data.channels,'Radiance')));
+        if NSpectrumSamples~=31 && NSpectrumSamples~=16
+            error('Number of radiance channel can only be 31 or 16.')
+        end
         RadianceIndex = find(strcmp(data.channels, 'Radiance.C01'));
-        radianceContainerMap = exrreadchannels(filename, data.channels{RadianceIndex:RadianceIndex+30});
+        radianceContainerMap = exrreadchannels(filename, data.channels{RadianceIndex:RadianceIndex+ (NSpectrumSamples-1)});
         image = cell2mat(values(radianceContainerMap));
-        output = reshape(image, [size, 31]);
+        
+        output = reshape(image, [size, NSpectrumSamples]);
+        
+
     case "zdepth"
         ZDepthIndex = find(strcmp(data.channels, 'Pz'));
         ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
