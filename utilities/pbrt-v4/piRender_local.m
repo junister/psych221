@@ -22,7 +22,7 @@ elseif dim_energy(3)==16
 end
 photons  = Energy2Quanta(wave,energy);
 ieObject = piSceneCreate(photons,'wavelength', wave);
-
+ieObject = sceneInterpolateW(ieObject,[400:10:700]);
 % get depth
 depthImage   = piReadEXR(outputFile,'data type','zdepth');
 ieObject = sceneSet(ieObject,'depth map',depthImage);

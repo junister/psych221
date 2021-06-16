@@ -15,19 +15,17 @@ formatted_fname = '/Users/zhenyi/git_repo/dev/iset3d/local/formatted/teapot-set/
 % Read the reformatted car recipe
 thisR = piRead(formatted_fname);
 
-thisR.set('film resolution',[256 256]);
+thisR.set('film resolution',[300 300]);
+thisR.set('rays per pixel',16)
 %% set render type
-thisR.film.saveRadiance.type = 'bool';
-thisR.film.saveRadiance.value  = true;
+% radiance 
+% rTypes = {'radiance','irradiance','depth','both','all','coordinates','material','mesh', 'illuminant','illuminantonly'};
+thisR.set('film render type',{'radiance','depth'})
 
-thisR.film.savePosition.type = 'bool';
-thisR.film.savePosition.value  = false;
-
-% thisR.film.saveRadianceasBasis.type = 'bool';
-% thisR.film.savebasis.value  = false;
 %% write the data out
 piWrite(thisR);
 %% render the scene (modify piRender later)
-pbrtPath    = '/Users/zhenyi/git_repo/PBRT_code/pbrt_zhenyi/pbrt_gpu/pbrt-v4/build/pbrt';
-scene = piRender_local(thisR, pbrtPath);
+tic
+scene = piRender(thisR);
 sceneWindow(scene);
+toc

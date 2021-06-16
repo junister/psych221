@@ -17,15 +17,14 @@ function output = piReadEXR(filename, varargin)
 %
 % Zhenyi, 2020
 % 
-% Make sure openexr functions are compiled: 
-%               (run make.m in ~/iset3d/ext/openexr)
-% 
-% Get exr channel information
-%{
-      data = exrinfo(filename);
-      fprintf( '%s \n', data.channels{:} ); fprintf('\n')
-%}   
-
+% python test
+% python installation: https://docs.conda.io/en/latest/miniconda.html
+% check version in command window:
+%          pe = pyenv;
+% run this in mac terminal: 
+%          brew install openexr 
+%          pip install git+https://github.com/jamesbowman/openexrpython.git
+%          pip install pyexr
 %% 
 parser = inputParser();
 varargin = ieParamFormat(varargin);
@@ -38,42 +37,27 @@ filename = parser.Results.filename;
 dataType = parser.Results.datatype;
 
 %%
-data = exrinfo(filename);
-size = double(data.size);
 
 switch dataType
     case "radiance"
-        data = exrinfo(filename);
-        NSpectrumSamples = numel(find(piContains(data.channels,'Radiance')));
-        if NSpectrumSamples~=31 && NSpectrumSamples~=16
-            error('Number of radiance channel can only be 31 or 16.')
+        image = single(py.pyexr.read(filename,'Radiance'));        
+        if isempty(find(image(:,:,17),1))
+            output = image(:,:,1:16);
         end
-        RadianceIndex = find(strcmp(data.channels, 'Radiance.C01'));
-        radianceContainerMap = exrreadchannels(filename, data.channels{RadianceIndex:RadianceIndex+ (NSpectrumSamples-1)});
-        image = cell2mat(values(radianceContainerMap));
         
-        output = reshape(image, [size, NSpectrumSamples]);
-        
-
     case "zdepth"
-        ZDepthIndex = find(strcmp(data.channels, 'Pz'));
-        ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
-        output=ZDepthMap;
+        output = single(py.pyexr.read(filename,'Pz')); 
+        
     case "3dcoordinates"
-        CoordIndex = find(strcmp(data.channels, 'Px'));
-        CoordMap = exrreadchannels(filename, data.channels{CoordIndex:CoordIndex+2});
-        image = cell2mat(values(CoordMap));
-        output = reshape(image, [size, 3]);
+        output(:,:,1) = single(py.pyexr.read(filename,'Px'));
+        output(:,:,2) = single(py.pyexr.read(filename,'Py'));
+        output(:,:,3) = single(py.pyexr.read(filename,'Pz'));
+        
     case "material"
-        matIndex = find(strcmp(data.channels, 'MaterialId'));
-        matMap = exrreadchannels(filename, data.channels{matIndex});
-        image = cell2mat(values(matMap));
-        output=image;
+        output=single(py.pyexr.read(filename,'MaterialId'));
+        
     case "normal"
-        NormIndex = find(strcmp(data.channels, 'Px'));
-        NormMap = exrreadchannels(filename, data.channels{NormIndex:NormIndex+2});
-        image = cell2mat(values(NormMap));
-        output = reshape(image, [size, 3]);
+        % to add
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
     case "instance"

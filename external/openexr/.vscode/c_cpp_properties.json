@@ -4,8 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "/usr/local/include/OpenEXR",
-                "/Applications/MATLAB_R2020b.app/bin",
-                "/Applications/MATLAB_R2020b.app/extern/include/",
+                "/Applications/MATLAB_R2021a.app/bin",
+                "/Applications/MATLAB_R2021a.app/extern/include/",
                 "${workspaceFolder}/**"
             ],
             "defines": [],

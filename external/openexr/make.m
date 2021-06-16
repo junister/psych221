@@ -20,7 +20,7 @@ end
 
 for n = 1%:size(build_files, 2)
   if(verbose == true)
-    clc;
+    clc;sudo 
   end
   
   file = cell2mat(build_files(n));

@@ -61,7 +61,7 @@ function thisR = piRead(fname,varargin)
  % thisR = piRecipeDefault('scene name','teapot');
 
  piWrite(thisR);
- scene =  piRender(thisR,'render type','radiance');
+ scene =  piRender(thisR);
  sceneWindow(scene);
 %}
 

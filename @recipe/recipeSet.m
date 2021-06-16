@@ -538,14 +538,17 @@ switch param
     case{'maxdepth','bounces','nbounces'}
         % thisR.set('n bounces',val);
         % Number of surfaces a ray can bounce from
-        
-        if(~strcmp(thisR.integrator.subtype,'path')) &&...
-                (~strcmp(thisR.integrator.subtype,'bdpt'))
-            disp('Changing integrator sub type to "bdpt"');
-            
-            % When multiple bounces are needed, use this integrator
+        if isempty(thisR.integrator)
+            thisR.integrator.type = 'Integrator';
             thisR.integrator.subtype = 'bdpt';
         end
+%         if(~strcmp(thisR.integrator.subtype,'path')) &&...
+%                 (~strcmp(thisR.integrator.subtype,'bdpt'))
+%             disp('Changing integrator sub type to "bdpt"');
+%             
+%             % When multiple bounces are needed, use this integrator
+%             thisR.integrator.subtype = 'bdpt';
+%         end
         thisR.integrator.maxdepth.value = val;
         thisR.integrator.maxdepth.type = 'integer';
         
@@ -638,6 +641,10 @@ switch param
     case {'raysperpixel','pixelsamples'}
         % thisR.set('rays per pixel')
         % How many rays from each pixel
+        if isempty(thisR.sampler)
+            thisR.sampler.type = 'Sampler';
+            thisR.sampler.subtype = 'pmj02bn';
+        end
         thisR.sampler.pixelsamples.value = val;
         thisR.sampler.pixelsamples.type = 'integer';
         
@@ -1140,7 +1147,26 @@ switch param
             error('Accept single number as concentration\n');
         end
         thisR.materials.list.(matName).floatconcentration = val{2};
-        
+    case {'filmrendertype'}
+        if numel(val)==1, val={val};end
+        thisR.metadata.rendertype = val;
+        for ii = 1:numel(val)
+            switch val{ii}
+                case 'radiance'
+                    thisR.film.saveRadiance.type = 'bool';
+                    thisR.film.saveRadiance.value  = true;
+                    thisR.film.saveRadianceAsBasis.type = 'bool';
+                    thisR.film.saveRadianceAsBasis.value=false;
+                case 'depth'
+                    % depth
+                    thisR.film.savePosition.type = 'bool';
+                    thisR.film.savePosition.value  = true;
+                case 'material'
+                    % to add
+                case 'instance'
+                    % to add
+            end
+        end
     otherwise
         error('Unknown parameter %s\n',param);
 end
