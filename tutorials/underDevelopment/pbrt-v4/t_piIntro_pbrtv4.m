@@ -25,7 +25,6 @@ thisR.set('film render type',{'radiance','depth'})
 %% write the data out
 piWrite(thisR);
 %% render the scene (modify piRender later)
-tic
+
 scene = piRender(thisR);
 sceneWindow(scene);
-toc
