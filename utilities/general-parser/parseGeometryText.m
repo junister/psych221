@@ -85,28 +85,28 @@ while i <= length(txt)
     elseif piContains(currentLine,'#ObjectName')
         [name, sz] = piParseObjectName(currentLine);
         
-    elseif piContains(currentLine,'ConcatTransform') 
+    elseif piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
 %         [rot, translation, ctform] = piParseConcatTransform(currentLine);
         [translation, rot, scale] = parseTransform(currentLine);
     elseif strncmp(currentLine,'Transform ',10)
 %         ctform = [];
         [translation, rot, scale] = parseTransform(currentLine);
-    elseif piContains(currentLine,'MediumInterface')
+    elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
         medium = currentLine;
         
-    elseif piContains(currentLine,'NamedMaterial')
+    elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
         mat = piParseGeometryMaterial(currentLine);
         
-    elseif piContains(currentLine,'Material')
+    elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
         mat = parseBlockMaterial(currentLine);
         
-    elseif piContains(currentLine,'AreaLightSource')
+    elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
         areaLight = currentLine;
         
     elseif piContains(currentLine,'LightSource') ||...
             piContains(currentLine, 'Rotate') ||...
-            piContains(currentLine, 'Scale')
+            piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
         % Usually light source contains only one line. Exception is there
         % are rotations or scalings
         if ~exist('lght','var')
@@ -115,9 +115,9 @@ while i <= length(txt)
             lght{end+1} = currentLine;
         end
         
-    elseif piContains(currentLine,'Shape')
+    elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         shape = piParseShape(currentLine);
-    elseif strcmp(currentLine,'AttributeEnd')
+    elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
         
         % Assemble all the read attributes into either a groub object, or a
         % geometry object. Only group objects can have subnodes (not

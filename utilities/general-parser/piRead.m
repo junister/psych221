@@ -271,7 +271,9 @@ end
 function [txtLines, header] = piReadText(fname)
 % Open, read, close excluding comment lines
 fileID = fopen(fname);
-tmp = textscan(fileID,'%s','Delimiter','\n','CommentStyle',{'#'});
+% tmp = textscan(fileID,'%s','Delimiter','\n','CommentStyle',{'#'});
+tmp = textscan(fileID,'%s','Delimiter','\n');
+
 txtLines = tmp{1};
 fclose(fileID);
 

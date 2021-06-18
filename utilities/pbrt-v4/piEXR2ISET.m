@@ -28,7 +28,7 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 %
 % ## python test
 % python installation: https://docs.conda.io/en/latest/miniconda.html
-% Install python 3.8
+% Install python 3.8 for matlab 2020 and above
 % check version in matlab command window:
 %          pe = pyenv; 
 % Install python library for reading exr files, run this in terminal: 
@@ -96,20 +96,20 @@ for ii = 1:numel(label)
             
             depthImage = single(py.pyexr.read(inputFile,'Pz'));
             
-        case "3dcoordinates"
+        case 'coordinates'
             coordinates(:,:,1) = single(py.pyexr.read(inputFile,'Px'));
             coordinates(:,:,2) = single(py.pyexr.read(inputFile,'Py'));
             coordinates(:,:,3) = single(py.pyexr.read(inputFile,'Pz'));
             
-        case "material"
+        case 'material'
             
             materialID = single(py.pyexr.read(inputFile,'MaterialId'));
             
-        case "normal"
+        case 'normal'
             % to add
-        case "albedo"
+        case 'albedo'
             % to add; only support rgb for now, spectral albdeo needs to add;
-        case "instance"
+        case 'instance'
             % to add
     end
 end

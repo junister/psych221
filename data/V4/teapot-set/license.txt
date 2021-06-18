@@ -1,0 +1,25 @@
+Blend #93150: Stelton Theo Teapot Set
+Released under Creative Commons Zero 1.0
+You are free to use this asset privately for any use you see fit. If you choose to distribute copies or modified versions of this asset you must do so under the following requirements:
+
+There are no requirements for this license.
+This blend is marked as Fan Art, you can not use it for commercial purposes under any circumstance.
+Failure to comply with these requirements, if any, is considered a severe violation of the License and the Blend Swap Terms of Use, Upload Rules and Code of Conduct.
+
+About "Stelton Theo Teapot Set":
+Blender: 2.79
+Render Engine: Cycles
+Uploaded on: 2018-12-18 16:42:23
+Perfect fit for any interior scene!Quickly made but hopefully clean premium tea set, based on an existing product.Modified textures from: http://cc0textures.comHDRs from: http://hdrihaven.comTea pot dimensions: 20.5cm x 31.278cm x 31.278cmCup dimensions: 10.5cm x 10.5cm x 10.5cmUploading is weird.
+Help us moderate this file
+Blend Swap is a place to share and get awesome 3D work, if you think this blend falls into one of the following issues please file a report from http://www.blendswap.com/blends/view/93150 by clicking on the Manage panel to the left of the blend and then on Report/Flag:
+
+The blend author didn't make this blend and posted it as their own.
+The blend author is violating a Creative Commons License or copyright.
+The blend is incomplete, work in progress, or has missing textures.
+The blend contains simulation cache files and other unneeded media.
+The preview image has nothing to do with the blend's contents.
+Your help allows the site to stay clear of broken and stolen work.
+
+Notes:
+Do NOT report this blend if you dont' know how to use a feature on Blender, instead use the questions section of the site.

@@ -66,7 +66,7 @@ basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --t
 [volume, ~, ~] = fileparts(fname);
 
 % Which docker image we run
-dockerimage = 'vistalab/pbrt-v3-spectral:latest';
+dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 % Give a name to docker container
 dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
 %% Build the command
@@ -81,7 +81,7 @@ dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, f
 [~, result] = system(dockercmd);
 
 % Copy formatted pbrt files to local directory.
-cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v3-spectral/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
+cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
 [status_copy, ~ ] = system(cpcmd);
 if status_copy
     disp('No converted file found.');
@@ -120,7 +120,7 @@ PLYmeshFiles = PLYmeshFiles{1};
 % end
 
 for ii = 1:numel(PLYmeshFiles)
-    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v3-spectral/build/%s %s',dockercontainerName, PLYmeshFiles{ii}, outputDir);
+    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, PLYmeshFiles{ii}, outputDir);
     [status_copy, ~ ] = system(cpcmd);
     if status_copy
         % If it fails we assume that is because there is no corresponding

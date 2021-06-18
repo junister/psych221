@@ -22,24 +22,26 @@ function [name, sz] = piParseObjectName(txt)
 % Find the location of #ObjectName in the string
 pattern = '#ObjectName';
 loc = strfind(txt,pattern);
+loc_dimenstion = strfind(txt,'# Dimension');
 
 % Look for a colon
-pos = strfind(txt,':');
-name = txt(loc(1)+length(pattern) + 1:max(pos(1)-1, 1));
+% pos = strfind(txt,':');
+name = txt(loc(1)+length(pattern) + 1:loc_dimenstion-1);
+if strcmp(name(end),' '), name(end)='';end
 
-posA = strfind(txt,'(');
-posB = strfind(txt,')');
-res = sscanf(txt(posA(1)+1:posB(1)-1),'%f, %f, %f');
+posA = strfind(txt,'[');
+posB = strfind(txt,']');
+res = sscanf(txt(posA(1)+1:posB(1)-1),'%f');
 
 % Position minimima and maxima for lower left (X,Y), upper right.
-sz.pmin = [-res(1) -res(3)];
-sz.pmax = [res(1) res(3)];
+sz.pmin = [-res(1)/2 -res(3)/2];
+sz.pmax = [res(1)/2 res(3)/2];
 
 % We are not really sure what these coordinates represent with respect to
 % the scene or the camera direction.  For one case we analyzed (a plane)
 % this is what the values meant.
-sz.l = 2*res(1);   % length (X)
-sz.w = 2*res(2);   % depth (Z)
-sz.h = 2*res(3);   % height (Y)
+sz.l = res(1);   % length (X)
+sz.w = res(2);   % depth  (Z)
+sz.h = res(3);   % height (Y)
 
 end
