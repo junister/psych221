@@ -1,0 +1,19 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 5 1  ]
+Camera "perspective"
+    "float lensradius" [ 0 ]
+    "float focaldistance" [ 2000 ]
+    "float fov" [ 72.45731 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 720 ]
+    "integer xresolution" [ 1280 ]
+Integrator "path"
+    "integer maxdepth" [ 1 ]
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+Include "sphere_materials.pbrt"
+Include "sphere_geometry.pbrt"

@@ -153,7 +153,7 @@ materiallib.fourier.bsdffile = 'bsdfs/roughglass_alpha_0.2.bsdf';
 
 %% TotalReflect
 materiallib.totalreflect = piMaterialCreate('totalReflect',...
-                            'type', 'diffuse', 'spectrum kd', [400 1 800 1]);
+                            'type', 'diffuse', 'spectrum reflectance', [400 1 800 1]);
 
 %%
 materiallib_updated = piMaterialEmptySlot(materiallib);

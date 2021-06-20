@@ -1,0 +1,6 @@
+AttributeBegin
+  #ObjectName Sphere#Dimension:[4 4 4]
+  NamedMaterial "white"
+  Shape "sphere" "float radius" 2
+AttributeEnd
+

@@ -183,12 +183,24 @@ for ii = 1:numel(thisR.lights)
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
             
-            % spectrum
-            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
-            if ~isempty(spdTxt)
-                lghtDef = strcat(lghtDef, spdTxt);
+            if isempty(thisLight.mapname.value)
+                % spectrum
+                [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
+                if ~isempty(spdTxt)
+                    lghtDef = strcat(lghtDef, spdTxt);
+                end
+            else
+                % mapname
+                [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+                if ~isempty(mapnameTxt)
+                    lghtDef = strcat(lghtDef, mapnameTxt);
+                    
+                    if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
+                        mapFile = which(mapName);
+                        copyfile(mapFile,thisR.get('output dir'))
+                    end
+                end
             end
-            
             % lghtDef = sprintf('LightSource "infinite" "%s L" %s', spectrumType, lightSpectrum);
             
             % nsamples
@@ -197,16 +209,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, nsamplesTxt);
             end
             
-            % mapname
-            [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
-            if ~isempty(mapnameTxt)
-                lghtDef = strcat(lghtDef, mapnameTxt);
-                
-                if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
-                    mapFile = which(mapName);
-                    copyfile(mapFile,thisR.get('output dir'))
-                end
-            end
+
             
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
@@ -320,8 +323,6 @@ for ii = 1:numel(thisR.lights)
     lightSourceText{ii}.line{end+1} = 'AttributeEnd';
     
 end
-
-
 
 if writefile
     %% Write to scene_lights.pbrt file

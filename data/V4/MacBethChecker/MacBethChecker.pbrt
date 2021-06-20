@@ -1,0 +1,27 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 -0.05 4 1  ]
+Camera "perspective"
+    "float lensradius" [ 0 ]
+    "float focaldistance" [ 2000 ]
+    "float fov" [ 35.9834 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 720 ]
+    "integer xresolution" [ 1280 ]
+    "string filename" [ "MacBethChecker.exr" ]
+Integrator "path"
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
+LightSource "distant"
+    "point3 to" [ 0.258819 0 0.9659258 ]
+    "point3 from" [ 0 0 0 ]
+    "rgb L" [ 1 1 1 ]
+Include "MacBethChecker_materials.pbrt"
+Include "MacBethChecker_geometry.pbrt"

@@ -1,0 +1,75 @@
+MakeNamedMaterial "Mat"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.00489631 0.00489631 0.00489631 ]
+MakeNamedMaterial "Patch01Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-1.spd" ]
+MakeNamedMaterial "Patch07Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-7.spd" ]
+MakeNamedMaterial "Patch13Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-13.spd" ]
+MakeNamedMaterial "Patch19Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-19.spd" ]
+MakeNamedMaterial "Patch02Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-2.spd" ]
+MakeNamedMaterial "Patch08Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-8.spd" ]
+MakeNamedMaterial "Patch14Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-14.spd" ]
+MakeNamedMaterial "Patch20Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-20.spd" ]
+MakeNamedMaterial "Patch03Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-3.spd" ]
+MakeNamedMaterial "Patch09Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-9.spd" ]
+MakeNamedMaterial "Patch15Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-15.spd" ]
+MakeNamedMaterial "Patch21Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-21.spd" ]
+MakeNamedMaterial "Patch04Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-4.spd" ]
+MakeNamedMaterial "Patch10Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-10.spd" ]
+MakeNamedMaterial "Patch16Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-16.spd" ]
+MakeNamedMaterial "Patch22Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-22.spd" ]
+MakeNamedMaterial "Patch05Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-5.spd" ]
+MakeNamedMaterial "Patch11Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-11.spd" ]
+MakeNamedMaterial "Patch17Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-17.spd" ]
+MakeNamedMaterial "Patch23Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-23.spd" ]
+MakeNamedMaterial "Patch06Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-6.spd" ]
+MakeNamedMaterial "Patch12Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-12.spd" ]
+MakeNamedMaterial "Patch18Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-18.spd" ]
+MakeNamedMaterial "Patch24Material"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/macbeth-24.spd" ]

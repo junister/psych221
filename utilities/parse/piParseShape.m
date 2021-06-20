@@ -22,7 +22,7 @@ if find(piContains(keyWords, 'Shape '))
             shape.radius = piParameterGet(txt, 'float radius');
             shape.phimax = piParameterGet(txt, 'float phimax');
             shape.innerradius = piParameterGet(txt, 'float innerradius');
-        case 'shpere'
+        case 'sphere'
             shape.radius = piParameterGet(txt, 'float radius');
             shape.zmin = piParameterGet(txt, 'float zmin');
             shape.zmax = piParameterGet(txt, 'float zmax');

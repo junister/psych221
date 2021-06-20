@@ -1,0 +1,24 @@
+MakeNamedMaterial "Light"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5678072 ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "cbox_red"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5678072 ]
+    "rgb reflectance" [ 1 0 0 ]
+MakeNamedMaterial "cbox_green"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5678072 ]
+    "rgb reflectance" [ 0 1 0 ]
+MakeNamedMaterial "cbox_Material"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5678072 ]
+    "rgb reflectance" [ 1 1 1 ]
+MakeNamedMaterial "small_box"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5 ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "large_box"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5678072 ]
+    "rgb reflectance" [ 0.9822506 0.9734453 0.9734453 ]

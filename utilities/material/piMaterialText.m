@@ -37,11 +37,6 @@ for ii=1:numel(matParams)
          thisType = material.(matParams{ii}).type;
          thisVal = material.(matParams{ii}).value;
          
-         % Quite annoying corner case. Diffusion (Kd), transmission (Kt), 
-         % specular (Ks) and mirror reflection (Kr) have capital K.
-         if isequal(matParams{ii}(1), 'k')
-             matParams{ii}(1) = 'K';
-         end
          if piContains(matParams{ii}, 'conductor') || ...
                  piContains(matParams{ii}, 'interface')
              matParams{ii} = strrep(matParams{ii}, '_','.');

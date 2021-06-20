@@ -98,7 +98,7 @@ if ~contains(outputFull,'_materials.pbrt') ||...
     
     while ~feof(fileIDin)
         thisline=fgets(fileIDin);
-        if ~contains(thisline,'Warning: No metadata written out.')
+        if ischar(thisline) && ~contains(thisline,'Warning: No metadata written out.')
             fprintf(fileIDout, '%s', thisline);
         end
     end

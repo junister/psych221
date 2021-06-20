@@ -1,0 +1,3 @@
+MakeNamedMaterial "white"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [400 1 800 1]

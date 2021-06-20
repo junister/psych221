@@ -323,7 +323,7 @@ end
 if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
-    FilePath = fullfile(piRootPath,'data','V3',sceneDir);
+    FilePath = fullfile(piRootPath,'data','V4',sceneDir);
 end
 
 fname = fullfile(FilePath,sceneFile);
@@ -377,7 +377,7 @@ function fname = piSceneWebTest(sceneName,sceneFile)
 % Check for a web scene
 
 % See if the scene is already in data/V3/web
-FilePath = fullfile(piRootPath,'data','V3','web',sceneName);
+FilePath = fullfile(piRootPath,'data','V4','web',sceneName);
 fname = fullfile(FilePath,sceneFile);
 
 % Download the file to data/V3/web

@@ -97,7 +97,8 @@ if true
             % It is a file name, so the type has to be spectrum or texture,
             % depending on the extension
             [~, ~, e] = fileparts(val); % Check extension
-            if isequal(e, '.spd')
+            pbrtSpecta = load('namedSpectra.mat');
+            if isequal(e, '.spd') || ~isempty(find(piContains(pbrtSpecta.namedSpectra,val), 1))
                 material.(pName).type = 'spectrum';
             elseif isequal(e, '.png') % not sure whether other type of files are supported
                 material.(pName).type = 'string';

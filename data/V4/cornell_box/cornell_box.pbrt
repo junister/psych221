@@ -1,0 +1,28 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 1 0 0 0 0 1 2.7755576e-17 0 0 -2.7755576e-17 1 0 0 0 0 1  ]
+Camera "perspective"
+    "float lensradius" [ 0 ]
+    "float focaldistance" [ 2000 ]
+    "float fov" [ 22.619865 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 500 ]
+    "integer xresolution" [ 500 ]
+    "string filename" [ "cornell_box.exr" ]
+Integrator "path"
+    "integer maxdepth" [ 1 ]
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
+LightSource "distant"
+    "point3 to" [ 0.258819 2.6809827e-17 0.9659258 ]
+    "point3 from" [ 0 0 0 ]
+    "rgb L" [ 1 1 1 ]
+Include "cornell_box_materials.pbrt"
+Include "cornell_box_geometry.pbrt"

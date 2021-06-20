@@ -145,7 +145,8 @@ elapsedTime = toc;
 %% Check the return
 
 if status
-    warning('Docker did not run correctly');            % The status may contain a useful error message that we should
+    warning('Docker did not run correctly');            
+    % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
     fprintf('Status:\n'); disp(status)
     fprintf('Result:\n'); disp(result)
@@ -155,7 +156,11 @@ end
 fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 
 %% Convert the returned data to an ieObject
-ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance','depth'});
+if isempty(thisR.metadata)
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance'});
+else
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
+end
 %% We used to name here, but apparently not needed any more
 
 % Why are we updating the wave?  Is that ever needed?

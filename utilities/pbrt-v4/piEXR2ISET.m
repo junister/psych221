@@ -49,7 +49,7 @@ p.addRequired('inputFile',@(x)(exist(x,'file')));
 p.addParameter('label','radiance',@(x)(ischar(x)||iscell(x)));
 
 p.addParameter('recipe',[],@(x)(isequal(class(x),'recipe')));
-p.addParameter('wave', [], @isnumeric);
+p.addParameter('wave', 400:10:700, @isnumeric);
 
 % For the OI case
 p.addParameter('meanilluminancepermm2',5,@isnumeric);
@@ -71,7 +71,6 @@ scalePupilArea        = p.Results.scalepupilarea;
 meanLuminance         = p.Results.meanluminance;
 wave                  = p.Results.wave;
 %%
-if numel(label)==1, label={label};end
 
 for ii = 1:numel(label)
     
@@ -139,7 +138,7 @@ switch lower(cameraType)
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
-if exist('ieObject','var') && ~isempty(ieObject)
+if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var')
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
 end
