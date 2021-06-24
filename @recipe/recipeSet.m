@@ -1153,18 +1153,25 @@ switch param
         for ii = 1:numel(val)
             switch val{ii}
                 case 'radiance'
-                    thisR.film.saveRadiance.type = 'bool';
-                    thisR.film.saveRadiance.value  = true;
-                    thisR.film.saveRadianceAsBasis.type = 'bool';
-                    thisR.film.saveRadianceAsBasis.value=false;
+                    thisR.film.saveRadiance.type  = 'bool';
+                    thisR.film.saveRadiance.value = true;
+                    thisR.film.saveRadianceAsBasis.type  = 'bool';
+                    thisR.film.saveRadianceAsBasis.value =false;
+                case 'radiancebasis'
+                    thisR.film.saveRadianceAsBasis.type  = 'bool';
+                    thisR.film.saveRadianceAsBasis.value = true;
+                    thisR.film.saveRadiance.type  = 'bool';
+                    thisR.film.saveRadiance.value = false;
                 case 'depth'
                     % depth
-                    thisR.film.savePosition.type = 'bool';
-                    thisR.film.savePosition.value  = true;
+                    thisR.film.saveDepth.type  = 'bool';
+                    thisR.film.saveDepth.value = true;
                 case 'material'
-                    % to add
+                    thisR.film.saveMaterial.type  = 'bool';
+                    thisR.film.saveMaterial.value = true;
                 case 'instance'
-                    % to add
+                    thisR.film.saveInstance.type  = 'bool';
+                    thisR.film.saveInstance.value = true;
             end
         end
     otherwise

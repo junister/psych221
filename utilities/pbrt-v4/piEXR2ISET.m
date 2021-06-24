@@ -109,7 +109,7 @@ for ii = 1:numel(label)
         case 'albedo'
             % to add; only support rgb for now, spectral albdeo needs to add;
         case 'instance'
-            % to add
+            instanceID = single(py.pyexr.read(inputFile,'InstanceId'));
     end
 end
 

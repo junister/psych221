@@ -1,0 +1,24 @@
+Transform [ 1 0 1.9470718e-7 0 -0 1 0 0 -1.9470718e-7 -0 1 0 -9.7353585e-8 -0.06999999 0.49999997 1  ]
+Camera "perspective"
+    "float fov" [ 30 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 800 ]
+    "integer xresolution" [ 800 ]
+Integrator "path"
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.09360644 0.10974494 0.12801072 ]
+Include "chessSet_materials.pbrt"
+Include "chessSet_geometry.pbrt"
+# Add an environment light
+Rotate -90 1 0 0
+Rotate 180 0 0 1
+LightSource "infinite"
+    "string filename" "20060807_wells6_hd.exr"

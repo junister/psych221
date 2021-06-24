@@ -47,11 +47,11 @@ fclose(fileIDin);
 fclose(fileIDout);
 
 movefile(outputFullTmp, outFile);
-
+[outputDir,~,~]=fileparts(outFile);
 inputMaterialfname  = fullfile(sceneDir,  [fname, '_materials', ext]);
 outputMaterialfname = fullfile(outputDir, [fname, '_materials', ext]);
 inputGeometryfname  = fullfile(sceneDir,  [fname, '_geometry',  ext]);
-outputGeometryfname = fullfile(outputDir, [thisName, '_geometry',  ext]);
+outputGeometryfname = fullfile(outputDir, [fname, '_geometry',  ext]);
 
 if exist(inputMaterialfname, 'file')
     piPBRTUpdateV4(inputMaterialfname,outputMaterialfname);
