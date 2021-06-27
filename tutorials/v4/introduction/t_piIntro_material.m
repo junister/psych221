@@ -22,7 +22,6 @@
 %% Initialize ISET and Docker
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-
 %% Read pbrt file for a Cinema4D exported scene
 
 sceneName = 'sphere';
@@ -37,7 +36,7 @@ distLight = piLightCreate('new dist light',...
 thisR.set('light', 'add', distLight);
 
 thisR.set('film resolution',[200 150]*2);
-thisR.set('rays per pixel',8);
+thisR.set('rays per pixel',64);
 thisR.set('fov',45);
 thisR.set('nbounces',5);
 thisR.set('film render type',{'radiance','depth'})
@@ -141,7 +140,7 @@ thisR.set('asset', assetName, 'material name', glassName);
 thisR.get('object material')
 
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene, 'name', 'Change sphere to glass');
 sceneWindow(scene);
 if piCamBio, sceneSet(scene,'render flag','hdr');
@@ -158,7 +157,7 @@ origFrom = [0 0 -5];  % Original from position
 % Set the camera from position a little higher and closer
 thisR.set('from',assetPosition + [0 1 -4]);
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene, 'name', 'Change sphere to glass');
 sceneWindow(scene);
 if piCamBio, sceneSet(scene,'render flag','hdr');
@@ -176,7 +175,7 @@ thisR.set('asset', assetName, 'material name', mirrorName);
 thisR.get('object material')
 
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene, 'name', 'Change sphere to glass');
 sceneWindow(scene);
 if piCamBio, sceneSet(scene,'render flag','hdr');

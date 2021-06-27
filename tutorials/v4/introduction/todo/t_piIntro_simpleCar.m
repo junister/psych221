@@ -24,9 +24,6 @@
 %% Initialize ISET and Docker
 
 ieInit;
-if ~piDockerExists, piDockerConfig; end
-% if ~piScitranExists, error('scitran installation required'); end
-
 %% Render cars on a planar surface
 
 % Initialize a planar surface with a checkerboard texture pattern
@@ -36,8 +33,8 @@ sceneR.set('outputFile',fullfile(piRootPath, 'local', sceneName,[sceneName,'.pbr
 
 % render quality
 sceneR.set('film resolution',[1280 600]/2);
-sceneR.set('pixel samples',8);
-sceneR.set('max depth',3);
+sceneR.set('pixel samples',64/2);
+sceneR.set('max depth',5);
 
 % camera properties
 sceneR.set('fov',45);
@@ -53,7 +50,7 @@ sceneR.set('asset','Checkerboard_B','world rotation',[90 30 0]);
 
 % The scene starts in data/V3 and it is reformatted into
 % local/formatted/car.
-car_fname = fullfile(piRootPath, 'data','V3','car','car.pbrt');
+car_fname = fullfile(piRootPath, 'data','V4','car','car.pbrt');
 car_formatted_fname = fullfile(piRootPath,'local','formatted','car','car.pbrt');
 
 if ~exist(car_formatted_fname,'file')
@@ -107,23 +104,24 @@ sceneR.show('assets materials');
 
 %% Set the car body to a new color.
 
-colorkd = piColorPick('blue');
+colorkd = piColorPick('red');
 
 MaterialName = 'AudiSportsCar01_Metal_Carbody02'; 
-sceneR.set('material',MaterialName,'kd value',colorkd);
+sceneR.set('material',MaterialName,'reflectance',colorkd);
 
 % Assign a nice position.
 sceneR.set('asset','AudiSportsCar01_B','world translation',[0.5 0 0]);
 sceneR.set('asset','AudiSportsCar01_B','world rotation',[0 -15 0]);
 sceneR.set('asset','AudiSportsCar01_B','world rotation',[0 -30 0]);
 
-%% Write out the pbrt scene file, based on scene.
+%% Set render type and write the scene out
+sceneR.set('film render type',{'radiance','depth'})
 piWrite(sceneR);   % We get a warning.  Ignore
 
 %% Render.
 
 % Maybe we should speed this up by only returning radiance.
-[scene, result] = piRender(sceneR,'render type','radiance');
+[scene, result] = piRender(sceneR);
 
 %  Show the scene in a window
 
@@ -171,11 +169,9 @@ rgbkd = piColorPick('white');
 rgbks = [0.15 0.15 0.15];
 
 newMat = piMaterialCreate(matName, ...
-    'type','substrate',...
-    'kd value',rgbkd,...
-    'ks value',rgbks,...
-    'uroughness value', 0.0005,...
-    'vroughness value', 0.0005);
+    'type','coateddiffuse',...
+    'reflectance',rgbkd,...
+    'roughness',0.01);
 
 sceneR.set('material','add', newMat);
 piMaterialPrint(sceneR);

@@ -1,0 +1,95 @@
+MakeNamedMaterial "AudiSportsCar01_Metal_Carbody02"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.4 ]
+    "rgb reflectance" [ 0.2961383 0.2961383 0.2961383 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Plate01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5 ]
+    "rgb reflectance" [ 0.9559735 0.9559735 0.9559735 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light01"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Carbody04"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0 ]
+    "rgb reflectance" [ 0 0 0 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light02"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light03"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Light02"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.020000078 ]
+    "rgb reflectance" [ 0.03189604 0.03189604 0.03189604 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Mirror01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0 ]
+    "rgb reflectance" [ 0 0 0 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light04"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light05"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Light06"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Interrior03"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.3 ]
+    "rgb reflectance" [ 0.014443845 0.014443845 0.014443845 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Interrior04"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.25 ]
+    "rgb reflectance" [ 0.0069954107 0.0069954107 0.0069954107 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Chrome01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.020000078 ]
+    "rgb reflectance" [ 0.021219011 0.021219011 0.021219011 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Light01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.23000002 ]
+    "rgb reflectance" [ 0.03189604 0.03189604 0.03189604 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Carbody01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.1 ]
+    "rgb reflectance" [ 0.0069954107 0.0069954107 0.0069954107 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Carbody03"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.25 ]
+    "rgb reflectance" [ 0.00303527 0.00303527 0.00303527 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Interrior05"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.3 ]
+    "rgb reflectance" [ 0.021219011 0.021219011 0.021219011 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Rim02"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.31 ]
+    "rgb reflectance" [ 0.03189604 0.03189604 0.03189604 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_BrakeDisk01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.25 ]
+    "rgb reflectance" [ 0.009721219 0.009721219 0.009721219 ]
+MakeNamedMaterial "AudiSportsCar01_Metal_Rim01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.16000004 ]
+    "rgb reflectance" [ 0.7304609 0.7304609 0.7304609 ]
+MakeNamedMaterial "AudiSportsCar01_Rubber_Tire01"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.21404114 0.21404114 0.21404114 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Interrior01"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0 ]
+    "rgb reflectance" [ 0.001517635 0.001517635 0.001517635 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_FrontWindShield"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]
+MakeNamedMaterial "AudiSportsCar01_Plastic_Interrior02"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0 ]
+    "rgb reflectance" [ 0.001517635 0.001517635 0.001517635 ]
+MakeNamedMaterial "AudiSportsCar01_Glass_Window02"
+    "string type" [ "dielectric" ]
+    "float eta" [ 1.333 ]

@@ -1,0 +1,14 @@
+
+AttributeBegin
+    #ObjectName Checkerboard#Dimension:[50 0 50]
+
+    AttributeBegin
+        NamedMaterial "board"
+        Shape "trianglemesh"
+            "point2 uv" [ 0 0 1 0 1 1 0 1 
+                ]
+            "normal N" [ -2 -2 1 2 -2 1 2 2 1 -2 2 1 ]
+            "point3 P" [ -2 -2 0 2 -2 0 2 2 0 -2 2 0 ]
+            "integer indices" [ 0 1 2 0 2 3 ]
+    AttributeEnd
+AttributeEnd

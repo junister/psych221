@@ -1,4 +1,4 @@
-function [materiallib_updated] = piMateriallib
+function [materiallib] = piMateriallib
 % A library of material properties (deprecated)
 %
 % Syntax:
@@ -33,6 +33,7 @@ function [materiallib_updated] = piMateriallib
 %  object.
 %
 % Zhenyi Liu Scien Stanford, 2018
+% Zhenyi 2021.
 %
 % See also
 %   piMaterial*
@@ -76,27 +77,32 @@ materiallib.carpaint.rgbks =[.15 .15 .15];
 materiallib.carpaint.floaturoughness =0.0005;
 materiallib.carpaint.floatvroughness=0.00051;
 
-%% chrome_spd
+%% silver
 %
 % This the chrome metal appearance.
 %
-materiallib.chrome_spd.stringtype='metal';
-materiallib.chrome_spd.floatroughness=0.01;
-materiallib.chrome_spd.spectrumk='spds/metals/Ag.k.spd';
-materiallib.chrome_spd.spectrumeta='spds/metals/Ag.eta.spd';
+materiallib.silver_measured.type='measured';
+materiallib.silver_measured.filename='spds/ilm_l3_37_metallic_spec.bsdf';
+
+materiallib.silver.type='coateddiffuse';
+materiallib.silver.reflectance = [ 0.64 0.64 0.64 ];
+materiallib.silver.eta =1;
+materiallib.silver.roughness = 0.075;
 
 %% blackrubber
 
 % Good for tires
-materiallib.blackrubber.floatroughness = 0.5;
-materiallib.blackrubber.stringtype = 'uber';
-materiallib.blackrubber.rgbkd = [ .01 .01 .01 ];
-materiallib.blackrubber.rgbks = [ 0.2 .2 .2 ];
+materiallib.blackmat.type = 'coateddiffuse';
+materiallib.blackmat.reflectance = [ 0.03 0.03 0.032 ];
+materiallib.blackmat.eta = 1.3;
+materiallib.blackmat.roughness = 5.8;
 
 %% mirror
 
-materiallib.mirror.stringtype='mirror';
-materiallib.mirror.spectrumkr = [400 1 800 1];
+materiallib.mirror.type      ='conductor';
+materiallib.mirror.roughness = 0;
+materiallib.mirror.eta       = 'metal-Ag-eta';
+materiallib.mirror.k         = 'metal-Ag-k';
 
 %% matte
 
@@ -115,15 +121,15 @@ materiallib.plastic.floatroughness = 0.1;
 %% glass
 
 % Standard glass appearance
-materiallib.glass.stringtype = 'glass';
-% materiallib.glass.rgbkr = [0.00415 0.00415 0.00415];
-materiallib.glass.spectrumkr = [400 1 800 1];
-materiallib.glass.spectrumkt = [400 1 800 1];
-materiallib.glass.eta = 1.5;
+materiallib.glass_measured.type = 'dielectric';
+materiallib.glass_measured.eta  = 'glass-BK7';
+%% normal glass
+materiallib.glass.type = 'dielectric';
+materiallib.glass.eta  = '1.3';
 
 %% Retroreflective
 
-materiallib.retroreflective.stringtype = 'retroreflective';
+% materiallib.retroreflective.stringtype = 'retroreflective';
 
 %% Uber
 
@@ -146,17 +152,14 @@ materiallib.skin.floaturoughness = 0.05;
 materiallib.skin.floateta = 1.333;
 materiallib.skin.floatvroughness = 0.05;
 materiallib.skin.boolremaproughness = 'false';
-%% fourier
-
-materiallib.fourier.stringtype = 'fourier';
-materiallib.fourier.bsdffile = 'bsdfs/roughglass_alpha_0.2.bsdf';
 
 %% TotalReflect
 materiallib.totalreflect = piMaterialCreate('totalReflect',...
                             'type', 'diffuse', 'spectrum reflectance', [400 1 800 1]);
 
-%%
-materiallib_updated = piMaterialEmptySlot(materiallib);
+%% 
+
+% materiallib_updated = piMaterialEmptySlot(materiallib);
 end
 
 function materiallib = piMaterialEmptySlot(materiallib)
