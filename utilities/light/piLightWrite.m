@@ -300,20 +300,11 @@ for ii = 1:numel(thisR.lights)
             end
             % lghtDef = sprintf('AreaLightSource "diffuse" "%s L" %s', spectrumType, lightSpectrum);
             
-            % nsamples
-            [~, nsamplesTxt] = piLightGet(thisLight, 'nsamples val', 'pbrt text', true);
-            if ~isempty(nsamplesTxt)
-                lghtDef = strcat(lghtDef, nsamplesTxt);
-            end
-            
-            % twosided
-            [~, twosidedTxt] = piLightGet(thisLight, 'twosided val', 'pbrt text', true);
-            if ~isempty(twosidedTxt)
-                lghtDef = strcat(lghtDef, twosidedTxt);
-            end
-            
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
-            
+            if thisLight.ReverseOrientation.value==true
+                rOTxt = 'ReverseOrientation';
+                lightSourceText{ii}.line = [lightSourceText{ii}.line rOTxt];
+            end
             % Attach shape
             [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
             

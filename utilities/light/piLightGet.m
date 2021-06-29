@@ -144,6 +144,10 @@ if pbrtText && ~isempty(val) &&...
             txt = piShape2Text(val);
         case 'translation'
             txt = {}; % Change to cells
+            % val can be a cell array
+            if ~iscell(val)
+                val = {val};
+            end
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('Translate %.3f %.3f %.3f',...
                     val{ii}(1), val{ii}(2),...
@@ -151,7 +155,7 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'rotation'
             % piLightGet(lgt,'rotation')
-
+            
             % val can be a cell array
             if ~iscell(val)
                 val = {val};
@@ -174,6 +178,9 @@ if pbrtText && ~isempty(val) &&...
                 txt{end + 1} = sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', val{ii}(:));
             end
         case 'scale'
+            if ~iscell(val)
+                val = {val};
+            end
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
             end

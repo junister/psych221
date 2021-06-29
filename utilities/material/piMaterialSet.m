@@ -100,7 +100,7 @@ if true
             pbrtSpecta = load('namedSpectra.mat');
             if isequal(e, '.spd') || ~isempty(find(piContains(pbrtSpecta.namedSpectra,val), 1))
                 material.(pName).type = 'spectrum';
-            elseif isequal(e, '.png') % not sure whether other type of files are supported
+            elseif isequal(e, '.png') || isequal(e, '.bsdf') % not sure whether other type of files are supported
                 material.(pName).type = 'string';
             else
                 material.(pName).type = 'texture';

@@ -1,58 +1,102 @@
-function ieObject = piRenderCloud(thisR)
+function ieObject = piRenderCloud(thisR,varargin)
 %% render using a google VM
 %{
-inputFolder = '/Users/zhenyi/git_repo/dev/iset3d-v4/local/TeaTime-converted'
-outputfile = piRenderCloud(inputFolder);
 %}
 %%
-wave = 400:10:700;
-zone = 'us-west1-a';
-instanceName = 'zhenyi27@holidayfun-zhenyi';
+p = inputParser;
+p.KeepUnmatched = true;
+
+% p.addRequired('pbrtFile',@(x)(exist(x,'file')));
+p.addRequired('recipe',@(x)(isequal(class(x),'recipe') || ischar(x)));
+
+varargin = ieParamFormat(varargin);
+% p.addParameter('meanluminance',100,@isnumeric);
+% p.addParameter('meanilluminancepermm2',[],@isnumeric);
+% p.addParameter('scalepupilarea',true,@islogical);
+p.addParameter('update',false,@islogical);
+p.addParameter('cleandata',false,@islogical);
+% p.addParameter('reflectancerender', false, @islogical);
+p.addParameter('instancename','zhenyi27@holidayfun-zhenyi',@ischar);
+p.addParameter('zone','us-west1-a',@ischar);
+p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
+p.addParameter('verbose', 2, @isnumeric);
+
+p.parse(thisR,varargin{:});
+% scalePupilArea = p.Results.scalepupilarea;
+% meanLuminance    = p.Results.meanluminance;
+wave             = p.Results.wave;
+% verbosity        = p.Results.verbose;
+zone             = p.Results.zone;
+instanceName     = p.Results.instancename;
+update           = p.Results.update;
+cleandata        = p.Results.cleandata;
+
 %%
 tic
 disp('*** Start rendering using a gcloud instance...');
-
-% zip folder
 inputFolder = thisR.get('output dir');
 [rootDir,fname]=fileparts(inputFolder);
-zipName = [fname,'.zip'];
-zipFile = fullfile(rootDir,zipName);
-zip(zipFile, inputFolder);
-% upload folder to google instance/ unzip/ render/ and bring back
-disp('Uploading the scene...');
 vmFolder = '~/git_repo/renderVolume';
-cmd = sprintf('gcloud compute scp --zone=%s %s %s:%s',...
-    zone, zipFile, instanceName,vmFolder);
-[status] = system(cmd);
-if status
-    error(result)
-end
-disp('Rendering...');
-
-baseCmd = spritnf('gcloud compute ssh --zone=%s %s ',...
-    zone, instanceName);
-renderCmd = strcat(baseCmd, sprintf(' --command ''cd %s && unzip -o %s && cd %s && ~/git_repo/PBRT-GPU/pbrt-zhenyi/build/pbrt --gpu %s --outfile %s''  ',...
-    vmFolder, zipName, fname,[fname, '.pbrt'],[fname, '.exr']));
-
-[status] = system(renderCmd);
-if status
-    error(result)
-end
-
 localFolder = fullfile(inputFolder,'renderings');
+
+baseCmd = sprintf('gcloud compute ssh --zone=%s %s ',...
+    zone, instanceName);
+if ~update
+    % zip folder
+    zipName = [fname,'.zip'];
+    zipFile = fullfile(rootDir,zipName);
+    zip(zipFile, inputFolder);
+    % upload folder to google instance/ unzip/ render/ and bring back
+    disp('Uploading the scene...');
+    cmd = sprintf('gcloud compute scp --zone=%s %s %s:%s',...
+        zone, zipFile, instanceName,vmFolder);
+    [status] = system(cmd);
+    if status
+        error(result)
+    end
+    disp('Rendering...');
+    renderCmd = strcat(baseCmd, sprintf(' --command ''cd %s && unzip -o %s && cd %s && ~/git_repo/PBRT-GPU/pbrt-zhenyi/build/pbrt --gpu %s --outfile %s''  ',...
+        vmFolder, zipName, fname,[fname, '.pbrt'],[fname, '.exr']));
+    
+    [status] = system(renderCmd);
+    if status
+        error(result)
+    end
+else
+    % only pbrt files
+    filenames = [inputFolder,'/*.pbrt'];
+     disp('Uploading the scene...');
+    cmd = sprintf('gcloud compute scp --zone=%s %s %s:%s',...
+        zone, filenames, instanceName,fullfile(vmFolder,fname));
+    [status] = system(cmd);
+    if status
+        error(result)
+    end
+    disp('Rendering...');
+    renderCmd = strcat(baseCmd, sprintf(' --command ''cd %s && ~/git_repo/PBRT-GPU/pbrt-zhenyi/build/pbrt --gpu %s --outfile %s''  ',...
+        fullfile(vmFolder,fname), [fname, '.pbrt'],[fname, '.exr']));    
+    [status] = system(renderCmd);
+    if status
+        error(result)
+    end
+end
+
 if ~exist(localFolder,'dir'), mkdir(localFolder);end
-GetImgCMD = sprintf('gcloud compute scp --zone=%s %s:%s %s',...
+GetDataCMD = sprintf('gcloud compute scp --zone=%s %s:%s %s',...
     zone, instanceName, fullfile(vmFolder, fname, [fname, '.exr']), localFolder);
-[status] = system(GetImgCMD);
+[status] = system(GetDataCMD);
 if status
     error(result)
 else
     outFile  = fullfile(localFolder, [fname, '.exr']);
 end
-% clean data
-disp('Data cleaning...');
-delete(zipFile);
-[status]= system(strcat(baseCmd,sprintf(' --command ''rm -r %s && mkdir %s''',vmFolder,vmFolder)));
+
+if cleandata
+    % clean data
+    disp('Data cleaning...');
+    delete(zipFile);
+    [status]= system(strcat(baseCmd,sprintf(' --command ''rm -r %s && mkdir %s''',vmFolder,vmFolder)));
+end
 %%
 elapsedTime = toc;
 fprintf('Rendering time for %s:  %.1f sec ***\n\n',fname,elapsedTime);
@@ -64,7 +108,7 @@ if isempty(thisR.metadata)
 else
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
 end
-%% 
+%%
 if isstruct(ieObject)
     switch ieObject.type
         case 'scene'

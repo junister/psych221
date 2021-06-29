@@ -181,8 +181,8 @@ switch ieParamFormat(lght.type)
         lght.twosided.type = 'bool';
         lght.twosided.value = [];
         
-        lght.nsamples.type = 'integer';
-        lght.nsamples.value = [];
+%         lght.nsamples.type = 'integer';
+%         lght.nsamples.value = [];
         
         lght.shape.type = 'shape';
         lght.shape.value = [];
@@ -199,6 +199,9 @@ switch ieParamFormat(lght.type)
         
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        
+        lght.ReverseOrientation.type = 'ReverseOrientation';
+        lght.ReverseOrientation.value = false;
 end
 
 

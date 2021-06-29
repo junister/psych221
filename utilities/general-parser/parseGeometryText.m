@@ -117,6 +117,13 @@ while i <= length(txt)
         
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         shape = piParseShape(currentLine);
+        if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
+            inputfile = thisR.get('input file');
+            [inputDir,sceneName,~] = fileparts(inputfile);
+            newPlyName = sprintf('%s_%s',sceneName,shape.filename);
+            movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,newPlyName));
+            shape.filename = newPlyName;
+        end
     elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
         
         % Assemble all the read attributes into either a groub object, or a
