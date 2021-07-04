@@ -4,13 +4,13 @@ st = scitran('stanfordlabs');
 
 %%
 assetType = {'city1','city2','city3','city4'};
-for aa = 1:numel(assetType)
+for aa = 3:numel(assetType)
     session = st.lookup(sprintf('wandell/Graphics auto/assets/%s',assetType{aa}),true);
     acqs    = session.acquisitions();
     %%
     
     for dd = 1:numel(acqs)
-        clearvars -except st acqs dd
+        clearvars -except st acqs dd aa assetType
         
         assetname = acqs{dd}.label;
         % The lookup reads from group/project/subject/session/acquisition
@@ -19,7 +19,6 @@ for aa = 1:numel(assetType)
         % We are going to put the object here
         dstDir = fullfile(piRootPath, 'local',assetname);
         thisR = piFWAssetCreate(acqs{dd}, 'resources', true, 'dstDir', dstDir);
-        
         
         %% update recipe
         % update material types
@@ -63,16 +62,25 @@ for aa = 1:numel(assetType)
         
         for pp = 1:numel(pbrtList)
             pbrtEXE = '/Users/zhenyi/git_repo/PBRT_code/pbrt_zhenyi/pbrt_gpu/pbrt-v4/build/pbrt';
+            if ~exist(pbrtList(pp).name, 'file')
+                sprintf('%s not exist\n', pbrtList(pp).name);
+                continue;
+            end
+            if piContains(pbrtList(pp).name, ' ')
+                newName = strrep(pbrtList(pp).name,' ','ext-');
+                movefile(pbrtList(pp).name, newName);
+                pbrtList(pp).name = newName;
+            end
             newTempFile = ['new_',pbrtList(pp).name];
             update_cmd = [pbrtEXE, ' --upgrade ',pbrtList(pp).name,' > ', newTempFile];
             [status,result] = system(update_cmd);
-            if ~status
+            if status
                 error(result);
             end
             movefile(newTempFile,pbrtList(pp).name);
             toply_cmd = [pbrtEXE, ' --toply ',pbrtList(pp).name, ' > ',newTempFile];
             [status,result] = system(toply_cmd);
-            if ~status
+            if status
                 error(result);
             end
             if exist(fullfile(dstDir,'scene/PBRT/pbrt-geometry/mesh_00001.ply'),'file')
@@ -91,6 +99,10 @@ for aa = 1:numel(assetType)
         for jj = 1:numel(objIdxList)
             thisNode = thisR.assets.Node{objIdxList(jj)};
             if piContains(thisNode.shape.filename,'.pbrt')
+                if piContains(thisNode.shape.filename, ' ')
+                    newName = strrep(thisNode.shape.filename,' ','ext-');
+                    thisNode.shape.filename = newName;
+                end
                 plyfile = strrep(thisNode.shape.filename,'.pbrt','.ply');
                 if exist(plyfile,'file')
                     thisNode.shape.meshshape = 'plymesh';
@@ -174,7 +186,7 @@ for aa = 1:numel(assetType)
         catch
             disp('Creating acq...')
             current_id = st.containerCreate('Wandell Lab', 'Graphics auto v4',...
-                'session',assetType,'subject','assets','acquisition',current_acquisitions);
+                'session',assetType{aa},'subject','assets','acquisition',current_acquisitions);
             if ~isempty(current_id.acquisition)
                 fprintf('%s acquisition created \n',current_acquisitions);
             end
