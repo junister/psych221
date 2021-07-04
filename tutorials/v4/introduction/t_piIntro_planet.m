@@ -13,8 +13,8 @@ infile = piPBRTReformat(pbrtFile);
 %%
 thisR  = piRead(infile);
 %%
-thisR.set('film resolution',[1920 1080]);
-thisR.set('rays per pixel',256)
+thisR.set('film resolution',[1920 1080]/2.5);
+thisR.set('rays per pixel',64)
 thisR.set('fov',35);
 %% convert plane to arealight
 ids = thisR.get('objects');
@@ -30,8 +30,10 @@ for ii=1:numel(ids)
             'translation', thisR.assets.Node{thisAsset}.translation, ...
             'rotation', thisR.assets.Node{thisAsset}.rotation,...
             'scale',thisR.assets.Node{thisAsset}.scale);
+        
         newLight.ReverseOrientation.value = true;
         newLight.shape.value = thisR.assets.Node{ids(ii)}.shape;
+        
         thisR.set('light', 'add', newLight);
         
         namelist{jj} = thisR.assets.Node{ids(ii)}.name;jj=jj+1;
@@ -45,6 +47,7 @@ for ii=1:numel(ids)
             'translation', thisR.assets.Node{thisAsset}.translation, ...
             'rotation', thisR.assets.Node{thisAsset}.rotation,...
             'scale',thisR.assets.Node{thisAsset}.scale);
+        
         newLight.shape.value = thisR.assets.Node{ids(ii)}.shape;
         
         thisR.set('light', 'add', newLight);
@@ -60,6 +63,7 @@ for ii=1:numel(ids)
             'translation', thisR.assets.Node{thisAsset}.translation, ...
             'rotation', thisR.assets.Node{thisAsset}.rotation,...
             'scale',thisR.assets.Node{thisAsset}.scale);
+        
         newLight.shape.value = thisR.assets.Node{ids(ii)}.shape;
         
         thisR.set('light', 'add', newLight);
@@ -74,6 +78,7 @@ for ii=1:numel(ids)
             'translation', thisR.assets.Node{thisAsset}.translation, ...
             'rotation', thisR.assets.Node{thisAsset}.rotation,...
             'scale',thisR.assets.Node{thisAsset}.scale);
+        
         newLight.shape.value = thisR.assets.Node{ids(ii)}.shape;
         
         thisR.set('light', 'add', newLight);
@@ -81,6 +86,7 @@ for ii=1:numel(ids)
         
     end
 end
+% Remove plane objects because they are lights now.
 for jj = 1:numel(namelist)
     thisR.set('asset',namelist{jj}(8:end),'delete');
 end
@@ -120,7 +126,7 @@ scene = piRenderCloud(thisR,'update',true);
 sceneWindow(scene);
 toc
 %}
-%% use measured bsdfs
+%% Assign random measured bsdfs
 bsdfsDir = fullfile(piRootPath, 'data/bsdf');
 bsdfList = dir([bsdfsDir, '/*.bsdf']);
 % random pick bsdf file
@@ -134,6 +140,8 @@ for ii = 1:numel(materialKeys)
         'filename',thisbsdfs);
     thisR.set('material','replace', materialKeys{ii}, newMat);
 end
+outputDir = thisR.get('output dir');
+copyfile(bsdfsDir, [outputDir,'/bsdf']);
 %% write the data out
 piWrite(thisR);
 

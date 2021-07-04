@@ -1,5 +1,5 @@
 function outfile = piFBX2PBRT(infile)
-% assimp can be part of docker
+% convert a FBX file to PBRT file.
 %
 [dir, fname,~] = fileparts(infile);
 outfile = fullfile(dir, [fname,'-converted.pbrt']);

@@ -46,7 +46,7 @@ varargin =ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('inputFile',@(x)(exist(x,'file')));
-p.addParameter('label','radiance',@(x)(ischar(x)||iscell(x)));
+p.addParameter('label',{'radiance','depth'},@(x)(ischar(x)||iscell(x)));
 
 p.addParameter('recipe',[],@(x)(isequal(class(x),'recipe')));
 p.addParameter('wave', 400:10:700, @isnumeric);
@@ -92,8 +92,12 @@ for ii = 1:numel(label)
             photons  = Energy2Quanta(data_wave,energy);
             
         case 'depth'
-            
-            depthImage = single(py.pyexr.read(inputFile,'Pz'));
+            try
+                depthImage = single(py.pyexr.read(inputFile,'Pz'));
+            catch
+                warning('Can not find "Pz" channel, ignore reading depth');
+                continue
+            end
             
         case 'coordinates'
             coordinates(:,:,1) = single(py.pyexr.read(inputFile,'Px'));
@@ -115,10 +119,15 @@ end
 
 %%
 % Create a name for the ISET object
-pbrtFile   = thisR.get('output basename');
-ieObjName  = sprintf('%s-%s',pbrtFile,datestr(now,'mmm-dd,HH:MM'));
+if ~isempty(thisR)
+    pbrtFile   = thisR.get('output basename');
+    ieObjName  = sprintf('%s-%s',pbrtFile,datestr(now,'mmm-dd,HH:MM'));
+    cameraType = thisR.get('camera subtype');
+else
+    ieObjName  = sprintf('ISETScene-%s',datestr(now,'mmm-dd,HH:MM'));
+    cameraType = 'perspective';
+end
 
-cameraType = thisR.get('camera subtype');
 switch lower(cameraType)
     case {'pinhole','spherical','perspective'}
         ieObject = piSceneCreate(photons,'wavelength', data_wave);

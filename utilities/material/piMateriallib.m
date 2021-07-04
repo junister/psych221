@@ -132,7 +132,7 @@ materiallib.glass.eta  = '1.3';
 % materiallib.retroreflective.stringtype = 'retroreflective';
 
 %% Uber
-
+%{
 materiallib.uber.stringtype = 'uber';
 
 %% translucent
@@ -160,8 +160,8 @@ materiallib.totalreflect = piMaterialCreate('totalReflect',...
 %% 
 
 % materiallib_updated = piMaterialEmptySlot(materiallib);
+%}
 end
-
 function materiallib = piMaterialEmptySlot(materiallib)
 % Empty the unused material slot for certain type of material, for example,
 % mirror is only defined by reflectivity, since the default material

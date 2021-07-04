@@ -26,10 +26,10 @@ p.parse(thisR,varargin{:});
 % meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
 % verbosity        = p.Results.verbose;
-zone             = p.Results.zone;
-instanceName     = p.Results.instancename;
-update           = p.Results.update;
-cleandata        = p.Results.cleandata;
+zone             = p.Results.zone; % cloud zone name;
+instanceName     = p.Results.instancename; % cloud instance name
+update           = p.Results.update; % only update modified pbrt files
+cleandata        = p.Results.cleandata; % delete data in VM folder
 
 %%
 tic
@@ -45,7 +45,8 @@ if ~update
     % zip folder
     zipName = [fname,'.zip'];
     zipFile = fullfile(rootDir,zipName);
-    zip(zipFile, inputFolder);
+    list = {'scene','bsdf','*.ply','*.pbrt','texture','*.exr','*.png'};
+    zip(zipFile, list, inputFolder);
     % upload folder to google instance/ unzip/ render/ and bring back
     disp('Uploading the scene...');
     cmd = sprintf('gcloud compute scp --zone=%s %s %s:%s',...

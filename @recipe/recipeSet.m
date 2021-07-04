@@ -1148,7 +1148,6 @@ switch param
         end
         thisR.materials.list.(matName).floatconcentration = val{2};
     case {'filmrendertype'}
-        if numel(val)==1, val={val};end
         thisR.metadata.rendertype = val;
         for ii = 1:numel(val)
             switch val{ii}
