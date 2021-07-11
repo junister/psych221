@@ -385,7 +385,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Translate
         if     isequal(val,'perspective'), val = 'pinhole';
         elseif isequal(val,'environment'), val = 'environment';
-        elseif ismember(val,{'realisticDiffraction','realisticEye','realistic','omni'})
+        elseif ismember(val,{'realisticDiffraction','realisticEye','realistic','omni','raytransfer'})
+            % All of these types have either a lens file or an RTF file
+            % that needs to be copied to the rendering directory.
             val = 'lens';
         end
     case 'realisticeyemodel'

@@ -8,20 +8,22 @@ function camera = piCameraCreate(cameraType,varargin)
 %  
 %   cameraType:
 %
-%    'pinhole'     - Default is pinhole camera, also called 'perspective'
-%    'omni'        - Standard lens, including potential microlens array
+%    'pinhole'      - Default is pinhole camera, also called 'perspective'
+%    'omni'         - Standard lens, including potential microlens array
+%    'ray transfer' - Ray transfer function.
+%    'realistic'    - This seems to be superseded completely by omni, except
+%                     for some old car scene generation cases that have not
+%                     been updated. 
 %
-%    'human eye'   - T. Lian human eye model that works with ISETBio and
-%                    sceneEye.  It includes specification of the index of
-%                    refraction for the cornea, lens and such (ior1-4).
+%    'human eye'    - T. Lian human eye model that works with ISETBio and
+%                     sceneEye.  It includes specification of the index of
+%                     refraction for the cornea, lens and such (ior1-4).
 %  Deprecated
-%    'light field' - microlens array in front of the sensor for a light
-%                    field camera
+%    'light field'  - microlens array in front of the sensor for a light
+%                     field camera
 %    'realisticDiffraction' - Not sure what that sub type is doing in
 %                                  light field
-%    'realistic'   - This seems to be superseded completely by omni, except
-%                    for some old car scene generation cases that have not
-%                    been updated. 
+
 %
 % Optional parameter/values
 %
@@ -56,6 +58,9 @@ c = piCameraCreate('human eye','lens file',lensname);
 lensname = 'legrand.dat';
 c = piCameraCreate('human eye','lens file',lensname);
 %}
+%{
+c = piCameraCreate('ray transfer','lens file','tmp.json')
+%}
 
 % PROGRAMMING
 %   TODO: Perhaps this should be a method in the recipe class?
@@ -73,7 +78,7 @@ p = inputParser;
 % omni is the most general type in current use
 % realistic should be replaced by omni in the future.  Not sure what we are
 % waiting for, but there is some feature ... (BW)
-validCameraTypes = {'pinhole','perspective','realistic','omni', 'humaneye','lightfield'};
+validCameraTypes = {'pinhole','perspective','realistic','omni', 'humaneye','lightfield','rtf','raytransfer'};
 p.addRequired('cameraType',@(x)(ismember(ieParamFormat(x),validCameraTypes)));
 
 % This will work for realistic, but not omni.  Perhaps we should make the
@@ -84,6 +89,8 @@ switch cameraType
         lensDefault = 'dgauss.22deg.12.5mm.json';
     case 'realistic'
         lensDefault = 'dgauss.22deg.12.5mm.dat';
+    case 'raytransfer'
+        lensDefault = '';   % This is the json file for a default RTF when we have one 
     otherwise
         lensDefault = '';
 end
@@ -165,34 +172,31 @@ switch ieParamFormat(cameraType)
         camera.focusdistance.type = 'float';
         camera.focusdistance.value = 10; % mm
         
+    case {'raytransfer','rtf'}
+        % Ray Transfer polynomials are in the json file specified by
+        % rtfModel.  We need to add some specifications of the lens
+        % properties here for convenience
+        camera.type           = 'Camera';
+        camera.subtype        = 'raytransfer';
+        camera.lensfile.type  = 'string';
+        camera.lensfile.value = lensDefault;  % JSON Polynomial ray transfer model
+        
+        % The values we store here should probably be in the JSON file
+        % written out by ZEMAX.  A plan might be
+        %
+        %    lensInfo = jsonread(camera.lensfile.value);
+        %
+        % Then set the lensInfo fields here.
+        %
+        camera.aperturediameter.type  = 'float';
+        camera.aperturediameter.value = 5;    % mm
+        camera.focusdistance.type     = 'float';
+        camera.focusdistance.value    = 10; % mm
     case {'lightfield'}
         % This may no longer be used.  The 'omni' type incorporates the
         % light field microlens method and is more modern.
         error('Use ''omni'' and add a microlens array');
-        %{
-        camera.type = 'Camera';
-        camera.subtype = 'omni'; 
-        camera.specfile.type = 'string';
-        camera.specfile.value = which(lensFile);
-        camera.filmdistance.type = 'float';
-        camera.filmdistance.value = 50;    % mm
-        camera.aperture_diameter.type = 'float';
-        camera.aperture_diameter.value = 2; % mm
-        camera.filmdiag.type = 'float';
-        camera.filmdiag.value = 7;
-        camera.diffractionEnabled.type = 'bool';
-        camera.diffractionEnabled.value = 'false';
-        camera.chromaticAberrationEnabled.type = 'bool';
-        camera.chromaticAberrationEnabled.value = 'false';
         
-        % Microlens parameters
-        camera.microlens_enabled.type = 'float';
-        camera.microlens_enabled.value = 1;
-        camera.num_pinholes_w.type = 'float';
-        camera.num_pinholes_w.value = 8;
-        camera.num_pinholes_h.type = 'float';
-        camera.num_pinholes_h.value = 8;
-        %}
     case {'humaneye'}
         % Human eye model used with sceneEye calculations in ISETBio.
         % The subtype 'realisticEye' is historical and sent to PBRT. It is

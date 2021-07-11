@@ -337,6 +337,9 @@ elseif isequal(thisR.get('realistic eye model'),'arizona')
 else
     % If the working copy doesn't exist, copy it.  
     % If it exists but there is a force overwrite, delete and copy.
+    %
+    % We need to check that this will work for the RTF json file as well.
+    % I think so. (BW).
     if ~exist(outputLensFile,'file')
         copyfile(inputLensFile,outputLensFile);
     elseif overwritelensfile
