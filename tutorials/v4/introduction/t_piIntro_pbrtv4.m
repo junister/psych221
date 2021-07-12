@@ -8,8 +8,10 @@
 %                 |  
 %                 x - - - - >y
 % unit scale uses centermeter by default
-%%
+%% Init
 ieInit;
+if ~piDockerExists, piDockerConfig; end
+
 %% support FBX to PBRT
 
 fbxFile   = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');

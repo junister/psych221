@@ -78,6 +78,7 @@ for ii = 1:numel(label)
         case 'radiance'
             %             energy = piReadEXR(inputFile, 'data type','radiance');
             energy = single(py.pyexr.read(inputFile,'Radiance'));
+            
             if isempty(find(energy(:,:,17),1))
                 energy = energy(:,:,1:16);
             end
