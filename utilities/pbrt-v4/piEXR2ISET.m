@@ -81,15 +81,10 @@ for ii = 1:numel(label)
             
             if isempty(find(energy(:,:,17),1))
                 energy = energy(:,:,1:16);
-            end
-            dim_energy = size(energy);
-            
-            if dim_energy(3)==31
-                data_wave = 400:10:700;
-            elseif dim_energy(3)==16
                 data_wave = 400:20:700;
-            end
-            
+            else
+                data_wave = 400:10:700;
+            end            
             photons  = Energy2Quanta(data_wave,energy);
             
         case 'depth'
