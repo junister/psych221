@@ -51,6 +51,15 @@ switch dataType
         ZDepthIndex = find(strcmp(data.channels, 'Pz'));
         ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
         output=ZDepthMap;
+    case "depth"
+        XDepthIndex = find(strcmp(data.channels, 'Px'));
+        XDepthMap = exrreadchannels(filename, data.channels{XDepthIndex});
+        YDepthIndex = find(strcmp(data.channels, 'Py'));
+        YDepthMap = exrreadchannels(filename, data.channels{YDepthIndex});
+        ZDepthIndex = find(strcmp(data.channels, 'Pz'));
+        ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
+        
+        output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
         CoordIndex = find(strcmp(data.channels, 'Px'));
         CoordMap = exrreadchannels(filename, data.channels{CoordIndex:CoordIndex+2});
@@ -59,8 +68,7 @@ switch dataType
     case "material"
         matIndex = find(strcmp(data.channels, 'MaterialId'));
         matMap = exrreadchannels(filename, data.channels{matIndex});
-        image = cell2mat(values(matMap));
-        output=image;
+        output = cell2mat(values(matMap));
     case "normal"
         NormIndex = find(strcmp(data.channels, 'Px'));
         NormMap = exrreadchannels(filename, data.channels{NormIndex:NormIndex+2});
@@ -69,7 +77,9 @@ switch dataType
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
     case "instance"
-        % to add
+        insIndex = find(strcmp(data.channels, 'InstanceId'));
+        insMap = exrreadchannels(filename, data.channels{insIndex});
+        output = cell2mat(values(insMap));
     otherwise
         error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
 end

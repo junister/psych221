@@ -76,8 +76,7 @@ for ii = 1:numel(label)
     
     switch label{ii}
         case 'radiance'
-            %             energy = piReadEXR(inputFile, 'data type','radiance');
-            energy = single(py.pyexr.read(inputFile,'Radiance'));
+            energy = piReadEXR(inputFile, 'data type','radiance');
             
             if isempty(find(energy(:,:,17),1))
                 energy = energy(:,:,1:16);
@@ -89,27 +88,24 @@ for ii = 1:numel(label)
             
         case 'depth'
             try
-                depthImage = single(py.pyexr.read(inputFile,'Pz'));
+                depthImage = piReadEXR(inputFile, 'data type','zdepth');
             catch
                 warning('Can not find "Pz" channel, ignore reading depth');
                 continue
             end
             
         case 'coordinates'
-            coordinates(:,:,1) = single(py.pyexr.read(inputFile,'Px'));
-            coordinates(:,:,2) = single(py.pyexr.read(inputFile,'Py'));
-            coordinates(:,:,3) = single(py.pyexr.read(inputFile,'Pz'));
+            coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
             
-        case 'material'
-            
-            materialID = single(py.pyexr.read(inputFile,'MaterialId'));
+        case 'material'   
+            materialID = piReadEXR(inputFile, 'data type','material');
             
         case 'normal'
             % to add
         case 'albedo'
             % to add; only support rgb for now, spectral albdeo needs to add;
         case 'instance'
-            instanceID = single(py.pyexr.read(inputFile,'InstanceId'));
+            instanceID = piReadEXR(inputFile, 'data type','instance');
     end
 end
 
