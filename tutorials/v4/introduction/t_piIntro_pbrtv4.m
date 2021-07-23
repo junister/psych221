@@ -30,9 +30,13 @@
 %                 x - - - - >y
 % unit scale uses centermeter by default
 %
-% TO CHECK for updates
+% We modified
 %    tree
-%    piWRS
+%   added piWRS.m
+%
+% TO CHECK for updates
+%    recipe.m, recipeSet.m recipeGet.m
+%    
 %   
 %% Init
 ieInit;
