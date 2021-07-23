@@ -47,14 +47,19 @@ lightSourceText = cell(1, numel(thisR.lights));
 for ii = 1:numel(thisR.lights)
     thisLight = thisR.lights{ii};
     spectrumScale = piLightGet(thisLight, 'specscale val');
-    
+    scaleTxt = sprintf('"float scale" %f',spectrumScale);
     %% Write out lightspectrum to the file if the data is from file
     specVal = piLightGet(thisLight, 'spd val');
     if ~isempty(specVal)
         if ischar(specVal)
             [~,~,ext] = fileparts(specVal);
+            outputDir = thisR.get('output dir');
             if isequal(ext,'.spd')
                 % User has a local file that will be copied
+                thisLightfile = fullfile(outputDir,specVal);
+                spds = textread(thisLightfile);
+                wavelength = spds(:,1);
+                data = spds(:,2);
             else
                 % Read the mat file.  Should have a mat extension.
                 % This is the wavelength hardcoded in PBRT
@@ -64,21 +69,19 @@ for ii = 1:numel(thisR.lights)
                 else
                     error('Light extension seems wrong: %s\n',ext);
                 end
-
-                % Saving the light information in the spd sub-directory 
-                outputDir = thisR.get('output dir');
                 lightSpdDir = fullfile(outputDir, 'spds', 'lights');
                 thisLightfile = fullfile(lightSpdDir,...
                     sprintf('%s_%f.spd', specVal, spectrumScale));
                 if ~exist(lightSpdDir, 'dir'), mkdir(lightSpdDir); end
-                
-                fid = fopen(thisLightfile, 'w');
-                for jj = 1: length(data)
-                    fprintf(fid, '%d %d \n', wavelength(jj), data(jj)*spectrumScale);
-                end
-                fclose(fid);                
-                
-            end        
+            end
+            % Saving the light information in the spd sub-directory
+            fid = fopen(thisLightfile, 'w');
+            for jj = 1: length(data)
+                fprintf(fid, '%f %.7f \n', wavelength(jj), data(jj)*spectrumScale);
+            end
+            fclose(fid);
+            
+            
         elseif isnumeric(specVal)
             % Numeric.  Do nothing
         else
@@ -122,8 +125,9 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, fromTxt);
             end
             
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
-                        
+            
         case 'distant'
             % Whether coordinate at camera pos
             if thisLight.cameracoordinate
@@ -152,7 +156,7 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(toTxt)
                 lghtDef = strcat(lghtDef, toTxt);
             end
-            
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
             
@@ -172,6 +176,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, mapnameTxt);
             end
             
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
         case 'infinite'
@@ -209,8 +214,9 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, nsamplesTxt);
             end
             
-
             
+            
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
         case 'projection'
@@ -235,6 +241,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, fovTxt);
             end
             
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
         case {'spot', 'spotlight'}
@@ -281,6 +288,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, conedeltaangleTxt);
             end
             
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             
             
@@ -298,6 +306,10 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(spdTxt)
                 lghtDef = strcat(lghtDef, spdTxt);
             end
+            %                         % Attach specscale
+            %             [~, scaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            %
+            %             lightSourceText{ii}.line = [lightSourceText{ii}.line scaleTxt];
             % lghtDef = sprintf('AreaLightSource "diffuse" "%s L" %s', spectrumType, lightSpectrum);
             
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
@@ -308,7 +320,9 @@ for ii = 1:numel(thisR.lights)
             % Attach shape
             [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
             
-            lightSourceText{ii}.line = [lightSourceText{ii}.line shpTxt];
+            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
+            lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
+            
             
     end
     lightSourceText{ii}.line{end+1} = 'AttributeEnd';

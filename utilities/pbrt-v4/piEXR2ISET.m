@@ -105,7 +105,7 @@ for ii = 1:numel(label)
         case 'albedo'
             % to add; only support rgb for now, spectral albdeo needs to add;
         case 'instance'
-            instanceID = piReadEXR(inputFile, 'data type','instance');
+            instanceID = piReadEXR(inputFile, 'data type','instanceId');
     end
 end
 

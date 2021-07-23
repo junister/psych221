@@ -1,11 +1,11 @@
 
 AttributeBegin
-    #ObjectName Camera# Dimension [0 0 0]
+    #ObjectName Camera#Dimension [0 0 0]
     ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0.05 -4 1  ]
 AttributeEnd
 
 AttributeBegin
-    #ObjectName colorChecker # Dimension [1.38 1.08 0.08]
+    #ObjectName colorChecker #Dimension [1.38 1.08 0.08]
 
     AttributeBegin
         NamedMaterial "Mat"

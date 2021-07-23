@@ -90,7 +90,7 @@ end
 p = inputParser;
 p.addRequired('lght', @isstruct);
 p.addRequired('param', @ischar);
-p.addRequired('val', @(x)(ischar(x) || isstruct(x) || isnumeric(x) ||...
+p.addRequired('val', @(x)(ischar(x) || isstring(x) || isstruct(x) || isnumeric(x) ||...
                             islogical(x) || iscell(x)));
 
 p.parse(lght, param, val, varargin{:});

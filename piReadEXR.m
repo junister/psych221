@@ -65,10 +65,9 @@ switch dataType
         CoordMap = exrreadchannels(filename, data.channels{CoordIndex:CoordIndex+2});
         image = cell2mat(values(CoordMap));
         output = reshape(image, [size, 3]);
-    case "material"
+    case "material" % single channel
         matIndex = find(strcmp(data.channels, 'MaterialId'));
-        matMap = exrreadchannels(filename, data.channels{matIndex});
-        output = cell2mat(values(matMap));
+        output = exrreadchannels(filename, data.channels{matIndex});
     case "normal"
         NormIndex = find(strcmp(data.channels, 'Px'));
         NormMap = exrreadchannels(filename, data.channels{NormIndex:NormIndex+2});
@@ -76,10 +75,9 @@ switch dataType
         output = reshape(image, [size, 3]);
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
-    case "instance"
+    case "instance" % single channel
         insIndex = find(strcmp(data.channels, 'InstanceId'));
-        insMap = exrreadchannels(filename, data.channels{insIndex});
-        output = cell2mat(values(insMap));
+        output = exrreadchannels(filename, data.channels{insIndex});
     otherwise
         error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
 end

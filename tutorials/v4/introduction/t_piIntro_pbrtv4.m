@@ -65,8 +65,6 @@ thisR.set('rays per pixel',16);
 % rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
 thisR.set('film render type',{'radiance','depth'})
 %% move object
-
-
 thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 
 %% write the data out
