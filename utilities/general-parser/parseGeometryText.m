@@ -121,7 +121,9 @@ while i <= length(txt)
             inputfile = thisR.get('input file');
             [inputDir,sceneName,~] = fileparts(inputfile);
             newPlyName = sprintf('%s_%s',sceneName,shape.filename);
-            movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,newPlyName));
+            if ~exist(fullfile(inputDir,newPlyName), 'file')
+                movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,newPlyName));
+            end
             shape.filename = newPlyName;
         end
     elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
@@ -203,7 +205,7 @@ while i <= length(txt)
                             end
                             
                             resObject.name = sprintf('%s_O', n);
-                        elseif ~isempty(mat)
+                        elseif exist('mat','var') && ~isempty(mat)
                             if ~isempty(mat.namedmaterial)
                                 warning('An object has been created with its material name: %s', mat.namedmaterial)
                                 resObject.name = sprintf('%s_O', mat.namedmaterial);

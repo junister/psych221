@@ -306,22 +306,22 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(spdTxt)
                 lghtDef = strcat(lghtDef, spdTxt);
             end
-            %                         % Attach specscale
-            %             [~, scaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
-            %
-            %             lightSourceText{ii}.line = [lightSourceText{ii}.line scaleTxt];
-            % lghtDef = sprintf('AreaLightSource "diffuse" "%s L" %s', spectrumType, lightSpectrum);
+
             
-            lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
+%             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             if thisLight.ReverseOrientation.value==true
                 rOTxt = 'ReverseOrientation';
                 lightSourceText{ii}.line = [lightSourceText{ii}.line rOTxt];
             end
             % Attach shape
-            [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
-            
-            lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
+            if isfield(thisLight.shape,'value')
+                [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
+            else
+                [~, shpTxt] = piLightGet(thisLight, 'shape struct', 'pbrt text', true);
+            end
+
+%             lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
+            lightSourceText{ii}.line = [lightSourceText{ii}.line sprintf("%s %s",lghtDef, scaleTxt) shpTxt ];
             
             
     end

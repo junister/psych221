@@ -7,7 +7,7 @@ outfile  = thisR.get('output file');
 currDir    = pwd;
 cd(outputDir);
 outputFile = fullfile(outputDir, [fname,'.exr']);
-renderCmd  = [pbrtPath, ' ',thisR.outputFile,' --outfile ',outputFile];
+renderCmd  = [pbrtPath, ' --gpu',thisR.outputFile,' --outfile ',outputFile];
 system(renderCmd)
 cd(currDir);
 

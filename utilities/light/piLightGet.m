@@ -89,7 +89,8 @@ end
 %% compose pbrt text
 txt = '';
 if pbrtText && ~isempty(val) &&...
-        (isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val') || isequal(pName, 'type'))
+        (isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val') || isequal(pName, 'type')) ||...
+        isequal(pTypeVal, 'struct')
     switch pName
         case 'type'
             if ~isequal(val, 'area')
@@ -155,7 +156,7 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'rotation'
             % piLightGet(lgt,'rotation')
-            
+
             % val can be a cell array
             if ~iscell(val)
                 val = {val};

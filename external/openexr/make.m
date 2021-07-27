@@ -18,7 +18,7 @@ if(verbose == true)
   additionals = [additionals, {'-v'}];
 end
 
-for n = 1%:size(build_files, 2)
+for n = 1:size(build_files, 2)
   if(verbose == true)
     clc;
   end

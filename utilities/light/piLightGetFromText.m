@@ -42,11 +42,20 @@ p.parse(intext, varargin{:});
 AttBegin  =  find(piContains(intext,'AttributeBegin'));
 AttEnd    =  find(piContains(intext,'AttributeEnd'));
 
-light     =  piContains(intext,'LightSource');
-lightIdx  =  find(light);   % Find which lines have LightSource on them.
+% light     =  piContains(intext,'LightSource');
 
+lightIdx  =  find(piContains(intext,'LightSource'));   % Find which lines have LightSource on them.
+% remove commentted line
+newlightIdx = [];
+for ii = 1:numel(lightIdx)
+    if ~strcmp(intext{lightIdx(ii)}(1),'#')
+        newlightIdx = [newlightIdx,lightIdx(ii)];
+    end
+end
+lightIdx = newlightIdx;
 %%
-nLights = sum(light);
+% nLights = sum(light);
+nLights = numel(lightIdx);
 lightSources = cell(1, nLights);
 lightTextRanges = cell(1, nLights);
 for ii = 1:nLights
