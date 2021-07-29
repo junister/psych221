@@ -67,6 +67,8 @@ thisR.set('film render type',{'radiance','depth'})
 %% move object
 thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 
+thisR.show('objects')
+
 %% write the data out
 
 scene = piWRS(thisR);

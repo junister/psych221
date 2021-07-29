@@ -97,13 +97,11 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
 p.addParameter('write',false,@islogical);
-% p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(varargin{:});
 
 sceneDir = p.Results.scenename;
 write     = p.Results.write;
-% verbosity = p.Results.verbose;
 
 %%  To read the file,the upper/lower case must be right
 

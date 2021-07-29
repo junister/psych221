@@ -1,18 +1,48 @@
 function outFile = piPBRTUpdateV4(inFile,outFile)
-% update PBRT file with v3 format to v4 format
-[sceneDir, fname,ext] =fileparts(inFile);
+% Jpdate PBRT file with v3 format to v4 format
+%
+%
+% Inputs
+%   inFile -  PBRT V3 file
+%   outFile - PBRT V4 file
+%
+% Output
+%   outFile
+%
+% Zhenyi
+%
+% See also
+%   s_updatePBRTFile is the script that manages the conversion
+
+%%
+if ~exist(inFile,'file'), error('Could not find %s',inFile); end
+if ~exist('outFile','var'), outFile = ''; end 
+
+%% First we call PBRT
+
+[sceneDir, fname,ext] = fileparts(inFile);
 dockerCMD = 'docker run -ti --rm';
 dockerImage = 'camerasimulation/pbrt-v4-cpu';
-% outFile = fullfile(sceneDir,[fname,'-v4.pbrt']);
+
+% Use default name for outFile
+if isempty(outFile)
+  outFile = fullfile(sceneDir,[fname,'-v4.pbrt']);
+end
+
+%% Call the pbrt docker image
+
 VolumeCMD = sprintf('--workdir="%s" --volume="%s:%s"',sceneDir,sceneDir,sceneDir);
 CMD = sprintf('%s %s %s pbrt --upgrade %s > %s',dockerCMD, VolumeCMD, dockerImage, inFile, outFile);
+
 [status,result]=system(CMD);
+
 if status
     error(result);
 end
 
-%% deal with more cases which are handled properly by PBRT v4
+%% Deal with some cases which were not handled properly 
 
+% Open the file
 fileIDin = fopen(outFile);
 
 % Create a tmp file
@@ -22,6 +52,8 @@ fileIDout = fopen(outputFullTmp, 'w');
 while ~feof(fileIDin)
     thisline=fgets(fileIDin);
     
+    % We can add other elseif cases as needed.
+
     % delete "string strategy" params
     if ischar(thisline) && contains(thisline,'string strategy')
         continue
@@ -29,9 +61,11 @@ while ~feof(fileIDin)
     % delete "twosided" for arealight
     elseif ischar(thisline) && contains(thisline,'twosided')
         continue
+        
         % delete "twosided" for arealight
     elseif ischar(thisline) && contains(thisline,'Warning')
         continue
+        
     % change ":Vector (1,2,3)" to "# Dimension [1 2 2]"
     elseif ischar(thisline) && contains(thisline,':Vector')
         thisline = strrep(thisline, ':Vector','#Dimension:');
@@ -41,12 +75,16 @@ while ~feof(fileIDin)
         fprintf(fileIDout, '%s', thisline);
         continue
     end
+    
     fprintf(fileIDout, '%s', thisline);
 end
+
 fclose(fileIDin);
+
 fclose(fileIDout);
 
 movefile(outputFullTmp, outFile);
+
 [outputDir,~,~]=fileparts(outFile);
 inputMaterialfname  = fullfile(sceneDir,  [fname, '_materials', ext]);
 outputMaterialfname = fullfile(outputDir, [fname, '_materials', ext]);

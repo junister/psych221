@@ -76,19 +76,71 @@ classdef recipe < matlab.mixin.Copyable
             [obj, val] = recipeSet(obj,varargin{:});
         end
         
-        function show(obj,varargin)
-            % Will become thisR.show('assets'), thisR.show('materials'),
-            % thisR.show('lights'), and so forth.
-            % 
+        function oFile = save(thisR,varargin)
+            % Save the recipe in a mat-file.
+            % By default, save it as sceneName-recipe.mat  in the input
+            % directory. 
+            %
+            % recipe.save('recipeFileName');
+            
+            if ~isempty(varargin)
+                oFile = varargin{1};
+            else                
+                oFile = thisR.get('input basename');
+                oFile = sprintf('%s-recipe',oFile);
+                
+                oDir = thisR.get('input dir');
+                oFile = fullfile(oDir,oFile);
+            end
+            
+            save(oFile,'thisR');
+        end
+        
+        function jsonFile = savejson(thisR,varargin)
+            % Save the recipe in a mat-file.
+            % By default, save it as sceneName-recipe.mat  in the input
+            % directory. 
+            %
+            % recipe.save('recipeFileName');
+            
+            if ~isempty(varargin)
+                jsonFile = varargin{1};
+            else                
+                jsonFile = thisR.get('input basename');
+                jsonFile = sprintf('%s-recipe',jsonFile);
+                
+                oDir = thisR.get('input dir');
+                jsonFile = fullfile(oDir,jsonFile);
+            end
+
+            [p,n,e] = fileparts(jsonFile);
+            if ~isequal(e,'.json')
+                disp('Adding json extension to file name');
+                jsonFile = fullfile(p,[n,'.json']);
+            end
+            jsonwrite(jsonFile,thisR);
+        end
+        
+        function T = show(obj,varargin)
+            %
+            % thisR.show('assets) - Brings up a window
+            % thisR.show('object materials') - Prints a table (returns T,
+            %              too)
+            %
             % Optional 
-            %   assets
-            %   assets materials
+            %   assets (or nodes)
+            %   node names
+            %   object materials
+            %   object positions
+            %   object sizes
             %   materials
             %   lights
-            % 
+ 
             if isempty(varargin), showType = 'assets';
             else,                 showType = varargin{1};
             end
+            
+            T = [];
             
             % We should probably use nodes and objects/assets distinctly
             switch ieParamFormat(showType)
@@ -98,16 +150,43 @@ classdef recipe < matlab.mixin.Copyable
                     if isempty(obj.assets), disp('No assets in this recipe');
                     else, obj.assets.show;
                     end
-                case 'nodenames'
+                case 'assetnames'
                     % List all the nodes, not just the objects
                     names = obj.get('asset names')';
                     rows = cell(numel(names),1);
                     for ii=1:numel(names), rows{ii} = sprintf('%d',ii); end
                     T = table(categorical(names),'VariableNames',{'assetName'}, 'RowNames',rows);
                     disp(T);
-                case {'objectsmaterials','assetsmaterials'}
-                    % Prints out a table
+                case {'objects'}
+                    % Tabular summary of object materials, positions, sizes
+                    names = obj.get('object names')';
+                    matT   = obj.get('object materials');
+                    coords = obj.get('object coordinates');
+                    oSizes = obj.get('object sizes');
+                    positionT = cell(size(names));
+                    sizeT = cell(size(names));
+                    for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
+                    for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
+                    T = table(matT, positionT, sizeT,'VariableNames',{'material','positions (m)','sizes (m)'}, 'RowNames',names);
+                    disp(T);
+                case {'objectmaterials','objectsmaterials','assetsmaterials'}
+                    % Prints out a table of just the materials
                     piAssetMaterialPrint(obj);
+                case {'objectpositions','objectposition','assetpositions','assetspositions'}
+                    % Print out the positions
+                    names = obj.get('object names')';
+                    coords = obj.get('object coordinates');
+                    positionT = cell(size(names));
+                    for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
+                    T = table(positionT,'VariableNames',{'positions (m)'}, 'RowNames',names);
+                    disp(T);
+                case {'objectsizes','assetsizes','objectsize'}
+                    names = obj.get('object names')';
+                    sizeT = cell(size(names));
+                    oSizes = obj.get('object sizes');
+                    for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
+                    T = table(sizeT,'VariableNames',{'sizes (m)'}, 'RowNames',names);
+                    disp(T);
                 case 'materials'
                     % Prints a table
                     piMaterialPrint(obj);

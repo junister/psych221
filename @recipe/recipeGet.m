@@ -262,6 +262,111 @@ switch ieParamFormat(param)  % lower case, no spaces
         else
             val = [];
         end        
+        
+        % Objects
+    case {'objectmaterial','materialobject'}
+        % val = thisR.get('object material');
+        %
+        % Cell arrays of object names and corresponding material
+        % names.
+        %
+        % We do not use findleaves because sometimes tree class
+        % thinks what we call is a branch is a leaf because,
+        % well, we don't put an object below a branch node.  We
+        % should trim the tree of useless branches (any branch
+        % that has no object beneath it). Maybe.  (BW).
+        ids = thisR.get('objects');
+        leafMaterial = cell(1,numel(ids));
+        leafNames = cell(1,numel(ids));
+        cnt = 1;
+        for ii=ids
+            thisAsset = thisR.get('asset',ii);
+            leafNames{cnt} = thisAsset.name;
+            leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
+            cnt = cnt + 1;
+        end
+        val.leafNames = leafNames;
+        val.leafMaterial = leafMaterial;
+    case {'objectmaterials'}
+        % A list of materials for each of the objects
+        % This and the one above should be merged.
+        tmp = thisR.get('object material');
+        val = (tmp.leafMaterial)';
+    case {'objects'}
+        % Indices to the objects
+        nnodes = thisR.assets.nnodes;
+        val = [];
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
+                val = [val,ii]; %#ok<AGROW>
+            end
+        end
+    case {'objectnames'}
+        % Names of the objects
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            val{ii} = names{ids(ii)};
+        end
+    case 'objectsimplenames'
+        % Names of the objects
+        % We think there is ID_Instance_ObjectName_O.
+        % So we try to delete the first two and the O atthe end.
+        % If there are fewer parts, we delete less.
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            nameParts = split(names{ids(ii)},'_');
+            if numel(nameParts) > 2
+                tmp = join(nameParts(3:(end-1)),'-');
+                val{ii} = tmp{1};
+            elseif numel(nameParts) > 1
+                val{ii} = nameParts{2};
+            else
+                val{ii} = nameParts{1};
+            end
+        end
+    case {'objectcoords','objectcoordinates'}
+        % Returns the coordinates of the objects (leafs of the asset tree)
+        % Units should be meters
+        % coords = thisR.get('object coordinates');
+        %
+        Objects  = thisR.get('objects');
+        nObjects = numel(Objects);
+        
+        % Get their world positions
+        val = zeros(nObjects,3);
+        for ii=1:nObjects
+            thisNode = thisR.get('assets',Objects(ii));
+            val(ii,:) = thisR.get('assets',thisNode.name,'world position');
+        end
+    case {'objectsizes'}
+        % All the objects
+        % thisR.get('object sizes')
+        Objects  = thisR.get('objects');
+        nObjects = numel(Objects);
+        val = zeros(nObjects,3);
+        for ii=1:nObjects
+            thisNode = thisR.get('assets',Objects(ii));
+            thisScale = thisR.get('assets',Objects(ii),'world scale');
+            
+            % All the object points
+            if isfield(thisNode.shape,'pointp')
+                pts = thisNode.shape.pointp;
+                % Range of points times any scale factors on the path
+                val(ii,1) = range(pts(1:3:end))*thisScale(1);
+                val(ii,2) = range(pts(2:3:end))*thisScale(2);
+                val(ii,3) = range(pts(3:3:end))*thisScale(3);
+            else
+                % There is no shape point information.  So we return NaNs.
+                val(ii,:) = NaN;
+            end
+            
+        end    
     case 'objectdistance'
         % thisR.get('object distance',units)
         diff = thisR.lookAt.from - thisR.lookAt.to;
@@ -1067,62 +1172,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('textures print')
         %
         piTexturePrint(thisR);
-    case {'objectmaterial','materialobject'}
-        % val = thisR.get('object material');
-        %
-        % Cell arrays of object names and corresponding material
-        % names.
-        %
-        % We do not use findleaves because sometimes tree class
-        % thinks what we call is a branch is a leaf because,
-        % well, we don't put an object below a branch node.  We
-        % should trim the tree of useless branches (any branch
-        % that has no object beneath it). Maybe.  (BW).
-        ids = thisR.get('objects');
-        leafMaterial = cell(1,numel(ids));
-        leafNames = cell(1,numel(ids));
-        cnt = 1;
-        for ii=ids
-            thisAsset = thisR.get('asset',ii);
-            leafNames{cnt} = thisAsset.name;
-            leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
-            cnt = cnt + 1;
-        end
-        val.leafNames = leafNames;
-        val.leafMaterial = leafMaterial;
-    case {'objects'}
-        % Indices to the objects
-        nnodes = thisR.assets.nnodes;
-        val = [];
-        for ii=1:nnodes
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
-                val = [val,ii]; %#ok<AGROW>
-            end
-        end
-    case {'objectnames'}
-        % Names of the objects
-        ids = thisR.get('objects');
-        names = thisR.assets.names;
-        val = cell(1,numel(ids));
-        for ii = 1:numel(ids)
-            val{ii} = names{ids(ii)};
-        end
-    case {'objectcoords','objectcoordinates'}
-        % Returns the coordinates of the objects (leafs of the asset tree)
-        % Units should be meters
-        % coords = thisR.get('object coordinates');
-        %
-        Objects  = thisR.get('objects');
-        nObjects = numel(Objects);
-        
-        % Get their world positions
-        val = zeros(nObjects,3);
-        for ii=1:nObjects
-            thisNode = thisR.get('assets',Objects(ii));
-            val(ii,:) = thisR.get('assets',thisNode.name,'world position');
-        end
-        
+    
         % Lights
     case{'light', 'lights'}
         if isempty(varargin)
@@ -1280,10 +1330,13 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'assetroot'}
         % The root of all assets just has a name, not properties.
         val = thisR.assets.get(1);
-    case {'assetnames'}
+    case {'nodenames','assetnames'}
+        % Assets should become object names.  But it is sometimes used for
+        % all the nodes.  THat's a mistake.
         % The names without the XXXID_ prepended
         val = thisR.assets.stripID;
     case {'assetparentid'}
+        % This should also be nodeparentid, not asset parent id.
         % thisR.get('asset parent id',assetName or ID);
         %
         % Returns the id of the parent node

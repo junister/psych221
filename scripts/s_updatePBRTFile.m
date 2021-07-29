@@ -1,11 +1,18 @@
-sceneName = 'checkerboard';
-inFile = fullfile('/Users/zhenyi/git_repo/dev/iset3d-v4/data/V3',sceneName,[sceneName,'.pbrt']);
+%% Update V3 to V4
+%
 
-outputDir = fullfile(piRootPath,'data/V4',sceneName);
+%%
+sceneName = 'SimpleScene';
+inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
+
+outputDir = fullfile(piRootPath,'data','v4',sceneName);
 if ~exist(outputDir,'dir'), mkdir(outputDir);end
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 
+% This does the PBRT conversion 
 outFile = piPBRTUpdateV4(inFile, outFile);
+
+%% Copy the auxiliary files
 
 [inputDir,~,~]=fileparts(inFile);
 fileList = dir(inputDir);
@@ -19,3 +26,8 @@ for ii = 1:numel(fileList)
             fullfile(outputDir, fileList(ii).name));
     end
 end
+
+% thisR = piRecipeDefault('scene name','simple scene');
+% scene = piWRS(thisR);
+
+%%
