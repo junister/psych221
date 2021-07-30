@@ -70,9 +70,9 @@ if find(piContains(keyWords, 'Shape '))
                     [~, ~, ext] = fileparts(shape.filename);
                 end
                 if isequal(ext, '.ply')
+                    % do something
                 else
-                    shape.floatuv = piParameterGet(txt, 'point2 uv');
-                    % shape.floatuv = keyWords{find(piContains(keyWords, 'float uv')) + 1};
+                    shape.point2uv = piParameterGet(txt, 'point2 uv');
                 end
             end
             
@@ -99,7 +99,7 @@ function s = shapeCreate
     s.filename='';
     s.integerindices = '';
     s.point3p = '';
-    s.floatuv = '';
+    s.point2uv = '';
     s.normaln = '';
     s.height = '';
     s.radius = '';

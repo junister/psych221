@@ -75,7 +75,7 @@ wave                  = p.Results.wave;
 for ii = 1:numel(label)
     
     switch label{ii}
-        case 'radiance'
+        case {'radiance','illuminance'}
             energy = piReadEXR(inputFile, 'data type','radiance');
             
             if isempty(find(energy(:,:,17),1))

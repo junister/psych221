@@ -52,7 +52,7 @@ if isempty(thisR.lights)
         txt = textscan(fileID,'%s','Delimiter','\n');
         newLights = piLightGetFromText(txt{1}, 'print', false);
         if ~isempty(newLights)
-            thisR.lights{end+1:end+numel(newLights)} = newLights{:};
+            thisR.lights(end+1:end+numel(newLights)) = newLights;
         else
             warning('%s exists but no light found. \n', inputFile_lights);
         end

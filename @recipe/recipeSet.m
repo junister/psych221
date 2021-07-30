@@ -1171,6 +1171,24 @@ switch param
                 case 'instance'
                     thisR.film.saveInstance.type  = 'bool';
                     thisR.film.saveInstance.value = true;
+                case 'illuminance'
+                    illumR = piRecipeCopy(thisR);
+                    illumR.film.saveRadiance.type  = 'bool';
+                    illumR.film.saveRadiance.value = true;
+                    illumR.film.saveRadianceAsBasis.type  = 'bool';
+                    illumR.film.saveRadianceAsBasis.value =false;
+                    % using radiance render type, but modify material
+                    matList = keys(illumR.materials.list);
+                    for jj = 1: numel(matList)
+                        thisMat = illumR.materials.list(matList{jj});
+                        thisMat.reflectance.type = 'spectrum';
+                        thisMat.reflectance.value = [300 1 800 1];
+                        illumR.materials.list(matList{jj}) = thisMat;
+                    end
+                    
+                    [dir, fname, ext]=fileparts(thisR.outputFile);
+                    illumR.outputFile = fullfile(dir, [fname,'_illuminance',ext]);
+                    thisR.metadata.illuminanceRecipe = illumR;
             end
         end
     otherwise

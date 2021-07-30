@@ -15,8 +15,8 @@ end
 if isfield(shape, 'point3p') && ~isempty(shape.point3p)
     txt = strcat(txt, ' "point3 P"', [' [',piNum2String(shape.point3p),']',]);
 end
-if isfield(shape, 'point2uv') && ~isempty(shape.floatuv)
-    txt = strcat(txt, ' "Point2 uv"', [' [',piNum2String(shape.floatuv),']',]);
+if isfield(shape, 'point2uv') && ~isempty(shape.point2uv)
+    txt = strcat(txt, ' "point2 uv"', [' [',piNum2String(shape.point2uv),']',]);
 end
 if isfield(shape, 'normaln') && ~isempty(shape.normaln)
     txt = strcat(txt, ' "normal N"', [' [',piNum2String(shape.normaln),']',]);
