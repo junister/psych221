@@ -46,7 +46,7 @@ varargin =ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('inputFile',@(x)(exist(x,'file')));
-p.addParameter('label',{'radiance','depth'},@(x)(ischar(x)||iscell(x)));
+p.addParameter('label',{'radiance'},@(x)(ischar(x)||iscell(x)));
 
 p.addParameter('recipe',[],@(x)(isequal(class(x),'recipe')));
 p.addParameter('wave', 400:10:700, @isnumeric);

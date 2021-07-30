@@ -140,6 +140,9 @@ switch tp
         texture.filename.type = 'string';
         texture.filename.value = '';
         
+        texture.basisfilename.type = 'string';
+        texture.basisfilename.value = '';
+        
         texture.wrap.type = 'string';
         texture.wrap.value = '';
         
