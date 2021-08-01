@@ -1,4 +1,4 @@
-function piTextureFileFormat(thisR)
+function piTextureFileFormat(directory)
 % Convert any jpg textures to png format.
 %
 % TODO - We need to write a routine that converts any jpg file names
@@ -7,7 +7,6 @@ function piTextureFileFormat(thisR)
 % ZL Scien Stanford, 2018
 
 %%
-directory = fileparts(thisR.inputFile);
 currentfolder = pwd;
 cd(directory)
 
@@ -66,17 +65,17 @@ if ~isempty(bmpFiles)
 end
 %% Put all texture files in a seperate folder.
 
-outputDir  = fileparts(thisR.outputFile);
-textureDir = fullfile(outputDir,'textures');
-textureFiles = dir('*.png'); 
-if ~exist(textureDir,'dir')
-    mkdir(textureDir);
-end
-for i=1:length(textureFiles)
-    textureFileName=textureFiles(i).name;
-    textureFilePath=textureFileName;
-    copyfile(textureFilePath,fullfile(textureDir,textureFileName));
-end
+% outputDir  = fileparts(thisR.outputFile);
+% textureDir = fullfile(outputDir,'textures');
+% textureFiles = dir('*.png'); 
+% if ~exist(textureDir,'dir')
+%     mkdir(textureDir);
+% end
+% for i=1:length(textureFiles)
+%     textureFileName=textureFiles(i).name;
+%     textureFilePath=textureFileName;
+%     copyfile(textureFilePath,fullfile(textureDir,textureFileName));
+% end
 %%
 cd(currentfolder)
 

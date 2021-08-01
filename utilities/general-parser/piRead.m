@@ -383,6 +383,7 @@ if(isempty(transformBlock) && isempty(lookAtBlock))
 end
 
 thisR.lookAt = struct('from',from,'to',to,'up',up);
+thisR.set('film render type',{'radiance'});
 
 end
 
