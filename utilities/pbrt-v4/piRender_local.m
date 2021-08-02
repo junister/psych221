@@ -7,13 +7,13 @@ outfile  = thisR.get('output file');
 currDir    = pwd;
 cd(outputDir);
 outputFile = fullfile(outputDir, [fname,'.exr']);
-renderCmd  = [pbrtPath, ' --gpu',thisR.outputFile,' --outfile ',outputFile];
+renderCmd  = [pbrtPath, ' --gpu ',thisR.outputFile,' --outfile ',outputFile];
 system(renderCmd)
 cd(currDir);
 
 %%
 %% read data
-energy   = piReadEXR(outputFile);
+energy   = piReadEXR_python(outputFile);
 dim_energy = size(energy);
 if dim_energy(3)==31
     wave = 400:10:700;
@@ -24,6 +24,6 @@ photons  = Energy2Quanta(wave,energy);
 ieObject = piSceneCreate(photons,'wavelength', wave);
 ieObject = sceneInterpolateW(ieObject,[400:10:700]);
 % get depth
-depthImage   = piReadEXR(outputFile,'data type','zdepth');
-ieObject = sceneSet(ieObject,'depth map',depthImage);
+% depthImage   = piReadEXR_python(outputFile,'data type','zdepth');
+% ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
