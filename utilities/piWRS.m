@@ -25,8 +25,7 @@ renderType = p.Results.rendertype;
 piWrite(thisR);
 
 [obj,results] = piRender(thisR,...
-    'docker image name',thisDocker, ...
-    'render type',renderType);
+    'docker image name',thisDocker);
 
 switch obj.type
     case 'scene'

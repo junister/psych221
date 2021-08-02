@@ -2,11 +2,12 @@
 %
 
 %%
-sceneName = 'SimpleScene';
+sceneName = 'chessSet';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 
-outputDir = fullfile(piRootPath,'data','v4',sceneName);
+outputDir = fullfile(piRootPath, 'data/v4',sceneName);
 if ~exist(outputDir,'dir'), mkdir(outputDir);end
+
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 
 % This does the PBRT conversion 
@@ -26,8 +27,18 @@ for ii = 1:numel(fileList)
             fullfile(outputDir, fileList(ii).name));
     end
 end
+%{
+infile = piPBRTReformat(outFile);
+thisR  = piRead(infile);
 
-% thisR = piRecipeDefault('scene name','simple scene');
+piWrite(thisR);
+
+scene = piRender(thisR);
+sceneWindow(scene);
+
+%}
+% thisR = piRecipeDefault('scene name','chessSet');
+% 
 % scene = piWRS(thisR);
 
 %%

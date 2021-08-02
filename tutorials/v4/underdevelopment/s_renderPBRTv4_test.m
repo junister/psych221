@@ -16,16 +16,18 @@ LightRotation = piRotationMatrix('z',180);
 piLightDelete(thisR, 'all'); 
 newDistant = piLightCreate('new envlight',...
                            'type', 'infinite',...
-                           'mapname','glacier_latlong.exr',...
+                           'mapname','room.exr',...
                            'rotation', LightRotation);
 thisR.set('light', 'add', newDistant);
 
 thisR.set('material','Ground','roughness value',0.5);
 thisR.set('material','Deer','roughness value',0.5);
 
+bunnyAsset = piAssetLoad('bunny.mat');
+piRecipeMerge(thisR, bunnyAsset.thisR, 'node name', bunnyAsset.mergeNode);
 %%
-thisR.set('film resolution',[500,300]*1.5);
-thisR.set('pixel samples',64);
+thisR.set('film resolution',[500,300]);
+thisR.set('pixel samples',32);
 thisR.set('fov',30);
 thisR.integrator.subtype = 'path';  
 thisR.set('film render type',{'radiance'});
