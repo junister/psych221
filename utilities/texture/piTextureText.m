@@ -65,6 +65,7 @@ for ii=1:numel(textureParams)
                 if isempty(imgFile)||isequal(imgFile,'')
                     warning('Texture %s not found!', thisVal);
                 else
+                    piTextureFileFormat(imgFile);
                     copyfile(imgFile,thisR.get('output dir'));
                 end
             end

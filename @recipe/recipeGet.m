@@ -365,7 +365,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             elseif isfield(thisNode.shape,'filename') && ...
                 ~isempty(thisNode.shape.filename)
                 
-                objectPly = pcread(fullfile(fileparts(thisR.outputFile),thisNode.shape.filename));
+                objectPly = pcread(fullfile(fileparts(thisR.inputFile),thisNode.shape.filename));
                 val(ii,1) = objectPly.XLimits(2)-objectPly.XLimits(1);
                 val(ii,2) = objectPly.XLimits(2)-objectPly.XLimits(1);
                 val(ii,3) = objectPly.XLimits(2)-objectPly.XLimits(1);
