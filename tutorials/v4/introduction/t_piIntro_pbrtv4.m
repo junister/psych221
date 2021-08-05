@@ -44,19 +44,13 @@ if ~piDockerExists, piDockerConfig; end
 
 %% support FBX to PBRT
 
-% fbxFile   = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
-fbxFile   = fullfile(piRootPath,'data','V4','testplane','testplane.fbx');
-% convert fbx to pbrt
-pbrtFile = piFBX2PBRT(fbxFile);
-% format this file 
-infile = piPBRTReformat(pbrtFile);
-
-%%
-thisR  = piRead(infile);
+fbxFile   = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
+%% 
+thisR  = piRead(fbxFile);
 %%
 % close up view
-thisR.set('from',[196.45 24.64 3.37]);
-thisR.set('to',  [96.55 20.50 1.98]);
+thisR.set('from',[1.9645 0.2464 0.0337]);
+thisR.set('to',  [0.9655 0.2050 0.0198]);
 thisR.set('up',  [0 1 0]);
 
 thisR.set('film resolution',[300 300]);

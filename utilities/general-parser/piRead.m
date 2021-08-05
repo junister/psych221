@@ -71,12 +71,34 @@ varargin =ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('fname', @(x)(exist(fname,'file')));
-p.addParameter('exporter', 'C4D', @ischar);
+p.addParameter('exporter', 'C4D', @ischar); % deal with this later
+
+% We use meters in PBRT, assimp uses centimeter as base unit
+% Blender scene has a scale factor equals to 100.
+% Not sure whether other type of FBX file has this problem.
+p.addParameter('convertunit',false,@islogical); 
+
 p.parse(fname,varargin{:});
+convertunit = p.Results.convertunit;
 
 thisR = recipe;
-[~, inputname, ~] = fileparts(fname);
-thisR.inputFile = fname;
+[~, inputname, input_ext] = fileparts(fname);
+
+
+% If input is a FBX file, we convert it into PBRT file
+if strcmpi(input_ext, '.fbx')
+    disp('Converting FBX file into PBRT file...')
+    pbrtFile = piFBX2PBRT(fname);
+   
+    disp('Formating PBRT file...')
+    infile = piPBRTReformat(pbrtFile);
+    
+    convertunit = true;
+else
+    infile = fname;
+end
+
+thisR.inputFile = infile;
 
 exporter = p.Results.exporter;
 
@@ -99,10 +121,13 @@ thisR.camera = piParseOptions(options, 'Camera');
 
 % Extract sampler block
 thisR.sampler = piParseOptions(options,'Sampler');
+
 % Extract film block
 thisR.film    = piParseOptions(options,'Film');
-% always use 'gbuffer' for multispectral
+
+% always use 'gbuffer' for multispectral rendering
 thisR.film.subtype = 'gbuffer';
+
 % Patch up the filmStruct to match the recipe requirements
 if(isfield(thisR.film,'filename'))
     % Remove the filename since it inteferes with the outfile name.
@@ -258,6 +283,26 @@ else
     % material ... / NamedMaterial
     % shape ...
     disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
+end
+
+% Unit scale 
+if convertunit
+    % scale camera position
+    thisR.lookAt.from = thisR.lookAt.from/100;
+    thisR.lookAt.to = thisR.lookAt.to/100;
+    
+    % scale objects
+    for ii = 2:numel(thisR.assets.Node)
+        thisNode = thisR.assets.Node{ii};
+        if strcmp(thisNode.type, 'branch')
+            % fix scale and translation
+            thisNode.scale = [1 1 1];
+            thisNode.translation = thisNode.translation/100;
+            
+            thisR.assets   = thisR.assets.set(ii, thisNode);
+        end
+    end
+    
 end
 
 disp('***Scene parsed.')
