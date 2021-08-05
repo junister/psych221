@@ -353,20 +353,32 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
             thisScale = thisR.get('assets',Objects(ii),'world scale');
-            
+            if isempty(thisScale), thisScale = [1 1 1];end
             % All the object points
-            if isfield(thisNode.shape,'pointp')
-                pts = thisNode.shape.pointp;
+            if isfield(thisNode.shape,'point3p') && ...
+                ~isempty(thisNode.shape.point3p)
+                pts = thisNode.shape.point3p;
                 % Range of points times any scale factors on the path
                 val(ii,1) = range(pts(1:3:end))*thisScale(1);
                 val(ii,2) = range(pts(2:3:end))*thisScale(2);
                 val(ii,3) = range(pts(3:3:end))*thisScale(3);
+            elseif isfield(thisNode.shape,'filename') && ...
+                ~isempty(thisNode.shape.filename)
+                
+                objectPly = pcread(fullfile(fileparts(thisR.outputFile),thisNode.shape.filename));
+                val(ii,1) = objectPly.XLimits(2)-objectPly.XLimits(1);
+                val(ii,2) = objectPly.XLimits(2)-objectPly.XLimits(1);
+                val(ii,3) = objectPly.XLimits(2)-objectPly.XLimits(1);
             else
-                % There is no shape point information.  So we return NaNs.
+                % There is no shape point information or ply file.  
+                % So we return NaNs.
                 val(ii,:) = NaN;
             end
             
-        end    
+        end   
+         % We also save objects size in branch node, maybe we should use
+         % that information instead. --zhenyi
+         % thisR.get('assetlist');
     case 'objectdistance'
         % thisR.get('object distance',units)
         diff = thisR.lookAt.from - thisR.lookAt.to;
@@ -418,7 +430,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Vector between from minus to
         val = thisR.lookAt.to - thisR.lookAt.from;
     case {'scale'}
-        % Change the size (scale) of something.  Almost always 1 1 1
+        % Change the size (scale) of something.  
+        % Almost always 1 1 1
+        % Blender scene use -1 1 1
         val = thisR.scale;
         
         % Motion is not always included.  When it is, there is a start and
