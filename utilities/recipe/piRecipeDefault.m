@@ -13,7 +13,7 @@ function thisR = piRecipeDefault(varargin)
 %   N/A  - Default returns the MCC scene
 %
 % Optional key/val pairs
-%   scene name - Specify a PBRT scene name from the data/V3 directory.
+%   scene name - Specify a PBRT scene name from the data/V4 directory.
 %     Here are some names: 
 %       MacBethChecker (default)
 %       SimpleScene
@@ -101,7 +101,7 @@ p.addParameter('write',false,@islogical);
 p.parse(varargin{:});
 
 sceneDir = p.Results.scenename;
-write     = p.Results.write;
+write    = p.Results.write;
 
 %%  To read the file,the upper/lower case must be right
 
@@ -316,7 +316,8 @@ switch ieParamFormat(sceneDir)
         error('Can not identify the scene, %s\n',sceneDir);
 end
 
-%% See if we can find the file
+%% See if we can find the file in data/V4
+
 % Local
 if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
@@ -324,6 +325,7 @@ else
     FilePath = fullfile(piRootPath,'data','V4',sceneDir);
 end
 
+% If we can not find it, check on the web.
 fname = fullfile(FilePath,sceneFile);
 if ~exist(fname,'file')
     fname = piSceneWebTest(sceneDir,sceneFile);
@@ -374,17 +376,17 @@ end
 function fname = piSceneWebTest(sceneName,sceneFile)
 % Check for a web scene
 
-% See if the scene is already in data/V3/web
+% See if the scene is already in data/V4/web
 FilePath = fullfile(piRootPath,'data','V4','web',sceneName);
 fname = fullfile(FilePath,sceneFile);
 
-% Download the file to data/V3/web
+% Download the file to data/V4/web
 if ~exist(fname,'file')
     % Download and confirm.
     piWebGet('resourcename', sceneName, 'resourcetype', 'pbrt', 'op', 'fetch', 'unzip', true);
     if ~exist(fname, 'file'), error('File not found'); end
 else
-    fprintf('File found %s in data/V3/web.\n',sceneName)
+    fprintf('File found %s in data/V4/web.\n',sceneName)
 end
 
 end

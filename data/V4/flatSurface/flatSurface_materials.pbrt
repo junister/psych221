@@ -1,0 +1,3 @@
+MakeNamedMaterial "Mat"
+    "string type" [ "diffuse" ]
+    "spectrum reflectance" [ "spds/totalreflect.spd" ]

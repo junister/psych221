@@ -67,6 +67,7 @@ basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --t
 
 % Which docker image we run
 dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
+
 % Give a name to docker container
 dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
 %% Build the command

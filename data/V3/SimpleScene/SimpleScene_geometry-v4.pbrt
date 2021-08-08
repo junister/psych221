@@ -11,7 +11,7 @@ AttributeBegin
             Scale 1 -1 1
             LightSource "infinite"
                 "string filename" "environment_Reflection.exr"
-                "integer nsamples" [ 128 ]
+                # "integer nsamples" [ 128 ]
         AttributeEnd
 
         AttributeBegin

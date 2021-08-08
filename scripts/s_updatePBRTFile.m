@@ -1,7 +1,13 @@
-%% Update V3 to V4
+%% Update PBRT V3 files to PBRT V4 files
 %
+% This script has a template for doing the update.  The key function that
+% changes the pbrt source files is piPBRTUpdateV4.
+%
+% See also
+%   piPBRTUpdateV4, piPBRTReformat
 
-%%
+%% Read in the file and get set up for output
+
 sceneName = 'chessSet';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 
@@ -10,10 +16,11 @@ if ~exist(outputDir,'dir'), mkdir(outputDir);end
 
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 
-% This does the PBRT conversion 
+%% This function does the PBRT conversion 
+
 outFile = piPBRTUpdateV4(inFile, outFile);
 
-%% Copy the auxiliary files
+%% Copy the auxiliary files from the V3 directory to the V4 directory
 
 [inputDir,~,~]=fileparts(inFile);
 fileList = dir(inputDir);
@@ -27,6 +34,7 @@ for ii = 1:numel(fileList)
             fullfile(outputDir, fileList(ii).name));
     end
 end
+
 %{
 infile = piPBRTReformat(outFile);
 thisR  = piRead(infile);
@@ -37,6 +45,7 @@ scene = piRender(thisR);
 sceneWindow(scene);
 
 %}
+
 % thisR = piRecipeDefault('scene name','chessSet');
 % 
 % scene = piWRS(thisR);
