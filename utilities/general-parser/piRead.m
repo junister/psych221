@@ -84,8 +84,7 @@ convertunit = p.Results.convertunit;
 thisR = recipe;
 [~, inputname, input_ext] = fileparts(fname);
 
-
-% If input is a FBX file, we convert it into PBRT file
+%% If input is a FBX file, we convert it into PBRT file
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
