@@ -364,11 +364,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val(ii,3) = range(pts(3:3:end))*thisScale(3);
             elseif isfield(thisNode.shape,'filename') && ...
                 ~isempty(thisNode.shape.filename)
-                
                 objectPly = pcread(fullfile(fileparts(thisR.inputFile),thisNode.shape.filename));
                 val(ii,1) = objectPly.XLimits(2)-objectPly.XLimits(1);
-                val(ii,2) = objectPly.XLimits(2)-objectPly.XLimits(1);
-                val(ii,3) = objectPly.XLimits(2)-objectPly.XLimits(1);
+                val(ii,2) = objectPly.YLimits(2)-objectPly.YLimits(1);
+                val(ii,3) = objectPly.ZLimits(2)-objectPly.ZLimits(1);
             else
                 % There is no shape point information or ply file.  
                 % So we return NaNs.
