@@ -52,8 +52,10 @@ fileIDout = fopen(outputFullTmp, 'w');
 while ~feof(fileIDin)
     thisline=fgets(fileIDin);
     
-    % We can add other elseif cases as needed.
-
+    % We can add other elseif cases as needed. float uv -> float2 uv
+    if ischar(thisline) && contains(thisline,'float uv')
+        thisline = strrep(thisline,'float uv','point2 uv');
+    end
     % delete "string strategy" params
     if ischar(thisline) && contains(thisline,'string strategy')
         continue

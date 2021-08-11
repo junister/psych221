@@ -296,7 +296,7 @@ if convertunit
         thisNode = thisR.assets.Node{ii};
         if strcmp(thisNode.type, 'branch')
             % fix scale and translation
-            thisNode.scale = [1 1 1];
+            thisNode.scale = thisNode.scale/100;
             thisNode.translation = thisNode.translation/100;
             
             thisR.assets   = thisR.assets.set(ii, thisNode);

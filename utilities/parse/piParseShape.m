@@ -74,6 +74,7 @@ if find(piContains(keyWords, 'Shape '))
                 else
                     shape.point2uv = piParameterGet(txt, 'point2 uv');
                 end
+%                 shape.point2uv = piParameterGet(txt, 'point2 uv');
             end
             
             if find(piContains(keyWords, 'normal N'))

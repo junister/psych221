@@ -81,7 +81,7 @@ if exist(Textures,'dir')
     cd(currentfolder)
 elseif exist(Textures, 'file')
     [~,fname,ext] = fileparts(Textures);
-    if ~strcmpi(ext,'.png')
+    if ~strcmpi(ext,'.png')&& ~strcmpi(ext,'.exr')
         currentimage = imread(Textures);
         output = sprintf('%s.png',fname);
         imwrite(currentimage,output);

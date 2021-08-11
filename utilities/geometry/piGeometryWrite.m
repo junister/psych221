@@ -150,6 +150,9 @@ for ii = 1:numel(children)
             if ~isempty(thisNode.shape.filename)
                 % If the shape has ply info, do this
                 % Convert shape struct to text
+                if ~exist(fullfile(rootPath, thisNode.shape.filename),'file')
+                    error('%s not exist',shape.filename);
+                end
                 [~, ~, e] = fileparts(thisNode.shape.filename);
                 if isequal(e, '.ply')
                     fprintf(fid, '%s \n',shapeText);
