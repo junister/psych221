@@ -48,7 +48,7 @@ thisR = piRecipeDefault('scene name','chessset');
 thisR.set('film resolution',[256 256]);
 thisR.set('rays per pixel',64);
 thisR.set('n bounces',3); % Number of bounces
-
+thisR.set('film render type',{'radiance','depth'})
 %% Save the recipe and render
 piWrite(thisR);
 

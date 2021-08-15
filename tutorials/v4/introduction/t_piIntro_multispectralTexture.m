@@ -9,7 +9,7 @@ thisR.set('film resolution',[500,500]);
 thisR.set('pixel samples',16);
 thisR.set('fov',40);
 thisR.integrator.subtype = 'path';  
-thisR.set('film render type',{'radiance'});
+thisR.set('film render type',{'radiance','depth'});
 %%
 piLightDelete(thisR, 'all'); 
 newDistant = piLightCreate('new distant',...
@@ -19,6 +19,7 @@ newDistant = piLightCreate('new distant',...
 thisR.set('light', 'add', newDistant);
 %%
 scene = piWRS(thisR);
+
 chartArea = round([19.0567 78.3351 461.8557 329.8969]);
 scene = sceneCrop(scene, chartArea);
 energyScene = sceneGet(scene, 'energy');
@@ -64,10 +65,6 @@ for ii = 1:6
     outBasis(ii).basis = imgBasis(:,ii);
     outBasis(ii).offset = ones(c_size,1)*offset;
 end
-
-
-
-
 %% Use this texture in a different scene
 
 fbxFile   = fullfile(piRootPath,'data','V4','testplane','testplane.fbx');
@@ -90,10 +87,6 @@ newDistant = piLightCreate('new distant',...
                            'spd','d65',...
                            'cameracoordinate', true);
 thisR.set('light', 'add', newDistant);
-
-% texPath = '/Users/zhenyi/git_repo/dev/iset3d-v4/local/testplane-converted/textures/iset-result-s.png';
-
-                   
 
 [dir, ~, ~]=fileparts(thisR.outputFile);
 basisFile = fullfile(dir, 'textures', 'basisJson.json');

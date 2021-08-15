@@ -39,3 +39,4 @@ if numel(find(diff>0.1))>1 || ~isreal(rotz) || ~isreal(roty) || ~isreal(rotx)
     warning('Unkown rotation, using transform');
     rotation = [];
 end
+end

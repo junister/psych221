@@ -208,10 +208,13 @@ while i <= length(txt)
                         elseif exist('mat','var') && ~isempty(mat)
                             if ~isempty(mat.namedmaterial)
                                 warning('An object has been created with its material name: %s', mat.namedmaterial)
-                                resObject.name = sprintf('%s_O', mat.namedmaterial);
+                                % give a random naming in case one type of
+                                % material is assigned to more than one
+                                % objects.
+                                resObject.name = sprintf('%s_%03d_O', mat.namedmaterial,randi(100));
                             else
                                 warning('An object has been created with its material type: %s', mat.type)
-                                resObject.name = sprintf('%s_O', mat.type);
+                                resObject.name = sprintf('%s_%03d_O', mat.type, randi(100));
                             end
                         end
                     end

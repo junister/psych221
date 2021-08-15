@@ -4,7 +4,7 @@ ieInit;
 piDockerConfig;
 %%
 % fbxFile   = fullfile(piRootPath,'data','V4','testplane','testplane.fbx');
-fbxFile = '/Users/zhenyi/Desktop/ford-scene/deer.fbx';
+% fbxFile = '/Users/zhenyi/Desktop/ford-scene/deer.fbx';
 % convert fbx to pbrt
 pbrtFile = piFBX2PBRT(fbxFile);
 % format this file 
@@ -26,12 +26,11 @@ thisR.set('material','Deer','roughness value',0.5);
 bunnyAsset = piAssetLoad('bunny.mat');
 piRecipeMerge(thisR, bunnyAsset.thisR, 'node name', bunnyAsset.mergeNode);
 %%
-thisR.set('film resolution',[500,300]);
+thisR.set('film resolution',[500,300]*2);
 thisR.set('pixel samples',32);
 thisR.set('fov',30);
 thisR.integrator.subtype = 'path';  
 thisR.set('film render type',{'radiance'});
-
 %%
 piWrite(thisR);
 scene = piRender(thisR);

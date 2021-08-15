@@ -42,36 +42,49 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% support FBX to PBRT
-
-fbxFile   = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
+%% piRead support FBX and PBRT
+% FBX is converted into PBRT
+% fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
+% fbxFile = '/Users/zhenyi/Desktop/ford-scene/ford-mustang-gt/mustang_lights.fbx';
 %% 
-thisR  = piRead(fbxFile);
+inputFile = '/Users/zhenyi/git_repo/dev/iset3d-v4/local/formatted/mustang_lights-converted/mustang_lights-converted.pbrt';
+thisR  = piRead(inputFile);
 %%
 % close up view
-thisR.set('from',[1.9645 0.2464 0.0337]);
-thisR.set('to',  [0.9655 0.2050 0.0198]);
-thisR.set('up',  [0 1 0]);
+% thisR.set('from',[1.9645 0.2464 0.0337]);
+% thisR.set('to',  [0.9655 0.2050 0.0198]);
+% thisR.set('up',  [0 1 0]);
 
-thisR.set('film resolution',[300 300]);
+thisR.set('film resolution',[1280 720]/2);
 thisR.set('rays per pixel',16);
 %% set render type
 % radiance 
 % rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
 thisR.set('film render type',{'radiance','depth'})
 %% move object
-thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
+% thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 
-thisR.show('objects')
+thisR.show('objects');
+%%
+% piLightDelete(thisR, 'all'); 
+lightName = 'new light';
+newLight = piLightCreate(lightName,...
+                        'type','infinite',...
+                        'spd',[0.4 0.3 0.3],...
+                        'specscale',1);
+thisR.set('light', 'add', newLight);
 
+iaAutoMaterialGroupAssign(thisR);
 %% write the data out
 
 scene = piWRS(thisR);
-
-%{
-scene = piRenderCloud(thisR);
+ %{
+tic
+piWrite(thisR);
+scene = piRender(thisR);
 sceneWindow(scene);
 toc
 %}
 %%
 piAssetGeometry(thisR);
+
