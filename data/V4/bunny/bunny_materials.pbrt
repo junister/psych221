@@ -1,0 +1,4 @@
+MakeNamedMaterial "BunnyMat"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5 ]
+    "rgb reflectance" [ 1 1 1 ]

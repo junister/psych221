@@ -1,5 +1,5 @@
 # Exported by PBRT exporter for Cinema 4D 
-Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 5 1  ]
+Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 500 1  ]
 Camera "perspective"
     "float lensradius" [ 0 ]
     "float focaldistance" [ 2000 ]
@@ -9,11 +9,16 @@ Sampler "halton"
 Film "rgb"
     "integer yresolution" [ 720 ]
     "integer xresolution" [ 1280 ]
+    "string filename" [ "sphere.exr" ]
 Integrator "path"
     "integer maxdepth" [ 1 ]
     "integer maxdepth" [ 5 ]
 
 
 WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
 Include "sphere_materials.pbrt"
 Include "sphere_geometry.pbrt"

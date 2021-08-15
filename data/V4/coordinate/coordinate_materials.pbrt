@@ -1,0 +1,12 @@
+MakeNamedMaterial "x_axis"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.08787618 0.08787618 ]
+MakeNamedMaterial "y_axis"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.03831073 0.60382736 0.07023876 ]
+MakeNamedMaterial "z_axis"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.03831073 0.38525215 0.60382736 ]
+MakeNamedMaterial "origin"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.069052756 0.07828832 0.07024521 ]

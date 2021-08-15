@@ -18,20 +18,30 @@ function properties = piMaterialProperties(materialType)
 %   piMaterialCreate
 %
 
+% Examples:
 %{
-materialType = 'disney';
+materialType = 'coateddiffuse';
 piMaterialProperties(materialType)
-
+%}
+%{
 materialType = 'hair';
+piMaterialProperties(materialType)
+%}
+%{
+materialType = 'mix';
 piMaterialProperties(materialType)
 
 %}
+
+%% Check that the material type is valid
     
 allTypes = piMaterialCreate('list available types');
 ii =  find(contains(allTypes,materialType));  %#ok<EFIND>
 if isempty(ii)
-    error('No material type called %s\n',materialType);
+    error('Not a recognized material type: %s\n',materialType);
 end
+
+%% If so, create it and return the field names
 
 thisMaterial = piMaterialCreate('thisName','type',allTypes{ii});
 properties = fieldnames(thisMaterial);

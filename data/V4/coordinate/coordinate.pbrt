@@ -1,0 +1,28 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 0.8272605 -0.30985302 -0.4686483 0 0 0.83416307 -0.5515179 0 0.5618186 0.45624894 0.69007015 0 0.1219613 0.045666166 1.3375916 1  ]
+Camera "perspective"
+    "float lensradius" [ 0 ]
+    "float focaldistance" [ 2000 ]
+    "float fov" [ 31.417276 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 720 ]
+    "integer xresolution" [ 1280 ]
+    "string filename" [ "coordinate.exr" ]
+Integrator "path"
+    "integer maxdepth" [ 1 ]
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.31854677 0.31854677 0.31854677 ]
+LightSource "distant"
+    "point3 to" [ -0.23856877 -0.53272533 0.8119659 ]
+    "point3 from" [ 0 0 0 ]
+    "rgb L" [ 1 1 1 ]
+Include "coordinate_materials.pbrt"
+Include "coordinate_geometry.pbrt"

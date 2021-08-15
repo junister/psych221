@@ -1,41 +1,62 @@
 function material = piMaterialCreate(name, varargin)
-%%
+%% Create a material for PBRT V4
 %
 % Synopsis:
 %   material = piMaterialCreate(name, varargin);
 %
 % Brief description:
-%   Create material with parameters.
+%   Create material with parameters.  The materials in V4 differ from the
+%   ones in V3.
 %
 % Inputs:
 %   name  - name of the material
 %
 % Optional key/val:
-%   type  - material type. Default is matte
+%   type  - material type (Default is diffuse)
 %     The special case of piMaterialCreate('list available types') returns
-%     the available material types.
+%     the available material types.  Here is a page describing the V4
+%     materials.
 %
-%     Types of materials in PBRT v4:
-%                                   diffuse
-%                                   coateddiffuse
-%                                   coatedconductor
-%                                   diffusetransmission
-%                                   dielectric
-%                                   thindielectric
-%                                   hair
-%                                   conductor
-%                                   measured
-%                                   subsurface
-%                                   mix
+%        https://github.com/shadeops/pbrt_v3-to-v4_migration/blob/master/README.md#material-changes
 %
+%     Materials changed in PBRT V4 are listed on the URL above.  We had
+%     these materials in V3.
+%
+%      material = {'matte','uber','plastic','metal','mirror','glass', ...
+%          'translucent','hair','kdsubsurface','disney','fourier', ...
+%          'mix','substrate','subsurface'};
+%
+%   According to the URL, these V3 materials were removed
+%       Uber, Translucent, Substrate, Plastic, Mirror, Metal, Matte,
+%       KdSubsurface, Glass, Fourier, Disney
+%
+%   Leaving only
+%
+%       material = {'hair','mix','subsurface'};
+%
+%   These materials were added
+%
+%      coatedconductor, coateddiffuse, conductor
+%      diffuse, diffusetransmission,   measured,
+%      dielectric, thindielectric
+%
+%   The current list seems to be
+%
+%      {coatedconductor, coateddiffuse, conductor, ...
+%      diffuse, diffusetransmission, ...
+%      measured, ...
+%      dielectric, thindielectric, ...
+%      hair, subsurface, mix}
 %
 %   Other key/val pairs depend on the material.  To see the properties of
 %   any specific material use
-%            piMaterialProperties('materialType')
+%
+%      piMaterialProperties('materialType')
 %
 %   The material properties are set by key/val pairs. For keys. it
 %   should follow the format of 'TYPE KEYNAME'. It's easier for us to
 %   extract type and parameter name using space.
+%
 %   Syntax is:
 %       material = piMaterialCreate(NAME, 'type', [MATERIAL TYPE],...
 %                                   [PROPERTYTYPE PROPERTYNAME], [VALUE]);
@@ -43,7 +64,7 @@ function material = piMaterialCreate(name, varargin)
 %                                   [PROPERTYNAME PROPERTYTYPE], [VALUE]);
 %
 % Returns:
-%   material                  - created material
+%   material  - created material
 %
 % ieExamplesRun('piMaterialCreate')
 %
@@ -57,16 +78,28 @@ function material = piMaterialCreate(name, varargin)
                                 'kd rgb',[1, 1, 1])
     material = piMaterialCreate('new material',...
                                 'kd rgb',[1, 1, 1]);
+
+    % Not sure the spectrum case has been added to PBRT V4 by Zhenyi yet.
     material = piMaterialCreate('new material', 'type', 'uber',...
                                 'spectrum kd', [400 1 800 1]);
 %}
-
+%{
+ piMaterialCreate('list available types')
+%}
 
 %% Special case
+
 if isequal(ieParamFormat(name),'listavailabletypes')
-    material = {'matte','uber','plastic','metal','mirror','glass', ...
-        'translucent','hair','kdsubsurface','disney','fourier', ...
-        'mix','substrate','subsurface'};
+    material = {'coatedconductor', 'coateddiffuse', 'conductor', ...
+        'diffuse', 'diffusetransmission', ...
+        'measured', ...
+        'dielectric', 'thindielectric', ...
+        'hair', 'subsurface', 'mix'};
+    % Left over from V3.  Delete when ready (BW).
+    %
+    %     material = {'diffuse','uber','plastic','metal','mirror','glass', ...
+    %         'translucent','hair','kdsubsurface','disney','fourier', ...
+    %         'mix','substrate','subsurface'};
     return;
 end
 
@@ -78,10 +111,11 @@ end
 for ii=1:2:numel(varargin)
     varargin{ii} = strrep(varargin{ii}, ' ', '_');
 end
+
 %% Parse inputs
 p = inputParser;
 p.addRequired('name', @ischar);
-p.addParameter('type', 'matte', @ischar);
+p.addParameter('type', 'diffuse', @ischar);
 p.KeepUnmatched = true;
 p.parse(name, varargin{:});
 
@@ -99,6 +133,7 @@ material.concentration.value = [];
 switch tp
     % Different materials have different properties
     case 'diffuse'
+        % This has defaults.  Maybe they should be here?
         material.type = 'diffuse';
         
         material.reflectance.type = 'spectrum';
@@ -246,7 +281,7 @@ switch tp
         material.normalmap.type = 'string';
         material.normalmap.value = [];
         
-                % object's index of refraction
+        % object's index of refraction
         material.eta.type = 'float';
         material.eta.value = [];
         
@@ -265,8 +300,8 @@ switch tp
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
         
-         material.tint.type = 'spectrum';
-        material.tint.value = [];       
+        material.tint.type = 'spectrum';
+        material.tint.value = [];
         
     case 'thindielectric'
         material.type = 'thindielectric';
@@ -357,7 +392,7 @@ switch tp
         
         material.normalmap.type = 'string';
         material.normalmap.value = [];
- 
+        
         material.reflectance.type = 'texture';
         material.reflectance.value = [];
         
@@ -365,7 +400,7 @@ switch tp
         material.mfp.value = [];
         
         material.g.type = 'float';
-        material.g.value = [];        
+        material.g.value = [];
         
         material.roughness.type = 'float';
         material.roughness.value = [];
@@ -432,7 +467,7 @@ material.name = strcat('Default material ', num2str(idx));
 thisR.materials.list(material.name) = material;
 
 if isempty(varargin)
-    material.stringtype = 'matte';
+    material.stringtype = 'diffuse';
     thisR.materials.list(material.name) = material;
 else
     for ii=1:2:length(varargin)
