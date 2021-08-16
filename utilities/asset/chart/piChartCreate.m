@@ -50,39 +50,28 @@ chartR.set('asset','Camera_B','delete');
 chartR.set('lights','delete','all');
 % [s,r] = piWRS(chartR);
 
-
-% Add a light.   
-%{
+%% Add a light.   
 % spd call not working in V4 because it has this special characteristic.
 distantLight = piLightCreate('distant','type','distant',...
-    'spd', [6000 0.001], ...
-    'cameracoordinate', true);
-%}
-distantLight = piLightCreate('distant','type','distant',...
-    'rgb spd', [.8 0.8 0.8], ...
+    'spd', 6000, ...
     'cameracoordinate', true);
 chartR.set('light','add',distantLight);
 % [s,r] = piWRS(chartR);
 % edit('/Users/wandell/Documents/MATLAB/iset3d-v4/local/flatSurface/flatSurface_geometry.pbrt')
 
-% Aim the camera at the object and bring it closer.
-% chartR.set('from',[0,0,0]);
-% chartR.set('to',  [0,0,1]);
-
-% Find the position of the surface
+%% Find the position of the surface
 surfaceName = '001_Cube_O';
 
-chartR.set('asset',surfaceName,'world position',[0 0 4]);
-p2r = chartR.get('asset',surfaceName,'path to root');
-for ii=1:numel(p2r)
-    assetSize = chartR.get('asset',p2r(ii),'size');
-    if ~isempty(assetSize) && assetSize.l > 0
-        sz = [assetSize.l, assetSize.h, assetSize.w];
-        break;
-    end
-end
+chartR.set('asset',surfaceName,'world position',[0 0 1]);
+
+% There is only one object, the flat surface. We get its size this way.
+% It would be better to have 
+%   sz = chartR.get('object size',surfaceName);
+sz = chartR.get('object sizes');
+
 % flatR.set('asset',surfaceName,'rotate',[0 0 0]);
 chartR.set('asset',surfaceName,'scale', (1 ./ sz));
+% sz = chartR.get('object sizes');
 
 % This simplifies the tree.
 wpos    = chartR.get('asset',surfaceName,'world position');
@@ -99,10 +88,11 @@ for ii=2:numel(id)
     chartR.set('asset',id(ii),'delete');
 end
 
-% Check again
+% Check again.  Should be 0.
 id = chartR.get('asset',surfaceName,'path to root');
 fprintf('Geometry nodes:  %d\n',numel(id) - 1);
 
+% Now put in a geometry node that has the right scale, position and such.
 if (numel(id)-1 == 0)
     geometryNode = piAssetCreate('type','branch');
     geometryNode.name = '001_Cube_G';
@@ -114,6 +104,17 @@ piAssetSet(chartR, geometryNode.name, 'translate',wpos);
 piAssetSet(chartR, geometryNode.name, 'scale',wscale);
 rotMatrix = [wrotate; fliplr(eye(3))];
 piAssetSet(chartR, geometryNode.name, 'rotation', rotMatrix);
+% [s,r] = piWRS(chartR);
+
+%% Place the camera and orientation
+
+% Aim the camera at the object and bring it closer.
+chartR.set('from',[0,0,0]);
+chartR.set('to',  [0,0,1]);
+chartR.set('up',  [0,1,0]);
+
+% Big white-ish scene
+%
 % [s,r] = piWRS(chartR);
 
 %%  Add the chart you want
@@ -166,7 +167,7 @@ chartTexture = piTextureCreate(textureName,...
 chartR.set('texture', 'add', chartTexture);
 
 % Specify the texture as part of the material
-chartR.set('material', surfaceMaterial.name, 'kd val', textureName);
+% chartR.set('material', surfaceMaterial.name, 'kd val', textureName);
 
 % chartR.get('material print');
 % chartR.show('objects');
@@ -182,7 +183,6 @@ parent = chartR.get('asset parent id',oName);
 gName = sprintf('%s_G',oName);
 chartR.set('asset',parent,'name',gName);
 
-
 %% Copy the texture file to the output dir
 
 textureFile = fullfile(piRootPath,'data','imageTextures',imgFile);
@@ -190,6 +190,7 @@ outputdir = chartR.get('output dir');
 if ~exist(textureFile,'file'), error('No texture file!'); end
 if ~exist(outputdir,'dir'), fprintf('Making output dir %s',outputdir); mkdir(outputdir); end
 copyfile(textureFile,outputdir);
+% [s,r] = piWRS(chartR);
 
 end
 

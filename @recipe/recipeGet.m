@@ -345,8 +345,10 @@ switch ieParamFormat(param)  % lower case, no spaces
             val(ii,:) = thisR.get('assets',thisNode.name,'world position');
         end
     case {'objectsizes'}
-        % All the objects
+        % Estimates the sizes of each of the objects
+        %
         % thisR.get('object sizes')
+        %
         Objects  = thisR.get('objects');
         nObjects = numel(Objects);
         val = zeros(nObjects,3);
@@ -1322,6 +1324,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % thisR.get('asset',idOrName,'world position')
                     val = thisR.get('asset', id, 'world translation');
                     val = val(1:3, 4)';
+                case 'worldscale'
+                    % Find the scale factors that apply to the object size
+                    nodeToRoot = thisR.assets.nodetoroot(id);
+                    [~, ~, val] = piTransformWorld2Obj(thisR, nodeToRoot);
                     
                     % These are local values, not world
                 case 'translation'

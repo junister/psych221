@@ -181,10 +181,13 @@ classdef recipe < matlab.mixin.Copyable
                     T = table(positionT,'VariableNames',{'positions (m)'}, 'RowNames',names);
                     disp(T);
                 case {'objectsizes','assetsizes','objectsize'}
+                    % Make a table of the object sizes.
                     names = obj.get('object names')';
                     sizeT = cell(size(names));
-                    oSizes = obj.get('object sizes');
-                    for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
+                    oSizes = obj.get('object sizes');  %????
+                    for ii=1:numel(names)
+                        sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); 
+                    end
                     T = table(sizeT,'VariableNames',{'sizes (m)'}, 'RowNames',names);
                     disp(T);
                 case 'materials'
