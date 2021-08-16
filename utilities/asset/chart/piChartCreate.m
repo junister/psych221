@@ -13,6 +13,11 @@ function [chartR, gName, oName]  = piChartCreate(chartName)
 %   gName   - Geometry node name
 %   oName   - Object node name
 %
+% Description
+%   We start with the flatSurface scene and add a texture to the flat
+%   surface.  The texture is one of the test charts listed above.  These
+%   are saved as png files in data/imageTexture.
+%
 % See also
 
 % Examples:
@@ -62,7 +67,7 @@ chartR.set('light','add',distantLight);
 %% Find the position of the surface
 surfaceName = '001_Cube_O';
 
-chartR.set('asset',surfaceName,'world position',[0 0 1]);
+chartR.set('asset',surfaceName,'world position',[0 0 2.3]);
 
 % There is only one object, the flat surface. We get its size this way.
 % It would be better to have 
