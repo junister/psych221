@@ -82,6 +82,7 @@ p.parse(fname,varargin{:});
 convertunit = p.Results.convertunit;
 
 thisR = recipe;
+thisR.version = 4;
 [~, inputname, input_ext] = fileparts(fname);
 
 %% If input is a FBX file, we convert it into PBRT file
