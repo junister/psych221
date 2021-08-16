@@ -167,7 +167,7 @@ chartTexture = piTextureCreate(textureName,...
 chartR.set('texture', 'add', chartTexture);
 
 % Specify the texture as part of the material
-% chartR.set('material', surfaceMaterial.name, 'kd val', textureName);
+chartR.set('material', surfaceMaterial.name, 'reflectance val', textureName);
 
 % chartR.get('material print');
 % chartR.show('objects');
