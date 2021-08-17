@@ -1,4 +1,6 @@
 %% pbrt v4 introduction 
+% User need to pull the docker image:
+%     docker pull camerasimulation/pbrt-v4-cpu
 %
 % OpenExr libraries are needed for the matlab openexr MEX file.
 % The issue is caused by openexr version…, 
@@ -44,29 +46,27 @@ if ~piDockerExists, piDockerConfig; end
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
-% fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
-% fbxFile = '/Users/zhenyi/Desktop/ford-scene/ford-mustang-gt/mustang_lights.fbx';
+fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
 %% 
-inputFile = '/Users/zhenyi/git_repo/dev/iset3d-v4/local/formatted/mustang_lights-converted/mustang_lights-converted.pbrt';
-thisR  = piRead(inputFile);
+thisR  = piRead(fbxFile);
 %%
 % close up view
-% thisR.set('from',[1.9645 0.2464 0.0337]);
-% thisR.set('to',  [0.9655 0.2050 0.0198]);
-% thisR.set('up',  [0 1 0]);
+thisR.set('from',[1.9645 0.2464 0.0337]);
+thisR.set('to',  [0.9655 0.2050 0.0198]);
+thisR.set('up',  [0 1 0]);
 
-thisR.set('film resolution',[1280 720]/2);
-thisR.set('rays per pixel',16);
+thisR.set('film resolution',[600 600]/2);
+thisR.set('rays per pixel',32);
 %% set render type
 % radiance 
 % rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
 thisR.set('film render type',{'radiance','depth'})
 %% move object
-% thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
+thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 
 thisR.show('objects');
 %%
-% piLightDelete(thisR, 'all'); 
+piLightDelete(thisR, 'all'); 
 lightName = 'new light';
 newLight = piLightCreate(lightName,...
                         'type','infinite',...
@@ -74,7 +74,6 @@ newLight = piLightCreate(lightName,...
                         'specscale',1);
 thisR.set('light', 'add', newLight);
 
-iaAutoMaterialGroupAssign(thisR);
 %% write the data out
 
 scene = piWRS(thisR);
