@@ -24,10 +24,24 @@ piRecipeMerge(thisR,eiachart.thisR,'node name',eiachart.mergeNode);
 % Assign the chart a position in this scene
 piAssetSet(thisR,eiachart.mergeNode,'translate',[-2 1.5 0]);
 
+% Add an environmental light to make it look nicer
+thisR.set('lights','delete','all');
+
+% Having trouble controlling the light here.
+fileName = 'room.exr';
+lgt = piLightCreate('room light', ...
+    'type', 'infinite',...
+    'mapname', fileName, ...
+    'cameracoordinate',true);
+% The image in the file needs to be rotated around so the camera sees it
+lgt = piLightSet(lgt, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+thisR.set('light','add',lgt);
+
 % Render
 piWRS(thisR);
 
 % thisR.show;
+% thisR.get('print lights');
 
 %% Add a second chart
 

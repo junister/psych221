@@ -630,7 +630,8 @@ end
 % We think nobody except us has these lights files.  So this will never get
 % executed.
 if ~isempty(lineLights)
-    thisR.world(lineLights) = sprintf('Include "%s_lights.pbrt" \n', basename);
+    % Changed from () to {}
+    thisR.world{lineLights} = sprintf('Include "%s_lights.pbrt" \n', basename);
 end
 
 %% Write out the World information.

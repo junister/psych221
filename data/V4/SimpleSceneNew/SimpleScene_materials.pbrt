@@ -1,0 +1,11 @@
+# Exported by piMaterialWrite on 2021/8/16 13:55:24.16 
+Texture "EIAChart-6011" "spectrum" "imagemap" "string filename" "EIA1956-300dpi-center.png"
+Texture "checkerboard_color" "spectrum" "imagemap" "string filename" "textures/checkerboard.png"
+MakeNamedMaterial "BODY" "string type" "diffuse" "rgb reflectance" [0.7197 0.0402 0.0050]
+MakeNamedMaterial "EIAChart-6011" "string type" "diffuse" "texture reflectance" "EIAChart-6011"
+MakeNamedMaterial "GLASS" "string type" "dielectric" "float eta" [1.3330]
+MakeNamedMaterial "Mat" "string type" "diffuse" "spectrum reflectance" "spds/totalreflect.spd"
+MakeNamedMaterial "Material" "string type" "coateddiffuse" "texture reflectance" "checkerboard_color" "float roughness" [0.6736]
+MakeNamedMaterial "mirror" "string type" "coateddiffuse" "rgb reflectance" [0.0000 0.0000 0.0000] "float roughness" [0.6736]
+MakeNamedMaterial "uber" "string type" "coateddiffuse" "rgb reflectance" [0.8228 0.8148 0.0723] "float roughness" [0.5000]
+MakeNamedMaterial "uber_blue" "string type" "coateddiffuse" "rgb reflectance" [0.0477 0.1075 0.3424] "float roughness" [0.5000]

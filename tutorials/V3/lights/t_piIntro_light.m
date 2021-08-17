@@ -12,6 +12,8 @@
 %     * SPD: RGB and Spectrum
 %     * Environment lights
 %
+% Runs with PBRT V4 (BW).
+%
 % See also
 %   The PBRT book definitions for lights are:
 %      https://www.pbrt.org/fileformat-v3.html#lights
@@ -20,7 +22,7 @@
 %% Initialize ISET and Docker and read a file
 
 % Start up ISET/ISETBio and check that the user is configured for docker
-clear; close all; ieInit;
+ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name','checkerboard');
@@ -47,6 +49,7 @@ thisR.get('light print');
 % control in ISET3d are defined in piLightCreate;  To see the list of
 % possible light types use
 %
+disp('Valid light types')
 piLightCreate('help');
 
 %% Add a spot light

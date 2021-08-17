@@ -40,13 +40,22 @@ function lght = piLightCreate(lightName, varargin)
 %{
  lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
 %}
+%{
+fileName = 'pngExample.png';
+lgt = piLightCreate('room light', ...
+    'type', 'infinite',...
+    'mapname', fileName);
+%}
 
 %% Check if the person just wants the light types
 
 validLights = {'distant','goniometric','infinite','point','area','projection','spot'};
 
-if isequal(ieParamFormat(lightName),'listavailabletypes')
+% Return on help or 'list available type'
+if isequal(ieParamFormat(lightName),'listavailabletypes') ...
+        || isequal(ieParamFormat(lightName),'help')
     lght = validLights;
+    disp(validLights);
     return;
 end
 

@@ -195,6 +195,9 @@ if any(piContains(world,'Include')) && ...
     
     % We get the name of the file we want to include.
     material_fname = erase(world{materialIdx},{'Include "','"'});
+
+    % Sometimes we have a trailing blank.  We move it here.
+    material_fname = strrep(material_fname,' ','');
     
     inputDir = thisR.get('inputdir');
     inputFile_materials = fullfile(inputDir, material_fname);
@@ -220,6 +223,10 @@ if any(piContains(world,'Include')) && ...
         % Read the geometry file and do the same.
         geometryIdx = find(contains(world, '_geometry.pbrt'), 1);
         geometry_fname = erase(world{geometryIdx},{'Include "','"'});
+        
+        % Remove trailing blanks
+        geometry_fname = strrep(geometry_fname,' ','');
+
         inputFile_geometry = fullfile(inputDir, geometry_fname);
         if ~exist(inputFile_geometry,'file'), error('File not found'); end
         
