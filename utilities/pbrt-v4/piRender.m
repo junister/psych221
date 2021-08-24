@@ -126,26 +126,94 @@ end
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
-renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
-
-if ~isempty(outputFolder)
-    if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-    dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
+% Experiment with calling a native version of pbrt on Windows
+% As of March, 2021 doesn't seem to make a difference on my test
+% machines, but it does work as long as you use the spectral version
+% of pbrt. So I've set the default to false.
+native_pbrt =   false;
+if ispc  % Windows
+    currFile = pbrtFile; % in v3 we could process several files, not sure about v4
+    if native_pbrt
+        % For now spectral pbrt changes data on write by 0a->0d0a
+        % so for this case we do a dos2unix conversion later
+        % Filepath to pbrt.exe goes here
+        pbrtBinary = 'pbrt.exe';
+        outF = fullfile(outputFolder, strcat('renderings/',currName,'.exr')); % for v4 assume exr
+        % Hack, for testing.
+        renderCommand = sprintf('%s --outfile %s %s', pbrtBinary, outF, currFile);
+        command = renderCommand;
+    else
+        
+        % Hack to reverse \ to / for _depth files, for compatibility
+        % with Linux-based Docker pbrt container
+        pFile = fopen(currFile,'rt');
+        tFileName = tempname;
+        tFile = fopen(tFileName,'wt');
+        while true
+            thisline = fgets(pFile);
+            if ~ischar(thisline); break; end  %end of file
+            if contains(thisline, "C:\")
+                thisline = strrep(thisline, piRootPath, '');
+                thisline = strrep(thisline, '\local', '');
+                thisline = strrep(thisline, '\', '/');
+            end
+            fprintf(tFile,  '%s', thisline);
+        end
+        fclose(pFile);
+        fclose(tFile);
+        copyfile(tFileName, currFile);
+        delete(tFileName);
+        
+        % With V4 we need EXR not Dat
+        outF = strcat('renderings/',currName,'.exr');
+        renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
+        folderBreak = split(outputFolder, filesep());
+        shortOut = strcat('/', char(folderBreak(end)));
+        
+        if ~isempty(outputFolder)
+            if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
+            dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
+        end
+        
+        %fix for non - C drives
+        %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
+        linuxOut = char(join(folderBreak,"/"));
+        
+        dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
+        
+        cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
+    end
+else  % Linux & Mac
+    renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+    if ~isempty(outputFolder)
+        if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
+        dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
+    end
+    
+    dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
+    
+    cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 end
 
-dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
-
-cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 
 %% Determine if prefer to use existing files, and if they exist.
 tic;
-[status, result] = piRunCommand(cmd, 'verbose', verbosity);
+if native_pbrt
+    if verbosity > 2
+        [status, result] = system(command,'-echo');
+        [status, result] = system(command); % don't display pbrt output
+    end
+    if ~status
+        unix2dos(outFile, true);
+    end
+else
+    [status, result] = piRunCommand(cmd, 'verbose', verbosity);
+end
 elapsedTime = toc;
 % disp(result)
 %% Check the return
 
-if status
-    warning('Docker did not run correctly');            
+if status    warning('Docker did not run correctly');
     % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
     fprintf('Status:\n'); disp(status)
