@@ -19,6 +19,7 @@ outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 %% This function does the PBRT conversion 
 
 outFile = piPBRTUpdateV4(inFile, outFile);
+dir(fileparts(outFile))
 
 %% Copy the auxiliary files from the V3 directory to the V4 directory
 
@@ -34,6 +35,7 @@ for ii = 1:numel(fileList)
             fullfile(outputDir, fileList(ii).name));
     end
 end
+dir(fileparts(outFile))
 
 %{
 infile = piPBRTReformat(outFile);

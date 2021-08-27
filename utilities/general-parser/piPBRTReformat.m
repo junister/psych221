@@ -1,27 +1,33 @@
 function outputFull = piPBRTReformat(fname,varargin)
-%% format a pbrt file from arbitrary source to standard format
+%% Reformat a pbrt file from arbitrary source to standard format
 %
 % Syntax:
 %    outputFull = piPBRTReformat(fname,varargin)
 %
 % Brief
-%    PBRT V3 files can appear in many formats.  This function uses the PBRT
-%    docker container to read those files and write out the equivalent PBRT
-%    file in the standard format.  It does this by calling PBRT with the
-%    'toply' switch.  So PBRT reads the existing data, converts any meshes
-%    to ply format, and writes out the results.
+%    PBRT V3 files exist in many formats.  This function uses the PBRT
+%    docker container to read the PBRT files and write out an equivalent
+%    PBRT file in a standard format.  It does this by calling PBRT with
+%    the 'toply' switch.  PBRT reads the existing data, converts any
+%    meshes to ply format, and writes out the results.
+%
+%    The files are written out into the local/formatted directory.  If you
+%    would like this file to become the standard, you can move it into
+%    data/V4/sceneName
 %
 % Input
 %   fname: The full path to the filename of the PBRT scene file.
 %
 % Key/val options
-%   outputFull:  The full path to the PBRT scene file that we output
-%                By default, this will be
-%                   outputFull = fullfile(piRootPath,'local','formatted',sceneName,sceneName.pbrt)
+%   outputFull:  The full path to the reformatted PBRT scene file that we
+%   create. By default, this will be
+%
+%      outputFull = fullfile(piRootPath,'local','formatted',sceneName,sceneName.pbrt)
 %
 % Example:
 %    piPBRTReformat(fname);
 %    piPBRTReformat(fname,'output full',fullfile(piRootPath,'local','formatted','test','test.pbrt')
+%
 % See also
 %
 
@@ -30,22 +36,29 @@ function outputFull = piPBRTReformat(fname,varargin)
 fname = fullfile(piRootPath,'data','V3','SimpleScene','SimpleScene.pbrt');
 formattedFname = piPBRTReformat(fname);
 %}
+%{
+fname = fullfile(piRootPath,'data','V3','ChessSet','ChessSet.pbrt');
+%}
 
 %% Parse
 
 % Force to no spaces and lower case
 varargin = ieParamFormat(varargin);
 
-% fname can be the full file name.  But it is only required that it be
-% found.
+% fname can be the full file name.  But it is only required that the file
+% be found on the path.
 p = inputParser;
 p.addRequired('fname',@(x)(exist(fname,'file')));
+
+% This is ugly.  We find the full path to the fname.  Maybe we should just
+% require the full path.
+fname = which(fname);
 [inputdir,thisName,ext] = fileparts(fname);
+
 p.addParameter('outputfull',fullfile(piRootPath,'local','formatted',thisName,[thisName,ext]),@ischar);
 
 p.parse(fname,varargin{:});
 outputFull = p.Results.outputfull;
-
 
 [outputDir, ~, ~] = fileparts(outputFull);
 if ~exist(outputDir,'dir')
