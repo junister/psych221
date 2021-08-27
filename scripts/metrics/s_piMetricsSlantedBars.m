@@ -32,7 +32,9 @@ fileName = 'room.exr';
 lgt = piLightCreate('room light', ...
     'type', 'infinite',...
     'mapname', fileName);
-% The image in the file needs to be rotated around so the camera sees it
+
+% The image in the light exr file needs to be rotated around so the camera
+% sees it 
 lgt = piLightSet(lgt, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 thisR.set('light','add',lgt);
 
@@ -48,7 +50,7 @@ mcc = piAssetLoad('macbeth');
 piRecipeMerge(thisR,mcc.thisR,'node name',mcc.mergeNode);
 piAssetSet(thisR,mcc.mergeNode,'translate',[0.5 2.5 0]);
 [~,result] = piWRS(thisR);
-disp(result)
+% disp(result)
 
 %% A third chart
 
@@ -56,29 +58,16 @@ sbar = piAssetLoad('slantedbar');
 piRecipeMerge(thisR,sbar.thisR,'node name',sbar.mergeNode);
 piAssetSet(thisR,sbar.mergeNode,'translate',[3 3 6]);
 [~,result] = piWRS(thisR);
-disp(result)
-
-%%  Chess set.  Next, try to control the reflectances of the chart
-
-thisR = piRecipeDefault('scene name','ChessSet');
-
-% Clear the default lights
-% thisR.set('light', 'delete', 'all');
-
-fileName = 'skylight-day.exr';
-exampleEnvLight = piLightCreate('room light', ...
-    'type', 'infinite',...
-    'mapname', fileName);
-exampleEnvLight = piLightSet(exampleEnvLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-
-thisR.set('lights', 'add', exampleEnvLight);  
-
-[~, result] = piWRS(thisR);
+% disp(result)
 
 %% The chess set with pieces
-load('ChessSetPieces-recipe','thisR');
-thisR.set('inputFile','/Users/wandell/Documents/MATLAB/iset3d-V4/data/V4/ChessSetPieces/ChessSet.pbrt'); 
+
+% See s_makeChessSet if you would like to change the background from blue
+% sky
+%
+load('ChessSet-recipe','thisR');
 chessR = thisR;
+% piWRS(chessR);
 
 % Merge them
 piRecipeMerge(chessR,eiachart.thisR,'node name',eiachart.mergeNode);

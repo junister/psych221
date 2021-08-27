@@ -8,7 +8,7 @@
 
 %% Read in the file and get set up for output
 
-sceneName = 'chessSet';
+sceneName = 'simplescene';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 
 outputDir = fullfile(piRootPath, 'data/v4',sceneName);
@@ -45,11 +45,7 @@ piWrite(thisR);
 
 scene = piRender(thisR);
 sceneWindow(scene);
-
 %}
 
-% thisR = piRecipeDefault('scene name','chessSet');
-% 
-% scene = piWRS(thisR);
 
 %%
