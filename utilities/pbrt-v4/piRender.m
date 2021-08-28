@@ -213,7 +213,8 @@ elapsedTime = toc;
 % disp(result)
 %% Check the return
 
-if status    warning('Docker did not run correctly');
+if status    
+    warning('Docker did not run correctly');
     % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
     fprintf('Status:\n'); disp(status)

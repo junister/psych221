@@ -159,6 +159,7 @@ classdef recipe < matlab.mixin.Copyable
                     disp(T);
                 case {'objects'}
                     % Tabular summary of object materials, positions, sizes
+                    % Then the lights.
                     names = obj.get('object names')';
                     matT   = obj.get('object materials');
                     coords = obj.get('object coordinates');
@@ -168,7 +169,14 @@ classdef recipe < matlab.mixin.Copyable
                     for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
                     for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
                     T = table(matT, positionT, sizeT,'VariableNames',{'material','positions (m)','sizes (m)'}, 'RowNames',names);
+                    
+                    fprintf('\nObjects\n -----------\n')
                     disp(T);
+                    
+                    % Always add the lights. We should edit piLightPrint to
+                    % create a Table. (BW).
+                    obj.show('lights');
+                    
                 case {'objectmaterials','objectsmaterials','assetsmaterials'}
                     % Prints out a table of just the materials
                     piAssetMaterialPrint(obj);

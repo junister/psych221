@@ -1,6 +1,7 @@
 function lght = piLightCreate(lightName, varargin)
 %% Create a light source struct for a recipe
 %
+% 
 % Synopsis:
 %   lght = piLightCreate(lightName,varargin)
 %
@@ -11,13 +12,17 @@ function lght = piLightCreate(lightName, varargin)
 %   type   - light type. Default is point light.  The light specific
 %    properties depend on the light type. To see the light types use
 %   
-%      lightTypes = piLightCreate('list available types');
+% Special inputs:
+%
+%      lightTypes = piLightCreate('list types');
 %
 %    Properties for each light type can be found
 %
 %        piLightProperties(lightTypes{3})
 %
-%    Look here for the PBRT website information about lights.
+%    Stored environmental light files are
+%
+%        lst = piLightCreate('list env lights');
 %
 % Description:
 %   In addition to creating a light struct, various light properties can be
@@ -29,6 +34,7 @@ function lght = piLightCreate(lightName, varargin)
 % See also
 %   piLightSet, piLightGet, piLightProperties
 %
+%   PBRT:  https://www.pbrt.org/fileformat-v3#lights
 
 % Examples
 %{
@@ -53,11 +59,26 @@ validLights = {'distant','goniometric','infinite','point','area','projection','s
 
 % Return on help or 'list available type'
 if isequal(ieParamFormat(lightName),'listavailabletypes') ...
+        || isequal(ieParamFormat(lightName),'listtypes') ...
         || isequal(ieParamFormat(lightName),'help')
     lght = validLights;
-    disp(validLights);
+    fprintf('\nLight Types\n----------\n');
+    for ii=1:length(validLights)
+        fprintf('%d:  %s\n',ii,validLights{ii});
+    end
     return;
 end
+
+% List the names of the environmental lights
+if isequal(ieParamFormat(lightName),'listenvlights')
+    lght = dir(fullfile(piRootPath,'data','lights','*.exr'));
+    fprintf('\nListing EXR env light files\n----------\n');
+    for ii=1:length(lght)
+        fprintf('%d:  %s\n',ii,lght(ii).name);
+    end
+    return;
+end
+
 
 %% Parse inputs
 
