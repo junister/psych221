@@ -8,7 +8,7 @@
 
 %% Read in the file and get set up for output
 
-sceneName = 'chessSet';
+sceneName = 'simplescene';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 
 outputDir = fullfile(piRootPath, 'data/v4',sceneName);
@@ -19,6 +19,7 @@ outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 %% This function does the PBRT conversion 
 
 outFile = piPBRTUpdateV4(inFile, outFile);
+dir(fileparts(outFile))
 
 %% Copy the auxiliary files from the V3 directory to the V4 directory
 
@@ -34,6 +35,7 @@ for ii = 1:numel(fileList)
             fullfile(outputDir, fileList(ii).name));
     end
 end
+dir(fileparts(outFile))
 
 %{
 infile = piPBRTReformat(outFile);
@@ -43,11 +45,7 @@ piWrite(thisR);
 
 scene = piRender(thisR);
 sceneWindow(scene);
-
 %}
 
-% thisR = piRecipeDefault('scene name','chessSet');
-% 
-% scene = piWRS(thisR);
 
 %%
