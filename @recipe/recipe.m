@@ -170,7 +170,8 @@ classdef recipe < matlab.mixin.Copyable
                     for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
                     T = table(matT, positionT, sizeT,'VariableNames',{'material','positions (m)','sizes (m)'}, 'RowNames',names);
                     
-                    fprintf('\nObjects\n -----------\n')
+                    fprintf('\nObjects\n')
+                    fprintf('____________________\n\n');
                     disp(T);
                     
                     % Always add the lights. We should edit piLightPrint to

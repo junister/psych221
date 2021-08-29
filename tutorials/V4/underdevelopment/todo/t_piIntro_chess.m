@@ -70,4 +70,11 @@ piWrite(thisR);
 [scene, result] = piRender(thisR);
 sceneWindow(scene);
 
+%% Finally, we stored a version of the image with a blue background
+
+load('chessSet-recipe','thisR');
+piWRS(thisR);
+
+thisR.show('objects');
+
 %% END

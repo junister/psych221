@@ -1,6 +1,12 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
+% WARNING:   ZLY wrote this differently from all the other 'gets'.  This
+%    get does not return the parameter.  It returns a string that specifies
+%    the parameter and can be used when writing out the PBRT file.  I think
+%    we might end up changing this, or at least modifying it so we can just
+%    get the values back.
+%
 % Synopsis
 %    [val, txt] = piLightGet(lght, param, varargin)
 %
