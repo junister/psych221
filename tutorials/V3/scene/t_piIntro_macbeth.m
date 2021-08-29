@@ -97,6 +97,7 @@ scenePlot(scene,'depth map');
 %
 % Get it and show it.
 
+%{
 wavelengths = sceneGet(scene,'wavelength');
 illuminantHyperspectralImage = sceneGet(scene,'illuminant photons');
 theWavelength = 550;
@@ -105,3 +106,4 @@ idx = find(wavelengths == theWavelength)
 illuminantImagePlane = illuminantHyperspectralImage(:,:,idx);
 figure; imshow(illuminantImagePlane/max(illuminantImagePlane(:)));
 title(sprintf('Illumination Map (%d nm)',theWavelength));
+%}
