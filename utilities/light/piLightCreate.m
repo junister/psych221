@@ -1,34 +1,47 @@
 function lght = piLightCreate(lightName, varargin)
 %% Create a light source struct for a recipe
 %
+% 
 % Synopsis:
 %   lght = piLightCreate(lightName,varargin)
 %
 % Inputs:
-%   lightName   - name of the light
+%   lightName   - name of the light.  There are various special cases,
+%        however, that are intended to help the programmer.  These are
+%
+%       'list types'  - Print out a list of the valid light types
+%       'help'        - As above
+%       'valid'       - Return a cell array of valid types, no print
+%       'list env file' - Print out exr files in the data/lights directory
 %
 % Optional key/val pairs
 %   type   - light type. Default is point light.  The light specific
-%    properties depend on the light type. To see the light types use
+%            properties depend on the light type. See below.
 %   
-%      lightTypes = piLightCreate('list available types');
+% Special lightName inputs:
 %
-%    Properties for each light type can be found
-%
-%        piLightProperties(lightTypes{3})
-%
-%    Look here for the PBRT website information about lights.
+%      piLightCreate('list types');
+%      validLights = piLightCreate('valid');
+%      envLights = piLightCreate('list env lights');
 %
 % Description:
 %   In addition to creating a light struct, various light properties can be
 %   specified in key/val pairs.
 %
+%   Settable properties for each light type are summarized here.  
+%
+%        piLightProperties(lightTypes{3})
+%
+%   We are still figuring out all the possible properties, so keep checking
+%   back here over time!
+%
 % Returns
-%   lght   - light struct
+%   lght   - light struct, or a cell array with the valid light types.
 %
 % See also
 %   piLightSet, piLightGet, piLightProperties
 %
+%   PBRT:  https://www.pbrt.org/fileformat-v3#lights
 
 % Examples
 %{
@@ -53,11 +66,32 @@ validLights = {'distant','goniometric','infinite','point','area','projection','s
 
 % Return on help or 'list available type'
 if isequal(ieParamFormat(lightName),'listavailabletypes') ...
+        || isequal(ieParamFormat(lightName),'listtypes') ...
         || isequal(ieParamFormat(lightName),'help')
     lght = validLights;
-    disp(validLights);
+    fprintf('\nLight Types\n----------\n');
+    for ii=1:length(validLights)
+        fprintf('%d:  %s\n',ii,validLights{ii});
+    end
     return;
 end
+
+if isequal(ieParamFormat(lightName),'valid')
+    % Do not print.
+    lght = validLights;
+    return;
+end
+
+% List the names of the environmental lights
+if isequal(ieParamFormat(lightName),'listenvlights')
+    lght = dir(fullfile(piRootPath,'data','lights','*.exr'));
+    fprintf('\nListing EXR env light files\n----------\n');
+    for ii=1:length(lght)
+        fprintf('%d:\t%s\n',ii,lght(ii).name);
+    end
+    return;
+end
+
 
 %% Parse inputs
 
@@ -189,10 +223,7 @@ switch ieParamFormat(lght.type)
     case {'area', 'arealight'}        
         lght.twosided.type = 'bool';
         lght.twosided.value = [];
-        
-%         lght.nsamples.type = 'integer';
-%         lght.nsamples.value = [];
-        
+                
         lght.shape.type = 'shape';
         lght.shape.value = [];
         

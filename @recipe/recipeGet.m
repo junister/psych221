@@ -1200,36 +1200,36 @@ switch ieParamFormat(param)  % lower case, no spaces
             return;
         end
         
-        %{
-        if ischar(varargin{1})
-            varargin{1} = ieParamFormat(varargin{1});
-        end
-        %}
-        
         switch varargin{1}
             case 'names'
+                % Special case.  List the names.
                 n = numel(thisR.lights);
                 val = cell(1, n);
                 for ii=1:n
                     val{ii} = thisR.lights{ii}.name;
                 end
             otherwise
-                % The first argument indicates the material name and there
-                % must be a second argument for the property
+                % The first argument describes the light, and there must be
+                % a second argument for the property.  The light can be
+                % described by index or by name.
                 if isnumeric(varargin{1}) && ...
                         varargin{1} <= numel(thisR.lights)
-                    % Search by index.  Get the material directly.
+                    % Light by index. 
                     lgtIdx = varargin{1};
                     thisLight = thisR.lights{lgtIdx};
                     val = thisLight;
                 elseif isstruct(varargin{1})
-                    % The user sent in the material.  We hope.
-                    % We should have a slot in material that identifies itself as a
-                    % material.  Maybe a test like "material.type ismember valid
-                    % materials."
+                    % The user sent in the light struct.  We hope.
+                    % We should have a slot in light that identifies itself as a
+                    % material.  Maybe a test like "light.type" ismember valid
+                    % lights."
                     thisLight = varargin{1};
+                    validLights = piLightCreate('valid');
+                    if ~ismember(thisLight.type,validLights)
+                        warning('The struct type, %s, is not a valid light type',thisLight.type);
+                    end
                 elseif ischar(varargin{1})
-                    % Search by name, find the index
+                    % Search by string name
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
                 end

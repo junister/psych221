@@ -1,5 +1,9 @@
 %% Render MacBeth color checker
 %
+% TODO
+%    I do not understand the replacement for render type yet.
+%    My effort (below) didn't pan out
+%
 % Description:
 %   Render a MacBeth color checker along with its illumination
 %   and depth map.
@@ -24,11 +28,6 @@
 %
 % See also
 %   t_piIntro_*
-
-% History:
-%   10/28/20  dhb  Explicitly show how to compute and look at depth map and
-%                  illumination map. The header comments said it did the
-%                  latter two, and now it does.
 
 %% init
 ieInit;
@@ -73,23 +72,38 @@ piWrite(thisR);
 % By default we get the radiance map and the depth map. The depth map is
 % distance from camera to each point along the line of sight.  See
 % t_piIntro_macbeth_zmap for how to compute a zmap.
-[scene, result] = piRender(thisR,'render type','all',...
-                                'scaleIlluminance', false);
+
+% We do not seem to have render type  for illumiinant implemented yet.
+% Or at least, I do not know how to use it.
+%
+% thisR.set('film render type',{'radiance','depth','illuminant'})
+
+thisR.set('film render type',{'radiance','depth'});
+[scene, result] = piRender(thisR,...
+    'render type','all', ...
+    'scaleIlluminance', false);
 sceneWindow(scene);
 
-% Plot the depth map.  For some reason scenePlot just shows this as all
+%% Plot the depth map.  
+% For some reason scenePlot just shows this as all
 % black, probably an issue of scaling. The code below normalizes and you
 % can see it.  Hard to tell that it isn't flat from the image,
 %
-% scenePlot(scene,'depth map');
-theDepthMap = sceneGet(scene,'depthMap');
-figure; imshow(theDepthMap/max(theDepthMap(:)))
-title('Depth Map');
+scenePlot(scene,'depth map');
 
-% The illumination map is in the scene.  Get it and show it.
+%% The illumination map is in the scene.  
+%
+% No, it does not appear to be in the scene
+%
+% Get it and show it.
+
+%{
 wavelengths = sceneGet(scene,'wavelength');
 illuminantHyperspectralImage = sceneGet(scene,'illuminant photons');
 theWavelength = 550;
-illuminantImagePlane = illuminantHyperspectralImage(:,:,wavelengths == theWavelength);
+idx = find(wavelengths == theWavelength)
+
+illuminantImagePlane = illuminantHyperspectralImage(:,:,idx);
 figure; imshow(illuminantImagePlane/max(illuminantImagePlane(:)));
 title(sprintf('Illumination Map (%d nm)',theWavelength));
+%}

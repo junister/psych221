@@ -7,8 +7,9 @@ thisR.set('assets','001_mirror_O','delete');
 thisR.set('lights','delete','#1_Light_type:infinite');
 
 % Trees outside the room
+piLightProperties('spot');
 fileName = 'room.exr';
-lgt = piLightCreate('room light', ...
+lgt = piLightCreate('outdoors light', ...
     'type', 'infinite',...
     'mapname', fileName);
 
@@ -18,12 +19,17 @@ lgt = piLightSet(lgt, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 thisR.set('light','add',lgt);
 
 %{
+fileName = 'clouds-sky.exr';
+lgt = piLightCreate('infinite light', ...
+    'type', 'distant');
+thisR.set('light','add',lgt);
+thisR.show('lights');
+%}
+%{
 % It would be nice to make another blue spot light or something
 %
-lgt = piLightCreate('blue spot', 'type','spot',...
-    'rgb spd',[0.5 0.7 1],...
-    'from',thisR.get('from'), ...
-    'to', thisR.get('to'));
+lgt = piLightCreate('blue point', 'type','point',...
+    'rgb spd',[0.5 0.7 1]);
 thisR.set('light','add',lgt);
 %}
 
