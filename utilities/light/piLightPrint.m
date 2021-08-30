@@ -31,7 +31,11 @@ for ii =1:numel(lightNames)
     types{ii,:} = thisR.lights{ii}.type;
     
     % Light positions
-    thisPos = piLightGet(thisR.lights{ii},'from');
+    if thisR.get('lights',ii,'cameracoordinate')
+        thisPos = 'camera';
+    else
+        thisPos = piLightGet(thisR.lights{ii},'from');
+    end
     if isempty(thisPos), pos{ii,:} = 'distant';
     else, pos{ii,:} = thisPos;
     end
