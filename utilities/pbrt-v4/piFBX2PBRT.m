@@ -21,7 +21,15 @@ currdir = pwd;
 cd(dir);
 
 %% Runs assimp command
-cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+% Windows doesn't add assimp dir to PATH by default
+% Not sure of the best way to handle that. Maybe we can even just ship the
+% binaries and point to them?
+if ispc
+    assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
+else
+    assimpBinary = 'assimp';
+end
+cmd = [[assimpBinary ' export '],infile, ' ',[fname,'-converted.pbrt']];
 [status,result] = system(cmd);
 
 if status
