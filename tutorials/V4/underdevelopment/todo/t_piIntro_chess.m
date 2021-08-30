@@ -69,6 +69,7 @@ thisR.set('light','add',pointLight);
 piWrite(thisR);
 [scene, result] = piRender(thisR);
 sceneWindow(scene);
+thisR.show('lights');
 
 %% Finally, we stored a version of the image with a blue background
 
