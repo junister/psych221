@@ -15,28 +15,51 @@ function outfile = piFBX2PBRT(infile)
 
 %% Find the input file and specify the converted output file
 
-[dir, fname,~] = fileparts(infile);
-outfile = fullfile(dir, [fname,'-converted.pbrt']);
+[indir, fname,~] = fileparts(infile);
+outfile = fullfile(indir, [fname,'-converted.pbrt']);
 currdir = pwd;
-cd(dir);
+cd(indir);
 
 %% Runs assimp command
+%{
 % Windows doesn't add assimp dir to PATH by default
 % Not sure of the best way to handle that. Maybe we can even just ship the
 % binaries and point to them?
-if ispc
-    assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
-else
-    assimpBinary = 'assimp';
-end
-cmd = [[assimpBinary ' export '],infile, ' ',[fname,'-converted.pbrt']];
-[status,result] = system(cmd);
+% if ispc
+%     assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
+% else
+%     assimpBinary = 'assimp';
+% end
+%}
+% build docker base cmd
+
+dockerimage = 'camerasimulation/pbrt-v4-cpu';
+
+basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+
+cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+
+dockercontainerName = ['Assimp-',num2str(randi(200))];
+dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
+
+[status,result] = system(dockercmd);
 
 if status
     disp(result);
     error('FBX to PBRT conversion failed.')
 end
 
-cd(currdir);
+cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
+[status_copy, ~ ] = system(cpcmd);
 
+cd(currdir);
+if status_copy
+    disp(result);
+    error('Copy file from docker container failed.\n ');
 end
+
+% remove docker container
+rmCmd = sprintf('docker rm %s',dockercontainerName);
+system(rmCmd);
+end
+

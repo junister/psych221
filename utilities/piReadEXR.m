@@ -38,49 +38,66 @@ filename = parser.Results.filename;
 dataType = parser.Results.datatype;
 
 %%
-data = exrinfo(filename);
-size = double(data.size);
 
 switch dataType
     case "radiance"
-        RadianceIndex = find(strcmp(data.channels, 'Radiance.C01'));
-        radianceContainerMap = exrreadchannels(filename, data.channels{RadianceIndex:RadianceIndex+30});
-        image = cell2mat(values(radianceContainerMap));
-        output = reshape(image, [size, 31]);
+        output = piEXR2Mat(filename, 'Radiance');
+%         RadianceIndex = find(strcmp(data.channels, 'Radiance.C01'));
+%         radianceContainerMap = exrreadchannels(filename, data.channels{RadianceIndex:RadianceIndex+30});
+%         image = cell2mat(values(radianceContainerMap));
+%         output = reshape(image, [size, 31]);
     case "zdepth"
-        ZDepthIndex = find(strcmp(data.channels, 'Pz'));
-        ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
-        output=ZDepthMap;
+        output = piEXR2Mat(filename, 'Pz');
+%         ZDepthIndex = find(strcmp(data.channels, 'Pz'));
+%         ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
+%         output=ZDepthMap;
     case "depth"
-        XDepthIndex = find(strcmp(data.channels, 'Px'));
-        XDepthMap = exrreadchannels(filename, data.channels{XDepthIndex});
-        YDepthIndex = find(strcmp(data.channels, 'Py'));
-        YDepthMap = exrreadchannels(filename, data.channels{YDepthIndex});
-        ZDepthIndex = find(strcmp(data.channels, 'Pz'));
-        ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
+        XDepthMap = piEXR2Mat(filename, 'Px');
+        YDepthMap = piEXR2Mat(filename, 'Py');
+        ZDepthMap = piEXR2Mat(filename, 'Pz');
+%         XDepthIndex = find(strcmp(data.channels, 'Px'));
+%         XDepthMap = exrreadchannels(filename, data.channels{XDepthIndex});
+%         YDepthIndex = find(strcmp(data.channels, 'Py'));
+%         YDepthMap = exrreadchannels(filename, data.channels{YDepthIndex});
+%         ZDepthIndex = find(strcmp(data.channels, 'Pz'));
+%         ZDepthMap = exrreadchannels(filename, data.channels{ZDepthIndex});
         
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
-        CoordIndex = find(strcmp(data.channels, 'Px'));
-        CoordMap = exrreadchannels(filename, data.channels{CoordIndex:CoordIndex+2});
-        image = cell2mat(values(CoordMap));
-        output = reshape(image, [size, 3]);
+        output(:,:,1) = piEXR2Mat(filename, 'Px');
+        output(:,:,2) = piEXR2Mat(filename, 'Py');
+        output(:,:,3) = piEXR2Mat(filename, 'Pz');
+%         CoordIndex = find(strcmp(data.channels, 'Px'));
+%         CoordMap = exrreadchannels(filename, data.channels{CoordIndex:CoordIndex+2});
+%         image(:,:,1) = cell2mat(values(CoordMap));
+%         output = reshape(image, [size, 3]);
     case "material" % single channel
-        matIndex = find(strcmp(data.channels, 'MaterialId'));
-        output = exrreadchannels(filename, data.channels{matIndex});
+        output = piEXR2Mat(filename, 'MaterialId');
+%         matIndex = find(strcmp(data.channels, 'MaterialId'));
+%         output = exrreadchannels(filename, data.channels{matIndex});
     case "normal"
-        NormIndex = find(strcmp(data.channels, 'Px'));
-        NormMap = exrreadchannels(filename, data.channels{NormIndex:NormIndex+2});
-        image = cell2mat(values(NormMap));
-        output = reshape(image, [size, 3]);
+        output(:,:,1) = piEXR2Mat(filename, 'Nx');
+        output(:,:,2) = piEXR2Mat(filename, 'Ny');
+        output(:,:,3) = piEXR2Mat(filename, 'Nz');
+%         NormIndex = find(strcmp(data.channels, 'Px'));
+%         NormMap = exrreadchannels(filename, data.channels{NormIndex:NormIndex+2});
+%         image = cell2mat(values(NormMap));
+%         output = reshape(image, [size, 3]);
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
     case "instance" % single channel
-        insIndex = find(strcmp(data.channels, 'InstanceId'));
-        output = exrreadchannels(filename, data.channels{insIndex});
+        output = piEXR2Mat(filename, 'InstanceId');
+%         insIndex = find(strcmp(data.channels, 'InstanceId'));
+%         output = exrreadchannels(filename, data.channels{insIndex});
     otherwise
         error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
 end
 
 
 end
+
+
+
+
+
+
