@@ -16,7 +16,7 @@ if ~exist(outputDir,'dir'), mkdir(outputDir);end
 
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);
 
-%% This function does the PBRT conversion 
+%% This function does the PBRT conversion
 
 outFile = piPBRTUpdateV4(inFile, outFile);
 dir(fileparts(outFile))
@@ -36,16 +36,5 @@ for ii = 1:numel(fileList)
     end
 end
 dir(fileparts(outFile))
-
-%{
-infile = piPBRTReformat(outFile);
-thisR  = piRead(infile);
-
-piWrite(thisR);
-
-scene = piRender(thisR);
-sceneWindow(scene);
-%}
-
 
 %%
