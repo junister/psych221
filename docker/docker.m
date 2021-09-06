@@ -16,8 +16,8 @@ classdef docker
         containerName = '';
         containerType = 'linux'; % default, even on Windows
         workingDirectory = '/';
-        volLocalPath = '';
-        volRemotePath = '';
+        localVolumePath = '';
+        targetVolumePath = '';
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
         dockerFlags = '';
         command = 'pbrt';
@@ -26,10 +26,9 @@ classdef docker
     end
     
     methods
-        function obj = docker(inputArg1,inputArg2)
+        function obj = docker()
             %Docker Construct an instance of this class
             %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
             % default for flags
             if ispc
                 obj.dockerFlags = '-i --rm';
@@ -42,10 +41,35 @@ classdef docker
             % for depth or other files that have embedded "wrong" paths
         end
         
-        function outputArg = run(obj,inputArg)
+        function outputArg = run(obj)
             %RUN Execute Docker command
             %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+            
+            builtCommand = obj.dockerCommand; % baseline
+            builtCommand = [builtCommand ' ' obj.dockerFlags]; 
+            if ~isequal(obj.workingDirectory, '')
+                builtCommand = [builtCommand ' -w ' obj.workingDirectory];
+            end
+            if ~isequal(obj.localVolumePath, '') && ~isequal(obj.targetVolumePath, '')
+                builtCommand = [builtCommand ' -v ' obj.localVolumePath ':' obj.targetVolumePath];
+            end
+            if isequal(obj.containerName, '')
+                outputArg = -1;
+                return;
+            else
+                builtCommand = [builtCommand ' ' obj.containerName];
+            end
+            if ~isequal(obj.outFile, '')
+                builtCommand = [builtCommand ' --outfile ' obj.outFile];
+            end
+            if ~isequal(obj.inFile, '')
+                builtCommand = [builtCommand ' ' obj.inFile];
+            end
+            if ispc
+                outputArg = system(builtCommand, '-echo');
+            else
+                outputArg = system(buitCommand);
+            end
         end
     end
 end
