@@ -11,7 +11,7 @@ function outfile = piFBX2PBRT(infile)
 % Some day we will Dockerize assimp
 %
 % See also
-%  
+%
 
 %% Find the input file and specify the converted output file
 
@@ -35,14 +35,25 @@ cd(indir);
 
 dockerimage = 'camerasimulation/pbrt-v4-cpu';
 
-basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
-
-cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
-
-dockercontainerName = ['Assimp-',num2str(randi(200))];
-dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
-
-[status,result] = system(dockercmd);
+if ~ispc
+    basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+    
+    cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+    
+    dockercontainerName = ['Assimp-',num2str(randi(200))];
+    dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
+    
+    [status,result] = system(dockercmd);
+else 
+    ourDocker = dockerWrapper();
+    ourDocker.dockerFlags = '-ti'; % no -rm this time!
+    ourDocker.dockerContainerName = ['Assimp' num2str(randi(200))];
+    ourDocker.dockerImageName = dockerimage;
+    ourDocker.command = 'assimp export';
+    ourDocker.inputFile = infile;
+    ourDocker.outputFile = [fname '-converted.pbrt'];
+    [status, result] = ourDocker.run();    
+end
 
 if status
     disp(result);

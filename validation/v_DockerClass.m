@@ -6,7 +6,7 @@ function success = v_DockerClass()
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
     % cd([piRootPath '/local']);
-    ourDocker = docker();
+    ourDocker = dockerWrapper();
     ourDocker.containerName = 'camerasimulation/pbrt-v4-cpu pbrt';
     ourDocker.workingDirectory = '/sphere';
     ourDocker.localVolumePath = 'c:/iset/iset3d-v4/local/sphere';

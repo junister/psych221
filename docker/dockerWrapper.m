@@ -1,4 +1,4 @@
-classdef docker
+classdef dockerWrapper
     %DOCKER Unified way to call docker containers for iset
     %   An attempt to resolve at least some of the myriad platform issues
     %   Not clear whether to make this generic or just for pbrt, in which
@@ -13,8 +13,9 @@ classdef docker
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
     
     properties
-        containerName = '';
-        containerType = 'linux'; % default, even on Windows
+        dockerContainerName = '';
+        dockerImageName = '';
+        dockerContainerType = 'linux'; % default, even on Windows
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
@@ -33,7 +34,7 @@ classdef docker
             if ispc
                 obj.dockerFlags = '-i --rm';
             else
-                obj.dockerFlags = 'ti --rm';
+                obj.dockerFlags = '-ti --rm';
             end
         end
         
@@ -49,12 +50,15 @@ classdef docker
             if ~isequal(obj.outputFile, '')
                 outputFolder = fileparts(obj.outputFile);
                 
-                % maybe this is now de-coupled from the working folder?
-                if(~exist(outputFolder,'dir'))
-                    error('We need an absolute path for the working folder.');
-                end
+                %if isequal(obj.command, 'pbrt')
+                %    % maybe this is now de-coupled from the working folder?
+                %    if(~exist(outputFolder,'dir'))
+                %        error('We need an absolute path for the working folder.');
+                %    end
+                %    pbrtFile = obj.outputFile;
+                %end
+                % not sure if this is general enough?
                 pbrtFile = obj.outputFile;
-                
                 [~,currName,~] = fileparts(pbrtFile);
             else
                 % need currName?
@@ -68,13 +72,23 @@ classdef docker
             
             
             builtCommand = obj.dockerCommand; % baseline
-            builtCommand = [builtCommand ' ' obj.dockerFlags];
+            if ispc
+                flags = strrep(obj.dockerFlags, '-ti', '-i');
+                flags = strrep(obj.dockerFlags, '-it', '-i');
+            else
+                flags = obj.dockerFlags;
+            end
+            builtCommand = [builtCommand ' ' flags];
+ 
+            if ~isequal(obj.dockerContainerName, '')
+                builtCommand = [builtCommand ' --name ' obj.dockerContainerName];
+            end
             
             if ~isequal(obj.workingDirectory, '')
                 builtCommand = [builtCommand ' -w ' obj.workingDirectory];
             end
             if ~isequal(obj.localVolumePath, '') && ~isequal(obj.targetVolumePath, '')
-                if ispc && ~isequal(obj.containerType, 'windows')
+                if ispc && ~isequal(obj.dockerContainerType, 'windows')
                     % need to rewrite targetVolumePath
                     folderBreak = split(obj.targetVolumePath, filesep());
                     fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
@@ -83,22 +97,22 @@ classdef docker
                 end
                 builtCommand = [builtCommand ' -v ' obj.localVolumePath ':' fOut];
             end
-            if isequal(obj.containerName, '')
+            if isequal(obj.dockerImageName, '')
                 outputArg = -1;
                 return;
             else
-                builtCommand = [builtCommand ' ' obj.containerName];
+                builtCommand = [builtCommand ' ' obj.dockerImageName];
             end
             if ~isequal(obj.command, '')
                 builtCommand = [builtCommand ' ' obj.command];
             end
             if ~isequal(obj.outputFile, '')
-                builtCommand = [builtCommand ' --outfile ' obj.outFile];
+                builtCommand = [builtCommand ' --outfile ' obj.outputFile];
             end
             if ~isequal(obj.inputFile, '')
                 if ispc
                     folderBreak = split(obj.inputFile, filesep());
-                    fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                    fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
                 else
                     fOut = obj.inputFile;
                 end
