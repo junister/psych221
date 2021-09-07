@@ -7,8 +7,17 @@ basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', infile];
 
-dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
-[status,result] = system(dockercmd);
+if ~ispc
+    dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
+    [status,result] = system(dockercmd);
+else
+    ourDocker = docker();
+    ourDocker.containerName = dockerimage;
+    ourDocker.dockerCommand = sprintf(basecmd, indir, indir, dockerimage, cmd);
+
+    status = ourDocker.run();
+end
+
 if status
     disp(result);
     error('EXR to Binary conversion failed.')

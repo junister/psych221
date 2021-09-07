@@ -70,11 +70,8 @@ piCopyFolder(inputdir, outputDir);
 
 %% convert %s mkdir mesh && cd mesh &&
 
-% The Docker base command includes 'toply'.  In that case, it does not
-% render the data, it just converts it.
-% basecmd = 'docker run -t --name %s --volume="%s":"%s" %s pbrt --toply %s > %s && ls';
-basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
-
+% moved some of the static pathing up, so we can modify if needed for the
+% ispc case -- DJC
 % The directory of the input file
 [volume, ~, ~] = fileparts(fname);
 
@@ -83,11 +80,38 @@ dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 
 % Give a name to docker container
 dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
-%% Build the command
-dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, [thisName, ext]);
 
-% dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
-% disp(dockercmd)
+% The Docker base command includes 'toply'.  In that case, it does not
+% render the data, it just converts it.
+% basecmd = 'docker run -t --name %s --volume="%s":"%s" %s pbrt --toply %s > %s && ls';
+%% Build the command
+if ispc
+        basecmd = 'docker run -i --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
+        % renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
+        folderBreak = split(outputDir, filesep());
+        shortOut = strcat('/', char(folderBreak(end)));
+        
+        if ~isempty(outputDir)
+            if ~exist(outputDir,'dir'), error('Need full path to %s\n',outputDir); end
+            dockerCommand = sprintf('%s -w %s', basecmd, shortOut);
+        end
+        
+        %fix for non - C drives
+        %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
+        linuxOut = char(join(folderBreak,"/"));
+        
+        dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
+        
+        cmd = sprintf('%s %s %s', dockerCommand, dockerimage, renderCommand);
+        dockercmd = cmd;
+else
+    basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
+    dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, [thisName, ext]);
+    % dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
+    % disp(dockercmd)
+end
+
+
 
 %% Run the command
 
