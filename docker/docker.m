@@ -15,7 +15,7 @@ classdef docker
     properties
         containerName = '';
         containerType = 'linux'; % default, even on Windows
-        workingDirectory = '/';
+        workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
@@ -41,24 +41,26 @@ classdef docker
             % for depth or other files that have embedded "wrong" paths
         end
         
-        function outputArg = run(obj)
+        function [outputArg, result] = run(obj)
             %RUN Execute Docker command
-            %   Detailed explanation goes here
             
             % Set up the output folder.  This folder will be mounted by the Docker
-            % image
-            outputFolder = fileparts(obj.outputFile);
-            
-            % maybe this is now de-coupled from the working folder?
-            if(~exist(outputFolder,'dir'))
-                error('We need an absolute path for the working folder.');
+            % image if needed. Some commands don't need one:
+            if ~isequal(obj.outputFile, '')
+                outputFolder = fileparts(obj.outputFile);
+                
+                % maybe this is now de-coupled from the working folder?
+                if(~exist(outputFolder,'dir'))
+                    error('We need an absolute path for the working folder.');
+                end
+                pbrtFile = obj.outputFile;
+                
+                [~,currName,~] = fileparts(pbrtFile);
+            else
+                % need currName?
             end
-            pbrtFile = obj.outputFile;
-            
-            [~,currName,~] = fileparts(pbrtFile);
-            
             % Make sure renderings folder exists
-            if obj.command = 'pbrt'
+            if (isequal(obj.command,'pbrt'))
                 if(~exist(fullfile(outputFolder,'renderings'),'dir'))
                     mkdir(fullfile(outputFolder,'renderings'));
                 end
@@ -67,15 +69,19 @@ classdef docker
             
             builtCommand = obj.dockerCommand; % baseline
             builtCommand = [builtCommand ' ' obj.dockerFlags];
+            
             if ~isequal(obj.workingDirectory, '')
                 builtCommand = [builtCommand ' -w ' obj.workingDirectory];
             end
             if ~isequal(obj.localVolumePath, '') && ~isequal(obj.targetVolumePath, '')
-                if ispc && ~equals(obj.containerType, 'windows')
+                if ispc && ~isequal(obj.containerType, 'windows')
                     % need to rewrite targetVolumePath
+                    folderBreak = split(obj.targetVolumePath, filesep());
+                    fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
                 else
+                    fOut = obj.targetVolumePath;
                 end
-                builtCommand = [builtCommand ' -v ' obj.localVolumePath ':' obj.targetVolumePath];
+                builtCommand = [builtCommand ' -v ' obj.localVolumePath ':' fOut];
             end
             if isequal(obj.containerName, '')
                 outputArg = -1;
@@ -83,16 +89,25 @@ classdef docker
             else
                 builtCommand = [builtCommand ' ' obj.containerName];
             end
-            if ~isequal(obj.outFile, '')
+            if ~isequal(obj.command, '')
+                builtCommand = [builtCommand ' ' obj.command];
+            end
+            if ~isequal(obj.outputFile, '')
                 builtCommand = [builtCommand ' --outfile ' obj.outFile];
             end
-            if ~isequal(obj.inFile, '')
-                builtCommand = [builtCommand ' ' obj.inFile];
+            if ~isequal(obj.inputFile, '')
+                if ispc
+                    folderBreak = split(obj.inputFile, filesep());
+                    fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                else
+                    fOut = obj.inputFile;
+                end
+                builtCommand = [builtCommand ' ' fOut];
             end
             if ispc
-                outputArg = system(builtCommand, '-echo');
+                [outputArg, result] = system(builtCommand, '-echo');
             else
-                outputArg = system(buitCommand);
+                [outputArg, result] = system(buitCommand);
             end
         end
     end
