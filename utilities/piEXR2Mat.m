@@ -12,8 +12,12 @@ if ~ispc
     [status,result] = system(dockercmd);
 else
     ourDocker = docker();
+    ourDocker.command = ['imgtool convert --exr2bin ' channelname];
     ourDocker.containerName = dockerimage;
-    ourDocker.dockerCommand = sprintf(basecmd, indir, indir, dockerimage, cmd);
+    ourDocker.localVolumePath = indir;
+    ourDocker.targetVolumePath = indir;
+    ourDocker.inputFile = infile;
+    ourDocker.outputFile = ''; % imgtool uses a default
 
     status = ourDocker.run();
 end
