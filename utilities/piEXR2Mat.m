@@ -2,7 +2,7 @@ function data = piEXR2Mat(infile, channelname)
 
 [indir, fname,~] = fileparts(infile);
 
-dockerimage = 'camerasimulation/pbrt-v4-cpu';
+dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', infile];
@@ -18,7 +18,8 @@ else
     ourDocker.targetVolumePath = indir;
     ourDocker.inputFile = infile;
     ourDocker.outputFile = ''; % imgtool uses a default
-
+    ourDocker.outputFilePrefix = '';
+    
     [status, result] = ourDocker.run();
 end
 

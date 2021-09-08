@@ -48,10 +48,12 @@ else
     ourDocker = dockerWrapper();
     ourDocker.dockerFlags = '-ti'; % no -rm this time!
     ourDocker.dockerContainerName = ['Assimp' num2str(randi(200))];
-    ourDocker.dockerImageName = dockerimage;
+    % no if we want latest?ourDocker.dockerImageName = dockerimage;
     ourDocker.command = 'assimp export';
     ourDocker.inputFile = infile;
+    %assimp just wants us to put outputfile second, not specify --outfile
     ourDocker.outputFile = [fname '-converted.pbrt'];
+    ourDocker.outputFilePrefix = '';
     [status, result] = ourDocker.run();    
 end
 

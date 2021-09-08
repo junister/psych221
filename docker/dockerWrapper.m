@@ -14,7 +14,7 @@ classdef dockerWrapper
     
     properties
         dockerContainerName = '';
-        dockerImageName = '';
+        dockerImageName =  'camerasimulation/pbrt-v4-cpu:latest';
         dockerContainerType = 'linux'; % default, even on Windows
         workingDirectory = '';
         localVolumePath = '';
@@ -24,6 +24,7 @@ classdef dockerWrapper
         command = 'pbrt';
         inputFile = '';
         outputFile = 'pbrt_output.exr';
+        outputFilePrefix = '--outfile';
     end
     
     methods
@@ -74,7 +75,7 @@ classdef dockerWrapper
             builtCommand = obj.dockerCommand; % baseline
             if ispc
                 flags = strrep(obj.dockerFlags, '-ti', '-i');
-                flags = strrep(obj.dockerFlags, '-it', '-i');
+                flags = strrep(flags, '-it', '-i');
             else
                 flags = obj.dockerFlags;
             end
@@ -106,23 +107,55 @@ classdef dockerWrapper
             if ~isequal(obj.command, '')
                 builtCommand = [builtCommand ' ' obj.command];
             end
-            if ~isequal(obj.outputFile, '')
-                builtCommand = [builtCommand ' --outfile ' obj.outputFile];
-            end
-            if ~isequal(obj.inputFile, '')
-                if ispc
-                    folderBreak = split(obj.inputFile, filesep());
-                    fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+            
+            %in cases where we don't use an of prefix then if comes befor
+            %of
+            if ~isequal(obj.outputFilePrefix, '')
+                builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' obj.outputFile];
+                if ~isequal(obj.inputFile, '')
+                    if ispc
+                        folderBreak = split(obj.inputFile, filesep());
+                        if isequal(obj.command, 'assimp export')
+                            % total hack, need to decide when we need
+                            % folder paths
+                            fOut = strcat(char(folderBreak(end)));
+                        else
+                            fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                        end
+                    else
+                        fOut = obj.inputFile;
+                    end
                 else
-                    fOut = obj.inputFile;
+                    
+                        if isequal(obj.command, 'assimp export')
+                            % total hack, need to decide when we need
+                            % folder paths
+                            fOut = strcat(char(folderBreak(end)));
+                        else
+                            fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                        end
+                    builtCommand = [builtCommand ' ' fOut];
                 end
-                builtCommand = [builtCommand ' ' fOut];
+            else
+                 if ~isequal(obj.inputFile, '')
+                    if ispc
+                        folderBreak = split(obj.inputFile, filesep());
+                        fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                    else
+                        fOut = obj.inputFile;
+                    end
+                    builtCommand = [builtCommand ' ' fOut];
+                    builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' obj.outputFile];
+                end
             end
+                
+            
             if ispc
                 [outputArg, result] = system(builtCommand, '-echo');
             else
                 [outputArg, result] = system(buitCommand);
             end
+            
         end
     end
 end
