@@ -28,7 +28,7 @@ classdef dockerWrapper
     end
     
     methods
-        function obj = docker()
+        function obj = dockerWrapper()
             %Docker Construct an instance of this class
             %   Detailed explanation goes here
             % default for flags
@@ -41,6 +41,17 @@ classdef dockerWrapper
         
         function output = convertPathsInFile(obj, input)
             % for depth or other files that have embedded "wrong" paths
+        end
+        
+        function output = pathToLinux(obj, inputPath)
+            
+            if isequal(fullfile(inputPath), inputPath)
+                % assume we have a drive letter
+                output = inputPath(3:end);
+                output = strrep(output, '\','/');
+            else
+                output = strrep(inputPath, '\','/');
+            end
         end
         
         function [outputArg, result] = run(obj)
@@ -80,19 +91,20 @@ classdef dockerWrapper
                 flags = obj.dockerFlags;
             end
             builtCommand = [builtCommand ' ' flags];
- 
+            
             if ~isequal(obj.dockerContainerName, '')
                 builtCommand = [builtCommand ' --name ' obj.dockerContainerName];
             end
             
             if ~isequal(obj.workingDirectory, '')
-                builtCommand = [builtCommand ' -w ' obj.workingDirectory];
+                builtCommand = [builtCommand ' -w ' pathToLinux(obj.workingDirectory)];
             end
             if ~isequal(obj.localVolumePath, '') && ~isequal(obj.targetVolumePath, '')
                 if ispc && ~isequal(obj.dockerContainerType, 'windows')
                     % need to rewrite targetVolumePath
-                    folderBreak = split(obj.targetVolumePath, filesep());
-                    fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                    %folderBreak = split(obj.targetVolumePath, filesep());
+                    %fOut = strcat('/', [char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                    fOut = obj.pathToLinux(obj.targetVolumePath);
                 else
                     fOut = obj.targetVolumePath;
                 end
@@ -108,47 +120,46 @@ classdef dockerWrapper
                 builtCommand = [builtCommand ' ' obj.command];
             end
             
-            %in cases where we don't use an of prefix then if comes befor
-            %of
+            %in cases where we don't use an of prefix then inputfile comes before
+            %outputfile
+            if ispc
+                outFileName = obj.pathToLinux(obj.outputFile);
+            else
+                outFileName = obj.outputFile;
+            end
             if ~isequal(obj.outputFilePrefix, '')
-                builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' obj.outputFile];
+                builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' outFileName];
                 if ~isequal(obj.inputFile, '')
                     if ispc
-                        folderBreak = split(obj.inputFile, filesep());
-                        if isequal(obj.command, 'assimp export')
-                            % total hack, need to decide when we need
-                            % folder paths
-                            fOut = strcat(char(folderBreak(end)));
-                        else
-                            fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
-                        end
+                        
+                        fOut = obj.pathToLinux(obj.inputFile);
                     else
                         fOut = obj.inputFile;
                     end
                 else
                     
-                        if isequal(obj.command, 'assimp export')
-                            % total hack, need to decide when we need
-                            % folder paths
-                            fOut = strcat(char(folderBreak(end)));
-                        else
-                            fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
-                        end
-                    builtCommand = [builtCommand ' ' fOut];
-                end
-            else
-                 if ~isequal(obj.inputFile, '')
-                    if ispc
-                        folderBreak = split(obj.inputFile, filesep());
+                    if isequal(obj.command, 'assimp export')
+                        % total hack, need to decide when we need
+                        % folder paths
+                        
+                        fOut = strcat(char(folderBreak(end)));
+                    else
                         fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                    end
+                end
+                builtCommand = [builtCommand ' ' fOut];
+            else
+                if ~isequal(obj.inputFile, '')
+                    if ispc
+                        fOut = obj.pathToLinux(obj.inputFile);
                     else
                         fOut = obj.inputFile;
                     end
                     builtCommand = [builtCommand ' ' fOut];
-                    builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' obj.outputFile];
+                    builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' outFileName];
                 end
             end
-                
+            
             
             if ispc
                 [outputArg, result] = system(builtCommand, '-echo');
