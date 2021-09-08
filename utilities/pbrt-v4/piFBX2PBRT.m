@@ -47,7 +47,7 @@ if ~ispc
 else 
     ourDocker = dockerWrapper();
     ourDocker.dockerFlags = '-ti'; % no -rm this time!
-    ourDocker.dockerContainerName = ['Assimp' num2str(randi(200))];
+    ourDocker.dockerContainerName = ['Assimp' num2str(randi(2000))];
     dockercontainerName = ourDocker.dockerContainerName;
     % no if we want latest?ourDocker.dockerImageName = dockerimage;
     ourDocker.command = 'assimp export';
@@ -70,10 +70,15 @@ if ~ispc
     [status_copy, ~ ] = system(cpcmd);
 else
     cpDocker = dockerWrapper();
-    cpDocker.dockerContainerName = dockerContainerName;
-    cpDocker.command = 'cp';
-    cpDocker.outputFile = [fname,'-converted.pbrt'];
-    [status_copy, result] = cpDocker.Run();
+    cpDocker.dockerImageName = ''; % use running container
+    cpDocker.dockerCommand = 'docker cp';
+    cpDocker.command = '';
+    cpDocker.dockerFlags = '';
+    linuxDir = cpDocker.pathToLinux(indir);
+    cpDocker.inputFile = [dockercontainerName ':' linuxDir  filesep()  fname '-converted.pbrt'];
+    cpDocker.outputFile = indir;
+    cpDocker.outputFilePrefix = '';
+    [status_copy, result] = cpDocker.run();
 end
 cd(currdir);
 if status_copy

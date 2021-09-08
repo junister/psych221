@@ -56,7 +56,7 @@ classdef dockerWrapper
         
         function [outputArg, result] = run(obj)
             %RUN Execute Docker command
-            
+
             % Set up the output folder.  This folder will be mounted by the Docker
             % image if needed. Some commands don't need one:
             if ~isequal(obj.outputFile, '')
@@ -97,7 +97,7 @@ classdef dockerWrapper
             end
             
             if ~isequal(obj.workingDirectory, '')
-                builtCommand = [builtCommand ' -w ' pathToLinux(obj.workingDirectory)];
+                builtCommand = [builtCommand ' -w ' obj.pathToLinux(obj.workingDirectory)];
             end
             if ~isequal(obj.localVolumePath, '') && ~isequal(obj.targetVolumePath, '')
                 if ispc && ~isequal(obj.dockerContainerType, 'windows')
@@ -111,8 +111,7 @@ classdef dockerWrapper
                 builtCommand = [builtCommand ' -v ' obj.localVolumePath ':' fOut];
             end
             if isequal(obj.dockerImageName, '')
-                outputArg = -1;
-                return;
+                %assume running container
             else
                 builtCommand = [builtCommand ' ' obj.dockerImageName];
             end
@@ -130,21 +129,20 @@ classdef dockerWrapper
             if ~isequal(obj.outputFilePrefix, '')
                 builtCommand = [builtCommand ' ' obj.outputFilePrefix ' ' outFileName];
                 if ~isequal(obj.inputFile, '')
-                    if ispc
-                        
+                    if ispc                        
                         fOut = obj.pathToLinux(obj.inputFile);
                     else
                         fOut = obj.inputFile;
                     end
                 else
-                    
+                    %not sure if we need this?
+                     folderBreak = split(obj.outputFile, filesep()); 
                     if isequal(obj.command, 'assimp export')
                         % total hack, need to decide when we need
                         % folder paths
-                        
                         fOut = strcat(char(folderBreak(end)));
                     else
-                        fOut = strcat('/', [char(folderBreak(end-2)) '/' char(folderBreak(end-1)) '/' char(folderBreak(end))]);
+                        fOut = obj.pathToLinux(obj.outputFile);
                     end
                 end
                 builtCommand = [builtCommand ' ' fOut];
