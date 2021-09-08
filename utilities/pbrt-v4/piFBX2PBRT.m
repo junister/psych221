@@ -48,9 +48,12 @@ else
     ourDocker = dockerWrapper();
     ourDocker.dockerFlags = '-ti'; % no -rm this time!
     ourDocker.dockerContainerName = ['Assimp' num2str(randi(200))];
+    dockercontainerName = ourDocker.dockerContainerName;
     % no if we want latest?ourDocker.dockerImageName = dockerimage;
     ourDocker.command = 'assimp export';
     ourDocker.inputFile = infile;
+    ourDocker.localVolumePath = indir;
+    ourDocker.targetVolumePath = indir;
     %assimp just wants us to put outputfile second, not specify --outfile
     ourDocker.outputFile = [fname '-converted.pbrt'];
     ourDocker.outputFilePrefix = '';
@@ -62,9 +65,16 @@ if status
     error('FBX to PBRT conversion failed.')
 end
 
-cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
-[status_copy, ~ ] = system(cpcmd);
-
+if ~ispc
+    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
+    [status_copy, ~ ] = system(cpcmd);
+else
+    cpDocker = dockerWrapper();
+    cpDocker.dockerContainerName = dockerContainerName;
+    cpDocker.command = 'cp';
+    cpDocker.outputFile = [fname,'-converted.pbrt'];
+    [status_copy, result] = cpDocker.Run();
+end
 cd(currdir);
 if status_copy
     disp(result);
