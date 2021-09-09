@@ -139,8 +139,8 @@ switch tp
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
         
-        material.sigma.type = 'float';
-        material.sigma.value = [];
+%         material.sigma.type = 'float';
+%         material.sigma.value = [];
         material.normalmap.type = 'string';
         material.normalmap.value = [];
         
@@ -299,9 +299,9 @@ switch tp
         
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
-        
-        material.tint.type = 'spectrum';
-        material.tint.value = [];
+%         
+%         material.tint.type = 'spectrum';
+%         material.tint.value = [];
         
     case 'thindielectric'
         material.type = 'thindielectric';
