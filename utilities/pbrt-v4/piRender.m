@@ -184,15 +184,28 @@ if ispc  % Windows
         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
     end
 else  % Linux & Mac
-    renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+    
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
-    
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
+    [GPUCheck,~] = system('nvidia-smi');
+    if ~GPUCheck
+        % GPU is available
+        cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+            '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+            '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+        renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
+        % update docker command to use gpu
+        dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
+        dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+        cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
+    else
+        renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+        cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
+    end
     
-    cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 end
 
 
