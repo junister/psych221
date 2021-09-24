@@ -1,14 +1,15 @@
 %% Store small recipes as mat-files in the data assets directory
 %
-% These assets are test objects we add to scenes using the piRecipeMerge()
-% method. 
+% We include these assets as little test objects in other scenes
 %
-% The assets here are:
-%  bunny, coordinate, sphere, EIA, ringsrays, slantedbar, gridlines, face,
-%  macbeth
+% At this date only the mat-files always work.  There are still problems
+% with the round-trip for the JSON files.  I will try to solve that.
 %
-% We save these test assets in data/assets. We save the recipes for the
-% bigger scenes in their input directories. 
+% Saving the recipes after the piRead saves a lot of time for some scenes.
+% Not all.
+%
+% We save the test charts and small scenes in data/assets
+% We save the recipes for the bigger scenes in their input directories.
 %
 % See also
 %   s_scenesRecipe
@@ -83,6 +84,10 @@ save(oFile,'mergeNode','-append');
 
 [thisR, mergeNode] = piChartCreate('macbeth');
 oFile = thisR.save(fullfile(assetDir,'macbeth.mat'));
+save(oFile,'mergeNode','-append');
+
+[thisR, mergeNode] = piChartCreate('pointarray_512_64');
+oFile = thisR.save(fullfile(assetDir,'pointarray512.mat'));
 save(oFile,'mergeNode','-append');
 
 

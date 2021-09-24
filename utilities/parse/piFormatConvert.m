@@ -27,7 +27,6 @@ while ii <= nLines
                 newlines{nn,1}=thisLine;
                 break;
             end
-            try
             for jj=(ii+1):nLines+1
                 if jj==nLines+1 || isempty(txtLines{jj}) || ~isequal(txtLines{jj}(1),'"')
                     if jj==nLines+1 || isempty(txtLines{jj}) || isempty(sscanf(txtLines{jj}(1:2), '%f')) ||...
@@ -47,16 +46,13 @@ while ii <= nLines
                         break;
                     end
                 end
-                
-            end
-            catch
-                disp('debug');
+
             end
         else
             newlines{nn,1}=thisLine; nn=nn+1;
         end
     end
-    
+
     ii=ii+1;
 end
 newlines(piContains(newlines,'Warning'))=[];

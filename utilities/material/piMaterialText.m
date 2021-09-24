@@ -21,7 +21,7 @@ if ~strcmp(material.name, '')
     else
         error('Bad material structure. %s.', material.name)
     end
-    
+
     val = strcat(valName, valType);
 else
     % For material which is not named.
@@ -36,7 +36,7 @@ for ii=1:numel(matParams)
             ~isempty(material.(matParams{ii}).value)
          thisType = material.(matParams{ii}).type;
          thisVal = material.(matParams{ii}).value;
-         
+
          if piContains(matParams{ii}, 'conductor') || ...
                  piContains(matParams{ii}, 'interface')
              matParams{ii} = strrep(matParams{ii}, '_','.');
@@ -56,7 +56,7 @@ for ii=1:numel(matParams)
          end
 
          val = strcat(val, thisText);
-        
+
     end
 end
 

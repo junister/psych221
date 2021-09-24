@@ -20,20 +20,14 @@ function properties = piLightProperties(lightType)
 
 % Examples:
 %{
-   piLightProperties('spot');
+   piLightProperties('spot')
 %}
 %{
-   piLightProperties('goniometric');
+   piLightProperties('goniometric')
 %}
 
 %
 thisLight = piLightCreate('ignoreMe','type',lightType);
 properties = fieldnames(thisLight);
-
-fprintf('\nProperties of %s\n--------------\n',lightType);
-for ii=1:numel(properties)
-    fprintf('%d:\t%s\n',ii,properties{ii});
-end
-
 
 end

@@ -5,58 +5,26 @@ function material = piMaterialCreate(name, varargin)
 %   material = piMaterialCreate(name, varargin);
 %
 % Brief description:
-%   Create material with parameters.  The materials in V4 differ from the
-%   ones in V3.
+%   Create material with parameters.
 %
 % Inputs:
 %   name  - name of the material
 %
 % Optional key/val:
-%   type  - material type (Default is diffuse)
+%   type  - material type. Default is matte
 %     The special case of piMaterialCreate('list available types') returns
-%     the available material types.  Here is a page describing the V4
-%     materials.
+%     the available material types.
 %
-%        https://github.com/shadeops/pbrt_v3-to-v4_migration/blob/master/README.md#material-changes
-%
-%     Materials changed in PBRT V4 are listed on the URL above.  We had
-%     these materials in V3.
-%
-%      material = {'matte','uber','plastic','metal','mirror','glass', ...
-%          'translucent','hair','kdsubsurface','disney','fourier', ...
-%          'mix','substrate','subsurface'};
-%
-%   According to the URL, these V3 materials were removed
-%       Uber, Translucent, Substrate, Plastic, Mirror, Metal, Matte,
-%       KdSubsurface, Glass, Fourier, Disney
-%
-%   Leaving only
-%
-%       material = {'hair','mix','subsurface'};
-%
-%   These materials were added
-%
-%      coatedconductor, coateddiffuse, conductor
-%      diffuse, diffusetransmission,   measured,
-%      dielectric, thindielectric
-%
-%   The current list seems to be
-%
-%      {coatedconductor, coateddiffuse, conductor, ...
-%      diffuse, diffusetransmission, ...
-%      measured, ...
-%      dielectric, thindielectric, ...
-%      hair, subsurface, mix}
+%     The PBRT default properties of any material type can be found on PBRT
+%     website: web('https://pbrt.org/fileformat-v3.html#materials')
 %
 %   Other key/val pairs depend on the material.  To see the properties of
 %   any specific material use
-%
-%      piMaterialProperties('materialType')
+%            piMaterialProperties('materialType')
 %
 %   The material properties are set by key/val pairs. For keys. it
 %   should follow the format of 'TYPE KEYNAME'. It's easier for us to
 %   extract type and parameter name using space.
-%
 %   Syntax is:
 %       material = piMaterialCreate(NAME, 'type', [MATERIAL TYPE],...
 %                                   [PROPERTYTYPE PROPERTYNAME], [VALUE]);
@@ -64,7 +32,7 @@ function material = piMaterialCreate(name, varargin)
 %                                   [PROPERTYNAME PROPERTYTYPE], [VALUE]);
 %
 % Returns:
-%   material  - created material
+%   material                  - created material
 %
 % ieExamplesRun('piMaterialCreate')
 %
@@ -78,28 +46,16 @@ function material = piMaterialCreate(name, varargin)
                                 'kd rgb',[1, 1, 1])
     material = piMaterialCreate('new material',...
                                 'kd rgb',[1, 1, 1]);
-
-    % Not sure the spectrum case has been added to PBRT V4 by Zhenyi yet.
     material = piMaterialCreate('new material', 'type', 'uber',...
                                 'spectrum kd', [400 1 800 1]);
 %}
-%{
- piMaterialCreate('list available types')
-%}
+
 
 %% Special case
-
 if isequal(ieParamFormat(name),'listavailabletypes')
-    material = {'coatedconductor', 'coateddiffuse', 'conductor', ...
-        'diffuse', 'diffusetransmission', ...
-        'measured', ...
-        'dielectric', 'thindielectric', ...
-        'hair', 'subsurface', 'mix'};
-    % Left over from V3.  Delete when ready (BW).
-    %
-    %     material = {'diffuse','uber','plastic','metal','mirror','glass', ...
-    %         'translucent','hair','kdsubsurface','disney','fourier', ...
-    %         'mix','substrate','subsurface'};
+    material = {'matte','uber','plastic','metal','mirror','glass', ...
+       'translucent','hair','kdsubsurface','disney','fourier', ...
+       'mix','substrate','subsurface'};
     return;
 end
 
@@ -135,284 +91,282 @@ switch tp
     case 'diffuse'
         % This has defaults.  Maybe they should be here?
         material.type = 'diffuse';
-        
+
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
-        
+
 %         material.sigma.type = 'float';
 %         material.sigma.value = [];
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
     case 'coateddiffuse'
         material.type = 'coateddiffuse';
-        
+
         % base reflectance of material
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
-        
+
         % object's index of refraction
         material.eta.type = 'float';
         material.eta.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.roughness.type = 'float';
         material.roughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.uroughness.type = 'float';
         material.uroughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.vroughness.type = 'float';
         material.vroughness.value = [];
-        
+
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
-        
+
         material.maxdepth.type = 'integer';
         material.maxdepth.value = [];
-        
+
         material.nsamples.type = 'integer';
         material.nsamples.value = [];
-        
+
         material.g.type = 'float';
         material.g.value = [];
-        
+
         material.albedo.type = 'spectrum';
         material.albedo.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.thickness.type = 'float';
         material.thickness.value = [];
-        
+
     case 'coatedconductor'
         material.type = 'coatedconductor';
-        
+
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
-        
+
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
-        
+
         material.maxdepth.type = 'integer';
         material.maxdepth.value = [];
-        
+
         material.nsamples.type = 'integer';
         material.nsamples.value = [];
-        
+
         material.g.type = 'float';
         material.g.value = [];
-        
+
         material.albedo.type = 'spectrum';
         material.albedo.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.thickness.type = 'float';
         material.thickness.value = [];
-        
+
         material.interface_eta.type = 'float';
         material.interface_eta.value = [];
-        
+
         material.interface_roughness.type = 'float';
         material.interface_roughness.value = [];
-        
+
         material.interface_uroughness.type = 'float';
         material.interface_uroughness.value = [];
-        
+
         material.interface_vroughness.type = 'float';
         material.interface_vroughness.value = [];
-        
+
         material.conductor_k.type = 'float';
         material.conductor_k.value = [];
-        
+
         material.conductor_eta.type = 'float';
         material.conductor_eta.value = [];
-        
+
         material.conductor_roughness.type = 'float';
         material.conductor_roughness.value = [];
-        
+
         material.conductor_uroughness.type = 'float';
         material.conductor_uroughness.value = [];
-        
+
         material.conductor_vroughness.type = 'float';
         material.conductor_vroughness.value = [];
-        
+
     case 'diffusetransmission'
         material.type = 'diffusetransmission';
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
-        
+
         material.transmittance.type = 'spectrum';
         material.transmittance.value = [];
-        
+
         material.sigma.type = 'float';
         material.sigma.value = [];
-        
+
         material.scale.type = 'float';
         material.scale.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
     case 'dielectric'
         material.type = 'dielectric';
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         % object's index of refraction
         material.eta.type = 'float';
         material.eta.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.roughness.type = 'float';
         material.roughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.uroughness.type = 'float';
         material.uroughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.vroughness.type = 'float';
         material.vroughness.value = [];
-        
+
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
-%         
-%         material.tint.type = 'spectrum';
-%         material.tint.value = [];
-        
+
+
     case 'thindielectric'
         material.type = 'thindielectric';
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.eta.type = 'float';
         material.eta.value = [];
     case 'hair'
         material.type = 'hair';
-        
+
         material.sigma_a.type = 'spectrum';
         material.sigma_a.value = [];
-        
+
         material.color.type = 'spectrum';
         material.color.value = [];
-        
+
         material.eumelanin.type = 'float';
         material.coeumelaninlor.value = [];
-        
+
         material.pheomelanin.type = 'float';
         material.pheomelanin.value = [];
-        
+
         material.eta.type = 'float';
         material.eta.value = [];
-        
+
         material.beta_m.type = 'float';
         material.beta_m.value = [];
-        
+
         material.beta_n.type = 'float';
         material.beta_n.value = [];
-        
+
         material.alpha.type = 'float';
         material.alpha.value = [];
-        
+
     case 'conductor'
         material.type = 'conductor';
-        
+
         % base reflectance of material
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.k.type = 'spectrum';
         material.k.value = [];
-        
+
         material.eta.type = 'float';
         material.eta.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.roughness.type = 'float';
         material.roughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.uroughness.type = 'float';
         material.uroughness.value = [];
-        
+
         % material's roughness affecting specular reflection & transmission
         material.vroughness.type = 'float';
         material.vroughness.value = [];
-        
+
         material.remaproughness.type = 'bool';
         material.remaproughness.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
     case 'measured'
         material.type = 'measured';
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.filename.type = 'string';
         material.filename.value = [];
     case 'subsurface'
         material.type = 'subsurface';
-        
+
         material.displacement.type = 'texture';
         material.displacement.value = [];
-        
+
         material.normalmap.type = 'string';
         material.normalmap.value = [];
-        
+
         material.reflectance.type = 'texture';
         material.reflectance.value = [];
-        
+
         material.mfp.type = 'texture';
         material.mfp.value = [];
-        
+
         material.g.type = 'float';
         material.g.value = [];
-        
+
         material.roughness.type = 'float';
         material.roughness.value = [];
-        
+
     case 'mix'
         material.type = 'mix';
-        
+
         %  a cell array
         material.materials.type = 'string';
         % ["mat1" "mat2"]
         material.materials.value = [];
-        
+
         material.amount.type = 'float';
         material.amount.value = [];
     otherwise
@@ -425,14 +379,14 @@ end
 for ii=1:2:numel(varargin)
     thisKey = varargin{ii};
     thisVal = varargin{ii + 1};
-    
+
     if isequal(thisKey, 'type')
         % Skip since we've taken care of material type above.
         continue;
     end
-    
+
     keyTypeName = strsplit(thisKey, '_');
-    
+
     % keyName is the property name. if it follows 'TYPE_NAME', we need
     % later, otherwise we need the first one.
     if piMaterialIsParamType(keyTypeName{1})
@@ -440,8 +394,8 @@ for ii=1:2:numel(varargin)
     else
         keyName = ieParamFormat(keyTypeName{1});
     end
-    
-    
+
+
     if isfield(material, keyName)
         material = piMaterialSet(material, sprintf('%s value', keyName),...
             thisVal);

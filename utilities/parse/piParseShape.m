@@ -2,7 +2,7 @@ function shape = piParseShape(txt)
 % Parse the shape information into struct
 % Logic:
 %   Normally the shape line has this format:
-%   'Shape "SHAPE" "integerindices" [] "point P" [] 
+%   'Shape "SHAPE" "integerindices" [] "point P" []
 %    "float uv" [] "normal N" []'
 %   We split the string based on the '"' and get each component
 %
@@ -26,11 +26,11 @@ if find(piContains(keyWords, 'Shape '))
             shape.radius = piParameterGet(txt, 'float radius');
             shape.zmin = piParameterGet(txt, 'float zmin');
             shape.zmax = piParameterGet(txt, 'float zmax');
-            shape.phimax = piParameterGet(txt, 'float phimax'); 
+            shape.phimax = piParameterGet(txt, 'float phimax');
         case 'cone'
             shape.height = piParameterGet(txt, 'float height');
             shape.radius = piParameterGet(txt, 'float radius');
-            shape.phimax = piParameterGet(txt, 'float phimax');           
+            shape.phimax = piParameterGet(txt, 'float phimax');
         case 'cylinder'
             shape.radius = piParameterGet(txt, 'float radius');
             shape.zmin = piParameterGet(txt, 'float zmin');
@@ -39,7 +39,7 @@ if find(piContains(keyWords, 'Shape '))
         case 'hyperboloid'
             shape.p1 = piParameterGet(txt, 'point p1');
             shape.p2 = piParameterGet(txt, 'point p2');
-            shape.phimax = piParameterGet(txt, 'float phimax');   
+            shape.phimax = piParameterGet(txt, 'float phimax');
         case 'paraboloid'
             shape.radius = piParameterGet(txt, 'float radius');
             shape.zmin = piParameterGet(txt, 'float zmin');
@@ -48,19 +48,19 @@ if find(piContains(keyWords, 'Shape '))
         case 'curve'
             % todo
         case {'trianglemesh', 'plymesh'}
-            
+
             if find(piContains(keyWords, 'filename'))
                 shape.filename = piParameterGet(txt, 'string filename');
             end
-            
+
             if find(piContains(keyWords, 'integer indices'))
                 shape.integerindices = uint64(piParameterGet(txt, 'integer indices'));
             end
-            
+
             if find(piContains(keyWords, 'integer faceIndices'))
                 shape.integerindices = uint64(piParameterGet(txt, 'integer faceIndices'));
             end
-            
+
             if find(piContains(keyWords, 'point3 P'))
                 shape.point3p = piParameterGet(txt, 'point3 P');
             end
@@ -76,14 +76,14 @@ if find(piContains(keyWords, 'Shape '))
                 end
 %                 shape.point2uv = piParameterGet(txt, 'point2 uv');
             end
-            
+
             if find(piContains(keyWords, 'normal N'))
                 shape.normaln = piParameterGet(txt, 'normal N');
                 %                 shape.normaln = keyWords{find(piContains(keyWords, 'normal N')) + 1};
             end
             % to add
             % float/texture alpha
-            % emission filename
+            % float/texture shadowalpha
         case 'heightfield'
             % todo
         case 'loopsubdiv'

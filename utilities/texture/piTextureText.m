@@ -8,7 +8,7 @@ function val = piTextureText(texture, thisR, varargin)
 %   val     - text
 %
 % ZLY, 2021
-% 
+%
 % See also
 
 %% Parse input
@@ -43,7 +43,7 @@ for ii=1:numel(textureParams)
             ~isempty(texture.(textureParams{ii}).value)
          thisType = texture.(textureParams{ii}).type;
          thisVal = texture.(textureParams{ii}).value;
-         
+
          if ischar(thisVal)
              thisText = sprintf(' "%s %s" "%s" ',...
                  thisType, textureParams{ii}, thisVal);
@@ -58,7 +58,7 @@ for ii=1:numel(textureParams)
          end
 
          val = strcat(val, thisText);
-         
+
          if isequal(textureParams{ii}, 'filename')
             if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
                 imgFile = which(thisVal);

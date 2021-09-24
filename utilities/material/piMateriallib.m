@@ -1,4 +1,4 @@
-function [materiallib] = piMateriallib
+function [materiallib_updated] = piMateriallib
 % A library of material properties (deprecated)
 %
 % Syntax:
@@ -33,7 +33,6 @@ function [materiallib] = piMateriallib
 %  object.
 %
 % Zhenyi Liu Scien Stanford, 2018
-% Zhenyi 2021.
 %
 % See also
 %   piMaterial*
@@ -41,7 +40,7 @@ function [materiallib] = piMateriallib
 
 % Examples:
 %{
-  
+
 %}
 
 %% carpaintmix
@@ -157,7 +156,7 @@ materiallib.skin.boolremaproughness = 'false';
 materiallib.totalreflect = piMaterialCreate('totalReflect',...
                             'type', 'diffuse', 'spectrum reflectance', [400 1 800 1]);
 
-%% 
+%%
 
 % materiallib_updated = piMaterialEmptySlot(materiallib);
 %}
@@ -212,7 +211,7 @@ for ii = 1: length(thisMaterial)
             materiallib.(thisMaterial{ii}).rgbkr = [];
             materiallib.(thisMaterial{ii}).rgbks = [];
             materiallib.(thisMaterial{ii}).rgbkd = [];
-            materiallib.(thisMaterial{ii}).rgbkt = []; 
+            materiallib.(thisMaterial{ii}).rgbkt = [];
     end
     else
         continue

@@ -1,5 +1,7 @@
-
-local
+*.mexmaci64
+*.mexmaci64
+local/*
+.DS_Store
+*~
+iset3d.wiki
 *.asv
-*.mexmaci64
-*.mexmaci64

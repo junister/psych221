@@ -76,7 +76,7 @@ p.addParameter('exporter', 'C4D', @ischar); % deal with this later
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
 % Not sure whether other type of FBX file has this problem.
-p.addParameter('convertunit',false,@islogical); 
+p.addParameter('convertunit',false,@islogical);
 
 p.parse(fname,varargin{:});
 convertunit = p.Results.convertunit;
@@ -89,10 +89,10 @@ thisR.version = 4;
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
-   
+
     disp('Formating PBRT file...')
     infile = piPBRTReformat(pbrtFile);
-    
+
     convertunit = true;
 else
     infile = fname;
@@ -185,82 +185,82 @@ end
 
 if any(piContains(world,'Include')) && ...
         any(piContains(world,'_materials.pbrt'))
-    
+
     % In this case we have an Include file for the materials.  The world
     % should be left alone.  We read the materials file to get the
     % materials and textures.
-    
+
     % Find material file
     materialIdx = find(contains(world, '_materials.pbrt'), 1);
-    
+
     % We get the name of the file we want to include.
     material_fname = erase(world{materialIdx},{'Include "','"'});
 
     % Sometimes we have a trailing blank.  We move it here.
     material_fname = strrep(material_fname,' ','');
-    
+
     inputDir = thisR.get('inputdir');
     inputFile_materials = fullfile(inputDir, material_fname);
     if ~exist(inputFile_materials,'file'), error('File not found'); end
-    
+
     % We found the material file.  We read it.
     [materialLines, ~] = piReadText(inputFile_materials);
-    
+
     % Change to the single line format from the standard block format with
     % indented lines
     materialLinesFormatted = piFormatConvert(materialLines);
-    
+
     % Read material and texture
     [materialLists, textureList] = parseMaterialTexture(materialLinesFormatted);
     fprintf('Read %d materials.\n', materialLists.Count);
     fprintf('Read %d textures.\n', textureList.Count);
-    
+
     % If exporter is Copy, don't parse the geometry.
     if isequal(exporter, 'Copy')
         disp('Scene geometry will not be parsed.');
         thisR.world = world;
-    else        
+    else
         % Read the geometry file and do the same.
         geometryIdx = find(contains(world, '_geometry.pbrt'), 1);
         geometry_fname = erase(world{geometryIdx},{'Include "','"'});
-        
+
         % Remove trailing blanks
         geometry_fname = strrep(geometry_fname,' ','');
 
         inputFile_geometry = fullfile(inputDir, geometry_fname);
         if ~exist(inputFile_geometry,'file'), error('File not found'); end
-        
+
         % Could this be piReadText too?
         % we need to read file contents with comments
         fileID = fopen(inputFile_geometry);
         tmp = textscan(fileID,'%s','Delimiter','\n');
         geometryLines = tmp{1};
         fclose(fileID);
-        
+
         % convert geometryLines into from the standard block indented format in
         % to the single line format.
         geometryLinesFormatted = piFormatConvert(geometryLines);
         [trees, ~] = parseGeometryText(thisR, geometryLinesFormatted,'');
     end
 else
-    
+
     % In this case there is no Include file for the materials.  They are
     % probably defined in the world block. We read the materials and
     % textures from the world block.  We delete them from the block because
     % piWrite will create the scene_materials.pbrt file and insert an
     % Include scene_materials.pbrt line into the world block.
-    
+
     inputFile_materials = [];
-    
+
     % Read material & texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
     fprintf('Read %d materials.\n', materialLists.Count);
     fprintf('Read %d textures.\n', textureList.Count);
-    
+
     % If exporter is Copy, don't parse.
     if isequal(exporter, 'Copy')
-        disp('Scene geometry will not be parsed.');        
+        disp('Scene geometry will not be parsed.');
     else
         % Read geometry
         [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
@@ -270,7 +270,7 @@ else
             thisR.world(2:parsedUntil)=[];
         end
     end
-    
+
 end
 
 thisR.materials.list = materialLists;
@@ -292,12 +292,12 @@ else
     disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
 end
 
-% Unit scale 
+% Unit scale
 if convertunit
     % scale camera position
     thisR.lookAt.from = thisR.lookAt.from/100;
     thisR.lookAt.to = thisR.lookAt.to/100;
-    
+
     % scale objects
     for ii = 2:numel(thisR.assets.Node)
         thisNode = thisR.assets.Node{ii};
@@ -305,11 +305,11 @@ if convertunit
             % fix scale and translation
             thisNode.scale = thisNode.scale/100;
             thisNode.translation = thisNode.translation/100;
-            
+
             thisR.assets   = thisR.assets.set(ii, thisNode);
         end
     end
-    
+
 end
 
 disp('***Scene parsed.')
@@ -423,7 +423,7 @@ if(~isempty(concatTBlock))
     values = textscan(concatTBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
     values = cell2mat(values(2:end));
     concatTransform = reshape(values,[4 4]);
-    
+
     % Apply transform and update lookAt
     lookAtTransform = piLookat2Transform(from,to,up);
     [from,to,up,flip] = piTransform2LookAt(lookAtTransform*concatTransform);
@@ -455,7 +455,7 @@ while ii<=nline
         % If the blockLine matches the BlockName, do something
         if strncmp(blockLine, blockName, length(blockName))
             s=[];
-            
+
             % If it is Transform, do this and then return
             if (strcmp(blockName,'Transform') || ...
                     strcmp(blockName,'LookAt')|| ...
@@ -463,12 +463,12 @@ while ii<=nline
                     strcmp(blockName,'Scale'))
                 return;
             end
-            
+
             % It was not Transform.  So figure it out.
             thisLine = strrep(blockLine,'[','');  % Get rid of [
             thisLine = strrep(thisLine,']','');   % Get rid of ]
             thisLine = textscan(thisLine,'%q');   % Find individual words into a cell array
-            
+
             % thisLine is a cell of 1.
             % It contains a cell array with the individual words.
             thisLine = thisLine{1};
@@ -477,7 +477,7 @@ while ii<=nline
             blockSubtype = thisLine{2};
             s = struct('type',blockType,'subtype',blockSubtype);
             dd = 3;
-            
+
             % Build a struct that will be used for representing this type
             % of Option (Camera, Sampler, Integrator, Film, ...)
             % This builds the struct and assigns the values of the
@@ -489,7 +489,7 @@ while ii<=nline
                     valueName = C{2};
                 end
                 value = thisLine{dd+1};
-                
+
                 % Convert value depending on type
                 if(isempty(valueType))
                     continue;
@@ -500,7 +500,7 @@ while ii<=nline
                 else
                     error('Did not recognize value type, %s, when parsing PBRT file!',valueType);
                 end
-                
+
                 tempStruct = struct('type',valueType,'value',value);
                 s.(valueName) = tempStruct;
                 dd = dd+2;
@@ -514,5 +514,3 @@ end
 end
 
 %% END
-
-

@@ -7,7 +7,7 @@ function thisR = piCameraTranslate(thisR, varargin)
 %                               'z shift',z);
 %
 % Brief description:
-%  Calculate a new camera position given by the specified shift in camera space
+%  Calculate a new camera position given by the specified shift
 %
 % Inputs
 %  recipe  - The recipe of the scene
@@ -16,7 +16,7 @@ function thisR = piCameraTranslate(thisR, varargin)
 %  xshift - The shift in x direction in camera space (meters)
 %  yshift - The shift in y direction in camera space (meters)
 %  zshift - The shift in z direction in camera space (meters)
-%  fromto - Whether to change the from, to or both {'from','to','both'}  
+%  fromto - Whether to change the from, to or both {'from','to','both'}
 %           (default 'both')
 %
 % Outputs
@@ -39,20 +39,20 @@ function thisR = piCameraTranslate(thisR, varargin)
 %  Suppose the world coordinates of the scene are (x,y,z) space.
 %  The viewing direction is 'direction'.  This is "to - from". We call this
 %  the z' direction in the camera space to distinguish it from the
-%  z-direction in the world. 
+%  z-direction in the world.
 %
 %  We need to define the x',y' dimensions in the camera space.
-%  We know that these are perpendicular to z'.  
+%  We know that these are perpendicular to z'.
 %
 %  We make the x' axis perpendicular to [0,1,0] and z'. Then we make y'
-%  axis perpendicular to (x',z'). 
+%  axis perpendicular to (x',z').
 %
 %     x' = cross([0,1,0],direction) and y' = cross(direction,x')
 %
 % (there is a way to use the nullspace method to do this calculation, too).
 %
 %  Finally, we want the positive y' to be in the same direction as 'up'. So
-%  we check the inner product of 'up' and y', and we make it positive. 
+%  we check the inner product of 'up' and y', and we make it positive.
 %
 % See also
 %    piCameraRotate
@@ -67,21 +67,21 @@ function thisR = piCameraTranslate(thisR, varargin)
       'dimX',squareSize,'dimY',squareSize);
   thisR.lookAt.from = [0;0;0];
   thisR.lookAt.to = [1;1;1];
-  
-  % Write a recipePlot and have it do things 
+
+  % Write a recipePlot and have it do things
   % recipePlot(thisR,'direction').  Maybe other stuff.
   deltaPosition = [1, 0, 0]';
   newR = thisR.copy;
   newR = piCameraShift(newR,'xshift',deltaPosition(1),...
       'yshift',deltaPosition(2),...
       'zshift',deltaPosition(3));
-  
+
   deltaPosition = [0, 1, 0]';
   newR = thisR.copy;
   newR = piCameraShift(newR,'xshift',deltaPosition(1),...
       'yshift',deltaPosition(2),...
       'zshift',deltaPosition(3));
-  
+
   deltaPosition = [0, 0, 1]';
   newR = thisR.copy;
   newR = piCameraShift(newR,'xshift',deltaPosition(1),...
@@ -125,7 +125,7 @@ cameraY = cross(cameraX,direction); cameraY = cameraY/norm(cameraY);
 % We want cameraY to be pointing in the same direction as lookAt.up
 up = thisR.get('up');
 if dot(cameraY,up) < 0, cameraY = -1*cameraY; end
-cameraX = reshape(cameraX, size(direction)); 
+cameraX = reshape(cameraX, size(direction));
 cameraY = reshape(cameraY, size(direction));
 
 %{

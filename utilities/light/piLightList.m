@@ -12,13 +12,15 @@ if nLights == 0
     disp('---------------------')
     disp('No lights listed in this recipe');
     disp('---------------------')
-else    
-    fprintf('\n ---------Lights--------- \n\n')
+else
+    disp('---------------------')
+    disp('*****Light Type******')
     for ii = 1:numel(thisR.lights)
         fprintf('%d: name: %s     type: %s\n', ii,...
             thisR.lights{ii}.name,thisR.lights{ii}.type);
-    end    
-    fprintf('\n ------------------------ \n\n')
+    end
+    disp('*********************')
+    disp('---------------------')
 end
 
 end

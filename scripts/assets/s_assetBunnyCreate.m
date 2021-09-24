@@ -1,8 +1,6 @@
 % s_BunnyAssetCreate;
-% Deprecated
-%
 % Generate and save bunny asset leaf node
-%
+
 %% init
 ieInit;
 if ~piDockerExists, piDockerConfig; end
@@ -10,7 +8,7 @@ if ~piDockerExists, piDockerConfig; end
 %% Save bunny asset
 assetSceneName = 'bunny';
 thisR = piRecipeDefault('scene name', assetSceneName);
-assetName = '001_Bunny_O';
+assetName = 'Bunny_O';
 subTree = thisR.get('asset', assetName, 'subtree');
 
 matList = thisR.get('materials');

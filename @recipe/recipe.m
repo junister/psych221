@@ -24,10 +24,10 @@ classdef recipe < matlab.mixin.Copyable
         % These are all structs that contain the parameters necessary
         % for piWrite to convert the structs to text output in the
         % scene.pbrt file.
-        
+
         % CAMERA - struct of camera parameters, including the lens
         % file
-        camera;     
+        camera;
         sampler;     % Sampling algorithm.  Only a few are allowed
         film;        % Equivalent to ISET sensor
         filter;      % Usually pixel filter
@@ -38,8 +38,8 @@ classdef recipe < matlab.mixin.Copyable
         world;       % A cell array with all the WorldBegin/End contents
         lights;       % Light sources
         transformTimes; % Transform start and end time
-        
-        % INPUTFILE -  
+
+        % INPUTFILE -
         inputFile = '';    % Original PBRT input file
         outputFile = '';   % Where outputFile = piWrite(recipe);
         renderedFile = ''; % Where piRender puts the radiance
@@ -51,64 +51,64 @@ classdef recipe < matlab.mixin.Copyable
         media;           % Volumetric rendering media.
         metadata;
         recipeVer = 2;
-        
+
         verbose = 2;    % default for how much debugging output to emit.
     end
-    
+
     properties (Dependent)
     end
-    
+
     methods
         % Constructor
         function obj = recipe(varargin)
             % Who knows what we will do in the future.
         end
-        
+
         function val = get(obj,varargin)
             % Returns derived parameters of the recipe that require some
             % computation
             val = recipeGet(obj,varargin{:});
         end
-        
+
         function [obj, val] = set(obj,varargin)
             % Sets parameters of the recipe.  Shortens the set call, mainly, and
             % does some parameter value checking.
             [obj, val] = recipeSet(obj,varargin{:});
         end
-        
+
         function oFile = save(thisR,varargin)
             % Save the recipe in a mat-file.
             % By default, save it as sceneName-recipe.mat  in the input
-            % directory. 
+            % directory.
             %
             % recipe.save('recipeFileName');
-            
+
             if ~isempty(varargin)
                 oFile = varargin{1};
-            else                
+            else
                 oFile = thisR.get('input basename');
                 oFile = sprintf('%s-recipe',oFile);
-                
+
                 oDir = thisR.get('input dir');
                 oFile = fullfile(oDir,oFile);
             end
-            
+
             save(oFile,'thisR');
         end
-        
+
         function jsonFile = savejson(thisR,varargin)
             % Save the recipe in a mat-file.
             % By default, save it as sceneName-recipe.mat  in the input
-            % directory. 
+            % directory.
             %
             % recipe.save('recipeFileName');
-            
+
             if ~isempty(varargin)
                 jsonFile = varargin{1};
-            else                
+            else
                 jsonFile = thisR.get('input basename');
                 jsonFile = sprintf('%s-recipe',jsonFile);
-                
+
                 oDir = thisR.get('input dir');
                 jsonFile = fullfile(oDir,jsonFile);
             end
@@ -120,14 +120,14 @@ classdef recipe < matlab.mixin.Copyable
             end
             jsonwrite(jsonFile,thisR);
         end
-        
+
         function T = show(obj,varargin)
             %
             % thisR.show('assets) - Brings up a window
             % thisR.show('object materials') - Prints a table (returns T,
             %              too)
             %
-            % Optional 
+            % Optional
             %   assets (or nodes)
             %   node names
             %   object materials
@@ -135,13 +135,13 @@ classdef recipe < matlab.mixin.Copyable
             %   object sizes
             %   materials
             %   lights
- 
+
             if isempty(varargin), showType = 'assets';
             else,                 showType = varargin{1};
             end
-            
+
             T = [];
-            
+
             % We should probably use nodes and objects/assets distinctly
             switch ieParamFormat(showType)
                 case {'assets','nodes'}
@@ -150,7 +150,7 @@ classdef recipe < matlab.mixin.Copyable
                     if isempty(obj.assets), disp('No assets in this recipe');
                     else, obj.assets.show;
                     end
-                case 'assetnames'
+                case 'nodenames'
                     % List all the nodes, not just the objects
                     names = obj.get('asset names')';
                     rows = cell(numel(names),1);
@@ -159,7 +159,6 @@ classdef recipe < matlab.mixin.Copyable
                     disp(T);
                 case {'objects'}
                     % Tabular summary of object materials, positions, sizes
-                    % Then the lights.
                     names = obj.get('object names')';
                     matT   = obj.get('object materials');
                     coords = obj.get('object coordinates');
@@ -169,15 +168,7 @@ classdef recipe < matlab.mixin.Copyable
                     for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
                     for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
                     T = table(matT, positionT, sizeT,'VariableNames',{'material','positions (m)','sizes (m)'}, 'RowNames',names);
-                    
-                    fprintf('\nObjects\n')
-                    fprintf('____________________\n\n');
                     disp(T);
-                    
-                    % Always add the lights. We should edit piLightPrint to
-                    % create a Table. (BW).
-                    obj.show('lights');
-                    
                 case {'objectmaterials','objectsmaterials','assetsmaterials'}
                     % Prints out a table of just the materials
                     piAssetMaterialPrint(obj);
@@ -190,13 +181,10 @@ classdef recipe < matlab.mixin.Copyable
                     T = table(positionT,'VariableNames',{'positions (m)'}, 'RowNames',names);
                     disp(T);
                 case {'objectsizes','assetsizes','objectsize'}
-                    % Make a table of the object sizes.
                     names = obj.get('object names')';
                     sizeT = cell(size(names));
-                    oSizes = obj.get('object sizes');  %????
-                    for ii=1:numel(names)
-                        sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); 
-                    end
+                    oSizes = obj.get('object sizes');
+                    for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
                     T = table(sizeT,'VariableNames',{'sizes (m)'}, 'RowNames',names);
                     disp(T);
                 case 'materials'
@@ -208,8 +196,8 @@ classdef recipe < matlab.mixin.Copyable
                 otherwise
                     error('Unknown show %s\n',varargin{1});
             end
-            
+
         end
     end
-    
+
 end

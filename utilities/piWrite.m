@@ -12,7 +12,7 @@ function workingDir = piWrite(thisR,varargin)
 % There are multiple options as to whether or not to overwrite files that
 % are already present in the output directory.  The logic and conditions
 % about these overwrites is quite complex right now, and we need to
-% simplify.  
+% simplify.
 %
 % In some cases, multiple PBRT scenes use the same resources files.  If you
 % know the resources files are already there, you can set
@@ -26,13 +26,13 @@ function workingDir = piWrite(thisR,varargin)
 % There are too many of these options.  We hope to simplify
 %
 %   overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   overwrite resources - If the resources files exist, overwrite (default true) 
-%   overwrite lensfile  - Logical. Default true  
+%   overwrite resources - If the resources files exist, overwrite (default true)
+%   overwrite lensfile  - Logical. Default true
 %   Deprecated overwrite materials - Logical. Default true
 %   Deprecated overwrite geometry  - Logical. Default true
 %   overwrite json      - Logical. Default true
-%   lightsFlag         
-%   thistrafficflow   
+%   lightsFlag
+%   thistrafficflow
 %
 %   verbose -- how chatty we are
 %
@@ -59,14 +59,14 @@ function workingDir = piWrite(thisR,varargin)
 %}
 %{
 thisR = piRecipeDefault('scene name','chessSet');
-lensfile = 'fisheye.87deg.6.0mm.json'; 
+lensfile = 'fisheye.87deg.6.0mm.json';
 
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 thisR.set('film resolution',round([300 200]));
 thisR.set('pixel samples',32);   % Number of rays set the quality.
 thisR.set('focus distance',0.45);
 thisR.set('film diagonal',10);
-thisR.integrator.subtype = 'path';  
+thisR.integrator.subtype = 'path';
 thisR.sampler.subtype = 'sobol';
 thisR.set('aperture diameter',3);
 
@@ -109,7 +109,7 @@ p.addParameter('overwritegeometry',true,@islogical);
 
 % % control lighting in geomtery.pbrt
 % p.addParameter('lightsflag',false,@islogical);
-% 
+%
 % % Read trafficflow variable
 % p.addParameter('thistrafficflow',[]);
 
@@ -148,7 +148,7 @@ if ~exist(workingDir,'dir'), mkdir(workingDir); end
 geometryDir = thisR.get('geometry dir');
 if ~exist(geometryDir, 'dir'), mkdir(geometryDir); end
 
-renderDir = thisR.get('rendered dir'); 
+renderDir = thisR.get('rendered dir');
 if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
 %% Selectively copy data from the input to the output directory.
@@ -159,10 +159,10 @@ piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
 if isequal(thisR.get('optics type'),'lens')
     % realisticEye has a lens file slot but it is empty. So we check
     % whether there is a lens file or not.
-    
+
     if ~isempty(thisR.get('lensfile'))
         piWriteLens(thisR,overwritelensfile);
-        
+
     end
 end
 
@@ -213,7 +213,7 @@ if overwritejson
     jsonwrite(jsonFile,thisR);
 end
 
-end   % End of piWrite 
+end   % End of piWrite
 
 %% Helper functions
 
@@ -223,7 +223,7 @@ function piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
 % Copy files from the input to output dir
 %
 % In some cases we are looping over many renderings.  In that case we may
-% turn off the repeated copies by setting overwriteresources to false.  
+% turn off the repeated copies by setting overwriteresources to false.
 
 inputDir   = thisR.get('input dir');
 outputDir  = thisR.get('output dir');
@@ -231,7 +231,7 @@ outputDir  = thisR.get('output dir');
 % We check for the overwrite here and we make sure there is also an input
 % directory to copy from.
 if overwriteresources && ~isempty(inputDir)
-    
+
     sources = dir(inputDir);
     status  = true;
     for i = 1:length(sources)
@@ -246,7 +246,6 @@ if overwriteresources && ~isempty(inputDir)
             [~, ~, extension] = fileparts(sources(i).name);
             % ChessSet needs input geometry because we can not parse it
             % yet. --zhenyi
-%             if ~(piContains(extension,'pbrt') || piContains(extension,'zip') || piContains(extension,'json'))
             if ~(piContains(extension,'zip') || piContains(extension,'json'))
                 thisFile = fullfile(sources(i).folder, sources(i).name);
                 if verbosity > 1
@@ -256,7 +255,7 @@ if overwriteresources && ~isempty(inputDir)
             end
         end
     end
-    
+
     if(~status)
         error('Failed to copy input directory to docker working directory.');
     else
@@ -283,7 +282,7 @@ if(exist(outFile,'file'))
         % Do not overwrite is set, and yet it exists. We don't like this
         % condition, so we throw an error.
         error('PBRT file %s exists.',outFile);
-    end 
+    end
 end
 
 end
@@ -335,11 +334,12 @@ elseif isequal(thisR.get('realistic eye model'),'arizona')
     % Still tracking down why no IOR files are associated with this model.
     arizonaWrite(thisR);
 else
-    % If the working copy doesn't exist, copy it.  
+    % If the working copy doesn't exist, copy it.
     % If it exists but there is a force overwrite, delete and copy.
     %
     % We need to check that this will work for the RTF json file as well.
     % I think so. (BW).
+
     if ~exist(outputLensFile,'file')
         copyfile(inputLensFile,outputLensFile);
     elseif overwritelensfile
@@ -357,19 +357,19 @@ function piWriteLookAtScale(thisR,fileID)
 % Optional Scale
 theScale = thisR.get('scale');
 
-if(~isempty(theScale))   
+if(~isempty(theScale))
    fprintf(fileID,'Scale %0.2f %0.2f %0.2f \n', [theScale(1) theScale(2) theScale(3)]);
     fprintf(fileID,'\n');
 end
 
 % Optional Motion Blur
 % default StartTime and EndTime is 0 to 1;
-if isfield(thisR.camera,'motion') 
-       
-    motionTranslate = thisR.get('camera motion translate'); 
-    motionStart     = thisR.get('camera motion rotation start'); 
-    motionEnd       = thisR.get('camera motion rotation end'); 
-    
+if isfield(thisR.camera,'motion')
+
+    motionTranslate = thisR.get('camera motion translate');
+    motionStart     = thisR.get('camera motion rotation start');
+    motionEnd       = thisR.get('camera motion rotation end');
+
     fprintf(fileID,'ActiveTransform StartTime \n');
     fprintf(fileID,'Translate 0 0 0 \n');
     fprintf(fileID,'Rotate %f %f %f %f \n',motionStart(:,1)); % Z
@@ -405,7 +405,7 @@ endTime = thisR.get('transform times end');
 
 if ~isempty(startTime) && ~isempty(endTime)
     fprintf(fileID,'TransformTimes %0.6f %0.6f \n', ...
-        startTime, endTime);    
+        startTime, endTime);
 end
 end
 
@@ -415,24 +415,25 @@ function piWriteBlocks(thisR,fileID)
 %
 % The blocks that are written out include
 %
-%  Camera and lens
+%  Camera, lens
 %
 
 workingDir = thisR.get('output dir');
 
 % These are the main fields in the recipe.  We call them the outer fields.
-% Within each outer field, there will be inner fields.
+% Within each outer field, there will be inner fields.  The outer fields
+% include film, filter, camera and such.
 outerFields = fieldnames(thisR);
 
 for ofns = outerFields'
     ofn = ofns{1};
-    
+
     % If empty, we skip this field.
     if(~isfield(thisR.(ofn),'type') || ...
             ~isfield(thisR.(ofn),'subtype'))
         continue;
     end
-    
+
     % Skip, we don't want to write these out here.  So if any one of these,
     % we skip to the next for-loop step
     if(strcmp(ofn,'world') || ...
@@ -441,39 +442,43 @@ for ofns = outerFields'
             strcmp(ofn,'outputFile')|| ...
             strcmp(ofn,'version')) || ...
             strcmp(ofn,'materials')|| ...
+            strcmp(ofn,'recipeVer')|| ...
+            strcmp(ofn,'exporter') || ...
+            strcmp(ofn,'metadata') || ...
+            strcmp(ofn,'renderedFile') || ...
             strcmp(ofn,'world')
         continue;
     end
-    
+
     % Deal with camera and medium
-    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium') 
+    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
        if ~isempty(thisR.(ofn).medium)
            currentMedium = [];
            for j=1:length(thisR.media.list)
                 if strcmp(thisR.media.list(j).name,thisR.(ofn).medium)
                     currentMedium = thisR.media.list;
                 end
-           end           
+           end
            fprintf(fileID,'MakeNamedMedium "%s" "string type" "water" "string absFile" "spds/%s_abs.spd" "string vsfFile" "spds/%s_vsf.spd"\n', ...
                currentMedium.name,...
                currentMedium.name,currentMedium.name);
            fprintf(fileID,'MediumInterface "" "%s"\n',currentMedium.name);
        end
     end
-    
+
     % Write header that identifies which block this is
     fprintf(fileID,'# %s \n',ofn);
-    
+
     % Write out the main type and subtypes
     fprintf(fileID,'%s "%s" \n',thisR.(ofn).type,...
         thisR.(ofn).subtype);
-    
+
     % Find and then loop through inner field names
     innerFields = fieldnames(thisR.(ofn));
     if(~isempty(innerFields))
         for ifns = innerFields'
             ifn = ifns{1};
-            
+
             % Skip these since we've written these out earlier.
             if(strcmp(ifn,'type') || ...
                     strcmp(ifn,'subtype') || ...
@@ -484,23 +489,23 @@ for ofns = outerFields'
                     strcmp(ifn,'medium'))
                 continue;
             end
-            
+
             %{
-             Many fields are written out in here.  
-             Some examples are 
-             type, subtype, lensfile retinaDistance 
+             Many fields are written out in here.
+             Some examples are
+             type, subtype, lensfile retinaDistance
              retinaRadius pupilDiameter retinaSemiDiam ior1 ior2 ior3 ior4
              type subtype pixelsamples type subtype xresolution yresolution
              type subtype maxdepth
             %}
-            
+
             currValue = thisR.(ofn).(ifn).value;
             currType  = thisR.(ofn).(ifn).type;
-            
+
             if(strcmp(currType,'string') || ischar(currValue))
                 % We have a string with some value
                 lineFormat = '  "%s %s" "%s" \n';
-                
+
                 % The currValue might be a full path to a file with an
                 % extension. We find the base file name and copy the file
                 % to the working directory. Then, we transform the string
@@ -516,7 +521,7 @@ for ofns = outerFields'
                         % is a lens file or an iorX.spd file, indicate that
                         % it is in the lens/ directory. Otherwise, copy the
                         % file to the working directory.
-                        
+
                         fileName = strcat(name,ext);
                         if strcmp(ifn,'specfile') || strcmp(ifn,'lensfile')
                             % It is a lens, so just update the name.  It
@@ -542,8 +547,8 @@ for ofns = outerFields'
                         end
                     end
                 end
-                   
-                                
+
+
             elseif(strcmp(currType,'spectrum') && ~ischar(currValue))
                 % A spectrum of type [wave1 wave2 value1 value2]. TODO:
                 % There are probably more variations of this...
@@ -561,7 +566,7 @@ for ofns = outerFields'
             elseif (strcmp(currType,'bool'))
                 lineFormat = '  "%s %s" %s \n';
             end
-            
+
             if ~islogical(currValue)
                 fprintf(fileID,lineFormat,...
                     currType,ifn,currValue);
@@ -572,7 +577,7 @@ for ofns = outerFields'
             end
         end
     end
-    
+
     % Blank line.
     fprintf(fileID,'\n');
 end
@@ -580,26 +585,26 @@ end
 end
 
 %%
-function piIncludeLines(thisR,fileID) 
+function piIncludeLines(thisR,fileID)
 % Insert the 'Include scene_materials.pbrt' and similarly for geometry and
-% lights into the main scene file 
+% lights into the main scene file
 %
 % We must add the materials before the geometry.
 % We add the lights at the end.
-% 
+%
 
 basename = thisR.get('output basename');
 
 % For the Copy case, we just copy the world and Include the lights.
 if isequal(thisR.exporter, 'Copy')
-    for ii = 1:numel(thisR.world)        
+    for ii = 1:numel(thisR.world)
         if ii == numel(thisR.world)
             % Lights at the end
             fprintf(fileID,'Include "%s_lights.pbrt" \n', basename);
         end
-        
+
         fprintf(fileID,'%s \n',thisR.world{ii});
-        
+
         if ii == 1
             % Materials at the beginning
             fprintf(fileID,'Include "%s_materials.pbrt" \n', basename);
@@ -618,42 +623,36 @@ lineLights    = find(contains(thisR.world, {'_lights.pbrt'}));
 
 % If we have  geometry Include, we overwrite it with the name we want.
 if ~isempty(lineGeometry)
-    thisR.world{lineGeometry} = sprintf('Include "%s_geometry.pbrt" \n', basename);
+    thisR.world{lineGeometry} = sprintf('Include "%s_geometry.pbrt"\n', basename);
 end
 
 % If we have materials Include, we overwrite it.
 % end.
 if ~isempty(lineMaterials)
-    thisR.world{lineMaterials} = sprintf('Include "%s_materials.pbrt" \n',basename);        
+    thisR.world{lineMaterials} = sprintf('Include "%s_materials.pbrt"\n',basename);
 end
 
 % We think nobody except us has these lights files.  So this will never get
 % executed.
 if ~isempty(lineLights)
-    % Changed from () to {}
-    thisR.world{lineLights} = sprintf('Include "%s_lights.pbrt" \n', basename);
+    thisR.world(lineLights) = sprintf('Include "%s_lights.pbrt"\n', basename);
 end
 
 %% Write out the World information.
 
-% Insert the Include lines as the last three before  WorldEnd. 
+% Insert the Include lines as the last three before  WorldEnd.
 for ii = 1:length(thisR.world)
-    currLine = thisR.world{ii};    
-    
+    currLine = thisR.world{ii};
+    if piContains(currLine, 'WorldEnd') && isempty(lineLights)
+        % Insert the lights file.
+        fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
+    end
+
     fprintf(fileID,'%s \n',currLine);
-    
+
     if piContains(currLine,'WorldBegin') && isempty(lineMaterials)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
-    end
-    
-    if piContains(currLine,'WorldBegin') && isempty(lineGeometry)
-        % Insert the materials file
-        fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
-    end
-    if piContains(currLine, 'WorldBegin') && isempty(lineLights)
-        % Insert the lights file.
-        fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
     end
 end
 

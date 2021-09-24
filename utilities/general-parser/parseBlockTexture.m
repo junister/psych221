@@ -26,7 +26,7 @@ for ss = 5:2:numel(thisLine)
     keyTypeName = strsplit(thisLine{ss}, ' ');
     keyType = ieParamFormat(keyTypeName{1});
     keyName = ieParamFormat(keyTypeName{2});
-    
+
     switch keyType
         case {'string'}
             thisVal = thisLine{ss + 1};
@@ -49,11 +49,14 @@ for ss = 5:2:numel(thisLine)
             elseif isequal(thisLine{ss + 1}, 'false')
                 thisVal = false;
             end
+        case ''
+            % Sometimes we have empty keyType and we just skip on
+            continue
         otherwise
             warning('Could not resolve the parameter type: %s', keyType);
-            continue;            
+            continue;
     end
-    
+
     newTexture = piTextureSet(newTexture, sprintf('%s value', keyName),...
         thisVal);
 end

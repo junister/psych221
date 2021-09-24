@@ -6,7 +6,7 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %     Returns us (thisR) as the primary result, which should be un-needed because
 %     we are a by-reference (handle) class. Second result is an optional
 %     error code or other return value.
-% 
+%
 % Description:
 %   The recipe class manages the PBRT rendering parameters.  The class
 %   has many fields specifying camera and rendering parameters. This
@@ -148,12 +148,12 @@ verbosity = p.Results.verbose;
 %% Act
 
 switch param
-    
+
     % Rendering and Docker related
     case {'outputfile'}
         % thisR.set('outputfile',fullfilepath);
         %
-        
+
         %{
         % The outputfile has a default initial string.  When we set,
         % we check that the new directory exists. If not, we make it.
@@ -162,7 +162,7 @@ switch param
         % stop the copy.
         %
         % I think it is strange that we are doing this in a set. (BW).
-        
+
         newDir     = fileparts(val);
         if ~exist(newDir,'dir')
             if verbosity > 1
@@ -175,9 +175,9 @@ switch param
         if ~exist(newDir,'dir')
             warning('output directory does not exist yet');
         end
-        
+
         thisR.outputFile = val;
-        
+
     case {'inputfile'}
         % thisR.set('input file',filename);
         val = which(val);
@@ -194,7 +194,7 @@ switch param
         % thisR.set('rendered file',fname);
         % Set the full path
         thisR.renderedfile = val;
-        
+
         % Scene parameters
     case 'objectdistance'
         % The 'from' spot, is the camera location.  The 'to' spot is
@@ -210,21 +210,21 @@ switch param
         % What is the relationship to the focal distance?  If we move
         % the camera, the focal distance is always with respect to the
         % camera, right?
-        
+
         % Unit length vector between from and to.
         objDirection = thisR.get('object direction');
-        
+
         % Scale the unit length vector to match val, thus setting the
         % distance between 'from' and 'to'.  This adjust the 'from'
         % (camera) position, but not the object position in the scene.
         thisR.lookAt.from = thisR.lookAt.to + objDirection*val;
         % warning('Object distance may not be important');
-        
+
     case {'accommodation'}
         % Special case where we allow setting accommodation or focal
         % distance.  My optometrist friends insist.
         thisR.set('focal distance',1/val);
-        
+
     case {'focusdistance','focaldistance'}
         % lens.set('focus distance',m)
         %
@@ -251,7 +251,7 @@ switch param
             thisR.camera.focusdistance.value = val;
             thisR.camera.focusdistance.type = 'float';
         end
-        
+
         % Camera
     case 'camera'
         % val = piCameraCreate('pinhole'); thisR = recipe;
@@ -260,15 +260,15 @@ switch param
         % The whole camera struct
         thisR.camera = val;
         %{
-        
+
         % This deprecated code is very bizarre for recipeSet. So I replaced
         % it.  But probably this change will break stuff.  We will have to
         % fix.
         thisR.camera = piCameraCreate(val,'lensFile',p.Results.lensfile);
-        
+
         % For the default camera, the film size is 35 mm
         thisR.set('film diagonal',35);
-        
+
         %}
     case 'mmunits'
         % thisR.set('mm units',true/false)
@@ -302,31 +302,31 @@ switch param
     case {'camerasubtype'}
         % I don't think the sub is needed.  But there it is.
         thisR.camera.subtype = val;
-        
+
         % Camera motion
     case {'cameramotiontranslatestart'}
         % thisR.set('camera motion translate start',vector)
         thisR.camera.motion.activeTransformStart.pos = val;
-        
+
     case {'cameramotiontranslateend'}
         % thisR.set('camera motion translate end',vector)
         thisR.camera.motion.activeTransformEnd.pos = val;
-        
+
     case {'cameramotionrotatestart'}
         % thisR.set('camera motion rotate start',rotMatrix)
         thisR.camera.motion.activeTransformStart.rotate = val;
-        
+
     case {'cameramotionrotateend'}
         % thisR.set('camera motion rotate end',rotMatrix)
         thisR.camera.motion.activeTransformEnd.rotate = val;
-        
+
         % Camera exposure
     case {'cameraexposure','exposuretime'}
         % Shutter duration in sec
         % Shutter open is always at time zero
         thisR.camera.shutteropen.type  = 'float';
         thisR.camera.shutteropen.value = 0;
-        
+
         thisR.camera.shutterclose.type = 'float';
         thisR.camera.shutterclose.value = val;
     case {'shutteropen'}
@@ -337,7 +337,7 @@ switch param
             end
         end
         thisR.camera.shutteropen.type  = 'float';
-        thisR.camera.shutteropen.value = val;        
+        thisR.camera.shutteropen.value = val;
     case {'shutterclose'}
         % thisR.set('shutter close',time)
         if isfield(thisR.camera,'shutteropen')
@@ -347,7 +347,7 @@ switch param
         end
         thisR.camera.shutterclose.type = 'float';
         thisR.camera.shutterclose.value = val; %single(val);
-        
+
         % Lens related
     case 'lensfile'
         % lens.set('lens file',val)   (string)
@@ -360,7 +360,7 @@ switch param
         end
         thisR.camera.lensfile.value = val;
         thisR.camera.lensfile.type = 'string';
-        
+
     case {'lensradius'}
         % lens.set('lens radius',val (mm))
         %
@@ -372,7 +372,7 @@ switch param
         else
             warning('Lens radius is set for perspective camera.  Use aperture diameter for omni');
         end
-        
+
         % Human eye model related
     case {'retinadistance'}
         % Specified in mm
@@ -390,7 +390,7 @@ switch param
         % Specified in mm
         thisR.camera.pupilDiameter.value = val;
         thisR.camera.pupilDiameter.type = 'float';
-        
+
     case {'ior1','ior2','ior3','ior4'}
         % thisR.set('ior1',fullfilename);
         %
@@ -419,7 +419,7 @@ switch param
                     thisR.camera.ior4.type = 'spectrum';
             end
         end
-        
+
         % More general camera parameters
     case {'aperture','aperturediameter'}
         % lens.set('aperture diameter',val (mm))
@@ -427,7 +427,7 @@ switch param
         % Set 'aperture diameter' should look at the aperture in the
         % lens file, which represents the largest possible aperture.
         % It should not allow a value bigger than that.  (ZL/BW).
-        
+
         % Throw a warning for perspective camera
         if isequal(thisR.camera.subtype,'pinhole') ||...
                 isequal(thisR.camera.subtype,'perspective')
@@ -435,7 +435,7 @@ switch param
             thisR.set('lens radius',val/2);
             return;
         end
-        
+
         thisR.camera.aperturediameter.value = val;
         thisR.camera.aperturediameter.type = 'float';
     case 'fov'
@@ -449,18 +449,18 @@ switch param
                 thisR.camera.fov.type = 'float';
             else
                 % camera types:  omni, realisticeye,
-                
+
                 % if two fov is given [hor, ver], we should resize film
                 % acoordingly.  This is the current number of spatial
                 % samples for the two dimensions
                 filmRes = thisR.get('spatial samples');
-                
+
                 % Set the field of view to the minimum of the two values
                 fov = min(val);
-                
+
                 % horizontal resolution/ vertical resolution
                 resRatio = tand(val(1)/2)/tand(val(2)/2);
-                
+
                 % Depending on which is the governing dimension, adjust the
                 % number of spatial samples, using the resolution ratio.
                 if fov == val(1)
@@ -486,17 +486,17 @@ switch param
             thisR.camera.diffractionEnabled.value = 'false';
         end
         thisR.camera.diffractionEnabled.type = 'bool';
-        
+
     case 'chromaticaberration'
         % Enable chrommatic aberration, and potentially set the number
         % of wavelength bands.  (Default is 8).
         %   thisR.set('chromatic aberration',true);
         %   thisR.set('chromatic aberration',false);
         %   thisR.set('chromatic aberration',16);
-        
+
         % Enable or disable
         thisR.camera.chromaticAberrationEnabled.type = 'bool';
-        
+
         % User turned off chromatic abberations
         if isequal(val,false)
             % Use path, not spectralpath, integrator and set nunCABand to
@@ -506,20 +506,20 @@ switch param
             thisR.set('integrator num ca bands',1);
             return;
         end
-        
+
         % User sent in true or an integer number of bands which implies
         % true.
         thisR.camera.chromaticAberrationEnabled.value = 'true';
-        
+
         % This is the integrator that manages chromatic aberration.
         thisR.set('integrator subtype','spectralpath');
-        
+
         % Set the number of bands.  These are divided evenly into bands
         % between 400 and 700 nm. There are  31 wavelength samples, so we
         % should not have more than 30 wavelength bands
         if islogical(val), val = 8;  end % Default number of bands
         thisR.set('integrator num cabands',val);
-        
+
     case 'integratorsubtype'
         % thisR.set('integrator subtype',val)
         %
@@ -529,29 +529,26 @@ switch param
         % are scattering media.
         thisR.integrator.type = 'Integrator';
         thisR.integrator.subtype = val;
-        
+
     case 'integratornumcabands'
         thisR.integrator.type = 'Integrator';
         thisR.integrator.numCABands.value = val;
         thisR.integrator.numCABands.type = 'integer';
-        
+
     case{'maxdepth','bounces','nbounces'}
         % thisR.set('n bounces',val);
         % Number of surfaces a ray can bounce from
-        if isempty(thisR.integrator)
-            thisR.integrator.type = 'Integrator';
+
+        if(~strcmp(thisR.integrator.subtype,'path')) &&...
+                (~strcmp(thisR.integrator.subtype,'bdpt'))
+            disp('Changing integrator sub type to "bdpt"');
+
+            % When multiple bounces are needed, use this integrator
             thisR.integrator.subtype = 'bdpt';
         end
-%         if(~strcmp(thisR.integrator.subtype,'path')) &&...
-%                 (~strcmp(thisR.integrator.subtype,'bdpt'))
-%             disp('Changing integrator sub type to "bdpt"');
-%             
-%             % When multiple bounces are needed, use this integrator
-%             thisR.integrator.subtype = 'bdpt';
-%         end
         thisR.integrator.maxdepth.value = val;
         thisR.integrator.maxdepth.type = 'integer';
-        
+
     case 'autofocus'
         % Should deprecate this.  Let's run it for a while and see how
         % often it turns up.
@@ -566,7 +563,7 @@ switch param
             end
             thisR.set('film distance',fdist);
         end
-        
+
         % Camera position related.  The units are in ????
     case 'lookat'
         % Includes the from, to and up in a struct
@@ -574,13 +571,13 @@ switch param
             thisR.lookAt = val;
         end
     case {'from','cameraposition'}
-        thisR.lookAt.from = val;
+        thisR.lookAt.from = val(:)';  % Force row vector
     case 'to'
-        thisR.lookAt.to = val;
+        thisR.lookAt.to = val(:)';
     case 'up'
-        thisR.lookAt.up = val;
-        
-        
+        thisR.lookAt.up = val(:)';
+
+
         % Microlens
     case 'microlens'
         % Not sure about what this means.  It is on or off
@@ -609,7 +606,7 @@ switch param
         % instructions about modeling light field cameras.
         thisR.camera.subpixels_h = val(1);
         thisR.camera.subpixels_w = val(2);
-        
+
         % Film parameters
     case 'filmdiagonal'
         % thisR.set('film diagonal',val)
@@ -631,7 +628,7 @@ switch param
         thisR.film.yresolution.value = val(2);
         thisR.film.xresolution.type = 'integer';
         thisR.film.yresolution.type = 'integer';
-        
+
         % Sampler
     case 'samplersubtype'
         % thisR.set('sampler subtype','halton')
@@ -647,20 +644,25 @@ switch param
         end
         thisR.sampler.pixelsamples.value = val;
         thisR.sampler.pixelsamples.type = 'integer';
-        
+
     case{'cropwindow'}
         thisR.film.cropwindow.value = [val(1) val(2) val(3) val(4)];
         thisR.film.cropwindow.type = 'float';
-        
+
         % SUMO parameters stored in recipe metadata
     case {'trafficflowdensity'}
         thisR.metadata.sumo.trafficflowdensity = val;
     case {'traffictimestamp'}
         thisR.metadata.sumo.timestamp = val;
-        
+
     case 'filter'
-        warning('Not sure how to set filter yet');
-        
+        % Spatial filter for interpolating rays onto the film sampling grid
+        % Options for the filter are
+        %
+        %    'box', 'triangle','gaussian','mitchell', 'sinc'
+        %
+        thisR.filter = val;
+
         % Getting ready for camera level recipe information.
         % Not really used yet and may never get used.
     case {'camerabody'}
@@ -669,7 +671,7 @@ switch param
         thisR.set('camera',val.camera);
         thisR.set('film',val.film);
         thisR.filter = thisR.set('filter',val.filter);
-        
+
         % Materials should be built up here.
     case {'materials', 'material'}
         % Act on the list of materials
@@ -679,7 +681,7 @@ switch param
         % thisR.set('material', 'add', newMaterial);
         % thisR.set('material', 'delete', matName);
         % thisR.set('material', matName, 'PARAM TYPE', VAL);
-        
+
         % In this case, we completely replace the material list.
         if isempty(varargin)
             if isa(thisR.materials.list, 'containers.Map')
@@ -700,7 +702,7 @@ switch param
                 error('Bad struct.');
             end
         elseif ischar(val)
-            % It is either a special command or the material name            
+            % It is either a special command or the material name
             switch val
                 case {'add'}
                     newMat = varargin{1};
@@ -722,7 +724,7 @@ switch param
                     thisMat = thisR.materials.list(val);
             end
         end
-        
+
         % At this point we have the material.
         if numel(varargin{1}) == 1
             % A material struct was sent in as the only argument.  We
@@ -735,14 +737,14 @@ switch param
             thisMat = piMaterialSet(thisMat, varargin{1}, varargin{2});
             thisR.set('materials', matName, thisMat);
         end
-        
+
     case {'materialsoutputfile'}
         % Deprecated?
         thisR.materials.outputfile = val;
 
     case {'textures', 'texture'}
         % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
-        
+
         if isempty(varargin)
             if iscell(val)
                 thisR.textures.list = val;
@@ -766,7 +768,7 @@ switch param
             newTexture = varargin{1};
             switch val
                 case {'add'}
-                    % thisR.set('textures', 'add', texture struct);                    
+                    % thisR.set('textures', 'add', texture struct);
                     thisR.textures.list(newTexture.name) = varargin{1};
                     return;
                 case {'delete', 'remove'}
@@ -793,7 +795,7 @@ switch param
                     [textureName, thisTexture] = piTextureFind(thisR.textures.list, 'name', textureName);
             end
         end
-        
+
         % At this point we have the material.
         if numel(varargin{1}) == 1
             % A material struct was sent in as the only argument.  We
@@ -806,8 +808,8 @@ switch param
             % property and then update the material in the list.
             thisTexture = piTextureSet(thisTexture, varargin{1}, varargin{2});
             thisR.set('textures', textureName, thisTexture);
-        end        
-        
+        end
+
     case {'light', 'lights'}
         % Examples
         % thisR.set('light', lightList);
@@ -817,7 +819,7 @@ switch param
         % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
         % thisR.set('light', 'translate', lghtName, [XSFT, YSFT, ZSFT], FROMTO)
         % thisR.set('light', 'scale', lightName, VAL);
-        
+
         % This is the case where we replace the light list
         if isempty(varargin)
             if iscell(val)
@@ -903,9 +905,9 @@ switch param
                         fromto = 'both';
                     end
                     up = thisR.get('up');
-                    
+
                     % If the light is at the same position of camera
-                    if lght.cameracoordinate 
+                    if lght.cameracoordinate
                         if isfield(lght, 'from')
                             lght = piLightSet(lght, 'from val', thisR.get('from'));
                         end
@@ -919,7 +921,7 @@ switch param
                            'fromto', fromto,...
                            'up', up);
                     thisR.set('light', lgtIdx, lght);
-                    
+
                     return;
                 otherwise
                     % Probably the light name.
@@ -927,7 +929,7 @@ switch param
                     [lgtIdx, thisLight] = piLightFind(thisR.lights, 'name', lgtName);
             end
         end
-        
+
         % At this point we have the light.
         if numel(varargin{1}) == 1
             % A light struct was sent in as the only argument.  We
@@ -940,26 +942,46 @@ switch param
             thisLight = piLightSet(thisLight, varargin{1}, varargin{2});
             thisR.set('light', lgtIdx, thisLight);
         end
-        
+
     case {'asset', 'assets'}
-        % Typical:    thisR.set(param,val) 
-        % This case:  thisR.set('asset',assetName, param, val);
+        % Typical:    thisR.set(param,val)
+        % This case:  thisR.set('asset',assetNameOrID, param, val);
         %
         % These operations need the whole tree, so we send in the
         % recipe that contains the asset tree, thisR.assets.
-        
+
         % Given the calling convention, val is assetName and
         % varargin{1} is the param, and varargin{2} is the value, if
         % needed.
-        assetName = val;        
+        if isnumeric(val)
+            % Person sent in an id, so we get the name here
+            [id,thisAsset] = piAssetFind(thisR,'id',val);
+            if val == 1, assetName = 'root';
+            else, assetName = thisAsset{1}.name;
+            end
+        else
+            assetName = val;
+        end
         param = varargin{1};
+        % If only one element in varargin, it should be a node struct.
+        if numel(varargin) == 1 && ~ischar(varargin{1})
+            thisR.assets = thisR.assets.set(id, varargin{1});
+            out = varargin{1};
+            return;
+        end
+        % Else we are setting a parameter value
         if numel(varargin) == 2, val   = varargin{2}; end
-        
+
         % Some of these functions should be edited to return the new
         % branch.  Some have been.
         switch ieParamFormat(param)
             case 'add'
+                % thisR.set('asset',parentName,newAsset);
                 out = piAssetAdd(thisR, assetName, val);
+            case {'cancellasttransformation', 'removelasttransformation',...
+                  'cancellasttrans', 'removelasttrans',...
+                  'cancellastaction', 'removelastaction'}
+                piAssetRemoveLastTrans(thisR, assetName);
             case {'delete', 'remove'}
                 % thisR.set('asset',assetName,'delete');
                 piAssetDelete(thisR, assetName);
@@ -967,6 +989,7 @@ switch param
                 % thisR.set('asset',assetName,'insert');
                 out = piAssetInsert(thisR, assetName, val);
             case {'parent'}
+                % thisR.set('asset',assetName,'parent',id)
                 piAssetSetParent(thisR, assetName, val);
             case {'translate', 'translation'}
                 % thisR.set('asset',assetName,'translate',val);
@@ -978,25 +1001,40 @@ switch param
                 newTrans = rotM \ [reshape(val, numel(val), 1); 0];
                 out = piAssetTranslate(thisR, assetName, newTrans(1:3));
             case {'rotate', 'rotation'}
+                % Figures out the rotation from the angles in val and sets
+                % the rotation matrix
                 out = piAssetRotate(thisR, assetName, val);
+            case {'rotationmatrix'}
+                % Just set the rotation matrix
+                % id = piAssetFind(thisR.assets,'name',assetName);
+                % Check that val is a rotation matrix
+                if size(val) == [4,4]
+                    piAssetSet(thisR, assetName, 'rotation',val);
+                else
+                    error('val must be 4x4 matrix');
+                end
+
+                %thisR.assets.Node{id}.rotation = val;
             case {'worldrotate', 'worldrotation'}
                 % Get current rotation matrix
                 curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
-                
+                [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
+                %{
+                % This section was wrapped in piTransformRotationInAbsSpace.
                 newRotM = eye(4);
-                % Loop through the three rotation                
+                % Loop through the three rotation
                 for ii=1:numel(val)
                     if ~isequal(val(ii), 0)
                         % Axis in world space
                         axWorld = zeros(4, 1);
                         axWorld(ii) = 1;
-                        
-                        % Axis orientation in object space
+
+                        % Axis orientation in world space
                         % axObj = inv(curRotM) * axWorld;
                         axObj = curRotM \ axWorld;
                         thisAng = val(ii);
-                        
-                        % Get the rotation matrix in object space
+
+                        % Get the rotation matrix in world space
                         thisM = piTransformRotation(axObj, thisAng);
                         newRotM = thisM * newRotM;
                     end
@@ -1004,16 +1042,17 @@ switch param
                 % Get rotation deg around x, y and z axis in object
                 % space.
                 rotDeg = piTransformRotM2Degs(newRotM);
+                %}
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
             case {'worldposition'}
                 % thisR.set('asset', assetName, 'world position', [1 2 3]);
                 % First get the position
                 pos = thisR.get('asset', assetName, 'world position');
-                
+
                 % Set a translation to (1) cancel the current translation
                 % and (2) move the object to the target position
                 newTrans = -pos + varargin{2}(:)';
-                
+
                 [~, out] = thisR.set('asset', assetName, 'world translation', newTrans);
             case {'scale'}
                 out = piAssetScale(thisR,assetName,val);
@@ -1023,6 +1062,7 @@ switch param
             case {'obj2light'}
                 piAssetObject2Light(thisR, assetName, val);
             case {'graft', 'subtreeadd'}
+                % thisR.set('asset',assetName,'graft',val); (Maybe)
                 id = thisR.get('asset', assetName, 'id');
                 rootSTID = thisR.assets.nnodes + 1;
                 thisR.assets = thisR.assets.graft(id, val);
@@ -1030,29 +1070,33 @@ switch param
                 % Get the root node of the subtree.
                 out = thisR.get('asset', rootSTID);
             case {'graftwithmaterial', 'graftwithmaterials'}
+                % thisR.set('asset',assetName,'graft with materials',assetFileName)
                 [assetTree, matList] = piAssetTreeLoad(val);
                 [~,out] = thisR.set('asset', assetName, 'graft', assetTree);
-                for ii=1:numel(matList)
-                    thisR.set('material', 'add', matList{ii});
+                keyList = keys(matList);
+                for ii=1:numel(keyList)
+                    thisR.set('material', 'add', matList(keyList{ii}));
                 end
             case {'chop', 'cut'}
                 id = thisR.get('asset', assetName, 'id');
                 thisR.assets = thisR.assets.chop(id);
             otherwise
                 % Set a parameter of an asset to val
+                % rotation is a parameter, but it is stopped above via the
+                % call to rotation matrix.
                 piAssetSet(thisR, assetName, varargin{1},val);
         end
         % reassign unique names for delete/chop;
         thisR.assets = thisR.assets.uniqueNames;
-        
+
         % ZLY added fluorescent sets
     case {'fluorophoreconcentration'}
         % thisR.set('fluorophore concentration',val,idx)
         if isempty(varargin), error('Material name or index required'); end
-        
+
         % material name
         materialName = varargin{1};
-        
+
         matName = val; % for older version
         switch thisR.recipeVer
             case 2
@@ -1062,7 +1106,7 @@ switch param
                 % sampling in the recipe to determine the EEM wavelength
                 % sampling.
                 thisR = piMaterialSet(thisR,materialName,'fluorophore concentration',val);
-                
+
             otherwise
                 % This is the original framing, before re-writing the
                 % materials.list organization by Zheng.
@@ -1080,10 +1124,10 @@ switch param
         % idx - a numerical index to the material or it can be a string
         % which is the name of the mater
         if isempty(varargin), error('Material name or index required'); end
-        
+
         % material name
         materialName = varargin{1};
-        
+
         matName = val;
         switch thisR.recipeVer
             case 2
@@ -1093,7 +1137,7 @@ switch param
                 % sampling in the recipe to determine the EEM wavelength
                 % sampling.
                 thisR = piMaterialSet(thisR,materialName,'fluorophore eem',val);
-                
+
             otherwise
                 % This is the original framing, before re-writing the
                 % materials.list organization by Zheng.
@@ -1108,7 +1152,7 @@ switch param
                 if length(varargin) > 2
                     error('Accept only one Donaldson matrix\n');
                 end
-                
+
                 fluorophoresName = val{2};
                 if isempty(fluorophoresName)
                     thisR.materials.list.(matName).photolumifluorescence = '';
@@ -1128,7 +1172,7 @@ switch param
                        ieNewGraphWin;
                        plot(wave,sum(eem)/dWave,'k--',wave,ex/max(ex(:)),'r:')
                     %}
-                    
+
                     % The data are converted to a vector like this
                     flatEEM = eem';
                     vec = [wave(1) wave(2)-wave(1) wave(end) flatEEM(:)'];
@@ -1185,7 +1229,7 @@ switch param
                         thisMat.reflectance.value = [300 1 800 1];
                         illumR.materials.list(matList{jj}) = thisMat;
                     end
-                    
+
                     [dir, fname, ext]=fileparts(thisR.outputFile);
                     illumR.outputFile = fullfile(dir, [fname,'_illuminance',ext]);
                     thisR.metadata.illuminanceRecipe = illumR;

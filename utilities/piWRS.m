@@ -5,7 +5,7 @@ function [obj,results] = piWRS(thisR,varargin)
 %
 % Synopsis
 %   [isetObj, results] = piWRS(thisR)
-% 
+%
 % See also
 %   piRender, sceneWindow, oiWindow
 
@@ -14,7 +14,7 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu',@ischar);
+p.addParameter('dockerimagename','vistalab/pbrt-v3-spectral:latest',@ischar);
 p.addParameter('rendertype','radiance',@ischar);
 
 p.parse(thisR,varargin{:});
@@ -25,7 +25,8 @@ renderType = p.Results.rendertype;
 piWrite(thisR);
 
 [obj,results] = piRender(thisR,...
-    'docker image name',thisDocker);
+    'docker image name',thisDocker, ...
+    'render type',renderType);
 
 switch obj.type
     case 'scene'

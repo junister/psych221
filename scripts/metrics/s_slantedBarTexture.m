@@ -2,7 +2,7 @@
 %
 % Deprecated.
 %
-%  This led to s_assetsCreate, s_scenesRecipe, and s_piMetrics* scripts. 
+%  This led to s_assetsCreate, s_scenesRecipe, and s_piMetrics* scripts.
 %
 % This scene only has one object, a uniform surface, and a camera.  We
 % point the camera towards the surface, and we paint a texture on the
@@ -52,7 +52,7 @@ thisR.set('to',  xyz -   [0,5,0]);
 % We can render at a couple of different distances (camera positions).
 lensname = 'dgauss.22deg.6.0mm.json';
 c = piCameraCreate('omni','lens file',lensname);
-thisR.set('camera',c); 
+thisR.set('camera',c);
 
 %% Set the field of view by choosing the film size
 
@@ -151,7 +151,7 @@ thisR.get('texture print');
 thisR.set('material', surfaceMaterial.name, 'kd val', chartName);
 thisR.show('assetsmaterials');
 
-%%
+%
 thisR.set('assets',surfaceName,'rotate',[30 20 10]);
 
 %% Write and render
