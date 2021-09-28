@@ -25,7 +25,11 @@ cd(dir);
 % Not sure of the best way to handle that. Maybe we can even just ship the
 % binaries and point to them?
 if ispc
-    assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
+    if isfile('C:\Program Files (x86)\assimp\bin64\assimp.exe')
+        assimpBinary = '"C:\Program Files (x86)\assimp\bin64\assimp.exe"';
+    else
+        assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp.exe"';
+    end
 else
     assimpBinary = 'assimp';
 end
