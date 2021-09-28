@@ -11,16 +11,17 @@ function outfile = piFBX2PBRT(infile)
 % Some day we will Dockerize assimp
 %
 % See also
-%  
+%
 
 %% Find the input file and specify the converted output file
 
-[dir, fname,~] = fileparts(infile);
-outfile = fullfile(dir, [fname,'-converted.pbrt']);
+[indir, fname,~] = fileparts(infile);
+outfile = fullfile(indir, [fname,'-converted.pbrt']);
 currdir = pwd;
-cd(dir);
+cd(indir);
 
 %% Runs assimp command
+%{
 % Windows doesn't add assimp dir to PATH by default
 % Not sure of the best way to handle that. Maybe we can even just ship the
 % binaries and point to them?
@@ -33,14 +34,35 @@ if ispc
 else
     assimpBinary = 'assimp';
 end
-cmd = [[assimpBinary ' export '],infile, ' ',[fname,'-converted.pbrt']];
-[status,result] = system(cmd);
 
 if status
     disp(result);
     error('FBX to PBRT conversion failed.')
 end
 
-cd(currdir);
-
+if ~ispc
+    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
+    [status_copy, ~ ] = system(cpcmd);
+else
+    cpDocker = dockerWrapper();
+    cpDocker.dockerImageName = ''; % use running container
+    cpDocker.dockerCommand = 'docker cp';
+    cpDocker.command = '';
+    cpDocker.dockerFlags = '';
+    linuxDir = cpDocker.pathToLinux(indir);
+    cpDocker.inputFile = [dockercontainerName ':' linuxDir  filesep()  fname '-converted.pbrt'];
+    cpDocker.outputFile = indir;
+    cpDocker.outputFilePrefix = '';
+    [status_copy, result] = cpDocker.run();
 end
+cd(currdir);
+if status_copy
+    disp(result);
+    error('Copy file from docker container failed.\n ');
+end
+
+% remove docker container
+rmCmd = sprintf('docker rm %s',dockercontainerName);
+system(rmCmd);
+end
+
