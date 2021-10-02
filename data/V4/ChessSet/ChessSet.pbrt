@@ -15,8 +15,8 @@ WorldBegin
 # Default Material
 Material "coateddiffuse"
     "rgb reflectance" [ 0.09360644 0.10974494 0.12801072 ]
-Include "chessSet_materials.pbrt"
-Include "chessSet_geometry.pbrt"
+Include "ChessSet_materials.pbrt"
+Include "ChessSet_geometry.pbrt"
 # Add an environment light
 Rotate -90 1 0 0
 Rotate 180 0 0 1
