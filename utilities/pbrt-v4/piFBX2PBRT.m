@@ -34,15 +34,11 @@ if ispc
 else
     assimpBinary = 'assimp';
 end
-
-if status
-    disp(result);
-    error('FBX to PBRT conversion failed.')
-end
+%}
 
 if ~ispc
     cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
-    [status_copy, ~ ] = system(cpcmd);
+    [status_copy, result ] = system(cpcmd);
 else
     cpDocker = dockerWrapper();
     cpDocker.dockerImageName = ''; % use running container
@@ -58,7 +54,7 @@ end
 cd(currdir);
 if status_copy
     disp(result);
-    error('Copy file from docker container failed.\n ');
+    error('Docker file copy failed.')
 end
 
 % remove docker container
