@@ -11,7 +11,7 @@ function outfile = piFBX2PBRT(infile)
 % Some day we will Dockerize assimp
 %
 % See also
-%
+%  
 
 %% Find the input file and specify the converted output file
 
@@ -25,16 +25,29 @@ cd(indir);
 % Windows doesn't add assimp dir to PATH by default
 % Not sure of the best way to handle that. Maybe we can even just ship the
 % binaries and point to them?
-if ispc
-    if isfile('C:\Program Files (x86)\assimp\bin64\assimp.exe')
-        assimpBinary = '"C:\Program Files (x86)\assimp\bin64\assimp.exe"';
-    else
-        assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp.exe"';
-    end
-else
-    assimpBinary = 'assimp';
-end
+% if ispc
+%     assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
+% else
+%     assimpBinary = 'assimp';
+% end
 %}
+% build docker base cmd
+
+dockerimage = 'camerasimulation/pbrt-v4-cpu';
+
+basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+
+cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+
+dockercontainerName = ['Assimp-',num2str(randi(200))];
+dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
+
+[status,result] = system(dockercmd);
+
+if status
+    disp(result);
+    error('FBX to PBRT conversion failed.')
+end
 
 if ~ispc
     cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
@@ -51,10 +64,12 @@ else
     cpDocker.outputFilePrefix = '';
     [status_copy, result] = cpDocker.run();
 end
+
+
 cd(currdir);
 if status_copy
     disp(result);
-    error('Docker file copy failed.')
+    error('Copy file from docker container failed.\n ');
 end
 
 % remove docker container
