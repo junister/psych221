@@ -10,6 +10,7 @@ Integrator "path"
     "integer maxdepth" [ 5 ]
 
 
+
 WorldBegin
 
 # Default Material
