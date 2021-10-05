@@ -193,7 +193,12 @@ else  % Linux & Mac
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
     % Check whether GPU is available
     [GPUCheck,~] = system('nvidia-smi');
+    ourGPU = gpuDevice();
+    if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+        GPUCheck = true;
+    end
     if ~GPUCheck
+        
         % GPU is available
         cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
