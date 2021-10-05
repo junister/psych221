@@ -195,7 +195,7 @@ else  % Linux & Mac
     [GPUCheck,~] = system('nvidia-smi');
     ourGPU = gpuDevice();
     if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
-        GPUCheck = true;
+        GPUCheck = -1;
     end
     if ~GPUCheck
         
