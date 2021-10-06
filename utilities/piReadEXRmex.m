@@ -1,7 +1,11 @@
-function output = piReadEXR(filename, varargin)
+function output = piReadEXRmex(filename, varargin)
 %% Read multispectral data from a .exr file (Openexr format)
 %
 %   [imageData, imageSize, lens] = piReadEXR(filename)
+%
+%% Deprecated in favor of python wrapper version
+%% Left in tree for anyone who has OpenEXR via .mex files working
+%% But has a problem with python + pyexr -- David Cardinal 10/05/21
 %
 % Required Input
 %   filename - existing .exr file
