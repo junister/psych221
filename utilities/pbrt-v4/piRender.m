@@ -192,13 +192,13 @@ else  % Linux & Mac
     
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
     % Check whether GPU is available
-    [GPUCheck,~] = system('nvidia-smi');
+    [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
     ourGPU = gpuDevice();
     if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
         GPUCheck = -1;
     end
     if ~GPUCheck
-        
+
         % GPU is available
         cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
@@ -206,7 +206,16 @@ else  % Linux & Mac
         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
         % update docker command to use gpu
         dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
-        dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+        switch ieParamFormat(strtrim(GPUModel))
+            case 'teslat4'
+                dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+            case {'geforcertx3070', 'geforcertx3090'}
+                dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+            otherwise
+                warning('No compatible docker image for GPU model: %s, might not be able to run docker.', GPUModel);
+                dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+        end
+        
         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
     else
         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
