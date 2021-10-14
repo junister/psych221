@@ -193,10 +193,15 @@ else  % Linux & Mac
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
     % Check whether GPU is available
     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
-    ourGPU = gpuDevice();
-    if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
-        GPUCheck = -1;
+    try
+        ourGPU = gpuDevice();
+        if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+            GPUCheck = -1;
+        end
+    catch
+        % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
     end
+
     if ~GPUCheck
 
         % GPU is available
