@@ -211,14 +211,17 @@ else  % Linux & Mac
         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
         % update docker command to use gpu
         dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
-        switch ieParamFormat(strtrim(GPUModel))
+        % switch based on first GPU available
+        % really should enumerate and look for the best one, I think
+        gpuModels = strsplit(ieParamFormat(strtrim(GPUModel))); 
+        switch gpuModels{1}
             case 'teslat4'
                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
             case {'geforcertx3070', 'geforcertx3090'}
                 dockerImageName = 'camerasimulation/pbrt-v4-gpu';
             otherwise
-                warning('No compatible docker image for GPU model: %s, might not be able to run docker.', GPUModel);
-                dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+                warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
+                dockerImageName = 'camerasimulation/pbrt-v4-cpu';
         end
         
         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
