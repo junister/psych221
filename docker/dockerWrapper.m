@@ -45,13 +45,17 @@ classdef dockerWrapper
         
         function output = pathToLinux(obj, inputPath)
             
-            if isequal(fullfile(inputPath), inputPath)
-                % assume we have a drive letter
-                output = inputPath(3:end);
-                output = strrep(output, '\','/');
+            if ispc
+                if isequal(fullfile(inputPath), inputPath)
+                    % assume we have a drive letter
+                    output = inputPath(3:end);
+                else
+                    output = strrep(output, '\','/');
+                end
             else
                 output = strrep(inputPath, '\','/');
             end
+            
         end
         
         function [outputArg, result] = run(obj)
