@@ -27,6 +27,26 @@ classdef dockerWrapper
         outputFilePrefix = '--outfile';
     end
     
+    methods (Static)
+        function containerName = getContainer(containerType)
+            persistent containerPBRTGPU = '';
+            switch containerType
+                case 'PBRT-GPU'
+                    if ~isempty(container-PBRT-GPU)
+                        containerPBRTGPU = startPBRTGPU();
+                    end
+                    containerName = containerPBRTGPU;
+                otherwise
+                    warning("No container found");
+
+            end
+        end
+
+        function gpuContainer = startPBRTGPU()
+            
+        end
+    end
+
     methods
         function obj = dockerWrapper()
             %Docker Construct an instance of this class

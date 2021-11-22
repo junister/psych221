@@ -209,21 +209,31 @@ else  % Linux & Mac
             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
             '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
-        % update docker command to use gpu
-        dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
+
         % switch based on first GPU available
         % really should enumerate and look for the best one, I think
         gpuModels = strsplit(ieParamFormat(strtrim(GPUModel))); 
+
         switch gpuModels{1}
             case 'teslat4'
                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+                dockerContainerName = 'pbrt-gpu';
             case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+                dockerContainerName = 'pbrt-gpu';
             otherwise
                 warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
                 dockerImageName = 'camerasimulation/pbrt-v4-cpu';
+                dockerContainerName = '';
         end
-        
+
+        % update docker command to use gpu
+        if ~isempty(dockerContainerName)
+            dockerFlags = sprintf('--gpus 1 -it --name %s', dockerContainerName);
+            dockerCommand  = strrep(dockerCommand,'-ti --rm',dockerFlags);
+        else
+            dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
+        end
         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
     else
         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
