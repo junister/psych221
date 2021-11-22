@@ -1,4 +1,4 @@
-function dockerImageName = piGetPBRTGPUImage()
+function dockerImageName = dockerGetPBRTGPUImage()
 
     % Check whether GPU is available
     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');

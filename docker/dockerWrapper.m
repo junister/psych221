@@ -54,10 +54,18 @@ classdef dockerWrapper
             % be old
             system(sprintf('docker container rm -f %s', pbrtGPUContainer));
 
-            dockerCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8000:81 %s %s', pbrtGPUContainer, cudalib, useImage);
-            dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
-                cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
+            % Starting as background we need to allow for all scenes
+            workDir = fullfile(piRootPath(), "local");
+            volumeMap = sprintf("-v %s:%s", workDir, workDir);
+
+            % set up the baseline command
+            dockerCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8000:81 %s %s %s', volumeMap, pbrtGPUContainer, cudalib, useImage);
+            cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
+
+            [status, result] = system(cmd);
+
         end
+    end
 
         methods
             function obj = dockerWrapper()
