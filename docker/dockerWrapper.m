@@ -101,7 +101,7 @@ classdef dockerWrapper
             gpuContainer = ['pbrt-gpu-' uName];
             % remove any existing container with the same name as it might
             % be old
-            system(sprintf('docker container rm -f %s', gpuContainer));
+            [status, result] = system(sprintf('docker container rm -f %s', gpuContainer));
 
             % Starting as background we need to allow for all scenes
             workDir = fullfile(piRootPath(), "local");
