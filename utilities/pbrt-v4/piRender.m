@@ -114,6 +114,19 @@ pbrtFile = thisR.outputFile;
 
 %% Call the Docker for rendering
 
+% This should all go through the dockerWrapper class
+% That requires dealing with:
+%  -- container has a base dir of local, not the scene folder
+%  -- any support for making sure various directories exist have to deal
+%  with that
+%  -- When pbrt is launched it needs to know how to navigate to the
+%  approprite scene
+%
+%  I think we should probably give up on native_pbrt, as it is too
+%  confusing, and was only being used on Windows
+%
+
+
 %% Build the docker command
 dockerCommand   = 'docker run -ti --rm';
 
@@ -133,63 +146,53 @@ outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 native_pbrt =   false;
 if ispc  % Windows
     currFile = pbrtFile; % in v3 we could process several files, not sure about v4
-    if native_pbrt
-        % For now spectral pbrt changes data on write by 0a->0d0a
-        % so for this case we do a dos2unix conversion later
-        % Filepath to pbrt.exe goes here
-        pbrtBinary = 'pbrt.exe';
-        outF = fullfile(outputFolder, strcat('renderings/',currName,'.exr')); % for v4 assume exr
-        % Hack, for testing.
-        renderCommand = sprintf('%s --outfile %s %s', pbrtBinary, outF, currFile);
-        command = renderCommand;
-    else
-        
-        % Hack to reverse \ to / for _depth files, for compatibility
-        % with Linux-based Docker pbrt container
-        pFile = fopen(currFile,'rt');
-        tFileName = tempname;
-        tFile = fopen(tFileName,'wt');
-        while true
-            thisline = fgets(pFile);
-            if ~ischar(thisline); break; end  %end of file
-            if contains(thisline, "C:\")
-                thisline = strrep(thisline, piRootPath, '');
-                thisline = strrep(thisline, '\local', '');
-                thisline = strrep(thisline, '\', '/');
-            end
-            fprintf(tFile,  '%s', thisline);
+
+    % Hack to reverse \ to / for _depth files, for compatibility
+    % with Linux-based Docker pbrt container
+    pFile = fopen(currFile,'rt');
+    tFileName = tempname;
+    tFile = fopen(tFileName,'wt');
+    while true
+        thisline = fgets(pFile);
+        if ~ischar(thisline); break; end  %end of file
+        if contains(thisline, "C:\")
+            thisline = strrep(thisline, piRootPath, '');
+            thisline = strrep(thisline, '\local', '');
+            thisline = strrep(thisline, '\', '/');
         end
-        fclose(pFile);
-        fclose(tFile);
-        copyfile(tFileName, currFile);
-        delete(tFileName);
-        
-        % With V4 we need EXR not Dat
-        outF = strcat('renderings/',currName,'.exr');
-        renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-        folderBreak = split(outputFolder, filesep());
-        shortOut = strcat('/', char(folderBreak(end)));
-        
-        if ~isempty(outputFolder)
-            if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-            dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
-        end
-        
-        %fix for non - C drives
-        %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
-        linuxOut = char(join(folderBreak,"/"));
-        
-        dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
-        
-        cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
+        fprintf(tFile,  '%s', thisline);
     end
+    fclose(pFile);
+    fclose(tFile);
+    copyfile(tFileName, currFile);
+    delete(tFileName);
+
+    % With V4 we need EXR not Dat
+    outF = strcat('renderings/',currName,'.exr');
+    renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
+    folderBreak = split(outputFolder, filesep());
+    shortOut = strcat('/', char(folderBreak(end)));
+
+    if ~isempty(outputFolder)
+        if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
+        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
+    end
+
+    %fix for non - C drives
+    %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
+    linuxOut = char(join(folderBreak,"/"));
+
+    dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
+
+    cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 else  % Linux & Mac
+
     renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
-    
+
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
     % Check whether GPU is available
     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
@@ -212,7 +215,7 @@ else  % Linux & Mac
 
         % switch based on first GPU available
         % really should enumerate and look for the best one, I think
-        gpuModels = strsplit(ieParamFormat(strtrim(GPUModel))); 
+        gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
         switch gpuModels{1}
             case 'teslat4'
@@ -234,7 +237,7 @@ else  % Linux & Mac
         else
             dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
         end
-        cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
+        cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
     else
         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
@@ -259,7 +262,7 @@ elapsedTime = toc;
 % disp(result)
 %% Check the return
 
-if status    
+if status
     warning('Docker did not run correctly');
     % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
@@ -288,7 +291,7 @@ if isstruct(ieObject)
             if ~isequal(curWave(:),wave(:))
                 ieObject = sceneSet(ieObject, 'wave', wave);
             end
-            
+
         case 'opticalimage'
             % names = strsplit(fileparts(thisR.inputFile),'/');
             % ieObject = oiSet(ieObject,'name',names{end});
@@ -296,7 +299,7 @@ if isstruct(ieObject)
             if ~isequal(curWave(:),wave(:))
                 ieObject = oiSet(ieObject,'wave',wave);
             end
-            
+
         otherwise
             error('Unknown struct type %s\n',ieObject.type);
     end
