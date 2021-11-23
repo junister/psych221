@@ -192,7 +192,7 @@ else  % Linux & Mac
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
-
+    tic;
     [status, result] = dockerWrapper.render(renderCommand, outputFolder);
 
 % 
