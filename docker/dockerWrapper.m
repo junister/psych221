@@ -75,6 +75,10 @@ classdef dockerWrapper
                     if isempty(containerPBRTGPU)
                         containerPBRTGPU = dockerWrapper.startPBRTGPU();
                     end
+                    [status, result] = system(sprintf("docker ps | grep %s", containerPBRTGPU));
+                    if strlength(result) == 0
+                        containerPBRTGPU = dockerWrapper.startPBRTGPU();
+                    end
                     containerName = containerPBRTGPU;
                 otherwise
                     warning("No container found");
