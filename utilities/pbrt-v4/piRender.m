@@ -193,73 +193,76 @@ else  % Linux & Mac
         dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
 
-    dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
-    % Check whether GPU is available
-    [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
-    try
-        ourGPU = gpuDevice();
-        if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
-            GPUCheck = -1;
-        end
-    catch
-        % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
-    end
+    [status, result] = dockerWrapper.render(renderCommand, outputFolder);
 
-    if ~GPUCheck
-
-        % GPU is available
-        cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-            '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-            '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
-        renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
-
-        % switch based on first GPU available
-        % really should enumerate and look for the best one, I think
-        gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
-
-        switch gpuModels{1}
-            case 'teslat4'
-                dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
-                dockerContainerName = 'pbrt-gpu';
-            case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
-                dockerContainerName = 'pbrt-gpu';
-            otherwise
-                warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                dockerImageName = 'camerasimulation/pbrt-v4-cpu';
-                dockerContainerName = '';
-        end
-
-        % update docker command to use gpu
-        if ~isempty(dockerContainerName)
-            dockerFlags = sprintf('--gpus 1 -it --name %s', dockerContainerName);
-            dockerCommand  = strrep(dockerCommand,'-ti --rm',dockerFlags);
-        else
-            dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
-        end
-        cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
-    else
-        renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
-        cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
-    end
-end
-
-
-%% Determine if prefer to use existing files, and if they exist.
-tic;
-if native_pbrt
-    if verbosity > 2
-        [status, result] = system(command,'-echo');
-        [status, result] = system(command); % don't display pbrt output
-    end
-    if ~status
-        unix2dos(outFile, true);
-    end
-else
-    [status, result] = piRunCommand(cmd, 'verbose', verbosity);
+% 
+%     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
+%     % Check whether GPU is available
+%     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
+%     try
+%         ourGPU = gpuDevice();
+%         if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+%             GPUCheck = -1;
+%         end
+%     catch
+%         % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
+%     end
+% 
+%     if ~GPUCheck
+% 
+%         % GPU is available
+%         cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+%             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+%             '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+%         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
+% 
+%         % switch based on first GPU available
+%         % really should enumerate and look for the best one, I think
+%         gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
+% 
+%         switch gpuModels{1}
+%             case 'teslat4'
+%                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+%                 dockerContainerName = 'pbrt-gpu';
+%             case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
+%                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+%                 dockerContainerName = 'pbrt-gpu';
+%             otherwise
+%                 warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
+%                 dockerImageName = 'camerasimulation/pbrt-v4-cpu';
+%                 dockerContainerName = '';
+%         end
+% 
+%         % update docker command to use gpu
+%         if ~isempty(dockerContainerName)
+%             dockerFlags = sprintf('--gpus 1 -it --name %s', dockerContainerName);
+%             dockerCommand  = strrep(dockerCommand,'-ti --rm',dockerFlags);
+%         else
+%             dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
+%         end
+%         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
+%     else
+%         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+%         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
+%     end
+% end
+% 
+% 
+% %% Determine if prefer to use existing files, and if they exist.
+% tic;
+% if native_pbrt
+%     if verbosity > 2
+%         [status, result] = system(command,'-echo');
+%         [status, result] = system(command); % don't display pbrt output
+%     end
+%     if ~status
+%         unix2dos(outFile, true);
+%     end
+% else
+%     [status, result] = piRunCommand(cmd, 'verbose', verbosity);
 end
 elapsedTime = toc;
-% disp(result)
+disp(result)
 %% Check the return
 
 if status

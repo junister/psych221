@@ -115,6 +115,12 @@ classdef dockerWrapper
                 warning("Failed to start Docker container %s with message: %s", gpuContainer, result);
             end
         end
+
+        function [status, result] = render(renderCommand, outputFolder)
+            useContainer = dockerWrapper.getContainer('PBRT-GPU');
+            containerRender = sprintf("docker exec -it %s sh -c 'cd %s && %s'",useContainer, outputFolder, renderCommand);
+            [status, result] = system(containerRender);
+        end
     end
 
     methods
