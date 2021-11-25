@@ -88,7 +88,7 @@ dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
 if ispc
     renderDocker = dockerWrapper();
     renderDocker.dockerCommand = 'docker run';
-    renderDocker.dockerFlags = '-t';
+    renderDocker.dockerFlags = '-t --name ';
     renderDocker.dockerContainerName = dockercontainerName;
     renderDocker.workingDirectory = outputDir;
     renderDocker.dockerImageName = dockerimage;
@@ -115,6 +115,8 @@ end
 
 
 % Copy formatted pbrt files to local directory.
+% I think only assimp puts them in build, so why are we looking there?
+%cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], dockerWrapper.pathToLinux(outputDir));
 cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
 [status_copy, ~ ] = system(cpcmd);
 if status_copy

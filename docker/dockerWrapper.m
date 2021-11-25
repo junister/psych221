@@ -12,6 +12,9 @@ classdef dockerWrapper
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
+    % docker containers don't keep running on Windows unless we force them:
+    % e.g.: docker run -it --name Assimp-1351 <volumes> <image> ...
+    %sh -c "assimp export <args> && ping -t localhost > NUL"
     properties
         dockerContainerName = '';
         dockerImageName =  'camerasimulation/pbrt-v4-cpu:latest';
@@ -192,15 +195,16 @@ classdef dockerWrapper
 
             builtCommand = obj.dockerCommand; % baseline
             if ispc
-                flags = strrep(obj.dockerFlags, '-ti', '-i');
-                flags = strrep(flags, '-it', '-i');
+                flags = strrep(obj.dockerFlags, '-ti ', '-i ');
+                flags = strrep(flags, '-it ', '-i ');
+                flags = strrep(flags, '-t', '-t ');
             else
                 flags = obj.dockerFlags;
             end
             builtCommand = [builtCommand ' ' flags];
 
             if ~isequal(obj.dockerContainerName, '')
-                builtCommand = [builtCommand ' --name ' obj.dockerContainerName];
+                builtCommand = [builtCommand obj.dockerContainerName];
             end
 
             if ~isequal(obj.workingDirectory, '')
@@ -219,6 +223,7 @@ classdef dockerWrapper
             end
             if isequal(obj.dockerImageName, '')
                 %assume running container
+                builtCommand = [builtCommand ''];
             else
                 builtCommand = [builtCommand ' ' obj.dockerImageName];
             end
