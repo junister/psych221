@@ -28,6 +28,22 @@ classdef dockerWrapper
     end
 
     methods (Static)
+        function output = pathToLinux(inputPath)
+
+            if ispc
+                if isequal(fullfile(inputPath), inputPath)
+                    % assume we have a drive letter
+                    output = inputPath(3:end);
+                    output = strrep(output, '\','/');
+                else
+                    output = strrep(inputPath, '\','/');
+                end
+            else
+                output = inputPath;
+            end
+
+        end
+        
         function dockerImageName = getPBRTGPUImage()
 
             % Check whether GPU is available
@@ -144,20 +160,6 @@ classdef dockerWrapper
             % for depth or other files that have embedded "wrong" paths
         end
 
-        function output = pathToLinux(obj, inputPath)
-
-            if ispc
-                if isequal(fullfile(inputPath), inputPath)
-                    % assume we have a drive letter
-                    output = inputPath(3:end);
-                else
-                    output = strrep(output, '\','/');
-                end
-            else
-                output = strrep(inputPath, '\','/');
-            end
-
-        end
 
         function [outputArg, result] = run(obj)
             %RUN Execute Docker command

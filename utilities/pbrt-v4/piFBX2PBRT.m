@@ -37,11 +37,15 @@ dockerimage = 'camerasimulation/pbrt-v4-cpu';
 
 basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
 
-cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+cmd = ['assimp export ',dockerWrapper.pathToLinux(infile), ' ',[fname,'-converted.pbrt']];
 
 dockercontainerName = ['Assimp-',num2str(randi(2000))];
-dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
+dockercmd = sprintf(basecmd, dockercontainerName, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
 
+if ispc % can't use tty flag on Windows
+    dockercmd = strrep(dockercmd,"-ti","-i");
+    dockercmd = strrep(dockercmd,"-it", "-i");
+end
 [status,result] = system(dockercmd);
 
 if status
