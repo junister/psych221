@@ -141,7 +141,10 @@ classdef dockerWrapper
 
         function [status, result] = render(renderCommand, outputFolder)
             useContainer = dockerWrapper.getContainer('PBRT-GPU');
-            renderCommand = strrep(renderCommand, 'pbrt', 'pbrt --gpu');
+            
+            % okay this is a hack!
+            renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
+
             containerRender = sprintf("docker exec -it %s sh -c 'cd %s && %s'",useContainer, outputFolder, renderCommand);
             [status, result] = system(containerRender);
         end
