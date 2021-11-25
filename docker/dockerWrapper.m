@@ -69,7 +69,10 @@ classdef dockerWrapper
                         dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                         %dockerContainerName = 'pbrt-gpu';
                     case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                        dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere';
+                        %dockerContainerName = 'pbrt-gpu';
+                    case {'geforcegtx1080',  'nvidiageforcegtx1080'}
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal';
                         %dockerContainerName = 'pbrt-gpu';
                     otherwise
                         warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
