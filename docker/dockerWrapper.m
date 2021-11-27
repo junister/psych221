@@ -53,11 +53,11 @@ classdef dockerWrapper
                         dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                         %dockerContainerName = 'pbrt-gpu';
                     case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                        dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-bg';
                         %dockerContainerName = 'pbrt-gpu';
                     otherwise
                         warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                        dockerImageName = 'camerasimulation/pbrt-v4-cpu';
+                        dockerImageName = 'digitalprodev/pbrt-v4-cpu';
                         %dockerContainerName = '';
                 end
 
@@ -90,13 +90,15 @@ classdef dockerWrapper
             useImage = dockerWrapper.getPBRTGPUImage();
 
             % gpu version of pbrt needs to have access to optix and nvidia
-            cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-                '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-                '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+            % Experimenting with putting the libs in the docker image
             if ispc
+                cudalib = ''; % By default we don't have them
                 uName = 'Windows';
             else
                 uName = getenv('USER');
+                cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+                '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+                '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
             end
             gpuContainer = ['pbrt-gpu-' uName];
             % remove any existing container with the same name as it might
