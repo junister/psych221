@@ -72,7 +72,10 @@ classdef dockerWrapper
                         dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                         %dockerContainerName = 'pbrt-gpu';
                     case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                        dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere';
+                        %dockerContainerName = 'pbrt-gpu';
+                    case {'geforcegtx1080',  'nvidiageforcegtx1080'}
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal';
                         %dockerContainerName = 'pbrt-gpu';
                     otherwise
                         warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
@@ -141,7 +144,10 @@ classdef dockerWrapper
 
         function [status, result] = render(renderCommand, outputFolder)
             useContainer = dockerWrapper.getContainer('PBRT-GPU');
-            renderCommand = strrep(renderCommand, 'pbrt', 'pbrt --gpu');
+            
+            % okay this is a hack!
+            renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
+
             containerRender = sprintf("docker exec -it %s sh -c 'cd %s && %s'",useContainer, outputFolder, renderCommand);
             [status, result] = system(containerRender);
         end
