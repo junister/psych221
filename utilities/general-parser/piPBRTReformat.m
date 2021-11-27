@@ -129,7 +129,7 @@ end
 % I think only assimp puts them in build, so why are we looking there?
 %cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], dockerWrapper.pathToLinux(outputDir));
 cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
-[status_copy, result ] = system(cpcmd);
+[status_copy, result_copy ] = system(cpcmd);
 if status_copy
     disp('No converted file found.');
 end
