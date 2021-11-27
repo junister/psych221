@@ -79,13 +79,16 @@ piCopyFolder(inputdir, outputDir);
 dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 
 % Give a name to docker container
-dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
+% make sure we don't have the same container numbers every time
+% right answer is to housekeep them!
+rng('shuffle');
+dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(20000))];
 
 % The Docker base command includes 'toply'.  In that case, it does not
 % render the data, it just converts it.
 % basecmd = 'docker run -t --name %s --volume="%s":"%s" %s pbrt --toply %s > %s && ls';
 %% Build the command
-if ispc
+if false % disable for now ispc
     renderDocker = dockerWrapper();
     renderDocker.dockerCommand = 'docker run';
     renderDocker.dockerFlags = '-t --name ';
@@ -94,20 +97,28 @@ if ispc
     renderDocker.dockerImageName = dockerimage;
     renderDocker.localVolumePath = volume;
     renderDocker.targetVolumePath = volume;
-    templateCommand = '/bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
-    renderDocker.command = sprintf(templateCommand,  renderDocker.pathToLinux(fname), [thisName, ext]);
+    templateCommand = 'sh -c "pbrt --toply %s > %s && ls mesh_*.ply"';
+    renderDocker.command = sprintf(templateCommand,  renderDocker.pathToLinux(fname), ...
+        dockerWrapper.pathToLinux(outputFull));
     %% Run the command
     % The variable 'result' has the formatted data.
     [~, result] = renderDocker.run();
         
 else
-    basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
-    dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, [thisName, ext]);
+    if ispc
+        flags = '-i ';
+    else
+        flags = '-it ';
+    end
+        
+    basecmd = 'docker run %s --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
+    dockercmd = sprintf(basecmd, flags, dockercontainerName, volume, ...
+        dockerWrapper.pathToLinux(volume), dockerimage, dockerWrapper.pathToLinux(fname), [thisName, ext]);
     % dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
     % disp(dockercmd)
     %% Run the command
     % The variable 'result' has the formatted data.
-    [~, result] = system(dockercmd);
+    [status_format, result] = system(dockercmd);
 end
 
 
@@ -118,7 +129,7 @@ end
 % I think only assimp puts them in build, so why are we looking there?
 %cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], dockerWrapper.pathToLinux(outputDir));
 cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
-[status_copy, ~ ] = system(cpcmd);
+[status_copy, result ] = system(cpcmd);
 if status_copy
     disp('No converted file found.');
 end
@@ -141,7 +152,7 @@ if ~contains(outputFull,'_materials.pbrt') ||...
     fclose(fileIDin);
     fclose(fileIDout);
     
-    movefile(outputFullTmp, outputFull);
+    movefile(outputFullTmp, outputFull, 'f');
 end
 %%
 

@@ -30,9 +30,10 @@ cd(nativeDir);
 
 % build docker base cmd
 dockerimage = 'camerasimulation/pbrt-v4-cpu';
-dockercontainerName = ['Assimp-',num2str(randi(2000))];
+rng('shuffle');
+dockercontainerName = ['Assimp-',num2str(randi(20000))];
 
-if ispc
+if false % not sure we need this ispc
     % Example of what works:
     % docker run -ti --name Assimp-9995 <vols> <img> ... 
     %sh -c "assimp export /iset/iset3d-v4/data/V4/teapot-set/TeaTime.fbx TeaTime-converted.pbrt && ping localhost > NUL"
@@ -54,7 +55,7 @@ end
 if ispc % can't use tty flag on Windows
     dockercmd = strrep(dockercmd,"-ti ","-i ");
     dockercmd = strrep(dockercmd,"-it ", "-i ");
-    [status,result] = system(dockercmd,'-echo');
+    [status,result] = system(dockercmd); %,'-echo');
 else
     [status,result] = system(dockercmd);
 end
