@@ -8,49 +8,68 @@ function outfile = piFBX2PBRT(infile)
 % Output
 %   outfile (pbrt)
 %
-% Some day we will Dockerize assimp
-%
 % See also
 %  
 
 %% Find the input file and specify the converted output file
 
-[indir, fname,~] = fileparts(infile);
-outfile = fullfile(indir, [fname,'-converted.pbrt']);
+nativeDir = fileparts(infile); % need native & Linux names on Windows
+[indir, fname,~] = fileparts(dockerWrapper.pathToLinux(infile));
+
+% We need to wind up with a Native path on Windows
+% so that subsequent code finds the file
+outfile = fullfile(nativeDir, [fname,'-converted.pbrt']);
 currdir = pwd;
-cd(indir);
+
+% this is a little odd for Windows as I don't think we can cd
+% to the desired directory so that the cp command after assimp
+% works with a local name.
+cd(nativeDir);
 
 %% Runs assimp command
-%{
-% Windows doesn't add assimp dir to PATH by default
-% Not sure of the best way to handle that. Maybe we can even just ship the
-% binaries and point to them?
-% if ispc
-%     assimpBinary = '"C:\Program Files (x86)\Assimp\bin\assimp"';
-% else
-%     assimpBinary = 'assimp';
-% end
-%}
+
 % build docker base cmd
-
 dockerimage = 'camerasimulation/pbrt-v4-cpu';
+rng('shuffle');
+dockercontainerName = ['Assimp-',num2str(randi(20000))];
 
-basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+if false % not sure we need this ispc
+    % Example of what works:
+    % docker run -ti --name Assimp-9995 <vols> <img> ... 
+    %sh -c "assimp export /iset/iset3d-v4/data/V4/teapot-set/TeaTime.fbx TeaTime-converted.pbrt && ping localhost > NUL"
+    basecmd = 'docker run -ti -d --name %s --volume="%s":"%s" %s %s';
+    runCmd = ['assimp export ',dockerWrapper.pathToLinux(infile), ' ',[fname,'-converted.pbrt']];
+    % for Windows need a wrapper
+    wrapCmd = ['sh -c " apt install -y iputils-ping && ' runCmd ' && ping localhost > NUL "'];
+        
+    dockercmd = sprintf(basecmd, dockercontainerName, nativeDir, dockerWrapper.pathToLinux(indir), dockerimage, wrapCmd);
 
-cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+else
+    basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+    cmd = ['assimp export ',dockerWrapper.pathToLinux(infile), ' ',[fname,'-converted.pbrt']];
+    dockercmd = sprintf(basecmd, dockercontainerName, nativeDir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
+end
 
-dockercontainerName = ['Assimp-',num2str(randi(2000))];
-dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
 
-[status,result] = system(dockercmd);
+
+if ispc % can't use tty flag on Windows
+    dockercmd = strrep(dockercmd,"-ti ","-i ");
+    dockercmd = strrep(dockercmd,"-it ", "-i ");
+    [status,result] = system(dockercmd); %,'-echo');
+else
+    [status,result] = system(dockercmd);
+end
 
 if status
     disp(result);
     error('FBX to PBRT conversion failed.')
 end
 
-if ~ispc
-    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
+% assimp in the docker container leaves our converted file in an
+% odd place. We need to rescue it!
+if true % ~ispc -- wrapper doesn't work right here.
+    % can't use native filesep as we want linux version always
+    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], nativeDir);
     [status_copy, result ] = system(cpcmd);
 else
     cpDocker = dockerWrapper();
@@ -72,8 +91,9 @@ if status_copy
     error('Copy file from docker container failed.\n ');
 end
 
+% sometimes we need it later!
 % remove docker container
-rmCmd = sprintf('docker rm %s',dockercontainerName);
-system(rmCmd);
-end
+%rmCmd = sprintf('docker rm %s',dockercontainerName);
+%system(rmCmd);
+%end
 

@@ -12,6 +12,9 @@ classdef dockerWrapper
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
+    % docker containers don't keep running on Windows unless we force them:
+    % e.g.: docker run -it --name Assimp-1351 <volumes> <image> ...
+    %sh -c "assimp export <args> && ping -t localhost > NUL"
     properties
         dockerContainerName = '';
         dockerImageName =  'camerasimulation/pbrt-v4-cpu:latest';
@@ -28,6 +31,22 @@ classdef dockerWrapper
     end
 
     methods (Static)
+        function output = pathToLinux(inputPath)
+
+            if ispc
+                if isequal(fullfile(inputPath), inputPath)
+                    % assume we have a drive letter
+                    output = inputPath(3:end);
+                    output = strrep(output, '\','/');
+                else
+                    output = strrep(inputPath, '\','/');
+                end
+            else
+                output = inputPath;
+            end
+
+        end
+        
         function dockerImageName = getPBRTGPUImage()
 
             % Check whether GPU is available
@@ -54,6 +73,9 @@ classdef dockerWrapper
                         %dockerContainerName = 'pbrt-gpu';
                     case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
                         dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-bg';
+                        %dockerContainerName = 'pbrt-gpu';
+                    case {'geforcegtx1080',  'nvidiageforcegtx1080'}
+                        dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal';
                         %dockerContainerName = 'pbrt-gpu';
                     otherwise
                         warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
@@ -90,9 +112,10 @@ classdef dockerWrapper
             useImage = dockerWrapper.getPBRTGPUImage();
 
             % gpu version of pbrt needs to have access to optix and nvidia
-            % Experimenting with putting the libs in the docker image
+            cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+                '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+                '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
             if ispc
-                cudalib = ''; % By default we don't have them
                 uName = 'Windows';
             else
                 uName = getenv('USER');
@@ -124,7 +147,10 @@ classdef dockerWrapper
 
         function [status, result] = render(renderCommand, outputFolder)
             useContainer = dockerWrapper.getContainer('PBRT-GPU');
-            renderCommand = strrep(renderCommand, 'pbrt', 'pbrt --gpu');
+            
+            % okay this is a hack!
+            renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
+
             containerRender = sprintf("docker exec -it %s sh -c 'cd %s && %s'",useContainer, outputFolder, renderCommand);
             [status, result] = system(containerRender);
         end
@@ -192,15 +218,16 @@ classdef dockerWrapper
 
             builtCommand = obj.dockerCommand; % baseline
             if ispc
-                flags = strrep(obj.dockerFlags, '-ti', '-i');
-                flags = strrep(flags, '-it', '-i');
+                flags = strrep(obj.dockerFlags, '-ti ', '-i ');
+                flags = strrep(flags, '-it ', '-i ');
+                flags = strrep(flags, '-t', '-t ');
             else
                 flags = obj.dockerFlags;
             end
             builtCommand = [builtCommand ' ' flags];
 
             if ~isequal(obj.dockerContainerName, '')
-                builtCommand = [builtCommand ' --name ' obj.dockerContainerName];
+                builtCommand = [builtCommand obj.dockerContainerName];
             end
 
             if ~isequal(obj.workingDirectory, '')
@@ -219,6 +246,7 @@ classdef dockerWrapper
             end
             if isequal(obj.dockerImageName, '')
                 %assume running container
+                builtCommand = [builtCommand ''];
             else
                 builtCommand = [builtCommand ' ' obj.dockerImageName];
             end
