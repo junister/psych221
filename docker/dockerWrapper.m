@@ -111,12 +111,11 @@ classdef dockerWrapper
         function gpuContainer = startPBRTGPU()
             useImage = dockerWrapper.getPBRTGPUImage();
 
-            % gpu version of pbrt needs to have access to optix and nvidia
-            cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-                '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-                '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+            rng('shuffle'); % make random numbers random
+            uniqueid = randi(20000);
             if ispc
-                uName = 'Windows';
+                cudalib = ''; % we build them into the docker image
+                uName = ['Windows' int2str(uniqueid)];
             else
                 uName = getenv('USER');
                 cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
@@ -129,7 +128,7 @@ classdef dockerWrapper
             %[status, result] = system(sprintf('docker container rm -f %s', gpuContainer));
 
             % Starting as background we need to allow for all scenes
-            workDir = fullfile(piRootPath(), "local");
+            workDir = fullfile(piRootPath(), 'local');
             volumeMap = sprintf("-v %s:%s", workDir, dockerWrapper.pathToLinux(workDir));
             placeholderCommand = 'bash';
 
@@ -151,7 +150,14 @@ classdef dockerWrapper
             % okay this is a hack!
             renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
 
-            containerRender = sprintf("docker exec -it %s sh -c 'cd %s && %s'",useContainer, outputFolder, renderCommand);
+            % Windows doesn't seem to like the t flag
+            if ispc
+                flags = '-i ';
+            else
+                flags = '-it ';
+            end
+            
+            containerRender = sprintf("docker exec %s %s sh -c 'cd %s && %s'",flags, useContainer, outputFolder, renderCommand);
             [status, result] = system(containerRender);
         end
     end
@@ -171,22 +177,7 @@ classdef dockerWrapper
         function output = convertPathsInFile(obj, input)
             % for depth or other files that have embedded "wrong" paths
         end
-
-        function output = pathToLinux(obj, inputPath)
-
-            if ispc
-                if isequal(fullfile(inputPath), inputPath)
-                    % assume we have a drive letter
-                    output = inputPath(3:end);
-                else
-                    output = strrep(output, '\','/');
-                end
-            else
-                output = strrep(inputPath, '\','/');
-            end
-
-        end
-
+        
         function [outputArg, result] = run(obj)
             %RUN Execute Docker command
 
