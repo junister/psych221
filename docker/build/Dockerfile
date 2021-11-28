@@ -1,11 +1,10 @@
 
-# Dockerize Vistalabs pbrt-v4 for GPU.
+# Dockerize Vistalab's pbrt-v4 for GPU.
 
- FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
-# try a skinny version
-#FROM digitalprodev/nvidia-x64:latest
+FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
 
 MAINTAINER Zhenyi Liu <zhenyiliu@stanford.edu>
+# Updated with debug tools & optix libs by David Cardinal
 
 ENV DEBIAN_FRONTEND=noninteractive
 
