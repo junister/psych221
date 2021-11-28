@@ -1,7 +1,9 @@
 
 # Dockerize Vistalabs pbrt-v4 for GPU.
 
-FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
+ FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
+# try a skinny version
+#FROM digitalprodev/nvidia-x64:latest
 
 MAINTAINER Zhenyi Liu <zhenyiliu@stanford.edu>
 
@@ -13,6 +15,10 @@ apt-get install -yq software-properties-common && \
 add-apt-repository ppa:graphics-drivers && \
 add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
 apt-get update
+
+
+# add bash so we can work interactively for debugging
+RUN apt-get install -yq bash vim
 
 RUN apt-get update -yq && apt-get install -yq --no-install-recommends \
 	build-essential \
@@ -31,6 +37,13 @@ RUN apt-get update -yq && apt-get install -yq --no-install-recommends \
        ca-certificates \
        curl && \
     rm -rf /var/lib/apt/lists/*
+
+# Copy Nvidia libraries so the runtime system doesn't need them
+COPY libs/libnvoptix.so.1 /usr/lib/x86_64-linux-gnu/libnvoptix.so.1
+COPY libs/libnvoptix.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02
+COPY libs/libnvidia-rtcore.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02
+COPY libs/libcuda.so.470.57.02 /usr/lib/x86_64-linux-gnu/libcuda.so.470.57.02
+COPY libs/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
 
 # Update cmake
 RUN apt-get purge cmake -y && apt autoremove -y \
