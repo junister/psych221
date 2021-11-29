@@ -1,5 +1,18 @@
 classdef dockerWrapper
-    %DOCKER Unified way to call docker containers for iset
+    %DOCKER Class providing accelerated pbrt on GPU performance
+    %
+    % In principle, when simply used for render acceleration 
+    % on a GPU, it should be user-transparent.
+    %
+    % It operates by having piRender() call it to determine the
+    % best docker image to run (ideally one with GPU support).
+    %
+    % It then starts that image as a persistent, named, container.
+    % Calls to piRender() will then use dockerWrapper to do the
+    % rendering in the running container, avoiding startup overhead
+    % (which is nearly 20 seconds per render without this approach).
+    
+    % FUTURE: Potenially unified way to call docker containers for iset
     %   An attempt to resolve at least some of the myriad platform issues
     %   Not clear whether to make this generic or just for pbrt, in which
     %   case we could handle the isnative binary case also?
@@ -12,6 +25,8 @@ classdef dockerWrapper
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
+    % For Windows we also need additional code to allow assimp & toply
+    % to be in the Docker container:
     % docker containers don't keep running on Windows unless we force them:
     % e.g.: docker run -it --name Assimp-1351 <volumes> <image> ...
     %sh -c "assimp export <args> && ping -t localhost > NUL"
