@@ -37,12 +37,13 @@ RUN apt-get update -yq && apt-get install -yq --no-install-recommends \
        curl && \
     rm -rf /var/lib/apt/lists/*
 
+# EXPERIMENTAL!!
 # Copy Nvidia libraries so the runtime system doesn't need them
-COPY libs/libnvoptix.so.1 /usr/lib/x86_64-linux-gnu/libnvoptix.so.1
-COPY libs/libnvoptix.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02
-COPY libs/libnvidia-rtcore.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02
-COPY libs/libcuda.so.470.57.02 /usr/lib/x86_64-linux-gnu/libcuda.so.470.57.02
-COPY libs/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
+#COPY libs/libnvoptix.so.1 /usr/lib/x86_64-linux-gnu/libnvoptix.so.1
+#COPY libs/libnvoptix.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02
+#COPY libs/libnvidia-rtcore.so.470.57.02 /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02
+#COPY libs/libcuda.so.470.57.02 /usr/lib/x86_64-linux-gnu/libcuda.so.470.57.02
+#COPY libs/libcuda.so.1 /usr/lib/x86_64-linux-gnu/libcuda.so.1
 
 # Update cmake
 RUN apt-get purge cmake -y && apt autoremove -y \
