@@ -50,7 +50,7 @@ RUN apt-get purge cmake -y && apt autoremove -y \
 && tar -xzvf cmake-3.18.1.tar.gz \
 && cd cmake-3.18.1 \
 && ./bootstrap \
-&& make -j4 \
+&& make -j12 \
 && make install
 
 
@@ -74,7 +74,7 @@ RUN apt-get update -yq && apt-get install -y git \
 
 WORKDIR /pbrt/pbrt-v4/build
 RUN cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DPBRT_OPTIX7_PATH=/pbrt/NVIDIA-OptiX-SDK-7.2.0-linux64-x86_64/ .. \
-&& make -j8
+&& make -j12
 
 ENV PATH $PATH:/pbrt/pbrt-v4/build
 
