@@ -16,16 +16,17 @@ p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
 p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu',@ischar);
 p.addParameter('rendertype','radiance',@ischar);
+p.addOptional('ourdocker','');
 
 p.parse(thisR,varargin{:});
-thisDocker = p.Results.dockerimagename;
+ourDocker = p.Results.ourdocker;
 renderType = p.Results.rendertype;
 
 %%
 piWrite(thisR);
 
 [obj,results] = piRender(thisR,...
-    'docker image name',thisDocker);
+    'ourdocker',ourDocker);
 
 switch obj.type
     case 'scene'

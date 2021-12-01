@@ -1,8 +1,12 @@
-function [status, result] = render(renderCommand, outputFolder)
-useContainer = dockerWrapper.getContainer('PBRT-GPU');
+function [status, result] = render(obj, renderCommand, outputFolder)
 
-% okay this is a hack!
-renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
+if obj.gpuRendering == true
+    useContainer = obj.getContainer('PBRT-GPU');
+    % okay this is a hack!
+    renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
+else
+    useContainer = obj.getContainer('PBRT-CPU');
+end
 
 % Windows doesn't seem to like the t flag
 if ispc

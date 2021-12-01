@@ -1,4 +1,4 @@
-function status = config(varargin)
+function status = config(obj, varargin)
 % Configure the Matlab environment and initiate the docker-machine
 %
 %   status = dockerWrapper.config(varargin)
@@ -26,7 +26,7 @@ function status = config(varargin)
 p = inputParser;
 p.addParameter('machine', 'default', @ischar);
 p.addOptional('debug', false, @islogical);
-p.addOptional('gpuRendering', 'true', @logical);
+p.addOptional('gpuRendering', true, @islogical);
 p.addOptional('useContext', '', @ischar); % experimental
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 
@@ -35,16 +35,16 @@ p.parse(varargin{:})
 args = p.Results;
 
 if ~isempty(args.gpuRendering)
-    dockerWrapper.gpuRendering = args.gpuRendering;
+    obj.gpuRendering = args.gpuRendering;
 end
 
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.useContext)
-    dockerWrapper.renderingContext = args.useContext;
+    obj.renderingContext = args.useContext;
     % since the remote system might have a different GPU
     % currently we need to have that passed in as well
     if ~isempty(args.remoteImage)
-        dockerWrapper.remoteImage = args.remoteImage;
+        obj.remoteImage = args.remoteImage;
     end
 end
 
@@ -156,7 +156,6 @@ if ismac
         if args.debug
             disp('Docker configured successfully!');
         end
-        dockerWrapper.config(args);
     else
         error('Docker could not be configured: %s', result);
     end
@@ -168,7 +167,6 @@ elseif isunix
     [status, result] = system('docker ps -a');
     if status == 0
         if args.debug; disp('Docker configured successfully!'); end
-        dockerWrapper.config(args);
     else
         if (args.debug); fprintf('Docker status: %d\n',status); end
         error('Docker not configured: %s', result);
@@ -178,9 +176,10 @@ elseif ispc
     [status, result] = system('docker ps -a');
     if status == 0
         if args.debug; disp('Docker configured successfully!'); end
-        dockerWrapper.config(args);
     else
         if (args.debug); fprintf('Docker status: %d\n',status); end
         error('Docker not configured: %s', result);
     end
 end
+
+% now that we have docker ready to go, ...

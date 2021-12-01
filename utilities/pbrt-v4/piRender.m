@@ -93,12 +93,12 @@ p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 p.addParameter('reflectancerender', false, @islogical);
-p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu',@ischar);
+p.addParameter('ourdocker','');
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
 p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(thisR,varargin{:});
-dockerImageName  = p.Results.dockerimagename;
+ourDocker = p.Results.ourdocker;
 scalePupilArea = p.Results.scalepupilarea;
 meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
@@ -124,10 +124,6 @@ pbrtFile = thisR.outputFile;
 %  -- When pbrt is launched it needs to know how to navigate to the
 %  approprite scene
 %
-%  I think we should probably give up on native_pbrt, as it is too
-%  confusing, and was only being used on Windows
-%
-
 
 %% Build the docker command
 dockerCommand   = 'docker run -ti --rm';
@@ -179,19 +175,21 @@ if ispc  % Windows
     %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
     linuxOut = char(join(folderBreak,"/"));
 
-    dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
-
-    cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
+    % legacy
+    %dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
+    %cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 else  % Linux & Mac
 
     renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
+        % Legacy
+        %dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
 end
 tic;
-[status, result] = dockerWrapper.render(renderCommand, outputFolder);
+
+[status, result] = ourDocker.render(renderCommand, outputFolder);
 elapsedTime = toc;
 disp(result)
 

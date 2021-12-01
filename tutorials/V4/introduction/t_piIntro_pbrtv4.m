@@ -26,7 +26,7 @@
 %   
 %% Init
 ieInit;
-dockerWrapper.init('gpuRendering', false);
+ourDocker = dockerWrapper('gpuRendering', false);
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
@@ -60,7 +60,7 @@ thisR.set('light', 'add', newLight);
 
 %% write the data out
 
-scene = piWRS(thisR);
+scene = piWRS(thisR,'ourDocker',ourDocker);
  %{
 tic
 piWrite(thisR);
