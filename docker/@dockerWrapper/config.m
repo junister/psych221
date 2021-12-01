@@ -1,7 +1,7 @@
 function status = config(varargin)
 % Configure the Matlab environment and initiate the docker-machine
 %
-%   status = piDockerConfig(varargin)
+%   status = dockerWrapper.config(varargin)
 %
 % INPUTS:
 %    'machine' - [Optional, type=char, default='default']
@@ -17,19 +17,37 @@ function status = config(varargin)
 %    [status] = piDockerConfig('machine', 'default', 'debug', true);
 %
 % (C) Stanford VISTA Lab, 2016
+%
+% Remote server code added by D. Cardinal 2021
+%
 
 %% Parse input arguments
 
 p = inputParser;
 p.addParameter('machine', 'default', @ischar);
 p.addOptional('debug', false, @islogical);
-p.addOptional('gpuRendering', 'true', @boolean);
-p.addOptional('remoteHost', '', @ischar); % experimental
+p.addOptional('gpuRendering', 'true', @logical);
+p.addOptional('useContext', '', @ischar); % experimental
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 
 p.parse(varargin{:})
 
 args = p.Results;
+
+if ~isempty(args.gpuRendering)
+    dockerWrapper.gpuRendering = args.gpuRendering;
+end
+
+% for remote rendering we need to be passed the docker context to use
+if ~isempty(args.useContext)
+    dockerWrapper.renderingContext = args.useContext;
+    % since the remote system might have a different GPU
+    % currently we need to have that passed in as well
+    if ~isempty(args.remoteImage)
+        dockerWrapper.remoteImage = args.remoteImage;
+    end
+end
+
 
 %% Configure Matlab ENV for the machine
 

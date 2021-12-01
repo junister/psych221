@@ -26,7 +26,7 @@
 %   
 %% Init
 ieInit;
-dockerWrapper.init;
+dockerWrapper.init('gpuRendering', false);
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT

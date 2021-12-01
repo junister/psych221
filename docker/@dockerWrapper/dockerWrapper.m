@@ -49,11 +49,12 @@ classdef dockerWrapper
 
     methods (Static)
 
-        % set up which containers and which host
-        init() %separate file
+        % housekeeping routines in separate files:
+        init(varargin) %separate file
         [dockerExists, status, result] = exists() % separate file
         status = config(varargin) % separate file
-                
+        [status, result] = render(renderCommand, outputFolder)       
+        
         function output = pathToLinux(inputPath)
 
             if ispc
@@ -167,22 +168,7 @@ classdef dockerWrapper
             end
         end
 
-        function [status, result] = render(renderCommand, outputFolder)
-            useContainer = dockerWrapper.getContainer('PBRT-GPU');
-            
-            % okay this is a hack!
-            renderCommand = replaceBetween(renderCommand, 1,4, 'pbrt --gpu ');
-
-            % Windows doesn't seem to like the t flag
-            if ispc
-                flags = '-i ';
-            else
-                flags = '-it ';
-            end
-            
-            containerRender = sprintf("docker exec %s %s sh -c 'cd %s && %s'",flags, useContainer, outputFolder, renderCommand);
-            [status, result] = system(containerRender);
-        end
+    
     end
 
     methods
