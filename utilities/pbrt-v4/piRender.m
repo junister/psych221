@@ -141,11 +141,6 @@ end
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
-% Experiment with calling a native version of pbrt on Windows
-% As of March, 2021 doesn't seem to make a difference on my test
-% machines, but it does work as long as you use the spectral version
-% of pbrt. So I've set the default to false.
-native_pbrt =   false;
 if ispc  % Windows
     currFile = pbrtFile; % in v3 we could process several files, not sure about v4
 
@@ -255,15 +250,6 @@ disp(result)
 % 
 % %% Determine if prefer to use existing files, and if they exist.
 % tic;
-% if native_pbrt
-%     if verbosity > 2
-%         [status, result] = system(command,'-echo');
-%         [status, result] = system(command); % don't display pbrt output
-%     end
-%     if ~status
-%         unix2dos(outFile, true);
-%     end
-% else
 %     [status, result] = piRunCommand(cmd, 'verbose', verbosity);
 
 %% Check the return

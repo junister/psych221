@@ -1,4 +1,4 @@
-function status = piDockerConfig(varargin)
+function status = config(varargin)
 % Configure the Matlab environment and initiate the docker-machine
 %
 %   status = piDockerConfig(varargin)

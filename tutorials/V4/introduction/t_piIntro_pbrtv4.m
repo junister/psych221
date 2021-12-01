@@ -1,26 +1,10 @@
 %% pbrt v4 introduction 
-% User need to pull the docker image:
+% Users need to pull the docker image(s):
 %     docker pull camerasimulation/pbrt-v4-cpu
 %
-% OpenExr libraries are needed for the matlab openexr MEX file.
-% The issue is caused by openexr version…, 
-% Use this version openexr2.5.3:
-% https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.3.zip
-% To install, download and unzip and in a terminal run
-%   mkdir build
-%   cd build
-%   cmake ../
-%   make
-%   make install
-%
-% Then go to ISET3d=v4/external/openexr and create the MEX file
-%   make
-%
-% This produces several mex files that we use for reading the rendered data
-%
-%  exrinfo.mexmaci64            exrreadchannels.mexmaci64
-%  exrwritechannels.mexmaci64   exrread.mexmaci64
-%  exrwrite.mexmaci64   
+% EXPERIMENTAL FOR GPU SUPPORT!
+% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
+% and/or     docker pull camerasimulation/pbrt-v4-t4  
 % 
 % CPU only
 % blender uses a coordinate system like this:
@@ -42,7 +26,7 @@
 %   
 %% Init
 ieInit;
-if ~piDockerExists, piDockerConfig; end
+dockerWrapper.init;
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT

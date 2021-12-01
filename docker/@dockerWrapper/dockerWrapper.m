@@ -33,7 +33,9 @@ classdef dockerWrapper
     properties
         dockerContainerName = '';
         dockerImageName =  'camerasimulation/pbrt-v4-cpu:latest';
+        dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
+        dockerRemoteHost = '';
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
@@ -46,6 +48,12 @@ classdef dockerWrapper
     end
 
     methods (Static)
+
+        % set up which containers and which host
+        init() %separate file
+        [dockerExists, status, result] = exists() % separate file
+        status = config(varargin) % separate file
+                
         function output = pathToLinux(inputPath)
 
             if ispc
