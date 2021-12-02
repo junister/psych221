@@ -69,7 +69,7 @@ classdef dockerWrapper
     end
     methods
         function ourContainer = startPBRT(obj, processorType)
-            if isequal(processorType, 'PBRT-GPU')
+            if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
             else
                 useImage = obj.getPBRTImage('CPU');
