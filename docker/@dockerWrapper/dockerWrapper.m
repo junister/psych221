@@ -64,9 +64,18 @@ classdef dockerWrapper
 
         end
 
-
+        % for switching docker to other (typically remote) context
+        % and then back. Static as it is system-wide
+        function setContext(useContext)
+            if ~isempty(useContext)
+                system(sprintf('docker context use %s', useContext));
+            else
+                system('docker context use default');
+            end
+        end
 
     end
+    
     methods
         function ourContainer = startPBRT(obj, processorType)
             if isequal(processorType, 'GPU')
@@ -80,7 +89,7 @@ classdef dockerWrapper
                 cudalib = ''; % we build them into the docker image
                 uName = ['Windows' int2str(uniqueid)];
             else
-                uName = getenv('USER');
+                uName = [getenv('USER') int2str(uniqueid)];
                 cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
                     '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
                     '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
@@ -102,7 +111,9 @@ classdef dockerWrapper
 
             % set up the baseline command
             if isequal(processorType, 'GPU')
-                dCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8010:81 %s', ourContainer, volumeMap);
+                % what if we don't listen. Do we still run?
+                dCommand = sprintf('docker run -d -it --gpus 1 --name %s  %s', ourContainer, volumeMap);
+%                dCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8010:81 %s', ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
                 dCommand = sprintf('docker run -d -it --name %s -p 8010:81 %s', ourContainer, volumeMap);
