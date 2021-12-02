@@ -15,6 +15,13 @@ else
     flags = '-it ';
 end
 
-containerRender = sprintf("docker exec %s %s sh -c 'cd %s && %s'",flags, useContainer, outputFolder, renderCommand);
+if ~isempty(obj.renderContext)
+    useContext = obj.renderContext;
+else
+    useContext = 'default';
+end
+        
+
+containerRender = sprintf("docker --context %s exec %s %s sh -c 'cd %s && %s'",useContext, flags, useContainer, outputFolder, renderCommand);
 [status, result] = system(containerRender);
 end

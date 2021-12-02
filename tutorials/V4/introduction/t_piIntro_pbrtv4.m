@@ -26,7 +26,8 @@
 %   
 %% Init
 ieInit;
-ourDocker = dockerWrapper('gpuRendering', true);
+ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'beluga','remoteImage', ...
+    'pbrt-v4-gpu-ampere-bg');
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT

@@ -1,4 +1,4 @@
-classdef dockerWrapper
+classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
     % In principle, when simply used for render acceleration
@@ -31,7 +31,7 @@ classdef dockerWrapper
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
-        useContext = '';
+        renderContext = '';
         remoteImage = '';
         workingDirectory = '';
         localVolumePath = '';
@@ -149,6 +149,10 @@ classdef dockerWrapper
             persistent containerPBRTCPU;
             switch containerType
                 case 'PBRT-GPU'
+                    % if we have one start our container on remote machine
+                    if ~isempty(obj.renderContext)
+                        dockerWrapper.setContext(obj.renderContext);
+                    end
                     if isempty(containerPBRTGPU)
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
@@ -157,6 +161,7 @@ classdef dockerWrapper
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
                     containerName = containerPBRTGPU;
+                    dockerWrapper.setContext('');
                 case 'PBRT-CPU'
                     if isempty(containerPBRTCPU)
                         containerPBRTCPU = obj.startPBRT('CPU');

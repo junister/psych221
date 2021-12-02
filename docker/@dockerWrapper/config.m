@@ -27,7 +27,7 @@ p = inputParser;
 p.addParameter('machine', 'default', @ischar);
 p.addOptional('debug', false, @islogical);
 p.addOptional('gpuRendering', true, @islogical);
-p.addOptional('useContext', '', @ischar); % experimental
+p.addOptional('renderContext', '', @ischar); % experimental
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 
 p.parse(varargin{:})
@@ -39,8 +39,8 @@ if ~isempty(args.gpuRendering)
 end
 
 % for remote rendering we need to be passed the docker context to use
-if ~isempty(args.useContext)
-    obj.renderingContext = args.useContext;
+if ~isempty(args.renderContext)
+    obj.renderContext = args.renderContext;
     % since the remote system might have a different GPU
     % currently we need to have that passed in as well
     if ~isempty(args.remoteImage)
