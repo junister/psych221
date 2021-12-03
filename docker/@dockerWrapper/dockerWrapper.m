@@ -33,6 +33,7 @@ classdef dockerWrapper < handle
         gpuRendering = true;
         renderContext = '';
         remoteImage = '';
+        remoteRoot = ''; % we need to know where to map on the remote system
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
@@ -86,14 +87,13 @@ classdef dockerWrapper < handle
             rng('shuffle'); % make random numbers random
             uniqueid = randi(20000);
             if ispc
-                cudalib = ''; % we build them into the docker image
                 uName = ['Windows' int2str(uniqueid)];
             else
                 uName = [getenv('USER') int2str(uniqueid)];
+            end
                 cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
                     '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
                     '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
-            end
             if isequal(processorType, 'GPU')
                 ourContainer = ['pbrt-gpu-' uName];
             else
@@ -105,8 +105,18 @@ classdef dockerWrapper < handle
             %[status, result] = system(sprintf('docker container rm -f %s', gpuContainer));
 
             % Starting as background we need to allow for all scenes
-            workDir = fullfile(piRootPath(), 'local');
-            volumeMap = sprintf("-v %s:%s", workDir, dockerWrapper.pathToLinux(workDir));
+            % if remote then need to figure out correct path
+            if ~isempty(obj.remoteRoot)
+                mountData = [obj.remoteRoot 'local'];
+            else
+                mountData = fullfile(piRootPath(), 'local');
+                if ispc && isequal(obj.dockerContainerType, 'linux')
+                    mountData = dockerWrapper.pathToLinux(mountData);
+                end
+            end
+            % is our mount point always the same?
+            mountPoint = '/iset/iset3d-v4/local/';
+            volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
             placeholderCommand = 'bash';
 
             % set up the baseline command
@@ -179,6 +189,12 @@ classdef dockerWrapper < handle
 
         function dockerImageName = getPBRTImage(obj, processorType)
 
+            % if we are told to run on a remote machine with a
+            % particular image, that takes precedence.
+            if ~isempty(obj.remoteImage)
+                dockerImageName = obj.remoteImage;
+                return;
+            end
             if isequal(processorType, 'GPU')
 
                 % Check whether GPU is available
@@ -200,7 +216,7 @@ classdef dockerWrapper < handle
                     gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
                     switch gpuModels{1}
-                        case 'teslat4'
+                        case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                             %dockerContainerName = 'pbrt-gpu';
                         case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}

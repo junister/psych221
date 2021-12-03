@@ -29,6 +29,7 @@ p.addOptional('debug', false, @islogical);
 p.addOptional('gpuRendering', true, @islogical);
 p.addOptional('renderContext', '', @ischar); % experimental
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
+p.addOptional('remoteRoot','',@ischar); % for different remote path
 
 p.parse(varargin{:})
 
@@ -38,6 +39,9 @@ if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end
 
+if ~isempty(args.remoteRoot)
+    obj.remoteRoot = args.remoteRoot;
+end
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)
     obj.renderContext = args.renderContext;

@@ -15,13 +15,15 @@ else
     flags = '-it ';
 end
 
+% ASSUME that if we supply a context it is on a Linux server
 if ~isempty(obj.renderContext)
     useContext = obj.renderContext;
+    outputFolder = dockerWrapper.pathToLinux(outputFolder);
 else
     useContext = 'default';
 end
         
 
-containerRender = sprintf("docker --context %s exec %s %s sh -c 'cd %s && %s'",useContext, flags, useContainer, outputFolder, renderCommand);
+containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
 [status, result] = system(containerRender);
 end

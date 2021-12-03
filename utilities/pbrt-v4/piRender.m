@@ -168,7 +168,7 @@ if ispc  % Windows
 
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
+    dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
     end
 
     %fix for non - C drives
