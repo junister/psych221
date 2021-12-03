@@ -23,7 +23,17 @@ else
     useContext = 'default';
 end
         
-
+% sync data over
+if ispc
+    rSync = 'wsl rsync'
+else
+    rSync = 'rsync'
+end
+% system(sprintf('%s -a %s %s',rSync, localScene, remoteScene);
 containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
 [status, result] = system(containerRender);
+if status == 0
+    % sync data back
+    % system(sprintf('%s -a %s %s',rSync, remoteScene, localScene);
+end
 end
