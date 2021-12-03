@@ -28,6 +28,7 @@ p.addParameter('machine', 'default', @ischar);
 p.addOptional('debug', false, @islogical);
 p.addOptional('gpuRendering', true, @islogical);
 p.addOptional('renderContext', '', @ischar); % experimental
+p.addOptional('remoteMachine','',@ischar); % for data sync
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 p.addOptional('remoteRoot','',@ischar); % for different remote path
 
@@ -50,6 +51,10 @@ if ~isempty(args.renderContext)
     if ~isempty(args.remoteImage)
         obj.remoteImage = args.remoteImage;
     end
+end
+
+if ~isempty(args.remoteMachine)
+    obj.remoteMachine = args.remoteMachine;
 end
 
 

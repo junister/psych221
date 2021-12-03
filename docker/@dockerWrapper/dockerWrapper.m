@@ -31,12 +31,18 @@ classdef dockerWrapper < handle
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
+
+        % these relate to remote/server rendering
+        % they overlap while we learn the best way to organize them
+        remoteMachine = ''; % for syncing the data
         renderContext = '';
         remoteImage = '';
         remoteRoot = ''; % we need to know where to map on the remote system
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
+
+        %
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
         dockerFlags = '';
         command = 'pbrt';
@@ -107,7 +113,7 @@ classdef dockerWrapper < handle
             % Starting as background we need to allow for all scenes
             % if remote then need to figure out correct path
             if ~isempty(obj.remoteRoot)
-                mountData = [obj.remoteRoot 'local'];
+                mountData = [obj.remoteRoot 'iset/iset3d-v4/local'];
             else
                 mountData = fullfile(piRootPath(), 'local');
                 if ispc && isequal(obj.dockerContainerType, 'linux')

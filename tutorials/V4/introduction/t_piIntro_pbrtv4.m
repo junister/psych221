@@ -26,8 +26,9 @@
 %   
 %% Init
 ieInit;
-ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'beluga','remoteImage', ...
-    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/iset/iset3d-v4/');
+ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
+    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
+    'remoteMachine', 'david81@beluga.psych.upenn.edu');
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
