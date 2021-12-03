@@ -20,7 +20,7 @@ else
     ourDocker.outputFile = ''; % imgtool uses a default
     ourDocker.outputFilePrefix = '';
     
-    [status, result] = ourDocker.run();
+    [status, result] = ourDocker.runCommand();
 end
 
 if status
