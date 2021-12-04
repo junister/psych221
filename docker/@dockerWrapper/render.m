@@ -29,7 +29,9 @@ if ~isempty(obj.remoteMachine)
     if ispc
         rSync = 'wsl rsync';
         % hack because wsl rsync uses Ubuntu file system!
-        nativeFolder = ['/mnt/c' outputFolder '/'];
+        % Need to sort out how to make this flexible
+        %nativeFolder = ['/mnt/c' outputFolder '/'];
+        nativeFolder = ['/mnt/b' outputFolder '/'];
     else
         rSync = 'rsync';
     end

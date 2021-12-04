@@ -93,7 +93,7 @@ p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 p.addParameter('reflectancerender', false, @islogical);
-p.addParameter('ourdocker','');
+p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
 p.addParameter('verbose', 2, @isnumeric);
 
@@ -103,6 +103,20 @@ scalePupilArea = p.Results.scalepupilarea;
 meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
+
+%% try to support docker servers
+persistent renderDocker;
+
+% try and set the default to a server:
+ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
+    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
+    'remoteMachine', 'david81@beluga.psych.upenn.edu');
+
+if ~isempty(ourDocker)
+    renderDocker = ourDocker; % use the one we are passed
+elseif isempty(renderDocker)
+    renderDocker = dockerWrapper(); % accept defaults
+end
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 
@@ -186,6 +200,11 @@ else  % Linux & Mac
         % Legacy
         %dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
+end
+
+% create a dockerWrapper object if we don't have one
+if isempty(ourDocker)
+    ourDocker = dockerWrapper();
 end
 tic;
 
