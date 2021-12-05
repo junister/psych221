@@ -40,12 +40,18 @@ if ~isempty(obj.remoteMachine)
     end
     remoteScenePath = [obj.remoteRoot outputFolder];
     remoteScene = [obj.remoteMachine ':' remoteScenePath '/'];
-    system(sprintf('%s -r %s %s',rSync, nativeFolder, remoteScene));
+    % use -c for checksum as clocks & file times won't match
+    % using -z for compression, but doesn't seem to make a difference?
+    system(sprintf('%s -r -c -z %s %s',rSync, nativeFolder, remoteScene));
 end
 containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
 [status, result] = system(containerRender);
 if status == 0 && ~isempty(obj.remoteMachine)
     % sync data back
-    system(sprintf('%s -r %s %s',rSync, remoteScene, nativeFolder));
+    % try just using the renderings sub-folder?
+    system(sprintf('%s -r %s %s',rSync, ...
+        remoteScene, nativeFolder));
+%
+% % buggy? [remoteScene 'renderings/'], [nativeFolder 'renderings/']));
 end
 end

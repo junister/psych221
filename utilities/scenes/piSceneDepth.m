@@ -28,7 +28,11 @@ pinholeR.camera = piCameraCreate('pinhole');
 %% The render returns the depth map in meters
 
 depthmap   = piRender(pinholeR, 'render type','depth');
-tmp        = depthmap(depthmap > 0);
+if isstruct(depthmap)
+    tmp        = depthmap.depthMap(depthmap.depthMap > 0);
+else
+    tmp        = depthmap(depthmap > 0);
+end
 depthrange = [min(tmp(:)), max(tmp(:))];
 
 %% If no output arguments plot the histogram
