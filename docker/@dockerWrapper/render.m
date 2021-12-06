@@ -46,6 +46,7 @@ if ~isempty(obj.remoteMachine)
         remoteAddress = obj.remoteMachine;
     end
     remoteScenePath = [obj.remoteRoot outputFolder];
+    remoteScenePath = strrep(remoteScenePath, '//', '/');
     remoteScene = [remoteAddress ':' remoteScenePath '/'];
 
     % DNS can be too slow for rsync sometimes
@@ -63,7 +64,8 @@ if ~isempty(obj.remoteMachine)
         error(rResult);
     end
     tic;
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
+    % switched to remote path -- does it work locally now?
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
     toc;
     if status == 0 && ~isempty(obj.remoteMachine)
