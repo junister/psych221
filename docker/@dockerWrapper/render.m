@@ -19,10 +19,11 @@ end
 nativeFolder = outputFolder;
 if ~isempty(obj.renderContext)
     useContext = obj.renderContext;
-    outputFolder = dockerWrapper.pathToLinux(outputFolder);
 else
     useContext = 'default';
 end
+% container is Linux, so convert
+outputFolder = dockerWrapper.pathToLinux(outputFolder);
         
 % sync data over
 if ~isempty(obj.remoteMachine)
@@ -55,18 +56,29 @@ if ~isempty(obj.remoteMachine)
     %end
     % use -c for checksum as clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
+    tic;
     [rStatus, rResult] = system(sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene));
+    toc;
     if rStatus ~= 0
         error(rResult);
     end
-end
-containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
-[status, result] = system(containerRender);
-if status == 0 && ~isempty(obj.remoteMachine)
+    tic;
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
+    [status, result] = system(containerRender);
+    toc;
+    if status == 0 && ~isempty(obj.remoteMachine)
     % sync data back
     % try just using the renderings sub-folder
+    tic;
     system(sprintf('%s -r %s %s',rSync, ...
         [remoteScene 'renderings/'], [nativeFolder 'renderings/']));
         %remoteScene, nativeFolder));
+    toc;
+    
+    end
+else
+    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, outputFolder, renderCommand);
+    [status, result] = system(containerRender);
+
 end
 end

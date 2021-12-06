@@ -116,14 +116,23 @@ classdef dockerWrapper < handle
             % if remote then need to figure out correct path
             if ~isempty(obj.remoteRoot)
                 mountData = [obj.remoteRoot 'iset/iset3d-v4/local'];
+            elseif ~isempty(obj.remoteMachine)
+                mountData = [obj.remoteRoot 'iset/iset3d-v4/local'];
             else
-                mountData = fullfile(piRootPath(), 'local');
-                if ispc && isequal(obj.dockerContainerType, 'linux')
-                    mountData = dockerWrapper.pathToLinux(mountData);
+                if isempty(obj.localRoot)
+                    mountData = fullfile(piRootPath(), 'local');
+                else
+                    mountData = fullfile(obj.localRoot, 'local');
                 end
+                % I don't think we want this for the local case!
+                %if ispc && isequal(obj.dockerContainerType, 'linux')
+                %    mountData = dockerWrapper.pathToLinux(mountData);
+                %end
             end
             % is our mount point always the same?
-            mountPoint = '/iset/iset3d-v4/local/';
+            %mountPoint = '/iset/iset3d-v4/local/';
+            mountPoint = dockerWrapper.pathToLinux(mountData);
+
             volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
             placeholderCommand = 'bash';
 
@@ -134,7 +143,7 @@ classdef dockerWrapper < handle
 %                dCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8010:81 %s', ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
-                dCommand = sprintf('docker run -d -it --name %s -p 8010:81 %s', ourContainer, volumeMap);
+                dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s', dCommand, useImage, placeholderCommand);
             end
 
@@ -203,6 +212,9 @@ classdef dockerWrapper < handle
                 dockerImageName = obj.remoteImage;
                 return;
             end
+
+            % otherwise we are local and will look for the correct
+            % container
             if isequal(processorType, 'GPU')
 
                 % Check whether GPU is available
