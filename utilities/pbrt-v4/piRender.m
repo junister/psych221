@@ -108,9 +108,11 @@ verbosity        = p.Results.verbose;
 persistent renderDocker;
 
 % try and set the default to a server:
+% if DNS is slow, use the IP address instead
 ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
-    'remoteMachine', 'david81@beluga.psych.upenn.edu');
+    'remoteMachine', '128.91.12.177', ...
+    'remoteUser', 'david81', 'localRoot', '/mnt/c');
 
 if ~isempty(ourDocker)
     renderDocker = ourDocker; % use the one we are passed

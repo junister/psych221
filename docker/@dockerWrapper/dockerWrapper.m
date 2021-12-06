@@ -35,9 +35,11 @@ classdef dockerWrapper < handle
         % these relate to remote/server rendering
         % they overlap while we learn the best way to organize them
         remoteMachine = ''; % for syncing the data
+        remoteUser = ''; % use for rsync & ssh/docker
         renderContext = '';
         remoteImage = '';
         remoteRoot = ''; % we need to know where to map on the remote system
+        localRoot = ''; % for the Windows/wsl case (sigh)
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';

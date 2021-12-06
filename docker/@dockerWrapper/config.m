@@ -29,8 +29,10 @@ p.addOptional('debug', false, @islogical);
 p.addOptional('gpuRendering', true, @islogical);
 p.addOptional('renderContext', '', @ischar); % experimental
 p.addOptional('remoteMachine','',@ischar); % for data sync
+p.addOptional('remoteUser','',@ischar); % for data sync
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 p.addOptional('remoteRoot','',@ischar); % for different remote path
+p.addOptional('localRoot','',@ischar); % for Windows/wsl
 
 p.parse(varargin{:})
 
@@ -43,6 +45,10 @@ end
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;
 end
+if ~isempty(args.localRoot)
+    obj.localRoot = args.localRoot;
+end
+
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)
     obj.renderContext = args.renderContext;
@@ -55,6 +61,7 @@ end
 
 if ~isempty(args.remoteMachine)
     obj.remoteMachine = args.remoteMachine;
+    obj.remoteUser = args.remoteUser;
 end
 
 
