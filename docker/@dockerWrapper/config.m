@@ -33,6 +33,7 @@ p.addOptional('remoteUser','',@ischar); % for data sync
 p.addOptional('remoteImage', '', @ischar); % image to use for remote render
 p.addOptional('remoteRoot','',@ischar); % for different remote path
 p.addOptional('localRoot','',@ischar); % for Windows/wsl
+p.addOptional('whichGPU', 1, @isnumeric); % select alternate gpu
 
 p.parse(varargin{:})
 
@@ -48,6 +49,7 @@ end
 if ~isempty(args.localRoot)
     obj.localRoot = args.localRoot;
 end
+obj.whichGPU = args.whichGPU;
 
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)

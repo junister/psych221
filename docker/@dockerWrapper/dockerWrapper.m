@@ -43,6 +43,7 @@ classdef dockerWrapper < handle
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
+        whichGPU = 1; % for multiple GPU configs we can pick one
 
         %
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
