@@ -11,17 +11,38 @@ classdef dockerWrapper < handle
     % Calls to piRender() will then use dockerWrapper to do the
     % rendering in the running container, avoiding startup overhead
     % (which is nearly 20 seconds per render without this approach).
-
+    %
+    % Parameters used for Remote Rendering
+    %
+    % remoteMachine -- name of remote machine to render on
+    % remoteUser -- username on remote machine (that has key support)
+    % remoteContext -- name of docker context pointing to renderer
+    % remoteImage -- GPU-specific docker image on remote machine
+    % remoteRoot -- needed if different from local piRoot
+    %
+    % localRoot -- only for WSL -- the /mnt path to the Windows piRoot
+    % 
+    % Additional Render-specific parameters
+    %
+    % whichGPU -- for multi-gpu rendering systems
+    % 
     % FUTURE: Potenially unified way to call docker containers for iset
     %   An attempt to resolve at least some of the myriad platform issues
-    %   Not clear whether to make this generic or just for pbrt, in which
-    %   case we could handle the isnative binary case also?
     %
-    %   Can probably roll the piDockerConfig code in here also.
 
     % Original by David Cardinal, Stanford University, September, 2021.
 
-    % Example of what we need to generate prior to running:
+    % Example of remote GPU rendering from a Windows client:
+    % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
+    %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
+    %     'remoteMachine', '<DNS resolvable host>', ...
+    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 1);
+
+    % Example of local CPU rendering:
+    % ourDocker = dockerWrapper('gpuRendering', false);
+
+    % Example of what we need to generate prior to running from scratch
+    % -- Not needed for rendering
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
