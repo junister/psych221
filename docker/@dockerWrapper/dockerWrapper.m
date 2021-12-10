@@ -160,9 +160,12 @@ classdef dockerWrapper < handle
 
             % set up the baseline command
             if isequal(processorType, 'GPU')
-                % what if we don't listen. Do we still run?
-                dCommand = sprintf('docker run -d -it --gpus 1 --name %s  %s', ourContainer, volumeMap);
-%                dCommand = sprintf('docker run -d -it --gpus 1 --name %s -p 8010:81 %s', ourContainer, volumeMap);
+                if isempty(obj.renderContext)
+                    contextFlag = '';
+                else
+                    contextFlag = [' --context ' obj.renderContext];
+                end
+                dCommand = sprintf('docker %s run -d -it --gpus 1 --name %s  %s', contextFlag, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
                 dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
@@ -198,19 +201,14 @@ classdef dockerWrapper < handle
             persistent containerPBRTCPU;
             switch containerType
                 case 'PBRT-GPU'
-                    % if we have one start our container on remote machine
-                    if ~isempty(obj.renderContext)
-                        dockerWrapper.setContext(obj.renderContext);
-                    end
                     if isempty(containerPBRTGPU)
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
-                    [status, result] = system(sprintf("docker ps | grep %s", containerPBRTGPU));
-                    if strlength(result) == 0
+                    [~, result] = system(sprintf("docker ps | grep %s", containerPBRTGPU));
+                    if strlength(result) == 0 % doesn't exist, so start one
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
                     containerName = containerPBRTGPU;
-                    dockerWrapper.setContext('');
                 case 'PBRT-CPU'
                     if isempty(containerPBRTCPU)
                         containerPBRTCPU = obj.startPBRT('CPU');

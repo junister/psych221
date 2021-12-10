@@ -1,5 +1,7 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
 
+verbose = true;
+
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');
     % okay this is a hack!
@@ -57,30 +59,36 @@ if ~isempty(obj.remoteMachine)
     %end
     % use -c for checksum as clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
-    tic;
+    putData = tic;
     [rStatus, rResult] = system(sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene));
-    toc;
+    if verbose
+        fprintf('Pushed scene to remote in: %6.2f\n', toc(putData))
+    end
     if rStatus ~= 0
         error(rResult);
     end
-    tic;
-    % switched to remote path -- does it work locally now?
+    renderStart = tic;
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
-    toc;
+    if verbose
+        fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
+    end
     if status == 0 && ~isempty(obj.remoteMachine)
     % sync data back
     % try just using the renderings sub-folder
-    tic;
+    getOutput = tic;
     system(sprintf('%s -r %s %s',rSync, ...
         [remoteScene 'renderings/'], [nativeFolder 'renderings/']));
-        %remoteScene, nativeFolder));
-    toc;
-    
+    if verbose
+        fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
+    end
     end
 else
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, outputFolder, renderCommand);
+    renderStart = tic;
     [status, result] = system(containerRender);
-
+    if verbose
+        fprintf('Rendered using default in: %6.2f\n', toc(renderStart))
+    end
 end
 end
