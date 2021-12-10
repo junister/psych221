@@ -134,6 +134,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'SimpleScene';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
+    case 'car'
+        sceneDir = 'car';
+        sceneFile = [sceneDir,'.pbrt'];
+        exporter = 'C4D';
     case 'chessset'
         sceneDir = 'ChessSet';
         sceneFile = [sceneDir,'.pbrt'];

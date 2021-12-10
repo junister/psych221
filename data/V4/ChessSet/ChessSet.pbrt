@@ -22,4 +22,4 @@ Include "ChessSet_geometry.pbrt"
 Rotate -90 1 0 0
 Rotate 180 0 0 1
 LightSource "infinite"
-    "string filename" "20060807_wells6_hd.exr"
+    "string mapname" "lightmap_v4.exr"

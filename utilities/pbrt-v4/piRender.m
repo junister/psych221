@@ -107,13 +107,15 @@ verbosity        = p.Results.verbose;
 %% try to support docker servers
 persistent renderDocker;
 
-% try and set the default to a server:
+ourDocker = dockerWrapper('gpuRendering', false);
 
-ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'render-vista','remoteImage', ...
-   'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot','/home/david/', ...
+% try and set the default to a server if we aren't passed one:
+if isempty(ourDocker)
+    ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'render-vista','remoteImage', ...
+    'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot','/home/david/', ...
     'remoteMachine', 'muxreconrt.stanford.edu', ...
     'remoteUser', 'david', 'localRoot', '/mnt/b', 'whichGPU', 1);
-
+end
 % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
 %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
 %     'remoteMachine', 'beluga.psych.upenn.edu', ...
@@ -216,11 +218,11 @@ end
 if isempty(ourDocker)
     ourDocker = dockerWrapper();
 end
-tic;
+preRender = tic;
 
 [status, result] = ourDocker.render(renderCommand, outputFolder);
-elapsedTime = toc;
-disp(result)
+elapsedTime = toc(preRender);
+fprintf("Complete render took: %6.2d seconds. Result: %s\n", elapsedTime, result);
 
 % 
 %     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
