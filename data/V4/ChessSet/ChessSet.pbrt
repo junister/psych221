@@ -19,7 +19,11 @@ Material "coateddiffuse"
 Include "ChessSet_materials.pbrt"
 Include "ChessSet_geometry.pbrt"
 # Add an environment light
-Rotate -90 1 0 0
-Rotate 180 0 0 1
-LightSource "infinite"
-    "string mapname" "lightmap_v4.exr"
+AttributeBegin
+    Rotate -120 1 0 0
+    Rotate 150 0 0 1
+    LightSource "infinite" "string filename" "lightmap_v4.exr"
+AttributeEnd
+
+
+

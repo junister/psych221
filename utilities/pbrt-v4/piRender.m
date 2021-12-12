@@ -107,7 +107,7 @@ verbosity        = p.Results.verbose;
 %% try to support docker servers
 persistent renderDocker;
 
-ourDocker = dockerWrapper('gpuRendering', false);
+%ourDocker = dockerWrapper('gpuRendering', false);
 
 % try and set the default to a server if we aren't passed one:
 if isempty(ourDocker)

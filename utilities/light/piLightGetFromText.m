@@ -131,8 +131,8 @@ for ii = 1:nLights
                 nsamples = piParameterGet(thisLine, 'integer nsamples');
                 thisLightSource = piLightSet(thisLightSource, 'nsamples val', nsamples);
 
-                % mapname
-                mapname = piParameterGet(thisLine, 'string mapname');
+                % mapname -- in v4 seems to have changed to filename
+                mapname = piParameterGet(thisLine, 'string filename');
                 thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
 
             case 'spot'
