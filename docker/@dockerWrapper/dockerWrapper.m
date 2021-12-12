@@ -7,7 +7,11 @@ classdef dockerWrapper < handle
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
     %
-    % It then starts that image as a persistent, named, container.
+    % If the GPU is local, this should be pretty straightforward.
+    % Running on a remote GPU is more comples. See below for
+    % more information on the required parameters.
+    %
+    % Either way, we start an image as a persistent, named, container.
     % Calls to piRender() will then use dockerWrapper to do the
     % rendering in the running container, avoiding startup overhead
     % (which is nearly 20 seconds per render without this approach).
@@ -48,6 +52,7 @@ classdef dockerWrapper < handle
 
     properties
         dockerContainerName = '';
+        % default image is cpu
         dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
