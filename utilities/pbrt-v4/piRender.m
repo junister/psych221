@@ -200,12 +200,12 @@ else  % Linux & Mac
         % update docker command to use gpu
         dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
         dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+        disp('***Rendering with GPU...');
         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
     else
         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
     end
-    
 end
 
 

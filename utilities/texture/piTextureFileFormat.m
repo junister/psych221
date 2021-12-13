@@ -7,6 +7,7 @@ function piTextureFileFormat(Textures)
 % ZL Scien Stanford, 2018
 
 %%
+% output = TextureFile;
 if exist(Textures,'dir')
     currentfolder = pwd;
     cd(Textures)

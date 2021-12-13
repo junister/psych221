@@ -57,18 +57,24 @@ for ii=1:numel(textureParams)
             end
          end
 
-         val = strcat(val, thisText);
          
          if isequal(textureParams{ii}, 'filename')
             if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
                 imgFile = which(thisVal);
                 if isempty(imgFile)||isequal(imgFile,'')
-                    warning('Texture %s not found!', thisVal);
+                    thisText = '';
+                    val = strrep(val,'imagemap', 'constant');
+                    val = strcat(val, ' "rgb value" [0.7 0.7 0.7]');
+                    warning('Texture %s not found! Changing it to defuse', thisVal);
+                    
                 else
-                    piTextureFileFormat(imgFile);
-                    copyfile(imgFile,thisR.get('output dir'));
+                   thisText = strrep(thisText,thisVal, imgFile);
+%                     piTextureFileFormat(imgFile);
+%                     copyfile(imgFile,thisR.get('output dir'));
                 end
             end
          end
+         val = strcat(val, thisText);
+         
     end
 end

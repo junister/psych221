@@ -94,7 +94,9 @@ for ii = 1:length(recipelist)
             dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
             copyfile(sourceAssets, dstAssets);
         else
-            copyfile(sourceDir, dstDir);
+            if exist(sourceDir, 'dir')
+                copyfile(sourceDir, dstDir);
+            end
         end
     end
     
