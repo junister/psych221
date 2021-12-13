@@ -151,7 +151,7 @@ switch ieParamFormat(lght.type)
         lght.nsamples.type = 'integer';
         lght.nsamples.value = [];
         
-        lght.mapname.type = 'string';
+        lght.mapname.type = 'filename string';
         lght.mapname.value = '';
         
         % Potentially has rotation, transformation or concatransformaiton
