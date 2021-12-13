@@ -191,9 +191,6 @@ else  % Linux & Mac
     end
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
 
-
-    if ~GPUCheck
-
     % Check whether GPU is available
     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
     try
