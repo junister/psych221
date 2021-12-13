@@ -115,7 +115,7 @@ end
 
 % Extensive Example:
 % renderString = {'gpuRendering', true, 'remoteMachine', <machine name>,'renderContext', <docker context>,'remoteImage', 'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot',<homedir>, 'remoteUser', uName, 'localRoot', <for WSL>, 'whichGPU', <#>};
-% setpref(docker, 'renderString', renderString);
+% setpref('docker', 'renderString', renderString);
 
 % or you can create one directly:
 % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
