@@ -150,10 +150,25 @@ for ii = 1:numel(children)
             if ~isempty(thisNode.shape.filename)
                 % If the shape has ply info, do this
                 % Convert shape struct to text
-                if ~exist(fullfile(rootPath, thisNode.shape.filename),'file')
-                    error('%s not exist',shape.filename);
-                end
                 [~, ~, e] = fileparts(thisNode.shape.filename);
+                if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.ply','.pbrt')),'file')
+                    if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.pbrt','.ply')),'file')
+                        error('%s not exist',thisNode.shape.filename);
+                    else
+                        thisNode.shape.filename = strrep(thisNode.shape.filename,'.pbrt','.ply');
+                        thisNode.shape.meshshape = 'plymesh';
+                        shapeText = piShape2Text(thisNode.shape);
+                    end
+                else
+                    if isequal(e, '.ply')
+                        thisNode.shape.filename = strrep(thisNode.shape.filename,'.ply','.pbrt');
+                        thisNode.shape.meshshape = 'trianglemesh';
+                        shapeText = piShape2Text(thisNode.shape);
+                    end
+                end
+
+               
+                
                 if isequal(e, '.ply')
                     fprintf(fid, '%s \n',shapeText);
                 else
@@ -227,11 +242,11 @@ for ii = 1:numel(children)
             thisNode.size.h), '\n'));
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.
-        if ~isempty(thisNode.motion)
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                'ActiveTransform StartTime \n'));
-        end
-        
+%         if ~isempty(thisNode.motion)
+%             fprintf(fid, strcat(spacing, indentSpacing,...
+%                 'ActiveTransform StartTime \n'));
+%         end
+%         
         % Translation
         
         % Rotation
@@ -263,24 +278,30 @@ for ii = 1:numel(children)
             sprintf('Scale %.5f %.5f %.5f', thisNode.scale), '\n'));
         
         % Write out motion
+        %{
         if ~isempty(thisNode.motion)
-            for jj = 1:size(thisNode.translation, 1)
+            for jj = 1:size(thisNode.translation, 2)
                 fprintf(fid, strcat(spacing, indentSpacing,...
                     'ActiveTransform EndTime \n'));
-                if isempty(thisNode.motion.translation(jj, :))
+                if ~isfield(thisNode.motion,'position')||...
+                        isempty(thisNode.motion.position(:,jj))
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'Translate 0 0 0\n'));
                 else
-                    pos = thisNode.motion.translation(jj,:);
+                    % check this: DEBUG
+                    if size(thisNode.motion.position,2)==3
+                        thisNode.motion.position = thisNode.motion.position';
+                    end
+                    pos = thisNode.motion.position(:,jj);
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         sprintf('Translate %f %f %f', pos(1),...
                         pos(2),...
                         pos(3)), '\n'));
                 end
                 
-                if isfield(thisNode.motion, 'rotation') && ~isempty(thisNode.motion.rotation)
+                if isfield(thisNode.motion, 'rotation') &&...
+                        ~isempty(thisNode.motion.rotation)
                     rot = thisNode.motion.rotation;
-                    
                     % Write out rotation
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         sprintf('Rotate %f %f %f %f',rot(:,jj*3-2)), '\n')); % Z
@@ -291,6 +312,7 @@ for ii = 1:numel(children)
                 end
             end
         end
+%}
         
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath);
         

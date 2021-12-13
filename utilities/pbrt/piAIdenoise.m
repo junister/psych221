@@ -60,7 +60,12 @@ energy = Quanta2Energy(wave, photons);
 
 %% Set up the denoiser path information
 
-oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.1.x86_64.macos', 'bin');
+if ismac
+    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.3.0.x86_64.macos', 'bin');
+else
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
+end
+
 outputTmp = fullfile(piRootPath,'local','tmp_input.pfm');
 DNImg_pth = fullfile(piRootPath,'local','tmp_dn.pfm');
 NewEnergy = zeros(rows, cols, chs);
@@ -71,11 +76,14 @@ for ii = 1:chs
     img_sp(:,:,2) = img_sp(:,:,1);
     img_sp(:,:,3) = img_sp(:,:,1);
     writePFM(img_sp, outputTmp);
-    cmd  = [oidn_pth, '/oidnDenoise --hdr ', outputTmp, ' -o ',DNImg_pth];
+
+    cmd  = [oidn_pth, '/oidnDenoise --threads 8 --hdr ', outputTmp, ' -o ',DNImg_pth];
+    [~, results] = system(cmd);
     [status, results] = system(cmd);
     if status
         error(results);
     end
+
     DNImg = readPFM(DNImg_pth);
     NewEnergy(:,:,ii) = DNImg(:,:,1).* max2(energy(:,:,ii));
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end

@@ -202,7 +202,9 @@ for ii = 1:numel(thisR.lights)
                     
                     if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
                         mapFile = which(mapName);
-                        copyfile(mapFile,thisR.get('output dir'))
+                        if ~isempty(mapFile)
+                            copyfile(mapFile,thisR.get('output dir'));
+                        end
                     end
                 end
             end
