@@ -86,37 +86,33 @@ dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(200))];
 % basecmd = 'docker run -t --name %s --volume="%s":"%s" %s pbrt --toply %s > %s && ls';
 %% Build the command
 if ispc
-        basecmd = 'docker run -i --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
-        % renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-        folderBreak = split(outputDir, filesep());
-        shortOut = strcat('/', char(folderBreak(end)));
+    renderDocker = dockerWrapper();
+    renderDocker.dockerCommand = 'docker run';
+    renderDocker.dockerFlags = '-t';
+    renderDocker.dockerContainerName = dockercontainerName;
+    renderDocker.workingDirectory = outputDir;
+    renderDocker.dockerImageName = dockerimage;
+    renderDocker.localVolumePath = volume;
+    renderDocker.targetVolumePath = volume;
+    templateCommand = '/bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
+    renderDocker.command = sprintf(templateCommand,  renderDocker.pathToLinux(fname), [thisName, ext]);
+    %% Run the command
+    % The variable 'result' has the formatted data.
+    [~, result] = renderDocker.run();
         
-        if ~isempty(outputDir)
-            if ~exist(outputDir,'dir'), error('Need full path to %s\n',outputDir); end
-            dockerCommand = sprintf('%s -w %s', basecmd, shortOut);
-        end
-        
-        %fix for non - C drives
-        %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
-        linuxOut = char(join(folderBreak,"/"));
-        
-        dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
-        
-        cmd = sprintf('%s %s %s', dockerCommand, dockerimage, renderCommand);
-        dockercmd = cmd;
 else
     basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
     dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, [thisName, ext]);
     % dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
     % disp(dockercmd)
+    %% Run the command
+    % The variable 'result' has the formatted data.
+    [~, result] = system(dockercmd);
 end
 
 
 
-%% Run the command
 
-% The variable 'result' has the formatted data.
-[~, result] = system(dockercmd);
 
 % Copy formatted pbrt files to local directory.
 cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);

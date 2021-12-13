@@ -11,7 +11,7 @@ function outfile = piFBX2PBRT(infile)
 % Some day we will Dockerize assimp
 %
 % See also
-%
+%  
 
 %% Find the input file and specify the converted output file
 
@@ -35,35 +35,36 @@ cd(indir);
 
 dockerimage = 'camerasimulation/pbrt-v4-cpu';
 
-if ~ispc
-    basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
-    
-    cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
-    
-    dockercontainerName = ['Assimp-',num2str(randi(200))];
-    dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
-    
-    [status,result] = system(dockercmd);
-else 
-    ourDocker = dockerWrapper();
-    ourDocker.dockerFlags = '-ti'; % no -rm this time!
-    ourDocker.dockerContainerName = ['Assimp' num2str(randi(200))];
-    % no if we want latest?ourDocker.dockerImageName = dockerimage;
-    ourDocker.command = 'assimp export';
-    ourDocker.inputFile = infile;
-    %assimp just wants us to put outputfile second, not specify --outfile
-    ourDocker.outputFile = [fname '-converted.pbrt'];
-    ourDocker.outputFilePrefix = '';
-    [status, result] = ourDocker.run();    
-end
+basecmd = 'docker run -ti --name %s --volume="%s":"%s" %s %s';
+
+cmd = ['assimp export ',infile, ' ',[fname,'-converted.pbrt']];
+
+dockercontainerName = ['Assimp-',num2str(randi(2000))];
+dockercmd = sprintf(basecmd, dockercontainerName, indir, indir, dockerimage, cmd);
+
+[status,result] = system(dockercmd);
 
 if status
     disp(result);
     error('FBX to PBRT conversion failed.')
 end
 
-cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
-[status_copy, ~ ] = system(cpcmd);
+if ~ispc
+    cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], indir);
+    [status_copy, result ] = system(cpcmd);
+else
+    cpDocker = dockerWrapper();
+    cpDocker.dockerImageName = ''; % use running container
+    cpDocker.dockerCommand = 'docker cp';
+    cpDocker.command = '';
+    cpDocker.dockerFlags = '';
+    linuxDir = cpDocker.pathToLinux(indir);
+    cpDocker.inputFile = [dockercontainerName ':' linuxDir  filesep()  fname '-converted.pbrt'];
+    cpDocker.outputFile = indir;
+    cpDocker.outputFilePrefix = '';
+    [status_copy, result] = cpDocker.run();
+end
+
 
 cd(currdir);
 if status_copy

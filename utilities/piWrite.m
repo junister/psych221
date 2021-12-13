@@ -197,11 +197,6 @@ fclose(fileID);
 % Even when copying, we extract the materials and textures
 piWriteMaterials(thisR,overwritematerials);
 
-%% If the exporter is copy, we do not write out the geometry
-if isequal(thisR.exporter, 'Copy')
-    return;
-end
-
 %% Overwrite geometry.pbrt
 piWriteGeometry(thisR,overwritegeometry);
 
@@ -617,19 +612,19 @@ lineGeometry  = find(contains(thisR.world, {'_geometry.pbrt'}));
 lineLights    = find(contains(thisR.world, {'_lights.pbrt'}));
 
 % If we have  geometry Include, we overwrite it with the name we want.
-if ~isempty(lineGeometry)
+if ~isempty(lineGeometry) && ~isempty(thisR.assets)
     thisR.world{lineGeometry} = sprintf('Include "%s_geometry.pbrt" \n', basename);
 end
 
 % If we have materials Include, we overwrite it.
 % end.
-if ~isempty(lineMaterials)
+if ~isempty(lineMaterials) && ~isempty(thisR.materials)
     thisR.world{lineMaterials} = sprintf('Include "%s_materials.pbrt" \n',basename);        
 end
 
 % We think nobody except us has these lights files.  So this will never get
 % executed.
-if ~isempty(lineLights)
+if ~isempty(lineLights) && ~isempty(thisR.lights)
     % Changed from () to {}
     thisR.world{lineLights} = sprintf('Include "%s_lights.pbrt" \n', basename);
 end
@@ -642,16 +637,16 @@ for ii = 1:length(thisR.world)
     
     fprintf(fileID,'%s \n',currLine);
     
-    if piContains(currLine,'WorldBegin') && isempty(lineMaterials)
+    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
     end
     
-    if piContains(currLine,'WorldBegin') && isempty(lineGeometry)
+    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
     end
-    if piContains(currLine, 'WorldBegin') && isempty(lineLights)
+    if piContains(currLine, 'WorldBegin') && isempty(lineLights) && ~isempty(thisR.lights)
         % Insert the lights file.
         fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
     end
@@ -680,7 +675,7 @@ end
 function piWriteGeometry(thisR,overwritegeometry)
 % Write the geometry file into the output dir
 %
-if overwritegeometry
+if overwritegeometry && ~isempty(thisR.assets)
     piGeometryWrite(thisR);
 end
 end

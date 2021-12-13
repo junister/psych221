@@ -88,7 +88,8 @@ for ii = 1:numel(label)
             
         case 'depth'
             try
-                depthImage = piReadEXR(inputFile, 'data type','zdepth');
+                depthImage = piReadEXR(inputFile, 'data type','depth');
+
             catch
                 warning('Can not find "Pz" channel, ignore reading depth');
                 continue

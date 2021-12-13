@@ -75,14 +75,17 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
     materialKeys= keys(thisR.materials.list);
     for ii=1:length(materialTxt)
-        % Converts the material struct to text
- 
+        % Converts the material struct to text 
         materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}));
     end
 else
     materialTxt{1} = '';
 end
 
+% check mix material, make sure mix material reference the material after the definition 
+mixMatIndex = piContains(materialTxt,'mix');
+mixMaterialText = materialTxt(mixMatIndex);
+nonMixMaterialText = materialTxt(~mixMatIndex);
 %% Write to scene_material.pbrt texture-material file
 output = thisR.get('materials output file'); 
 fileID = fopen(output,'w');
@@ -95,35 +98,44 @@ if ~isempty(textureTxt)
     end
 end
 
-% Add the materials
-nPaintLines = {};
-gg = 1;
-for dd = 1:length(materialTxt)
-    if piContains(materialTxt{dd},'paint_base') &&...
-            ~piContains(materialTxt{dd},'mix')||...
-            piContains(materialTxt{dd},'paint_mirror') &&...
-            ~piContains(materialTxt{dd},'mix')
-        nPaintLines{gg} = dd;
-        gg = gg+1;
-    end
+% write out nonMix materials first
+for row=1:length(nonMixMaterialText)
+    fprintf(fileID,'%s\n',nonMixMaterialText{row});
+end
+% write out mix materials
+for row=1:length(mixMaterialText)
+    fprintf(fileID,'%s\n',mixMaterialText{row});
 end
 
+% Add the materials
+% nPaintLines = {};
+% gg = 1;
+% for dd = 1:length(materialTxt)
+%     if piContains(materialTxt{dd},'paint_base') &&...
+%             ~piContains(materialTxt{dd},'mix')||...
+%             piContains(materialTxt{dd},'paint_mirror') &&...
+%             ~piContains(materialTxt{dd},'mix')
+%         nPaintLines{gg} = dd;
+%         gg = gg+1;
+%     end
+% end
+
 % Find material names contains 'paint_base' or 'paint_mirror'
-if ~isempty(nPaintLines)
-    for hh = 1:length(nPaintLines)
-        fprintf(fileID,'%s\n',materialTxt{nPaintLines{hh}});
-        materialTxt{nPaintLines{hh}} = [];
-    end
-    materialTxt = materialTxt(~cellfun('isempty',materialTxt));
-    %     nmaterialTxt = length(materialTxt)-length(nPaintLines);
-    for row=1:length(materialTxt)
-        fprintf(fileID,'%s\n',materialTxt{row});
-    end
-else
-    for row=1:length(materialTxt)
-        fprintf(fileID,'%s\n',materialTxt{row});
-    end
-end
+% if ~isempty(nPaintLines)
+%     for hh = 1:length(nPaintLines)
+%         fprintf(fileID,'%s\n',materialTxt{nPaintLines{hh}});
+%         materialTxt{nPaintLines{hh}} = [];
+%     end
+%     materialTxt = materialTxt(~cellfun('isempty',materialTxt));
+% 
+%     for row=1:length(materialTxt)
+%         fprintf(fileID,'%s\n',materialTxt{row});
+%     end
+% else
+%     for row=1:length(materialTxt)
+%         fprintf(fileID,'%s\n',materialTxt{row});
+%     end
+% end
 
 %% Write media to xxx_materials.pbrt
 
