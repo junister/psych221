@@ -107,15 +107,17 @@ verbosity        = p.Results.verbose;
 %% try to support docker servers
 persistent renderDocker;
 
-%ourDocker = dockerWrapper('gpuRendering', false);
-
 % try and set the default to a server if we aren't passed one:
 if isempty(ourDocker)
-    ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'render-vista','remoteImage', ...
-    'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot','/home/david/', ...
-    'remoteMachine', 'muxreconrt.stanford.edu', ...
-    'remoteUser', 'david', 'localRoot', '/mnt/c', 'whichGPU', 1);
+    renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
+    ourDocker = dockerWrapper(renderPrefs{:});
 end
+
+% Extensive Example:
+% renderString = {'gpuRendering', true, 'remoteMachine', <machine name>,'renderContext', <docker context>,'remoteImage', 'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot',<homedir>, 'remoteUser', uName, 'localRoot', <for WSL>, 'whichGPU', <#>};
+% setpref(docker, 'renderString', renderString);
+
+% or you can create one directly:
 % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
 %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
 %     'remoteMachine', 'beluga.psych.upenn.edu', ...
