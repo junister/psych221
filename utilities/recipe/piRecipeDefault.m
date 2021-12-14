@@ -307,7 +307,11 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'living-room-3';
         sceneFile = 'scene.pbrt';
         exporter = 'Copy';
-    case {'livingroom3mini', 'living-room-3-mini'}
+    case {'bistro'}
+        sceneDir = 'bistro';
+        sceneFile = 'bistro_cafe.pbrt';
+        exporter = 'Copy';
+    case {'livingroom3mini', 'living-room-3-mini'}    
         % Not running
         sceneDir = 'living-room-3-mini';
         sceneFile = [sceneDir,'.pbrt'];
@@ -385,7 +389,7 @@ FilePath = fullfile(piRootPath,'data','V4','web',sceneName);
 fname = fullfile(FilePath,sceneFile);
 
 % Download the file to data/V4/web
-if ~exist(fname,'file')
+if ~exist(fname,'file') && ~isfolder(FilePath)
     % Download and confirm.
     piWebGet('resourcename', sceneName, 'resourcetype', 'pbrt', 'op', 'fetch', 'unzip', true);
     if ~exist(fname, 'file'), error('File not found'); end
