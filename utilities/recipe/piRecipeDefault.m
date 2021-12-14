@@ -307,6 +307,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'living-room-3';
         sceneFile = 'scene.pbrt';
         exporter = 'Copy';
+    case {'landscape'}
+        sceneDir = 'landscape';
+        sceneFile = 'view-0.pbrt';
+        exporter = 'Copy';
     case {'bistro'}
         sceneDir = 'bistro';
         sceneFile = 'bistro_cafe.pbrt';

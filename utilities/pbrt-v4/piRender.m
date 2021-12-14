@@ -298,7 +298,7 @@ fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 
 %% Convert the returned data to an ieObject
 if isempty(thisR.metadata)
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance'});
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance','depth'});
 else
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
 end
