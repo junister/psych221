@@ -246,6 +246,8 @@ switch param
                 isequal(thisR.camera.subtype,'perspective')
             thisR.camera.focaldistance.value = val;
             thisR.camera.focaldistance.type = 'float';
+            % pbrt v4 gets mad if we don't get rid of the field
+            thisR.camera = rmfield(thisR.camera,'focusdistance');
         else
             % When there is a lens.  Omni.  Realistic.
             thisR.camera.focusdistance.value = val;
