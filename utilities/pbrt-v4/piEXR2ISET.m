@@ -85,10 +85,13 @@ for ii = 1:numel(label)
                 data_wave = 400:10:700;
             end            
             photons  = Energy2Quanta(data_wave,energy);
-            
-        case 'depth'
+
+        case {'depth', 'zdepth'}
             try
-                depthImage = piReadEXR(inputFile, 'data type','depth');
+                % we error if x & y are missing 
+                % unless we call zdepth -- we should probably
+                % just have the ReadEXR code be more resilient
+                depthImage = piReadEXR(inputFile, 'data type','zdepth');
 
             catch
                 warning('Can not find "Pz" channel, ignore reading depth');
@@ -135,8 +138,21 @@ switch lower(cameraType)
             ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
         end
         
-    case {'realistic'}
+    case {'omni'}
         % todo
+        %% HACK ALERT: Copy other case code here to see what happens:
+        ieObject = piSceneCreate(photons,'wavelength', data_wave);
+        ieObject = sceneSet(ieObject,'name',ieObjName);
+        if numel(data_wave)<31
+            % interpolate data for gpu rendering
+            ieObject = sceneInterpolateW(ieObject,wave);
+        end
+        
+        if ~isempty(thisR)
+            % PBRT may have assigned a field of view
+            ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
+        end
+
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
