@@ -17,7 +17,8 @@ apt-get update
 
 
 # add bash so we can work interactively for debugging
-RUN apt-get install -yq bash vim
+# annoyingly, these rely on another repo we need to add:(
+# RUN apt-get install -yq bash vim
 
 RUN apt-get update -yq && apt-get install -yq --no-install-recommends \
 	build-essential \
