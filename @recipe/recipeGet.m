@@ -601,7 +601,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         opticsType = thisR.get('optics type');
         switch opticsType
-            case {'pinhole'}
+            case {'pinhole', 'perspective'}
                 % Everything is in focus for a pinhole camera.  For
                 % pinholes this is focaldistance.  But not for omni.
                 disp('No true focal distance for pinhole. This value is arbitrary');
