@@ -31,13 +31,9 @@ outputFolder = dockerWrapper.pathToLinux(outputFolder);
 if ~isempty(obj.remoteMachine)
     if ispc
         rSync = 'wsl rsync';
-        pingC = 'wsl ping -c 1';
-        % hack because wsl rsync uses Ubuntu file system!
-        % Need to sort out how to make this flexible
         nativeFolder = [obj.localRoot outputFolder '/'];
     else
         rSync = 'rsync';
-        pingC = 'ping -c 1';
     end
     if isempty(obj.remoteRoot)
         % if no remote root, then we need to look up our local root and use it!
@@ -51,13 +47,7 @@ if ~isempty(obj.remoteMachine)
     remoteScenePath = strrep(remoteScenePath, '//', '/');
     remoteScene = [remoteAddress ':' remoteScenePath '/'];
 
-    % DNS can be too slow for rsync sometimes
-    % so we pre-load the A record by using ping
-    %[pStatus, pResult] = system([pingC ' ' obj.remoteMachine]);
-    %if pStatus ~= 0
-        %warning(pResult);
-    %end
-    % use -c for checksum as clocks & file times won't match
+    % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
     [rStatus, rResult] = system(sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene));
@@ -70,7 +60,7 @@ if ~isempty(obj.remoteMachine)
     renderStart = tic;
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
-    if verbose
+    if true % verbose
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
     end
     if status == 0 && ~isempty(obj.remoteMachine)
