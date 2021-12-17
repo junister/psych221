@@ -4,7 +4,7 @@
 %
 % EXPERIMENTAL FOR GPU SUPPORT!
 % and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
-% and/or     docker pull camerasimulation/pbrt-v4-t4  
+% and/or     docker pull camcerasimulation/pbrt-v4-t4  
 % 
 % CPU only
 % blender uses a coordinate system like this:
@@ -44,7 +44,7 @@ thisR.set('rays per pixel',32);
 %% set render type
 % radiance 
 % rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
-thisR.set('film render type',{'radiance','depth'})
+thisR.set('film render type',{'radiance'});
 %% move object
 thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 

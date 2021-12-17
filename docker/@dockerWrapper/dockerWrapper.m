@@ -157,8 +157,8 @@ classdef dockerWrapper < handle
                 %end
             end
             % is our mount point always the same?
-            %mountPoint = '/iset/iset3d-v4/local/';
-            mountPoint = dockerWrapper.pathToLinux(mountData);
+            mountPoint = '/iset/iset3d-v4/local/';
+            %mountPoint = dockerWrapper.pathToLinux(mountData);
 
             volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
             placeholderCommand = 'bash';

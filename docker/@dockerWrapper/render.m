@@ -58,7 +58,10 @@ if ~isempty(obj.remoteMachine)
         error(rResult);
     end
     renderStart = tic;
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
+    % remoteScenePath seems to include homedir, which isn't part of the
+    % Docker container, so let's try without
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
+    % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
     if true % verbose
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
