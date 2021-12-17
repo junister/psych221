@@ -208,7 +208,12 @@ if ispc  % Windows
     %cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 else  % Linux & Mac
 
-    renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+    % With V4 we need EXR not Dat
+    outF = strcat('renderings/',currName,'.exr');
+    renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
+    folderBreak = split(outputFolder, filesep());
+    shortOut = strcat('/', char(folderBreak(end)));
+
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         % Legacy

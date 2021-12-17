@@ -58,9 +58,10 @@ if ~isempty(obj.remoteMachine)
         error(rResult);
     end
     renderStart = tic;
-    % remoteScenePath seems to include homedir, which isn't part of the
-    % Docker container, so let's try without
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, outputFolder, renderCommand);
+    % our output folder path starts from root, not from where the volume is
+    % mounted
+    shortOutput = strrep(outputFolder,getenv('HOME'),'' );
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
     if true % verbose
@@ -77,7 +78,10 @@ if ~isempty(obj.remoteMachine)
     end
     end
 else
-    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, outputFolder, renderCommand);
+    % our output folder path starts from root, not from where the volume is
+    % mounted
+    shortOutput = strrep(outputFolder,getenv('HOME'),'' );
+    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOutput, renderCommand);
     renderStart = tic;
     [status, result] = system(containerRender);
     if verbose
