@@ -1,8 +1,15 @@
 %% pbrt v4 introduction 
-% Users need to pull the docker image(s):
+%
+% The proper versions of these containers need to be on the machine
+% where they will execute.  Typically the GPU containers are already
+% installed on the remote machine.
+%
+% Users typically pull their own copy of the CPU docker image(s):
+%
 %     docker pull camerasimulation/pbrt-v4-cpu
 %
 % EXPERIMENTAL FOR GPU SUPPORT!
+%
 % and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
 % and/or     docker pull camcerasimulation/pbrt-v4-t4  
 % 
@@ -26,7 +33,6 @@
 %   
 %% Init
 ieInit;
-
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
