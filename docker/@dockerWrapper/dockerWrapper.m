@@ -265,7 +265,7 @@ classdef dockerWrapper < handle
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                             %dockerContainerName = 'pbrt-gpu';
                         case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-bg';
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                             %dockerContainerName = 'pbrt-gpu';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal';
