@@ -16,6 +16,26 @@ function status = piDockerConfig(varargin)
 % EXAMPLE:
 %    [status] = piDockerConfig('machine', 'default', 'debug', true);
 %
+% Note:
+%   You can check that docker context exists this way
+%
+%       cmd = 'docker context list';
+%       [str,r] = system(cmd)
+%
+%   Look in the r variable to find whether getpref remote context
+%   exists.
+%
+%   For the GPU on V4, we might be able to config the docker context
+%   for people.  That command is:
+%
+%       docker context create --docker host=ssh://wandell@muxreconrt.stanford.edu wandell-v4 
+%
+%   renderString = getpref('docker','renderString');
+%
+% This might change, but for now, find 'renderContext' and the next
+% argument is the context.
+%
+%
 % (C) Stanford VISTA Lab, 2016
 
 %% Parse input arguments
