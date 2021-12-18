@@ -47,7 +47,7 @@ if ~isempty(obj.remoteMachine)
     % in the case of Mac (& Linux?) outputFolder includes both
     % our iset dir and then the relative path
     [~, sceneDir, ~] = fileparts(outputFolder);
-    remoteScenePath = [obj.remoteRoot '/iset/iset3d-v4/local/' sceneDir];
+    remoteScenePath = [obj.remoteRoot obj.relativeScenePath sceneDir];
 
     %remoteScenePath = [obj.remoteRoot outputFolder];
     remoteScenePath = strrep(remoteScenePath, '//', '/');
@@ -67,7 +67,7 @@ if ~isempty(obj.remoteMachine)
     % our output folder path starts from root, not from where the volume is
     % mounted
     [~, sceneDir, ~] = fileparts(outputFolder);
-    shortOut = ['/iset/iset3d-v4/local/' sceneDir];
+    shortOut = [obj.relativeScenePath sceneDir];
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
@@ -86,7 +86,8 @@ if ~isempty(obj.remoteMachine)
     end
 else
     % our output folder path starts from root, not from where the volume is
-    % mounted
+    % mounted -- sort of weenie as this is the Windows path while on
+    % windows
     shortOut = dockerWrapper.pathToLinux('\iset\iset3d-v4\local');
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     renderStart = tic;

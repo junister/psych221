@@ -72,6 +72,7 @@ classdef dockerWrapper < handle
         whichGPU = 1; % for multiple GPU configs we can pick one
 
         %
+        relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
         dockerFlags = '';
         command = 'pbrt';
@@ -142,9 +143,9 @@ classdef dockerWrapper < handle
             % Starting as background we need to allow for all scenes
             % if remote then need to figure out correct path
             if ~isempty(obj.remoteRoot)
-                mountData = [obj.remoteRoot 'iset/iset3d-v4/local'];
+                mountData = [obj.remoteRoot obj.relativeScenePath];
             elseif ~isempty(obj.remoteMachine)
-                mountData = [obj.remoteRoot 'iset/iset3d-v4/local'];
+                mountData = [obj.remoteRoot obj.relativeScenePath];
             else
                 if isempty(obj.localRoot)
                     mountData = fullfile(piRootPath(), 'local');
@@ -157,7 +158,7 @@ classdef dockerWrapper < handle
                 %end
             end
             % is our mount point always the same?
-            mountPoint = '/iset/iset3d-v4/local/';
+            mountPoint = obj.relativeScenePath;
             %mountPoint = dockerWrapper.pathToLinux(mountData);
 
             volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
