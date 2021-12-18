@@ -157,6 +157,7 @@ classdef dockerWrapper < handle
                 %    mountData = dockerWrapper.pathToLinux(mountData);
                 %end
             end
+            mountData = strrep(mountData,'//','/');
             % is our mount point always the same?
             mountPoint = obj.relativeScenePath;
             %mountPoint = dockerWrapper.pathToLinux(mountData);
