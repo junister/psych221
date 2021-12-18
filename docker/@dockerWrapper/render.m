@@ -43,7 +43,13 @@ if ~isempty(obj.remoteMachine)
     else
         remoteAddress = obj.remoteMachine;
     end
-    remoteScenePath = [obj.remoteRoot outputFolder];
+
+    % in the case of Mac (& Linux?) outputFolder includes both
+    % our iset dir and then the relative path
+    [~, sceneDir, ~] = fileparts(outputFolder);
+    remoteScenePath = [obj.remoteRoot '/iset/iset3d-v4/local/' sceneDir];
+
+    %remoteScenePath = [obj.remoteRoot outputFolder];
     remoteScenePath = strrep(remoteScenePath, '//', '/');
     remoteScene = [remoteAddress ':' remoteScenePath '/'];
 
