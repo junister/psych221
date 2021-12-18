@@ -17,6 +17,8 @@ else
     flags = '-it ';
 end
 
+[~, sceneDir, ~] = fileparts(outputFolder);
+
 % ASSUME that if we supply a context it is on a Linux server
 nativeFolder = outputFolder;
 if ~isempty(obj.renderContext)
@@ -66,7 +68,7 @@ if ~isempty(obj.remoteMachine)
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
-    [~, sceneDir, ~] = fileparts(outputFolder);
+
     shortOut = [obj.relativeScenePath sceneDir];
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
@@ -88,7 +90,7 @@ else
     % our output folder path starts from root, not from where the volume is
     % mounted -- sort of weenie as this is the Windows path while on
     % windows
-    shortOut = dockerWrapper.pathToLinux('\iset\iset3d-v4\local');
+    shortOut = [obj.relativeScenePath sceneDir];
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     renderStart = tic;
     [status, result] = system(containerRender);
