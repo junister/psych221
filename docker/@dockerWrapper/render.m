@@ -60,7 +60,8 @@ if ~isempty(obj.remoteMachine)
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
-    shortOutput = strrep(outputFolder,getenv('HOME'),'' );
+    [~, sceneDir, ~] = fileparts(outputFolder);
+    shortOut = ['/iset/iset3d-v4/local/' sceneDir];
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     [status, result] = system(containerRender);
@@ -80,8 +81,8 @@ if ~isempty(obj.remoteMachine)
 else
     % our output folder path starts from root, not from where the volume is
     % mounted
-    shortOutput = strrep(outputFolder,getenv('HOME'),'' );
-    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOutput, renderCommand);
+    shortOut = dockerWrapper.pathToLinux('\iset\iset3d-v4\local');
+    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     renderStart = tic;
     [status, result] = system(containerRender);
     if verbose
