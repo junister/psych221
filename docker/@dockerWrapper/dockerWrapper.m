@@ -209,7 +209,13 @@ classdef dockerWrapper < handle
                     if isempty(containerPBRTGPU)
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
-                    [~, result] = system(sprintf("docker ps | grep %s", containerPBRTGPU));
+                    % Need to switch to render context here!
+                    if ~isempty(obj.renderContext)
+                        cFlag = ['--context ' obj.renderContext];
+                    else
+                        cFlag = '';
+                    end
+                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, containerPBRTGPU));
                     if strlength(result) == 0 % doesn't exist, so start one
                         containerPBRTGPU = obj.startPBRT('GPU');
                     end
