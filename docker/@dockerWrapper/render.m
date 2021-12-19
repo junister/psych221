@@ -81,7 +81,7 @@ if ~isempty(obj.remoteMachine)
     % try just using the renderings sub-folder
     getOutput = tic;
     system(sprintf('%s -r %s %s',rSync, ...
-        [remoteScene 'renderings/'], [nativeFolder 'renderings/']));
+        [remoteScene 'renderings/'], fullfile(nativeFolder, 'renderings')));
     if verbose
         fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
     end
