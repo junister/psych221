@@ -550,6 +550,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % problem.
                 
                 % Make sure the lensfile is in the data/lens directory.
+                if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
                 [~,name,ext] = fileparts(thisR.camera.lensfile.value);
                 baseName = [name,ext];
                 val = fullfile(piRootPath,'data','lens',baseName);
@@ -560,6 +561,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         % fprintf('Using lens file at %s\n',val);
                     end
+                end
                 end
                 
         end
