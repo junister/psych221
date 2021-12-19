@@ -58,7 +58,11 @@ if ~isempty(obj.remoteMachine)
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
-    [rStatus, rResult] = system(sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene));
+    putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
+    if verbose
+        fprintf(" Rsync Put: %s\n", putCommand);
+    end
+    [rStatus, rResult] = system(putCommand);
     if verbose
         fprintf('Pushed scene to remote in: %6.2f\n', toc(putData))
     end
@@ -75,13 +79,20 @@ if ~isempty(obj.remoteMachine)
     [status, result] = system(containerRender);
     if true % verbose
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
+        fprintf(" With Result: %s", result);
     end
     if status == 0 && ~isempty(obj.remoteMachine)
     % sync data back
     % try just using the renderings sub-folder
     getOutput = tic;
-    system(sprintf('%s -r %s %s',rSync, ...
-        [remoteScene 'renderings/'], fullfile(nativeFolder, 'renderings')));
+    pullCommand = sprintf('%s -r %s %s',rSync, ...
+        [remoteScene 'renderings/'], fullfile(nativeFolder, 'renderings'));
+    if verbose
+        fprintf(" Rsync Pull: %s\n", pullCommand);
+    end
+
+    % bring back results
+    system(pullCommand);
     if verbose
         fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
     end
