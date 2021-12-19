@@ -13,16 +13,10 @@ cd(currDir);
 
 %%
 %% read data
-energy   = piReadEXR_python(outputFile);
-dim_energy = size(energy);
-if dim_energy(3)==31
-    wave = 400:10:700;
-elseif dim_energy(3)==16
-    wave = 400:20:700;
-end
+energy   = piReadEXR(outputFile);
+wave = 400:10:700;
 photons  = Energy2Quanta(wave,energy);
 ieObject = piSceneCreate(photons,'wavelength', wave);
-ieObject = sceneInterpolateW(ieObject,[400:10:700]);
 % get depth
 % depthImage   = piReadEXR_python(outputFile,'data type','zdepth');
 % ieObject = sceneSet(ieObject,'depth map',depthImage);

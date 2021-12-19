@@ -186,10 +186,25 @@ for ii = 1:numel(thisR.lights)
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
-            % spectrum
-            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
-            if ~isempty(spdTxt)
-                lghtDef = strcat(lghtDef, spdTxt);
+            if isempty(thisLight.mapname.value)
+                % spectrum
+                [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
+                if ~isempty(spdTxt)
+                    lghtDef = strcat(lghtDef, spdTxt);
+                end
+            else
+                % mapname
+                [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+                if ~isempty(mapnameTxt)
+                    lghtDef = strcat(lghtDef, mapnameTxt);
+
+                    if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
+                        mapFile = which(mapName);
+                        if ~isempty(mapFile)
+                            copyfile(mapFile,thisR.get('output dir'));
+                        end
+                    end
+                end
             end
 
             % lghtDef = sprintf('LightSource "infinite" "%s L" %s', spectrumType, lightSpectrum);

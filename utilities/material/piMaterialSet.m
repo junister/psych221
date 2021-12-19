@@ -49,7 +49,7 @@ end
 p = inputParser;
 p.addRequired('material', @(x)(isstruct(x)));
 p.addRequired('param', @ischar);
-p.addRequired('val', @(x)(ischar(x) || isstruct(x) || isnumeric(x) || islogical(x)));
+p.addRequired('val', @(x)(ischar(x) || isstruct(x) || isnumeric(x) || islogical(x) || iscell(x)));
 
 p.parse(material, param, val, varargin{:});
 

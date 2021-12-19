@@ -184,16 +184,26 @@ if ispc  % Windows
         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
     end
 else  % Linux & Mac
-    renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
+    
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
-    
     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
+
     % Check whether GPU is available
-    [GPUCheck,~] = system('nvidia-smi');
+    [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
+    try
+        ourGPU = gpuDevice();
+        if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+            GPUCheck = -1;
+        end
+    catch
+        % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
+    end
+
     if ~GPUCheck
+
         % GPU is available
         cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
@@ -201,7 +211,23 @@ else  % Linux & Mac
         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
         % update docker command to use gpu
         dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
-        dockerImageName = 'camerasimulation/pbrt-v4-gpu';
+
+
+        disp('***Rendering with GPU...');
+        % switch based on first GPU available
+        % really should enumerate and look for the best one, I think
+        gpuModels = strsplit(ieParamFormat(strtrim(GPUModel))); 
+        switch gpuModels{1}
+            case 'teslat4'
+                dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+            case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
+                dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
+            otherwise
+                warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
+                dockerImageName = 'camerasimulation/pbrt-v4-cpu';
+        end
+        
+
         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);   
     else
         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);

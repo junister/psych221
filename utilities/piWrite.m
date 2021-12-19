@@ -197,11 +197,6 @@ fclose(fileID);
 % Even when copying, we extract the materials and textures
 piWriteMaterials(thisR,overwritematerials);
 
-%% If the exporter is copy, we do not write out the geometry
-if isequal(thisR.exporter, 'Copy')
-    return;
-end
-
 %% Overwrite geometry.pbrt
 piWriteGeometry(thisR,overwritegeometry);
 
@@ -650,9 +645,18 @@ for ii = 1:length(thisR.world)
 
     fprintf(fileID,'%s \n',currLine);
 
-    if piContains(currLine,'WorldBegin') && isempty(lineMaterials)
+    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
+    end
+
+    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets)
+        % Insert the materials file
+        fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
+    end
+    if piContains(currLine, 'WorldBegin') && isempty(lineLights) && ~isempty(thisR.lights)
+        % Insert the lights file.
+        fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
     end
 end
 
@@ -679,7 +683,7 @@ end
 function piWriteGeometry(thisR,overwritegeometry)
 % Write the geometry file into the output dir
 %
-if overwritegeometry
+if overwritegeometry && ~isempty(thisR.assets)
     piGeometryWrite(thisR);
 end
 end

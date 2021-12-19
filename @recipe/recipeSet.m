@@ -520,7 +520,7 @@ switch param
         if islogical(val), val = 8;  end % Default number of bands
         thisR.set('integrator num cabands',val);
 
-    case 'integratorsubtype'
+    case {'integratorsubtype','integrator'}
         % thisR.set('integrator subtype',val)
         %
         % Different integrators are needed depending on the materials in

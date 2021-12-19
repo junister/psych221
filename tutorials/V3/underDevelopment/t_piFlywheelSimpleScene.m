@@ -95,7 +95,7 @@ fprintf('%s uploaded \n',pngfile);
 %% Upload the road.fwList
 % Syntax is: Group/Project/Subject/Session/Acquisition
 
-base_acq = st.fw.lookup('wandell/Graphics auto/assets/data/others');
+base_acq = st.fw.lookup('wandell/Graphics auto v4/assets/data/others');
 data_acq = st.fw.lookup(fullfile('wandell/Graphics auto/assets', sceneName, sceneName));
 road.fwList = [base_acq.id,' ','data.zip',' '...
         data_acq.id,' ',[sceneName,'.cgresource.zip']];

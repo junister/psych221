@@ -150,10 +150,25 @@ for ii = 1:numel(children)
             if ~isempty(thisNode.shape.filename)
                 % If the shape has ply info, do this
                 % Convert shape struct to text
-                if ~exist(fullfile(rootPath, thisNode.shape.filename),'file')
-                    error('%s not exist',shape.filename);
-                end
                 [~, ~, e] = fileparts(thisNode.shape.filename);
+                if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.ply','.pbrt')),'file')
+                    if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.pbrt','.ply')),'file')
+                        error('%s not exist',thisNode.shape.filename);
+                    else
+                        thisNode.shape.filename = strrep(thisNode.shape.filename,'.pbrt','.ply');
+                        thisNode.shape.meshshape = 'plymesh';
+                        shapeText = piShape2Text(thisNode.shape);
+                    end
+                else
+                    if isequal(e, '.ply')
+                        thisNode.shape.filename = strrep(thisNode.shape.filename,'.ply','.pbrt');
+                        thisNode.shape.meshshape = 'trianglemesh';
+                        shapeText = piShape2Text(thisNode.shape);
+                    end
+                end
+
+
+
                 if isequal(e, '.ply')
                     fprintf(fid, '%s \n',shapeText);
                 else
@@ -227,39 +242,29 @@ for ii = 1:numel(children)
             thisNode.size.h), '\n'));
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.
-        if ~isempty(thisNode.motion)
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                'ActiveTransform StartTime \n'));
-        end
+%         if ~isempty(thisNode.motion)
+%             fprintf(fid, strcat(spacing, indentSpacing,...
+%                 'ActiveTransform StartTime \n'));
+%         end
+%
+        % Translation
 
-        % Transformation section
-        if ~isempty(thisNode.rotation)
-            % Zheng: I think it is always this case, but maybe it is rarely
-            % the case below. Have no clue.
-            % If this way, we would write the translation, rotation and
-            % scale line by line based on the order of thisNode.transorder
-            pointerT = 1; pointerR = 1; pointerS = 1;
-            for tt = 1:numel(thisNode.transorder)
-                switch thisNode.transorder(tt)
-                    case 'T'
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Translate %.5f %.5f %.5f', thisNode.translation{pointerT}(1),...
-                            thisNode.translation{pointerT}(2),...
-                            thisNode.translation{pointerT}(3)), '\n'));
-                        pointerT = pointerT + 1;
-                    case 'R'
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 1)), '\n'));
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 2)), '\n'));
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 3)), '\n'));
-                        pointerR = pointerR + 1;
-                    case 'S'
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Scale %.10f %.10f %.10f', thisNode.scale{pointerS}), '\n'));
-                        pointerS = pointerS + 1;
-                end
+        % Rotation
+        if ~isempty(thisNode.translation) || ~isempty(thisNode.rotation)
+            if ~isempty(thisNode.translation) && ~isequal(thisNode.translation, [0 0 0])
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Translate %.5f %.5f %.5f', thisNode.translation(1),...
+                    thisNode.translation(2),...
+                    thisNode.translation(3)), '\n'));
+            end
+            zeroRotationMatrix = piRotationMatrix;
+            if ~isempty(thisNode.rotation) && ~isequal(thisNode.rotation,zeroRotationMatrix)
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 1)), '\n'));
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 2)), '\n'));
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 3)), '\n'));
             end
         else
             thisNode.concattransform(13:15) = thisNode.translation(:);
@@ -295,24 +300,30 @@ for ii = 1:numel(children)
         %}
 
         % Write out motion
+        %{
         if ~isempty(thisNode.motion)
-            for jj = 1:size(thisNode.translation, 1)
+            for jj = 1:size(thisNode.translation, 2)
                 fprintf(fid, strcat(spacing, indentSpacing,...
                     'ActiveTransform EndTime \n'));
-                if isempty(thisNode.motion.translation(jj, :))
+                if ~isfield(thisNode.motion,'position')||...
+                        isempty(thisNode.motion.position(:,jj))
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'Translate 0 0 0\n'));
                 else
-                    pos = thisNode.motion.translation(jj,:);
+                    % check this: DEBUG
+                    if size(thisNode.motion.position,2)==3
+                        thisNode.motion.position = thisNode.motion.position';
+                    end
+                    pos = thisNode.motion.position(:,jj);
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         sprintf('Translate %f %f %f', pos(1),...
                         pos(2),...
                         pos(3)), '\n'));
                 end
 
-                if isfield(thisNode.motion, 'rotation') && ~isempty(thisNode.motion.rotation)
+                if isfield(thisNode.motion, 'rotation') &&...
+                        ~isempty(thisNode.motion.rotation)
                     rot = thisNode.motion.rotation;
-
                     % Write out rotation
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         sprintf('Rotate %f %f %f %f',rot(:,jj*3-2)), '\n')); % Z

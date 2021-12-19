@@ -95,8 +95,6 @@ switch tp
         material.reflectance.type = 'spectrum';
         material.reflectance.value = [];
 
-%         material.sigma.type = 'float';
-%         material.sigma.value = [];
         material.normalmap.type = 'string';
         material.normalmap.value = [];
 

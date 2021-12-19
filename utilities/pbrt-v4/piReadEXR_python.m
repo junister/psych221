@@ -40,10 +40,8 @@ dataType = parser.Results.datatype;
 
 switch dataType
     case "radiance"
-        image = single(py.pyexr.read(filename,'Radiance'));        
-        if isempty(find(image(:,:,17),1))
-            output = image(:,:,1:16);
-        end
+        output = single(py.pyexr.read(filename,'Radiance'));        
+
         
     case "zdepth"
         output = single(py.pyexr.read(filename,'Pz')); 

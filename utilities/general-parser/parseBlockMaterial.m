@@ -20,7 +20,7 @@ newMat = piMaterialCreate(matName, 'type', matType);
 thisLine = thisLine(~cellfun('isempty',thisLine));
 
 % For strings 3 to the end, parse
-for ss = 3:2:numel(thisLine)
+for ss = 3:2:numel(thisLine)-1
     % Get parameter type and name
     keyTypeName = strsplit(thisLine{ss}, ' ');
     keyType = ieParamFormat(keyTypeName{1});
@@ -39,7 +39,11 @@ for ss = 3:2:numel(thisLine)
 
     switch keyType
         case {'string', 'texture'}
-            thisVal = thisLine{ss + 1};
+            if ~strcmp(keyName, 'materials')
+                thisVal = thisLine{ss + 1};
+            else
+                thisVal = {thisLine{ss+1},thisLine{ss+2}};
+            end
         case {'float', 'rgb', 'color', 'photolumi'}
             % Parse a float number from string
             % str2num can convert string to vector. str2double can't.

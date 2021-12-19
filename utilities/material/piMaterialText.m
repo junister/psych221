@@ -29,7 +29,6 @@ else
 end
 %% For each field that is not empty, concatenate it to the text line
 matParams = fieldnames(material);
-
 for ii=1:numel(matParams)
     if ~isequal(matParams{ii}, 'name') && ...
             ~isequal(matParams{ii}, 'type') && ...
@@ -37,9 +36,11 @@ for ii=1:numel(matParams)
          thisType = material.(matParams{ii}).type;
          thisVal = material.(matParams{ii}).value;
 
-         if piContains(matParams{ii}, 'conductor') || ...
-                 piContains(matParams{ii}, 'interface')
-             matParams{ii} = strrep(matParams{ii}, '_','.');
+         if piContains(matParams{ii}, 'conductor')
+             matParams{ii} = strcat('conductor.',strrep(matParams{ii},'conductor',''));
+         end
+         if piContains(matParams{ii}, 'interface')
+             matParams{ii} = strcat('interface.',strrep(matParams{ii},'interface',''));
          end
          if ischar(thisVal)
              thisText = sprintf(' "%s %s" "%s" ',...
@@ -53,6 +54,8 @@ for ii=1:numel(matParams)
                 thisText = sprintf(' "%s %s" [%s] ',...
                      thisType, matParams{ii}, num2str(thisVal, '%.4f '));
              end
+         elseif iscell(thisVal)
+             thisText = sprintf(' "%s %s" [ "%s" "%s" ] ',thisType, matParams{ii}, thisVal{1}, thisVal{2});
          end
 
          val = strcat(val, thisText);

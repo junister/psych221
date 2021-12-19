@@ -45,7 +45,7 @@ thisR.set('film render type',{'radiance','depth'})
 % Render
 piWrite(thisR);
 scene = piRender(thisR);
-scene = sceneSet(scene,'name',sprintf('Default %s',sceneName));
+scene = sceneSet(scene,'name',sprintf('Uber %s',sceneName));
 sceneWindow(scene);
 
 %% The material library
