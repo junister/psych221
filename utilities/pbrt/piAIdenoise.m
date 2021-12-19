@@ -12,7 +12,7 @@ function [object, results] = piAIdenoise(object,varargin)
 %
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons
-%           denoised is returned 
+%           denoised is returned
 %
 % Description
 %   This routine is to run a denoiser (oidn_pth) on rendered images when
@@ -20,10 +20,10 @@ function [object, results] = piAIdenoise(object,varargin)
 %   look better.  It is not used for true simulations of sensor data.
 %
 %   This is a Monte Carlo denoiser based on a trained model from intel open
-%   image denoise: 'https://www.openimagedenoise.org/'. 
+%   image denoise: 'https://www.openimagedenoise.org/'.
 %
 %   Ultimately, this will become a docker image that can integrate with
-%   PBRT. 
+%   PBRT.
 %
 % See also
 %   sceneWindow, oiWindow
@@ -61,7 +61,7 @@ energy = Quanta2Energy(wave, photons);
 %% Set up the denoiser path information
 
 if ismac
-    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.3.0.x86_64.macos', 'bin');
+    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.1.x86_64.macos', 'bin');
 else
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
 end
