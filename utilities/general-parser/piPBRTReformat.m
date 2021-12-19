@@ -40,6 +40,10 @@ varargin = ieParamFormat(varargin);
 % found.
 p = inputParser;
 p.addRequired('fname',@(x)(exist(fname,'file')));
+
+% This is ugly.  We find the full path to the fname.  Maybe we should just
+% require the full path.
+% fname = which(fname);
 [inputdir,thisName,ext] = fileparts(fname);
 p.addParameter('outputfull',fullfile(piRootPath,'local','formatted',thisName,[thisName,ext]),@ischar);
 

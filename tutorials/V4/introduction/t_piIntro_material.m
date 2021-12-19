@@ -12,6 +12,7 @@
 %    ISET3d, (ISETCam or ISETBio), JSONio
 %
 % ZL, BW SCIEN 2018
+% Updated for v4 2021
 %
 % See also
 %   t_piIntro_*
@@ -35,8 +36,8 @@ distLight = piLightCreate('new dist light',...
                             'cameracoordinate', true);
 thisR.set('light', 'add', distLight);
 
-thisR.set('film resolution',[200 150]*2);
-thisR.set('rays per pixel',64);
+thisR.set('film resolution',[200 150]*1.5);
+thisR.set('rays per pixel',32);
 thisR.set('fov',45);
 thisR.set('nbounces',5);
 thisR.set('film render type',{'radiance','depth'})
@@ -133,7 +134,7 @@ end
 %% Make the sphere glass
 
 glassName = 'glass';
-glass = piMaterialCreate(glassName, 'type', 'dielectric','eta','glass-BK7');
+glass = piMaterialCreate(glassName, 'type', 'dielectric','eta',[1.5]);
 thisR.set('material', 'add', glass);
 thisR.get('print materials');
 thisR.set('asset', assetName, 'material name', glassName);
@@ -148,21 +149,21 @@ else,        sceneSet(scene,'gamma',0.6);
 end
 %% Change the camera position
 
-% Where is the sphere ...
-assetPosition = thisR.get('asset',assetName,'world position');
-thisR.set('to',assetPosition);
-
-origFrom = [0 0 -5];  % Original from position
-
-% Set the camera from position a little higher and closer
-thisR.set('from',assetPosition + [0 1 -4]);
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene, 'name', 'Change sphere to glass');
-sceneWindow(scene);
-if piCamBio, sceneSet(scene,'render flag','hdr');
-else,        sceneSet(scene,'gamma',0.6);
-end
+% % Where is the sphere ...
+% assetPosition = thisR.get('asset',assetName,'world position');
+% thisR.set('to',assetPosition);
+% 
+% origFrom = [0 0 -5];  % Original from position
+% 
+% % Set the camera from position a little higher and closer
+% thisR.set('from',assetPosition + [0 1 -4]);
+% piWrite(thisR);
+% scene = piRender(thisR);
+% scene = sceneSet(scene, 'name', 'Change sphere to glass');
+% sceneWindow(scene);
+% if piCamBio, sceneSet(scene,'render flag','hdr');
+% else,        sceneSet(scene,'gamma',0.6);
+% end
 
 %% Change the sphere to a mirror 
 

@@ -53,6 +53,7 @@ for ii = numel(txtLines):-1:1
         %   materialMap(matName) = materialStruct;
         %
         m_index = m_index+1;
+        
         materialList{m_index}  = parseBlockMaterial(thisLine); %#ok<AGROW>
         materialMap(materialList{m_index}.name) = materialList{m_index};
         txtLines(ii) = [];

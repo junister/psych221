@@ -102,7 +102,22 @@ while i <= length(txt)
 
     elseif piContains(currentLine,'Shape')
         shape = piParseShape(currentLine);
-    elseif strcmp(currentLine,'AttributeEnd')
+        if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
+            inputfile = thisR.get('input file');
+            [inputDir,sceneName,~] = fileparts(inputfile);
+            [folder,fname,ext]=fileparts(shape.filename);
+            newPlyName = sprintf('%s_%s',sceneName,[fname,ext]);
+            if ~exist(fullfile(inputDir,newPlyName), 'file')
+                movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,folder,newPlyName));
+            end
+            shape.filename = newPlyName;
+        end
+    elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
+
+        % Assemble all the read attributes into either a groub object, or a
+        % geometry object. Only group objects can have subnodes (not
+        % children). This can be confusing but is somewhat similar to
+        % previous representation.
 
         % More to explain this long if-elseif-else condition:
         %   First check if this is a light/arealight node. If so, parse the

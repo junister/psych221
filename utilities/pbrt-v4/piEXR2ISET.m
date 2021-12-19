@@ -2,13 +2,13 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 % Read an exr-file rendered by PBRT, and return an ieObject or a
 % metadataMap
 %       ieObject = piExr2ISET(inputFile, varagin)
-% 
+%
 % Brief description:
 %   We take a exr-file from pbrt as input and return an ISET object.
 %
 % Inputs
 %   inputFile - Multi-spectral exr-file rendered by pbrt.
-% 
+%
 % Optional key/value pairs
 %   label            -  Specify the type of data: radiance, mesh, depth.
 %                       Default is radiance
@@ -30,8 +30,8 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 % python installation: https://docs.conda.io/en/latest/miniconda.html
 % Install python 3.8 for matlab 2020 and above
 % check version in matlab command window:
-%          pe = pyenv; 
-% Install python library for reading exr files, run this in terminal: 
+%          pe = pyenv;
+% Install python library for reading exr files, run this in terminal:
 %          sudo apt install libopenexr-dev # (ubuntu)
 %          brew install openexr # (mac)
 %          pip install git+https://github.com/jamesbowman/openexrpython.git
@@ -73,33 +73,33 @@ wave                  = p.Results.wave;
 %%
 
 for ii = 1:numel(label)
-    
+
     switch label{ii}
         case {'radiance','illuminance'}
             energy = piReadEXR(inputFile, 'data type','radiance');
-            
+
             if isempty(find(energy(:,:,17),1))
                 energy = energy(:,:,1:16);
                 data_wave = 400:20:700;
             else
                 data_wave = 400:10:700;
-            end            
+            end
             photons  = Energy2Quanta(data_wave,energy);
-            
+
         case 'depth'
             try
-                depthImage = piReadEXR(inputFile, 'data type','zdepth');
+                depthImage = piReadEXR(inputFile, 'data type','depth');
             catch
                 warning('Can not find "Pz" channel, ignore reading depth');
                 continue
             end
-            
+
         case 'coordinates'
             coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
-            
-        case 'material'   
+
+        case 'material'
             materialID = piReadEXR(inputFile, 'data type','material');
-            
+
         case 'normal'
             % to add
         case 'albedo'
@@ -128,12 +128,12 @@ switch lower(cameraType)
             % interpolate data for gpu rendering
             ieObject = sceneInterpolateW(ieObject,wave);
         end
-        
+
         if ~isempty(thisR)
             % PBRT may have assigned a field of view
             ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
         end
-        
+
     case {'realistic'}
         % todo
     otherwise
@@ -143,8 +143,3 @@ if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var')
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
 end
-
-
-
-
-
