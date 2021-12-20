@@ -89,8 +89,12 @@ classdef dockerWrapper < handle
 
             if ispc
                 if isequal(fullfile(inputPath), inputPath)
-                    % assume we have a drive letter
-                    output = inputPath(3:end);
+                    if numel(inputPath) > 3 && isequal(inputPath(2:3),':\')
+                        % assume we have a drive letter
+                        output = inputPath(3:end);
+                    else
+                        output = inputPath;
+                    end
                     output = strrep(output, '\','/');
                 else
                     output = strrep(inputPath, '\','/');

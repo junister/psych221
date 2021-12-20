@@ -86,7 +86,7 @@ if ~isempty(obj.remoteMachine)
     % try just using the renderings sub-folder
     getOutput = tic;
     pullCommand = sprintf('%s -r %s %s',rSync, ...
-        [remoteScene 'renderings/'], fullfile(nativeFolder, 'renderings'));
+        [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
     if verbose
         fprintf(" Rsync Pull: %s\n", pullCommand);
     end

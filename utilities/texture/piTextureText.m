@@ -68,6 +68,10 @@ for ii=1:numel(textureParams)
                     warning('Texture %s not found! Changing it to defuse', thisVal);
                     
                 else
+                    if ispc % try to fix filename for the Linux docker container                        
+                        imgFile = dockerWrapper.pathToLinux(imgFile);
+                    end
+
                    thisText = strrep(thisText,thisVal, imgFile);
 %                     piTextureFileFormat(imgFile);
 %                     copyfile(imgFile,thisR.get('output dir'));
