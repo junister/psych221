@@ -113,9 +113,11 @@ for ii = 1:nLights
             case 'infinite'
                 % Spectrum
                 spec = piParameterGet(thisLine, 'L');
-                if piContains(thisLine, 'blackbody')
+                if piContains(thisLine, 'blackbody') || numel(spec)==1
                     spec = spec(1);
+                    thisLightSource.spd.type = 'blackbody';
                 end
+                
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % n samples

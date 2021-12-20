@@ -100,10 +100,11 @@ function val = recipeGet(thisR, param, varargin)
 %                             just exist as a parameter.  If it doesn't
 %                             exist, then we use the film size to and FOV
 %                             to figure out what it must be.
-%      'spatial samples'    - Sampling resolution
+%      'spatial samples'    - Number of row and col samples
 %      'film x resolution'  - Number of x dimension samples
 %      'film y resolution'  - Number of y-dimension samples
-%      'film diagonarl'     - Size in mm
+%      'sample spacing'     - Spacing between row and col samples
+%      'film diagonal'      - Size in mm
 %
 %
 %      % Special retinal properties for human eye models
@@ -273,7 +274,8 @@ switch ieParamFormat(param)  % lower case, no spaces
 
     case {'lookatdirection','objectdirection'}
         % A unit vector in the lookAt direction
-        % This vector is v = to - 'from', so  v + 'from' = 'to'
+        %   This vector is v = 'to' - 'from',
+        %   so  v + 'from' = 'to'
         val = thisR.lookAt.to - thisR.lookAt.from;
         val = val/norm(val);
 
@@ -425,19 +427,23 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % examples in the data/lens directory and avoiding this
                 % problem.
 
-                % Make sure the lensfile is in the data/lens directory.
-                [~,name,ext] = fileparts(thisR.camera.lensfile.value);
-                baseName = [name,ext];
-                val = fullfile(piRootPath,'data','lens',baseName);
-                if ~exist(val,'file')
-                    val = which(baseName);
-                    if isempty(val)
-                        error('Can not find the lens file %s\n',val);
-                    else
-                        % fprintf('Using lens file at %s\n',val);
+                % If the lens file exists already found, use it
+                if exist(thisR.camera.lensfile.value, 'file')
+                    val = thisR.camera.lensfile.value;
+                else
+                    % Make sure the lensfile is in the data/lens directory.
+                    [~,name,ext] = fileparts(thisR.camera.lensfile.value);
+                    baseName = [name,ext];
+                    val = fullfile(piRootPath,'data','lens',baseName);
+                    if ~exist(val,'file')
+                        val = which(baseName);
+                        if isempty(val)
+                            error('Can not find the lens file %s\n',val);
+                        else
+                            % fprintf('Using lens file at %s\n',val);
+                        end
                     end
                 end
-
         end
     case {'lensdir','lensdirinput'}
         % This is the directory where the lens files are kept, not the
@@ -465,15 +471,22 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = fullfile(outputDir,'lens',lensfullbasename);
 
     case {'focusdistance','focaldistance'}
-        % recipe.get('focal distance')  (m)
-        %
         % Distance in object space that is in focus on the film. If the
         % camera model has a lens, we check whether the lens can bring this
         % distance into focus on the film plane.
         %
-        % N.B.  For pinhole this is focal distance.
-        %       For lens, this   is focus distance.
-        %       (in PBRT parlance)
+        %   recipe.get('focal distance')  (m)
+        %
+        % N.B.  The phrasing can be confusing.  This is the distance to the
+        %       plane in OBJECT space that is in focus. This can be easily
+        %       confused the the lens' focal length - which is a different
+        %       thing!
+        %
+        %       In PBRT parlance this is stored differently depending on
+        %       the camera model.
+        %
+        %       For pinhole this is stored as focal distance.
+        %       For lens, this stored as focus distance.
         %
         opticsType = thisR.get('optics type');
         switch opticsType
@@ -520,8 +533,10 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'filmdistance'}
         % thisR.get('film distance',unit); % Returned in meters
         %
-        % If the camera is a pinhole, we might have a filmdistance.  We
-        % don't understand that.
+        % If the camera is a pinhole, it might have a filmdistance.  If it
+        % does not, then we calculate where the film should be positioned
+        % so that the film diagonal and the field of view all make sense
+        % together.
         %
         % When there is a lens, PBRT sets the filmdistance so that an
         % object at the focaldistance is in focus. This is a means of
@@ -562,9 +577,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                     lensFile = thisR.get('lens file');
                     if exist('lensFocus','file')
                         % If isetlens is on the path, we convert the
-                        % distance to the focal plane into millimeters
-                        % and see whether there is a film distance so
-                        % that the plane is in focus.
+                        % distance to the in-focus object plane into
+                        % millimeters and see whether there is a film
+                        % distance so that that object plane is in focus.
+                        % This is
                         %
                         % But we return the value in meters
                         val = lensFocus(lensFile,1e+3*thisR.get('focal distance'))*1e-3;
@@ -843,6 +859,12 @@ switch ieParamFormat(param)  % lower case, no spaces
           thisR.set('film resolution', nMicrolens .* nSubpixels);
         %}
 
+    case {'samplespacing'}
+        % Distance in meters between the row and col samples
+
+        % This formula assumes film diagonal pixels
+        val =thisR.get('filmdiagonal')/norm(thisR.get('spatial samples'));
+
     case 'filmxresolution'
         % An integer specifying number of samples
         val = thisR.film.xresolution.value;
@@ -850,6 +872,14 @@ switch ieParamFormat(param)  % lower case, no spaces
         % An integer specifying number of samples
         val = [thisR.film.yresolution.value];
 
+    case {'filmwidth'}
+        % x-dimension, columns
+        ss   = thisR.get('spatial samples'); % Number of samples
+        val = ss(1)*thisR.get('sample spacing');
+    case {'filmheight'}
+        % y-dimension, rows
+        ss   = thisR.get('spatial samples'); % Number of samples
+        val = ss(2)*thisR.get('sample spacing');
     case 'aperturediameter'
         % Needs to be checked.  Default units are meters or millimeters?
         if isfield(thisR.camera, 'aperturediameter') ||...
@@ -1158,10 +1188,14 @@ switch ieParamFormat(param)  % lower case, no spaces
             % All the object points
             if isfield(thisNode.shape,'pointp')
                 pts = thisNode.shape.pointp;
-                % Range of points times any scale factors on the path
-                val(ii,1) = range(pts(1:3:end))*thisScale(1);
-                val(ii,2) = range(pts(2:3:end))*thisScale(2);
-                val(ii,3) = range(pts(3:3:end))*thisScale(3);
+                if ~isempty(pts)
+                    % Range of points times any scale factors on the path
+                    val(ii,1) = range(pts(1:3:end))*thisScale(1);
+                    val(ii,2) = range(pts(2:3:end))*thisScale(2);
+                    val(ii,3) = range(pts(3:3:end))*thisScale(3);
+                else
+                    val(ii,:) = NaN;
+                end
             else
                 % There is no shape point information.  So we return NaNs.
                 val(ii,:) = NaN;
@@ -1239,11 +1273,18 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('lights print');
         piLightList(thisR);
     % Asset specific gets - more work needed here.
-    case {'asset', 'assets'}
+    case {'asset', 'assets','node','nodes'}
+        %
         % thisR.get('asset',assetName or ID);  % Returns the asset
         % thisR.get('asset',assetName,param);  % Returns the param val
         % thisR.get('asset',name or ID,'world position')
         % thisR.get('asset',name or ID,'size')
+
+        %
+        % We are slowly starting to call nodes nodes, rather than
+        % assets.  We think of an asset now as, say, a car with all of
+        % its parts.  A node is the node in a tree that contains
+        % multiple assets. (BW, Sept 2021).
 
         [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
         % If only one asset matches, turn it from cell to struct.
@@ -1354,7 +1395,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = piAssetGet(thisAsset,varargin{2});
             end
         end
-    case {'assetid'}
+    case {'nodeid','assetid'}
         % thisR.get('asset id',assetName);  % ID from name
         val = piAssetFind(thisR.assets,'name',varargin{1});
     case {'assetroot'}
@@ -1366,7 +1407,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % The names without the XXXID_ prepended
         % What about objectnames
         val = thisR.assets.stripID;
-    case {'assetparentid'}
+    case {'nodeparentid','assetparentid'}
         % thisR.get('asset parent id',assetName or ID);
         %
         % Returns the id of the parent node
@@ -1380,7 +1421,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisNodeID = thisNode;
         end
         val = thisR.assets.getparent(thisNodeID);
-    case {'assetparent'}
+    case {'nodeparent','assetparent'}
         % thisR.get('asset parent',assetName)
         %
         thisNode = varargin{1};

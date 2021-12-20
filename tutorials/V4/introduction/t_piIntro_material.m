@@ -32,7 +32,7 @@ thisR = piRecipeDefault('scene name',sceneName);
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
                             'type', 'distant',...
-                            'spd', 9000,... % blackbody
+                            'blackbody spd', 9000,... % blackbody
                             'cameracoordinate', true);
 thisR.set('light', 'add', distLight);
 

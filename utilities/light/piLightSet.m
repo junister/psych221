@@ -128,7 +128,7 @@ if isfield(lght, pName)
         if isequal(pName, 'spd') || isequal(pName, 'scale')
             if numel(val) == 3 && ~ischar(val)
                 lght.(pName).type = 'rgb';
-            elseif numel(val) == 2 && ~ischar(val)
+            elseif numel(val) == 1 && ~ischar(val)
                 lght.(pName).type = 'blackbody';
             elseif (numel(val) > 3 && mod(numel(val), 2) == 0)|| ischar(val)
                 lght.(pName).type = 'spectrum';

@@ -49,6 +49,8 @@ for ii=numel(nodeToRoot):-1:1
                         rotM(:, 3), thisTrans);
                     transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
 
+                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4) .* scaleM';
+
                     pointerT = pointerT + 1;
                 case 'R'
                     rotDegs = thisAsset.rotation{pointerR}(1,:);

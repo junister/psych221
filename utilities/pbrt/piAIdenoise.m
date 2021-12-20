@@ -27,6 +27,9 @@ function [object, results] = piAIdenoise(object,varargin)
 %
 % See also
 %   sceneWindow, oiWindow
+%
+% Update History:
+%   10/15/21    djc    Fixed Windows pathing
 
 %% Parse
 p = inputParser;
@@ -76,8 +79,7 @@ for ii = 1:chs
     img_sp(:,:,2) = img_sp(:,:,1);
     img_sp(:,:,3) = img_sp(:,:,1);
     writePFM(img_sp, outputTmp);
-
-    cmd  = [oidn_pth, '/oidnDenoise --threads 8 --hdr ', outputTmp, ' -o ',DNImg_pth];
+    cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp, ' -o ',DNImg_pth];
     [~, results] = system(cmd);
     [status, results] = system(cmd);
     if status

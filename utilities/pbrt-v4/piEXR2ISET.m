@@ -94,7 +94,8 @@ for ii = 1:numel(label)
                 warning('Can not find "Pz" channel, ignore reading depth');
                 continue
             end
-
+        case 'zdepth'
+            depthImage = piReadEXR(inputFile, 'data type','zdepth');
         case 'coordinates'
             coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
 

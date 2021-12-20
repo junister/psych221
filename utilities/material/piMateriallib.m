@@ -1,4 +1,5 @@
-function [materiallib_updated] = piMateriallib
+function [materiallib] = piMateriallib
+% Not sure whether we will use this anymore --Zhenyi
 % A library of material properties (deprecated)
 %
 % Syntax:
@@ -106,7 +107,7 @@ materiallib.mirror.k         = 'metal-Ag-k';
 %% matte
 
 % Standard matte surface.  Only diffuse.
-materiallib.matte.stringtype = 'matte';
+materiallib.matte.stringtype = 'diffuse';
 
 %% plastic
 

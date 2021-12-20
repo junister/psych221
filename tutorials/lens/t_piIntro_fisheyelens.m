@@ -31,17 +31,18 @@ thisR = piRecipeDefault('scene name','chessSet');
 
 % This is a quick rendering of the PBRT scene through a pinhole optics
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 
 % Have a look
 sceneWindow(scene);
-
 %% Set render quality
-%
+
 % Set resolution for speed or quality.
 thisR.set('film resolution',round([600 400]*0.5));
 quality = 1;   % 1 is fast/low 20 is high/slow
 thisR.set('pixel samples',64*quality);   % Number of rays set the quality.
+
+thisR.set('film render type',{'radiance','depth'});
 
 %% Add camera with a fisheye lens
 %

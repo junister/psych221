@@ -32,12 +32,12 @@ v_piDataScenes;                  % Checks the local data scenes
 %%  Rotate the camera
 
 disp('t_piIntro_cameramotion')
-t_piIntro_cameramotion
+t_cameraMotion
 
 %% Maybe redundant with prior cameramotion
 
 disp('t_piIntro_cameraposition')
-t_piIntro_cameraposition
+t_cameraPosition
 
 %% Try a lens
 
@@ -47,7 +47,7 @@ t_piIntro_fisheyelens;
 %%  Change the lighting
 
 disp('t_piIntro_light')
-t_piIntro_light
+t_piIntro_light;
 
 %%  Glass, mirrors ...
 
@@ -70,3 +70,4 @@ disp('t_piIntro_texture')
 t_piIntro_texture
 
 %% END
+

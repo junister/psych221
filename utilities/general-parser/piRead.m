@@ -258,8 +258,8 @@ if convertunit % make it a function --Zhenyi
         thisNode = thisR.assets.Node{ii};
         if strcmp(thisNode.type, 'branch')
             % fix scale and translation
-            thisNode.scale = thisNode.scale/100;
-            thisNode.translation = thisNode.translation/100;
+            thisNode.scale{1} = thisNode.scale{1}/100;
+            thisNode.translation{1} = thisNode.translation{1}/100;
             thisR.assets   = thisR.assets.set(ii, thisNode);
         end
     end

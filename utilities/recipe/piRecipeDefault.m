@@ -97,11 +97,15 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
 p.addParameter('write',false,@islogical);
+p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
+
+% p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(varargin{:});
 
-sceneDir = p.Results.scenename;
-write    = p.Results.write;
+sceneDir   = p.Results.scenename;
+write      = p.Results.write;
+loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
 
@@ -121,7 +125,7 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'MacBethCheckerCus';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
-    case 'macbethcheckercb'
+    case {'macbethcheckercb', 'mcccb'}
         sceneDir = 'mccCB';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
@@ -137,7 +141,7 @@ switch ieParamFormat(sceneDir)
     case 'chessset'
         sceneDir = 'ChessSet';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'Copy';
+        exporter = 'C4D';
     case 'chesssetpieces'
         sceneDir = 'ChessSetPieces';
         sceneFile = ['ChessSet','.pbrt'];
@@ -219,10 +223,15 @@ switch ieParamFormat(sceneDir)
         sceneFile = ['cornell_box','.pbrt'];
         exporter = 'C4D';
     case {'cornellboxbunnychart'}
+        if loadrecipe && exist('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','file')
+            load('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','thisR');
+            return;
+        end
         sceneDir = 'Cornell_BoxBunnyChart';
         sceneFile = ['Cornell_Box_Multiple_Cameras_Bunny_charts','.pbrt'];
         exporter = 'C4D';
     case {'cornellboxreference'}
+        % Main Cornell Box
         sceneDir = 'CornellBoxReference';
         sceneFile = ['CornellBoxReference','.pbrt'];
         exporter = 'C4D';

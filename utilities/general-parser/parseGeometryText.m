@@ -44,7 +44,7 @@ while i <= length(txt)
     currentLine = txt{i};
     % ZLY: an emergency patch for Brian's presentation tomorrow If we found
     % ObjectBegin, that means we won't parse anything
-    if piContains(currentLine, 'ObjectBegin')
+    if piContains(currentLine, 'ObjectBegin') && ~strcmp(currentLine(1),'#')
         trees = {};
         parsedUntil = i;
         return;
@@ -52,7 +52,7 @@ while i <= length(txt)
 
     % Return if we've reached the end of current attribute
 
-    if strcmp(currentLine,'AttributeBegin')
+    if strcmp(currentLine,'AttributeBegin') && ~strcmp(currentLine(1),'#')
         % This is an Attribute inside an Attribute
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
 
@@ -70,28 +70,28 @@ while i <= length(txt)
     elseif piContains(currentLine,'#ObjectName')
         [name, sz] = piParseObjectName(currentLine);
 
-    elseif piContains(currentLine,'ConcatTransform')
+    elseif piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
         % [rot, translation, ctform] = piParseConcatTransform(currentLine);
         [translation, rot, scale] = parseTransform(currentLine);
     elseif strncmp(currentLine,'Transform ',10)
         % ctform = [];
         [translation, rot, scale] = parseTransform(currentLine);
-    elseif piContains(currentLine,'MediumInterface')
+    elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
         medium = currentLine;
 
-    elseif piContains(currentLine,'NamedMaterial')
+    elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
         mat = piParseGeometryMaterial(currentLine);
 
-    elseif piContains(currentLine,'Material')
+    elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
         mat = parseBlockMaterial(currentLine);
 
-    elseif piContains(currentLine,'AreaLightSource')
+    elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
         areaLight = currentLine;
 
     elseif piContains(currentLine,'LightSource') ||...
             piContains(currentLine, 'Rotate') ||...
-            piContains(currentLine, 'Scale')
+            piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
         % Usually light source contains only one line. Exception is there
         % are rotations or scalings
         if ~exist('lght','var')
@@ -100,7 +100,7 @@ while i <= length(txt)
             lght{end+1} = currentLine; %#ok<AGROW>
         end
 
-    elseif piContains(currentLine,'Shape')
+    elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         shape = piParseShape(currentLine);
         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
             inputfile = thisR.get('input file');

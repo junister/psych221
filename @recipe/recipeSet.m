@@ -171,10 +171,7 @@ switch param
             mkdir(newDir);
         end
         %}
-        newDir     = fileparts(val);
-        if ~exist(newDir,'dir')
-            warning('output directory does not exist yet');
-        end
+        newDir = fileparts(val);
 
         thisR.outputFile = val;
 
@@ -204,21 +201,32 @@ switch param
         % This routine adjusts the the 'from' position, moving the
         % camera position. It does so by keeping the 'to' position the
         % same, so the camera is still looking at the same location.
-        % Thus, the point of this set is to move the camera closer or
-        % further from the 'to' position.
+        % Thus, this set moves the camera closer or further from the 'to'
+        % position.
         %
         % What is the relationship to the focal distance?  If we move
         % the camera, the focal distance is always with respect to the
-        % camera, right?
 
-        % Unit length vector between from and to.
+        % camera, right?  Or is it always at the 'to' distance???  You can
+        % force it to be the 'to' by using
+        %
+        % thisR.set('focal distance',thisR.get('object distance'))
+        %
+
+        assert(val > 0);  % We do not change which side of 'to' this way.
+
+        % Unit length vector  objDir = ('to' - 'from')
+        % So, 'from' + objDir moves towards 'to'
+        %     'from' - objDir moves away from 'to'
         objDirection = thisR.get('object direction');
 
-        % Scale the unit length vector to match val, thus setting the
-        % distance between 'from' and 'to'.  This adjust the 'from'
-        % (camera) position, but not the object position in the scene.
-        thisR.lookAt.from = thisR.lookAt.to + objDirection*val;
-        % warning('Object distance may not be important');
+        % Change in distance (in meters).  If val is bigger, delta is
+        % negative and adding moves away from 'to'.  If val is smaller,
+        % delta is positive and we move towards 'to'.
+        delta = thisR.get('object distance') - val;
+
+        % Test: If we set val to 0, the new from should be at 'to',
+        thisR.lookAt.from = thisR.lookAt.from + objDirection*delta;
 
     case {'accommodation'}
         % Special case where we allow setting accommodation or focal
@@ -270,6 +278,15 @@ switch param
         thisR.set('film diagonal',35);
 
         %}
+    case 'scale'
+        % Scale something?? Was missing until December 11, 2021.
+        % Will experiment with what it does.  There is a slot for it in
+        % piWrite().
+        if numel(val) == 3,     thisR.scale = val(:)';
+        elseif numel(val) == 1, thisR.scale = ones(3,1)*val;
+        else, warning('Bad scale value.  Must be scalar or 3-vector');
+        end
+
     case 'mmunits'
         % thisR.set('mm units',true/false)
         %
@@ -943,12 +960,17 @@ switch param
             thisR.set('light', lgtIdx, thisLight);
         end
 
-    case {'asset', 'assets'}
+    case {'asset', 'assets','node','nodes'}
         % Typical:    thisR.set(param,val)
         % This case:  thisR.set('asset',assetNameOrID, param, val);
         %
         % These operations need the whole tree, so we send in the
         % recipe that contains the asset tree, thisR.assets.
+
+        % We are slowly starting to call nodes nodes, rather than
+        % assets.  We think of an asset now as, say, a car with all of
+        % its parts.  A node is the node in a tree that contains
+        % multiple assets. (BW, Sept 2021).
 
         % Given the calling convention, val is assetName and
         % varargin{1} is the param, and varargin{2} is the value, if
@@ -981,7 +1003,11 @@ switch param
             case {'cancellasttransformation', 'removelasttransformation',...
                   'cancellasttrans', 'removelasttrans',...
                   'cancellastaction', 'removelastaction'}
+                % Note: this is for transformation only, not
+                % motion/animation
                 piAssetRemoveLastTrans(thisR, assetName);
+            case {'clearmotion', 'removemotion', 'cancelmotion'}
+                piAssetSet(thisR, assetName, 'motion', []);
             case {'delete', 'remove'}
                 % thisR.set('asset',assetName,'delete');
                 piAssetDelete(thisR, assetName);
@@ -999,7 +1025,10 @@ switch param
                 rotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
                 % newTrans = inv(rotM) * [reshape(val, numel(val), 1); 0];
                 newTrans = rotM \ [reshape(val, numel(val), 1); 0];
-                out = piAssetTranslate(thisR, assetName, newTrans(1:3));
+
+                % Get the scale
+                worldScale = thisR.get('asset', assetName, 'world scale');
+                out = piAssetTranslate(thisR, assetName, newTrans(1:3)./worldScale(:));
             case {'rotate', 'rotation'}
                 % Figures out the rotation from the angles in val and sets
                 % the rotation matrix
@@ -1062,8 +1091,8 @@ switch param
             case {'obj2light'}
                 piAssetObject2Light(thisR, assetName, val);
             case {'graft', 'subtreeadd'}
-                % thisR.set('asset',assetName,'graft',val); (Maybe)
-                id = thisR.get('asset', assetName, 'id');
+                % thisR.set('asset',nodeForGraft,'graft',subtree);
+                id = thisR.get('node', assetName, 'id');
                 rootSTID = thisR.assets.nnodes + 1;
                 thisR.assets = thisR.assets.graft(id, val);
                 thisR.assets = thisR.assets.uniqueNames;

@@ -107,7 +107,7 @@ thisR.camera = piCameraCreate('omni','lensFile',thisLens);
 % camera we can reset the focus, of course.s
 thisR.set('focus distance',0.6);
 
-% The FOV is not used for the 'realistic' camera.
+% The FOV is not used for the 'omni' camera.
 % The FOV is determined by the lens. 
 
 % This is the size of the film/sensor in millimeters 
@@ -222,7 +222,7 @@ lightfield = ip2lightfield(ip,'pinholes',nMicrolens,'colorspace','srgb');
 %
 % Click on window to select and then press Escape to close the window
 %
-LFDispVidCirc(lightfield.^(1/2.2))
+LFDispVidCirc(lightfield.^(1/2.2));
 %% Focus on a region
 
 %{
