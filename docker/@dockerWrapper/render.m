@@ -74,8 +74,11 @@ if ~isempty(obj.remoteMachine)
     % mounted
 
     shortOut = [obj.relativeScenePath sceneDir];
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, shortOut, renderCommand);
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/* && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
+    if verbose
+        fprintf("Render: %s\n", containerRender);
+    end
     [status, result] = system(containerRender);
     if true % verbose
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))

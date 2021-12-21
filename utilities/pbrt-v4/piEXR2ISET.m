@@ -91,10 +91,25 @@ for ii = 1:numel(label)
                 % we error if x & y are missing 
                 % unless we call zdepth -- we should probably
                 % just have the ReadEXR code be more resilient
-                depthImage = piReadEXR(inputFile, 'data type','zdepth');
+                % we might already have the output, but it might or
+                % might not have a suffix?
+                [dir, file, ~] = fileparts(inputFile);
+                exrFile = fullfile(dir, file);
+                depthFile = sprintf('%s_%d_%d_Pz',exrFile, thisR.film.yresolution.value, ...
+                        thisR.film.xresolution.value);
+                if isfile(depthFile)
+                    [fid, ~] = fopen(depthFile, 'r');
+                    serializedImage = fread(fid, inf, 'float');
+                    ieObject = reshape(serializedImage, thisR.film.yresolution.value, thisR.film.xresolution.value, 1);
+                    fclose(fid);
+                    delete(depthFile);
 
+                else
+                    depthImage = piReadEXR(inputFile, 'data type','zdepth');
+                end
+                
             catch
-                warning('Can not find "Pz" channel, ignore reading depth');
+                warning('Can not find "Pz(?)" channel in %s, ignore reading depth', inputFile);
                 continue
             end
             
