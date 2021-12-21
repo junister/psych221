@@ -33,6 +33,7 @@
 %   
 %% Init
 ieInit;
+if ~piDockerExists, piDockerConfig; end
 
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
