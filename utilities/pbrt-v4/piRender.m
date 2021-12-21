@@ -135,7 +135,7 @@ end
 %% We have a radiance recipe and we have written the pbrt radiance file
 
 % Set up the output folder.  This folder will be mounted by the Docker
-% image
+% image if run locally.  When run remotely, we are using rsynch and different mount points.
 outputFolder = fileparts(thisR.outputFile);
 if(~exist(outputFolder,'dir'))
     error('We need an absolute path for the working folder.');
