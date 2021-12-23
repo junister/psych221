@@ -79,7 +79,7 @@ if ~isempty(obj.remoteMachine)
     if verbose
         fprintf("Render: %s\n", containerRender);
     end
-    [status, result] = system(containerRender);
+    [status, result] = system(containerRender, '-echo');
     if true % verbose
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
         fprintf(" With Result: %s", result);
