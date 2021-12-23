@@ -127,6 +127,10 @@ for ii = 1:nLights
                 end
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float specscale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
+
                 % n samples
                 nsamples = piParameterGet(thisLine, 'integer nsamples');
                 thisLightSource = piLightSet(thisLightSource, 'nsamples val', nsamples);
