@@ -106,6 +106,10 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'spd'
             spectrumScale = lght.specscale.value;
+            
+            % Maybe fix specscale earlier and more gnerally.
+            if isempty(spectrumScale), spectrumScale = 1; end
+            
             if ischar(lght.spd.value)
                 [~, ~, ext] = fileparts(lght.spd.value);
                 if ~isequal(ext, '.spd')

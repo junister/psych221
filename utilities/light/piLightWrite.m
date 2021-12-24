@@ -46,8 +46,12 @@ lightSourceText = cell(1, numel(thisR.lights));
 %% Check all applicable parameters for every light
 for ii = 1:numel(thisR.lights)
     thisLight = thisR.lights{ii};
+    
+    % Sometimes this parameter is empty.  So we set it to 1.
     spectrumScale = piLightGet(thisLight, 'specscale val');
-    scaleTxt = sprintf('"float scale" %f',spectrumScale);
+    if isempty(spectrumScale), spectrumScale = 1; end
+    scaleTxt = sprintf('"float scale" %f',spectrumScale);    
+    
     %% Write out lightspectrum to the file if the data is from file
     specVal = piLightGet(thisLight, 'spd val');
     if ~isempty(specVal)
@@ -309,8 +313,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, spdTxt);
             end
 
-            
-%             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
+            % lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             if thisLight.ReverseOrientation.value==true
                 rOTxt = 'ReverseOrientation';
                 lightSourceText{ii}.line = [lightSourceText{ii}.line rOTxt];
@@ -322,9 +325,8 @@ for ii = 1:numel(thisR.lights)
                 [~, shpTxt] = piLightGet(thisLight, 'shape struct', 'pbrt text', true);
             end
 
-%             lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
+            % lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
             lightSourceText{ii}.line = [lightSourceText{ii}.line sprintf("%s %s",lghtDef, scaleTxt) shpTxt ];
-            
             
     end
     lightSourceText{ii}.line{end+1} = 'AttributeEnd';
