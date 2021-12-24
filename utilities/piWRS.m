@@ -29,7 +29,7 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu:latest',@ischar);
+% p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu:latest',@ischar);
 p.addParameter('rendertype','radiance',@ischar);
 p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
@@ -37,6 +37,7 @@ p.addParameter('show',true,@islogical);
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
+% thisDocker = p.Results.dockerimagename;
 renderType = p.Results.rendertype;
 name = p.Results.name;
 show = p.Results.show;
@@ -46,7 +47,6 @@ piWrite(thisR);
 
 [obj,results] = piRender(thisR,...
     'ourdocker', ourDocker, ...
-    'docker image name',thisDocker, ...
     'render type',renderType);
 
 switch obj.type
