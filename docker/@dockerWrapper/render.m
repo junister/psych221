@@ -58,11 +58,19 @@ if ~isempty(obj.remoteMachine)
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
-    putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
+    if ismac
+        % We needed the extra slash for the mac.  But still investigation
+        % (DJC)
+        putCommand = sprintf('%s -r -t %s %s',rSync, [nativeFolder,'/'], remoteScene);
+    else
+        putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
+    end
+    
     if verbose
         fprintf(" Rsync Put: %s\n", putCommand);
     end
     [rStatus, rResult] = system(putCommand);
+
     if verbose
         fprintf('Pushed scene to remote in: %6.2f\n', toc(putData))
     end
