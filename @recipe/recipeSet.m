@@ -247,7 +247,9 @@ switch param
             thisR.camera.focaldistance.value = val;
             thisR.camera.focaldistance.type = 'float';
             % pbrt v4 gets mad if we don't get rid of the field
-            thisR.camera = rmfield(thisR.camera,'focusdistance');
+            if isfield(thisR.camera,'focusdistance')
+                thisR.camera = rmfield(thisR.camera,'focusdistance');
+            end
         else
             % When there is a lens.  Omni.  Realistic.
             thisR.camera.focusdistance.value = val;
