@@ -97,7 +97,7 @@ p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(thisR,varargin{:});
 dockerImageName  = p.Results.dockerimagename;
-scalePupilArea = p.Results.scalepupilarea;
+scalePupilArea   = p.Results.scalepupilarea;
 meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
