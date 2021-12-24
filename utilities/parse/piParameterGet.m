@@ -30,34 +30,34 @@ value=[];
 if piContains(match,'string') || piContains(match,'bool')
     matchIndex = regexp(thisLine, match);
     if isempty(matchIndex)
-        return; 
+        return;
     end
     newline = thisLine(matchIndex+length(match)+2 : end);
     parameter_toc = regexp(newline, '"');
     value = newline(parameter_toc(1)+1: parameter_toc(2)-1);
 elseif piContains(match, ' L') && piContains(thisLine,'.spd')
-    matchIndex = regexp(thisLine, '.spd"');
+    matchIndex = regexp(thisLine, '.spd');
     n=matchIndex;
-    while n<= numel(thisLine)
+    while n<numel(thisLine)
         if strcmp(thisLine(n),'"')
             % find spd file end token
             end_toc = n;
             break;
-            
+
         end
         n=n+1;
     end
     n=matchIndex;
     while n>1
         if strcmp(thisLine(n),'"')
-            % find spd file start token
+            % find spd file end token
             start_toc = n;
             break;
         end
         n=n-1;
     end
     value = thisLine(start_toc+1: end_toc-1);
-    
+
     % If it is a spd file, load in the data as a vector
     if exist(value, 'file')
         fid = fopen(value, 'r');
@@ -65,8 +65,7 @@ elseif piContains(match, ' L') && piContains(thisLine,'.spd')
         fclose(fid);
         value = piMaterialCreateSPD(spd{1}, spd{2});
     else
-        warning('SPD file: %s is not found.', value);
-%         error('SPD file: %s does not exist.', value)
+        error('SPD file: %s does not exist.', value)
     end
 else
     matchIndex = regexp(thisLine, match);

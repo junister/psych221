@@ -25,16 +25,18 @@ for ss = 3:2:numel(thisLine)-1
     keyTypeName = strsplit(thisLine{ss}, ' ');
     keyType = ieParamFormat(keyTypeName{1});
     keyName = ieParamFormat(keyTypeName{2});
+
     if piContains(keyName,'.')
         keyName = strrep(keyName,'.','');
     end
+
     % Some corner cases
     % "index" should be replaced with "eta"
     switch keyName
         case 'index'
             keyName = 'eta';
     end
-    
+
     switch keyType
         case {'string', 'texture'}
             if ~strcmp(keyName, 'materials')
@@ -61,13 +63,15 @@ for ss = 3:2:numel(thisLine)-1
             elseif isequal(thisLine{ss + 1}, 'false')
                 thisVal = false;
             end
+        case ''
+            continue
         otherwise
             warning('Could not resolve the parameter type: %s', keyType);
             continue;
     end
-    
+
     newMat = piMaterialSet(newMat, sprintf('%s value', keyName),...
         thisVal);
-    
+
 end
 end

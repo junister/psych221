@@ -6,7 +6,7 @@ function properties = piMaterialProperties(materialType)
 %
 % Input
 %   materialType:   See the possible material types using
-%      piMaterialCreate('list available types') 
+%      piMaterialCreate('list available types')
 %
 % Optional key/val
 %   N/A
@@ -34,7 +34,7 @@ piMaterialProperties(materialType)
 %}
 
 %% Check that the material type is valid
-    
+
 allTypes = piMaterialCreate('list available types');
 ii =  find(contains(allTypes,materialType));  %#ok<EFIND>
 if isempty(ii)
@@ -47,4 +47,3 @@ thisMaterial = piMaterialCreate('thisName','type',allTypes{ii});
 properties = fieldnames(thisMaterial);
 
 end
-

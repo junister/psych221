@@ -30,19 +30,19 @@ for n = 1:size(build_files, 2)
     if(verbose == true)
         clc;
     end
-    
+
     file = cell2mat(build_files(n));
-    
+
     disp(['Building ', file]);
-    
+
     if ispc
         % So far, with 2.5 the MEX DLLs build, but MATLAB
         % crashes when the tutorials are run
-        
+
         % SO this isn't a working code path (at least yet), more of a place
         % to start for anyone brave enough to help get this running on
         % Windows
-        
+
         % should use symbolic links to versions, once we get something
         % running
         % Also, I've had to comment out lines 296 and 297 from half.h to
@@ -76,7 +76,7 @@ for n = 1:size(build_files, 2)
                 '-Lc:\ProgramData\Anaconda3\Library\lib','-lIlmThread',... %path to IlmThread.lib
                 '-largeArrayDims', ...
                 additionals{:});
-        end    
+        end
         else
             mex(file, companion_files{:}, ...
                 '-I/usr/local/include/OpenEXR', ...
@@ -90,6 +90,6 @@ for n = 1:size(build_files, 2)
                 additionals{:});
         end
     end
-    
+
     clear;
     disp('Finished building OpenEXR for Matlab');

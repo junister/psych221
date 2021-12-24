@@ -1,12 +1,6 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
-% WARNING:   ZLY wrote this differently from all the other 'gets'.  This
-%    get does not return the parameter.  It returns a string that specifies
-%    the parameter and can be used when writing out the PBRT file.  I think
-%    we might end up changing this, or at least modifying it so we can just
-%    get the values back.
-%
 % Synopsis
 %    [val, txt] = piLightGet(lght, param, varargin)
 %
@@ -123,7 +117,8 @@ if pbrtText && ~isempty(val) &&...
                     lightSpectrum = sprintf('"%s"', lght.spd.value);
                 end
             elseif isnumeric(lght.spd.value)
-                lightSpectrum = ['[' ,piNum2String(lght.spd.value * spectrumScale),']'];
+                txt = piNum2String(lght.spd.value * spectrumScale);
+                lightSpectrum = ['[' ,txt,']'];
             end
             switch lght.type
                 case {'point', 'goniometric', 'projection', 'spot', 'spotlight'} % I
@@ -185,18 +180,17 @@ if pbrtText && ~isempty(val) &&...
                 end
             end
         case 'ctform'
+            % Not sure why the cell stuff became a problem here ...
+            if ~iscell(val), val = {val}; end % BW
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', val{ii}(:));
             end
         case 'scale'
-            if ~iscell(val)
-                val = {val};
-            end
+            % Or here.
+            if ~iscell(val), val = {val}; end % BW
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
             end
-        case 'power'
-            txt = sprintf(' "float power" [%.4f]',val);
     end
 end
 

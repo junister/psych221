@@ -20,10 +20,8 @@ p.parse(str);
 str = ieParamFormat(str);
 
 %%
-% paramTypes = {'string', 'float', 'integer', 'point', 'shape', 'bool',...
-%     'spectrum', 'rgb', 'color'};
-paramTypes = {'string', 'float', 'integer', 'point', 'bool',...
-    'spectrum', 'rgb', 'color'};
+paramTypes = {'string', 'float', 'integer', 'point', 'shape', 'bool',...
+            'spectrum', 'rgb', 'color'};
 val = ismember(str, paramTypes);
-        
+
 end

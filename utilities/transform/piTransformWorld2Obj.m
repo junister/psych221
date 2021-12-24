@@ -23,7 +23,7 @@ function [rotM, transM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
 %    N/A
 %
 % Output
-%    rotM   - 4x4 matrix representing rotation 
+%    rotM   - 4x4 matrix representing rotation
 %    transM - 4x4 matrix representing translation
 %    scaleM - vector of object size scale factors
 %
@@ -39,17 +39,48 @@ for ii=numel(nodeToRoot):-1:1
     % Get asset and its rotation and translation
     thisAsset = thisR.get('asset', nodeToRoot(ii));
     if isequal(thisAsset.type, 'branch')
-        thisRot = fliplr(piAssetGet(thisAsset, 'rotate')); % PBRT uses wired order of ZYX
+        pointerT = 1; pointerR = 1; pointerS = 1;
+        for tt = 1:numel(thisAsset.transorder)
+            switch thisAsset.transorder(tt)
+                case 'T'
+                    thisTrans = thisAsset.translation{pointerT};
+                    curTransM =  piTransformTranslation(rotM(:, 1),...
+                        rotM(:, 2),...
+                        rotM(:, 3), thisTrans);
+                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
+
+                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4) .* scaleM';
+
+                    pointerT = pointerT + 1;
+                case 'R'
+                    rotDegs = thisAsset.rotation{pointerR}(1,:);
+                    thisRotM = piTransformDegs2RotM(rotDegs, rotM);
+                    % Update x y z axis
+                    [~, ~, ~, rotM] = piTransformAxis(rotM(:,1), rotM(:,2),rotM(:,3),thisRotM);
+
+                    pointerR = pointerR + 1;
+                case 'S'
+                    thisScale = thisAsset.scale{pointerS};
+                    scaleM = scaleM * diag(thisScale);
+                    pointerS = pointerS + 1;
+            end
+        end
+
+        %{
+        % Residual code for previous structure
         thisTrans = piAssetGet(thisAsset, 'translate');
         thisScale = piAssetGet(thisAsset, 'scale');
-        
+
         % Calculate this translation matrix
         curTransM =  piTransformTranslation(rotM(:, 1),...
             rotM(:, 2),...
             rotM(:, 3), thisTrans);
         transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
         scaleM = scaleM * diag(thisScale);
-        
+
+
+        % Section was wrapped into function piTransformDegs2RotM
+        thisRot = fliplr(piAssetGet(thisAsset, 'rotate')); % PBRT uses wired order of ZYX
         % Calculate rotation transform
         thisRotM = eye(4);
         for jj=1:size(thisRot, 2)
@@ -61,6 +92,7 @@ for ii=numel(nodeToRoot):-1:1
         end
         % Update x y z axis
         [~, ~, ~, rotM] = piTransformAxis(rotM(:,1), rotM(:,2),rotM(:,3),thisRotM);
+        %}
     end
 end
 

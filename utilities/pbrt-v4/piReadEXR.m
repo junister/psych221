@@ -11,21 +11,21 @@ function output = piReadEXR(filename, varargin)
 %   NSpectrumSamples - number of spectrum samples
 %
 % Returns
-%  
+%
 % Read .exr image data from the fiven filename.
 %
 %
 % Zhenyi, 2020
-% 
+%
 % python test
 % python installation: https://docs.conda.io/en/latest/miniconda.html
 % check version in command window:
 %          pe = pyenv;
-% run this in mac terminal: 
-%          brew install openexr 
+% run this in mac terminal:
+%          brew install openexr
 %          pip install git+https://github.com/jamesbowman/openexrpython.git
 %          pip install pyexr
-%% 
+%%
 parser = inputParser();
 varargin = ieParamFormat(varargin);
 
@@ -40,22 +40,22 @@ dataType = parser.Results.datatype;
 
 switch dataType
     case "radiance"
-        image = single(py.pyexr.read(filename,'Radiance'));        
+        image = single(py.pyexr.read(filename,'Radiance'));
         if isempty(find(image(:,:,17),1))
             output = image(:,:,1:16);
         end
-        
+
     case "zdepth"
-        output = single(py.pyexr.read(filename,'Pz')); 
-        
+        output = single(py.pyexr.read(filename,'Pz'));
+
     case "3dcoordinates"
         output(:,:,1) = single(py.pyexr.read(filename,'Px'));
         output(:,:,2) = single(py.pyexr.read(filename,'Py'));
         output(:,:,3) = single(py.pyexr.read(filename,'Pz'));
-        
+
     case "material"
         output=single(py.pyexr.read(filename,'MaterialId'));
-        
+
     case "normal"
         % to add
     case "albedo"

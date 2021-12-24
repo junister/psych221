@@ -9,7 +9,24 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Test image raytransfer
+
+thisR = piRecipeDefault('scene name','simple scene');
+camera = piCameraCreate('raytransfer','lensfile','dgauss-22deg-3.0mm.json');
+thisR.set('camera',camera);
+thisR.set('film diagonal',5)
+piWrite(thisR);
+thisDocker = 'vistalab/pbrt-v3-spectral:raytransfer';
+
+[oi, result] = piRender(thisR, 'dockerimagename',...
+            thisDocker);
+
+        oiWindow(oi)
+
+
 %% Make the chart, simple scene, and merge
+
+
 
 thisR = piRecipeDefault('scene name','simple scene');
 thisR.set('assets','Camera_B','delete');
@@ -24,50 +41,35 @@ piRecipeMerge(thisR,eiachart.thisR,'node name',eiachart.mergeNode);
 % Assign the chart a position in this scene
 piAssetSet(thisR,eiachart.mergeNode,'translate',[-2 1.5 0]);
 
-% Add an environmental light to make it look nicer
-thisR.set('lights','delete','all');
+%% SET RTF
+thisR.set('camera',camera);
+thisR.set('film diagonal',5)
 
-% Having trouble controlling the light here.
-fileName = 'room.exr';
-lgt = piLightCreate('room light', ...
-    'type', 'infinite',...
-    'mapname', fileName);
-
-% The image in the light exr file needs to be rotated around so the camera
-% sees it 
-lgt = piLightSet(lgt, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-thisR.set('light','add',lgt);
+%%
 
 % Render
 piWRS(thisR);
 
 % thisR.show;
-% thisR.get('print lights');
 
 %% Add a second chart
 
 mcc = piAssetLoad('macbeth');
 piRecipeMerge(thisR,mcc.thisR,'node name',mcc.mergeNode);
 piAssetSet(thisR,mcc.mergeNode,'translate',[0.5 2.5 0]);
-[~,result] = piWRS(thisR);
-% disp(result)
+piWRS(thisR);
 
 %% A third chart
 
 sbar = piAssetLoad('slantedbar');
 piRecipeMerge(thisR,sbar.thisR,'node name',sbar.mergeNode);
 piAssetSet(thisR,sbar.mergeNode,'translate',[3 3 6]);
-[~,result] = piWRS(thisR);
-% disp(result)
+piWRS(thisR);
 
-%% The chess set with pieces
+%%  Chess set.  Next, try to control the reflectances of the chart
 
-% See s_makeChessSet if you would like to change the background from blue
-% sky
-%
-load('ChessSet-recipe','thisR');
-chessR = thisR;
-% piWRS(chessR);
+% The chess set with pieces
+chessR = piRecipeLoad('ChessSetPieces-recipe');
 
 % Merge them
 piRecipeMerge(chessR,eiachart.thisR,'node name',eiachart.mergeNode);
@@ -217,5 +219,3 @@ sceneWindow(scene);
 % sceneWindow(scene);
 
 %% END
-
-

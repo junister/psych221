@@ -1,19 +1,19 @@
 function thisRV2 = piRecipeUpdate(thisRV2)
-% Convert a render recipe from V1 structure to V2 structure. 
+% Convert a render recipe from V1 structure to V2 structure.
 %
 % Synopsis
 %   thisRV2 = piRecipeUpdate(thisRV2)
 %
 % The change(s) are:
 %
-%   1. Change material format: Extract texture from material slot and make it 
-%      a separate slot.
-%   2. Rearrange assets to new structure
+%   1. Change material format
+%   2. Extract texture from material slot and make it a separate slot.
+%   3. Rearrange assets to new tree structure
 %
 % Syntax:
 %
 % Description:
-%   
+%
 % Inputs:
 %   thisR - recipe
 %
@@ -58,12 +58,12 @@ assetsTree = tree('root');
 
 for ii=1:nAssets
    thisAsset = thisRV2.assets(ii);
-   
+
    % The V1 assets are a cell array and each entry can have multiple
    % children. But children do not have children. We attach the first level
-   % to the root, and the children to the entry in the first level. 
-   
-   % For every asset we figure out its node type  
+   % to the root, and the children to the entry in the first level.
+
+   % For every asset we figure out its node type
    thisNode = parseV1Assets(thisAsset);
    [assetsTree, id] = assetsTree.addnode(1, thisNode);
    % Check the children
@@ -87,8 +87,8 @@ function node = parseV1Assets(thisAsset)
     %
     %   If children is not empty it is a branch. Version 1 has no slot for
     %   lights.
-    %      
-    
+    %
+
     if isfield(thisAsset, 'material') && ~isfield(thisAsset, 'children')
         % An object
         node = piAssetCreate('type', 'object');
@@ -122,7 +122,7 @@ function node = parseV1Assets(thisAsset)
         end
     end
 end
-    
+
 function thisRV2 = piRecipeUpdateMaterials(thisRV2)
 % Update the materials AND textures
 
@@ -131,6 +131,6 @@ txtLines = thisRV2.materials.txtLines;
 
 % We parse the text into the format needed for the materials and textures,
 % separately, in Version 2
-[thisRV2.materials.list, thisRV2.textures.list] = parseMaterialTexture(txtLines); 
+[thisRV2.materials.list, thisRV2.textures.list] = parseMaterialTexture(txtLines);
 
 end

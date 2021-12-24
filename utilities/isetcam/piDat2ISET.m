@@ -71,12 +71,12 @@ wave                  = p.Results.wave;
 
 % nWave = length(wave);
 if(strcmp(label,'radiance') || strcmp(label, 'illuminant') || strcmp(label, 'illuminantonly'))
-    
+
     % The PBRT output is in energy units.  Scenes and OIs data are
     % represented in photons
     energy = piReadDAT(inputFile, 'verbose', verbosity);
     photons = Energy2Quanta(wave,energy);
-    
+
     if strcmp(label, 'illuminant') || strcmp(label, 'illuminantonly')
         ieObject = photons;
         return;
@@ -111,32 +111,49 @@ ieObjName = sprintf('%s-%s',pbrtFile,datestr(now,'mmm-dd,HH:MM'));
 % If radiance, return a scene or optical image
 cameraType = thisR.get('camera subtype');
 switch lower(cameraType)
-    case {'realisticdiffraction','realistic','omni'}
+
+    case {'realisticdiffraction','realistic','omni','raytransfer'}
         % If we used a lens, the ieObject is an optical image (irradiance).
-        
+        %
         % We specify the mean illuminance of the OI mean illuminance
         % with respect to a 1 mm^2 aperture. That way, if we change
         % the aperture, but nothing else, the illuminance level will
         % scale correctly.
 
-        % Try to find the optics parameters from the lensfile in the
-        % PBRT recipe.  The function looks for metadata, if it cannot
-        % find that slot it tries to decode the file name.  The file
-        % name part should go away before too long because we can just
-        % create the metadata once from the file name.
-        [focalLength, fNumber] = piRecipeFindOpticsParams(thisR);
-        
+        % We read the lens parameters differently for ray transfer type
+        switch(cameraType)
+            case 'raytransfer'
+                % Just made stuff up for defaults at this point
+                fNumber = [];
+                focalLength = [];
+                lensData = jsonread(thisR.camera.lensfile.value);
+                if isfield(lensData,'fnumber')
+                    fNumber = lensData.fnumber;
+                end
+                if isfield(lensData,'focallength')
+                    focalLength = lensData.focallength;
+                end
+
+            otherwise
+                % Try to find the optics parameters from the lensfile in the
+                % PBRT recipe.  The function looks for metadata, if it cannot
+                % find that slot it tries to decode the file name.  The file
+                % name part should go away before too long because we can just
+                % create the metadata once from the file name.
+                [focalLength, fNumber] = piRecipeFindOpticsParams(thisR);
+        end
+
         % Start building the oi
         ieObject = piOICreate(photons,'wavelength',wave);
-        
+
         % Set the parameters the best we can from the lens file.
         if ~isempty(focalLength)
-            ieObject = oiSet(ieObject,'optics focal length',focalLength); 
+            ieObject = oiSet(ieObject,'optics focal length',focalLength);
         end
         if ~isempty(fNumber)
-            ieObject = oiSet(ieObject,'optics fnumber',fNumber); 
+            ieObject = oiSet(ieObject,'optics fnumber',fNumber);
         end
-        
+
         % Calculate and set the oi 'fov' using the film diagonal size
         % and the lens information.  First get width of the film size.
         % This could be a function inside of get.
@@ -145,12 +162,12 @@ switch lower(cameraType)
         x        = res(1); y = res(2);
         d        = sqrt(x^2 + y^2);        % Number of samples along the diagonal
         filmwidth   = (filmDiag / d) * x;  % Diagonal size by d gives us mm per step
-        
+
         % Next calculate the fov
         focalLength = oiGet(ieObject,'optics focal length');
         fov         = 2 * atan2d(filmwidth / 2, focalLength);
         ieObject    = oiSet(ieObject,'fov',fov);
-        
+
         ieObject = oiSet(ieObject,'name',ieObjName);
 
         ieObject = oiSet(ieObject,'optics model','iset3d');
@@ -160,35 +177,35 @@ switch lower(cameraType)
         else
             warning('Render recipe is not specified.');
         end
-        
+
         % We set meanIlluminance per square millimeter of the lens
         % aperture.
         if(scalePupilArea)
             aperture = oiGet(ieObject,'optics aperture diameter');
             lensArea = pi*(aperture*1e3/2)^2;
             meanIlluminance = meanIlluminancepermm2*lensArea;
-            
+
             ieObject        = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
         end
     case {'realisticeye'}
        % A human eye model, and the ieObject is an optical image (irradiance).
-        
+
         focalLength = thisR.get('retina distance','m');
         pupilDiameter = thisR.get('pupil diameter','m');
         fNumber = focalLength/pupilDiameter;
-        
+
         % Start building the oi
         ieObject = piOICreate(photons,'wavelength',wave);
-        
+
         % Set the parameters the best we can from the lens file.
         ieObject = oiSet(ieObject,'optics focal length',focalLength);
         ieObject = oiSet(ieObject,'optics fnumber',fNumber);
-        
+
         % Calculate and set the oi 'fov'.
         fov = thisR.get('fov');
         ieObject    = oiSet(ieObject,'fov',fov);
-        
+
         ieObject = oiSet(ieObject,'name',ieObjName);
 
         ieObject = oiSet(ieObject,'optics model','iset3d');
@@ -199,17 +216,17 @@ switch lower(cameraType)
             % This should never happen!
             warning('Render recipe is not specified.');
         end
-        
+
         % We set meanIlluminance per square millimeter of the lens
         % aperture.
         if(scalePupilArea)
             aperture = oiGet(ieObject,'optics aperture diameter');
             lensArea = pi*(aperture*1e3/2)^2;
             meanIlluminance = meanIlluminancepermm2*lensArea;
-            
+
             ieObject        = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
-        end 
+        end
     case {'pinhole','environment','perspective'}
         % A scene radiance, not an oi
         ieObject = piSceneCreate(photons,...
@@ -219,7 +236,7 @@ switch lower(cameraType)
             % PBRT may have assigned a field of view
             ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
         end
-        
+
         % In this case we cannot scale by the area because the aperture
         % is a pinhole.  The ieObject is a scene.  So we use the mean
         % luminance parameter (default is 100 cd/m2).
@@ -228,9 +245,7 @@ switch lower(cameraType)
         end
         ieObject = sceneSet(ieObject,'luminance',sceneCalculateLuminance(ieObject));
     otherwise
-        error('Unknown optics type %s\n',cameraType);       
+        error('Unknown optics type %s\n',cameraType);
 end
 
 end
-
-

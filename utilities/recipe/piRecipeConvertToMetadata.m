@@ -42,7 +42,8 @@ if strcmp(metadata, 'illuminant') || strcmp(metadata, 'illuminantonly')
     oDir  = metadataRecipe.get('output dir');
     metadataRecipe.set('output file',fullfile(oDir,[oFile,'_illuminant.pbrt']));
 
-    totalReflection = metadataRecipe.materials.lib.totalreflect;
+    totalReflection = piMaterialCreate('totalReflect',...
+                            'type', 'diffuse', 'spectrum reflectance', [400 1 800 1]);
     
     % piMaterialTotalAssign(thisR)
 %     mlist = metadataRecipe.materials.list;

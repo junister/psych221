@@ -3,7 +3,7 @@ function thisR = piLightRead(thisR)
 %
 % Synopsis:
 %   thisR = piLightRead(thisR)
-% 
+%
 % Description:
 %   We create the lights slot in the recipe from text in the World or
 %   from a file.
@@ -41,38 +41,23 @@ thisR = piDeleteWorldText(thisR, lightTextRanges);
 
 % do we need this every time?
 if isempty(thisR.lights)
-    
+
     % Get light from scene_lights.pbrt file
     [p,n,~] = fileparts(thisR.inputFile);
     fname_lights = sprintf('%s_lights.pbrt',n);
     inputFile_lights=fullfile(p,fname_lights);
-    
+
     if exist(inputFile_lights,'file')
         fileID = fopen(inputFile_lights);
         txt = textscan(fileID,'%s','Delimiter','\n');
         newLights = piLightGetFromText(txt{1}, 'print', false);
         if ~isempty(newLights)
-            thisR.lights(end+1:end+numel(newLights)) = newLights;
+            thisR.lights{end+1:end+numel(newLights)} = newLights{:};
         else
             warning('%s exists but no light found. \n', inputFile_lights);
         end
-    else
-        % try geometry file
-        fname_geometry = sprintf('%s_geometry.pbrt',n);
-        inputFile_geometry=fullfile(p,fname_geometry);
-        if exist(inputFile_geometry,'file')
-            fileID = fopen(inputFile_geometry);
-            txt = textscan(fileID,'%s','Delimiter','\n');
-            [newlines] = piFormatConvert(txt{1});
-            newLights = piLightGetFromText(newlines, 'print', false);
-            if ~isempty(newLights)
-                thisR.lights{end+1:end+numel(newLights)} = newLights{:};
-            else
-                warning('%s exists but no light found. \n', inputFile_geometry);
-            end
-        end
     end
-    
+
 end
 
 end

@@ -59,7 +59,8 @@ thisR.set('light', 'add', newDistant);
 thisR.set('integrator subtype','path');
 thisR.set('rays per pixel', 16);
 thisR.set('fov', 30);
-thisR.set('filmresolution', [640, 360]*2);
+thisR.set('filmresolution', [640, 360]);
+thisR.set('film render type',{'radiance','depth'});
 
 %% Write the scene
 %
@@ -78,10 +79,7 @@ piWrite(thisR);
 %
 % thisR.set('film render type',{'radiance','depth','illuminant'})
 
-thisR.set('film render type',{'radiance','depth'});
-[scene, result] = piRender(thisR,...
-    'render type','all', ...
-    'scaleIlluminance', false);
+[scene, result] = piRender(thisR,'scaleIlluminance', false);
 sceneWindow(scene);
 
 %% Plot the depth map.  
