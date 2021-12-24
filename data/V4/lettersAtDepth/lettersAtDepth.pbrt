@@ -1,0 +1,22 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 -0.01 0 1  ]
+Camera "perspective"
+    "float fov" [ 30 ]
+Sampler "halton"
+    "integer pixelsamples" [ 32 ]
+Film "rgb"
+    "integer yresolution" [ 128 ]
+    "integer xresolution" [ 128 ]
+Integrator "path"
+    "integer maxdepth" [ 1 ]
+
+
+WorldBegin
+
+# Default Material
+Material "coateddiffuse"
+    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
+LightSource "infinite"
+    "spectrum L" [ "EqualEnergy.spd" ]
+Include "lettersAtDepth_materials.pbrt"
+Include "lettersAtDepth_geometry.pbrt"

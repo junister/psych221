@@ -151,6 +151,7 @@ end
 % Where is the sphere ...
 assetPosition = thisR.get('asset',assetName,'world position');
 thisR.set('to',assetPosition);
+% piAssetGeometry(thisR);
 
 origFrom = [0 0 -5];  % Original from position
 
