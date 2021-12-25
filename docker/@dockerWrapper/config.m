@@ -25,15 +25,15 @@ function status = config(obj, varargin)
 
 p = inputParser;
 p.addParameter('machine', 'default', @ischar);
-p.addOptional('debug', false, @islogical);
-p.addOptional('gpuRendering', true, @islogical);
-p.addOptional('renderContext', '', @ischar); % experimental
-p.addOptional('remoteMachine','',@ischar); % for data sync
-p.addOptional('remoteUser','',@ischar); % for data sync
-p.addOptional('remoteImage', '', @ischar); % image to use for remote render
-p.addOptional('remoteRoot','',@ischar); % for different remote path
-p.addOptional('localRoot','',@ischar); % for Windows/wsl
-p.addOptional('whichGPU', 1, @isnumeric); % select alternate gpu
+p.addParameter('debug', false, @islogical);
+p.addParameter('gpuRendering', true, @islogical);
+p.addParameter('renderContext', '', @ischar); % experimental
+p.addParameter('remoteMachine','',@ischar); % for data sync
+p.addParameter('remoteUser','',@ischar); % for data sync
+p.addParameter('remoteImage', '', @ischar); % image to use for remote render
+p.addParameter('remoteRoot','',@ischar); % for different remote path
+p.addParameter('localRoot','',@ischar); % for Windows/wsl
+p.addParameter('whichGPU', 1, @isnumeric); % select alternate gpu
 
 p.parse(varargin{:})
 
@@ -42,6 +42,7 @@ args = p.Results;
 if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end
+obj.whichGPU = args.whichGPU;
 
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;

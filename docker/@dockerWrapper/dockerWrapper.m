@@ -69,7 +69,7 @@ classdef dockerWrapper < handle
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
-        whichGPU = 1; % for multiple GPU configs we can pick one
+        whichGPU = 0; % for multiple GPU configs we can pick one
 
         %
         relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static
@@ -176,7 +176,9 @@ classdef dockerWrapper < handle
                 else
                     contextFlag = [' --context ' obj.renderContext];
                 end
-                dCommand = sprintf('docker %s run -d -it --gpus 1 --name %s  %s', contextFlag, ourContainer, volumeMap);
+                % want: --gpus '"device=#"'
+                gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
+                dCommand = sprintf('docker %s run -d -it %s --name %s  %s', contextFlag, gpuString, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
                 dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
