@@ -1,6 +1,6 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
 
-verbose = 1; % 0, 1, 2
+verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');

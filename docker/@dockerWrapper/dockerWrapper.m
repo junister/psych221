@@ -120,6 +120,7 @@ classdef dockerWrapper < handle
     
     methods
         function ourContainer = startPBRT(obj, processorType)
+            verbose = getpref('docker','verbosity',1);
             if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
             else
@@ -187,6 +188,9 @@ classdef dockerWrapper < handle
             end
 
             [status, result] = system(cmd);
+            if verbose > 0
+                fprintf("Started Docker with %d: %s\n", status, cmd);
+            end
             if status == 0
                 return;
             else
