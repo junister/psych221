@@ -229,7 +229,7 @@ preRender = tic;
 
 [status, result] = ourDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
-fprintf("Complete render took: %6.2d seconds. Result: %s\n", elapsedTime, result);
+fprintf("Complete render took: %6.2d seconds.", elapsedTime);
 
 % 
 %     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
