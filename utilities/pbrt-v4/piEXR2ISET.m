@@ -49,7 +49,7 @@ p.addRequired('inputFile',@(x)(exist(x,'file')));
 p.addParameter('label',{'radiance'},@(x)(ischar(x)||iscell(x)));
 
 p.addParameter('recipe',[],@(x)(isequal(class(x),'recipe')));
-p.addParameter('wave', 400:10:700, @isnumeric);
+% p.addParameter('wave', 400:10:700, @isnumeric);
 
 % For the OI case
 p.addParameter('meanilluminancepermm2',5,@isnumeric);
@@ -59,17 +59,17 @@ p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('meanluminance',100,@isnumeric);
 
 % determine how chatty we should be
-p.addParameter('verbose', 2, @isnumeric);
+% p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(inputFile,varargin{:});
 label       = p.Results.label;
 thisR       = p.Results.recipe;
-verbosity   = p.Results.verbose;
+% verbosity   = p.Results.verbose;
 
 meanIlluminancepermm2 = p.Results.meanilluminancepermm2;
 scalePupilArea        = p.Results.scalepupilarea;
 meanLuminance         = p.Results.meanluminance;
-wave                  = p.Results.wave;
+% wave                  = p.Results.wave;
 %%
 
 for ii = 1:numel(label)
@@ -154,6 +154,24 @@ end
 
 switch lower(cameraType)
     case {'pinhole','spherical','perspective'}
+        % A scene radiance, not an oi
+        ieObject = piSceneCreate(photons,...
+            'wavelength', data_wave);
+        ieObject = sceneSet(ieObject,'name',ieObjName);
+        if ~isempty(thisR)
+            % PBRT may have assigned a field of view
+            ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
+        end
+
+        % In this case we cannot scale by the area because the aperture
+        % is a pinhole.  The ieObject is a scene.  So we use the mean
+        % luminance parameter (default is 100 cd/m2).
+        if meanLuminance > 0
+            ieObject = sceneAdjustLuminance(ieObject,meanLuminance);
+        end
+        ieObject = sceneSet(ieObject,'luminance',sceneCalculateLuminance(ieObject));
+        
+        %{
         % Pinhole and perspective mean the same thing.
         % In this camera type, we consider the data a scene.
         ieObject = piSceneCreate(photons,'wavelength', data_wave);
@@ -167,7 +185,7 @@ switch lower(cameraType)
             % PBRT may have assigned a field of view
             ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
         end
-        
+        %}
     case {'realisticdiffraction','realistic','omni','raytransfer'}
         % If we used a lens, the ieObject is an optical image (irradiance).
         %
@@ -200,7 +218,7 @@ switch lower(cameraType)
         end
         
         % Start building the oi
-        ieObject = piOICreate(photons,'wavelength',wave);
+        ieObject = piOICreate(photons,'wavelength',data_wave);
         
         % Set the parameters the best we can from the lens file.
         if ~isempty(focalLength)
@@ -252,7 +270,7 @@ switch lower(cameraType)
         fNumber = focalLength/pupilDiameter;
         
         % Start building the oi
-        ieObject = piOICreate(photons,'wavelength',wave);
+        ieObject = piOICreate(photons,'wavelength',data_wave);
         
         % Set the parameters the best we can from the lens file.
         ieObject = oiSet(ieObject,'optics focal length',focalLength);
@@ -282,27 +300,7 @@ switch lower(cameraType)
             
             ieObject        = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
-        end
-        %{
-    case {'omni','realistic'}
-        % This should be an optical image because there is a lens.
-        % todo
-        
-        pause;
-        
-        % HACK ALERT: Copy other case code here to see what happens:
-        ieObject = piSceneCreate(photons,'wavelength', data_wave);
-        ieObject = sceneSet(ieObject,'name',ieObjName);
-        if numel(data_wave)<31
-            % interpolate data for gpu rendering
-            ieObject = sceneInterpolateW(ieObject,wave);
-        end
-        
-        if ~isempty(thisR)
-            % PBRT may have assigned a field of view
-            ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
-        end
-        %}
+        end    
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
