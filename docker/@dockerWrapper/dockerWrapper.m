@@ -29,6 +29,7 @@ classdef dockerWrapper < handle
     % Additional Render-specific parameters
     %
     % whichGPU -- for multi-gpu rendering systems
+    %   use device number (e.g. 0, 1, etc.) or -1 for don't care
     % 
     % FUTURE: Potenially unified way to call docker containers for iset
     %   An attempt to resolve at least some of the myriad platform issues
@@ -40,7 +41,7 @@ classdef dockerWrapper < handle
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
-    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 1);
+    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 0);
 
     % Example of local CPU rendering:
     % ourDocker = dockerWrapper('gpuRendering', false);
@@ -69,7 +70,7 @@ classdef dockerWrapper < handle
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
-        whichGPU = 0; % for multiple GPU configs we can pick one
+        whichGPU = -1; % for multiple GPU configs, or -1 for any
 
         %
         relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static

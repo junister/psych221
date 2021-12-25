@@ -33,7 +33,7 @@ p.addParameter('remoteUser','',@ischar); % for data sync
 p.addParameter('remoteImage', '', @ischar); % image to use for remote render
 p.addParameter('remoteRoot','',@ischar); % for different remote path
 p.addParameter('localRoot','',@ischar); % for Windows/wsl
-p.addParameter('whichGPU', 1, @isnumeric); % select alternate gpu
+p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
 
 p.parse(varargin{:})
 
@@ -50,7 +50,12 @@ end
 if ~isempty(args.localRoot)
     obj.localRoot = args.localRoot;
 end
-obj.whichGPU = args.whichGPU;
+
+if args.whichGPU == -1 % theoretically any, but now just 0
+    obj.whichGPU = 0;
+else
+    obj.whichGPU = args.whichGPU;
+end
 
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)
