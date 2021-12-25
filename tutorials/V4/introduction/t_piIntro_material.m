@@ -22,6 +22,7 @@
 %% Initialize ISET and Docker
 ieInit;
 if ~piDockerExists, piDockerConfig; end
+
 %% Read pbrt file for a Cinema4D exported scene
 
 sceneName = 'sphere';
