@@ -1,28 +1,23 @@
 %% Illustrates setting scene materials
 %
-% This example scene includes glass and other materials.  The script
+% This example scene includes glass and mirror materials.  The script
 % sets up the glass material and number of bounces to make the glass
 % appear reasonable.
 %
-% It also uses piMaterialsGroupAssign() to set a list of materials (in
-% this case a mirror) that are part of the scene.
 %
 % Dependencies:
-%
-%    ISET3d, (ISETCam or ISETBio), JSONio
+%    ISET3d-v4, (ISETCam or ISETBio), JSONio
 %
 % ZL, BW SCIEN 2018
 %
 % See also
 %   t_piIntro_*
 
-% TODO:
-%  See notes at end.
-
 %% Initialize ISET and Docker
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-%% Read pbrt file for a Cinema4D exported scene
+
+%% Read pbrt file 
 
 sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
@@ -30,22 +25,19 @@ thisR = piRecipeDefault('scene name',sceneName);
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
-                            'type', 'distant',...
-                            'spd', 9000,... % blackbody
-                            'cameracoordinate', true);
+    'type', 'distant',...
+    'spd', 9000,... % blackbody
+    'cameracoordinate', true);
 thisR.set('light', 'add', distLight);
 
 thisR.set('film resolution',[200 150]*2);
 thisR.set('rays per pixel',64);
 thisR.set('fov',45);
 thisR.set('nbounces',5);
-thisR.set('film render type',{'radiance','depth'})
+thisR.set('film render type',{'radiance','depth'});
 
 % Render
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene,'name',sprintf('Uber %s',sceneName));
-sceneWindow(scene);
+piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 
 %% The material library
 
@@ -66,7 +58,7 @@ redMatte = piMaterialCreate('redMatte', 'type', 'diffuse');
 thisR.set('material', 'add', redMatte);
 thisR.get('materials print');
 
-%% Set the spectral reflectance of the matte material to be very red.  
+%% Set the spectral reflectance of the matte material to be very red.
 
 wave = 400:10:700;
 reflectance = ones(size(wave));
@@ -79,28 +71,26 @@ spdRef = piMaterialCreateSPD(wave, reflectance);
 % material
 thisR.set('material', redMatte, 'reflectance value', spdRef);
 
-%% Set the material 
+%% Set the material
 assetName = '001_Sphere_O';
 thisR.set('asset',assetName,'material name',redMatte.name);
 
 % Show that we set it
 thisR.get('object material')
 
-%% Let's have a look
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene,'name',sprintf('Red %s',sceneName));
-sceneWindow(scene);
+% Let's have a look
+
+scene = piWRS(thisR,'name',sprintf('Red %s',sceneName));
+
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
-%%  Now change an environmental light
+%%  Now Put the sphere in an environment
 
 rmLight = piLightCreate('room light', ...
     'type', 'infinite',...
     'mapname', 'room.exr');
 rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-%% Put the sphere in an environment
 
 % Make the sphere a little smaller
 assetName = '001_Sphere_O';
@@ -115,18 +105,15 @@ thisR.set('light', 'add', rmLight);
 %
 % For standard environment lights, we want something like
 %
-%   thisR.set('skymap',filename); 
+%   thisR.set('skymap',filename);
 %
 if ~exist(fullfile(thisR.get('output dir'),'room.exr'),'file')
     exrFile = which('room.exr');
     copyfile(exrFile,thisR.get('output dir'))
 end
 
-%% Write and render
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene,'name',sprintf('Red %s',sceneName));
-sceneWindow(scene);
+scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName));
+
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
@@ -139,33 +126,31 @@ thisR.get('print materials');
 thisR.set('asset', assetName, 'material name', glassName);
 thisR.get('object material')
 
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene, 'name', 'Change sphere to glass');
-sceneWindow(scene);
+scene = piWRS(thisR, 'name', 'Change sphere to glass');
+
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
 %% Change the camera position
 
 % Where is the sphere ...
+origFrom = thisR.get('from');
+origTo = thisR.get('to');
 assetPosition = thisR.get('asset',assetName,'world position');
 thisR.set('to',assetPosition);
 % piAssetGeometry(thisR);
 
-origFrom = [0 0 -5];  % Original from position
+thisR.set('from',origFrom + [10 20 0]);
 
 % Set the camera from position a little higher and closer
-thisR.set('from',assetPosition + [0 1 -4]);
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene, 'name', 'Change sphere to glass');
-sceneWindow(scene);
+
+scene = piWRS(thisR, 'name', 'Change camera position');
+
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
 
-%% Change the sphere to a mirror 
+%% Change the sphere to a mirror
 
 mirrorName = 'mirror2';
 mirror = piMaterialCreate(mirrorName, 'type', 'conductor',...
@@ -175,10 +160,8 @@ thisR.get('print materials');
 thisR.set('asset', assetName, 'material name', mirrorName);
 thisR.get('object material')
 
-piWrite(thisR);
-scene = piRender(thisR);
-scene = sceneSet(scene, 'name', 'Change sphere to glass');
-sceneWindow(scene);
+scene = piWRS(thisR, 'name', 'Change glass to mirror');
+
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
