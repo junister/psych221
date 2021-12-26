@@ -3,6 +3,8 @@ function [newlines] = piFormatConvert(txtLines)
 nn=1;ii=1;
 % remove empty cells
 txtLines = txtLines(~cellfun('isempty',txtLines));
+% remove lines start with '#' except '#ObjectName'
+txtLines = txtLines(or(~strncmp(txtLines,'#',1), strncmp(txtLines,'#ObjectName',11)));
 tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
 txtLines = regexprep(txtLines, '\t', ' ');
 % deal with special case
@@ -27,7 +29,6 @@ while ii <= nLines
                 newlines{nn,1}=thisLine;
                 break;
             end
-            try
             for jj=(ii+1):nLines+1
                 if jj==nLines+1 || isempty(txtLines{jj}) || ~isequal(txtLines{jj}(1),'"')
                     if jj==nLines+1 || isempty(txtLines{jj}) || isempty(sscanf(txtLines{jj}(1:2), '%f')) ||...
@@ -48,9 +49,6 @@ while ii <= nLines
                     end
                 end
                 
-            end
-            catch
-                disp('debug');
             end
         else
             newlines{nn,1}=thisLine; nn=nn+1;

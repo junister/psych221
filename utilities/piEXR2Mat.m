@@ -62,7 +62,7 @@ if strcmp(channelname,'Radiance')
         delete(filename);
     end
 else
-        filename = fullfile(indir, baseName);
+        filename = fullfile(indir, baseName{1});
         [fid, message] = fopen(filename, 'r');
         serializedImage = fread(fid, inf, 'float');
         data = reshape(serializedImage, height, width, 1);

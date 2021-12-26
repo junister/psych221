@@ -76,10 +76,10 @@ p.addParameter('exporter', 'C4D', @ischar); % deal with this later
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
 % Not sure whether other type of FBX file has this problem.
-p.addParameter('convertunit',false,@islogical); 
+% p.addParameter('convertunit',false,@islogical); 
 
 p.parse(fname,varargin{:});
-convertunit = p.Results.convertunit;
+% convertunit = p.Results.convertunit;
 
 thisR = recipe;
 thisR.version = 4;
@@ -292,7 +292,8 @@ else
     disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
 end
 
-% Unit scale 
+%{
+% Unit scale
 if convertunit
     % scale camera position
     thisR.lookAt.from = thisR.lookAt.from/100;
@@ -311,7 +312,7 @@ if convertunit
     end
     
 end
-
+%}
 disp('***Scene parsed.')
 
 

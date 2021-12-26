@@ -27,6 +27,8 @@ if ~piDockerExists, piDockerConfig; end
 sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
+% convert scene unit from centimeter to meter
+thisR = piUnitConvert(thisR);
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
