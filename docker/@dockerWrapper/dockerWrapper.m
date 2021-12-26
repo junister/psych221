@@ -2,13 +2,13 @@ classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
     % In principle, when simply used for render acceleration
-    % on a GPU, it should be user-transparent.
+    % on a GPU, it should be user-transparent by default.
     %
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
     %
     % If the GPU is local, this should be pretty straightforward.
-    % Running on a remote GPU is more comples. See below for
+    % Running on a remote GPU is more complex. See below for
     % more information on the required parameters.
     %
     % Either way, we start an image as a persistent, named, container.
@@ -32,17 +32,20 @@ classdef dockerWrapper < handle
     %   use device number (e.g. 0, 1, etc.) or -1 for don't care
     % 
     % FUTURE: Potenially unified way to call docker containers for iset
-    %   An attempt to resolve at least some of the myriad platform issues
+    %   as an attempt to resolve at least some of the myriad platform issues
     %
 
     % Original by David Cardinal, Stanford University, September, 2021.
 
-    % Example of remote GPU rendering from a Windows client:
+    % Example of remote GPU rendering initialization from a Windows client:
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
     %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 0);
-
+    % NOTE: For ease of use you can simply do:
+    %   setpref('docker', 'renderString', <same arguments>)
+    %     and any new docker containers will use that.
+    %
     % Example of local CPU rendering:
     % ourDocker = dockerWrapper('gpuRendering', false);
 

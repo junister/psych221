@@ -88,14 +88,14 @@ p.KeepUnmatched = true;
 p.addRequired('recipe',@(x)(isequal(class(x),'recipe') || ischar(x)));
 
 varargin = ieParamFormat(varargin);
-p.addParameter('meanluminance',100,@isnumeric);
+p.addParameter('meanluminance',0,@isnumeric);
 p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
-p.addParameter('verbose', 2, @isnumeric);
+p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 
 p.parse(thisR,varargin{:});
 ourDocker = p.Results.ourdocker;
