@@ -3,6 +3,8 @@ function [newlines] = piFormatConvert(txtLines)
 nn=1;ii=1;
 % remove empty cells
 txtLines = txtLines(~cellfun('isempty',txtLines));
+% remove lines start with '#' except '#ObjectName'
+txtLines = txtLines(or(~strncmp(txtLines,'#',1), strncmp(txtLines,'#ObjectName',11)));
 tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
 txtLines = regexprep(txtLines, '\t', ' ');
 % deal with special case
@@ -46,13 +48,13 @@ while ii <= nLines
                         break;
                     end
                 end
-
+                
             end
         else
             newlines{nn,1}=thisLine; nn=nn+1;
         end
     end
-
+    
     ii=ii+1;
 end
 newlines(piContains(newlines,'Warning'))=[];

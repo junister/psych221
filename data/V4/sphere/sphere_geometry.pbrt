@@ -6,11 +6,7 @@ AttributeEnd
 
 AttributeBegin
     #ObjectName Sphere#Dimension:[189.834 189.834 189.834]
-
-    AttributeBegin
-        #ObjectName Sphere#Dimension:[189.834 189.834 189.834]
-
-        AttributeBegin
+AttributeBegin
             NamedMaterial "white"
             Shape "trianglemesh"
                 "point2 uv" [ 0 -0.9166666 0 -0.83333325 0.041666664 -0.83333325 0.041666664 -0.9166666 
@@ -558,6 +554,5 @@ AttributeBegin
                                     37 39 269 268 312 313 39 41 270 269 314 315 41 
                                     43 271 270 316 317 43 45 272 271 318 319 45 47 
                                     273 272 320 321 47 49 274 273 322 ]
-        AttributeEnd
-    AttributeEnd
+AttributeEnd
 AttributeEnd
