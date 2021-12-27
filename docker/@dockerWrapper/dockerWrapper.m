@@ -88,6 +88,34 @@ classdef dockerWrapper < handle
     methods (Static)
 
         [dockerExists, status, result] = exists() % separate file
+        
+        function reset()
+            % we should remove any existing containers here
+            % to sweep up after ourselves.
+            dockerWrapper.staticVar('set', 'PBRT-GPU', '');
+            dockerWrapper.staticVar('set', 'PBRT-CPU', '');
+        end
+
+        % for now we want containers to be global, so we hacked this
+        % in because Matlab doesn't support static @ class level
+        % and so we can switch to making them per instance if wanted.
+        function retVal = staticVar(action, varname, value)
+            persistent gpuContainer;
+            persistent cpuContainer;
+            switch varname
+                case 'PBRT-GPU'
+                    if action == 'set'
+                        gpuContainer = value;
+                    end
+                    retVal = gpuContainer;
+                case 'PBRT-CPU'
+                    if action == 'set'
+                        cpuContainer = value;
+                    end
+                    retVal = cpuContainer;
+            end
+            status = 0;
+        end
 
         function output = pathToLinux(inputPath)
 
@@ -218,12 +246,13 @@ classdef dockerWrapper < handle
         end
 
         function containerName = getContainer(obj,containerType)
-            persistent containerPBRTGPU;
-            persistent containerPBRTCPU;
+            % persistent containerPBRTGPU;
+            %persistent containerPBRTCPU;
             switch containerType
                 case 'PBRT-GPU'
-                    if isempty(containerPBRTGPU)
-                        containerPBRTGPU = obj.startPBRT('GPU');
+                    if isempty(obj.staticVar('get', 'PBRT-GPU', ''))
+                        %containerPBRTGPU = obj.startPBRT('GPU');
+                        obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
                     % Need to switch to render context here!
                     if ~isempty(obj.renderContext)
@@ -231,20 +260,21 @@ classdef dockerWrapper < handle
                     else
                         cFlag = '';
                     end
-                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, containerPBRTGPU));
+                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-GPU', '')));
                     if strlength(result) == 0 % doesn't exist, so start one
-                        containerPBRTGPU = obj.startPBRT('GPU');
+                        obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
-                    containerName = containerPBRTGPU;
+                    containerName = obj.staticVar('get','PBRT-GPU', '');
                 case 'PBRT-CPU'
-                    if isempty(containerPBRTCPU)
-                        containerPBRTCPU = obj.startPBRT('CPU');
+                    if isempty(obj.staticVar('get', 'PBRT-CPU', ''))
+                        %containerPBRTCPU = obj.startPBRT('CPU');
+                        obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    [status, result] = system(sprintf("docker ps | grep %s", containerPBRTCPU));
+                    [status, result] = system(sprintf("docker ps | grep %s", obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
-                        containerPBRTCPU = obj.startPBRT('CPU');
+                        obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    containerName = containerPBRTCPU;
+                    containerName = obj.staticVar('get', 'PBRT-CPU', '');
                 otherwise
                     warning("No container found");
 
