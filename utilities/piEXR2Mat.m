@@ -57,7 +57,12 @@ if strcmp(channelname,'Radiance')
         end
         [fid, message] = fopen(filename, 'r');
         serializedImage = fread(fid, inf, 'float');
-        data(:,:,ii) = reshape(serializedImage, height, width, 1);
+        try
+            data(:,:,ii) = reshape(serializedImage, height, width, 1);
+        catch
+            warning('Error reshaping radiance data.');
+            pause;
+        end
         fclose(fid);
         delete(filename);
     end
