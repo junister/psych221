@@ -34,11 +34,15 @@ p.addParameter('remoteImage', '', @ischar); % image to use for remote render
 p.addParameter('remoteRoot','',@ischar); % for different remote path
 p.addParameter('localRoot','',@ischar); % for Windows/wsl
 p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
+p.addParameter('verbosity', 1, @isnumeric); % 
 
 p.parse(varargin{:})
 
 args = p.Results;
 
+if ~isempty(args.verbosity)
+    setpref('docker','verbosity', args.verbosity);
+end
 if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end

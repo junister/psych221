@@ -142,7 +142,6 @@ classdef dockerWrapper < handle
                     end
                     retVal = renderContext;
             end
-            status = 0;
         end
 
         function output = pathToLinux(inputPath)
@@ -257,9 +256,6 @@ classdef dockerWrapper < handle
                 warning("Failed to start Docker container with message: %s", result);
             end
         end
-
-
-
 
         function obj = dockerWrapper(varargin)
             %Docker Construct an instance of this class
