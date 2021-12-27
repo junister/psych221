@@ -111,7 +111,7 @@ for ii = 1:numel(label)
                     delete(depthFile);
                     
                 else
-                    depthImage = piReadEXR(inputFile, 'data type','zdepth');
+                    depthImage = piReadEXR(inputFile, 'data type','depth');
                 end
                 
             catch
