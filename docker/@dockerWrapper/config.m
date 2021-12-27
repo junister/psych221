@@ -59,7 +59,9 @@ end
 
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)
-    obj.renderContext = args.renderContext;
+    % context is global for now, not sure what we really want
+    dockerWrapper.staticVar('set','renderContext', args.renderContext);
+
     % since the remote system might have a different GPU
     % currently we need to have that passed in as well
     if ~isempty(args.remoteImage)

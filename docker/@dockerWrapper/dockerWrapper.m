@@ -66,7 +66,7 @@ classdef dockerWrapper < handle
         % they overlap while we learn the best way to organize them
         remoteMachine = ''; % for syncing the data
         remoteUser = ''; % use for rsync & ssh/docker
-        renderContext = '';
+
         remoteImage = '';
         remoteRoot = ''; % we need to know where to map on the remote system
         localRoot = ''; % for the Windows/wsl case (sigh)
@@ -92,8 +92,30 @@ classdef dockerWrapper < handle
         function reset()
             % we should remove any existing containers here
             % to sweep up after ourselves.
-            dockerWrapper.staticVar('set', 'PBRT-GPU', '');
-            dockerWrapper.staticVar('set', 'PBRT-CPU', '');
+            if ~isempty(dockerWrapper.staticVar('get','PBRT-GPU',''))
+                dockerWrapper.cleanup(obj, dockerWrapper.staticVar('get','PBRT-GPU',''));
+                dockerWrapper.staticVar('set', 'PBRT-GPU', '');
+            end
+            if ~isempty(dockerWrapper.staticVar('get','PBRT-CPU',''))
+                dockerWrapper.cleanup(obj, dockerWrapper.staticVar('get','PBRT-CPU',''));
+                dockerWrapper.staticVar('set', 'PBRT-CPU', '');
+            end
+        end
+
+        function cleanup(containerName)
+            if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                contextFlag = sprintf(' --context %s ', dockerWrapper.staticVar('get','renderContext'));
+            else
+                contextFlag = '';
+            end
+            cleanupCmd = sprintf('docker %s rm -f %s', ...
+                contextFlag, containerName);
+            [status, result] = system(cleanupCmd);
+            if status == 0
+                disp("cleaned up containger");
+            else
+                disp("Failed to cleanup: %s", result);
+            end
         end
 
         % for now we want containers to be global, so we hacked this
@@ -102,17 +124,23 @@ classdef dockerWrapper < handle
         function retVal = staticVar(action, varname, value)
             persistent gpuContainer;
             persistent cpuContainer;
+            persistent renderContext;
             switch varname
                 case 'PBRT-GPU'
-                    if action == 'set'
+                    if isequal(action, 'set')
                         gpuContainer = value;
                     end
                     retVal = gpuContainer;
                 case 'PBRT-CPU'
-                    if action == 'set'
+                    if isequal(action, 'set')
                         cpuContainer = value;
                     end
                     retVal = cpuContainer;
+                case 'renderContext'
+                    if isequal(action, 'set')
+                        renderContext = value;
+                    end
+                    retVal = renderContext;
             end
             status = 0;
         end
@@ -150,7 +178,8 @@ classdef dockerWrapper < handle
     end
     
     methods
-        function ourContainer = startPBRT(obj, processorType)
+
+            function ourContainer = startPBRT(obj, processorType)
             verbose = getpref('docker','verbosity',1);
             if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
@@ -204,10 +233,10 @@ classdef dockerWrapper < handle
 
             % set up the baseline command
             if isequal(processorType, 'GPU')
-                if isempty(obj.renderContext)
+                if isempty(dockerWrapper.staticVar('get','renderContext'))
                     contextFlag = '';
                 else
-                    contextFlag = [' --context ' obj.renderContext];
+                    contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
                 end
                 % want: --gpus '"device=#"'
                 gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
@@ -255,8 +284,8 @@ classdef dockerWrapper < handle
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
                     % Need to switch to render context here!
-                    if ~isempty(obj.renderContext)
-                        cFlag = ['--context ' obj.renderContext];
+                    if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                        cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
                     else
                         cFlag = '';
                     end

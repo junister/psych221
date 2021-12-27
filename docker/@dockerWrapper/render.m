@@ -21,8 +21,8 @@ end
 
 % ASSUME that if we supply a context it is on a Linux server
 nativeFolder = outputFolder;
-if ~isempty(obj.renderContext)
-    useContext = obj.renderContext;
+if ~isempty(dockerWrapper.staticVar('get','renderContext',''))
+    useContext = dockerWrapper.staticVar('get','renderContext','');
 else
     useContext = 'default';
 end
