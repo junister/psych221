@@ -93,11 +93,11 @@ classdef dockerWrapper < handle
             % we should remove any existing containers here
             % to sweep up after ourselves.
             if ~isempty(dockerWrapper.staticVar('get','PBRT-GPU',''))
-                dockerWrapper.cleanup(obj, dockerWrapper.staticVar('get','PBRT-GPU',''));
+                dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-GPU',''));
                 dockerWrapper.staticVar('set', 'PBRT-GPU', '');
             end
             if ~isempty(dockerWrapper.staticVar('get','PBRT-CPU',''))
-                dockerWrapper.cleanup(obj, dockerWrapper.staticVar('get','PBRT-CPU',''));
+                dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-CPU',''));
                 dockerWrapper.staticVar('set', 'PBRT-CPU', '');
             end
         end
@@ -112,7 +112,7 @@ classdef dockerWrapper < handle
                 contextFlag, containerName);
             [status, result] = system(cleanupCmd);
             if status == 0
-                disp("cleaned up containger");
+                disp("cleaned up container");
             else
                 disp("Failed to cleanup: %s", result);
             end
