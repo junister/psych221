@@ -831,6 +831,34 @@ switch param
             thisR.set('textures', textureName, thisTexture);
         end
 
+    case {'skymap'} % add a skymap by filename
+        skymapFileName = val;
+        % if the map isn't already in the output dir, we have to copy it
+        if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
+            if isfile(fullfile(piRootPath,'data','lights', skymapFileName))
+                copyfile(fullfile(piRootPath,'data','lights', skymapFileName),...
+                    thisR.get('output dir'));
+            else
+                exrFile = which(skymapFileName);
+                if ~isempty(exrFile)
+                    copyfile(exrFile,thisR.get('output dir'));
+                else
+                    warning("Unable to find skymap: %s\n", skymapFileName);
+                    return % can't create the light
+                end
+            end
+        end
+        % Now create a sky light with default params.
+        envLight = piLightCreate('skymap', ...
+            'type', 'infinite',...
+            'mapname', skymapFileName);
+        
+        envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+
+        thisR.set('light', 'add', envLight);
+        out = envLight;
+        % We need to return envLight to our caller!
+
     case {'light', 'lights'}
         % Examples
         % thisR.set('light', lightList);
@@ -903,9 +931,9 @@ switch param
                     end
 
                     lght = piLightRotate(lght, 'xrot', xRot,...
-                                                'yrot', yRot,...
-                                                'zrot', zRot,...
-                                                'order', order);
+                        'yrot', yRot,...
+                        'zrot', zRot,...
+                        'order', order);
                     thisR.set('light', lgtIdx, lght);
                     return;
 
@@ -937,10 +965,10 @@ switch param
                         end
                     end
                     lght = piLightTranslate(lght, 'xshift', xSft,...
-                           'yshift', ySft,...
-                           'zshift', zSft,...
-                           'fromto', fromto,...
-                           'up', up);
+                        'yshift', ySft,...
+                        'zshift', zSft,...
+                        'fromto', fromto,...
+                        'up', up);
                     thisR.set('light', lgtIdx, lght);
 
                     return;
@@ -1005,8 +1033,8 @@ switch param
                 % thisR.set('asset',parentName,newAsset);
                 out = piAssetAdd(thisR, assetName, val);
             case {'cancellasttransformation', 'removelasttransformation',...
-                  'cancellasttrans', 'removelasttrans',...
-                  'cancellastaction', 'removelastaction'}
+                    'cancellasttrans', 'removelasttrans',...
+                    'cancellastaction', 'removelastaction'}
                 % Note: this is for transformation only, not
                 % motion/animation
                 piAssetRemoveLastTrans(thisR, assetName);

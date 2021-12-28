@@ -23,7 +23,7 @@ sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-thisR = piUnitConvert(thisR);
+%thisR = piUnitConvert(thisR);
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
@@ -89,30 +89,33 @@ else,        sceneSet(scene,'gamma',0.6);
 end
 %%  Now Put the sphere in an environment
 
-rmLight = piLightCreate('room light', ...
-    'type', 'infinite',...
-    'mapname', 'room.exr');
-rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+%rmLight = piLightCreate('room light', ...
+%    'type', 'infinite',...
+%    'mapname', 'room.exr');
 
 % Make the sphere a little smaller
 assetName = '001_Sphere_O';
 thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 
-% Add an environmental light
-thisR.set('light', 'delete', 'all');
-thisR.set('light', 'add', rmLight);
+%thisR.set('light', 'add', rmLight);
 
 % Check that the room.exr file is in the directory.
 % In time, we will be using piRenderValidate()
 %
 % For standard environment lights, we want something like
 %
-%   thisR.set('skymap',filename);
+% Add an environmental light
+thisR.set('light', 'delete', 'all');
+[~, rmLight] = thisR.set('skymap','room.exr');
+% doing this now in set, as I think it has to happen
+% before the light is added???
+%rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+
 %
-if ~exist(fullfile(thisR.get('output dir'),'room.exr'),'file')
-    exrFile = which('room.exr');
-    copyfile(exrFile,thisR.get('output dir'))
-end
+%if ~exist(fullfile(thisR.get('output dir'),'room.exr'),'file')
+%    exrFile = which('room.exr');
+%    copyfile(exrFile,thisR.get('output dir'))
+%end
 
 scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName));
 
