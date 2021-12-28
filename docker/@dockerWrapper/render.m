@@ -82,7 +82,9 @@ if ~isempty(obj.remoteMachine)
     % mounted
 
     shortOut = [obj.relativeScenePath sceneDir];
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/* && %s"',useContext, flags, useContainer, shortOut, renderCommand);
+    % need to cd to our scene, and remove all old renders
+    % some leftover files can start with "." so need to get them also
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
     if verbose > 0
         fprintf("Render: %s\n", containerRender);
