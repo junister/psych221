@@ -6,8 +6,4 @@ local
 docker/build/pbrt-v4
 docker/build/libs
 docker/build/NVIDIA-OptiX-SDK-7.2.0-linux64-x86_64
-data/V4/bistro
-data/V4/landscape
-data/V4/ChessSet.mp4
-ChessSet.mp4
-ChessSet.avi.mp4
+data/V4/web

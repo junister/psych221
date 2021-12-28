@@ -344,6 +344,9 @@ if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
     FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+    if ~isfolder(FilePath)
+        FilePath = fullfile(piRootPath,'data','V4','web',sceneDir);
+    end
 end
 
 % If we can not find it, check on the web.

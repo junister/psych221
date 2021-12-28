@@ -56,6 +56,7 @@ classdef dockerWrapper < handle
 
     properties
         dockerContainerName = '';
+        dockerContainerID = '';
         % default image is cpu
         dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
         dockerImageRender = ''; % set based on local machine
@@ -251,6 +252,7 @@ classdef dockerWrapper < handle
                 fprintf("Started Docker with %d: %s\n", status, cmd);
             end
             if status == 0
+                obj.dockerContainerID = result; % hex name for it
                 return;
             else
                 warning("Failed to start Docker container with message: %s", result);
