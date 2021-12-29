@@ -158,6 +158,11 @@ switch tp
         texture.gamma.type = 'bool';
         texture.gamma.value = [];
 
+        % this is new in v4 and relates to gamma
+        % but not sure if it replaces or extends 
+        texture.encoding.type = 'string';
+        texture.encoding.value = [];
+
         % Basis features
         texture.basis.type = 'string';
         texture.basis.value = '';
