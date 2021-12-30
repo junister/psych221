@@ -23,7 +23,9 @@ sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-%thisR = piUnitConvert(thisR);
+
+% thisR = piUnitConvert(thisR);
+
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
@@ -112,10 +114,10 @@ thisR.set('light', 'delete', 'all');
 %rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 
 %
-%if ~exist(fullfile(thisR.get('output dir'),'room.exr'),'file')
-%    exrFile = which('room.exr');
-%    copyfile(exrFile,thisR.get('output dir'))
-%end
+if ~exist(fullfile(thisR.get('output dir'),'room.exr'),'file')
+    exrFile = fullfile(piRootPath,'data','lights','room.exr');
+    copyfile(exrFile,thisR.get('output dir'))
+end
 
 scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName));
 
