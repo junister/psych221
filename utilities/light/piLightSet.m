@@ -5,7 +5,7 @@ function lght = piLightSet(lght, param, val, varargin)
 %  lght = piLightSet(lght, param, val, varargin)
 %
 % Inputs
-%   lght:    light struct
+%   lght:     An ISET3d light struct
 %   param:    The parameter to set
 %   val:      The new value
 %

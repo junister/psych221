@@ -193,10 +193,10 @@ if ispc  % Windows
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
     folderBreak = split(outputFolder, filesep());
     shortOut = strcat('/', char(folderBreak(end)));
-
+    
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-    dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
+        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
     end
 
     %fix for non - C drives

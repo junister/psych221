@@ -831,16 +831,24 @@ switch param
             thisR.set('textures', textureName, thisTexture);
         end
 
-    case {'skymap'} % add a skymap by filename
+    case {'skymap'} 
+        % thisR.set('skypmap',filename)
+        % add a skymap by filename
+        
         skymapFileName = val;
+        
         % if the map isn't already in the output dir, we have to copy it
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
+            
+            % If it is not in the local directory, check the data/lights
             if isfile(fullfile(piRootPath,'data','lights', skymapFileName))
                 copyfile(fullfile(piRootPath,'data','lights', skymapFileName),...
                     thisR.get('output dir'));
             else
+                % Not found yet, look for it on the path
                 exrFile = which(skymapFileName);
                 if ~isempty(exrFile)
+                    fprintf('Using skymap:  %s\n',exrFile);
                     copyfile(exrFile,thisR.get('output dir'));
                 else
                     warning("Unable to find skymap: %s\n", skymapFileName);
@@ -848,11 +856,13 @@ switch param
                 end
             end
         end
-        % Now create a sky light with default params.
+        
+        % Create a sky light with default params.
         envLight = piLightCreate('skymap', ...
             'type', 'infinite',...
             'mapname', skymapFileName);
         
+        % We should make these scale and rotation values parameters.
         envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 
         thisR.set('light', 'add', envLight);
