@@ -89,7 +89,7 @@ classdef dockerWrapper < handle
     methods (Static)
 
         [dockerExists, status, result] = exists() % separate file
-        
+                
         function reset()
             % we should remove any existing containers here
             % to sweep up after ourselves.
