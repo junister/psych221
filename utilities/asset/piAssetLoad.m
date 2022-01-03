@@ -51,6 +51,9 @@ asset = load(fname);
 [thePath,n,e] = fileparts(asset.thisR.get('input file'));
 
 temp = split(thePath,'iset3d');
+% A lot of our assets were hard-coded with v3 paths
+% Hack to fix for v4
+temp = strrep(temp,'V3','V4');
 
 % Find a file in the user's path that matches the name and extension
 inFile = fullfile(piRootPath,temp{2},[n,e]);
@@ -64,7 +67,7 @@ asset.thisR.set('input file',inFile);
 [thePath,n,e] = fileparts(asset.thisR.get('output file'));
 
 % Find the last element of the path
-temp = split(thePath,'/');
+temp = split(thePath,filesep);
 
 % The file name for this user should be
 outFile=fullfile(piRootPath,'local',temp{end},[n,e]);
