@@ -79,38 +79,53 @@ order  = p.Results.order;
 
 %% Rotate the light
 
-if ~isfield(lght, 'to') && ~strcmpi(lght.type, 'infinite')
- 
-    warning('This light does not have to! Doing nothing.');
-else
-    for ii = 1:numel(order)
-        thisAxis = order(ii);
-        
-        toVal = piLightGet(lght, 'to val');
-        fromVal = piLightGet(lght, 'from val');
-        toDir = toVal - fromVal;
-        switch thisAxis
-            case 'x'
-                rotationMatrix = rotationMatrix3d([deg2rad(xrot),0,0]);
-            case 'y'
-                rotationMatrix = rotationMatrix3d([0,deg2rad(yrot),0]);
-            case 'z'
-                rotationMatrix = rotationMatrix3d([0,0,deg2rad(zrot)]);
-            otherwise
-                error('Unknown axis: %s.\n', thisAxis);
-        end
+switch lght.type
+    case 'infinite'
+        % Ask (ZL)^2 about this.  Probably piWrite() does something with
+        % these parameters.  What do they each mean?
+       lght = piLightSet(lght, 'rotation val', {[0 0 1 0], [xrot,yrot,zrot, 0]});
 
-        newto = reshape(toDir, [1, 3]) * rotationMatrix;
+    otherwise
+        if ~isfield(lght, 'to')
+            warning('This light does not have a to field! Doing nothing.');
+            return;
+        end
         
-        %{
+        for ii = 1:numel(order)
+            thisAxis = order(ii);
+            
+            toVal   = piLightGet(lght, 'to val');
+            fromVal = piLightGet(lght, 'from val');
+            toDir   = toVal - fromVal;
+            
+            if isempty(toDir)
+                warning('Cannot use this routine to rotate a skymap');
+                return;
+            end
+            
+            switch thisAxis
+                case 'x'
+                    rotationMatrix = rotationMatrix3d([deg2rad(xrot),0,0]);
+                case 'y'
+                    rotationMatrix = rotationMatrix3d([0,deg2rad(yrot),0]);
+                case 'z'
+                    rotationMatrix = rotationMatrix3d([0,0,deg2rad(zrot)]);
+                otherwise
+                    error('Unknown axis: %s.\n', thisAxis);
+            end
+            
+            
+            newto = reshape(toDir, [1, 3]) * rotationMatrix;
+            
+            %{
             if ii ~= 1
                 idx = numel(thisR.lights);
             end
-        %}
-        lght = piLightSet(lght, 'to val', fromVal + newto);
-        % piLightSet(thisR, idx, 'to', thisR.lights{idx}.from + newto);
-    end
+            %}
+            lght = piLightSet(lght, 'to val', fromVal + newto);
+            % piLightSet(thisR, idx, 'to', thisR.lights{idx}.from + newto);
+        end
+end
 end
 
 % lightSource = thisR.lights{end};
-end

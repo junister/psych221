@@ -862,7 +862,9 @@ switch param
             'type', 'infinite',...
             'mapname', skymapFileName);
         
-        % We should make these scale and rotation values parameters.
+        % We should make these scale and rotation values parameters. We
+        % think this default puts the center of the image at the top of the
+        % sphere.
         envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 
         thisR.set('light', 'add', envLight);
