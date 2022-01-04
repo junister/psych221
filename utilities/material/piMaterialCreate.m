@@ -52,10 +52,18 @@ function material = piMaterialCreate(name, varargin)
 
 
 %% Special case
+validmaterials = ...
+    {'diffuse','coateddiffuse','coatedconductor',...
+    'diffusetransmission','dielectric','thindielectric','hair', ...
+    'measured','subsurface','mix'};
 if isequal(ieParamFormat(name),'listavailabletypes')
-    material = {'matte','uber','plastic','metal','mirror','glass', ...
+    material = validmaterials;
+        %{
+        % V3 materials.  Now deprecated, sigh.
+        {'matte','uber','plastic','metal','mirror','glass', ...
        'translucent','hair','kdsubsurface','disney','fourier', ...
        'mix','substrate','subsurface'};
+        %}
     return;
 end
 
@@ -71,7 +79,7 @@ end
 %% Parse inputs
 p = inputParser;
 p.addRequired('name', @ischar);
-p.addParameter('type', 'diffuse', @ischar);
+p.addParameter('type', 'diffuse', @(x)(ismember(x,validmaterials)));
 p.KeepUnmatched = true;
 p.parse(name, varargin{:});
 
