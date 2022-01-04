@@ -103,40 +103,40 @@ piAssetSet(chartR, geometryNode.name, 'rotation', rotMatrix);
 uniqueKey = randi(1e4,1);
 
 switch ieParamFormat(chartName)
-    case 'eia'        
+    case 'eia'
         textureName = sprintf('EIAChart-%d',uniqueKey);
         imgFile   = 'EIA1956-300dpi-center.png';
-        
-    case 'slantedbar'        
+
+    case 'slantedbar'
         textureName = sprintf('slantedbar-%d',uniqueKey);
         imgFile   = 'slantedbar.png';
-        
+
     case 'ringsrays'
         textureName = sprintf('ringsrays-%d',uniqueKey);
         imgFile   = 'ringsrays.png';
-        
+
     case 'gridlines'
         textureName = sprintf('gridlines-%d',uniqueKey);
         imgFile = 'gridlines.png';
-        
+
     case 'macbeth'
         % This has the macbeth as an image (texture). There is a separate
         % script (s_assetMCCCBCreate) that includes the true spectral data.
         % That one is used for the Cornell Box project.
         textureName = sprintf('macbeth-%d',uniqueKey);
         imgFile = 'macbeth.png';
-        
+
         % Make the surface shape match the MCC shape
         piAssetSet(chartR, geometryNode.name, 'scale',wscale.*[1 4/6 1]);
 
     case 'face'
         textureName = sprintf('face-%d',uniqueKey);
         imgFile = 'monochromeFace.png';
-        
+
     case 'pointarray_512_64'
         textureName = sprintf('pointarray_512_64-%d',uniqueKey);
         imgFile = 'pointArray_512_64.png';
-        
+
     otherwise
         error('Unknown chart name %s\n',chartName);
 end
@@ -167,7 +167,7 @@ chartR.set('asset',surfaceName,'name',oName);
 % Specify the chart as having this material
 chartR.set('asset',oName,'material name',surfaceMaterial.name);
 
-parent = chartR.get('asset parent id',oName); 
+parent = chartR.get('asset parent id',oName);
 gName = sprintf('%s_G',oName);
 chartR.set('asset',parent,'name',gName);
 
@@ -181,4 +181,3 @@ if ~exist(outputdir,'dir'), fprintf('Making output dir %s',outputdir); mkdir(out
 copyfile(textureFile,outputdir);
 
 end
-

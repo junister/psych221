@@ -50,20 +50,17 @@ asset = load(fname);
 % in the ISET3D directory tree.
 [thePath,n,e] = fileparts(asset.thisR.get('input file'));
 
-if contains(thePath,'iset3d-v4')
-    temp = split(thePath,'iset3d-v4');
-else
-    temp = split(thePath,'iset3d');
-end
-% A lot of our assets were hard-coded with v3 paths
-% Hack to fix for v4, as we don't want to use V3 assets
-temp = strrep(temp,'V3','V4');
+% Find the name of the directory containing the file.
+temp = split(thePath,filesep);
+theDir = temp{end};
 
-% Find a file in the user's path that matches the name and extension
-inFile = fullfile(piRootPath,temp{2},[n,e]);
+% Insist that this is a V4 pbrt file.
+inFile = fullfile(piRootPath,'data','V4',theDir,[n,e]);
 
-if isempty(inFile), error('Cannot find the PBRT input file %s\n',thisR.inputFile); end
+% Make sure it exists
+if ~isfile(inFile), error('Cannot find the PBRT input file %s\n',thisR.inputFile); end
 
+% Set it
 asset.thisR.set('input file',inFile);
 
 %% Adjust the input slot in the recipe for the local user
@@ -72,9 +69,10 @@ asset.thisR.set('input file',inFile);
 
 % Find the last element of the path
 temp = split(thePath,filesep);
+theDir = temp{end};
 
 % The file name for this user should be
-outFile=fullfile(piRootPath,'local',temp{end},[n,e]);
+outFile=fullfile(piRootPath,'local',theDir,[n,e]);
 
 asset.thisR.set('output file',outFile);
 

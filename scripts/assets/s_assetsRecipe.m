@@ -28,8 +28,8 @@ thisR = piRecipeDefault('scene name', sceneName);
 thisR.set('from',[0 0 0]);
 thisR.set('to',[0 0 1]);
 thisR.set('asset', 'Bunny_B', 'world position', [0 0 1]);
-mergeNode = 'Bunny_B';
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
+mergeNode = 'Bunny_B';
 save(oFile,'mergeNode','-append');
 
 %%  Coordinate axes at 000
