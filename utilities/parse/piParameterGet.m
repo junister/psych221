@@ -38,12 +38,11 @@ if piContains(match,'string') || piContains(match,'bool')
 elseif piContains(match, ' L') && piContains(thisLine,'.spd')
     matchIndex = regexp(thisLine, '.spd');
     n=matchIndex;
-    while n<numel(thisLine)
+    while n <= numel(thisLine)   % Changed to <=, Jan 2022 (BW)
         if strcmp(thisLine(n),'"')
             % find spd file end token
             end_toc = n;
             break;
-
         end
         n=n+1;
     end

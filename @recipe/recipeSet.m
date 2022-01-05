@@ -1264,7 +1264,7 @@ switch param
             error('Accept single number as concentration\n');
         end
         thisR.materials.list.(matName).floatconcentration = val{2};
-    case {'filmrendertype'}
+    case {'filmrendertype','rendertype'}
         thisR.metadata.rendertype = val;
         for ii = 1:numel(val)
             switch val{ii}
