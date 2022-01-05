@@ -40,18 +40,24 @@ if ~piDockerExists, piDockerConfig; end
 fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
 %% 
 thisR  = piRead(fbxFile);
+
 %%
+% convert scene unit from centimeter to meter
+thisR = piUnitConvert(thisR, 100);
+
 % close up view
 thisR.set('from',[1.9645 0.2464 0.0337]);
 thisR.set('to',  [0.9655 0.2050 0.0198]);
 thisR.set('up',  [0 1 0]);
+
+
 
 thisR.set('film resolution',[600 600]/2);
 thisR.set('rays per pixel',32);
 %% set render type
 % radiance 
 % rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
-thisR.set('film render type',{'radiance'});
+thisR.set('film render type',{'radiance','depth'});
 %% move object
 thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 

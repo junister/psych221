@@ -1,7 +1,7 @@
 function ieObject = piEXR2ISET(inputFile, varargin)
 % Read an exr-file rendered by PBRT, and return an ieObject or a
 % metadataMap
-%       ieObject = piExr2ISET(inputFile, varagin)
+%       ieObject =  piEXR2ISET(inputFile, varagin)
 % 
 % Brief description:
 %   We take a exr-file from pbrt as input and return an ISET object.
@@ -20,7 +20,8 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 %                       diameter.
 %
 % Output
-%   ieObject: if label is radiance: optical image;
+%   ieObject- if label is radiance with omni/realistic lens: optical image;
+%             if label is radiance with other types of lens: scene;
 %             else, a metadatMap
 %
 %

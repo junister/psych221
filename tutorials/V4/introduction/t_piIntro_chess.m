@@ -29,15 +29,11 @@
 %   
 %% Init
 ieInit;
-
-
 %% piRead support FBX and PBRT
-% FBX is converted into PBRT
-%fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
-% or you can use a PBRT file
-fbxFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
+% FBX is converted into PBRT or you can use a PBRT file
+pbrtFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
 %% 
-thisR  = piRead(fbxFile);
+thisR  = piRead(pbrtFile);
 %%
 % close up view
 thisR.set('from',[1.9645 0.2464 0.0337]);

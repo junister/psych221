@@ -28,7 +28,7 @@ sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-thisR = piUnitConvert(thisR);
+thisR = piUnitConvert(thisR, 100);
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...

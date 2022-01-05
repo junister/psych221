@@ -93,7 +93,7 @@ piCameraTranslate(thisR,'z shift',1);
 
 piWrite(thisR);
 %%
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Equal energy (spot)');
 sceneWindow(scene);
 
@@ -104,7 +104,7 @@ sceneWindow(scene);
 thisR.set('light', lightName, 'coneangle', 10);
 piWrite(thisR);
 
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Equal energy (spot)');
 val   = thisR.get('light', lightName, 'coneangle val');
 scene = sceneSet(scene,'name',sprintf('EE spot %d',val));
@@ -121,7 +121,7 @@ thisR.set('light', 'translate', 'new spot light', [0.1, 0, 0]);
 
 piWrite(thisR);
 
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Equal energy (spot)');
 val   = thisR.get('light', lightName, 'coneangle');
 scene = sceneSet(scene,'name',sprintf('EE spot to right %d',val));
@@ -133,7 +133,7 @@ sceneWindow(scene);
 thisR.set('light', 'rotate', 'new spot light', [0, -5, 0]); % -5 degree around y axis
 piWrite(thisR);
 
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Equal energy (spot)');
 val   = thisR.get('light', lightName, 'coneangle val');
 scene = sceneSet(scene,'name',sprintf('Rotate EE spot'));
@@ -171,7 +171,7 @@ thisR.set('lights', 'replace', 'new point', distLight);
 thisR.get('lights print');
 
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Blue (distant)');
 sceneWindow(scene);
 
@@ -198,7 +198,7 @@ piCameraRotate(thisR, 'y rot', -10);
 piCameraRotate(thisR, 'x rot', 10);
 
 piWrite(thisR);
-[scene, result] = piRender(thisR, 'render type', 'radiance');
+[scene, result] = piRender(thisR);
 scene = sceneSet(scene,'name','Environment light');
 sceneWindow(scene);
 
