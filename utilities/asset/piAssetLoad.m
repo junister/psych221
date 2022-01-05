@@ -51,7 +51,13 @@ asset = load(fname);
 [thePath,n,e] = fileparts(asset.thisR.get('input file'));
 
 % Find the name of the directory containing the file.
-temp = split(thePath,filesep);
+% Cross-platform issue: Win paths will have \, Linux/Mac /
+% but we don't know what has been encoded in there.
+if contains(thePath, '/')
+    temp = split(thePath,'/');
+else
+    temp = split(thePath,'\');
+end
 theDir = temp{end};
 
 % Insist that this is a V4 pbrt file.

@@ -53,10 +53,12 @@ function material = piMaterialCreate(name, varargin)
 
 %% Special case
 validmaterials = ...
-    {'diffuse','coateddiffuse','coatedconductor',...
+    {'diffuse','coateddiffuse','coatedconductor','conductor',...
     'diffusetransmission','dielectric','thindielectric','hair', ...
     'measured','subsurface','mix'};
-if isequal(ieParamFormat(name),'listavailabletypes')
+%{
+% need to check type, not name...
+if isequal(ieParamFormat(type),'listavailabletypes')
     material = validmaterials;
         %{
         % V3 materials.  Now deprecated, sigh.
@@ -66,7 +68,7 @@ if isequal(ieParamFormat(name),'listavailabletypes')
         %}
     return;
 end
-
+%}
 %% Replace the space in parameters.
 
 % For example, 'rgb kd' won't pass parse with the space, but we need the
