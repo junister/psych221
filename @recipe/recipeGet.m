@@ -1139,6 +1139,24 @@ switch ieParamFormat(param)  % lower case, no spaces
             % Includes ids and everything
             val{ii} = names{ids(ii)};
         end
+        
+    case {'objectnamesnoid'}
+        % Names of the objects with the ID stripped.
+        % I don't think we are doing this properly.  We need a routine to
+        % break an asset name into
+        %
+        %    [id, instance, objectname] = assetNameParse(name)
+        %
+        % And then we should call that routine for this set of gets.
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            thisName = names{ids(ii)};
+            val{ii} = thisName(8:end);
+        end
+        
     case 'objectsimplenames'
         % Names of the objects
         % We think there is ID_Instance_ObjectName_O.
