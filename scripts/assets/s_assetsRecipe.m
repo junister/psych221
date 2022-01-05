@@ -36,6 +36,10 @@ save(oFile,'mergeNode','-append');
 
 sceneName = 'coordinate';
 thisR = piRecipeDefault('scene name', sceneName);
+thisR.set('asset',10,'delete');
+thisR.set('asset',7,'delete');
+thisR.set('asset',4,'delete');
+% piWRS(thisR);
 mergeNode = 'Coordinate_B';
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');

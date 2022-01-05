@@ -47,11 +47,14 @@ for ii=numel(nodeToRoot):-1:1
                     curTransM =  piTransformTranslation(rotM(:, 1),...
                         rotM(:, 2),...
                         rotM(:, 3), thisTrans);
-                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
-
+                    
+                    % How did this line get here?
+                    % transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
+                    %
+                    
                     transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4) .* scaleM';
-
                     pointerT = pointerT + 1;
+                    
                 case 'R'
                     rotDegs = thisAsset.rotation{pointerR}(1,:);
                     thisRotM = piTransformDegs2RotM(rotDegs, rotM);
