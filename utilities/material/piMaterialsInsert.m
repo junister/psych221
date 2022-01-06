@@ -32,62 +32,44 @@ thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric','eta','gl
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
+% Diffuse colors
 thisMaterialName = 'Red'; 
 thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'diffuse');
 thisMaterial = piMaterialSet(thisMaterial,'reflectance',[1 0.3 0.3]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
-%{
-
-thisMaterialName = 'Red_plastic'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'plastic');
-thisMaterial = piMaterialSet(thisMaterial,'kd',[1 0.3 0.3]);
-thisR.set('material', 'add', thisMaterial);
-materialNames{end+1} = thisMaterialName;
-
 thisMaterialName = 'White'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'uber');
-thisMaterial = piMaterialSet(thisMaterial,'kd',[1 1 1]);
-thisR.set('material', 'add', thisMaterial);
-materialNames{end+1} = thisMaterialName;
-
-thisMaterialName = 'White_plastic'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'plastic');
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'diffuse');
 thisMaterial = piMaterialSet(thisMaterial,'kd',[1 1 1]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
 % Make a new material like White, but color it gray
 thisMaterialName = 'Gray'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'uber');
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'diffuse');
 thisMaterial = piMaterialSet(thisMaterial,'kd',[0.2 0.2 0.2]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
-% Make a new material like White, but color it gray
+% Goal:  shiny colors
+thisMaterialName = 'Red_plastic'; 
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
+thisMaterial = piMaterialSet(thisMaterial,'kd',[1 0.3 0.3]);
+thisR.set('material', 'add', thisMaterial);
+materialNames{end+1} = thisMaterialName;
+
+thisMaterialName = 'White_plastic'; 
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
+thisMaterial = piMaterialSet(thisMaterial,'kd',[1 1 1]);
+thisR.set('material', 'add', thisMaterial);
+materialNames{end+1} = thisMaterialName;
+
 thisMaterialName = 'Gray_plastic'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'plastic');
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
 thisMaterial = piMaterialSet(thisMaterial,'kd',[0.2 0.2 0.2]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
-
-% Make a new material like White, but make it specular/shiny
-thisMaterialName = 'Shiny'; 
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'plastic');
-thisMaterial = piMaterialSet(thisMaterial,'kd',[0.7 0.7 0.7]);
-thisMaterial = piMaterialSet(thisMaterial,'ks',[1 1 1]);
-thisMaterial = piMaterialSet(thisMaterial,'roughness',1);
-thisR.set('material', 'add', thisMaterial);
-materialNames{end+1} = thisMaterialName;
-%}
-
-%{
-thisMaterialName = 'mirror';
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'mirror');
-thisR.set('material', 'add', thisMaterial);
-materialNames{end+1} = thisMaterialName;
-%}
 
 thisMaterialName = 'mirror';
 thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'conductor',...
@@ -96,7 +78,7 @@ thisR.set('material', 'add', thisMaterial);
 
 %% Materials based on textures
 
-%{
+% {
 % Wood grain (light, large grain)
 thisMaterialName = 'wood001';
 thisTexture = piTextureCreate(thisMaterialName,...
@@ -104,7 +86,7 @@ thisTexture = piTextureCreate(thisMaterialName,...
     'type', 'imagemap',...
     'filename', 'woodgrain001.png');
 thisR.set('texture', 'add', thisTexture);
-thisMaterial = piMaterialCreate(thisMaterialName,'type','uber','kd val',thisMaterialName);
+thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
@@ -115,7 +97,7 @@ thisTexture = piTextureCreate(thisMaterialName,...
     'type', 'imagemap',...
     'filename', 'woodgrain002.exr');
 thisR.set('texture', 'add', thisTexture);
-thisMaterial = piMaterialCreate(thisMaterialName,'type','uber','kd val',thisMaterialName);
+thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
@@ -126,7 +108,7 @@ thisTexture = piTextureCreate(thisMaterialName,...
     'type', 'imagemap',...
     'filename', 'mahoganyDark.exr');
 thisR.set('texture', 'add', thisTexture);
-thisMaterial = piMaterialCreate(thisMaterialName,'type','plastic','kd val',thisMaterialName);
+thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
@@ -137,7 +119,7 @@ thisTexture = piTextureCreate(thisMaterialName,...
     'type', 'imagemap',...
     'filename', 'brickwall001.png');
 thisR.set('texture', 'add', thisTexture);
-thisMaterial = piMaterialCreate(thisMaterialName,'type','uber','kd val',thisMaterialName);
+thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
@@ -148,11 +130,9 @@ thisTexture = piTextureCreate(thisMaterialName,...
     'type', 'imagemap',...
     'filename', 'marbleBeige.exr');
 thisR.set('texture', 'add', thisTexture);
-thisMaterial = piMaterialCreate(thisMaterialName,'type','uber','kd val',thisMaterialName);
+thisMaterial = piMaterialCreate(thisMaterialName,'type','coateddiffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
-
-%}
 
 if true
     thisR.get('print materials');
