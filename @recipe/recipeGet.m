@@ -230,7 +230,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Standard location for the scene geometry output information
         outputDir = thisR.get('output dir');
 %         val = fullfile(outputDir,'scene','PBRT','pbrt-geometry');
-        val = fullfile(outputDir,'meshes');
+        val = fullfile(outputDir,'geometry');
         
         
         % Graphics related

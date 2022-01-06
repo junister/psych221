@@ -179,10 +179,10 @@ for ii = 1:numel(children)
                 % There is a shape slot we also open the
                 % geometry file.
                 name = thisNode.name;
-                geometryFile = fopen(fullfile(rootPath,'meshes',sprintf('%s.pbrt',name)),'w');
+                geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
                 fprintf(geometryFile,'%s',shapeText);
                 fclose(geometryFile);
-                fprintf(fid, 'Include "meshes/%s.pbrt" \n', name);
+                fprintf(fid, 'Include "geometry/%s.pbrt" \n', name);
             end
         end
         
