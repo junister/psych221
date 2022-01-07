@@ -1,13 +1,27 @@
 function [newlines] = piFormatConvert(txtLines)
 % Format txtlines into a standard format.
+%
+% Inputs
+%   txtLines - Text lines read from a pbrt file
+%
+% Output
+%   newlines - Formatted to be compliant with ISET3d needs
+%
+% See also
+%
+
+%%
 nn=1;ii=1;
-% remove empty cells
+
+%% remove empty cells
 txtLines = txtLines(~cellfun('isempty',txtLines));
-% remove lines start with '#' except '#ObjectName'
+
+%% remove lines start with '#' except '#ObjectName'
 txtLines = txtLines(or(~strncmp(txtLines,'#',1), strncmp(txtLines,'#ObjectName',11)));
 tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
 txtLines = regexprep(txtLines, '\t', ' ');
-% deal with special case
+
+%% deal with special case
 idxList = find(strcmp(txtLines,']'));
 for idx = 1:numel(idxList)
     txtLines{idxList(idx)-1} = strcat(txtLines{idxList(idx)-1},txtLines{idxList(idx)});
@@ -16,6 +30,8 @@ end
 txtLines = txtLines(~cellfun('isempty',txtLines));
 nLines = numel(txtLines);
 newlines = cell(nLines, 1);
+
+% Comments needed.
 while ii <= nLines
     thisLine = txtLines{ii};
     if length(thisLine) >= length('Shape')
@@ -57,6 +73,9 @@ while ii <= nLines
     
     ii=ii+1;
 end
+
+%% Clear out junk
 newlines(piContains(newlines,'Warning'))=[];
 newlines = newlines(~cellfun('isempty', newlines));
+
 end

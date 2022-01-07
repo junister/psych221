@@ -240,6 +240,8 @@ if any(piContains(world,'Include')) && ...
         % convert geometryLines into from the standard block indented format in
         % to the single line format.
         geometryLinesFormatted = piFormatConvert(geometryLines);
+        
+        % Builds the asset tree including creating the shape information.
         [trees, ~] = parseGeometryText(thisR, geometryLinesFormatted,'');
     end
 else

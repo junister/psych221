@@ -58,6 +58,7 @@ chartR.set('light','add',distantLight);
 % Aim the camera at the object and bring it closer.
 chartR.set('from',[0,0,0]);
 chartR.set('to',  [0,0,1]);
+chartR.set('up',  [0,1,0]);
 
 % Find the position of the surface
 surfaceName = '001_Cube_O';
@@ -144,7 +145,7 @@ end
 %% Make a chart material and texture
 
 % Create a new material and add it to the recipe
-surfaceMaterial = piMaterialCreate(textureName,'type','Matte');
+surfaceMaterial = piMaterialCreate(textureName,'type','diffuse');
 chartR.set('material','add',surfaceMaterial);
 
 % Create a new texture and add it to the recipe

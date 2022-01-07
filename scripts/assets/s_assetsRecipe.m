@@ -67,10 +67,21 @@ save(oFile,'mergeNode','-append');
 %
 
 [thisR, mergeNode] = piChartCreate('EIA');
+thisR.set('lights','delete','all');
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
-
+%{
+ lgt = piLightCreate('point light 1');
+ thisR.set('light','add',lgt);
+ piWRS(thisR);
+%}
 [thisR, mergeNode]= piChartCreate('ringsrays');
+%{
+  thisR.set('materials','delete','Mat');
+  thisR.get('print materials');
+ piWRS(thisR);
+
+%}
 oFile = thisR.save(fullfile(assetDir,'ringsrays.mat'));
 save(oFile,'mergeNode','-append');
 

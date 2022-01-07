@@ -101,6 +101,7 @@ while i <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
+        % Not a comment.  Contains a shape.
         shape = piParseShape(currentLine);
         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
             inputfile = thisR.get('input file');

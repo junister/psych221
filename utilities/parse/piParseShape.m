@@ -1,13 +1,22 @@
 function shape = piParseShape(txt)
 % Parse the shape information into struct
+%
+% Input
+%   txt - The line of text with the shape information
+%
+% Output
+%   shape - 
 % Logic:
 %   Normally the shape line has this format:
-%   'Shape "SHAPE" "integerindices" [] "point P" []
-%    "float uv" [] "normal N" []'
-%   We split the string based on the '"' and get each component
 %
-% Test
+%   'Shape "SHAPE" "integerindices" [] "point P" [] "float uv" [] "normal N" []'
+%
+%   We split the string based on the '"' and read each component
+%
+
+% Examples: 
 %{
+% This reads shapes from the MCC
 thisR = piRecipeDefault('scene name', 'MacBethChecker');
 %}
 %%
