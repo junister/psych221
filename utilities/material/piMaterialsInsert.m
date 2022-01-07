@@ -25,14 +25,19 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 
 materialNames = {};
 
-%% Simple materials
+%% Interesting materials
 
 thisMaterialName = 'glass';
 thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric','eta','glass-BK7');
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
-% Diffuse colors
+thisMaterialName = 'mirror';
+thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'conductor',...
+    'roughness',0,'eta','metal-Ag-eta','k','metal-Ag-k');
+thisR.set('material', 'add', thisMaterial);
+
+%% Diffuse colors
 thisMaterialName = 'Red'; 
 thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'diffuse');
 thisMaterial = piMaterialSet(thisMaterial,'reflectance',[1 0.3 0.3]);
@@ -52,7 +57,7 @@ thisMaterial = piMaterialSet(thisMaterial,'kd',[0.2 0.2 0.2]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
-% Goal:  shiny colors
+%% Goal:  shiny colors
 thisMaterialName = 'Red_plastic'; 
 thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
 thisMaterial = piMaterialSet(thisMaterial,'kd',[1 0.3 0.3]);
@@ -71,12 +76,14 @@ thisMaterial = piMaterialSet(thisMaterial,'kd',[0.2 0.2 0.2]);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
 
-thisMaterialName = 'mirror';
-thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'conductor',...
-    'roughness',0,'eta','metal-Ag-eta','k','metal-Ag-k');
-thisR.set('material', 'add', thisMaterial);
-
 %% Materials based on textures
+
+% Maybe we should insert the textures first, and then create the
+% materials.
+
+% Like insert textures, and then
+
+% Create materials.  Not sure this is done properly for V4.
 
 % {
 % Wood grain (light, large grain)
@@ -133,6 +140,8 @@ thisR.set('texture', 'add', thisTexture);
 thisMaterial = piMaterialCreate(thisMaterialName,'type','coateddiffuse','kd val',thisMaterialName);
 thisR.set('material', 'add', thisMaterial);
 materialNames{end+1} = thisMaterialName;
+
+%% This will become a parameter some day.
 
 if true
     thisR.get('print materials');
