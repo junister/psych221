@@ -123,20 +123,41 @@ plot3(lookat.to(1),lookat.to(2),lookat.to(3),'go',...
     'MarkerFaceColor','g');
 text(lookat.to(1)+sx,lookat.to(2)+sy,lookat.to(3),'to','Color','g');
 
-% Blue dashed line of site
+%% Dashed line of site
 % Equation of the line is start + t*direction
 % We draw the line from to for a lineLength
-lineLength = 10;     % Meters
 direction = lookat.to - lookat.from;
+lineLength = norm(direction);     % Meters
 direction = direction/norm(direction);
 
 start = lookat.from;
 stop  = lookat.from + lineLength*direction;
 line([start(1),stop(1)],...
     [start(2), stop(2)],...
-    [start(3), stop(3)],'Color','b',...
+    [start(3), stop(3)],'Color','r',...
     'Linestyle',':',...
     'Linewidth',2);
+
+%% Dashed line in up direction
+
+% Equation of the line is start + t*direction
+% We draw the line from to for a lineLength
+direction = lookat.up;
+direction = direction/norm(direction);
+
+% I make this line shorter.
+start = lookat.from;
+stop  = lookat.from + 0.5*lineLength*direction;
+line([start(1),stop(1)],...
+    [start(2), stop(2)],...
+    [start(3), stop(3)],'Color','r',...
+    'Linestyle',':',...
+    'Linewidth',2);
+
+plot3(stop(1) ,stop(2),stop(3),'bo',...
+    'Markersize',12,...
+    'MarkerFaceColor','b');
+text(stop(1)+sx,stop(2)+sy,stop(3),'up','Color','b');
 
 %% Label the graph
 
@@ -151,7 +172,6 @@ title(sprintf('%s (%s)',bName,oType));
 
 %% By default set the xy plane view
 switch lower(p.Results.inplane)
-
     case 'xy'
         view(0,270);
     case 'xz'
@@ -159,9 +179,9 @@ switch lower(p.Results.inplane)
         view(-180,0);
 end
 
-% Square up the axes.
+%% Square up the axes.
 boxMax = max([max(coords(:,1)),max(coords(:,2)),max(coords(:,3)),max(lookat.to),max(lookat.from)]);
-boxMin = min([min(coords(:,1)),min(coords(:,2)),min(coords(:,3)),min(lookat.to),min(lookat.from)]);
+boxMin = min([min(coords(:,1)),min(coords(:,2)),min(coords(:,3)),min(lookat.to),min(lookat.from),min(stop)]);
 delta = (boxMax - boxMin)*0.1;
 boxMax = boxMax + delta;
 boxMin = boxMin - delta;
