@@ -57,7 +57,7 @@ for ii=1:numel(textureParams)
             end
          end
 
-         val = strcat(val, thisText);
+         % val = strcat(val, thisText);
 
          if isequal(textureParams{ii}, 'filename')
             if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
@@ -72,10 +72,12 @@ for ii=1:numel(textureParams)
                     if ispc % try to fix filename for the Linux docker container                        
                         imgFile = dockerWrapper.pathToLinux(imgFile);
                     end
-
-                   thisText = strrep(thisText,thisVal, imgFile);
+                    
+                    % In the future we might want to copy the texture files
+                    % into a folder.
+                   % thisText = strrep(thisText,thisVal, imgFile);
 %                     piTextureFileFormat(imgFile);
-%                     copyfile(imgFile,thisR.get('output dir'));
+                    copyfile(imgFile,thisR.get('output dir'));
                 end
             end
          end
