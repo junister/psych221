@@ -268,7 +268,7 @@ end
 outFile = thisR.get('output file');
 
 % Check if the outFile exists. If it does, decide what to do.
-if(exist(outFile,'file'))
+if(isfile(outFile))
     if overwritepbrtfile
         % A pbrt scene file exists.  We delete here and write later.
         fprintf('Overwriting PBRT file %s\n',outFile)

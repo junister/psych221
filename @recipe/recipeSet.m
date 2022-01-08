@@ -27,6 +27,11 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %    'to'         - Position the camera is pointed to
 %    'up'         - The up direction, not always the y-direction
 %
+%  % Lights
+%    'skymap'     - Name of environmental light exr file
+%    'skymap', 'rotation val', <over-ride default rotatio>
+%    'skymap, <name>, <optional attribute>, <attribute value>
+%
 %  % Camera
 %    'camera'     - Struct with camera information
 %    'camera subtype' - The valid camera subtypes are
@@ -862,11 +867,15 @@ switch param
             'type', 'infinite',...
             'mapname', skymapFileName);
         
-        % We should make these scale and rotation values parameters. We
-        % think this default puts the center of the image at the top of the
-        % sphere.
-        envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-
+        if isequal(varargin{1},'rotation val')
+            envLight = piLightSet(envLight', 'rotation val', varargin{2});
+        else
+            envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+            % pass attributes through to set
+            if ~isempty(varargin{1})
+                envLight = piLightSet(envLight,varargin{1},varargin{2});
+            end
+        end
         thisR.set('light', 'add', envLight);
         out = envLight;
         % We need to return envLight to our caller!
