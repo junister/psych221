@@ -4,13 +4,13 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 %       ieObject = piExr2ISET(inputFile, varagin)
 %
 % Brief description:
-%   We take a exr-file from pbrt as input and return an ISET object.
+%   We take an exr-file from pbrt as input and return an ISET object.
 %
 % Inputs
 %   inputFile - Multi-spectral exr-file rendered by pbrt.
 %
 % Optional key/value pairs
-%   label            -  Specify the type of data: radiance, mesh, depth.
+%   label            -  Specify the type(s) of data: radiance, mesh, depth.
 %                       Default is radiance
 %   recipe           -  The recipe used to create the file
 %   mean luminance   -  Set the mean illuminance, if -1 do not scale values
@@ -21,21 +21,10 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 %
 % Output
 %   ieObject: if label is radiance: optical image;
-%             else, a metadatMap
-%
+%             else, a metadataMap
 %
 % Zhenyi, 2021
 %
-% ## python test
-% python installation: https://docs.conda.io/en/latest/miniconda.html
-% Install python 3.8 for matlab 2020 and above
-% check version in matlab command window:
-%          pe = pyenv;
-% Install python library for reading exr files, run this in terminal:
-%          sudo apt install libopenexr-dev # (ubuntu)
-%          brew install openexr # (mac)
-%          pip install git+https://github.com/jamesbowman/openexrpython.git
-%          pip install pyexr
 %%
 %{
  opticalImage = piEXR2ISET('radiance.exr','label','radiance','recipe',thisR);
@@ -155,6 +144,7 @@ end
 switch lower(cameraType)
     case {'pinhole','spherical','perspective'}
         % A scene radiance, not an oi
+        % NB: This fails if we are only asked for depth!!
         ieObject = piSceneCreate(photons,...
             'wavelength', data_wave);
         ieObject = sceneSet(ieObject,'name',ieObjName);
