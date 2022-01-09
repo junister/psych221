@@ -86,6 +86,7 @@ end
 mixMatIndex = piContains(materialTxt,'mix');
 mixMaterialText = materialTxt(mixMatIndex);
 nonMixMaterialText = materialTxt(~mixMatIndex);
+
 %% Write to scene_material.pbrt texture-material file
 output = thisR.get('materials output file'); 
 fileID = fopen(output,'w');
