@@ -564,6 +564,10 @@ switch param
     case{'maxdepth','bounces','nbounces'}
         % thisR.set('n bounces',val);
         % Number of surfaces a ray can bounce from
+        %
+        % This can be set for some, but not all integrators.
+        % Also, sometimes the integrator slot is empty.  I am not sure what
+        % happens then (BW).
 
         if(~strcmp(thisR.integrator.subtype,'path')) &&...
                 (~strcmp(thisR.integrator.subtype,'bdpt'))

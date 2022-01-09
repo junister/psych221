@@ -1,7 +1,10 @@
 function [obj,results] = piWRS(thisR,varargin)
-% Write, render, show radiance image
-%
 % Write, Render, Show a scene specified by a recipe (thisR).
+%
+% Brief description:
+%   We often write, render and show a scene or oi.  This executes that
+%   sequence, allowing the user to set a few parameters.  It is possible to
+%   control some of the parameters in key/val options.
 %
 % Synopsis
 %   [isetObj, results] = piWRS(thisR, varargin)
@@ -12,15 +15,17 @@ function [obj,results] = piWRS(thisR,varargin)
 % Optional key/val pairs
 %   'name'  - Set the Scene or OI name
 %   'render type' - Cell array of render objectives ('radiance','depth',
-%   ... others).  If it is a char, then we convert it to a cell.
+%           ... others).  If it is a char, then we convert it to a cell.
 %   'show'  -  Call a window to show the object (default) and insert it in
-%              the vcSESSION database
+%           the vcSESSION database
 %   'docker image name' - Specify the docker image
 %
 % Returns
 %   obj     - a scene or oi
 %   results - The piRender text outputs
-
+%
+% Description
+%   
 %
 % See also
 %   piRender, sceneWindow, oiWindow
@@ -29,6 +34,7 @@ function [obj,results] = piWRS(thisR,varargin)
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
+
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
 % p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu:latest',@ischar);
 p.addParameter('rendertype','radiance',@(x)(ischar(x) || iscell(x)));
