@@ -867,13 +867,15 @@ switch param
             'type', 'infinite',...
             'mapname', skymapFileName);
         
-        if isequal(varargin{1},'rotation val')
-            envLight = piLightSet(envLight', 'rotation val', varargin{2});
-        else
-            envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-            % pass attributes through to set
-            if ~isempty(varargin{1})
-                envLight = piLightSet(envLight,varargin{1},varargin{2});
+        if ~isempty(varargin)
+            if isequal(varargin{1},'rotation val')
+                envLight = piLightSet(envLight', 'rotation val', varargin{2});
+            else
+                envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+                % pass attributes through to set
+                if ~isempty(varargin{1})
+                    envLight = piLightSet(envLight,varargin{1},varargin{2});
+                end
             end
         end
         thisR.set('light', 'add', envLight);
