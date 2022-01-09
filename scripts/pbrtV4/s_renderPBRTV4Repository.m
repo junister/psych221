@@ -5,11 +5,16 @@
 % The contemporary bathroom took about 4 minutes to run on the muxreconrt.
 
 % Read the original
-thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/contemporary_bathroom/contemporary_bathroom.pbrt');
+thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/web/contemporary_bathroom/contemporary_bathroom.pbrt','exporter','Copy');
 
 % Make sure the exporter is set to 'Copy' so all the files are copied
-thisR.set('exporter','Copy');
+% thisR.set('exporter','Copy');
+% thisR.set('film resolution',[960 540]);  %?? x,y so (col, row)
 
+scene = piWRS(thisR);
+sceneSet(scene,'gamma',0.6);
+
+%{
 % Write it in local
 piWrite(thisR);
 
@@ -19,6 +24,25 @@ scene = piRender(thisR);
 % Show it.  Looks right with HDR rendering.  OK with gamma 0.6.
 sceneWindow(scene);
 sceneSet(scene,'gamma',0.6);
+%}
+%%  The bistro cafe took about 4 minutes just to sync 
+
+% Read the original
+thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/web/bistro_boulangerie/bistro_boulangerie.pbrt');
+
+% Make sure the exporter is set to 'Copy' so all the files are copied
+thisR.set('exporter','Copy');
+thisR.set('camera position',[8 5.9 -35]);
+thisR.set('film resolution',[960 540]/2);  %?? x,y so (col, row)
+to = [9.6000    3.9000  -25.0000];
+from = [8.0000    3.9000  -35.0000];
+thisR.set('from',from + [0 -2 0]);
+% thisR.set('to',to + [0 2 0]);
+thisR.set('object distance',12);
+
+scene = piWRS(thisR);
+sceneSet(scene,'gamma',0.7);
+
 
 %% Maybe we can set the exporter in piWRS call?
 
