@@ -19,7 +19,7 @@ else
     ourDocker.inputFile = infile;
     ourDocker.outputFile = ''; % imgtool uses a default
     ourDocker.outputFilePrefix = '';
-    
+
     [status, result] = ourDocker.runCommand();
 end
 
@@ -29,10 +29,9 @@ if status
 end
 filelist = dir([indir,sprintf('/%s_*',fname)]);
 
-% if there are both depth and radiance files
-% (on Windows at least) the Radiance files aren't
-% always listed first, so we need to find one to
-% get our base name
+%{
+% In an error case there might be additional files
+% This code is designed to help with that if needed
 baseName = '';
 dataFile = '';
 for ii = 1:numel(filelist)
@@ -45,8 +44,15 @@ for ii = 1:numel(filelist)
         width= str2double(nameparts{Nparts-1});
     end
 end
+%}
+nameparts = strsplit(filelist(1).name,'_');
+Nparts = numel(nameparts);
+height = str2double(nameparts{Nparts-2});
+width= str2double(nameparts{Nparts-1});
+
 
 if strcmp(channelname,'Radiance')
+    baseName = strsplit(filelist(1).name,'.');
 
     for ii = 1:31
         filename = fullfile(indir, [baseName{1},sprintf('.C%02d',ii)]);
@@ -67,12 +73,12 @@ if strcmp(channelname,'Radiance')
         delete(filename);
     end
 else
-        filename = fullfile(indir, baseName{1});
-        [fid, message] = fopen(filename, 'r');
-        serializedImage = fread(fid, inf, 'float');
-        data = reshape(serializedImage, height, width, 1);
-        fclose(fid);
-        delete(filename);
+    filename = fullfile(indir, filelist(1).name);
+    [fid, message] = fopen(filename, 'r');
+    serializedImage = fread(fid, inf, 'float');
+    data = reshape(serializedImage, height, width, 1);
+    fclose(fid);
+    delete(filename);
 end
-    
+
 end
