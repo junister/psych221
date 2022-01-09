@@ -43,8 +43,28 @@ materialNames = {};
 for ii=1:numel(mType)
     
     if ismember(mType{ii},{'all','glass'})
-        thisMaterialName = 'glass';
+        
+        thisMaterialName = 'glass_architectural';   % barcelona-pavilion
+        thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric');
+        thisMaterial = piMaterialSet(thisMaterial,'roughness',0);  % 0
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
+        
+        thisMaterialName = 'glass_dark';
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric','eta','glass-BK7');
+        thisMaterial = piMaterialSet(thisMaterial,'roughness',0);  
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
+ 
+        thisMaterialName = 'glass_exterior';   % Line 1226 bistro
+        thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coatedconductor');
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
+        
+        % contemporary-bathroom line 72 et seq
+        thisMaterialName = 'glass_ewt_window';   % Line 72
+        thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric');
+        thisMaterial = piMaterialSet(thisMaterial,'eta',1.5);  
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
     end
@@ -54,6 +74,7 @@ for ii=1:numel(mType)
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'conductor',...
             'roughness',0,'eta','metal-Ag-eta','k','metal-Ag-k');
         thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
     end
     
     %% Diffuse colors
@@ -80,22 +101,29 @@ for ii=1:numel(mType)
         
     end
     
-    if ismember(mType{ii},{'all','plastic'})
+    if ismember(mType{ii},{'all','glossy'})
         
-        %% Goal:  shiny colors
-        thisMaterialName = 'Gray_plastic';
+        %% Goal:  glossy colors
+        thisMaterialName = 'Black_glossy';    % barcelona-pavilion scene
+        thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
+        thisMaterial = piMaterialSet(thisMaterial,'reflectance',[0.02 0.02 0.02]);
+        thisMaterial = piMaterialSet(thisMaterial,'roughness',0.0104);
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
+        
+        thisMaterialName = 'Gray_glossy';
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
         thisMaterial = piMaterialSet(thisMaterial,'reflectance',[0.2 0.2 0.2]);
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
         
-        thisMaterialName = 'Red_plastic';
+        thisMaterialName = 'Red_glossy';
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
         thisMaterial = piMaterialSet(thisMaterial,'reflectance',[1 0.3 0.3]);
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
         
-        thisMaterialName = 'White_plastic';
+        thisMaterialName = 'White_glossy';
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'coateddiffuse');
         thisMaterial = piMaterialSet(thisMaterial,'reflectance',[1 1 1]);
         thisR.set('material', 'add', thisMaterial);

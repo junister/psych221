@@ -27,7 +27,9 @@ fileName = 'room.exr';
 envLight = piLightCreate('background', ...
     'type', 'infinite',...
     'mapname', fileName);
-thisR.set('lights', 'add', envLight);                       
+thisR.set('lights', 'add', envLight);     
+
+% thisR.set('lights','background','rotation val',{[0 0 5 0], [0 1 0 0]});
 thisR.set('lights','background','rotation val',{[0 0 5 0], [135 1 0 0]});
 
 % Insert the materials
@@ -40,9 +42,10 @@ matNames = thisR.get('material', 'names');
 % use them again.
 newMatNames = matNames(~piContains(matNames, 'Patch'));
 
-% N.B.  Glass is not looking clear.  Adjust its parameters!
+% N.B.  Glass is wrong.  I haven't found a good one yet (BW). 
+%
 % Assign each of the 24 patches a material.  If we run out of materials,
-% make it a mirror.
+% make it a mirror.  There is one mirror in the list.
 for ii=2:numel(objNames)
     if (ii - 1) <= numel(newMatNames)
         thisR.set('asset', objNames{ii}, 'materialname', newMatNames{ii-1});
@@ -50,6 +53,8 @@ for ii=2:numel(objNames)
         thisR.set('asset',objNames{ii},'material name','mirror');
     end
 end
+
+thisR.set('nbounces',8);
 
 scene = piWRS(thisR);
 sceneSet(scene,'gamma',0.7);
