@@ -10,7 +10,7 @@
 %
 %  Check that you have the updated docker image by running
 %
-%    docker pull vistalab/pbrt-v3-spectral
+%    docker pull vistalab/pbrt-v4-cpu (or version for gpu)
 %
 % See also
 %   thisR.list produces a list of the files on your system.
@@ -22,12 +22,12 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Read the white-room file for the Remote Data site
+%% Read a file for the Remote Data site
 
 % This is the INPUT file name
 % thisR = piRecipeDefault('scene name','cornellbox');
 % thisR = piRecipeDefault('scene name','coloredCube');
-% thisR = piRecipeDefault('scene name','ChessSet');
+thisR = piRecipeDefault('scene name','ChessSet');
 
 %% Change render quality
 thisR.set('film resolution',[192 192]);
