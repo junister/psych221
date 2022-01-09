@@ -176,7 +176,7 @@ if ispc  % Windows
     while true
         thisline = fgets(pFile);
         if ~ischar(thisline); break; end  %end of file
-        if contains(thisline, "C:\")
+        if contains(thisline, "C:\") || contains(thisline, "B:\")
             thisline = strrep(thisline, piRootPath, '');
             thisline = strrep(thisline, '\local', '');
             thisline = strrep(thisline, '\', '/');
