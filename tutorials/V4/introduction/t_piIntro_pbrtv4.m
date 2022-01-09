@@ -38,19 +38,20 @@ if ~piDockerExists, piDockerConfig; end
 %% piRead support FBX and PBRT
 % FBX is converted into PBRT
 fbxFile = fullfile(piRootPath,'data','V4','teapot-set','TeaTime.fbx');
-%% Right now it is looking from top down
+%% 
 thisR  = piRead(fbxFile);
+
 %%
-%{
+% convert scene unit from centimeter to meter
+thisR = piUnitConvert(thisR, 100);
+
 % close up view
-% thisR.set('from',[1.9645 0.2464 0.0337]);
-thisR.set('from', [200 50 0]);
-cylinder4Pos = thisR.get('asset', '004_Cylinder.004_O', 'world position');
-% thisR.set('to',  [0.9655 0.2050 0.0198]);
-thisR.set('to', cylinder4Pos );
+thisR.set('from',[1.9645 0.2464 0.0337]);
+thisR.set('to',  [0.9655 0.2050 0.0198]);
 thisR.set('up',  [0 1 0]);
-thisR.set('object distance', 150);
-%}
+
+
+
 thisR.set('film resolution',[600 600]/2);
 thisR.set('rays per pixel',32);
 %% set render type
@@ -62,15 +63,13 @@ thisR.set('asset','Cylinder.001_B','world translation',[0.2 0 0]);
 
 thisR.show('objects');
 %%
-%{
 piLightDelete(thisR, 'all'); 
 lightName = 'new light';
 newLight = piLightCreate(lightName,...
-                        'type','point',...
-                        'blackbody spd',[0.4 0.3 0.3],...
+                        'type','infinite',...
+                        'spd',[0.4 0.3 0.3],...
                         'specscale',1);
 thisR.set('light', 'add', newLight);
-%}
 
 %% write the data out
 

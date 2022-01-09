@@ -17,14 +17,13 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Read pbrt file 
+%% Read pbrt file
 
 sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-
-% thisR = piUnitConvert(thisR);
+thisR = piUnitConvert(thisR, 100);
 
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
@@ -108,7 +107,7 @@ thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 %
 % Add an environmental light
 thisR.set('light', 'delete', 'all');
-[~, rmLight] = thisR.set('skymap','room.exr');
+[~, rmLight] = thisR.set('skymap','room.exr','rotation val', {[0 0 1 0], [-90 1 0 0]});
 % doing this now in set, as I think it has to happen
 % before the light is added???
 %rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
@@ -147,7 +146,7 @@ assetPosition = thisR.get('asset',assetName,'world position');
 thisR.set('to',assetPosition);
 % piAssetGeometry(thisR);
 
-thisR.set('from',origFrom + [10 20 0]);
+thisR.set('from',origFrom + [1 2 0]);
 
 % Set the camera from position a little higher and closer
 

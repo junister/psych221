@@ -230,7 +230,7 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'geometrydir','outputgeometrydir'}
         % Standard location for the scene geometry output information
         outputDir = thisR.get('output dir');
-        val = fullfile(outputDir,'scene','PBRT','pbrt-geometry');
+        val = fullfile(outputDir,'geometry');
 
         % Graphics related
     case {'exporter'}
@@ -426,7 +426,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % cases.  We might do something about putting the microlens
                 % examples in the data/lens directory and avoiding this
                 % problem.
-               
+
                 % Make sure the lensfile is in the data/lens directory.
                 if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
                     [~,name,ext] = fileparts(thisR.camera.lensfile.value);
@@ -1139,7 +1139,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             % Includes ids and everything
             val{ii} = names{ids(ii)};
         end
-        
+
     case {'objectnamesnoid'}
         % Names of the objects with the ID stripped.
         % I don't think we are doing this properly.  We need a routine to
@@ -1156,7 +1156,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisName = names{ids(ii)};
             val{ii} = thisName(8:end);
         end
-        
+
     case 'objectsimplenames'
         % Names of the objects
         % We think there is ID_Instance_ObjectName_O.

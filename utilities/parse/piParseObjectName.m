@@ -48,6 +48,8 @@ else
     sz.w = res(2);   % depth  (Z)
     sz.h = res(3);   % height (Y)
 end
+name = erase(name,'"');
+name = erase(name,' ');
 if strcmp(name(end),' '), name(end)='';end
 
 end

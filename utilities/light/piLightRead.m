@@ -56,6 +56,26 @@ if isempty(thisR.lights)
         else
             warning('%s exists but no light found. \n', inputFile_lights);
         end
+        %
+        % Dont parse the light in geometry, we already parse them in
+        % parseGeometry.m
+%     else
+%         % try geometry file
+%         fname_geometry = sprintf('%s_geometry.pbrt',n);
+%         inputFile_geometry=fullfile(p,fname_geometry);
+%         if exist(inputFile_geometry,'file')
+%             fileID = fopen(inputFile_geometry);
+%             txt = textscan(fileID,'%s','Delimiter','\n');
+%             [newlines] = piFormatConvert(txt{1});
+%             newLights = piLightGetFromText(newlines, 'print', false);
+%             if ~isempty(newLights)
+%                 thisR.lights{end+1:end+numel(newLights)} = newLights{:};
+%             else
+%                 warning('%s exists but no light found. \n', inputFile_geometry);
+%             end
+%         end
+%     end
+
     end
 
 end

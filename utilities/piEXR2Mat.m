@@ -1,11 +1,27 @@
-function data = piEXR2Mat(infile, channelname)
-
-[indir, fname,~] = fileparts(infile);
+function data = piEXR2Mat(inputFile, channelname)
+% Read exr channel data into MATLAB, docker image is needed.
+%
+%           data = piEXR2Mat(inputFile, channelname)
+%
+% Brief description:
+%   We take an exr file from pbrt as input and return MAT file with
+%   specific channel name.
+%
+% Inputs
+%   inputFile - Multi-spectral exr-file rendered by pbrt.
+%
+% Output
+%   data - Matlab data.
+%
+%
+% Zhenyi, 2021
+%%
+[indir, fname,~] = fileparts(inputFile);
 
 dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
-cmd = ['imgtool convert --exr2bin ',channelname, ' ', infile];
+cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
 
 if ~ispc
     dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
@@ -16,7 +32,7 @@ else
     ourDocker.dockerImageName = dockerimage;
     ourDocker.localVolumePath = indir;
     ourDocker.targetVolumePath = indir;
-    ourDocker.inputFile = infile;
+    ourDocker.inputFile = inputFile;
     ourDocker.outputFile = ''; % imgtool uses a default
     ourDocker.outputFilePrefix = '';
 

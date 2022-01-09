@@ -66,15 +66,11 @@ while i <= length(txt)
 
         subtrees = cat(1, subtrees, subnodes);
         i =  i + retLine;
-
-    elseif piContains(currentLine,'#ObjectName')
+    elseif strncmp(currentLine,'#ObjectName', 11)
         [name, sz] = piParseObjectName(currentLine);
 
-    elseif piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
-        % [rot, translation, ctform] = piParseConcatTransform(currentLine);
-        [translation, rot, scale] = parseTransform(currentLine);
-    elseif strncmp(currentLine,'Transform ',10)
-        % ctform = [];
+    elseif strncmp(currentLine,'Transform ',10) ||...
+            piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
         [translation, rot, scale] = parseTransform(currentLine);
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
@@ -103,16 +99,18 @@ while i <= length(txt)
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         % Not a comment.  Contains a shape.
         shape = piParseShape(currentLine);
-        if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
-            inputfile = thisR.get('input file');
-            [inputDir,sceneName,~] = fileparts(inputfile);
-            [folder,fname,ext]=fileparts(shape.filename);
-            newPlyName = sprintf('%s_%s',sceneName,[fname,ext]);
-            if ~exist(fullfile(inputDir,newPlyName), 'file')
-                movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,folder,newPlyName));
-            end
-            shape.filename = newPlyName;
-        end
+
+%         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
+%             inputfile = thisR.get('input file');
+%             [inputDir,sceneName,~] = fileparts(inputfile);
+%             [folder, filename, ext]=fileparts(shape.filename);
+%             newPlyName = sprintf('%s_%s%s',sceneName,filename, ext);
+%             if ~exist(fullfile(inputDir,newPlyName), 'file')
+%                 movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,folder,newPlyName));
+%             end
+%             shape.filename = newPlyName;
+%         end
+
     elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
 
         % Assemble all the read attributes into either a groub object, or a
@@ -138,19 +136,21 @@ while i <= length(txt)
             end
             if exist('areaLight','var')
                 resLight.lght = piLightGetFromText({areaLight}, 'print', false);
-
                 if exist('shape', 'var')
                     resLight.lght{1}.shape = shape;
                 end
 
                 if exist('rot', 'var')
-                    resLight.lght{1}.rotate = rot;
+                    resLight.lght{1}.rotation.type = 'rotation';
+                    resLight.lght{1}.rotation.value = {rot};
                 end
                 if exist('ctform', 'var')
-                    resLight.lght{1}.concattransform = ctform;
+                    resLight.lght{1}.ctform.type  = 'ctform';
+                    resLight.lght{1}.ctform.value = {ctform};
                 end
                 if exist('translation', 'var')
-                    resLight.lght{1}.translation = translation;
+                    resLight.lght{1}.translation.type  = 'translation';
+                    resLight.lght{1}.translation.value = {translation};
                 end
 
             end

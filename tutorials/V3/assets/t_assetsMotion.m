@@ -56,7 +56,7 @@ sceneWindow(scene);
 
 %% Delete the motion translation
 
-% We illustrate the change in the asset three before and after deleting the
+% We illustrate the change in the asset tree before and after deleting the
 % branch
 thisR.assets.show([],2);
 thisR.set('asset',T1.name,'delete');

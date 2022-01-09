@@ -165,9 +165,6 @@ for ii = 1:numel(children)
                         shapeText = piShape2Text(thisNode.shape);
                     end
                 end
-
-
-
                 if isequal(e, '.ply')
                     fprintf(fid, '%s \n',shapeText);
                 else
@@ -180,10 +177,10 @@ for ii = 1:numel(children)
                 % There is a shape slot we also open the
                 % geometry file.
                 name = thisNode.name;
-                geometryFile = fopen(fullfile(rootPath,'scene','PBRT','pbrt-geometry',sprintf('%s.pbrt',name)),'w');
+                geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
                 fprintf(geometryFile,'%s',shapeText);
                 fclose(geometryFile);
-                fprintf(fid, 'Include "scene/PBRT/pbrt-geometry/%s.pbrt" \n', name);
+                fprintf(fid, 'Include "geometry/%s.pbrt" \n', name);
             end
         end
 

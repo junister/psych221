@@ -79,7 +79,6 @@ p.addParameter('exporter', 'C4D', @ischar); % deal with this later
 % p.addParameter('convertunit',false,@islogical); 
 
 p.parse(fname,varargin{:});
-% convertunit = p.Results.convertunit;
 
 thisR = recipe;
 thisR.version = 4;
@@ -92,8 +91,6 @@ if strcmpi(input_ext, '.fbx')
    
     disp('Formating PBRT file...')
     infile = piPBRTReformat(pbrtFile);
-    
-    convertunit = true;
 else
     infile = fname;
 end
@@ -112,7 +109,7 @@ thisR.set('outputFile',outputFile);
 [txtLines, ~] = piReadText(thisR.inputFile);
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
-[options, world] = piReadWorldText(thisR, txtLines);
+[options, ~] = piReadWorldText(thisR, txtLines);
 
 %% Read options information
 % think about using piParameterGet;
@@ -182,7 +179,62 @@ else
 end
 
 %%  Read world information for the Include files
+world = thisR.world;
+if any(piContains(world, 'Include'))
+    % If we have an Include file. The txt lines in the file will be merged
+    % into thisR.world and be parsed together.
+    inputDir = thisR.get('inputdir');
+    IncludeIdxList = find(piContains(world, 'Include'));
+    
+    for IncludeIdx = 1:numel(IncludeIdxList)
+        IncStrSplit = strsplit(world{IncludeIdxList(IncludeIdx)},' ');
+        IncFileName = erase(IncStrSplit{2},'"');
+        IncFileNamePath = fullfile(inputDir, IncFileName);
+        [IncLines, ~] = piReadText(IncFileNamePath);
+        thisR.world{IncludeIdxList(IncludeIdx)} = [];
+        thisR.world = {thisR.world, IncLines};
+        thisR.world = cat(1, thisR.world{:});
+    end
+end
 
+thisR.world = piFormatConvert(thisR.world);
+
+if isequal(exporter, 'Copy')
+    disp('Scene will not be parsed. Maybe we can parse in the future');
+    thisR.world = world;
+else
+    % Read material and texture
+    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
+    thisR.world = newWorld;
+    fprintf('Read %d materials.\n', materialLists.Count);
+    fprintf('Read %d textures.\n', textureList.Count);
+    
+    [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
+    if ~isempty(trees)
+        parsedUntil(parsedUntil>numel(thisR.world))=numel(thisR.world);
+        % remove parsed line from world
+        thisR.world(2:parsedUntil)=[];
+    end
+    thisR.materials.list = materialLists;
+%     thisR.materials.inputFile_materials = inputFile_materials;
+    
+    % Call material lib
+    thisR.materials.lib = piMateriallib;
+    
+    thisR.textures.list = textureList;
+%     thisR.textures.inputFile_textures = inputFile_materials;
+    
+    if exist('trees','var') && ~isempty(trees)
+        thisR.assets = trees.uniqueNames;
+    else
+        % needs to add function to read structure like this:
+        % transform [...] / Translate/ rotate/ scale/
+        % material ... / NamedMaterial
+        % shape ...
+        disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
+    end
+end
+%{
 if any(piContains(world,'Include')) && ...
         any(piContains(world,'_materials.pbrt'))
     
@@ -272,49 +324,9 @@ else
             thisR.world(2:parsedUntil)=[];
         end
     end
-    
-end
-
-thisR.materials.list = materialLists;
-thisR.materials.inputFile_materials = inputFile_materials;
-
-% Call material lib
-thisR.materials.lib = piMateriallib;
-
-thisR.textures.list = textureList;
-thisR.textures.inputFile_textures = inputFile_materials;
-
-if exist('trees','var') && ~isempty(trees)
-    thisR.assets = trees.uniqueNames;
-else
-    % needs to add function to read structure like this:
-    % transform [...] / Translate/ rotate/ scale/
-    % material ... / NamedMaterial
-    % shape ...
-    disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
-end
-
-%{
-% Unit scale
-if convertunit
-    % scale camera position
-    thisR.lookAt.from = thisR.lookAt.from/100;
-    thisR.lookAt.to = thisR.lookAt.to/100;
-    
-    % scale objects
-    for ii = 2:numel(thisR.assets.Node)
-        thisNode = thisR.assets.Node{ii};
-        if strcmp(thisNode.type, 'branch')
-            % fix scale and translation
-            thisNode.scale = thisNode.scale/100;
-            thisNode.translation = thisNode.translation/100;
-            
-            thisR.assets   = thisR.assets.set(ii, thisNode);
-        end
-    end
-    
 end
 %}
+
 disp('***Scene parsed.')
 
 

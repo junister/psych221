@@ -20,7 +20,7 @@ thisR.set('outputFile',outFile);
 piCameraTranslate(thisR,'z shift',2);
 
 %% Check the light list
-piLightGet(thisR);
+piLightList(thisR);
 
 %% Remove all the lights
 thisR    = piLightDelete(thisR, 'all');
@@ -35,7 +35,7 @@ thisR    = piLightDelete(thisR, 'all');
 spotlight = piLightCreate('new skymap',...
     'type','spot',...
     'spd','equalEnergy',...
-    'spectrum scale', 1,...
+    'specscale', 1,...
     'coneangle',20,...
     'cameracoordinate', true);
 
@@ -71,7 +71,7 @@ piWrite(thisR);
 shiftedSpotLight = piLightGet(thisR,'idx',1);
 
 %% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 val   = piLightGet(thisR,'idx',1,'param','from','print',false);
 scene = sceneSet(scene,'name',sprintf('EE point [%d,%d,%d]',val));
 sceneWindow(scene);
@@ -81,7 +81,7 @@ piLightSet(thisR,idx,'type', 'infinite');
 piWrite(thisR);
 
 %% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 val = piLightGet(thisR,'idx',idx,'param','type');
 scene = sceneSet(scene,'name',sprintf('EE type %s',val));
 sceneWindow(scene);

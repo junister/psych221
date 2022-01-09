@@ -21,40 +21,42 @@ thisR.set('outputFile',outFile);
 piCameraTranslate(thisR,'z shift',2);
 
 %% Check the light list
-piLightGet(thisR);
+piLightList(thisR);
 
 %% Remove all the lights
 thisR     = piLightDelete(thisR, 'all');
-lightList = piLightGet(thisR);
+lightList = piLightList(thisR);
 
 %% Add one equal energy light
 
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
 % edges
-thisR = piLightAdd(thisR,... 
+newLight = piLightCreate('new spot light',... 
     'type','spot',...
     'light spectrum','equalEnergy',...
-    'spectrum scale', 1,...
+    'specscale', 1,...
     'cone angle',20,...
     'cameracoordinate', true);
-
+thisR.set('light', 'add', newLight);
+thisR.get('light print');
 %% Render
 piWrite(thisR);
 
 %% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 scene = sceneSet(scene,'name','Equal energy (spot)');
 sceneWindow(scene);
 
+% --- Below is not working(ZL) ---
 %%  Narrow the cone angle of the spot light a lot
-idx = 1;
-piLightSet(thisR,idx,'spectrum', 'tungsten');
-piWrite(thisR);
-
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Tungsten');
-sceneWindow(scene);
+% idx = 1;
+% piLightSet(thisR,idx,'spectrum', 'tungsten');
+% piWrite(thisR);
+% 
+% %% Used for scene
+% scene = piRender(thisR);
+% scene = sceneSet(scene,'name','Tungsten');
+% sceneWindow(scene);
 
 %%
