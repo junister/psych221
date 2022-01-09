@@ -54,7 +54,7 @@ for ii=2:numel(objNames)
     end
 end
 
-thisR.set('nbounces',8);
+thisR.set('nbounces',4);
 
 scene = piWRS(thisR);
 sceneSet(scene,'gamma',0.7);

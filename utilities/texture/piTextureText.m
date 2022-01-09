@@ -26,11 +26,11 @@ else
 end
 
 % format
-formTxt = sprintf(' "%s"', texture.format);
+formTxt = sprintf(' "%s" ', texture.format);
 val = strcat(valName, formTxt);
 
 % type
-tyTxt = sprintf(' "%s"', texture.type);
+tyTxt = sprintf(' "%s" ', texture.type);
 val = strcat(val, tyTxt);
 
 %% For each field that is not empty, concatenate it to the text line

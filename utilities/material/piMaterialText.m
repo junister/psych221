@@ -15,7 +15,7 @@ p.parse(material, varargin{:});
 if ~strcmp(material.name, '')
     valName = sprintf('MakeNamedMaterial "%s" ',material.name);
     if isfield(material,'type')
-        valType = sprintf(' "string type" "%s" ',material.type);
+        valType = sprintf(' "string type" [ "%s" ] ',material.type);
     elseif isfield(material,'stringtype')
         valType = sprintf(' "string type" "%s" ',material.stringtype);
     else
