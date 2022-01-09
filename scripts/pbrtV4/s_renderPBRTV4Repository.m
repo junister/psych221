@@ -13,7 +13,7 @@ thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/web/contempora
 
 % Make sure the exporter is set to 'Copy' so all the files are copied
 % thisR.set('exporter','Copy');
-% thisR.set('film resolution',[960 540]);  %?? x,y so (col, row)
+% thisR.set('film resolution',[1920 1080]/4);  %?? x,y so (col, row)
 
 scene = piWRS(thisR);
 sceneSet(scene,'gamma',0.6);

@@ -17,8 +17,8 @@ Integrator "path"
 WorldBegin
 
 # Default Material
-Material "coateddiffuse"
-    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
+# Material "coateddiffuse"
+#    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
 LightSource "distant"
     "point3 to" [ 0.258819 0 0.9659258 ]
     "point3 from" [ 0 0 0 ]

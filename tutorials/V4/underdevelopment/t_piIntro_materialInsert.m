@@ -18,6 +18,8 @@ if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name', 'MacBethChecker');
 
+thisR.set('asset','001_colorChecker_O','delete');
+
 % Widen the field of view
 thisR.set('fov',40);
 

@@ -5,8 +5,7 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %  [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %
 % Brief description
-%   Makes it easy to add a collection of materials to use for the scene
-%   objects.
+%   Add a collection of materials to use for the scene objects.
 %
 % Input
 %   thisR - Recipe
@@ -17,7 +16,10 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %
 % Description
 %   We add materials with textures, colors, some plastics.  It gives a list
-%   of materials that we are likely to want.
+%   of materials that we are likely to want.  You can select a group of
+%   materials using a cell array as the first argument.
+%
+%     thisR = piMaterialsInsert(thisR,{'glass','mirror'});
 %
 % See also
 
