@@ -42,31 +42,22 @@ p.parse(intext, varargin{:});
 AttBegin  =  find(piContains(intext,'AttributeBegin'));
 AttEnd    =  find(piContains(intext,'AttributeEnd'));
 
-% light     =  piContains(intext,'LightSource');
+light     =  piContains(intext,'LightSource');
+lightIdx  =  find(light);   % Find which lines have LightSource on them.
 
-lightIdx  =  find(piContains(intext,'LightSource'));   % Find which lines have LightSource on them.
-% remove commentted line
-newlightIdx = [];
-for ii = 1:numel(lightIdx)
-    if ~strcmp(intext{lightIdx(ii)}(1),'#')
-        newlightIdx = [newlightIdx,lightIdx(ii)];
-    end
-end
-lightIdx = newlightIdx;
 %%
-% nLights = sum(light);
-nLights = numel(lightIdx);
+nLights = sum(light);
 lightSources = cell(1, nLights);
 lightTextRanges = cell(1, nLights);
 for ii = 1:nLights
     % Find the attributes sections of the input text from the World.
-    %    
-    
+    %
+
     % Check if the light line falls in any range of AttBegin-AttEnd.
-    % If yes, process the whole section. Otherwise, process that line. 
+    % If yes, process the whole section. Otherwise, process that line.
     % This can lead to problems for the file having a lot of transforms
     % without grouping them by AttributeBegin/End.
-    
+
     for jj = 1:numel(AttBegin)
         if lightIdx(ii) > AttBegin(jj) &&...
                 lightIdx(ii) < AttEnd(jj)
@@ -78,7 +69,7 @@ for ii = 1:nLights
         lightLines  = intext(lightIdx(ii));
         lightTextRanges{ii} = lightIdx(ii);
     end
-    
+
     % The txt below is derived from the intext stored in the
     % lightSources.line slot.
     if find(piContains(lightLines, 'AreaLightSource'))
@@ -122,9 +113,11 @@ for ii = 1:nLights
             case 'infinite'
                 % Spectrum
                 spec = piParameterGet(thisLine, 'L');
-                if piContains(thisLine, 'blackbody')
+                if piContains(thisLine, 'blackbody') || numel(spec)==1
                     spec = spec(1);
+                    thisLightSource.spd.type = 'blackbody';
                 end
+                
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % Spectrum Scale
@@ -189,12 +182,12 @@ for ii = 1:nLights
 
                 % to
                 to = piParameterGet(thisLine, 'point to');
-                thisLightSource = piLightSet(thisLightSource, 'to val', to);               
+                thisLightSource = piLightSet(thisLightSource, 'to val', to);
 
             case 'projection'
                 % Spectrum
                 spec = piParameterGet(thisLine, 'I');
-                thisLightSource = piLightSet(thisLightSource, 'spd val', spec);               
+                thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % FOV
                 fov = piParameterGet(thisLine, 'float fov');
@@ -205,11 +198,11 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
         end
     end
-    
+
     % For the lines after the AttributeBegin
     for kk = 2:numel(lightLines)-1
         thisLine = lightLines{kk};
-        
+
         % Zheng: To check with Zhenyi - do we need all rot, position and
         % ctform?
         % Parse ConcatTransform
@@ -261,11 +254,11 @@ for ii = 1:nLights
                 tmp = textscan(fileID,'%s','Delimiter','\n');
                 geometryLines = tmp{1};
                 fclose(fileID);
-                
+
                 % convert geometryLines into from the standard block indented format in
                 % to the single line format.
                 geometryLinesFormatted = piFormatConvert(geometryLines);
-                
+
                 % There should be only one line for the actual geometry,
                 % others might be comments.
                 for gg = 1:numel(geometryLinesFormatted)
@@ -295,9 +288,9 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'cameracoordinate', true);
             end
         end
-        
+
     end
-    
+
     lightSources{ii} = thisLightSource;
 end
 
@@ -314,4 +307,3 @@ end
 
 
 end
-

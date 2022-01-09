@@ -1,0 +1,5 @@
+Texture "flatwhite_color" "spectrum" "imagemap"
+    "string filename" [ "flatwhite.png" ]
+MakeNamedMaterial "Mat"
+    "string type" [ "diffuse" ]
+    "texture reflectance" [ "flatwhite_color" ]

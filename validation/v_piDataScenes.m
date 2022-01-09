@@ -27,13 +27,13 @@ if ~piDockerExists, piDockerConfig; end
 % This is the INPUT file name
 % thisR = piRecipeDefault('scene name','cornellbox');
 % thisR = piRecipeDefault('scene name','coloredCube');
-thisR = piRecipeDefault('scene name','ChessSet');
+% thisR = piRecipeDefault('scene name','ChessSet');
 
 %% Change render quality
 thisR.set('film resolution',[192 192]);
 thisR.set('rays per pixel',96);
 thisR.set('n bounces',1); % Number of bounces
-
+thisR.set('film rendertype',{'radiance','depth'});
 %% Render
 tic
 piWrite(thisR);

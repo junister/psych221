@@ -3,7 +3,7 @@ function thisR = piLightRead(thisR)
 %
 % Synopsis:
 %   thisR = piLightRead(thisR)
-% 
+%
 % Description:
 %   We create the lights slot in the recipe from text in the World or
 %   from a file.
@@ -41,18 +41,18 @@ thisR = piDeleteWorldText(thisR, lightTextRanges);
 
 % do we need this every time?
 if isempty(thisR.lights)
-    
+
     % Get light from scene_lights.pbrt file
     [p,n,~] = fileparts(thisR.inputFile);
     fname_lights = sprintf('%s_lights.pbrt',n);
     inputFile_lights=fullfile(p,fname_lights);
-    
+
     if exist(inputFile_lights,'file')
         fileID = fopen(inputFile_lights);
         txt = textscan(fileID,'%s','Delimiter','\n');
         newLights = piLightGetFromText(txt{1}, 'print', false);
         if ~isempty(newLights)
-            thisR.lights(end+1:end+numel(newLights)) = newLights;
+            thisR.lights{end+1:end+numel(newLights)} = newLights{:};
         else
             warning('%s exists but no light found. \n', inputFile_lights);
         end
@@ -75,7 +75,9 @@ if isempty(thisR.lights)
 %             end
 %         end
 %     end
-    
+
+    end
+
 end
 
 end

@@ -16,10 +16,7 @@ function piTexturePrint(thisR)
 
 fprintf('\n--- Texture names ---\n');
 textureNames = thisR.get('texture', 'names');
-if isempty(textureNames)
-    disp('No texture found.');
-    return
-end
+
 for ii =1:numel(textureNames)
     rows{ii, :}  = num2str(ii);
     names{ii,:}  = textureNames{ii};

@@ -1,6 +1,17 @@
 function txt = piShape2Text(shape)
-% Convert the shape struct to text
-%%
+% Convert data in the shape struct to text for the PBRT file
+%
+% Synopsis
+%   txt = piShape2Text(shape)
+%
+% Input:
+%   shape - a shape struct with various slots
+%
+% Output
+%   txt  - Converted to the format needed to write out in a pbrt file
+%
+% See also
+%
 txt = "Shape ";
 
 if isfield(shape, 'meshshape') && ~isempty(shape.meshshape)

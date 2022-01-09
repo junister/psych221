@@ -8,7 +8,7 @@ function val = piTextureText(texture, thisR, varargin)
 %   val     - text
 %
 % ZLY, 2021
-% 
+%
 % See also
 
 %% Parse input
@@ -26,11 +26,11 @@ else
 end
 
 % format
-formTxt = sprintf(' "%s"', texture.format);
+formTxt = sprintf(' "%s" ', texture.format);
 val = strcat(valName, formTxt);
 
 % type
-tyTxt = sprintf(' "%s"', texture.type);
+tyTxt = sprintf(' "%s" ', texture.type);
 val = strcat(val, tyTxt);
 
 %% For each field that is not empty, concatenate it to the text line
@@ -43,7 +43,7 @@ for ii=1:numel(textureParams)
             ~isempty(texture.(textureParams{ii}).value)
          thisType = texture.(textureParams{ii}).type;
          thisVal = texture.(textureParams{ii}).value;
-         
+
          if ischar(thisVal)
              thisText = sprintf(' "%s %s" "%s" ',...
                  thisType, textureParams{ii}, thisVal);
@@ -57,7 +57,8 @@ for ii=1:numel(textureParams)
             end
          end
 
-         
+         % val = strcat(val, thisText);
+
          if isequal(textureParams{ii}, 'filename')
             if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
                 imgFile = which(thisVal);
@@ -66,19 +67,21 @@ for ii=1:numel(textureParams)
                     val = strrep(val,'imagemap', 'constant');
                     val = strcat(val, ' "rgb value" [0.7 0.7 0.7]');
                     warning('Texture %s not found! Changing it to defuse', thisVal);
-                    
+
                 else
                     if ispc % try to fix filename for the Linux docker container                        
                         imgFile = dockerWrapper.pathToLinux(imgFile);
                     end
-
-                   thisText = strrep(thisText,thisVal, imgFile);
+                    
+                    % In the future we might want to copy the texture files
+                    % into a folder.
+                   % thisText = strrep(thisText,thisVal, imgFile);
 %                     piTextureFileFormat(imgFile);
-%                     copyfile(imgFile,thisR.get('output dir'));
+                    copyfile(imgFile,thisR.get('output dir'));
                 end
             end
          end
          val = strcat(val, thisText);
-         
+
     end
 end

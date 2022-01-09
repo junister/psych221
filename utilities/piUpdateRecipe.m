@@ -1,8 +1,12 @@
 function thisR = piUpdateRecipe(thisR)
-% Convert recipe from old structure to newer structure. The change(s) are:
+% Convert recipe from old structure to newer structure. 
+%
+% The change(s) are:
+%
 %   1. Change material format: Extract texture from material slot and make it 
 %      a separate slot.
 %   2. Rearrange assets to new structure
+%
 % Syntax:
 %
 % Description:

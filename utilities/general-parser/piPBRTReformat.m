@@ -1,33 +1,27 @@
 function outputFull = piPBRTReformat(fname,varargin)
-%% Reformat a pbrt file from arbitrary source to standard format
+%% format a pbrt file from arbitrary source to standard format
 %
 % Syntax:
 %    outputFull = piPBRTReformat(fname,varargin)
 %
 % Brief
-%    PBRT V3 files exist in many formats.  This function uses the PBRT
-%    docker container to read the PBRT files and write out an equivalent
-%    PBRT file in a standard format.  It does this by calling PBRT with
-%    the 'toply' switch.  PBRT reads the existing data, converts any
-%    meshes to ply format, and writes out the results.
-%
-%    The files are written out into the local/formatted directory.  If you
-%    would like this file to become the standard, you can move it into
-%    data/V4/sceneName
+%    PBRT V3 files can appear in many formats.  This function uses the PBRT
+%    docker container to read those files and write out the equivalent PBRT
+%    file in the standard format.  It does this by calling PBRT with the
+%    'toply' switch.  So PBRT reads the existing data, converts any meshes
+%    to ply format, and writes out the results.
 %
 % Input
 %   fname: The full path to the filename of the PBRT scene file.
 %
 % Key/val options
-%   outputFull:  The full path to the reformatted PBRT scene file that we
-%   create. By default, this will be
-%
-%      outputFull = fullfile(piRootPath,'local','formatted',sceneName,sceneName.pbrt)
+%   outputFull:  The full path to the PBRT scene file that we output
+%                By default, this will be
+%                   outputFull = fullfile(piRootPath,'local','formatted',sceneName,sceneName.pbrt)
 %
 % Example:
 %    piPBRTReformat(fname);
 %    piPBRTReformat(fname,'output full',fullfile(piRootPath,'local','formatted','test','test.pbrt')
-%
 % See also
 %
 
@@ -36,29 +30,26 @@ function outputFull = piPBRTReformat(fname,varargin)
 fname = fullfile(piRootPath,'data','V3','SimpleScene','SimpleScene.pbrt');
 formattedFname = piPBRTReformat(fname);
 %}
-%{
-fname = fullfile(piRootPath,'data','V3','ChessSet','ChessSet.pbrt');
-%}
 
 %% Parse
 
 % Force to no spaces and lower case
 varargin = ieParamFormat(varargin);
 
-% fname can be the full file name.  But it is only required that the file
-% be found on the path.
+% fname can be the full file name.  But it is only required that it be
+% found.
 p = inputParser;
 p.addRequired('fname',@(x)(exist(fname,'file')));
 
 % This is ugly.  We find the full path to the fname.  Maybe we should just
 % require the full path.
-fname = which(fname);
+% fname = which(fname);
 [inputdir,thisName,ext] = fileparts(fname);
-
 p.addParameter('outputfull',fullfile(piRootPath,'local','formatted',thisName,[thisName,ext]),@ischar);
 
 p.parse(fname,varargin{:});
 outputFull = p.Results.outputfull;
+
 
 [outputDir, ~, ~] = fileparts(outputFull);
 if ~exist(outputDir,'dir')
@@ -72,6 +63,7 @@ piCopyFolder(inputdir, outputDir);
 
 % moved some of the static pathing up, so we can modify if needed for the
 % ispc case -- DJC
+
 % The directory of the input file
 [volume, ~, ~] = fileparts(fname);
 
@@ -103,7 +95,7 @@ if false % disable for now ispc
     %% Run the command
     % The variable 'result' has the formatted data.
     [~, result] = renderDocker.run();
-        
+
 else
     if ispc
         flags = '-i ';
@@ -138,11 +130,11 @@ end
 % Do this only for the main pbrt file
 if ~contains(outputFull,'_materials.pbrt') ||...
         ~contains(outputFull,'_geometry.pbrt')
-    
+
     fileIDin = fopen(outputFull);
     outputFullTmp = fullfile(outputDir, [thisName, '_tmp',ext]);
     fileIDout = fopen(outputFullTmp, 'w');
-    
+
     while ~feof(fileIDin)
         thisline=fgets(fileIDin);
         if ischar(thisline) && ~contains(thisline,'Warning: No metadata written out.')
@@ -152,7 +144,9 @@ if ~contains(outputFull,'_materials.pbrt') ||...
     fclose(fileIDin);
     fclose(fileIDout);
     
+    % Force over-write???
     movefile(outputFullTmp, outputFull, 'f');
+
 end
 %%
 
@@ -161,13 +155,14 @@ end
 PLYmeshFiles = textscan(result, '%s');
 PLYmeshFiles = PLYmeshFiles{1};
 % PLYFolder    = fullfile(outputDir,'scene/PBRT/pbrt-geometry');
-% 
+%
 % if ~exist(PLYFolder,'dir')
 %     mkdir(PLYFolder);
 % end
 
 for ii = 1:numel(PLYmeshFiles)
     cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, PLYmeshFiles{ii}, outputDir);
+
     [status_copy, ~ ] = system(cpcmd);
     if status_copy
         % If it fails we assume that is because there is no corresponding
@@ -228,7 +223,7 @@ function copyFolder(inputDir, outputDir)
             end
         end
     end
-    
+
     if(~status)
         error('Failed to copy input directory to docker working directory.');
     else

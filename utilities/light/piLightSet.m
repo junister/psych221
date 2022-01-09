@@ -5,7 +5,7 @@ function lght = piLightSet(lght, param, val, varargin)
 %  lght = piLightSet(lght, param, val, varargin)
 %
 % Inputs
-%   lght:    light struct
+%   lght:     An ISET3d light struct
 %   param:    The parameter to set
 %   val:      The new value
 %
@@ -80,7 +80,7 @@ if isstruct(val) && ~isequal(pName, 'shape')
 else
     % Otherwise, we assume we are setting a specific val
     pTypeVal = 'val';
-    
+
     % But we do allow the user to override the 'val'
     if numel(nameTypeVal) > 1
         pTypeVal = nameTypeVal{2};
@@ -90,7 +90,7 @@ end
 p = inputParser;
 p.addRequired('lght', @isstruct);
 p.addRequired('param', @ischar);
-p.addRequired('val', @(x)(ischar(x) || isstring(x) || isstruct(x) || isnumeric(x) ||...
+p.addRequired('val', @(x)(ischar(x) || isstruct(x) || isnumeric(x) ||...
                             islogical(x) || iscell(x)));
 
 p.parse(lght, param, val, varargin{:});
@@ -103,27 +103,27 @@ if isfield(lght, pName)
         lght.(pName) = val;
         return;
     end
-    
+
     % Set the whole struct
     if isempty(pTypeVal)
         lght.(pName) = val;
         return
     end
-    
+
     % Set parameter type
     if isequal(pTypeVal, 'type')
         lght.(pName).type = type;
         return;
     end
-    
+
     if isequal(pName, 'from') || isequal(pName, 'to')
         lght.cameracoordinate = false;
     end
-    
+
     % Set parameter value
     if isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val')
         lght.(pName).value = val;
-        
+
         % Changing property type if the user doesn't specify it.
         if isequal(pName, 'spd') || isequal(pName, 'scale')
             if numel(val) == 3 && ~ischar(val)

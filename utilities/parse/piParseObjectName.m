@@ -33,14 +33,14 @@ if isempty(loc_dimenstion)
     sz.h = [];
 else
     name = txt(loc(1)+length(pattern) + 1:loc_dimenstion-1);
-    
+
     posA = strfind(txt,'[');
     posB = strfind(txt,']');
     res = sscanf(txt(posA(1)+1:posB(1)-1),'%f');
     % Position minimima and maxima for lower left (X,Y), upper right.
     sz.pmin = [-res(1)/2 -res(3)/2];
     sz.pmax = [res(1)/2 res(3)/2];
-    
+
     % We are not really sure what these coordinates represent with respect to
     % the scene or the camera direction.  For one case we analyzed (a plane)
     % this is what the values meant.
@@ -51,4 +51,5 @@ end
 name = erase(name,'"');
 name = erase(name,' ');
 if strcmp(name(end),' '), name(end)='';end
+
 end

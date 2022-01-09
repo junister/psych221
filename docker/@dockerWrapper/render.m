@@ -1,6 +1,6 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
 
-verbose = true;
+verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');
@@ -21,8 +21,8 @@ end
 
 % ASSUME that if we supply a context it is on a Linux server
 nativeFolder = outputFolder;
-if ~isempty(obj.renderContext)
-    useContext = obj.renderContext;
+if ~isempty(dockerWrapper.staticVar('get','renderContext',''))
+    useContext = dockerWrapper.staticVar('get','renderContext','');
 else
     useContext = 'default';
 end
@@ -66,12 +66,12 @@ if ~isempty(obj.remoteMachine)
         putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
     end
     
-    if verbose
+    if verbose > 0
         fprintf(" Rsync Put: %s\n", putCommand);
     end
     [rStatus, rResult] = system(putCommand);
 
-    if verbose
+    if verbose > 0
         fprintf('Pushed scene to remote in: %6.2f\n', toc(putData))
     end
     if rStatus ~= 0
@@ -82,15 +82,29 @@ if ~isempty(obj.remoteMachine)
     % mounted
 
     shortOut = [obj.relativeScenePath sceneDir];
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/* && %s"',useContext, flags, useContainer, shortOut, renderCommand);
+    % need to cd to our scene, and remove all old renders
+    % some leftover files can start with "." so need to get them also
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',useContext, flags, useContainer, shortOut, renderCommand);
     % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
-    if verbose
+    if verbose > 0
         fprintf("Render: %s\n", containerRender);
     end
-    [status, result] = system(containerRender, '-echo');
-    if true % verbose
+
+    % This is dorky. My bad:)
+    if verbose > 1
+        [status, result] = system(containerRender, '-echo');
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
         fprintf(" With Result: %s", result);
+    elseif verbose == 1
+        [status, result] = system(containerRender);
+        fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
+        if status == 0
+            fprintf('Success!\n');
+        else
+            fprintf(" With Error: %s", result);
+        end
+    else
+        [status, result] = system(containerRender);
     end
     if status == 0 && ~isempty(obj.remoteMachine)
     % sync data back
@@ -98,13 +112,13 @@ if ~isempty(obj.remoteMachine)
     getOutput = tic;
     pullCommand = sprintf('%s -r %s %s',rSync, ...
         [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
-    if verbose
+    if verbose > 0
         fprintf(" Rsync Pull: %s\n", pullCommand);
     end
 
     % bring back results
     system(pullCommand);
-    if verbose
+    if verbose > 0
         fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
     end
     end
@@ -116,7 +130,7 @@ else
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     renderStart = tic;
     [status, result] = system(containerRender);
-    if verbose
+    if verbose > 0
         fprintf('Rendered using default in: %6.2f\n', toc(renderStart))
     end
 end

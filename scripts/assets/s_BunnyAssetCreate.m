@@ -1,6 +1,9 @@
 % s_BunnyAssetCreate;
 % Generate and save bunny asset leaf node
 
+disp('I think this is v3 only?');
+pause;
+
 %% init
 ieInit;
 if ~piDockerExists, piDockerConfig; end

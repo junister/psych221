@@ -1,5 +1,5 @@
 function material = piMaterialSet(material, param, val, varargin)
-%% 
+%%
 %
 % Synopsis
 %    material = piMaterialSet(material, param, val, varargin)
@@ -62,19 +62,19 @@ if true
         material.(pName) = val;
         return;
     end
-    
+
     % Set a whole struct
     if isempty(pTypeVal)
         material.(pName) = val;
         return;
     end
-    
+
     % Set parameter type
     if isequal(pTypeVal, 'type')
         material.(pName).type = type;
         return;
     end
-    
+
     % Set parameter value
     if isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val')
         material.(pName).value = val;
@@ -164,8 +164,8 @@ switch param
         % Set the rgb or spetrum value.  We should check that the param is
         % a valid field from below.
         obj.materials.list{idx}.(param) = val;
-        
-        % Clean up the unnecessary color fields 
+
+        % Clean up the unnecessary color fields
         if strncmp(param,'texture',7)
             % if a texture do this
             switch param(end-2:end)

@@ -295,7 +295,8 @@ classdef tree
             createAssetsTree(assets, obj, 1);
             
             % collapse by default
-            % expand(t,'all');
+            expand(t);
+            
             % User data is saved at t.UserData;
             thisAsset = t.UserData;
             %%
@@ -363,7 +364,7 @@ classdef tree
             % If id is passed, we check if that node starts with XXXID.
             if isstruct(obj.Node{id})
                 % It is real node.
-                if numel(obj.Node{id}.name) >= 8 &&...
+                if isfield(obj.Node{id},'name') && numel(obj.Node{id}.name) >= 8 &&...
                    isequal(obj.Node{id}.name(1:6), sprintf('%04dID', id))
                     val = true;
                 else

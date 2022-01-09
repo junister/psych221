@@ -88,14 +88,14 @@ p.KeepUnmatched = true;
 p.addRequired('recipe',@(x)(isequal(class(x),'recipe') || ischar(x)));
 
 varargin = ieParamFormat(varargin);
-p.addParameter('meanluminance',100,@isnumeric);
+p.addParameter('meanluminance',0,@isnumeric);
 p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
-p.addParameter('verbose', 2, @isnumeric);
+p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 
 p.parse(thisR,varargin{:});
 ourDocker = p.Results.ourdocker;
@@ -193,10 +193,10 @@ if ispc  % Windows
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
     folderBreak = split(outputFolder, filesep());
     shortOut = strcat('/', char(folderBreak(end)));
-
+    
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-    dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
+        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
     end
 
     %fix for non - C drives
@@ -229,7 +229,7 @@ preRender = tic;
 
 [status, result] = ourDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
-fprintf("Complete render took: %6.2d seconds. Result: %s\n", elapsedTime, result);
+fprintf("Complete render took: %6.2d seconds.", elapsedTime);
 
 % 
 %     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);

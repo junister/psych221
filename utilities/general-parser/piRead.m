@@ -292,6 +292,8 @@ if any(piContains(world,'Include')) && ...
         % convert geometryLines into from the standard block indented format in
         % to the single line format.
         geometryLinesFormatted = piFormatConvert(geometryLines);
+        
+        % Builds the asset tree including creating the shape information.
         [trees, ~] = parseGeometryText(thisR, geometryLinesFormatted,'');
     end
 else
@@ -495,6 +497,11 @@ while ii<=nline
             % of Option (Camera, Sampler, Integrator, Film, ...)
             % This builds the struct and assigns the values of the
             % parameters
+            %
+            % TODO:
+            % If the parameter is 'float cropwindow' we need to read the
+            % following four entries, not just one.  This might be a
+            % problem in other reads, too, such as spectrum?
             while dd <= nStrings
                 if piContains(thisLine{dd},' ')
                     C = strsplit(thisLine{dd},' ');

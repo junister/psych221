@@ -25,23 +25,28 @@ function status = config(obj, varargin)
 
 p = inputParser;
 p.addParameter('machine', 'default', @ischar);
-p.addOptional('debug', false, @islogical);
-p.addOptional('gpuRendering', true, @islogical);
-p.addOptional('renderContext', '', @ischar); % experimental
-p.addOptional('remoteMachine','',@ischar); % for data sync
-p.addOptional('remoteUser','',@ischar); % for data sync
-p.addOptional('remoteImage', '', @ischar); % image to use for remote render
-p.addOptional('remoteRoot','',@ischar); % for different remote path
-p.addOptional('localRoot','',@ischar); % for Windows/wsl
-p.addOptional('whichGPU', 1, @isnumeric); % select alternate gpu
+p.addParameter('debug', false, @islogical);
+p.addParameter('gpuRendering', true, @islogical);
+p.addParameter('renderContext', '', @ischar); % experimental
+p.addParameter('remoteMachine','',@ischar); % for data sync
+p.addParameter('remoteUser','',@ischar); % for data sync
+p.addParameter('remoteImage', '', @ischar); % image to use for remote render
+p.addParameter('remoteRoot','',@ischar); % for different remote path
+p.addParameter('localRoot','',@ischar); % for Windows/wsl
+p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
+p.addParameter('verbosity', 1, @isnumeric); % 
 
 p.parse(varargin{:})
 
 args = p.Results;
 
+if ~isempty(args.verbosity)
+    setpref('docker','verbosity', args.verbosity);
+end
 if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end
+obj.whichGPU = args.whichGPU;
 
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;
@@ -49,11 +54,18 @@ end
 if ~isempty(args.localRoot)
     obj.localRoot = args.localRoot;
 end
-obj.whichGPU = args.whichGPU;
+
+if args.whichGPU == -1 % theoretically any, but now just 0
+    obj.whichGPU = 0;
+else
+    obj.whichGPU = args.whichGPU;
+end
 
 % for remote rendering we need to be passed the docker context to use
 if ~isempty(args.renderContext)
-    obj.renderContext = args.renderContext;
+    % context is global for now, not sure what we really want
+    dockerWrapper.staticVar('set','renderContext', args.renderContext);
+
     % since the remote system might have a different GPU
     % currently we need to have that passed in as well
     if ~isempty(args.remoteImage)

@@ -14,7 +14,7 @@ function thisR = piRecipeDefault(varargin)
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name from the data/V4 directory.
-%     Here are some names: 
+%     Here are some names:
 %       MacBethChecker (default)
 %       SimpleScene
 %       checkerboard
@@ -46,7 +46,7 @@ function thisR = piRecipeDefault(varargin)
 %}
 %{
    thisR = piRecipeDefault('scene name','SimpleScene');
-   piWrite(thisR); 
+   piWrite(thisR);
    scene = piRender(thisR);
    sceneWindow(scene);
 %}
@@ -56,15 +56,15 @@ function thisR = piRecipeDefault(varargin)
    sceneWindow(scene);
 %}
 %{
-   thisR = piRecipeDefault('scene name','checkerboard'); 
+   thisR = piRecipeDefault('scene name','checkerboard');
    piWrite(thisR);
    scene = piRender(thisR);
    scene = piRender(thisR,'render type','illuminant');
    sceneWindow(scene);
 %}
 %{
-   % #ETTBSkip - Zheng should look at and make fix the issue with the light. 
-   thisR = piRecipeDefault('scene name','slantedBar'); 
+   % #ETTBSkip - Zheng should look at and make fix the issue with the light.
+   thisR = piRecipeDefault('scene name','slantedBar');
    piWrite(thisR);
    scene = piRender(thisR,'render type','radiance');
    scene = sceneSet(scene,'mean luminance',100);
@@ -72,20 +72,20 @@ function thisR = piRecipeDefault(varargin)
 %}
 %{
    thisR = piRecipeDefault('scene name','chessSet');
-   piWrite(thisR); 
+   piWrite(thisR);
    scene = piRender(thisR, 'render type', 'both');
    sceneWindow(scene);
 %}
 
 %{
    thisR = piRecipeDefault('scene name','teapot');
-   piWrite(thisR); 
+   piWrite(thisR);
    scene = piRender(thisR);
    sceneWindow(scene);
 %}
 %{
    thisR = piRecipeDefault('scene name','MacBeth Checker CusLight');
-   piWrite(thisR); 
+   piWrite(thisR);
    [scene, results] = piRender(thisR);
    sceneWindow(scene);
 %}
@@ -97,37 +97,41 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
 p.addParameter('write',false,@islogical);
+p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
+
+% p.addParameter('verbose', 2, @isnumeric);
 
 p.parse(varargin{:});
 
-sceneDir = p.Results.scenename;
-write    = p.Results.write;
+sceneDir   = p.Results.scenename;
+write      = p.Results.write;
+loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
 
 % We check based on all lower case, but get the capitalization right by
 % assignment in the case
 switch ieParamFormat(sceneDir)
-    
+
     case 'macbethchecker'
         sceneDir = 'MacBethChecker';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
     case 'macbethcheckerbox'
-        sceneDir = 'MacBethCheckerBox'; 
+        sceneDir = 'MacBethCheckerBox';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
     case 'macbethcheckercus'
         sceneDir = 'MacBethCheckerCus';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
-    case 'macbethcheckercb'
+    case {'macbethcheckercb', 'mcccb'}
         sceneDir = 'mccCB';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
-        
+
     case 'whiteboard'
-        sceneDir = 'WhiteBoard';        
+        sceneDir = 'WhiteBoard';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
     case 'simplescene'
@@ -143,7 +147,7 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
     case 'chesssetpieces'
-        sceneDir = 'ChessSetPieces';    
+        sceneDir = 'ChessSetPieces';
         sceneFile = ['ChessSet','.pbrt'];
         exporter = 'C4D';
     case 'chessset_2'
@@ -154,7 +158,7 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'ChessSetScaled';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Copy';
-        
+
     case 'checkerboard'
         sceneDir = 'checkerboard';
         sceneFile = [sceneDir,'.pbrt'];
@@ -177,11 +181,11 @@ switch ieParamFormat(sceneDir)
     case 'slantedbarc4d'
         sceneDir = 'slantedBarC4D';
         sceneFile = 'slantedBarC4D.pbrt';
-        exporter = 'C4D';    
+        exporter = 'C4D';
     case 'slantedbarasset'
         sceneDir = 'slantedbarAsset';
         sceneFile = 'slantedbarAsset.pbrt';
-        exporter = 'C4D';          
+        exporter = 'C4D';
     case 'flatsurface'
         sceneDir = 'flatSurface';
         sceneFile = 'flatSurface.pbrt';
@@ -208,32 +212,37 @@ switch ieParamFormat(sceneDir)
         exporter = 'C4D';
     case 'macbethcheckercuslight'
         sceneDir = 'MacBethCheckerCusLight';
-        sceneFile = ['MacBethCheckerCus','.pbrt'];        
+        sceneFile = ['MacBethCheckerCus','.pbrt'];
         exporter = 'C4D';
     case 'bunny'
         sceneDir = 'bunny';
         sceneFile = ['bunny','.pbrt'];
-        exporter = 'C4D';      
+        exporter = 'C4D';
     case 'coordinate'
         sceneDir = 'coordinate';
         sceneFile = ['coordinate','.pbrt'];
-        exporter = 'C4D';        
+        exporter = 'C4D';
     case {'cornellbox', 'cornell_box'}
         sceneDir = 'cornell_box';
         sceneFile = ['cornell_box','.pbrt'];
         exporter = 'C4D';
     case {'cornellboxbunnychart'}
+        if loadrecipe && exist('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','file')
+            load('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','thisR');
+            return;
+        end
         sceneDir = 'Cornell_BoxBunnyChart';
         sceneFile = ['Cornell_Box_Multiple_Cameras_Bunny_charts','.pbrt'];
         exporter = 'C4D';
     case {'cornellboxreference'}
+        % Main Cornell Box
         sceneDir = 'CornellBoxReference';
         sceneFile = ['CornellBoxReference','.pbrt'];
-        exporter = 'C4D';  
+        exporter = 'C4D';
     case {'cornellboxlamp'}
         sceneDir = 'CornellBoxLamp';
         sceneFile = ['CornellBoxLamp','.pbrt'];
-        exporter = 'C4D';         
+        exporter = 'C4D';
     case 'snellenatdepth'
         sceneDir = 'snellenAtDepth';
         sceneFile = ['snellen','.pbrt'];
@@ -245,7 +254,7 @@ switch ieParamFormat(sceneDir)
         exporter = 'Copy';
     case 'lettersatdepth'
         sceneDir = 'lettersAtDepth';
-        sceneFile = [sceneDir,'.pbrt'];        
+        sceneFile = [sceneDir,'.pbrt'];
         exporter = 'C4D';
     case 'bathroom'
         sceneDir = 'bathroom';
@@ -262,7 +271,7 @@ switch ieParamFormat(sceneDir)
     case 'veach-ajar'
         sceneDir = 'veach-ajar';
         sceneFile = 'scene.pbrt';
-        exporter = 'Copy';    
+        exporter = 'Copy';
     case 'villalights'
         sceneDir = 'villaLights';
         sceneFile = 'scene.pbrt';
@@ -335,6 +344,9 @@ if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
     FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+    if ~isfolder(FilePath)
+        FilePath = fullfile(piRootPath,'data','V4','web',sceneDir);
+    end
 end
 
 % If we can not find it, check on the web.
@@ -402,4 +414,3 @@ else
 end
 
 end
-

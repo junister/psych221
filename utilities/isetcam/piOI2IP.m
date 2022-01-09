@@ -34,12 +34,13 @@ p.addRequired('oi',@isstruct);
 p.addParameter('sensor','',@ischar);   % A file name
 p.addParameter('pixelsize',2,@isscalar);
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
+p.addParameter('etime',1/100,@isscalar); % [mm]
 
 p.parse(oi,varargin{:});
 sensorName   = p.Results.sensor;
 pixelSize    = p.Results.pixelsize;
 filmDiagonal = p.Results.filmdiagonal;
-
+eTime        = p.Results.etime;
 %% oi to sensor
 if isempty(sensorName)
     sensor = sensorCreate;
@@ -83,16 +84,17 @@ fprintf('Rectangle\n'); disp(rect); fprintf('\n');
 % The film diagonal is in mm.  So the 1e-3 makes it meters. The oiSize is
 % the pixels. The optimal pixel must be the sensor pixel size needed to
 % match the sampling of the oi samples? But this seems to be in meters.
-optimalPixel = sqrt(filmDiagonal^2/(oiSize(1)^2+oiSize(2)^2))*1e-3; % Meters
-sensor = sensorSet(sensor, 'size', oiGet(oi,'size') * (optimalPixel/(pixelSize*1e-6)));
+% optimalPixel = sqrt(filmDiagonal^2/(oiSize(1)^2+oiSize(2)^2))*1e-3; % Meters
+% sensor = sensorSet(sensor, 'size', oiGet(oi,'size') * (optimalPixel/(pixelSize*1e-6)));
 
+sensor = sensorSet(sensor, 'size', [1000, 1000]);
 % Not sure why we don't do this, except perhaps the fov is unreliable?
 % sensor   = sensorSetSizeToFOV(sensor,oiGet(oi,'fov'));
 
 %% Compute
 
-eTime  = autoExposure(oi,sensor,0.90,'weighted','center rect',rect);
-fprintf('eT: %s ms \n',eTime*1e3);
+% eTime  = autoExposure(oi,sensor,0.90,'weighted','center rect',rect);
+fprintf('eT: %f ms \n',eTime*1e3);
 sensor = sensorSet(sensor,'exp time',eTime);
 sensor = sensorCompute(sensor,oi);
 % sensorWindow(sensor);

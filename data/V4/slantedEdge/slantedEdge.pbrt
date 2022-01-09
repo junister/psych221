@@ -1,0 +1,24 @@
+# Exported by PBRT exporter for Cinema 4D 
+Transform [ 1 0 8.881784e-16 0 -0 1 0 0 -8.881784e-16 -0 1 0 -8.881784e-17 0 0.1 1  ]
+Camera "perspective"
+    "float lensradius" [ 0 ]
+    "float focaldistance" [ 2000 ]
+    "float fov" [ 31.417276 ]
+Sampler "halton"
+    "integer pixelsamples" [ 16 ]
+Film "rgb"
+    "integer yresolution" [ 720 ]
+    "integer xresolution" [ 1280 ]
+    "string filename" [ "slantedEdge.exr" ]
+Integrator "path"
+    "integer maxdepth" [ 5 ]
+
+
+WorldBegin
+
+LightSource "distant"
+    "rgb L" [ 1 1 1 ]
+    "point3 to" [ 0 0 0 ]
+    "point3 from" [ 0 0 -100 ]
+Include "slantedEdge_materials.pbrt"
+Include "slantedEdge_geometry.pbrt"

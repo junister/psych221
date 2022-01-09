@@ -11,7 +11,7 @@ function piTextureFileFormat(Textures)
 if exist(Textures,'dir')
     currentfolder = pwd;
     cd(Textures)
-    
+
     %% Find any jpg file
     jpgFiles =  dir('*.jpg');
     bmpFiles  = dir('*.bmp');
@@ -66,7 +66,7 @@ if exist(Textures,'dir')
         fprintf('Converted %d bmp files.\n',numel(bmpFiles));
     end
     %% Put all texture files in a seperate folder.
-    
+
     % outputDir  = fileparts(thisR.outputFile);
     % textureDir = fullfile(outputDir,'textures');
     % textureFiles = dir('*.png');
@@ -87,7 +87,7 @@ elseif exist(Textures, 'file')
         output = sprintf('%s.png',fname);
         imwrite(currentimage,output);
         % After writing the pngs, we erase the original file.
-        delete(Textures);        
+        delete(Textures);
     end
 else
     warning('Texture %s not found!', Textures);

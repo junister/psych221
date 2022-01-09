@@ -1,0 +1,8 @@
+MakeNamedMaterial "white"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5 ]
+    "rgb reflectance" [ 0.61049557 0.61049557 0.61049557 ]
+MakeNamedMaterial "black"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.5 ]
+    "rgb reflectance" [ 0.00699541 0.00699541 0.00699541 ]

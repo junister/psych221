@@ -18,12 +18,12 @@ inv_dcm = piAngle2dcm(rotz, roty, rotx);
 % end
 
 %{
-% Forcing to real is not a good idea.  
+% Forcing to real is not a good idea.
 rotx = real(rotx*180/pi);
 roty = real(roty*180/pi);
 rotz = real(rotz*180/pi);
 %}
-% {                   
+% {
 rotx = rotx*180/pi;
 roty = roty*180/pi;
 rotz = rotz*180/pi;
@@ -38,5 +38,4 @@ diff = inv_dcm(:) - dcm(:);
 if numel(find(diff>0.1))>1 || ~isreal(rotz) || ~isreal(roty) || ~isreal(rotx)
     warning('Unkown rotation, using transform');
     rotation = [];
-end
 end

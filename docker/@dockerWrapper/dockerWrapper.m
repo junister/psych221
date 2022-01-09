@@ -2,13 +2,13 @@ classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
     % In principle, when simply used for render acceleration
-    % on a GPU, it should be user-transparent.
+    % on a GPU, it should be user-transparent by default.
     %
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
     %
     % If the GPU is local, this should be pretty straightforward.
-    % Running on a remote GPU is more comples. See below for
+    % Running on a remote GPU is more complex. See below for
     % more information on the required parameters.
     %
     % Either way, we start an image as a persistent, named, container.
@@ -29,19 +29,23 @@ classdef dockerWrapper < handle
     % Additional Render-specific parameters
     %
     % whichGPU -- for multi-gpu rendering systems
+    %   use device number (e.g. 0, 1, etc.) or -1 for don't care
     % 
     % FUTURE: Potenially unified way to call docker containers for iset
-    %   An attempt to resolve at least some of the myriad platform issues
+    %   as an attempt to resolve at least some of the myriad platform issues
     %
 
     % Original by David Cardinal, Stanford University, September, 2021.
 
-    % Example of remote GPU rendering from a Windows client:
+    % Example of remote GPU rendering initialization from a Windows client:
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
-    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 1);
-
+    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 0);
+    % NOTE: For ease of use you can simply do:
+    %   setpref('docker', 'renderString', <same arguments>)
+    %     and any new docker containers will use that.
+    %
     % Example of local CPU rendering:
     % ourDocker = dockerWrapper('gpuRendering', false);
 
@@ -52,6 +56,7 @@ classdef dockerWrapper < handle
 
     properties
         dockerContainerName = '';
+        dockerContainerID = '';
         % default image is cpu
         dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
         dockerImageRender = ''; % set based on local machine
@@ -62,14 +67,14 @@ classdef dockerWrapper < handle
         % they overlap while we learn the best way to organize them
         remoteMachine = ''; % for syncing the data
         remoteUser = ''; % use for rsync & ssh/docker
-        renderContext = '';
+
         remoteImage = '';
         remoteRoot = ''; % we need to know where to map on the remote system
         localRoot = ''; % for the Windows/wsl case (sigh)
         workingDirectory = '';
         localVolumePath = '';
         targetVolumePath = '';
-        whichGPU = 1; % for multiple GPU configs we can pick one
+        whichGPU = -1; % for multiple GPU configs, or -1 for any
 
         %
         relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static
@@ -84,6 +89,61 @@ classdef dockerWrapper < handle
     methods (Static)
 
         [dockerExists, status, result] = exists() % separate file
+                
+        function reset()
+            % we should remove any existing containers here
+            % to sweep up after ourselves.
+            if ~isempty(dockerWrapper.staticVar('get','PBRT-GPU',''))
+                dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-GPU',''));
+                dockerWrapper.staticVar('set', 'PBRT-GPU', '');
+            end
+            if ~isempty(dockerWrapper.staticVar('get','PBRT-CPU',''))
+                dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-CPU',''));
+                dockerWrapper.staticVar('set', 'PBRT-CPU', '');
+            end
+        end
+
+        function cleanup(containerName)
+            if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                contextFlag = sprintf(' --context %s ', dockerWrapper.staticVar('get','renderContext'));
+            else
+                contextFlag = '';
+            end
+            cleanupCmd = sprintf('docker %s rm -f %s', ...
+                contextFlag, containerName);
+            [status, result] = system(cleanupCmd);
+            if status == 0
+                disp("cleaned up container");
+            else
+                disp("Failed to cleanup: %s", result);
+            end
+        end
+
+        % for now we want containers to be global, so we hacked this
+        % in because Matlab doesn't support static @ class level
+        % and so we can switch to making them per instance if wanted.
+        function retVal = staticVar(action, varname, value)
+            persistent gpuContainer;
+            persistent cpuContainer;
+            persistent renderContext;
+            switch varname
+                case 'PBRT-GPU'
+                    if isequal(action, 'set')
+                        gpuContainer = value;
+                    end
+                    retVal = gpuContainer;
+                case 'PBRT-CPU'
+                    if isequal(action, 'set')
+                        cpuContainer = value;
+                    end
+                    retVal = cpuContainer;
+                case 'renderContext'
+                    if isequal(action, 'set')
+                        renderContext = value;
+                    end
+                    retVal = renderContext;
+            end
+        end
 
         function output = pathToLinux(inputPath)
 
@@ -118,7 +178,9 @@ classdef dockerWrapper < handle
     end
     
     methods
-        function ourContainer = startPBRT(obj, processorType)
+
+            function ourContainer = startPBRT(obj, processorType)
+            verbose = getpref('docker','verbosity',1);
             if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
             else
@@ -171,12 +233,14 @@ classdef dockerWrapper < handle
 
             % set up the baseline command
             if isequal(processorType, 'GPU')
-                if isempty(obj.renderContext)
+                if isempty(dockerWrapper.staticVar('get','renderContext'))
                     contextFlag = '';
                 else
-                    contextFlag = [' --context ' obj.renderContext];
+                    contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
                 end
-                dCommand = sprintf('docker %s run -d -it --gpus 1 --name %s  %s', contextFlag, ourContainer, volumeMap);
+                % want: --gpus '"device=#"'
+                gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
+                dCommand = sprintf('docker %s run -d -it %s --name %s  %s', contextFlag, gpuString, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
                 dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
@@ -184,15 +248,16 @@ classdef dockerWrapper < handle
             end
 
             [status, result] = system(cmd);
+            if verbose > 0
+                fprintf("Started Docker with %d: %s\n", status, cmd);
+            end
             if status == 0
+                obj.dockerContainerID = result; % hex name for it
                 return;
             else
                 warning("Failed to start Docker container with message: %s", result);
             end
         end
-
-
-
 
         function obj = dockerWrapper(varargin)
             %Docker Construct an instance of this class
@@ -208,33 +273,35 @@ classdef dockerWrapper < handle
         end
 
         function containerName = getContainer(obj,containerType)
-            persistent containerPBRTGPU;
-            persistent containerPBRTCPU;
+            % persistent containerPBRTGPU;
+            %persistent containerPBRTCPU;
             switch containerType
                 case 'PBRT-GPU'
-                    if isempty(containerPBRTGPU)
-                        containerPBRTGPU = obj.startPBRT('GPU');
+                    if isempty(obj.staticVar('get', 'PBRT-GPU', ''))
+                        %containerPBRTGPU = obj.startPBRT('GPU');
+                        obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
                     % Need to switch to render context here!
-                    if ~isempty(obj.renderContext)
-                        cFlag = ['--context ' obj.renderContext];
+                    if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                        cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
                     else
                         cFlag = '';
                     end
-                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, containerPBRTGPU));
+                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-GPU', '')));
                     if strlength(result) == 0 % doesn't exist, so start one
-                        containerPBRTGPU = obj.startPBRT('GPU');
+                        obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
-                    containerName = containerPBRTGPU;
+                    containerName = obj.staticVar('get','PBRT-GPU', '');
                 case 'PBRT-CPU'
-                    if isempty(containerPBRTCPU)
-                        containerPBRTCPU = obj.startPBRT('CPU');
+                    if isempty(obj.staticVar('get', 'PBRT-CPU', ''))
+                        %containerPBRTCPU = obj.startPBRT('CPU');
+                        obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    [status, result] = system(sprintf("docker ps | grep %s", containerPBRTCPU));
+                    [status, result] = system(sprintf("docker ps | grep %s", obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
-                        containerPBRTCPU = obj.startPBRT('CPU');
+                        obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    containerName = containerPBRTCPU;
+                    containerName = obj.staticVar('get', 'PBRT-CPU', '');
                 otherwise
                     warning("No container found");
 

@@ -45,7 +45,7 @@ if ischar(assetInfo)
     assetName = assetInfo;
     assetInfo = piAssetFind(thisR.assets, 'name', assetInfo);
     if isempty(assetInfo)
-        warning('Couldn not find an asset with name %s:', assetName);
+        warning('No asset named %s:', assetName);
         return;
     end
 end
@@ -101,10 +101,13 @@ switch thisNode.type
             case {'size'}
                 thisNode.size = val;
             case {'scale'}
+                if ~iscell(val), val = {val}; end
                 thisNode.scale = val;
             case {'translation', 'translate'}
+                if ~iscell(val), val = {val}; end
                 thisNode.translation = val;
             case {'rotation', 'rotate'}
+                if ~iscell(val), val = {val}; end
                 thisNode.rotation = val;
             case {'motion'}
                 thisNode.motion = val;

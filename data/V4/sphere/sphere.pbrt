@@ -16,9 +16,5 @@ Integrator "path"
 
 
 WorldBegin
-
-# Default Material
-Material "coateddiffuse"
-    "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
 Include "sphere_materials.pbrt"
 Include "sphere_geometry.pbrt"

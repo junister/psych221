@@ -100,10 +100,11 @@ function val = recipeGet(thisR, param, varargin)
 %                             just exist as a parameter.  If it doesn't
 %                             exist, then we use the film size to and FOV
 %                             to figure out what it must be.
-%      'spatial samples'    - Sampling resolution
+%      'spatial samples'    - Number of row and col samples
 %      'film x resolution'  - Number of x dimension samples
 %      'film y resolution'  - Number of y-dimension samples
-%      'film diagonarl'     - Size in mm
+%      'sample spacing'     - Spacing between row and col samples
+%      'film diagonal'      - Size in mm
 %
 %
 %      % Special retinal properties for human eye models
@@ -130,12 +131,12 @@ function val = recipeGet(thisR, param, varargin)
 %    % Asset information
 %       'assets'      - This struct includes the objects and their
 %                       properties in the World
-%       'asset names' 
+%       'asset names'
 %       'asset id'
 %       'asset root'
 %       'asset names'
 %       'asset parent id'
-%       'assetparent'
+%       'asset parent'
 %       'asset list'  - a list of branches.
 %
 %    % Material information
@@ -162,8 +163,8 @@ function val = recipeGet(thisR, param, varargin)
 
   thisR.get('asset names')       % The call should be the same!
   thisR.get('materials','names');
-  thisR.get('textures','names')  
-  thisR.get('light','names')      
+  thisR.get('textures','names')
+  thisR.get('light','names')
 
 %}
 
@@ -190,7 +191,7 @@ val = [];
 %%
 
 switch ieParamFormat(param)  % lower case, no spaces
-   
+
     % File management
     case 'inputfile'
         % The place where the PBRT scene files start before being modified
@@ -229,10 +230,8 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'geometrydir','outputgeometrydir'}
         % Standard location for the scene geometry output information
         outputDir = thisR.get('output dir');
-%         val = fullfile(outputDir,'scene','PBRT','pbrt-geometry');
         val = fullfile(outputDir,'geometry');
-        
-        
+
         % Graphics related
     case {'exporter'}
         % 'C4D' or 'Unknown' or 'Copy' at present.
@@ -263,125 +262,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.transformTimes.end;
         else
             val = [];
-        end        
-        
-        % Objects
-    case {'objectmaterial','materialobject'}
-        % val = thisR.get('object material');
-        %
-        % Cell arrays of object names and corresponding material
-        % names.
-        %
-        % We do not use findleaves because sometimes tree class
-        % thinks what we call is a branch is a leaf because,
-        % well, we don't put an object below a branch node.  We
-        % should trim the tree of useless branches (any branch
-        % that has no object beneath it). Maybe.  (BW).
-        ids = thisR.get('objects');
-        leafMaterial = cell(1,numel(ids));
-        leafNames = cell(1,numel(ids));
-        cnt = 1;
-        for ii=ids
-            thisAsset = thisR.get('asset',ii);
-            leafNames{cnt} = thisAsset.name;
-            leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
-            cnt = cnt + 1;
         end
-        val.leafNames = leafNames;
-        val.leafMaterial = leafMaterial;
-    case {'objectmaterials'}
-        % A list of materials for each of the objects
-        % This and the one above should be merged.
-        tmp = thisR.get('object material');
-        val = (tmp.leafMaterial)';
-    case {'objects'}
-        % Indices to the objects
-        nnodes = thisR.assets.nnodes;
-        val = [];
-        for ii=1:nnodes
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
-                val = [val,ii]; %#ok<AGROW>
-            end
-        end
-    case {'objectnames'}
-        % Names of the objects
-        ids = thisR.get('objects');
-        names = thisR.assets.names;
-        val = cell(1,numel(ids));
-        for ii = 1:numel(ids)
-            % Includes ids and everything
-            val{ii} = names{ids(ii)};
-        end
-    case 'objectsimplenames'
-        % Names of the objects
-        % We think there is ID_Instance_ObjectName_O.
-        % So we try to delete the first two and the O atthe end.
-        % If there are fewer parts, we delete less.
-        ids = thisR.get('objects');
-        names = thisR.assets.names;
-        val = cell(1,numel(ids));
-        for ii = 1:numel(ids)
-            nameParts = split(names{ids(ii)},'_');
-            if numel(nameParts) > 2
-                tmp = join(nameParts(3:(end-1)),'-');
-                val{ii} = tmp{1};
-            elseif numel(nameParts) > 1
-                val{ii} = nameParts{2};
-            else
-                val{ii} = nameParts{1};
-            end
-        end
-    case {'objectcoords','objectcoordinates'}
-        % Returns the coordinates of the objects (leafs of the asset tree)
-        % Units should be meters
-        % coords = thisR.get('object coordinates');
-        %
-        Objects  = thisR.get('objects');
-        nObjects = numel(Objects);
-        
-        % Get their world positions
-        val = zeros(nObjects,3);
-        for ii=1:nObjects
-            thisNode = thisR.get('assets',Objects(ii));
-            val(ii,:) = thisR.get('assets',thisNode.name,'world position');
-        end
-    case {'objectsizes'}
-        % Estimates the sizes of each of the objects
-        %
-        % thisR.get('object sizes')
-        %
-        Objects  = thisR.get('objects');
-        nObjects = numel(Objects);
-        val = zeros(nObjects,3);
-        for ii=1:nObjects
-            thisNode = thisR.get('assets',Objects(ii));
-            thisScale = thisR.get('assets',Objects(ii),'world scale');
-            if isempty(thisScale), thisScale = [1 1 1];end
-            % All the object points
-            if isfield(thisNode.shape,'point3p') && ...
-                ~isempty(thisNode.shape.point3p)
-                pts = thisNode.shape.point3p;
-                % Range of points times any scale factors on the path
-                val(ii,1) = range(pts(1:3:end))*thisScale(1);
-                val(ii,2) = range(pts(2:3:end))*thisScale(2);
-                val(ii,3) = range(pts(3:3:end))*thisScale(3);
-            elseif isfield(thisNode.shape,'filename') && ...
-                ~isempty(thisNode.shape.filename)
-                objectPly = pcread(fullfile(fileparts(thisR.inputFile),thisNode.shape.filename));
-                val(ii,1) = objectPly.XLimits(2)-objectPly.XLimits(1);
-                val(ii,2) = objectPly.YLimits(2)-objectPly.YLimits(1);
-                val(ii,3) = objectPly.ZLimits(2)-objectPly.ZLimits(1);
-            else
-                % There is no shape point information or ply file.  
-                % So we return NaNs.
-                val(ii,:) = NaN;
-            end
-            
-        end   
-         % We also save objects size in branch node, maybe we should use
-         % that information instead. --zhenyi
-         % thisR.get('assetlist');
     case 'objectdistance'
         % thisR.get('object distance',units)
         diff = thisR.lookAt.from - thisR.lookAt.to;
@@ -390,15 +271,14 @@ switch ieParamFormat(param)  % lower case, no spaces
         if ~isempty(varargin)
             val = val*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case {'lookatdirection','objectdirection'}
         % A unit vector in the lookAt direction
-        % At some point we called this the object direction to indicate
-        % that we are looking at an object in this direction.  Though the
-        % reality is we may just be looking at the sky - no object.
-        val = thisR.lookAt.from - thisR.lookAt.to;
+        %   This vector is v = 'to' - 'from',
+        %   so  v + 'from' = 'to'
+        val = thisR.lookAt.to - thisR.lookAt.from;
         val = val/norm(val);
-        
+
         % Camera fields
     case {'camera'}
         % The whole struct
@@ -414,10 +294,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isfield(thisR.camera,'subtype')
             val = thisR.camera.subtype;
         end
-        
+
         % Trying to change from perspective to pinhole (BW)
         if isequal(val,'perspective'), val = 'pinhole'; end
-        
+
     case 'lookat'
         val = thisR.lookAt;
     case {'from','cameraposition'}
@@ -433,11 +313,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Vector between from minus to
         val = thisR.lookAt.to - thisR.lookAt.from;
     case {'scale'}
-        % Change the size (scale) of something.  
-        % Almost always 1 1 1
-        % Blender scene use -1 1 1
+        % Change the size (scale) of something.  Almost always 1 1 1
         val = thisR.scale;
-        
+
         % Motion is not always included.  When it is, there is a start and
         % end position, and a start and end rotation.
     case {'cameramotiontranslate'}
@@ -478,8 +356,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         catch
             val = 0;
         end
-        
-    case {'shutterclose'} 
+
+    case {'shutterclose'}
         % thisR.get('shutter close');  % Time in sec
         % When not set, the exposure duration is 1 sec and open,close are
         % [0,1]
@@ -488,7 +366,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         catch
             val = 1;
         end
-        
+
         % Lens and optics
     case 'opticstype'
         % val = thisR.get('optics type');
@@ -503,13 +381,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         % realisticEye
         %
         val = thisR.camera.subtype;
-        
+
         % Translate
         if     isequal(val,'perspective'), val = 'pinhole';
         elseif isequal(val,'environment'), val = 'environment';
         elseif ismember(val,{'realisticDiffraction','realisticEye','realistic','omni','raytransfer'})
-            % All of these types have either a lens file or an RTF file
-            % that needs to be copied to the rendering directory.
             val = 'lens';
         end
     case 'realisticeyemodel'
@@ -528,10 +404,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         else
             val = [];
         end
-        
+
     case {'lensfile','lensfileinput'}
         % The lens file from the data/lens directory.
-        
+
         % There are a few different camera types.  Not all have lens files.
         subType = thisR.camera.subtype;
         switch(lower(subType))
@@ -550,22 +426,21 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % cases.  We might do something about putting the microlens
                 % examples in the data/lens directory and avoiding this
                 % problem.
-                
+
                 % Make sure the lensfile is in the data/lens directory.
                 if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
-                [~,name,ext] = fileparts(thisR.camera.lensfile.value);
-                baseName = [name,ext];
-                val = fullfile(piRootPath,'data','lens',baseName);
-                if ~exist(val,'file')
-                    val = which(baseName);
-                    if isempty(val)
-                        error('Can not find the lens file %s\n',val);
-                    else
-                        % fprintf('Using lens file at %s\n',val);
+                    [~,name,ext] = fileparts(thisR.camera.lensfile.value);
+                    baseName = [name,ext];
+                    val = fullfile(piRootPath,'data','lens',baseName);
+                    if ~exist(val,'file')
+                        val = which(baseName);
+                        if isempty(val)
+                            error('Can not find the lens file %s\n',val);
+                        else
+                            % fprintf('Using lens file at %s\n',val);
+                        end
                     end
                 end
-                end
-                
         end
     case {'lensdir','lensdirinput'}
         % This is the directory where the lens files are kept, not the
@@ -591,17 +466,24 @@ switch ieParamFormat(param)  % lower case, no spaces
         outputDir = thisR.get('outputdir');
         lensfullbasename = thisR.get('lens full basename');
         val = fullfile(outputDir,'lens',lensfullbasename);
-        
+
     case {'focusdistance','focaldistance'}
-        % recipe.get('focal distance')  (m)
-        %
         % Distance in object space that is in focus on the film. If the
         % camera model has a lens, we check whether the lens can bring this
         % distance into focus on the film plane.
         %
-        % N.B.  For pinhole this is focal distance.
-        %       For lens, this   is focus distance.
-        %       (in PBRT parlance)
+        %   recipe.get('focal distance')  (m)
+        %
+        % N.B.  The phrasing can be confusing.  This is the distance to the
+        %       plane in OBJECT space that is in focus. This can be easily
+        %       confused the the lens' focal length - which is a different
+        %       thing!
+        %
+        %       In PBRT parlance this is stored differently depending on
+        %       the camera model.
+        %
+        %       For pinhole this is stored as focal distance.
+        %       For lens, this stored as focus distance.
         %
         opticsType = thisR.get('optics type');
         switch opticsType
@@ -619,7 +501,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             case 'lens'
                 % Focal distance given the object distance and the lens file
                 val      = thisR.camera.focusdistance.value; % Meters
-                
+
                 % If isetlens is on the path, we convert the distance to
                 % the focal plane into millimeters and warn if there is no
                 % film distance that will bring the object into focus.
@@ -635,21 +517,23 @@ switch ieParamFormat(param)  % lower case, no spaces
             otherwise
                 error('Unknown camera type %s\n',opticsType);
         end
-        
+
         % Adjust spatial units per user's specification
         if isempty(varargin), return;
         else, val = val*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case {'accommodation'}
         % thisR.get('accommodation');   % Diopters
         val = 1 / thisR.get('focal distance','m');
-        
+
     case {'filmdistance'}
         % thisR.get('film distance',unit); % Returned in meters
         %
-        % If the camera is a pinhole, we might have a filmdistance.  We
-        % don't understand that.
+        % If the camera is a pinhole, it might have a filmdistance.  If it
+        % does not, then we calculate where the film should be positioned
+        % so that the film diagonal and the field of view all make sense
+        % together.
         %
         % When there is a lens, PBRT sets the filmdistance so that an
         % object at the focaldistance is in focus. This is a means of
@@ -672,12 +556,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % we use the diagonal.
                     fov = thisR.get('fov');  % Degrees
                     filmDiag = thisR.get('film diagonal','m');  % m
-                    
+
                     %   tand(fov) = opp/adj; adjacent is distance
                     val = (filmDiag/2)/tand(fov);               % m
-                    
+
                 end
-                
+
             case 'lens'
                 % We separate out the omni and human realisticEye models
                 if strcmp(thisR.get('camera subtype'),'realisticEye')
@@ -690,9 +574,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                     lensFile = thisR.get('lens file');
                     if exist('lensFocus','file')
                         % If isetlens is on the path, we convert the
-                        % distance to the focal plane into millimeters
-                        % and see whether there is a film distance so
-                        % that the plane is in focus.
+                        % distance to the in-focus object plane into
+                        % millimeters and see whether there is a film
+                        % distance so that that object plane is in focus.
+                        % This is
                         %
                         % But we return the value in meters
                         val = lensFocus(lensFile,1e+3*thisR.get('focal distance'))*1e-3;
@@ -709,13 +594,13 @@ switch ieParamFormat(param)  % lower case, no spaces
             otherwise
                 error('Unknown opticsType %s\n',opticsType);
         end
-        
+
         % Adjust spatial units per user's specification
         if isempty(varargin), return;
         else, val = val*ieUnitScaleFactor(varargin{1});
         end
-        
-        
+
+
         % realisticEye parameters
     case {'retinadistance'}
         % Default storage in mm.  Hence the scale factor on units
@@ -723,12 +608,12 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.camera.retinaDistance.value;
         else, error('%s only exists for realisticEye model',param);
         end
-        
+
         % Adjust spatial units per user's specification
         if isempty(varargin), return;
         else, val = (val*1e-3)*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case {'eyeradius','retinaradius'}
         % thisR.get('eye radius','m');
         % Default storage in mm.
@@ -743,7 +628,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isempty(varargin), return;
         else, val = (val*1e-3)*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case {'retinasemidiam'}
         % Curved retina parameter.
         % Default storage in mm.  Hence the scale factor on units
@@ -755,7 +640,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isempty(varargin), return;
         else, val = (val*1e-3)*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case 'center2chord'
         % Distance from the center of the eyeball to the chord that defines
         % the field of view.  We know the radius of the eyeball and the
@@ -765,7 +650,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         % See the PPT about the eyeball geometry, defining the retina
         % radius, distance, and semidiam
-        
+
         eyeRadius = thisR.get('retina radius','mm');
         semiDiam  = thisR.get('retina semidiam','mm');
         if(eyeRadius < semiDiam)
@@ -775,21 +660,21 @@ switch ieParamFormat(param)  % lower case, no spaces
             error('semiDiam is larger than eye ball radius. Not good.')
         end
         val = sqrt(eyeRadius^2 - semiDiam^2);
-        
+
     case {'lens2chord','distance2chord'}
         %  Distance from the back of the lens to the chord that defines
         %  the field of view.
         %
         % See the PPT about the eyeball geometry, defining the retina
         % radius, distance, and semidiam
-        
+
         eyeRadius     = thisR.get('retina radius','mm');
         focalDistance = thisR.get('retina distance','mm');
         d = focalDistance - eyeRadius;
-        
+
         a = thisR.get('center 2 chord');
         val = a+d;
-        
+
     case {'ior1'}
         % Index of refraction 1
         if isequal(thisR.camera.subtype,'realisticEye')
@@ -812,7 +697,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.camera.ior4.value;
         else, error('%s only exists for realisticEye model',param);
         end
-        
+
         % Back to the general case
     case {'fov','fieldofview'}
         % recipe.get('fov') - degrees
@@ -821,7 +706,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.camera.fov.value;
             return;
         end
-        
+
         % Try to figure out.  But we have to deal with fov separately for
         % different types of camera models.
         filmDiag = thisR.get('film diagonal');
@@ -883,7 +768,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 filmDistance  = lensFocus(lensFile,1e+3*focusDistance); % mm
                 val           = atand(filmDiag/2/filmDistance);
         end
-        
+
     case 'depthrange'
         % dRange = thisR.get('depth range');
         % Values in meters
@@ -892,7 +777,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isempty(varargin), return;
         else, val = val*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case 'pupildiameter'
         % Default units are millimeters
         switch ieParamFormat(thisR.camera.subtype)
@@ -907,7 +792,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isempty(varargin), return;
         else, val = (val*1e-3)*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case 'diffraction'
         % thisR.get('diffraction');
         %
@@ -919,7 +804,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.camera.diffractionEnabled.value;
         end
         if isequal(val,'true'), val = true; else, val = false; end
-        
+
     case 'chromaticaberration'
         % thisR.get('chromatic aberration')
         % True or false (on or off)
@@ -928,7 +813,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = thisR.camera.chromaticAberrationEnabled.value;
         end
         if isequal(val,'true'), val = true; else, val = false; end
-        
+
     case 'numcabands'
         % thisR.get('num ca bands')
         try
@@ -936,7 +821,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         catch
             val = 0;
         end
-        
+
         % Light field camera parameters
     case {'nmicrolens','npinholes'}
         % How many microlens (pinholes)
@@ -946,7 +831,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % How many film pixels behind each microlens/pinhole
         val(2) = thisR.camera.subpixels_w;
         val(1) = thisR.camera.subpixels_h;
-        
+
         % Film (because of PBRT.  ISETCam it would be sensor).
     case {'spatialsamples','filmresolution','spatialresolution'}
         % thisR.get('spatial samples');
@@ -954,7 +839,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % When using ISETBio, we usually call it spatial samples or spatial
         % resolution.  For ISET3d, it is usually film resolution because of
         % the PBRT notation.
-        % 
+        %
         % We also have some matters to consider for light field cameras.
         try
             val = [thisR.film.xresolution.value,thisR.film.yresolution.value];
@@ -965,19 +850,33 @@ switch ieParamFormat(param)  % lower case, no spaces
         %{
         % For a lightfield camera, if film resolution is not defined, we
           could do this. This would be an omni camera that has microlenses.
-          
+
           nMicrolens = thisR.get('n microlens');
           nSubpixels = thisR.get('n subpixels');
           thisR.set('film resolution', nMicrolens .* nSubpixels);
         %}
-        
+
+    case {'samplespacing'}
+        % Distance in meters between the row and col samples
+
+        % This formula assumes film diagonal pixels
+        val =thisR.get('filmdiagonal')/norm(thisR.get('spatial samples'));
+
     case 'filmxresolution'
         % An integer specifying number of samples
         val = thisR.film.xresolution.value;
     case 'filmyresolution'
         % An integer specifying number of samples
         val = [thisR.film.yresolution.value];
-        
+
+    case {'filmwidth'}
+        % x-dimension, columns
+        ss   = thisR.get('spatial samples'); % Number of samples
+        val = ss(1)*thisR.get('sample spacing');
+    case {'filmheight'}
+        % y-dimension, rows
+        ss   = thisR.get('spatial samples'); % Number of samples
+        val = ss(2)*thisR.get('sample spacing');
     case 'aperturediameter'
         % Needs to be checked.  Default units are meters or millimeters?
         if isfield(thisR.camera, 'aperturediameter') ||...
@@ -986,12 +885,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         else
             val = NaN;
         end
-        
+
         % Need to check on the units!
         if isempty(varargin), return;
         else, val = val*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case {'filmdiagonal','filmdiag'}
         % recipe.get('film diagonal');  in mm
         if isfield(thisR.film,'diagonal')
@@ -1001,31 +900,31 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisR.set('film diagonal',10);
             val = 10;
         end
-        
+
         % By default the film is stored in mm, unfortunately.  So we scale
         % to meters and then apply unit scale factor
         if isempty(varargin), return;
         else, val = val*1e-3*ieUnitScaleFactor(varargin{1});
         end
-        
+
     case 'filmsubtype'
         % What are the legitimate options?
         if isfield(thisR.film,'subtype')
             val = thisR.film.subtype;
         end
-        
+
     case {'raysperpixel'}
         if isfield(thisR.sampler,'pixelsamples')
             val = thisR.sampler.pixelsamples.value;
         end
-        
+
     case {'cropwindow'}
         if(isfield(thisR.film,'cropwindow'))
             val = thisR.film.cropwindow.value;
         else
             val = [0 1 0 1];
         end
-        
+
         % Rendering related
     case{'maxdepth','bounces','nbounces'}
         % Number of bounces.  If not specified, 1.  Otherwise ...
@@ -1033,7 +932,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isfield(thisR.integrator,'maxdepth')
             val = thisR.integrator.maxdepth.value;
         end
-        
+
     case{'integrator','integratorsubtype'}
         if isfield(thisR.integrator,'subtype')
             val = thisR.integrator.subtype;
@@ -1045,13 +944,13 @@ switch ieParamFormat(param)  % lower case, no spaces
         if(isfield(thisR.renderer, 'nWaveBands'))
             val = thisR.renderer.nWaveBands.value;
         end
-        
+
     case{'camerabody'}
         % thisR.get('camera body');
         val.camera = thisR.camera;
         val.film   = thisR.film;
         val.filter = thisR.filter;
-        
+
         % Materials.  Still needs work, but exists (BW).
     case {'materials', 'material'}
         % thisR.Get('material',matName,property)
@@ -1065,7 +964,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % kdVal  = thisR.get('material', 'uber', 'kd value');
         %
         % Get a  property from a material or a material property named in
-        % this recipe. 
+        % this recipe.
 
         if isempty(varargin)
             % Return the whole material list
@@ -1078,7 +977,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
             return;
         end
-        
+
         % Here we list the material names or find a material by its name.
         % If there is a material name (varargin{1}) and then a material
         % property (varargin{2}) we call piMaterialGet.  See piMaterialGet
@@ -1102,7 +1001,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     thisMat = thisR.materials.list(varargin{1});
                     val = thisMat;
                 end
-                
+
                 if isempty(thisMat)
                     warning('Could not find material. Return.')
                     return;
@@ -1113,8 +1012,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % Return the material property
                     val = piMaterialGet(thisMat, varargin{2});
                 end
-        end                        
-        
+        end
+
     case {'nmaterial', 'nmaterials', 'materialnumber', 'materialsnumber'}
         % thisR.get('n materials')
         % Number of materials in this scene.
@@ -1122,23 +1021,23 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'materialsprint','printmaterials', 'materialprint', 'printmaterial'}
         % thisR.get('materials print');
         %
-        % These are the materials that are named in the tree hierarchy.        
+        % These are the materials that are named in the tree hierarchy.
         piMaterialPrint(thisR);
     case {'materialsoutputfile'}
         % Unclear why this is still here.  Probably deprecated.
         val = thisR.materials.outputfile;
-        
+
         % Getting ready for textures
     case{'texture', 'textures'}
         % thisR.get('texture', textureName, property)
-        
+
         % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
         % textures = thisR.get('texture');
         % thisTexture = thisR.get('texture', 'reflectanceChart_color');
         % thisName = thisR.get('texture', 'reflectanceChart_color', 'name');
         % filename = thisR.get('texture', 'reflectanceChart_color', 'filename');
         % filenameVal = thisR.get('texture', 'reflectanceChart_color', 'filename val');
-        
+
         if isempty(varargin)
             % Return the whole texture list
             if isfield(thisR.textures, 'list')
@@ -1148,9 +1047,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                 warning('No material in this recipe')
                 val = {};
             end
-            return;        
+            return;
         end
-        
+
         switch varargin{1}
             % Special cases
             case 'names'
@@ -1166,7 +1065,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     [~, thisTexture] = piTextureFind(thisR.textures.list, 'name', varargin{1});
                     val = thisTexture;
                 end
-                
+
                 if isempty(thisTexture)
                     warning('Could not find material. Return.')
                     return;
@@ -1176,9 +1075,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % thisR.get('texture', texture/idx/name, property)
                     % Return the texture property
                     val = piTextureGet(thisTexture, varargin{2});
-                end                
+                end
         end
-        
+
     case {'ntexture', 'ntextures', 'texturenumber', 'texturesnumber'}
         % thisR.get('n textures')
         % Number of textures in this scene
@@ -1191,7 +1090,135 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('textures print')
         %
         piTexturePrint(thisR);
-    
+
+        % Objects
+    case {'objectmaterial','materialobject'}
+        % val = thisR.get('object material');
+        %
+        % Cell arrays of object names and corresponding material
+        % names.
+        %
+        % We do not use findleaves because sometimes tree class
+        % thinks what we call is a branch is a leaf because,
+        % well, we don't put an object below a branch node.  We
+        % should trim the tree of useless branches (any branch
+        % that has no object beneath it). Maybe.  (BW).
+        ids = thisR.get('objects');
+        leafMaterial = cell(1,numel(ids));
+        leafNames = cell(1,numel(ids));
+        cnt = 1;
+        for ii=ids
+            thisAsset = thisR.get('asset',ii);
+            leafNames{cnt} = thisAsset.name;
+            leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
+            cnt = cnt + 1;
+        end
+        val.leafNames = leafNames;
+        val.leafMaterial = leafMaterial;
+    case {'objectmaterials'}
+        % A list of materials for each of the objects
+        % This and the one above should be merged.
+        tmp = thisR.get('object material');
+        val = (tmp.leafMaterial)';
+    case {'objects'}
+        % Indices to the objects
+        nnodes = thisR.assets.nnodes;
+        val = [];
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
+                val = [val,ii]; %#ok<AGROW>
+            end
+        end
+    case {'objectnames'}
+        % Names of the objects
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            val{ii} = names{ids(ii)};
+        end
+
+    case {'objectnamesnoid'}
+        % Names of the objects with the ID stripped.
+        % I don't think we are doing this properly.  We need a routine to
+        % break an asset name into
+        %
+        %    [id, instance, objectname] = assetNameParse(name)
+        %
+        % And then we should call that routine for this set of gets.
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            thisName = names{ids(ii)};
+            val{ii} = thisName(8:end);
+        end
+
+    case 'objectsimplenames'
+        % Names of the objects
+        % We think there is ID_Instance_ObjectName_O.
+        % So we try to delete the first two and the O atthe end.
+        % If there are fewer parts, we delete less.
+        ids = thisR.get('objects');
+        names = thisR.assets.names;
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            nameParts = split(names{ids(ii)},'_');
+            if numel(nameParts) > 2
+                tmp = join(nameParts(3:(end-1)),'-');
+                val{ii} = tmp{1};
+            elseif numel(nameParts) > 1
+                val{ii} = nameParts{2};
+            else
+                val{ii} = nameParts{1};
+            end
+        end
+    case {'objectcoords','objectcoordinates'}
+        % Returns the coordinates of the objects (leafs of the asset tree)
+        % Units should be meters
+        % coords = thisR.get('object coordinates');
+        %
+        Objects  = thisR.get('objects');
+        nObjects = numel(Objects);
+
+        % Get their world positions
+        val = zeros(nObjects,3);
+        for ii=1:nObjects
+            thisNode = thisR.get('assets',Objects(ii));
+            val(ii,:) = thisR.get('assets',thisNode.name,'world position');
+        end
+    case {'objectsizes'}
+        % All the objects
+        % thisR.get('object sizes')
+        Objects  = thisR.get('objects');
+        nObjects = numel(Objects);
+        val = zeros(nObjects,3);
+        for ii=1:nObjects
+            thisNode = thisR.get('assets',Objects(ii));
+            thisScale = thisR.get('assets',Objects(ii),'world scale');
+
+            % All the object points
+            if isfield(thisNode.shape,'pointp')
+                pts = thisNode.shape.pointp;
+                if ~isempty(pts)
+                    % Range of points times any scale factors on the path
+                    val(ii,1) = range(pts(1:3:end))*thisScale(1);
+                    val(ii,2) = range(pts(2:3:end))*thisScale(2);
+                    val(ii,3) = range(pts(3:3:end))*thisScale(3);
+                else
+                    val(ii,:) = NaN;
+                end
+            else
+                % There is no shape point information.  So we return NaNs.
+                val(ii,:) = NaN;
+            end
+
+        end
+
+
         % Lights
     case{'light', 'lights'}
         if isempty(varargin)
@@ -1203,41 +1230,41 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
             return;
         end
-        
+
+        %{
+        if ischar(varargin{1})
+            varargin{1} = ieParamFormat(varargin{1});
+        end
+        %}
+
         switch varargin{1}
             case 'names'
-                % Special case.  List the names.
                 n = numel(thisR.lights);
                 val = cell(1, n);
                 for ii=1:n
                     val{ii} = thisR.lights{ii}.name;
                 end
             otherwise
-                % The first argument describes the light, and there must be
-                % a second argument for the property.  The light can be
-                % described by index or by name.
+                % The first argument indicates the material name and there
+                % must be a second argument for the property
                 if isnumeric(varargin{1}) && ...
                         varargin{1} <= numel(thisR.lights)
-                    % Light by index. 
+                    % Search by index.  Get the material directly.
                     lgtIdx = varargin{1};
                     thisLight = thisR.lights{lgtIdx};
                     val = thisLight;
                 elseif isstruct(varargin{1})
-                    % The user sent in the light struct.  We hope.
-                    % We should have a slot in light that identifies itself as a
-                    % material.  Maybe a test like "light.type" ismember valid
-                    % lights."
+                    % The user sent in the material.  We hope.
+                    % We should have a slot in material that identifies itself as a
+                    % material.  Maybe a test like "material.type ismember valid
+                    % materials."
                     thisLight = varargin{1};
-                    validLights = piLightCreate('valid');
-                    if ~ismember(thisLight.type,validLights)
-                        warning('The struct type, %s, is not a valid light type',thisLight.type);
-                    end
                 elseif ischar(varargin{1})
-                    % Search by string name
+                    % Search by name, find the index
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
                 end
-                
+
                 if isempty(thisLight)
                     warning('Could not find light. Return.')
                     return;
@@ -1256,15 +1283,24 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = numel(thisR.lights);
         else
             val = 0;
-        end                    
+        end
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
         piLightList(thisR);
     % Asset specific gets - more work needed here.
-    case {'asset', 'assets'}
+    case {'asset', 'assets','node','nodes'}
+        %
         % thisR.get('asset',assetName or ID);  % Returns the asset
         % thisR.get('asset',assetName,param);  % Returns the param val
-        
+        % thisR.get('asset',name or ID,'world position')
+        % thisR.get('asset',name or ID,'size')
+
+        %
+        % We are slowly starting to call nodes nodes, rather than
+        % assets.  We think of an asset now as, say, a car with all of
+        % its parts.  A node is the node in a tree that contains
+        % multiple assets. (BW, Sept 2021).
+
         [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
         % If only one asset matches, turn it from cell to struct.
         if numel(thisAsset) == 1
@@ -1274,7 +1310,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         if length(varargin) == 1
             val = thisAsset;
             return;
-        else 
+        else
             if strncmp(varargin{2},'material',8)
                 material = thisR.materials.list(thisAsset.material.namedmaterial);
             end
@@ -1296,13 +1332,17 @@ switch ieParamFormat(param)  % lower case, no spaces
                     end
                     [~, val] = val.stripID([],replace);
 
+                case 'children'
+                    % Get the children of a node
+                    val = thisR.assets.getchildren(id);
+
                 case {'nodetoroot','pathtoroot'}
                     % thisR.get('asset',assetName,'node to root');
                     %
                     % Returns the sequence of ids from this node id to
                     % root of the tree.
                     val = thisR.assets.nodetoroot(id);
-                    
+
                     % Get material properties from this asset
                 case 'material'
                     % thisR.get('asset',assetName,'material');
@@ -1312,10 +1352,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                 case 'materialtype'
                     val = material.type;
                     % Leafs (objects) in the tree.
-                
+
                     % World position and orientation properties.  These
                     % need more explanation.
                 case 'worldrotationmatrix'
+                    % This is a 4x4 matrix, that represents accumulated
+                    % rotation effects of ALL rotation action.
                     nodeToRoot = thisR.assets.nodetoroot(id);
                     [val, ~] = piTransformWorld2Obj(thisR, nodeToRoot);
                 case 'worldrotationangle'
@@ -1332,7 +1374,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % Find the scale factors that apply to the object size
                     nodeToRoot = thisR.assets.nodetoroot(id);
                     [~, ~, val] = piTransformWorld2Obj(thisR, nodeToRoot);
-                    
+
                     % These are local values, not world
                 case 'translation'
                     % Translation is always in the branch, not in the
@@ -1343,23 +1385,44 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         val = piAssetGet(thisAsset, 'translation');
                     end
-                otherwise                    
+                case 'rotation'
+                    if thisR.assets.isleaf(id)
+
+                    else
+                        val = piAsseGet(thisAsset, 'rotation');
+                    end
+                case 'size'
+                    % thisR.get('asset',objectName,'size');
+                    % Size of one object in meters
+                    if thisR.assets.isleaf(id)
+                        % Only objects
+                        thisScale = thisR.get('assets',id,'world scale');
+                        pts = thisAsset.shape.point3p;
+                        val(1) = range(pts(1:3:end))*thisScale(1);
+                        val(2) = range(pts(2:3:end))*thisScale(2);
+                        val(3) = range(pts(3:3:end))*thisScale(3);
+                    else
+                        warning('Only objects have a size');
+                        val = [];
+                    end
+                otherwise
+                    % Give it a try.
                     val = piAssetGet(thisAsset,varargin{2});
             end
         end
-    case {'assetid'}
+    case {'nodeid','assetid'}
         % thisR.get('asset id',assetName);  % ID from name
         val = piAssetFind(thisR.assets,'name',varargin{1});
     case {'assetroot'}
         % The root of all assets just has a name, not properties.
         val = thisR.assets.get(1);
     case {'nodenames','assetnames'}
-        % Assets should become object names.  But it is sometimes used for
-        % all the nodes.  THat's a mistake.
+        % We have a confusion between nodes and assets.  The assets should
+        % refer to just the objects, not all the nodes IMHO (BW).
         % The names without the XXXID_ prepended
+        % What about objectnames
         val = thisR.assets.stripID;
-    case {'assetparentid'}
-        % This should also be nodeparentid, not asset parent id.
+    case {'nodeparentid','assetparentid'}
         % thisR.get('asset parent id',assetName or ID);
         %
         % Returns the id of the parent node
@@ -1373,14 +1436,15 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisNodeID = thisNode;
         end
         val = thisR.assets.getparent(thisNodeID);
-    case {'assetparent'}
+    case {'nodeparent','assetparent'}
         % thisR.get('asset parent',assetName)
         %
         thisNode = varargin{1};
         parentNode = thisR.get('asset parent id',thisNode);
-        val = thisR.assets.Node{parentNode};   
+        val = thisR.assets.Node{parentNode};
 
         % Delete this stuff when we get ready to merge.
+        %{
     case {'assetlist'}
         assetNames = thisR.get('asset names');
         nn = 1;
@@ -1391,12 +1455,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                     ~piContains(assetNames{ii},'_T') && ...
                     ~piContains(assetNames{ii},'_S') && ...
                     ~piContains(assetNames{ii},'_R')
-                
+
                 val{nn} = thisR.get('assets',assetNames{ii});
                 nn=nn+1;
             end
         end
-        
+        %}
+
     otherwise
         error('Unknown parameter %s\n',param);
 end
