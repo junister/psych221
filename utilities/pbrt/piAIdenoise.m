@@ -56,11 +56,6 @@ switch object.type
         error('Should never get here.  %s\n',object.type);
 end
 
-% Not sure why ZL does this?  Also, Why the normalization?  Probablyl a
-% requirement of the denoiser, which needs the data between 0 and 1?
-% Could we do this in photon space and save the conversion? (BW).
-energy = Quanta2Energy(wave, photons);
-
 %% Set up the denoiser path information
 
 if ismac
@@ -71,11 +66,11 @@ end
 
 outputTmp = fullfile(piRootPath,'local','tmp_input.pfm');
 DNImg_pth = fullfile(piRootPath,'local','tmp_dn.pfm');
-NewEnergy = zeros(rows, cols, chs);
+NewPhotons = zeros(rows, cols, chs);
 
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel denoiser'); end
 for ii = 1:chs
-    img_sp(:,:,1) = energy(:,:,ii)/max2(energy(:,:,ii));
+    img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
     img_sp(:,:,2) = img_sp(:,:,1);
     img_sp(:,:,3) = img_sp(:,:,1);
     writePFM(img_sp, outputTmp);
@@ -87,12 +82,12 @@ for ii = 1:chs
     end
 
     DNImg = readPFM(DNImg_pth);
-    NewEnergy(:,:,ii) = DNImg(:,:,1).* max2(energy(:,:,ii));
+    NewPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
 end
 if ~quiet, close(h); end
 
-object.data.photons = Energy2Quanta(wave, NewEnergy);
+object.data.photons = NewPhotons;
 
 if exist(DNImg_pth,'file'), delete(DNImg_pth); end
 if exist(outputTmp,'file'), delete(outputTmp); end
