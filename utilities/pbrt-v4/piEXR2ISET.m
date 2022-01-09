@@ -99,8 +99,10 @@ for ii = 1:numel(label)
                     fclose(fid);
                     delete(depthFile);
                     
-                else
+                elseif isequal(label{ii},'depth')
                     depthImage = piReadEXR(inputFile, 'data type','depth');
+                elseif isequal(label{ii},'zdepth')
+                    depthImage = piReadEXR(inputFile, 'data type','zdepth');
                 end
                 
             catch

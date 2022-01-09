@@ -45,10 +45,23 @@ switch dataType
     case "zdepth"
         output = piEXR2Mat(filename, 'Pz');
     case "depth"
-        XDepthMap = piEXR2Mat(filename, 'Px');
-        YDepthMap = piEXR2Mat(filename, 'Py');
-        ZDepthMap = piEXR2Mat(filename, 'Pz');
-        
+        % We only want to sum the depths that we have, so we need to 
+        % look for errors when we retrieve each one
+        try
+            XDepthMap = piEXR2Mat(filename, 'Px');
+        catch
+            XDepthMap = [0];
+        end
+        try
+            YDepthMap = piEXR2Mat(filename, 'Py');
+        catch
+            YDepthMap = [0];
+        end
+        try
+            ZDepthMap = piEXR2Mat(filename, 'Pz');
+        catch
+            ZDepthMap = [0];
+        end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
         output(:,:,1) = piEXR2Mat(filename, 'Px');
