@@ -27,7 +27,7 @@ for ii = 2:numel(thisR.assets.Node)
             thisNode.scale = thisNode.scale/factor;
         elseif iscell(thisNode.scale)
             for j = 1:numel(thisNode.scale)
-                thisNode.scale{j} = thisNode.scale{j}/facotr;
+                thisNode.scale{j} = thisNode.scale{j}/factor;
             end
         else
             warning("Not sure how to adjust scale");
