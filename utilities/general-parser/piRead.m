@@ -97,7 +97,9 @@ end
 
 thisR.inputFile = infile;
 
+% Copy?  Or some other method?
 exporter = p.Results.exporter;
+thisR.exporter = exporter;
 
 %% Set the default output directory
 outFilepath      = fullfile(piRootPath,'local',inputname);
@@ -163,7 +165,9 @@ if(flip)
 end
 
 % Read the light sources and delete them in world
-thisR = piLightRead(thisR);
+if ~isequal(exporter,'Copy')
+    thisR = piLightRead(thisR);
+end
 
 % Read Scale, if it exists
 % Because PBRT is a LHS and many object models are exported with a RHS,
@@ -181,17 +185,30 @@ end
 %%  Read world information for the Include files
 world = thisR.world;
 if any(piContains(world, 'Include'))
-    % If we have an Include file. The txt lines in the file will be merged
-    % into thisR.world and be parsed together.
+    % If we have an Include file in the world section, the txt lines in the
+    % file will be merged into thisR.world.  Then we will parse the
+    % information in those include files with the information in the world
+    % section.
+    %
+
+    % Find all the lines in world that have an 'Include'
     inputDir = thisR.get('inputdir');
     IncludeIdxList = find(piContains(world, 'Include'));
     
+    % For each of those lines ....
     for IncludeIdx = 1:numel(IncludeIdxList)
+        % Find the include file
         IncStrSplit = strsplit(world{IncludeIdxList(IncludeIdx)},' ');
         IncFileName = erase(IncStrSplit{2},'"');
         IncFileNamePath = fullfile(inputDir, IncFileName);
+        
+        % Read the text from the include file
         [IncLines, ~] = piReadText(IncFileNamePath);
+        
+        % Erase the include line.
         thisR.world{IncludeIdxList(IncludeIdx)} = [];
+        
+        % Add the text to the world section 
         thisR.world = {thisR.world, IncLines};
         thisR.world = cat(1, thisR.world{:});
     end
@@ -216,13 +233,13 @@ else
         thisR.world(2:parsedUntil)=[];
     end
     thisR.materials.list = materialLists;
-%     thisR.materials.inputFile_materials = inputFile_materials;
+    %     thisR.materials.inputFile_materials = inputFile_materials;
     
     % Call material lib
     thisR.materials.lib = piMateriallib;
     
     thisR.textures.list = textureList;
-%     thisR.textures.inputFile_textures = inputFile_materials;
+    %     thisR.textures.inputFile_textures = inputFile_materials;
     
     if exist('trees','var') && ~isempty(trees)
         thisR.assets = trees.uniqueNames;

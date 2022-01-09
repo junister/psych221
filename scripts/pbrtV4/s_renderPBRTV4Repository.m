@@ -2,13 +2,13 @@
 %
 %
 
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
 % The contemporary bathroom took about 4 minutes to run on the muxreconrt.
 
 % Read the original
-thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/contemporary_bathroom/contemporary_bathroom.pbrt');
-
-% Make sure the exporter is set to 'Copy' so all the files are copied
-thisR.set('exporter','Copy');
+thisR = piRead('/Users/wandell/Documents/MATLAB/iset3d-v4/data/V4/web/contemporary_bathroom/contemporary_bathroom.pbrt','exporter','Copy');
 
 % Write it in local
 piWrite(thisR);

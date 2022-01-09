@@ -133,6 +133,7 @@ overwritegeometry   = p.Results.overwritegeometry;
 overwritejson       = p.Results.overwritejson;
 verbosity           = p.Results.verbose;
 
+exporter = thisR.get('exporter');
 
 %% Check the input and output directories
 
@@ -187,7 +188,9 @@ piWriteBlocks(thisR,fileID);
 piIncludeLines(thisR,fileID);
 
 %% Write out the lights
-piLightWrite(thisR);
+if ~isequal(exporter,'Copy')
+    piLightWrite(thisR);
+end
 
 %% Close the main PBRT scene file
 fclose(fileID);
@@ -195,10 +198,14 @@ fclose(fileID);
 %% Write scene_materials.pbrt
 
 % Even when copying, we extract the materials and textures
-piWriteMaterials(thisR,overwritematerials);
+if ~isequal(exporter,'Copy')    
+    piWriteMaterials(thisR,overwritematerials);
+end
 
 %% Overwrite geometry.pbrt
-piWriteGeometry(thisR,overwritegeometry);
+if ~isequal(exporter,'Copy')    
+    piWriteGeometry(thisR,overwritegeometry);
+end
 
 %% Overwrite xxx.json - For traffic scenes
 
@@ -599,17 +606,17 @@ basename = thisR.get('output basename');
 % For the Copy case, we just copy the world and Include the lights.
 if isequal(thisR.exporter, 'Copy')
     for ii = 1:numel(thisR.world)
-        if ii == numel(thisR.world)
-            % Lights at the end
-            fprintf(fileID,'Include "%s_lights.pbrt" \n', basename);
-        end
-
+        %         if ii == numel(thisR.world)
+        %             % Lights at the end
+        %             fprintf(fileID,'Include "%s_lights.pbrt" \n', basename);
+        %         end
+        
         fprintf(fileID,'%s \n',thisR.world{ii});
-
-        if ii == 1
-            % Materials at the beginning
-            fprintf(fileID,'Include "%s_materials.pbrt" \n', basename);
-        end
+        
+        %         if ii == 1
+        %             % Materials at the beginning
+        %             fprintf(fileID,'Include "%s_materials.pbrt" \n', basename);
+        %         end
     end
     return;
 end
