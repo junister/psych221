@@ -18,32 +18,55 @@ if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name', 'MacBethChecker');
 
-% Add a light so we can see through the glass
-fileName = 'cathedral_interior.exr';
+% Widen the field of view
+thisR.set('fov',40);
+
+% Add a light with bright windows
+% fileName = 'cathedral_interior.exr';
+fileName = 'room.exr';
 envLight = piLightCreate('background', ...
     'type', 'infinite',...
     'mapname', fileName);
 thisR.set('lights', 'add', envLight);                       
-thisR.set('lights','background','rotation val',{[0 0 5 0], [45 1 0 0]});
+thisR.set('lights','background','rotation val',{[0 0 5 0], [135 1 0 0]});
 
-% piWRS(thisR);
-thisR = piMaterialsInsert(thisR);
-% object = thisR.get('asset', '001_colorChecker_O');
+% Insert the materials
+thisR = piMaterialsInsert(thisR,'mtype',{'all'});
 
 objNames = thisR.get('object names');
 matNames = thisR.get('material', 'names');
 
-% Patch are the current materials.  We don't want to use them again
-% Glass is not looking clear.  Adjust its parameters!
+% Materials containing 'Patch' are the current materials.  We don't want to
+% use them again.
 newMatNames = matNames(~piContains(matNames, 'Patch'));
-for ii = 2:numel(newMatNames) + 1
-    thisR.set('asset', objNames{ii}, 'materialname', newMatNames{ii-1});
+
+% N.B.  Glass is not looking clear.  Adjust its parameters!
+% Assign each of the 24 patches a material.  If we run out of materials,
+% make it a mirror.
+for ii=2:numel(objNames)
+    if (ii - 1) <= numel(newMatNames)
+        thisR.set('asset', objNames{ii}, 'materialname', newMatNames{ii-1});
+    else
+        thisR.set('asset',objNames{ii},'material name','mirror');
+    end
 end
 
-piWRS(thisR);
+scene = piWRS(thisR);
+sceneSet(scene,'gamma',0.7);
 
-%%
-% thisR.set('asset', '008_colorChecker_O', 'materialname', 'mahogany');
+%% END
 
-
-%%
+%{
+% This is an interesting arrangement with every other row being a mirror
+% But it includes fewer textures
+newMatNames = matNames(~piContains(matNames, 'Patch'));
+nMaterials = numel(newMatNames);
+for ii = 2:2:(numel(objNames))
+    thisMaterial = mod(ii/2,nMaterials);
+    thisR.set('asset', objNames{ii}, 'material name', newMatNames{thisMaterial});
+    thisR.set('asset', objNames{ii+1}, 'material name', 'mirror');
+end
+%}
+% for ii=(numel(newMatNames)+2):numel(objNames)
+%     thisR.set('asset',objNames{ii},'material name','mirror');
+% end
