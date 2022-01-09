@@ -23,17 +23,24 @@ function [depthrange, depthmap] = piSceneDepth(thisR)
 % We think we should not have to do this to correctly get the depth.  The
 % PBRT calculation should be independent of the lens!!!
 pinholeR        = thisR.copy;
+pinholeR.set('camera','delete');
 pinholeR.camera = piCameraCreate('pinhole');
+% Note: We put back the original recipe later
+piWrite(pinholeR);
+
 
 %% The render returns the depth map in meters
 
-depthmap   = piRender(pinholeR, 'render type','depth');
+% only asking for depth might not return anything, so ask for both?
+depthmap   = piRender(pinholeR, 'film render type','depth');
 if isstruct(depthmap)
     tmp        = depthmap.depthMap(depthmap.depthMap > 0);
 else
     tmp        = depthmap(depthmap > 0);
 end
 depthrange = [min(tmp(:)), max(tmp(:))];
+
+piWrite(thisR); % put it back the way the user wanted it
 
 %% If no output arguments plot the histogram
 
