@@ -348,7 +348,12 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
             % Attach shape
-            [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
+            % Attach shape
+            if isfield(thisLight.shape,'value')
+                [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
+            else
+                [~, shpTxt] = piLightGet(thisLight, 'shape struct', 'pbrt text', true);
+            end
 
             lightSourceText{ii}.line = [lightSourceText{ii}.line shpTxt];
     end
