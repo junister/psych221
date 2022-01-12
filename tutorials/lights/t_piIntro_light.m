@@ -64,9 +64,18 @@ piLightCreate('list avaiable types');
 % key/val parameters for this function.  Thus, coneangle cannot be 'cone
 % angle'.
 %
-% Consult the textbook to see the full list of parameters.
-%
+% Until the v4 textbook is published, only informal sources are available
+% for light parameters.
+% 
+% Many are the same as v3, documented here
 % https://www.pbrt.org/fileformat-v3.html#lights
+%
+% But there are a lot of changes for v4. Here is a web resource we use:
+% https://github.com/shadeops/pbrt_v3-to-v4_migration
+%
+% We are also starting to add v4 information to the iset3D wiki:
+% https://github.com/ISET/iset3d/wiki
+% That will eventually show up in a wiki for iset3d-v4
 %
 lightName = 'new spot light';
 newLight = piLightCreate(lightName,...
