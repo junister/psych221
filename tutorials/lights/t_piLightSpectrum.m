@@ -13,31 +13,33 @@ if ~piDockerExists, piDockerConfig; end
 thisR = piRecipeDefault('scene name','checkerboard');
 
 %% The output will be written here
+%{
 sceneName = 'checkerboard';
 outFile = fullfile(piRootPath,'local',sceneName,'checkerboard.pbrt');
 thisR.set('outputFile',outFile);
-
+%}
 %% Set up the render parameters
 piCameraTranslate(thisR,'z shift',2);
 
 %% Check the light list
-piLightGet(thisR);
+thisR.get('light print');
 
 %% Remove all the lights
-thisR     = piLightDelete(thisR, 'all');
-lightList = piLightGet(thisR);
-
+thisR.set('light', 'delete', 'all');
+thisR.get('light print');
 %% Add one equal energy light
 
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
 % edges
-thisR = piLightAdd(thisR,... 
-    'type','spot',...
-    'light spectrum','equalEnergy',...
-    'spectrum scale', 1,...
-    'cone angle',20,...
-    'cameracoordinate', true);
+spotLgt = piLightCreate('new spot',...
+                        'type', 'spot',...
+                        'spd', 'equalEnergy',...
+                        'specscale float', 1,...
+                        'coneangle', 20,...
+                        'cameracoordinate', true);
+thisR.set('light', 'add', spotLgt);
+thisR.get('light print');
 
 %% Render
 piWrite(thisR);
@@ -48,8 +50,7 @@ scene = sceneSet(scene,'name','Equal energy (spot)');
 sceneWindow(scene);
 
 %%  Narrow the cone angle of the spot light a lot
-idx = 1;
-piLightSet(thisR,idx,'spectrum', 'tungsten');
+thisR.set('lights', 'new spot', 'spd', 'tungsten');
 piWrite(thisR);
 
 %% Used for scene

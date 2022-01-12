@@ -76,7 +76,7 @@ for ii = 1:numel(thisR.lights)
                 outputDir = thisR.get('output dir');
                 lightSpdDir = fullfile(outputDir, 'spds', 'lights');
                 thisLightfile = fullfile(lightSpdDir,...
-                    sprintf('%s_%f.spd', specVal, spectrumScale));
+                    sprintf('%s_%f.spd', ieParamFormat(specVal), spectrumScale));
                 if ~exist(lightSpdDir, 'dir'), mkdir(lightSpdDir); end
 
                 fid = fopen(thisLightfile, 'w');
