@@ -28,9 +28,11 @@ function lght = piLightSet(lght, param, val, varargin)
 %             'area'    - convert an object into an area light. (TL: Needs
 %                         more documentation; I'm not sure how it's used at
 %                         the moment.)
-%             'infinite' - an infinitely far away light source that
+%             'infinite' - A global illumination, infinitely far away, that
 %                          potentially casts illumination from all
-%                          directions. Takes no parameters.
+%                          directions. Takes no parameters.  Sometimes
+%                          called a skymap and based on an exr file
+%                          (mapname).
 %
 %  'spectrum' - The spectrum that the light will emit. Read
 %                          from ISETCam/ISETBio light data. See

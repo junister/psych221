@@ -35,7 +35,7 @@ for ii =1:numel(lightNames)
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
     position(ii,:) = thisR.get('light',ii,'position');    
-    spdT{ii} = thisLight.spd.value;
+    spdT{ii} = num2str(thisLight.spd.value);
 end
 
 %% Display the table
