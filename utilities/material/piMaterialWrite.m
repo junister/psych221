@@ -46,7 +46,10 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
             nn=nn+1;
         end
     end
-    textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
+    % ZLY: if special texture cases exist, append them to the end
+    if exist('TextureTex', 'var')
+        textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
+    end
 else
     textureTxt = {};
 end

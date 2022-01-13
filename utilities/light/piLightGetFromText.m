@@ -138,11 +138,11 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % from
-                from = piParameterGet(thisLine, 'point from');
+                from = piParameterGet(thisLine, 'point3 from');
                 thisLightSource = piLightSet(thisLightSource, 'from val', from);
 
                 % to
-                to = piParameterGet(thisLine, 'point to');
+                to = piParameterGet(thisLine, 'point3 to');
                 thisLightSource = piLightSet(thisLightSource, 'to val', to);
 
                 % cone angle
@@ -159,7 +159,7 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % from
-                from = piParameterGet(thisLine, 'point from');
+                from = piParameterGet(thisLine, 'point3 from');
                 thisLightSource = piLightSet(thisLightSource, 'from val', from);
 
             case 'goniometric'
@@ -177,11 +177,11 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % from
-                from = piParameterGet(thisLine, 'point from');
+                from = piParameterGet(thisLine, 'point3 from');
                 thisLightSource = piLightSet(thisLightSource, 'from val', from);
 
                 % to
-                to = piParameterGet(thisLine, 'point to');
+                to = piParameterGet(thisLine, 'point3 to');
                 thisLightSource = piLightSet(thisLightSource, 'to val', to);
 
             case 'projection'
