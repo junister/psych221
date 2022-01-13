@@ -1,6 +1,8 @@
 %% t_piLightType
 %
+%   BRT V4 light types illustrated
 %
+% ZLy
 
 %% Initialize ISET and Docker
 
@@ -9,20 +11,20 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the file
-thisR = piRecipeDefault('scene name','checkerboard');
 
-%% The output will be written here
-%{
-sceneName = 'checkerboard';
-outFile = fullfile(piRootPath,'local',sceneName,'checkerboard.pbrt');
-thisR.set('outputFile',outFile);
+% thisR = piRecipeDefault('scene name','checkerboard');
+
+% Scale the sphere to 1 meter size.  This should be the default sphere, 1
+% meter size at location 0,0,0 (BW)
+% {
+thisR = piRecipeDefault('scene name','sphere');
+thisR.set('asset','001_Sphere_O','scale',2/380);
+% Put the camera 3 meters away
+thisR.set('from',[0 0 3]);
 %}
 
-%% Set up the render parameters
-piCameraTranslate(thisR,'z shift',2);
-
 %% Check the light list
-thisR.get('light print');
+thisR.show('lights');
 
 %% Remove all the lights
 thisR.set('light', 'delete', 'all');
@@ -40,54 +42,54 @@ spotlight = piLightCreate('new spot',...
     'cameracoordinate', true);
 
 thisR.set('light', 'add', spotlight);
-%% Render
-piWrite(thisR);
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-val = thisR.get('light', 'new spot', 'coneangle');
-scene = sceneSet(scene,'name',sprintf('EE spot %d',val));
-sceneWindow(scene);
+%% Render depth and radiance
+
+thisR.set('render type',{'radiance','depth'});
+
+piWRS(thisR,'name',sprintf('EE spot %d %d %d',val));
 
 %%  Narrow the cone angle of the spot light a lot
 thisR.set('light', 'new spot', 'coneangle', 10);
-piWrite(thisR);
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-val = thisR.get('light', 'new spot', 'coneangle');
-scene = sceneSet(scene,'name',sprintf('EE spot %d',val));
-sceneWindow(scene);
+piWRS(thisR,'name','EE spot angle 10');
 
 %%  Change the light and render again
-thisR.set('light', 'translate', 'new spot', [2 0 2]);
 
-%{
-piLightSet(thisR,idx,'type','spot');
-piLightTranslate(thisR,idx,...
-    'z shift',2,...
-    'x shift',2);
-%}
 thisR.set('light', 'new spot', 'coneangle', 25);
-piWrite(thisR);
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-val = thisR.get('light', 'new spot', 'from');
-scene = sceneSet(scene,'name',sprintf('EE point [%d,%d,%d]',val));
-sceneWindow(scene);
+piWRS(thisR,'name','EE spot angle 25')
 
 %%  Change the light and render again
-infLight = piLightCreate('inf light',...
-                        'type','infinite',...
-                        'spd','D50');
-thisR.set('light', 'replace', 'new spot', infLight);
-thisR.get('light print');
-piWrite(thisR);
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-val = thisR.get('light', infLight.name, 'type');
-scene = sceneSet(scene,'name',sprintf('EE type %s',val));
-sceneWindow(scene);
+% Infinite means the light is on the whole sphere with a particular SPD.
+infLight = piLightCreate('inf light',...
+    'type','infinite',...
+    'spd','D50');
+thisR.set('light', 'replace', 'new spot', infLight);
+
+thisR.show('lights');
+
+piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val))
+
+%% One more example
+thisR.set('light', 'delete', 'all');
+
+thisR.set('light', 'add', spotlight);
+
+% Infinite means the light is on the whole sphere with a particular SPD.
+infLight = piLightCreate('room',...
+    'type','infinite',...
+    'mapname', 'room.exr');
+
+thisR.set('light','new spot','specscale',10);
+thisR.set('light','new spot','from',thisR.get('from') + [2 0 0]);
+thisR.set('light','new spot','to',[0 0 0]);
+thisR.set('light', 'add', infLight);
+
+thisR.show('lights');
+
+piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val))
+
+%% END
 

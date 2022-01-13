@@ -121,6 +121,7 @@ function val = recipeGet(thisR, param, varargin)
 %     'n subpixels'      - 2 vector, row,col
 %
 %    % Properties of how PBRT does the rendering
+%      'render type'   -  Cell array indicating 'radiance','depth', ...
 %      'integrator'
 %      'rays per pixel'
 %      'n bounces'
@@ -278,7 +279,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         %   so  v + 'from' = 'to'
         val = thisR.lookAt.to - thisR.lookAt.from;
         val = val/norm(val);
-
+    case {'rendertype','filmrendertype'}
+        % A cell array of the radiance and other metadata types
+        val = thisR.metadata.rendertype;
+        
         % Camera fields
     case {'camera'}
         % The whole struct
@@ -1201,8 +1205,8 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisScale = thisR.get('assets',Objects(ii),'world scale');
 
             % All the object points
-            if isfield(thisNode.shape,'pointp')
-                pts = thisNode.shape.pointp;
+            if isfield(thisNode.shape,'point3p')
+                pts = thisNode.shape.point3p;
                 if ~isempty(pts)
                     % Range of points times any scale factors on the path
                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
@@ -1239,14 +1243,16 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         switch varargin{1}
             case 'names'
+                % thisR.get('lights','names')
                 n = numel(thisR.lights);
                 val = cell(1, n);
                 for ii=1:n
                     val{ii} = thisR.lights{ii}.name;
                 end
+
             otherwise
-                % The first argument indicates the material name and there
-                % must be a second argument for the property
+                % The first argument indicates the light name and there
+                % must be a second argument for the light property
                 if isnumeric(varargin{1}) && ...
                         varargin{1} <= numel(thisR.lights)
                     % Search by index.  Get the material directly.
@@ -1260,7 +1266,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % materials."
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
-                    % Search by name, find the index
+                    % Search for the light by name, find its index
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
                 end
@@ -1270,10 +1276,32 @@ switch ieParamFormat(param)  % lower case, no spaces
                     return;
                 end
                 if numel(varargin) >= 2
-                    % Return the material property
+                    % thisR.get('light',idx,'position');
+                    %
+                    % Return the light property
                     % thisR.get('material', material/idx/name, property)
                     % Return the material property
-                    val = piLightGet(thisLight, varargin{2});
+                    switch varargin{2}
+                        case 'position'
+                            % thisR.get('light',idx,'position')                            
+                            if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
+                                % The position may be at the camera, so we need
+                                % this special case.
+                                val = thisR.get('from');
+                            elseif isfield(thisLight,'from')
+                                val = thisLight.from.value;
+                            elseif isequal(thisLight.type,'infinite')
+                                val = Inf;
+                            elseif isequal(thisLight.type,'area')
+                                % Area light will need a different approach
+                                val = [];
+                            else
+                                val = Inf;
+                            end
+                        otherwise
+                            % Most light properties use this method
+                            val = piLightGet(thisLight, varargin{2});
+                    end
                 end
         end
     case {'nlight', 'nlights', 'light number', 'lights number'}

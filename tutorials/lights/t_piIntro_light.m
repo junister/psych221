@@ -99,7 +99,7 @@ piCameraTranslate(thisR,'z shift',1);
 
 piWrite(thisR);
 %%
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR, 'film render type', 'radiance');
 scene = sceneSet(scene,'name','Equal energy (spot)');
 sceneWindow(scene);
 
