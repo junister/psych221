@@ -27,7 +27,8 @@ if strcmp(match, 'L')
 end
 
 value=[];
-if piContains(match,'string') || piContains(match,'bool')
+if piContains(match,'string') || piContains(match,'bool') ||...
+        piContains(match,'texture')
     matchIndex = regexp(thisLine, match);
     if isempty(matchIndex)
         return;

@@ -77,12 +77,12 @@ switch tp
         texture.value.value = [];
     case 'scale'
         texture.type = 'scale';
-
-        texture.tex1.type = 'float';
-        texture.tex1.value = [];
-
-        texture.tex2.type = 'float';
-        texture.tex2.value = [];
+        
+        texture.scale.type = 'float';
+        texture.scale.value = [];
+        
+        texture.tex.type = 'texture';
+        texture.tex.value = [];
 
     case 'mix'
         texture.type = 'mix';

@@ -56,4 +56,8 @@ end
 if isfield(shape, 'phimax') && ~isempty(shape.phimax)
     txt = strcat(txt, ' "float phimax"', [' [',piNum2String(shape.phimax),']',]);
 end
+if isfield(shape, 'alpha') && ~isempty(shape.alpha)
+    txt = strcat(txt, ' "texture alpha"', [' ["',piNum2String(shape.alpha),'"]',]);
+end
+
 end

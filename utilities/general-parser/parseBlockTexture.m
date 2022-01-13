@@ -28,13 +28,17 @@ for ss = 5:2:numel(thisLine)
     keyName = ieParamFormat(keyTypeName{2});
 
     switch keyType
-        case {'string'}
+        case {'string','texture'}
+            
             thisVal = thisLine{ss + 1};
-        case {'float', 'rgb', 'color'}
+        case {'float', 'rgb', 'color','float scale'}
+            
             thisVal = str2num(thisLine{ss + 1});
         case {'integer'}
+            
             thisVal = uint64(str2num(thisLine{ss + 1}));
         case {'spectrum'}
+            
             [~, ~, e] = fileparts(thisLine{ss + 1});
             if isequal(e, '.spd')
                 % Is a file
@@ -43,7 +47,9 @@ for ss = 5:2:numel(thisLine)
                 % Is vector
                 thisVal = str2num(thisLine{ss + 1});
             end
+            
         case 'bool'
+            
             if isequal(thisLine{ss + 1}, 'true')
                 thisVal = true;
             elseif isequal(thisLine{ss + 1}, 'false')

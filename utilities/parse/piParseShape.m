@@ -90,8 +90,11 @@ if find(piContains(keyWords, 'Shape '))
                 shape.normaln = piParameterGet(txt, 'normal N');
                 %                 shape.normaln = keyWords{find(piContains(keyWords, 'normal N')) + 1};
             end
+            
+            if find(piContains(keyWords,'texture alpha'))
+                shape.alpha = piParameterGet(txt, 'texture alpha');
+            end
             % to add
-            % float/texture alpha
             % float/texture shadowalpha
         case 'heightfield'
             % todo
@@ -118,4 +121,5 @@ function s = shapeCreate
     s.p1 = '';
     s.p2='';
     s.phimax = '';
+    s.alpha = '';
 end

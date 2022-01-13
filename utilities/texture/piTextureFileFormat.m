@@ -1,95 +1,95 @@
-function piTextureFileFormat(Textures)
-% Convert any jpg textures to png format.
+function thisR = piTextureFileFormat(thisR)
+% Convert textures to PNG format.
+%     thisR = piTextureFileFormat(thisR)
+% 
+% Brief description:
+%   We convert any texture files used in the scene to PNG format.
+% 
+% Inputs: 
+%   thisR: render recipe.
 %
-% TODO - We need to write a routine that converts any jpg file names
-% in the PBRT files into png file names
+% Outputs:
+%   thisR: render recipe with updated textures.
 %
-% ZL Scien Stanford, 2018
-
+%
+% Note (Zhenyi): There is a weird case for me, when I use a JPG texture, the 
+%                PBRT runs without error, however the surface reflection
+%                which used a JPG texture is missing.
+%
+% ZL Scien Stanford, 2022
 %%
-% output = TextureFile;
-if exist(Textures,'dir')
-    currentfolder = pwd;
-    cd(Textures)
+textureList = values(thisR.textures.list);
 
-    %% Find any jpg file
-    jpgFiles =  dir('*.jpg');
-    bmpFiles  = dir('*.bmp');
-    %% Convert the jpg files to png
-    if ~isempty(jpgFiles)
-        nfiles = length(jpgFiles);
-        for ii=1:nfiles
-            % some hidden files might appear in dir as '._xxxxx.jpg', which we
-            % will delete.
-            if isequal(jpgFiles(ii).name(1),'.')
-                delete(jpgFiles(ii).name);
-            else
-                currentfilename = jpgFiles(ii).name;
-                currentimage = imread(currentfilename);
-                if piContains(jpgFiles(ii).name,'.JPG')
-                    currentname  = erase(jpgFiles(ii).name,'.JPG');
-                elseif piContains(jpgFiles(ii).name,'.jpg')
-                    currentname  = erase(jpgFiles(ii).name,'.jpg');
-                end
-                output = sprintf('%s.png',currentname);
-                imwrite(currentimage,output);
-                % After writing the pngs, we erase the jpg file.
-                original = sprintf('%s.jpg',currentname);
-                delete(original);
-            end
-        end
-        fprintf('Converted %d jpg files.\n',numel(jpgFiles));
-        % else
-        %     fprintf('No jpg files to be converted \n');
-    end
-    %% Convert the bump files to png
-    if ~isempty(bmpFiles)
-        nfiles = length(bmpFiles);
-        for ii=1:nfiles
-            % some hidden files might appear in dir as '._xxxxx.jpg', which we
-            % will delete.
-            if isequal(bmpFiles(ii).name(1),'.')
-                delete(bmpFiles(ii).name);
-            else
-                currentfilename = bmpFiles(ii).name;
-                currentimage = imread(currentfilename);
-                if piContains(bmpFiles(ii).name,'.bmp')
-                    currentname  = erase(bmpFiles(ii).name,'.bmp');
-                end
-                output = sprintf('%s.png',currentname);
-                imwrite(currentimage,output);
-                % After writing the pngs, we erase the jpg file.
-                original = sprintf('%s.bmp',currentname);
-                delete(original);
-            end
-        end
-        fprintf('Converted %d bmp files.\n',numel(bmpFiles));
-    end
-    %% Put all texture files in a seperate folder.
+inputDir = thisR.get('input dir');
 
-    % outputDir  = fileparts(thisR.outputFile);
-    % textureDir = fullfile(outputDir,'textures');
-    % textureFiles = dir('*.png');
-    % if ~exist(textureDir,'dir')
-    %     mkdir(textureDir);
-    % end
-    % for i=1:length(textureFiles)
-    %     textureFileName=textureFiles(i).name;
-    %     textureFilePath=textureFileName;
-    %     copyfile(textureFilePath,fullfile(textureDir,textureFileName));
-    % end
-    %%
-    cd(currentfolder)
-elseif exist(Textures, 'file')
-    [~,fname,ext] = fileparts(Textures);
-    if ~strcmpi(ext,'.png')&& ~strcmpi(ext,'.exr')
-        currentimage = imread(Textures);
-        output = sprintf('%s.png',fname);
-        imwrite(currentimage,output);
-        % After writing the pngs, we erase the original file.
-        delete(Textures);
+for ii = 1:numel(textureList)
+    if piContains(textureList{ii}.name,'.alphamap')
+        continue;
     end
-else
-    warning('Texture %s not found!', Textures);
+    
+    [path, name, ext] = fileparts(textureList{ii}.filename.value);
+    
+    if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
+        
+        texSlotName = textureList{ii}.filename.value;
+        thisImgPath = fullfile(inputDir, texSlotName);
+        
+        if exist(thisImgPath, 'file')
+            
+            thisImg = imread(thisImgPath);
+            outputPath = fullfile(inputDir, path, [name,'.png']);
+            
+            imwrite(thisImg,outputPath);
+      
+            % update texture slot
+            textureList{ii}.filename.value = fullfile(path, [name,'.png']);
+            thisR.textures.list(textureList{ii}.name) = textureList{ii};
+                
+            fprintf('Texture: %s is converted \n',textureList{ii}.filename.value);
+            
+            % remove the original jpg textures.
+%             delete(thisImgPath);
+        else
+            warning('Texture: %s is missing',textureList{ii}.filename.value);
+        end
+    end
 end
+
+% Update normal textures
+matKeys = keys(thisR.materials.list);
+
+for ii = 1:numel(matKeys)
+    thisMat = thisR.materials.list(matKeys{ii});
+    thisMat.normalmap.type = 'string';
+    normalImgPath = thisMat.normalmap.value;
+    thisImgPath = fullfile(inputDir, normalImgPath);
+    
+    if isempty(normalImgPath)
+        continue;
+    end
+    
+    if exist(thisImgPath, 'file') && ~isempty(normalImgPath)
+        
+        [path, name, ext] = fileparts(normalImgPath);
+        
+        thisImg = imread(thisImgPath);
+        outputPath = fullfile(inputDir, path, [name,'.png']);
+        
+        imwrite(thisImg,outputPath);
+        % update texture slot
+        thisMat.normalmap.value = fullfile(path, [name,'.png']);
+        
+        thisR.materials.list(matKeys{ii}) = thisMat;
+        
+        fprintf('Normal Map: %s is converted \n',normalImgPath);
+        
+        % remove the original jpg textures.
+%         delete(thisImgPath);
+    else
+        warning('Normal Map: %s is missing',normalImgPath);
+    end
+    
+end
+
+
 end

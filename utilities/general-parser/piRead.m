@@ -241,6 +241,9 @@ else
     thisR.textures.list = textureList;
     %     thisR.textures.inputFile_textures = inputFile_materials;
     
+    % Convert texture file format to PNG
+    thisR = piTextureFileFormat(thisR);
+
     if exist('trees','var') && ~isempty(trees)
         thisR.assets = trees.uniqueNames;
     else
@@ -250,6 +253,7 @@ else
         % shape ...
         disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
     end
+    
 end
 %{
 if any(piContains(world,'Include')) && ...

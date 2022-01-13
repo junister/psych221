@@ -31,44 +31,25 @@ p.parse(thisR);
 % Texture txt lines creation are moved into piTextureText function.
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
-    textureTxt = cell(1, thisR.textures.list.Count);
+%     textureTxt = cell(1, thisR.textures.list.Count);
     textureKeys = keys(thisR.textures.list);
+    tt = 1;
+    nn = 1;
     for ii = 1:numel(textureKeys)
-        textureTxt{ii} = piTextureText(thisR.textures.list(textureKeys{ii}), thisR);
+        tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR);
+        if piContains(tmpTxt,'texture tex')
+            % This texture has a property defined by another texture
+            TextureTex{tt} = tmpTxt;
+            tt=tt+1;
+        else
+            textureTxt{nn} = tmpTxt;
+            nn=nn+1;
+        end
     end
+    textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
 else
     textureTxt = {};
 end
-
-%% Parse the output file, working directory, stuff like that.
-% Commented by ZLY. Does this section do any work?
-
-%{
-% Converts any jpg file names in the PBRT files into png file names
-ntxtLines=length(thisR.materials.txtLines);
-for jj = 1:ntxtLines
-    str = thisR.materials.txtLines(jj);
-    if piContains(str,'.jpg"')
-        thisR.materials.txtLines(jj) = strrep(str,'jpg','png');
-    end
-    if piContains(str,'.jpg "')
-        thisR.materials.txtLines(jj) = strrep(str,'jpg ','png');
-    end
-    % photoshop exports texture format with ".JPG "(with extra space) ext.
-    if piContains(str,'.JPG "')
-        thisR.materials.txtLines(jj) = strrep(str,'JPG ','png');
-    end
-    if piContains(str,'.JPG"')
-        thisR.materials.txtLines(jj) = strrep(str,'JPG','png');
-    end
-    if piContains(str,'bmp')
-        thisR.materials.txtLines(jj) = strrep(str,'bmp','png');
-    end
-    if piContains(str,'tif')
-        thisR.materials.txtLines(jj) = strrep(str,'tif','png');
-    end
-end
-%}
 
 %% Create txtLines for the material struct array
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
@@ -107,36 +88,6 @@ end
 for row=1:length(mixMaterialText)
     fprintf(fileID,'%s\n',mixMaterialText{row});
 end
-
-% Add the materials
-% nPaintLines = {};
-% gg = 1;
-% for dd = 1:length(materialTxt)
-%     if piContains(materialTxt{dd},'paint_base') &&...
-%             ~piContains(materialTxt{dd},'mix')||...
-%             piContains(materialTxt{dd},'paint_mirror') &&...
-%             ~piContains(materialTxt{dd},'mix')
-%         nPaintLines{gg} = dd;
-%         gg = gg+1;
-%     end
-% end
-
-% Find material names contains 'paint_base' or 'paint_mirror'
-% if ~isempty(nPaintLines)
-%     for hh = 1:length(nPaintLines)
-%         fprintf(fileID,'%s\n',materialTxt{nPaintLines{hh}});
-%         materialTxt{nPaintLines{hh}} = [];
-%     end
-%     materialTxt = materialTxt(~cellfun('isempty',materialTxt));
-% 
-%     for row=1:length(materialTxt)
-%         fprintf(fileID,'%s\n',materialTxt{row});
-%     end
-% else
-%     for row=1:length(materialTxt)
-%         fprintf(fileID,'%s\n',materialTxt{row});
-%     end
-% end
 
 %% Write media to xxx_materials.pbrt
 
