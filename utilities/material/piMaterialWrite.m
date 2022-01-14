@@ -35,6 +35,8 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     textureKeys = keys(thisR.textures.list);
     tt = 1;
     nn = 1;
+    TextureTex = [];
+    textureTxt = [];
     for ii = 1:numel(textureKeys)
         tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR);
         if piContains(tmpTxt,'texture tex')
@@ -47,7 +49,7 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
         end
     end
     % ZLY: if special texture cases exist, append them to the end
-    if exist('TextureTex', 'var')
+    if numel(TextureTex) > 0
         textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
     end
 else
@@ -59,20 +61,20 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
     materialKeys= keys(thisR.materials.list);
     for ii=1:length(materialTxt)
-        % Converts the material struct to text 
+        % Converts the material struct to text
         materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}));
     end
 else
     materialTxt{1} = '';
 end
 
-% check mix material, make sure mix material reference the material after the definition 
+% check mix material, make sure mix material reference the material after the definition
 mixMatIndex = piContains(materialTxt,'mix');
 mixMaterialText = materialTxt(mixMatIndex);
 nonMixMaterialText = materialTxt(~mixMatIndex);
 
 %% Write to scene_material.pbrt texture-material file
-output = thisR.get('materials output file'); 
+output = thisR.get('materials output file');
 fileID = fopen(output,'w');
 fprintf(fileID,'# Exported by piMaterialWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
 
@@ -142,7 +144,6 @@ if ~isempty(medium.vsfFile)
     val_floatindex = sprintf(' "string vsfFile" "spds/%s_vsf.spd"',medium.name);
     val = strcat(val, val_floatindex);
 end
-    
+
 
 end
-

@@ -23,10 +23,10 @@ textureList = values(thisR.textures.list);
 inputDir = thisR.get('input dir');
 
 for ii = 1:numel(textureList)
-    if piContains(textureList{ii}.name,'.alphamap')
+
+    if ~isfield(textureList{ii},'filename')
         continue;
     end
-    
     [path, name, ext] = fileparts(textureList{ii}.filename.value);
     
     if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
@@ -35,11 +35,13 @@ for ii = 1:numel(textureList)
         thisImgPath = fullfile(inputDir, texSlotName);
         
         if exist(thisImgPath, 'file')
-            
-            thisImg = imread(thisImgPath);
+ 
             outputPath = fullfile(inputDir, path, [name,'.png']);
             
-            imwrite(thisImg,outputPath);
+            if ~exist(outputPath,'file')
+                thisImg = imread(thisImgPath);
+                imwrite(thisImg,outputPath);
+            end
       
             % update texture slot
             textureList{ii}.filename.value = fullfile(path, [name,'.png']);
