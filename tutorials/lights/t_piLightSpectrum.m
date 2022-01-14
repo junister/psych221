@@ -1,7 +1,14 @@
 %% t_piLightSpectrum
 %
-% Render the checkerboard scene with two light spectra
+% Render the checkerboard scene with two different light spectra
 %
+% What are the possible spectral we can use?  Let's illustrate in here.  
+% There is a way to get fluorescence, but I don't know how.
+%
+% Blackbody, rgb, and equal energy are illustrated
+%
+% See also
+%   t_piLightType
 
 %% Initialize ISET and Docker
 
@@ -12,50 +19,72 @@ if ~piDockerExists, piDockerConfig; end
 %% Read the file
 thisR = piRecipeDefault('scene name','checkerboard');
 
-%% The output will be written here
-%{
-sceneName = 'checkerboard';
-outFile = fullfile(piRootPath,'local',sceneName,'checkerboard.pbrt');
-thisR.set('outputFile',outFile);
-%}
-%% Set up the render parameters
+% Set up the render parameters
 piCameraTranslate(thisR,'z shift',2);
 
-%% Check the light list
-thisR.get('light print');
-
-%% Remove all the lights
+% Add one equal energy light
 thisR.set('light', 'delete', 'all');
-thisR.get('light print');
-%% Add one equal energy light
 
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
 % edges
-spotLgt = piLightCreate('new spot',...
+spotLgt1 = piLightCreate('spot1',...
                         'type', 'spot',...
                         'spd', 'equalEnergy',...
                         'specscale float', 1,...
                         'coneangle', 20,...
                         'cameracoordinate', true);
-thisR.set('light', 'add', spotLgt);
+thisR.set('light', 'add', spotLgt1);
+
 thisR.get('light print');
 
-%% Render
-piWrite(thisR);
+% Render
+piWRS(thisR,'name','Equal energy (spot)');
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Equal energy (spot)');
-sceneWindow(scene);
+%%  Change the spectrum to tungsten
 
-%%  Narrow the cone angle of the spot light a lot
-thisR.set('lights', 'new spot', 'spd', 'tungsten');
-piWrite(thisR);
+% What are the possible spd values?
+thisR.set('lights', 'spot1', 'spd', 'tungsten');
 
-%% Used for scene
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Tungsten');
-sceneWindow(scene);
+piWRS(thisR,'name','Tungsten (spot)');
 
-%%
+%% What are the possible spd strings?
+
+thisR.set('lights', 'spot1', 'spd', 'D50');
+
+piWRS(thisR,'name','D50 (spot)');
+
+%% Black body - specify just a single color temperature value
+
+thisR.set('lights', 'spot1', 'spd', 3000);
+
+piWRS(thisR,'name','3K (spot)');
+
+%% Now overlay two lights
+
+spotLgt2 = piLightCreate('spot2',...
+                        'type', 'spot',...
+                        'spd', 3000,...
+                        'specscale float', 1,...
+                        'coneangle', 20,...
+                        'cameracoordinate', true);
+thisR.set('lights','add',spotLgt2);
+
+position = thisR.get('lights','spot1','position');
+thisR.set('lights','spot1','from',position + [3 0 0]);
+thisR.set('lights','spot2','from',position - [3 0 0]);
+
+thisR.set('lights','spot1','spd',8000);
+
+thisR.show('lights');
+
+piWRS(thisR,'name','Mixture (spot)');
+
+%% Adjust spread of the spots
+
+% Annoyingly, we can't use 'cone angle'
+thisR.set('lights','spot1','coneangle',5);
+thisR.set('lights','spot2','coneangle',5);
+piWRS(thisR,'name','Mixture narrow (spot)');
+
+%% END
