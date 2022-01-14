@@ -20,9 +20,24 @@ function [name, sz] = piParseObjectName(txt)
 
 
 % Find the location of #ObjectName in the string
-pattern = '#ObjectName';
-loc = strfind(txt,pattern);
-loc_dimenstion = strfind(txt,'#Dimension');
+patternList = {'#ObjectName','#object name', '#collection name'};
+for ii = 1:3
+    pattern = patternList{ii};
+    loc = strfind(txt,pattern);
+    if isempty(loc)
+        continue;
+    else
+        
+        loc_dimenstion = strfind(txt,'#Dimension');
+        break;
+    end
+end
+% if piContains(txt,'#ObjectName')
+%     pattern = '#ObjectName';
+%     loc = strfind(txt,pattern);
+%     loc_dimenstion = strfind(txt,'#Dimension');
+% end
+
 
 % Look for a colon
 % pos = strfind(txt,':');
@@ -50,6 +65,6 @@ else
 end
 name = erase(name,'"');
 name = erase(name,' ');
-if strcmp(name(end),' '), name(end)='';end
+% if strcmp(name(end),' '), name(end)='';end
 
 end

@@ -17,7 +17,7 @@ nn=1;ii=1;
 txtLines = txtLines(~cellfun('isempty',txtLines));
 
 %% remove lines start with '#' except '#ObjectName'
-txtLines = txtLines(or(~strncmp(txtLines,'#',1), strncmp(txtLines,'#ObjectName',11)));
+txtLines = txtLines(or(~strncmp(txtLines,'#',1), contains(txtLines,{'#ObjectName','#object name','#collection name'})));
 tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
 txtLines = regexprep(txtLines, '\t', ' ');
 
@@ -70,7 +70,6 @@ while ii <= nLines
             newlines{nn,1}=thisLine; nn=nn+1;
         end
     end
-    
     ii=ii+1;
 end
 

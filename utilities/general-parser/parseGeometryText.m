@@ -52,7 +52,7 @@ while i <= length(txt)
 
     % Return if we've reached the end of current attribute
 
-    if strcmp(currentLine,'AttributeBegin') && ~strcmp(currentLine(1),'#')
+    if strcmp(currentLine,'AttributeBegin')
         % This is an Attribute inside an Attribute
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
 
@@ -66,11 +66,12 @@ while i <= length(txt)
 
         subtrees = cat(1, subtrees, subnodes);
         i =  i + retLine;
-    elseif strncmp(currentLine,'#ObjectName', 11)
+    elseif contains(currentLine,{'#ObjectName','#object name','#collection name'})&&...
+            strcmp(currentLine(1),'#')
         [name, sz] = piParseObjectName(currentLine);
 
     elseif strncmp(currentLine,'Transform ',10) ||...
-            piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
+            piContains(currentLine,'ConcatTransform') 
         [translation, rot, scale] = parseTransform(currentLine);
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
