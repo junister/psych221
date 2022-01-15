@@ -16,6 +16,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 % Zhenyi, 2021
 %%
+persistent ourDocker;
 [indir, fname,~] = fileparts(inputFile);
 
 dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
@@ -27,7 +28,8 @@ if ~ispc
     dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
     [status,result] = system(dockercmd);
 else
-    ourDocker = dockerWrapper();
+
+    if isempty(ourDocker), ourDocker = dockerWrapper(); end
     ourDocker.command = ['imgtool convert --exr2bin ' channelname];
     ourDocker.dockerImageName = dockerimage;
     ourDocker.localVolumePath = indir;
