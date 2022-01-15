@@ -34,8 +34,12 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
-    position(ii,:) = thisR.get('light',ii,'position');    
-    spdT{ii} = num2str(thisLight.spd.value);
+    position(ii,:) = thisR.get('light',ii,'position');
+    if isempty(thisLight.mapname)
+        spdT{ii} = num2str(thisLight.spd.value);
+    else
+        spdT{ii} = thisLight.mapname.value;
+    end
 end
 
 %% Display the table
