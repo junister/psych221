@@ -72,15 +72,20 @@ for ii = 1:numel(matKeys)
     
     if exist(thisImgPath, 'file') && ~isempty(normalImgPath)
         
-        [path, name, ext] = fileparts(normalImgPath);
+        [path, name, ext] = fileparts(dockerWrapper.pathToLinux(normalImgPath));
         
         thisImg = imread(thisImgPath);
         outputPath = fullfile(inputDir, path, [name,'.png']);
         
         imwrite(thisImg,outputPath);
         % update texture slot
-        thisMat.normalmap.value = fullfile(path, [name,'.png']);
-        
+        % This is a problem if we are running on Windows and
+        % rendering on Linux
+        if ispc
+            thisMat.normalmap.value = dockerWrapper.pathToLinux(fullfile(path, [name,'.png']));
+        else
+            thisMat.normalmap.value = fullfile(path, [name,'.png']);
+        end
         thisR.materials.list(matKeys{ii}) = thisMat;
         
         fprintf('Normal Map: %s is converted \n',normalImgPath);
