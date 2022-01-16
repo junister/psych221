@@ -55,9 +55,11 @@ height = 0;
 width = 0;
 
 for ii = 1:numel(allFiles)
-    if isequal(baseName, '') && ~isempty(strfind(allFiles(ii).name, channelname))
+    if ~isempty(strfind(allFiles(ii).name, channelname))
         dataFile = allFiles(ii);
-        baseName = strsplit(dataFile.name,'.');
+        if isequal(baseName, '')
+            baseName = strsplit(dataFile.name,'.');
+        end
         nameparts = strsplit(dataFile.name,'_');
         Nparts = numel(nameparts);
         height = str2double(nameparts{Nparts-2});
@@ -71,15 +73,10 @@ end
 
 
 if strcmp(channelname,'Radiance')
-    baseName = strsplit(fileList(1).name,'.');
 
-    for ii = 1:31
-        filename = fullfile(indir, [baseName{1},sprintf('.C%02d',ii)]);
+    for ii = 1:numel(fileList)
+        filename = fullfile(fileList(ii).folder, fileList(ii).name);
 
-        % On windows suffix might not exist?
-        if ~isfile(filename)
-            filename = fullfile(indir, baseName{1});
-        end
         [fid, message] = fopen(filename, 'r');
         serializedImage = fread(fid, inf, 'float');
         try
@@ -92,7 +89,7 @@ if strcmp(channelname,'Radiance')
         delete(filename);
     end
 else
-    filename = fullfile(indir, fileList(1).name);
+    filename = fullfile(fileList(1).folder, fileList(1).name);
     [fid, message] = fopen(filename, 'r');
     serializedImage = fread(fid, inf, 'float');
     data = reshape(serializedImage, height, width, 1);
