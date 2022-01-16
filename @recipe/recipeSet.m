@@ -847,6 +847,9 @@ switch param
         skymapFileName = val;
         
         % if the map isn't already in the output dir, we have to copy it
+        if ~isfolder(fullfile(thisR.get('output dir')))
+            mkdir(fullfile(thisR.get('output dir')));
+        end
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
             
             % If it is not in the local directory, check the data/lights

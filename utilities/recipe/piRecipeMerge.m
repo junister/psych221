@@ -90,11 +90,12 @@ for ii = 1:length(recipelist)
         
         % Copy the assets from source to destination
         sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
-        if exist(sourceAssets, 'dir')&& ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
+        if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
             dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
             copyfile(sourceAssets, dstAssets);
         else
-            if exist(sourceDir, 'dir')
+            if isfolder(sourceDir)
+                if ~isfolder(dstDir), mkdir(dstDir), end;
                 copyfile(sourceDir, dstDir);
             end
         end
