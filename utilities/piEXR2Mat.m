@@ -45,32 +45,33 @@ if status
     disp(result);
     error('EXR to Binary conversion failed.')
 end
-filelist = dir([indir,sprintf('/%s_*',fname)]);
+allFiles = dir([indir,sprintf('/%s_*',fname)]);
+fileList = [];
 
-%{
 % In an error case there might be additional files
 % This code is designed to help with that if needed
 baseName = '';
-dataFile = '';
-for ii = 1:numel(filelist)
-    if isequal(baseName, '') && ~isempty(strfind(filelist(ii).name, channelname))
-        dataFile = filelist(ii);
-        baseName = strsplit(filelist(ii).name,'.');
-        nameparts = strsplit(filelist(ii).name,'_');
+height = 0; 
+width = 0;
+
+for ii = 1:numel(allFiles)
+    if isequal(baseName, '') && ~isempty(strfind(allFiles(ii).name, channelname))
+        dataFile = allFiles(ii);
+        baseName = strsplit(dataFile.name,'.');
+        nameparts = strsplit(dataFile.name,'_');
         Nparts = numel(nameparts);
         height = str2double(nameparts{Nparts-2});
         width= str2double(nameparts{Nparts-1});
+        if isempty(fileList), fileList = [dataFile]; 
+        else
+            fileList(end+1) = dataFile;
+        end
     end
 end
-%}
-nameparts = strsplit(filelist(1).name,'_');
-Nparts = numel(nameparts);
-height = str2double(nameparts{Nparts-2});
-width= str2double(nameparts{Nparts-1});
 
 
 if strcmp(channelname,'Radiance')
-    baseName = strsplit(filelist(1).name,'.');
+    baseName = strsplit(fileList(1).name,'.');
 
     for ii = 1:31
         filename = fullfile(indir, [baseName{1},sprintf('.C%02d',ii)]);
@@ -91,7 +92,7 @@ if strcmp(channelname,'Radiance')
         delete(filename);
     end
 else
-    filename = fullfile(indir, filelist(1).name);
+    filename = fullfile(indir, fileList(1).name);
     [fid, message] = fopen(filename, 'r');
     serializedImage = fread(fid, inf, 'float');
     data = reshape(serializedImage, height, width, 1);
