@@ -24,13 +24,13 @@ if ~piDockerExists, piDockerConfig; end
 % meter size at location 0,0,0 (BW)
 % {
 thisR = piRecipeDefault('scene name','sphere');
-thisR.set('asset','001_Sphere_O','scale',2/380);
+thisR.set('asset','Sphere_O','scale',2/380);
 % Put the camera 3 meters away
 thisR.set('from',[0 0 3]);
 %}
 
 % Remove all the lights
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 %% Add one equal energy light
 
@@ -44,7 +44,7 @@ spotWhite = piLightCreate('spotWhite',...
     'coneangle',20,...
     'cameracoordinate', true);
 
-thisR.set('light', 'add', spotWhite);
+thisR.set('light', spotWhite, 'add');
 
 % Check the light list
 thisR.show('lights');
@@ -76,21 +76,21 @@ spotBlue = piLightCreate('spotBlue',...
     'coneangle',20,...
     'cameracoordinate', true);
 
-thisR.set('light', 'replace', 'spotWhite', spotBlue);
+thisR.set('light', 'spotWhite', 'replace', spotBlue);
 
 % Infinite means the light is on the whole sphere with a particular SPD.
 roomLight = piLightCreate('inf light',...
     'type','infinite',...
     'spd','D50');
 
-thisR.set('light', 'add', roomLight);
+thisR.set('light', roomLight, 'add');
 
 thisR.show('lights');
 
 piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val));
 
 %% One more example
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 spotYellow = piLightCreate('spotYellow',...
     'type','spot',...
@@ -105,15 +105,15 @@ roomLight = piLightCreate('room',...
     'type','infinite',...
     'mapname', 'room.exr');
 
-thisR.set('light', 'add', spotBlue);
+thisR.set('light', spotBlue, 'add');
 thisR.set('light','spotBlue','from',thisR.get('from') + [3 0 0]);
 thisR.set('light','spotBlue','to',[0 0 0]);
 
-thisR.set('light', 'add', spotYellow);
+thisR.set('light', spotYellow, 'add');
 thisR.set('light','spotYellow','from',thisR.get('from') + [-3 0 0]);
 thisR.set('light','spotYellow','to',[0 0 0]);
 
-thisR.set('light', 'add', roomLight);
+thisR.set('light', roomLight, 'add');
 
 thisR.show('lights');
 
@@ -126,8 +126,10 @@ piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val))
 %   thisR.set('light','room','rotate',{[xxx],[xxx]});
 %
 % And we should explain what the heck the xxx values are.
-roomLight = piLightSet(roomLight, 'rotation val', {[0 0 1 0], [-90 45 0 0]});
-thisR.set('light', 'replace', 'room', roomLight);
+thisR.set('light', roomLight.name, 'rotation', [0 0 1]);
+thisR.set('light', roomLight.name, 'rotation', [-90 45 0]);
+% roomLight = piLightSet(roomLight, 'rotation val', {[0 0 1 0], [-90 45 0 0]});
+thisR.set('light', 'room', 'replace', roomLight);
 
 piWRS(thisR,'name','Rotated skymap');
 

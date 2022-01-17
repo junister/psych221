@@ -1278,7 +1278,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
                     %}
+                    varargin{1} = piLightNameFormat(varargin{1});
                     thisLight = thisR.get('asset', varargin{1});
+                    
                     % thisLight = thisLight.lght{1};
                 end
 
@@ -1315,6 +1317,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                             end
                         case 'name'
                             val = thisLight.name;
+                        case {'light', 'lght'}
+                            val = thisLight.lght{1};
                         otherwise
                             % Most light properties use this method
                             val = piLightGet(thisLgtStruct, varargin{2});

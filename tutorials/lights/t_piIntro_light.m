@@ -38,7 +38,7 @@ thisR.get('light', 1)
 
 %% Remove all the lights
 
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 thisR.get('light print');
 
 %% Types of lights
@@ -77,7 +77,7 @@ piLightCreate('list available types')
 % https://github.com/ISET/iset3d/wiki
 % That will eventually show up in a wiki for iset3d-v4
 %
-lightName = 'new spot light';
+lightName = 'new_spot_light_L';
 newLight = piLightCreate(lightName,...
                         'type','spot',...
                         'spd','equalEnergy',...
@@ -85,7 +85,7 @@ newLight = piLightCreate(lightName,...
                         'coneangle', 15,...
                         'conedeltaangle', 10, ...
                         'cameracoordinate', true);
-thisR.set('light', 'add', newLight);
+thisR.set('light', newLight, 'add');
 thisR.get('light print');
 
 %% Set up the render parameters
@@ -123,7 +123,7 @@ sceneWindow(scene);
 %   'light' - action - lightName or index - parameter value
 %
 % We shift the light here by 0.1 meters in the x-direction.
-thisR.set('light', 'translate', 'new spot light', [0.1, 0, 0]);
+thisR.set('light', 'new_spot_light_L', 'translate',[1, 0, 0]);
 
 piWrite(thisR);
 
@@ -136,7 +136,7 @@ sceneWindow(scene);
 %% Rotate the light
 
 % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
-thisR.set('light', 'rotate', 'new spot light', [0, -5, 0]); % -5 degree around y axis
+thisR.set('light', 'new_spot_light_L', 'rotate', [0, -5, 0]); % -5 degree around y axis
 piWrite(thisR);
 
 scene = piRender(thisR, 'render type', 'radiance');
@@ -149,13 +149,13 @@ sceneWindow(scene);
 
 % Here we're changing enough that it's easier to delete the
 % existing light and add another from scratch.
-thisR.set('light', 'delete', 'all');
-pointLight = piLightCreate('new point',...
+thisR.set('light', 'all', 'delete');
+pointLight = piLightCreate('new_point_L',...
                            'type', 'point', ...
                            'spd spectrum', 'Tungsten',...
                            'specscale float', 1,...
                            'cameracoordinate', true);
-thisR.set('light', 'add', pointLight);
+thisR.set('light', pointLight, 'add');
 
 thisR.get('light print');
 
@@ -168,12 +168,12 @@ sceneWindow(scene);
 
 %% When spd is three numbers, we recognize it is rgb values
 
-distLight = piLightCreate('new dist',...
+distLight = piLightCreate('new_dist_L',...
                            'type', 'distant', ...
                            'spd', [0.3 0.5 1],...
                            'specscale float', 1,...
                            'cameracoordinate', true);
-thisR.set('lights', 'replace', 'new point', distLight);                       
+thisR.set('lights', 'new_point_L', 'replace', distLight);                       
 thisR.get('lights print');
 
 piWrite(thisR);
@@ -183,15 +183,16 @@ sceneWindow(scene);
 
 %% Add an environment light
 
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 fileName = 'pngExample.png';
-exampleEnvLight = piLightCreate('room light', ...
+exampleEnvLight = piLightCreate('room_light_L', ...
     'type', 'infinite',...
     'mapname', fileName);
-exampleEnvLight = piLightSet(exampleEnvLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
 
-thisR.set('lights', 'add', exampleEnvLight);                       
+thisR.set('lights', exampleEnvLight, 'add');   
+thisR.set('light', 'room_light_L', 'rotation', [0 0 1 ]);
+thisR.set('light', 'room_light_L', 'rotation', [-90 1 0]);
 
 % Check the light list
 thisR.get('light print');
