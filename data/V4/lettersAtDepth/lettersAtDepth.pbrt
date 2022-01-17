@@ -16,7 +16,10 @@ WorldBegin
 # Default Material
 Material "coateddiffuse"
     "rgb reflectance" [ 0.10048151 0.11928019 0.13998489 ]
+AttributeBegin
+#object name: "infinite_light"
 LightSource "infinite"
     "spectrum L" [ "EqualEnergy.spd" ]
+AttributeEnd
 Include "lettersAtDepth_materials.pbrt"
 Include "lettersAtDepth_geometry.pbrt"

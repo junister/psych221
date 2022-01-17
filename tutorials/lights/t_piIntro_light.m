@@ -31,7 +31,7 @@ thisR = piRecipeDefault('scene name','checkerboard');
 thisR.get('light print');
 
 % We can get a specific light by its name
-thisR.get('light', '#2_Light_type:distant')
+thisR.get('light', 'distant_light_L')
 
 % Or we can get the light from its index (number) in this list.
 thisR.get('light', 1)
@@ -47,7 +47,7 @@ thisR.get('light print');
 % control in ISET3d are defined in piLightCreate;  To see the list of
 % possible light types use
 %
-piLightCreate('list avaiable types');
+piLightCreate('list available types')
 
 %% Add a spot light
 %

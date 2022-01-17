@@ -1223,15 +1223,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
 
-        % Lights
+    % Lights
     case{'light', 'lights'}
         if isempty(varargin)
+            % Treat this same as get names
+            %{
             if isprop(thisR, 'lights')
                 val = thisR.lights;
             else
                 warning('No lights in this recipe')
                 val = {};
             end
+            %}
+            val = thisR.assets.mapLgtShortName2Idx.keys;
             return;
         end
 
@@ -1244,22 +1248,25 @@ switch ieParamFormat(param)  % lower case, no spaces
         switch varargin{1}
             case 'names'
                 % thisR.get('lights','names')
-                n = numel(thisR.lights);
-                val = cell(1, n);
-                for ii=1:n
-                    val{ii} = thisR.lights{ii}.name;
-                end
+                val = thisR.assets.mapLgtShortName2Idx.keys;
 
             otherwise
                 % The first argument indicates the light name and there
                 % must be a second argument for the light property
                 if isnumeric(varargin{1}) && ...
-                        varargin{1} <= numel(thisR.lights)
-                    % Search by index.  Get the material directly.
+                        varargin{1} <= thisR.get('nlights')
+                    % Search by index. 
+                    %{
                     lgtIdx = varargin{1};
                     thisLight = thisR.lights{lgtIdx};
                     val = thisLight;
+                    %}
+                    lgtNames = thisR.assets.mapLgtShortName2Idx.keys;
+                    lgtIdx = varargin{1};
+                    thisLight = thisR.get('asset', lgtNames{lgtIdx});
+                    val = thisLight;
                 elseif isstruct(varargin{1})
+                    % ZLY: I think it should not be here?
                     % The user sent in the material.  We hope.
                     % We should have a slot in material that identifies itself as a
                     % material.  Maybe a test like "material.type ismember valid
@@ -1267,51 +1274,64 @@ switch ieParamFormat(param)  % lower case, no spaces
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
                     % Search for the light by name, find its index
+                    %{
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
+                    %}
+                    thisLight = thisR.get('asset', varargin{1});
+                    % thisLight = thisLight.lght{1};
                 end
 
                 if isempty(thisLight)
                     warning('Could not find light. Return.')
                     return;
                 end
+                % Get a 
+                if numel(varargin) == 1
+                    val = thisLight;
+                end
                 if numel(varargin) >= 2
                     % thisR.get('light',idx,'position');
                     %
                     % Return the light property
-                    % thisR.get('material', material/idx/name, property)
-                    % Return the material property
+                    % Return the light property
+                    thisLgtStruct = thisLight.lght{1};
                     switch varargin{2}
                         case 'position'
                             % thisR.get('light',idx,'position')                            
-                            if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
+                            if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
                                 % The position may be at the camera, so we need
                                 % this special case.
                                 val = thisR.get('from');
-                            elseif isfield(thisLight,'from')
-                                val = thisLight.from.value;
-                            elseif isequal(thisLight.type,'infinite')
+                            elseif isfield(thisLgtStruct,'from')
+                                val = thisLgtStruct.from.value;
+                            elseif isequal(thisLgtStruct.type,'infinite')
                                 val = Inf;
-                            elseif isequal(thisLight.type,'area')
+                            elseif isequal(thisLgtStruct.type,'area')
                                 % Area light will need a different approach
-                                val = [];
+                                val = thisR.get('asset', thisLight.name, 'world position');
                             else
                                 val = Inf;
                             end
+                        case 'name'
+                            val = thisLight.name;
                         otherwise
                             % Most light properties use this method
-                            val = piLightGet(thisLight, varargin{2});
+                            val = piLightGet(thisLgtStruct, varargin{2});
                     end
                 end
         end
     case {'nlight', 'nlights', 'light number', 'lights number'}
         % thisR.get('n lights')
         % Number of lights in this scene.
+        val = numel(thisR.get('light', 'names'));
+        %{
         if isprop(thisR, 'lights')
             val = numel(thisR.lights);
         else
             val = 0;
         end
+        %}
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
         piLightList(thisR);

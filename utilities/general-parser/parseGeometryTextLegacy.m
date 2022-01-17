@@ -127,50 +127,44 @@ while i <= length(txt)
         %   Else, it must be an object node which contains material info
         %   and other things.
 
-        if exist('areaLight','var') || exist('lght','var') || exist('rot','var') || exist('translation','var') || ...
-                exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
-            
+        if exist('areaLight','var') || exist('lght','var')
             % This is a 'light' node
-            if exist('areaLight','var') || exist('lght','var')    
-                resLight = piAssetCreate('type', 'light');
-                if exist('lght','var')
-                    % Wrap the light text into attribute section
-                    lghtWrap = [{'AttributeBegin'}, lght(:)', {'AttributeEnd'}];
-                    resLight.lght = piLightGetFromText(lghtWrap, 'print', false);
-                end
-                if exist('areaLight','var')
-                    resLight.lght = piLightGetFromText({areaLight}, 'print', false);
-                    if exist('shape', 'var')
-                        resLight.lght{1}.shape = shape;
-                    end
-                    
-                    %{
-                    if exist('rot', 'var')
-                        resLight.lght{1}.rotation.type = 'rotation';
-                        resLight.lght{1}.rotation.value = {rot};
-                    end
-                    if exist('ctform', 'var')
-                        resLight.lght{1}.ctform.type  = 'ctform';
-                        resLight.lght{1}.ctform.value = {ctform};
-                    end
-                    if exist('translation', 'var')
-                        resLight.lght{1}.translation.type  = 'translation';
-                        resLight.lght{1}.translation.value = {translation};
-                    end
-                    %}
-                    
-                end
-                
-                if exist('name', 'var')
-                    resLight.name = sprintf('%s_L', name); 
-                    resLight.lght{1}.name = resLight.name;
-                end
-                
-                subtrees = cat(1, subtrees, tree(resLight));
-                % trees = subtrees;
+            resLight = piAssetCreate('type', 'light');
+            if exist('lght','var')
+                % Wrap the light text into attribute section
+                lghtWrap = [{'AttributeBegin'}, lght(:)', {'AttributeEnd'}];
+                resLight.lght = piLightGetFromText(lghtWrap, 'print', false);
             end
-            
+            if exist('areaLight','var')
+                resLight.lght = piLightGetFromText({areaLight}, 'print', false);
+                if exist('shape', 'var')
+                    resLight.lght{1}.shape = shape;
+                end
+
+                if exist('rot', 'var')
+                    resLight.lght{1}.rotation.type = 'rotation';
+                    resLight.lght{1}.rotation.value = {rot};
+                end
+                if exist('ctform', 'var')
+                    resLight.lght{1}.ctform.type  = 'ctform';
+                    resLight.lght{1}.ctform.value = {ctform};
+                end
+                if exist('translation', 'var')
+                    resLight.lght{1}.translation.type  = 'translation';
+                    resLight.lght{1}.translation.value = {translation};
+                end
+
+            end
+
+            if exist('name', 'var'), resLight.name = sprintf('%s_L', name); end
+
+            subtrees = cat(1, subtrees, tree(resLight));
+            trees = subtrees;
+
+        elseif exist('rot','var') || exist('translation','var') || ...
+                exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
             % This is a branch or an object
+
             if exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
                 % This path if it is an object
                 resObject = piAssetCreate('type', 'object');
@@ -225,25 +219,27 @@ while i <= length(txt)
                 end
 
                 subtrees = cat(1, subtrees, tree(resObject));
-                % trees = subtrees;
+                trees = subtrees;
             end
-            
+
             % This path if it is a 'branch' node
-            resCurrent = piAssetCreate('type', 'branch');
-            % If present populate fields.
-            if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
-            if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
+            if exist('rot','var') || exist('translation','var')
+                resCurrent = piAssetCreate('type', 'branch');
+
+                % If present populate fields.
+                if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
                 if exist('translation','var'), resCurrent.translation = {translation}; end
                 if exist('scale','var'), resCurrent.scale = {scale}; end
+
+                trees = tree(resCurrent);
+                for ii = 1:numel(subtrees)
+                    % TODO: solve the empty node name problem here
+                    trees = trees.graft(1, subtrees(ii));
+                end
             end
-            trees = tree(resCurrent);
-            for ii = 1:numel(subtrees)
-                % TODO: solve the empty node name problem here
-                trees = trees.graft(1, subtrees(ii));
-            end
-        
+
         elseif exist('name','var')
             % Create a branch, add it to the main tree.
             resCurrent = piAssetCreate('type', 'branch');
@@ -253,7 +249,7 @@ while i <= length(txt)
                 trees = trees.graft(1, subtrees(ii));
             end
         end
-        
+
         parsedUntil = i;
         return;
 
@@ -267,12 +263,7 @@ parsedUntil = i;
 % We build the main tree from any defined subtrees.  Each subtree is an
 % asset.
 if ~isempty(subtrees)
-    % ZLY: modified the root node to a identity transformation branch node.
-    % Need more test
-    rootAsset = piAssetCreate('type', 'branch');
-    rootAsset.name = 'root_B';
-    trees = tree(rootAsset);
-    % trees = tree('root');
+    trees = tree('root');
     % Add each of the subtrees to the root
     for ii = 1:numel(subtrees)
         trees = trees.graft(1, subtrees(ii));

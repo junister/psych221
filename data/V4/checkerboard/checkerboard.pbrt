@@ -16,11 +16,17 @@ WorldBegin
 
 # uniform blue-ish illumination from all directions
 # approximate the sun
+AttributeBegin
+#object name: "infinite_light"
 LightSource "infinite"
     "rgb L" [ 0.4 0.45 0.5 ]
+AttributeEnd
+AttributeBegin
+#object name: "distant_light"
 LightSource "distant"
     "float scale" [1.5]
     "blackbody L" [ 3000 ]
     "point3 from" [ -30 40 100 ]
+AttributeEnd
 Include "checkerboard_materials.pbrt"
 Include "checkerboard_geometry.pbrt"

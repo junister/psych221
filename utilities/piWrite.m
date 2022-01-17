@@ -188,9 +188,11 @@ piWriteBlocks(thisR,fileID);
 piIncludeLines(thisR,fileID);
 
 %% Write out the lights
+%{
 if ~isequal(exporter,'Copy')
     piLightWrite(thisR);
 end
+%}
 
 %% Close the main PBRT scene file
 fclose(fileID);

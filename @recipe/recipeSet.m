@@ -885,6 +885,7 @@ switch param
         % We need to return envLight to our caller!
 
     case {'light', 'lights'}
+        % TODO: Switch the name action order 
         % Examples
         % thisR.set('light', lightList);
         % thisR.set('light', lightName, newLight);
@@ -893,11 +894,25 @@ switch param
         % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
         % thisR.set('light', 'translate', lghtName, [XSFT, YSFT, ZSFT], FROMTO)
         % thisR.set('light', 'scale', lightName, VAL);
-
+        
+        % After making light consistant with assets:
+        % thisR.set('light', newLight, 'add');
+        % thisR.set('light', lightName, 'delete');
+        % thisR.set('light', lightName, 'rotate', [XROT, YROT, ZROT], ORDER)
+        % thisR.set('light', 'translate', lghtName, [XSFT, YSFT, ZSFT], FROMTO);
+        % thisR.set('light', lightname, 'specscale', val);
+        
         % This is the case where we replace the light list
         if isempty(varargin)
             if iscell(val)
-                thisR.lights = val;
+                % thisR.lights = val;
+                for ii=1:numel(val)
+                    % Create new light asset
+                    newLightAsset = piAssetCreate('type', 'light');
+                    newLightAsset.name = val{ii}.name;
+                    newLightAsset.lght{1} = val{ii};
+                    thisR.set('asset', 'add', newLightAsset);
+                end
             else
                 warning('Please provide a list of lights in cell array')
             end
@@ -908,11 +923,12 @@ switch param
         % Search by name or index
         if isnumeric(val) && val <= numel(thisR.lights)
             lgtIdx = val;
-            thisLight = thisR.lights{val};
+            thisLight = thisR.get('light', val);
         elseif isstruct(val)
             % Sent in a struct
             if isfield(val, 'name'), lgtName = val.name;
-                [lgtIdx, thisLight] = piLightFind(thisR.lights, 'name', lgtName);
+                % [lgtIdx, thisLight] = piLightFind(thisR.lights, 'name', lgtName);
+                thisLight = thisR.get('light', lgtName);
             else
                 error('Bad struct.');
             end
@@ -920,29 +936,62 @@ switch param
             % It is either a special command or the light name
             switch val
                 case {'add'}
+                    newLightAsset = piAssetCreate('type', 'light');
+                    newLightAsset.name = val.name;
+                    newLightAsset.lght{1} = val;
+                    thisR.set('asset', 'add', newLightAsset);
+                    %{
                     nLight = thisR.get('n light');
                     thisR.lights{nLight + 1} = varargin{1};
+                    %}
                     return;
                 case {'delete', 'remove'}
                     % thisR.set('light', 'delete', idxORname);
                     if isnumeric(varargin{1})
-                        thisR.lights(varargin{1}) = [];
+                        % thisR.lights(varargin{1}) = [];
+                        lgtNames = thisR.get('light', 'names');
+                        thisR.set('asset', lgtNames{varargin{1}}, 'delete');
                     elseif isequal(varargin{1}, 'all')
-                        thisR.lights = {};
+                        lgtNames = thisR.get('light', 'names');
+                        for ii=1:numel(lgtNames)
+                            thisR.set('asset', lgtNames{ii}, 'delete');
+                        end
                     else
+                        % Search by name
+                        thisR.set('asset', varargin{1}, 'delete');
+                        %{
                         [lgtIdx, ~] = piLightFind(thisR.lights, 'name', varargin{1});
                         thisR.lights(lgtIdx) = [];
+                        %}
                     end
                     return;
                 case {'replace'}
+                    thisLgtAsset = thisR.get('light', varargin{1});
+                    thisLgtAsset.lght{1} = varargin{2};
+                    thisLgtAsset.name = varargin{2}.name;
+                    thisR.set('asset', varargin{1}, thisLgtAsset);
+                    %{
                     idx = piLightFind(thisR.lights, 'name', varargin{1});
                     thisR.lights{idx} = varargin{2};
+                    %}
                     return;
                 case {'rotate', 'rotation'}
                     % Rotate the direction, angle in degrees
                     % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
                     % See piLightRotate
-                    [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
+                    lghtAsset = thisR.get('light', varargin{1});
+                    lght = lghtAsset.lght{1};
+                    
+                    % This might not be elegant enough..? (ZLY)
+                    % If it has no from field, then the transformation will
+                    % be applied to the branch node (for infinite and area light).
+                    if ~isfield(lght, 'from')
+                        thisR.set('asset', varargin{1}, 'rotate', varargin{2});
+                        return;
+                    end
+                    
+                    % Else it has from field, treat it differently.
+                    % [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
 
                     if numel(varargin) == 2
                         xRot = varargin{2}(1);
@@ -959,14 +1008,23 @@ switch param
                         'yrot', yRot,...
                         'zrot', zRot,...
                         'order', order);
-                    thisR.set('light', lgtIdx, lght);
+                    thisR.set('asset', varargin{1}, 'lght', lght);
                     return;
 
                 case {'translate', 'translation'}
                     % thisR.set('light', 'translate', lghtName, [XSFT, YSFT, ZSFT], FROMTO)
                     % See piLightRotate
-                    [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
-
+                    % [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
+                    lghtAsset = thisR.get('light', varargin{1});
+                    lght = lghtAsset.lght{1};
+                    
+                    % If it has no from field, then the transformation will
+                    % be applied to the branch node (for infinite and area light).
+                    if ~isfield(lght, 'from')
+                        thisR.set('asset', varargin{1}, 'translate', varargin{2});
+                        return;
+                    end
+                    
                     if numel(varargin) == 2
                         xSft = varargin{2}(1);
                         ySft = varargin{2}(2);
@@ -994,13 +1052,15 @@ switch param
                         'zshift', zSft,...
                         'fromto', fromto,...
                         'up', up);
-                    thisR.set('light', lgtIdx, lght);
-
+                    thisR.set('asset', varargin{1}, 'lght', lght);
                     return;
+                    
                 otherwise
                     % Probably the light name.
                     lgtName = val;
-                    [lgtIdx, thisLight] = piLightFind(thisR.lights, 'name', lgtName);
+                    thisLightAsset = thisR.get('light', lgtName);
+                    thisLight = thisLightAsset.lght{1};
+                    % [lgtIdx, thisLight] = piLightFind(thisR.lights, 'name', lgtName);
             end
         end
 
@@ -1009,17 +1069,20 @@ switch param
             % A light struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
             % it.
-            thisR.lights{lgtIdx} = varargin{1};
+            % thisR.lights{lgtIdx} = varargin{1};
+            thisR.set('light', 'replace', lgtName, varargin{1});
         else
             % A light name and property was sent in.  We set the
             % property and then update the material in the list.
             thisLight = piLightSet(thisLight, varargin{1}, varargin{2});
-            thisR.set('light', lgtIdx, thisLight);
+            thisR.set('asset', lgtName, 'lght', thisLight);
         end
 
     case {'asset', 'assets','node','nodes'}
         % Typical:    thisR.set(param,val)
         % This case:  thisR.set('asset',assetNameOrID, param, val);
+        %          or thisR.set('asset', assetName/assetStruct, action);
+        %          or thisR.set('asset', assetName, action, val);
         %
         % These operations need the whole tree, so we send in the
         % recipe that contains the asset tree, thisR.assets.
@@ -1040,12 +1103,14 @@ switch param
             end
         else
             assetName = val;
+            id = thisR.get('asset', assetName, 'id');
         end
         param = varargin{1};
         % If only one element in varargin, it should be a node struct.
         if numel(varargin) == 1 && ~ischar(varargin{1})
             thisR.assets = thisR.assets.set(id, varargin{1});
             out = varargin{1};
+            thisR.assets = thisR.assets.uniqueNames;
             return;
         end
         % Else we are setting a parameter value

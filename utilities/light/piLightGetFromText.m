@@ -139,11 +139,14 @@ for ii = 1:nLights
 
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
-                thisLightSource = piLightSet(thisLightSource, 'from val', from);
-
+                if ~isempty(from)
+                    thisLightSource = piLightSet(thisLightSource, 'from val', from);
+                end
                 % to
                 to = piParameterGet(thisLine, 'point3 to');
-                thisLightSource = piLightSet(thisLightSource, 'to val', to);
+                if ~isempty(to)
+                    thisLightSource = piLightSet(thisLightSource, 'to val', to);
+                end
 
                 % cone angle
                 coneangle = piParameterGet(thisLine, 'float coneangle');
@@ -160,7 +163,9 @@ for ii = 1:nLights
 
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
-                thisLightSource = piLightSet(thisLightSource, 'from val', from);
+                if ~isempty(from)
+                    thisLightSource = piLightSet(thisLightSource, 'from val', from);
+                end
 
             case 'goniometric'
                 % Spectrum
@@ -178,11 +183,14 @@ for ii = 1:nLights
 
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
-                thisLightSource = piLightSet(thisLightSource, 'from val', from);
-
+                if ~isempty(from)
+                    thisLightSource = piLightSet(thisLightSource, 'from val', from);
+                end 
                 % to
                 to = piParameterGet(thisLine, 'point3 to');
-                thisLightSource = piLightSet(thisLightSource, 'to val', to);
+                if ~isempty(to)
+                    thisLightSource = piLightSet(thisLightSource, 'to val', to);
+                end
 
             case 'projection'
                 % Spectrum
@@ -202,7 +210,7 @@ for ii = 1:nLights
     % For the lines after the AttributeBegin
     for kk = 2:numel(lightLines)-1
         thisLine = lightLines{kk};
-
+        %{
         % Zheng: To check with Zhenyi - do we need all rot, position and
         % ctform?
         % Parse ConcatTransform
@@ -235,6 +243,16 @@ for ii = 1:nLights
             curTrans{end + 1} = translation;
             thisLightSource = piLightSet(thisLightSource, 'translation val', curTrans);
         end
+        
+        % Look up scale
+        scl = find(piContains(thisLine, 'Scale'));
+        if scl
+            [~, scle] = piParseVector(thisLine);
+            curScale = piLightGet(thisLightSource, 'scale val');
+            curScale{end + 1} = scle;
+            thisLightSource = piLightSet(thisLightSource, 'scale val', curScale);
+        end
+        %}
 
         % Parse shape. Two possible cases: geometry is defined inline or
         % included in another file
@@ -272,14 +290,7 @@ for ii = 1:nLights
             end
         end
 
-        % Look up scale
-        scl = find(piContains(thisLine, 'Scale'));
-        if scl
-            [~, scle] = piParseVector(thisLine);
-            curScale = piLightGet(thisLightSource, 'scale val');
-            curScale{end + 1} = scle;
-            thisLightSource = piLightSet(thisLightSource, 'scale val', curScale);
-        end
+
 
         scl = find(piContains(thisLine, 'CoordSysTransform'));
         if scl
