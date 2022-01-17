@@ -188,7 +188,7 @@ piWriteBlocks(thisR,fileID);
 piIncludeLines(thisR,fileID);
 
 %% Write out the lights
-if ~isequal(exporter,'Copy')
+if ~isempty(thisR.lights)
     piLightWrite(thisR);
 end
 
@@ -198,7 +198,7 @@ fclose(fileID);
 %% Write scene_materials.pbrt
 
 % Even when copying, we extract the materials and textures
-if ~isequal(exporter,'Copy')    
+if ~isempty(thisR.materials.list)    
     piWriteMaterials(thisR,overwritematerials);
 end
 
@@ -602,25 +602,6 @@ function piIncludeLines(thisR,fileID)
 %
 
 basename = thisR.get('output basename');
-
-% For the Copy case, we just copy the world and Include the lights.
-if isequal(thisR.exporter, 'Copy')
-    for ii = 1:numel(thisR.world)
-        %         if ii == numel(thisR.world)
-        %             % Lights at the end
-        %             fprintf(fileID,'Include "%s_lights.pbrt" \n', basename);
-        %         end
-        
-        fprintf(fileID,'%s \n',thisR.world{ii});
-        
-        %         if ii == 1
-        %             % Materials at the beginning
-        %             fprintf(fileID,'Include "%s_materials.pbrt" \n', basename);
-        %         end
-    end
-    return;
-end
-
 %% Find the World lines with _geometry, _materials, _lights
 
 % We are being aggressive about the Include files.  We want to name them
@@ -628,6 +609,28 @@ end
 lineMaterials = find(contains(thisR.world, {'_materials.pbrt'}));
 lineGeometry  = find(contains(thisR.world, {'_geometry.pbrt'}));
 lineLights    = find(contains(thisR.world, {'_lights.pbrt'}));
+
+% For the Copy case, we just copy the world and Include the lights and materials.
+if isequal(thisR.exporter, 'Copy')
+    for ii = 1:numel(thisR.world)
+        fprintf(fileID,'%s \n',thisR.world{ii});
+        if piContains(thisR.world{ii},'WorldBegin') && ...
+                isempty(lineMaterials) &&...
+                ~isempty(thisR.materials)
+            % Insert the materials file
+            fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));   
+        end
+        if piContains(thisR.world{ii}, 'WorldBegin') &&...
+                isempty(lineLights) &&...
+                ~isempty(thisR.lights)
+            % Insert the lights file.
+            fprintf(fileID, sprintf('Include "%s_lights.pbrt" \n', basename));
+        end
+    end
+    return;
+end
+
+
 
 % If we have  geometry Include, we overwrite it with the name we want.
 if ~isempty(lineGeometry)
