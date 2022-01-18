@@ -76,7 +76,7 @@ switch dataType
         output(:,:,3) = piEXR2Mat(filename, 'Nz');
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
-    case "instance" % single channel
+    case "instanceId" % single channel
         output = piEXR2Mat(filename, 'InstanceId');
     otherwise
         error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
