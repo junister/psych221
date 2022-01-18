@@ -75,7 +75,7 @@ for ii = 7%1:numel(namelist)
     thisR.set('nbounces',5);
     if ii ==1
         infiniteLight = piLightCreate('infiniteLight','type','infinite','spd','D65');
-        thisR.set('light','add',infiniteLight);
+        thisR.set('light',infiniteLight,'add');
         % thisR = piLightAdd(thisR,'type','infinite','light spectrum','D65');
     end
     %%

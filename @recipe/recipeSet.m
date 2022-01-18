@@ -880,7 +880,7 @@ switch param
                 envLight = piLightSet(envLight,varargin{1},varargin{2});
             end
         end
-        thisR.set('light', 'add', envLight);
+        thisR.set('light', envLight, 'add');
         out = envLight;
         % We need to return envLight to our caller!
 
@@ -1043,7 +1043,7 @@ switch param
             % should check it, make sure its name is unique, and then set
             % it.
             % thisR.lights{lgtIdx} = varargin{1};
-            thisR.set('light', 'replace', lghtName, varargin{1});
+            thisR.set('light', lghtName, 'replace', varargin{1});
         else
             % thisR.set('light', lightName, param, val)
             % A light name and property was sent in.  We set the

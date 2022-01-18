@@ -23,7 +23,7 @@ sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-thisR = piUnitConvert(thisR, 100);
+% thisR = piUnitConvert(thisR, 100);
 
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
@@ -31,7 +31,7 @@ distLight = piLightCreate('new dist light',...
     'type', 'distant',...
     'spd', 9000,... % blackbody
     'cameracoordinate', true);
-thisR.set('light', 'add', distLight);
+thisR.set('light', distLight, 'add');
 
 thisR.set('film resolution',[200 150]*2);
 thisR.set('rays per pixel',64);
@@ -75,7 +75,7 @@ spdRef = piMaterialCreateSPD(wave, reflectance);
 thisR.set('material', redMatte, 'reflectance value', spdRef);
 
 %% Set the material
-assetName = '001_Sphere_O';
+assetName = 'Sphere_O';
 thisR.set('asset',assetName,'material name',redMatte.name);
 
 % Show that we set it
@@ -95,7 +95,7 @@ end
 %    'mapname', 'room.exr');
 
 % Make the sphere a little smaller
-assetName = '001_Sphere_O';
+assetName = 'Sphere_O';
 thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 
 %thisR.set('light', 'add', rmLight);
@@ -106,7 +106,7 @@ thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 % For standard environment lights, we want something like
 %
 % Add an environmental light
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 [~, rmLight] = thisR.set('skymap','room.exr','rotation val', {[0 0 1 0], [-90 1 0 0]});
 % doing this now in set, as I think it has to happen
 % before the light is added???
@@ -123,7 +123,7 @@ scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName));
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
-%% Make the sphere glass
+c;c%% Make the sphere glass
 
 glassName = 'glass';
 glass = piMaterialCreate(glassName, 'type', 'dielectric','eta','glass-BK7');

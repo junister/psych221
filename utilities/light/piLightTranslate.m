@@ -59,7 +59,7 @@ function lght = piLightTranslate(lght, varargin)
                 'spd val', 'D50',...
                 'coneangle val', 5);
     thisR.set('light', 'add', spotLight);
-    thisR.set('light', 'translate', 'new spot', [1 0 0]);
+    thisR.set('light', 'new spot', 'translate', [1 0 0]);
 
     piWrite(thisR, 'overwritematerials', true);
 
