@@ -63,6 +63,11 @@ matKeys = keys(thisR.materials.list);
 for ii = 1:numel(matKeys)
     thisMat = thisR.materials.list(matKeys{ii});
     thisMat.normalmap.type = 'string';
+    
+    if ~isfield(thisMat.normalmap, 'value')
+        continue;
+    end
+    
     normalImgPath = thisMat.normalmap.value;
     thisImgPath = fullfile(inputDir, normalImgPath);
     
