@@ -298,7 +298,7 @@ switch lower(cameraType)
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
-if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var')
+if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
 
