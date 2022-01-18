@@ -18,20 +18,24 @@ function piCopyFolder(inputDir, outputDir)
 
 %% Find all the files in the input directory
 sources = dir(inputDir);
-
+ 
+if ~exist(outputDir, 'dir')
+    mkdir(outputDir);
+end
 %%
 status  = true;
 for i=1:length(sources)
     if startsWith(sources(i).name(1),'.')
         % Skip dot-files
         continue;
-    elseif sources(i).isdir && (strcmpi(sources(i).name,'spds') || strcmpi(sources(i).name,'textures'))
+    elseif sources(i).isdir && (strcmpi(sources(i).name,'spds') || strcmpi(sources(i).name,'textures') ||...
+            strcmpi(sources(i).name,'geometry'))
         % Copy the spds and textures directory files.
         status = status && copyfile(fullfile(sources(i).folder, sources(i).name), fullfile(outputDir,sources(i).name));
     else
         % Selectively copy the files in the scene root folder
         [~, ~, extension] = fileparts(sources(i).name);
-        if ~(piContains(extension,'pbrt') || piContains(extension,'zip') || piContains(extension,'json'))
+        if ~(piContains(extension,'zip') || piContains(extension,'json'))
             thisFile = fullfile(sources(i).folder, sources(i).name);
             fprintf('Copying %s\n',thisFile)
             status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
