@@ -38,6 +38,7 @@ scaleM = ones(1,3);   % Scale factors
 for ii=numel(nodeToRoot):-1:1
     % Get asset and its rotation and translation
     thisAsset = thisR.get('asset', nodeToRoot(ii));
+    if iscell(thisAsset), thisAsset = thisAsset{1}; end
     if isequal(thisAsset.type, 'branch')
         pointerT = 1; pointerR = 1; pointerS = 1;
         for tt = 1:numel(thisAsset.transorder)

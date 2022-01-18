@@ -193,8 +193,24 @@ classdef recipe < matlab.mixin.Copyable
                     % Prints a table
                     piMaterialPrint(obj);
                 case 'lights'
-                    % Prints a table
+                    % Prints a table of light parameters
                     piLightPrint(obj);
+                case 'skymap'
+                    % Brings up image of the skymap (global
+                    % illumination)
+                    nLights = numel(obj.lights);
+                    for ii=1:nLights
+                        if isequal(obj.get('light',ii,'type'),'infinite')
+                            mapname = obj.get('light',ii,'mapname');
+                            if ~isempty(mapname)
+                                mapname = fullfile(obj.get('outputdir'),mapname);
+                                img = exrread(mapname);
+                                ieNewGraphWin;
+                                imagesc(img.^0.6);
+                                title(mapname);
+                            end
+                        end
+                    end
                 otherwise
                     error('Unknown show %s\n',varargin{1});
             end

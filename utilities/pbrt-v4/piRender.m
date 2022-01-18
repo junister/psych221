@@ -1,5 +1,5 @@
 function [ieObject, result] = piRender(thisR,varargin)
-% Read a PBRT scene file, run the docker cmd locally, return the ieObject.
+% Read a PBRT scene file, run the docker command, return the ieObject.
 %
 % updated version using dockerWrapper for render -- D. Cardinal
 

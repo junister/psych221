@@ -218,9 +218,25 @@ end
 
 thisR.world = piFormatConvert(thisR.world);
 
-if isequal(exporter, 'Copy')
+if strcmpi(exporter, 'Copy')
     disp('Scene will not be parsed. Maybe we can parse in the future');
-    thisR.world = world;
+        % Read material and texture
+    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
+    thisR.world = newWorld;
+    fprintf('Read %d materials.\n', materialLists.Count);
+    fprintf('Read %d textures.\n', textureList.Count);
+    
+    thisR.materials.list = materialLists;
+    
+    % Call material lib
+    thisR.materials.lib = piMateriallib;
+    
+    thisR.textures.list = textureList;
+    
+    % Convert texture file format to PNG
+    thisR = piTextureFileFormat(thisR);
+    
+    thisR.world = newWorld;
 else
     % Read material and texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
@@ -235,13 +251,11 @@ else
         thisR.world(2:parsedUntil)=[];
     end
     thisR.materials.list = materialLists;
-    %     thisR.materials.inputFile_materials = inputFile_materials;
     
     % Call material lib
     thisR.materials.lib = piMateriallib;
     
     thisR.textures.list = textureList;
-    %     thisR.textures.inputFile_textures = inputFile_materials;
     
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);

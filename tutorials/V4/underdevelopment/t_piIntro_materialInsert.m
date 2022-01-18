@@ -57,7 +57,7 @@ for ii=2:numel(objNames)
 end
 
 thisR.set('nbounces',4);
-
+thisR.set('rays per pixel',128);
 scene = piWRS(thisR);
 sceneSet(scene,'gamma',0.7);
 

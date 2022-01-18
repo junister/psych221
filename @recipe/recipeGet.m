@@ -1113,6 +1113,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         cnt = 1;
         for ii=ids
             thisAsset = thisR.get('asset',ii);
+            if iscell(thisAsset), thisAsset = thisAsset{1}; end
             leafNames{cnt} = thisAsset.name;
             leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
             cnt = cnt + 1;
@@ -1192,6 +1193,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = zeros(nObjects,3);
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
+            if iscell(thisNode), thisNode = thisNode{1}; end
             val(ii,:) = thisR.get('assets',thisNode.name,'world position');
         end
     case {'objectsizes'}
@@ -1202,6 +1204,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = zeros(nObjects,3);
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
+            if iscell(thisNode), thisNode = thisNode{1}; end
             thisScale = thisR.get('assets',Objects(ii),'world scale');
 
             % All the object points
@@ -1352,13 +1355,22 @@ switch ieParamFormat(param)  % lower case, no spaces
         % assets.  We think of an asset now as, say, a car with all of
         % its parts.  A node is the node in a tree that contains
         % multiple assets. (BW, Sept 2021).
-
-        [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
-        % If only one asset matches, turn it from cell to struct.
-        if numel(thisAsset) == 1
-            thisAsset = thisAsset{1};
+        
+        if ischar(varargin{1})  
+            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+            % If only one asset matches, turn it from cell to struct.
+        else
+            if numel(varargin{1}) > 1
+                id = varargin{1}(1);
+            else
+                id = varargin{1};
+            end
+            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
         end
-        if isempty(id), error('Could not find asset %s\n',varargin{1}); end
+        if isempty(id)
+            error('Could not find asset %s\n',varargin{1}); 
+        end
+        if iscell(thisAsset), thisAsset = thisAsset{1}; end
         if length(varargin) == 1
             val = thisAsset;
             return;
