@@ -83,9 +83,9 @@ if strcmp(channelname,'Radiance')
             data(:,:,ii) = reshape(serializedImage, height, width, 1);
         catch
             warning('Error reshaping radiance data.');
-            pause;
         end
         fclose(fid);
+        % these channel files sometimes seem to be protected?
         delete(filename);
     end
 else
