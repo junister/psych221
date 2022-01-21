@@ -21,9 +21,9 @@ setpref('ISET3d', 'tStart', tic);
 
 %% Depth in x,y,z dimensions
 disp('*** DEPTH -- t_piIntro_macbeth')
-setpref('ISET3d', 'tvmccStart', tic);
+setpref('ISET3d', 'tvdepthStart', tic);
 t_piIntro_macbeth;               % Gets the depth map
-setpref('ISET3d', 'tvmccTime', toc(getpref('ISET3d', 'tvmccStart', 0)));
+setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Zmap
 disp('t_piIntro_macbeth_zmap')
