@@ -23,6 +23,9 @@ function lght = piLightCreate(lightName, varargin)
 %   In addition to creating a light struct, various light properties can be
 %   specified in key/val pairs.
 %
+%   The 'spd spectrum' property reads a file from ISETCam/data/lights
+%   that defines a light spectrum.  For example, Tungsten or D50.
+%
 % Returns
 %   lght   - light struct
 %

@@ -51,7 +51,7 @@ thisAsset = {};
 
 if isKey(assets.mapFullName2Idx, val)
     id = assets.mapFullName2Idx(val);
-    thisAsset = assets.getID(id);
+    thisAsset = assets.get(id);
 elseif isKey(assets.mapShortName2Idx, val)
     id = assets.mapShortName2Idx(val);
     thisAsset = {assets.get(id)};

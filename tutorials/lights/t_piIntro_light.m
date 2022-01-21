@@ -97,24 +97,19 @@ thisR.get('light print');
 % scale of the scene to use this sensibly.
 piCameraTranslate(thisR,'z shift',1); 
 
-piWrite(thisR);
-%%
-scene = piRender(thisR, 'film render type', 'radiance');
-scene = sceneSet(scene,'name','Equal energy (spot)');
-sceneWindow(scene);
+thisR.set('render type',{'radiance'});
+
+piWRS(thisR,'name','Equal energy (spot)');
 
 %%  Narrow the cone angle of the spot light a lot
 
 % We just have one light, and can set its properites with
 % piLightSet, indexing into the first light.
-thisR.set('light', lightName, 'coneangle', 10);
-piWrite(thisR);
+coneAngle = 10;
 
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Equal energy (spot)');
-val   = thisR.get('light', lightName, 'coneangle val');
-scene = sceneSet(scene,'name',sprintf('EE spot %d',val));
-sceneWindow(scene);
+thisR.set('light', lightName, 'coneangle', coneAngle);
+
+piWRS(thisR,'name',sprintf('EE spot %d',coneAngle));
 
 %% Shift the light to the right
 
@@ -125,61 +120,74 @@ sceneWindow(scene);
 % We shift the light here by 0.1 meters in the x-direction.
 thisR.set('light', 'new_spot_light_L', 'translate',[1, 0, 0]);
 
-piWrite(thisR);
-
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Equal energy (spot)');
-val   = thisR.get('light', lightName, 'coneangle');
-scene = sceneSet(scene,'name',sprintf('EE spot to right %d',val));
-sceneWindow(scene);
+piWRS(thisR,'name',sprintf('EE spot %d',coneAngle));
 
 %% Rotate the light
 
 % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
-thisR.set('light', 'new_spot_light_L', 'rotate', [0, -5, 0]); % -5 degree around y axis
-piWrite(thisR);
+thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -5 degree around y axis
+piWRS(thisR,'name',sprintf('Rotate EE spot'));
 
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Equal energy (spot)');
-val   = thisR.get('light', lightName, 'coneangle val');
-scene = sceneSet(scene,'name',sprintf('Rotate EE spot'));
-sceneWindow(scene);
+%%  Change the light to a point light source 
 
-%%  Change the light once more and render again
-
-% Here we're changing enough that it's easier to delete the
-% existing light and add another from scratch.
 thisR.set('light', 'all', 'delete');
-pointLight = piLightCreate('new_point_L',...
-                           'type', 'point', ...
-                           'spd spectrum', 'Tungsten',...
-                           'specscale float', 1,...
-                           'cameracoordinate', true);
-thisR.set('light', pointLight, 'add');
 
+% Create a point light at the camera position
+% The spd spectrum points to a file that is saved in
+% ISETCam/data/lights
+yellowPoint = piLightCreate('yellow_point_L',...
+    'type', 'point', ...
+    'spd spectrum', 'Tungsten',...
+    'specscale float', 1,...
+    'cameracoordinate', true);
+
+thisR.set('light', yellowPoint, 'add');
+
+% Move the point closer to the object
+thisR.set('light','yellow_point_L','translate',[0 0 -7])
+thisR.get('light print');
+piWRS(thisR,'name','Tungsten (point)');
+
+%% Add a second point just to the right
+%
+% Note:  The blueLEDFlood is too narrow band, we think!
+% We should check that (Zly/BW).
+%
+
+thisR.set('light', 'all', 'delete');
+% Create a point light at the camera position
+whitePoint = piLightCreate('white_point_L',...
+    'type', 'point', ...
+    'spd spectrum', 'D50',...
+    'specscale float', 0.5,...
+    'cameracoordinate', true);
+
+thisR.set('light', whitePoint, 'add');
+
+% Move the point closer to the object
+thisR.set('light','white_point_L','translate',[1 0 -7]);
 thisR.get('light print');
 
-%% Render and look
+% Put the yellow light in again, separated in x
+thisR.set('light',yellowPoint,'add');
+thisR.set('light','yellow_point_L','translate',[-1 0 -7]);
 
-piWrite(thisR);
-[scene, ~] = piRender(thisR, 'render type', 'radiance'); 
-scene = sceneSet(scene,'name','Tungsten (point)');
-sceneWindow(scene);
+piWRS(thisR,'name','Yellow and Blue points');
 
 %% When spd is three numbers, we recognize it is rgb values
 
 distLight = piLightCreate('new_dist_L',...
-                           'type', 'distant', ...
-                           'spd', [0.3 0.5 1],...
-                           'specscale float', 1,...
-                           'cameracoordinate', true);
-thisR.set('lights', 'new_point_L', 'replace', distLight);                       
+    'type', 'distant', ...
+    'spd', [0.3 0.5 1],...
+    'specscale float', 1,...
+    'cameracoordinate', true);
+
+thisR.set('light', 'all', 'delete');
+thisR.set('light',distLight,'add');
+
 thisR.get('lights print');
 
-piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Blue (distant)');
-sceneWindow(scene);
+piWRS(thisR,'name','Blue (distant)');
 
 %% Add an environment light
 
@@ -204,9 +212,6 @@ piCameraTranslate(thisR,'z shift', -10);
 piCameraRotate(thisR, 'y rot', -10);
 piCameraRotate(thisR, 'x rot', 10);
 
-piWrite(thisR);
-[scene, result] = piRender(thisR, 'render type', 'radiance');
-scene = sceneSet(scene,'name','Environment light');
-sceneWindow(scene);
+piWRS(thisR,'name','Environment light');
 
 %% END

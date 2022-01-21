@@ -1,7 +1,0 @@
-AttributeBegin
-    #ObjectName Checkerboard:Vector(50, 0, 50)
-    AttributeBegin
-        NamedMaterial "board"
-        Shape "trianglemesh" "integer indices" [0 1 2 0 2 3] "point P" [ -2 -2 0   2 -2 0   2 2 0   -2 2 0 ] "normal N" [ -2 -2 1   2 -2 1   2 2 1   -2 2 1 ] "float uv" [ 0 0   1 0    1 1   0 1 ]
-    AttributeEnd
-AttributeEnd
