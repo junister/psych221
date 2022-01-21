@@ -77,15 +77,15 @@ piWrite(thisR);
 [scene, result] = piRender(thisR);
 % Compute the zmap.
 %
-% Start by doing a rendering that returns the XYZ 3D coordinates of the visible
+% Start by doing a rendering that returns the Z 3D coordinates of the visible
 % surfaces.
-[coords, result] = piRender(thisR, 'render type','coordinates');
+[sceneWithDepth, result] = piRender(thisR, 'render type','zmap');
 
 % Get where camera is looking from
 cameraCoord = thisR.lookAt.from;
 
 % Compute the zmap
-zmap = coords(:,:,3) - cameraCoord(3);
+zmap = sceneWithDepth.depthMap - cameraCoord(3);
 
 %% Call this the 'depth map' and plot.
 %
