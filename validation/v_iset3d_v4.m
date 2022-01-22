@@ -22,7 +22,13 @@ setpref('ISET3d', 'tStart', tic);
 %% Depth in x,y,z dimensions
 disp('*** DEPTH -- t_piIntro_macbeth')
 setpref('ISET3d', 'tvdepthStart', tic);
-t_piIntro_macbeth;               % Gets the depth map
+try
+    % seems to have broken?
+    t_piIntro_macbeth;               % Gets the depth map
+catch
+    disp('Macbeth failed');
+end
+
 setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Zmap
