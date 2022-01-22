@@ -106,7 +106,6 @@ disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " s
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
 fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
-fprintf("MCC:        %5.1f seconds.\n", getpref('ISET3d','tvmccTime'));
 fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
