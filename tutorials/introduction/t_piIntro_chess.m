@@ -74,10 +74,15 @@ thisR.set('light',pointLight,'add');
 
 piWRS(thisR);
 
-%% Se a skympa
+%% Set a skymap
 
 thisR.set('skymap','room.exr');
 thisR.get('light print');
 piWRS(thisR);
+
+%% Rotate the skymap
+thisR.set('light','skymap_L','rotate',[30 0 0]);
+piWRS(thisR);
+
 
 %% END
