@@ -51,28 +51,33 @@ thisR.set('film resolution',[256 256]);
 thisR.set('rays per pixel',64);
 thisR.set('n bounces',3); % Number of bounces traced for each ray
 
-%% Save the recipe
-piWrite(thisR);
-
-% There is no lens, just a pinhole.  In that case, we are rendering a
-% scene. If we had a lens, we would be rendering an optical image.
-scene = piRender(thisR);
-sceneWindow(scene);
+thisR.set('render type',{'radiance','depth'});
+piWRS(thisR);
 
 %% By default, we have also computed the depth map, so we can render it
+scene = ieGetObject('scene');
 scenePlot(scene,'depth map');
 
 %% Add a bright point light near the front where the camera is
 
+thisR.get('light print');
+thisR.set('light','all','delete');
+
 % First create the light
-pointLight = piLightCreate('point','type','point','cameracoordinate', true);
+pointLight = piLightCreate('point',...
+    'type','point',...
+    'cameracoordinate', true);
+
 
 % Then add it to our scene
-thisR.set('light','add',pointLight);
+thisR.set('light',pointLight,'add');
 
-% Write out our modified scene, render it, and view it
-piWrite(thisR);
-[scene, result] = piRender(thisR);
-sceneWindow(scene);
+piWRS(thisR);
+
+%% Se a skympa
+
+thisR.set('skymap','room.exr');
+thisR.get('light print');
+piWRS(thisR);
 
 %% END

@@ -874,16 +874,23 @@ switch param
             'type', 'infinite',...
             'mapname', skymapFileName);
         
-        if ~isempty(varargin) && isequal(varargin{1},'rotation val')
-            envLight = piLightSet(envLight', 'rotation val', varargin{2});
-        else
-            envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-            % pass attributes through to set
-            if ~isempty(varargin) && numel(varargin) >= 2
-                envLight = piLightSet(envLight,varargin{1},varargin{2});
-            end
-        end
         thisR.set('light', envLight, 'add');
+                
+        if ~isempty(varargin) && isequal(varargin{1},'rotation val')
+            thisR.set('light',envLight.name,'rotate',varargin{2});
+            
+            % envLight = piLightSet(envLight', 'rotation val', varargin{2});
+        else
+            thisR.set('light',envLight.name,'rotate',[  0 0 1 ]);
+            thisR.set('light',envLight.name,'rotate',[-90 0 0 ]);
+            
+            % envLight = piLightSet(envLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
+            % pass attributes through to set
+            % if ~isempty(varargin) && numel(varargin) >= 2
+            %    envLight = piLightSet(envLight,varargin{1},varargin{2});
+            % end
+        end
+        
         out = envLight;
         % We need to return envLight to our caller!
 
