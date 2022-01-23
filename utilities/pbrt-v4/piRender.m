@@ -96,6 +96,7 @@ p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
+p.addParameter('rendertype', []); % if none we use what is in the recipe
 
 p.parse(thisR,varargin{:});
 ourDocker = p.Results.ourdocker;
@@ -103,6 +104,7 @@ scalePupilArea = p.Results.scalepupilarea;
 meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
+renderType       = p.Results.rendertype;
 
 %% try to support docker servers
 persistent renderDocker;
@@ -243,7 +245,9 @@ end
 fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 
 %% Convert the returned data to an ieObject
-if isempty(thisR.metadata)
+if ~isempty(renderType)
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',renderType);
+elseif isempty(thisR.metadata)
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance','depth'});
 else
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
