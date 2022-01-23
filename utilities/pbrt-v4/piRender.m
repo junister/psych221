@@ -162,9 +162,10 @@ dockerCommand   = 'docker run -ti --rm';
 
 % Make sure renderings folder exists and is fresh
 if(isfolder(fullfile(outputFolder,'renderings')))
-    rmdir(fullfile(outputFolder, 'renderings'), 's');
-end
+    delete(fullfile(outputFolder, 'renderings', '*'));
+else
     mkdir(fullfile(outputFolder,'renderings'));
+end
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
@@ -243,6 +244,12 @@ if status
 end
 
 fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
+
+% not sure what we should return with 'all' but this is a start
+% as I'm not sure coordinates is working
+if isequal(renderType,'all')
+    renderType = {'radiance','depth'};
+end
 
 %% Convert the returned data to an ieObject
 if ~isempty(renderType)

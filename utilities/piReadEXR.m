@@ -64,8 +64,12 @@ switch dataType
         end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
-        output(:,:,1) = piEXR2Mat(filename, 'Px');
-        output(:,:,2) = piEXR2Mat(filename, 'Py');
+        try
+            output(:,:,1) = piEXR2Mat(filename, 'Px');
+            output(:,:,2) = piEXR2Mat(filename, 'Py');
+        catch
+            warning('Missing a Px or Py depth channel');
+        end
         output(:,:,3) = piEXR2Mat(filename, 'Pz');
 
     case "material" % single channel
