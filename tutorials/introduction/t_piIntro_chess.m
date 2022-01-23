@@ -1,4 +1,8 @@
-%% Introducing iset3d calculations with the Chess Set
+%% pbrt v4 introduction 
+% Users need to pull the docker image(s):
+%     Current temporary locations
+%     docker pull camerasimulation/pbrt-v4-cpu
+%     docker pull digitalprodev/pbrt-v4-cpu
 %
 % Brief description:
 %  This script renders the chess set scene.  
@@ -28,11 +32,11 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Read the recipe
-
-thisR = piRecipeDefault('scene name','chessset');
-
-%% Set the render quality
+%% piRead support FBX and PBRT
+% FBX is converted into PBRT or you can use a PBRT file
+pbrtFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
+%% 
+thisR  = piRead(pbrtFile);
 
 % There are many rendering parameters.  This is the just an introductory
 % script, so we set a minimal number of parameters.  Much of what is

@@ -75,14 +75,14 @@ matKeys = keys(thisR.materials.list);
 
 for ii = 1:numel(matKeys)
     thisMat = thisR.materials.list(matKeys{ii});
-    thisMat.normalmap.type = 'string';
-    
-    if ~isfield(thisMat.normalmap, 'value')
+
+    if ~isfield(thisMat, 'normalmap')||isempty(thisMat.normalmap)
         continue;
     end
-    
     normalImgPath = thisMat.normalmap.value;
+    thisMat.normalmap.type = 'string';
     thisImgPath = fullfile(inputDir, normalImgPath);
+    
     
     if isempty(normalImgPath)
         continue;

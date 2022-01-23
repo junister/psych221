@@ -280,7 +280,7 @@ outFile = thisR.get('output file');
 if(isfile(outFile))
     if overwritepbrtfile
         % A pbrt scene file exists.  We delete here and write later.
-        fprintf('Overwriting PBRT file %s\n',outFile)
+        % fprintf('Overwriting PBRT file %s\n',outFile) -- Too chatty
         delete(outFile);
     else
         % Do not overwrite is set, and yet it exists. We don't like this

@@ -62,8 +62,8 @@ for ii = 1:numel(allFiles)
         end
         nameparts = strsplit(dataFile.name,'_');
         Nparts = numel(nameparts);
-        height = str2double(nameparts{Nparts-2});
-        width= str2double(nameparts{Nparts-1});
+        if height == 0, height = str2double(nameparts{Nparts-2}); end
+        if width == 0, width= str2double(nameparts{Nparts-1}); end
         if isempty(fileList), fileList = [dataFile]; 
         else
             fileList(end+1) = dataFile;
@@ -83,9 +83,9 @@ if strcmp(channelname,'Radiance')
             data(:,:,ii) = reshape(serializedImage, height, width, 1);
         catch
             warning('Error reshaping radiance data.');
-            pause;
         end
         fclose(fid);
+        % these channel files sometimes seem to be protected?
         delete(filename);
     end
 else

@@ -96,6 +96,7 @@ p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
+p.addParameter('rendertype', []); % if none we use what is in the recipe
 
 p.parse(thisR,varargin{:});
 ourDocker = p.Results.ourdocker;
@@ -103,6 +104,7 @@ scalePupilArea = p.Results.scalepupilarea;
 meanLuminance    = p.Results.meanluminance;
 wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
+renderType       = p.Results.rendertype;
 
 %% try to support docker servers
 persistent renderDocker;
@@ -158,8 +160,10 @@ dockerCommand   = 'docker run -ti --rm';
 
 [~,currName,~] = fileparts(pbrtFile);
 
-% Make sure renderings folder exists
-if(~exist(fullfile(outputFolder,'renderings'),'dir'))
+% Make sure renderings folder exists and is fresh
+if(isfolder(fullfile(outputFolder,'renderings')))
+    delete(fullfile(outputFolder, 'renderings', '*'));
+else
     mkdir(fullfile(outputFolder,'renderings'));
 end
 
@@ -221,72 +225,12 @@ else  % Linux & Mac
     end
 end
 
-% create a dockerWrapper object if we don't have one
-if isempty(ourDocker)
-    ourDocker = dockerWrapper();
-end
 preRender = tic;
 
-[status, result] = ourDocker.render(renderCommand, outputFolder);
+[status, result] = renderDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
 fprintf("Complete render took: %6.2d seconds.", elapsedTime);
 
-% 
-%     dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);
-%     % Check whether GPU is available
-%     [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
-%     try
-%         ourGPU = gpuDevice();
-%         if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
-%             GPUCheck = -1;
-%         end
-%     catch
-%         % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
-%     end
-% 
-%     if ~GPUCheck
-% 
-%         % GPU is available
-%         cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-%             '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-%             '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
-%         renderCommand = sprintf('pbrt --gpu --outfile %s %s', outFile, pbrtFile);
-% 
-%         % switch based on first GPU available
-%         % really should enumerate and look for the best one, I think
-%         gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
-% 
-%         switch gpuModels{1}
-%             case 'teslat4'
-%                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
-%                 dockerContainerName = 'pbrt-gpu';
-%             case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-%                 dockerImageName = 'camerasimulation/pbrt-v4-gpu-ampere';
-%                 dockerContainerName = 'pbrt-gpu';
-%             otherwise
-%                 warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-%                 dockerImageName = 'camerasimulation/pbrt-v4-cpu';
-%                 dockerContainerName = '';
-%         end
-% 
-%         % update docker command to use gpu
-%         if ~isempty(dockerContainerName)
-%             dockerFlags = sprintf('--gpus 1 -it --name %s', dockerContainerName);
-%             dockerCommand  = strrep(dockerCommand,'-ti --rm',dockerFlags);
-%         else
-%             dockerCommand  = strrep(dockerCommand,'-ti --rm','--gpus 1 -it --rm');
-%         end
-%         cmd = sprintf('%s %s %s %s', dockerCommand, cudalib, dockerImageName, renderCommand);
-%     else
-%         renderCommand = sprintf('pbrt --outfile %s %s', outFile, pbrtFile);
-%         cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
-%     end
-% end
-% 
-% 
-% %% Determine if prefer to use existing files, and if they exist.
-% tic;
-%     [status, result] = piRunCommand(cmd, 'verbose', verbosity);
 
 %% Check the return
 
@@ -301,8 +245,16 @@ end
 
 fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 
+% not sure what we should return with 'all' but this is a start
+% as I'm not sure coordinates is working
+if isequal(renderType,'all')
+    renderType = {'radiance','depth'};
+end
+
 %% Convert the returned data to an ieObject
-if isempty(thisR.metadata)
+if ~isempty(renderType)
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',renderType);
+elseif isempty(thisR.metadata)
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance','depth'});
 else
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);

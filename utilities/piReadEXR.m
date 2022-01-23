@@ -64,8 +64,12 @@ switch dataType
         end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
-        output(:,:,1) = piEXR2Mat(filename, 'Px');
-        output(:,:,2) = piEXR2Mat(filename, 'Py');
+        try
+            output(:,:,1) = piEXR2Mat(filename, 'Px');
+            output(:,:,2) = piEXR2Mat(filename, 'Py');
+        catch
+            warning('Missing a Px or Py depth channel');
+        end
         output(:,:,3) = piEXR2Mat(filename, 'Pz');
 
     case "material" % single channel
@@ -76,7 +80,7 @@ switch dataType
         output(:,:,3) = piEXR2Mat(filename, 'Nz');
     case "albedo"
         % to add; only support rgb for now, spectral albdeo needs to add;
-    case "instance" % single channel
+    case "instanceId" % single channel
         output = piEXR2Mat(filename, 'InstanceId');
     otherwise
         error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')

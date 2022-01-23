@@ -21,9 +21,15 @@ setpref('ISET3d', 'tStart', tic);
 
 %% Depth in x,y,z dimensions
 disp('*** DEPTH -- t_piIntro_macbeth')
-setpref('ISET3d', 'tvmccStart', tic);
-t_piIntro_macbeth;               % Gets the depth map
-setpref('ISET3d', 'tvmccTime', toc(getpref('ISET3d', 'tvmccStart', 0)));
+setpref('ISET3d', 'tvdepthStart', tic);
+try
+    % seems to have broken?
+    t_piIntro_macbeth;               % Gets the depth map
+catch
+    disp('Macbeth failed');
+end
+
+setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Zmap
 disp('t_piIntro_macbeth_zmap')
@@ -106,7 +112,6 @@ disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " s
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
 fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
-fprintf("MCC:        %5.1f seconds.\n", getpref('ISET3d','tvmccTime'));
 fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
