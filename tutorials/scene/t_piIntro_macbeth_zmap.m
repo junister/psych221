@@ -60,6 +60,7 @@ thisR.set('light', 'add', newDistLight);
 thisR.set('integrator subtype','path');
 thisR.set('pixelsamples', 16);
 thisR.set('filmresolution', [640, 360]);
+thisR.set('film render type',{'radiance','depth'});
 
 %% Write and render
 piWrite(thisR, 'overwritematerials', true);
@@ -67,19 +68,24 @@ piWrite(thisR, 'overwritematerials', true);
 % This case uses the default docker image, that does not incorporate
 % fluorescence rendering.  'all' means the illuminant, depth, and
 % radiance. Here we just render the radiance image.
-[scene,  result] = piRender(thisR, 'render type','radiance'); %#ok<ASGLU>
+[scene,  result] = piRender(thisR); %#ok<ASGLU>
 sceneWindow(scene);
 
+thisR.lookAt.from = [0.1 0.05 -4];
+
+piWrite(thisR);
+[scene, result] = piRender(thisR);
 % Compute the zmap.
 %
-% Start by doing a rendering that returns the XYZ 3D coordinates of the visible
+% Start by doing a rendering that returns the Z 3D coordinates of the visible
 % surfaces.
-[sceneWithDepth, result] = piRender(thisR, 'render type','zmap');
+[sceneWithDepth, result] = piRender(thisR, 'render type','coordinates');
 
 % Get where camera is looking from
 cameraCoord = thisR.lookAt.from;
 
-% Compute the zmap
+% Compute the zmap -- Note that we currently only get 1D coordinates. Not
+% sure why?
 zmap = sceneWithDepth.depthMap - cameraCoord(3);
 
 %% Call this the 'depth map' and plot.
