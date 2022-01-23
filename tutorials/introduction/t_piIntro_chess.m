@@ -1,78 +1,80 @@
-%% Introducing iset3d calculations with the Chess Set
+%% pbrt v4 introduction 
+% Users need to pull the docker image(s):
+%     Current temporary locations
+%     docker pull camerasimulation/pbrt-v4-cpu
+%     docker pull digitalprodev/pbrt-v4-cpu
 %
-% Brief description:
-%  This script renders the chess set scene in the data directory of the ISET3d
-%  repository.
+% EXPERIMENTAL FOR GPU SUPPORT!
+% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
+% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-mux
+% and/or     docker pull camerasimulation/pbrt-v4-t4  
 % 
-% Dependencies:
-%    ISET3d and either ISETCam or ISETBio
+% CPU only
+% blender uses a coordinate system like this:
+%    
+%                 z
+%                 ^  
+%                 |
+%                 |  
+%                 x - - - - >y
+% unit scale uses centermeter by default
 %
-%  Check that you have the latest docker image by running
+% We modified
+%    tree
+%   added piWRS.m
 %
-%    docker pull vistalab/pbrt-v3-spectral
-%
-% Description:
-%  This script introduces how to read one of the ISET3d default scenes to
-%  create a recipe for rendering via PBRT.  
-%
-%  This script:
-%
-%    * Initializes the recipe
-%    * Sets the film (sensor) resolution parameters
-%    * Calls the renderer that invokes PBRT via docker
-%    * Loads the returned radiance and depth map into an ISET Scene structure.
-%    * Adds a point light
-%
-% Authors
-%  TL, BW, ZL, ZLy SCIEN 2017
-% Updates
-%  10/16/21 djc Cleanup comments
-%
-% See also
-%   t_piIntro_*, piRecipeDefault, @recipe
-%
-
-%% Initialize ISET and Docker
-
-% Start up ISET and check that docker is configured 
+% TO CHECK for updates
+%    recipe.m, recipeSet.m recipeGet.m
+%    
+%   
+%% Init
 ieInit;
-if ~piDockerExists, piDockerConfig; end
+%% piRead support FBX and PBRT
+% FBX is converted into PBRT or you can use a PBRT file
+pbrtFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
+%% 
+thisR  = piRead(pbrtFile);
+%%
+% close up view
+thisR.set('from',[1.9645 0.2464 0.0337]);
+thisR.set('to',  [0.9655 0.2050 0.0198]);
+thisR.set('up',  [0 1 0]);
 
-%% Read the recipe
+thisR.set('film resolution',[600 600]/2);
+thisR.set('rays per pixel',32);
+%% set render type
+% radiance 
+% rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
+thisR.set('film render type',{'radiance','depth'})
 
-thisR = piRecipeDefault('scene name','chessset');
+thisR.show('objects');
+%%
+piLightDelete(thisR, 'all'); 
+mainLight = piLightCreate('mainLight', ...
+                        'type','distant',...
+                        'specscale', 3,...
+                        'cameracoordinate', true);
+thisR.set('light', 'add', mainLight);
+                    
+lightName = 'env light';
+envLight = piLightCreate(lightName,...
+                        'type','infinite',...
+                        'spd',[0.4 0.3 0.3],...
+                        'specscale',1, ...
+                        'mapname', 'sun-clouds.exr');
 
-%% Set the render quality
+thisR.set('light', 'add', envLight);
 
-% There are many rendering parameters.  This is the just an introductory
-% script, so we set a minimal number of parameters.  Much of what is
-% described in other scripts expands on this section.
-thisR.set('film resolution',[256 256]);
-thisR.set('rays per pixel',64);
-thisR.set('n bounces',3); % Number of bounces traced for each ray
+%% write the data out
 
-%% Save the recipe
+scene = piWRS(thisR);
+ %{
+tic
 piWrite(thisR);
-
-% There is no lens, just a pinhole.  In that case, we are rendering a
-% scene. If we had a lens, we would be rendering an optical image.
 scene = piRender(thisR);
 sceneWindow(scene);
+toc
+%}
+%%
+piAssetGeometry(thisR);
 
-%% By default, we have also computed the depth map, so we can render it
-scenePlot(scene,'depth map');
-
-%% Add a bright point light near the front where the camera is
-
-% First create the light
-pointLight = piLightCreate('point','type','point','cameracoordinate', true);
-
-% Then add it to our scene
-thisR.set('light','add',pointLight);
-
-% Write out our modified scene, render it, and view it
-piWrite(thisR);
-[scene, result] = piRender(thisR);
-sceneWindow(scene);
-
-%% END
