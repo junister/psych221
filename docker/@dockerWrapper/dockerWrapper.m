@@ -193,9 +193,14 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-                    '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-                    '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+                if contains(obj.dockerImageName, 'shared')
+                    % we don't need to mount libraries
+                    cudalib = '';
+                else
+                    cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+                        '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+                        '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+                end
             if isequal(processorType, 'GPU')
                 ourContainer = ['pbrt-gpu-' uName];
             else
@@ -347,7 +352,7 @@ classdef dockerWrapper < handle
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                             %dockerContainerName = 'pbrt-gpu';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal';
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
                             %dockerContainerName = 'pbrt-gpu';
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
