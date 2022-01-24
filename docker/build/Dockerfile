@@ -64,7 +64,7 @@ RUN apt-get update -yq && apt-get install -y git \
 && make \
 && make install
 
-# try to build-in libs
+# try to build-in libs -- but they may need to be symlinked for this to work
 COPY libnvoptix.so.1 /usr/lib/x86_64-linux-gnu/libnvoptix.so.1
 COPY libnvidia-rtcore.so.1 /usr/lib/x86_64-linux-gnu/libnnvidia-rtcore.so.1
 
