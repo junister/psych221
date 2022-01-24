@@ -75,6 +75,7 @@ matKeys = keys(thisR.materials.list);
 
 for ii = 1:numel(matKeys)
     thisMat = thisR.materials.list(matKeys{ii});
+
     if ~isfield(thisMat, 'normalmap')||isempty(thisMat.normalmap)
         continue;
     end

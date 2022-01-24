@@ -28,7 +28,7 @@ function lght = piLightRotate(lght, varargin)
                 'spd val', 'D50',...
                 'coneangle val', 5);
     spotLight = piLightRotate(spotLight, 'x rot', 5);
-    thisR.set('light', 'add', spotLight);
+    thisR.set('light', spotLight, 'add');
 
     piWrite(thisR, 'overwritematerials', true);
 
@@ -46,8 +46,8 @@ function lght = piLightRotate(lght, varargin)
                 'cameracoordinate', true,...
                 'spd val', 'D50',...
                 'coneangle val', 5);
-    thisR.set('light', 'add', spotLight);
-    thisR.set('light', 'rotate', 'new spot', [5 0 0]);
+    thisR.set('light', spotLight, 'add');
+    thisR.set('light', 'new spot', 'rotate', [5 0 0]);
 
     piWrite(thisR, 'overwritematerials', true);
 

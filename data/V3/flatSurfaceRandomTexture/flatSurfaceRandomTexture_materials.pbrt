@@ -1,2 +1,0 @@
-Texture "reflectanceChart_color" "spectrum" "imagemap" "string filename" "reflectanceChart.png"
-MakeNamedMaterial "Mat" "string type" "matte" "texture Kd" "reflectanceChart_color"

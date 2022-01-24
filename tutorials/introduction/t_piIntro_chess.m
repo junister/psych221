@@ -1,80 +1,85 @@
-%% pbrt v4 introduction 
-% Users need to pull the docker image(s):
-%     Current temporary locations
-%     docker pull camerasimulation/pbrt-v4-cpu
-%     docker pull digitalprodev/pbrt-v4-cpu
+%% Introducing iset3d calculations with the Chess Set
 %
-% EXPERIMENTAL FOR GPU SUPPORT!
-% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
-% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-mux
-% and/or     docker pull camerasimulation/pbrt-v4-t4  
+% Brief description:
+%  This script renders the chess set scene.  
 % 
-% CPU only
-% blender uses a coordinate system like this:
-%    
-%                 z
-%                 ^  
-%                 |
-%                 |  
-%                 x - - - - >y
-% unit scale uses centermeter by default
+%  This script:
 %
-% We modified
-%    tree
-%   added piWRS.m
+%    * Initializes the recipe
+%    * Sets the film (sensor) resolution parameters
+%    * Calls the renderer that invokes PBRT via docker
+%    * Loads the returned radiance and depth map into an ISET Scene structure.
+%    * Adds a point light
 %
-% TO CHECK for updates
-%    recipe.m, recipeSet.m recipeGet.m
-%    
-%   
-%% Init
+% Dependencies:
+%    ISET3d and either ISETCam or ISETBio
+%
+%  Check that you have the latest docker image by running
+%
+%    docker pull vistalab/pbrt-v3-spectral
+%
+% See also
+%   t_piIntro_*, piRecipeDefault, @recipe
+%
+
+%% Initialize ISET and Docker
+
+% Start up ISET and check that docker is configured 
 ieInit;
-%% piRead support FBX and PBRT
-% FBX is converted into PBRT or you can use a PBRT file
-pbrtFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
-%% 
-thisR  = piRead(pbrtFile);
-%%
-% close up view
-thisR.set('from',[1.9645 0.2464 0.0337]);
-thisR.set('to',  [0.9655 0.2050 0.0198]);
-thisR.set('up',  [0 1 0]);
+if ~piDockerExists, piDockerConfig; end
 
-thisR.set('film resolution',[600 600]/2);
-thisR.set('rays per pixel',32);
-%% set render type
-% radiance 
-% rTypes = {'radiance','depth','both','all','coordinates','material','instance', 'illuminant','illuminantonly'};
-thisR.set('film render type',{'radiance','depth'})
+%% Read the recipe
 
-thisR.show('objects');
-%%
-piLightDelete(thisR, 'all'); 
-mainLight = piLightCreate('mainLight', ...
-                        'type','distant',...
-                        'specscale', 3,...
-                        'cameracoordinate', true);
-thisR.set('light', 'add', mainLight);
-                    
-lightName = 'env light';
-envLight = piLightCreate(lightName,...
-                        'type','infinite',...
-                        'spd',[0.4 0.3 0.3],...
-                        'specscale',1, ...
-                        'mapname', 'sun-clouds.exr');
+thisR = piRecipeDefault('scene name','chessset');
 
-thisR.set('light', 'add', envLight);
+%% Set the render quality
 
-%% write the data out
+% There are many rendering parameters.  This is the just an introductory
+% script, so we set a minimal number of parameters.  Much of what is
+% described in other scripts expands on this section.
+thisR.set('film resolution',[256 256]);
+thisR.set('rays per pixel',64);
+thisR.set('n bounces',4); % Number of bounces traced for each ray
 
-scene = piWRS(thisR);
- %{
-tic
-piWrite(thisR);
-scene = piRender(thisR);
-sceneWindow(scene);
-toc
-%}
-%%
-piAssetGeometry(thisR);
+thisR.set('render type',{'radiance','depth'});
+piWRS(thisR);
 
+%% By default, we have also computed the depth map, so we can render it
+scene = ieGetObject('scene');
+
+scenePlot(scene,'depth map');
+
+%% Add a bright point light near the front where the camera is
+
+thisR.get('light print');
+thisR.set('light','all','delete');
+
+% First create the light
+pointLight = piLightCreate('point',...
+    'type','point',...
+    'cameracoordinate', true);
+
+% Then add it to our scene
+thisR.set('light',pointLight,'add');
+
+% For now only radiance. Because we can.
+thisR.set('render type',{'radiance'});
+
+piWRS(thisR,'name','Point light');
+
+%% Add a skymap
+
+[~, skyMap] = thisR.set('skymap','room.exr');
+
+thisR.get('light print');
+
+piWRS(thisR, 'name', 'Point light and skymap');
+
+%% Rotate the skymap
+
+thisR.set('light',skyMap.name,'rotate',[30 0 0]);
+
+piWRS(thisR, 'name','Rotate skymap');
+
+
+%% END

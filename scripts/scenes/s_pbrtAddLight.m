@@ -32,7 +32,7 @@ sceneWindow(scene);
 newLight = piLightCreate('outside','type','infinite','mapname','room.exr');
 % newLight = piLightCreate('inside','type','spot','cameracoordinate',true,'spd',[1 0 0]);
 
-thisR.set('light','add',newLight);
+thisR.set('light',newLight,'add');
 txt = piLightWrite(thisR);
 
 nLines = numel(txt{1}.line);

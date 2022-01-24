@@ -23,7 +23,7 @@ thisR = piRecipeDefault('scene name','checkerboard');
 piCameraTranslate(thisR,'z shift',2);
 
 % Add one equal energy light
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
@@ -34,7 +34,7 @@ spotLgt1 = piLightCreate('spot1',...
                         'specscale float', 1,...
                         'coneangle', 20,...
                         'cameracoordinate', true);
-thisR.set('light', 'add', spotLgt1);
+thisR.set('light', spotLgt1, 'add');
 
 thisR.get('light print');
 
@@ -44,37 +44,37 @@ piWRS(thisR,'name','Equal energy (spot)');
 %%  Change the spectrum to tungsten
 
 % What are the possible spd values?
-thisR.set('lights', 'spot1', 'spd', 'tungsten');
+thisR.set('lights', 'spot1_L', 'spd', 'tungsten');
 
 piWRS(thisR,'name','Tungsten (spot)');
 
 %% What are the possible spd strings?
 
-thisR.set('lights', 'spot1', 'spd', 'D50');
+thisR.set('lights', 'spot1_L', 'spd', 'D50');
 
 piWRS(thisR,'name','D50 (spot)');
 
 %% Black body - specify just a single color temperature value
 
-thisR.set('lights', 'spot1', 'spd', 3000);
+thisR.set('lights', 'spot1_L', 'spd', 3000);
 
 piWRS(thisR,'name','3K (spot)');
 
 %% Now overlay two lights
 
-spotLgt2 = piLightCreate('spot2',...
+spotLgt2 = piLightCreate('spot2_L',...
                         'type', 'spot',...
                         'spd', 3000,...
                         'specscale float', 1,...
                         'coneangle', 20,...
                         'cameracoordinate', true);
-thisR.set('lights','add',spotLgt2);
+thisR.set('lights',spotLgt2, 'add');
 
-position = thisR.get('lights','spot1','position');
-thisR.set('lights','spot1','from',position + [3 0 0]);
-thisR.set('lights','spot2','from',position - [3 0 0]);
+position = thisR.get('lights','spot1_L','position');
+thisR.set('lights','spot1_L','from',position + [3 0 0]);
+thisR.set('lights','spot2_L','from',position - [3 0 0]);
 
-thisR.set('lights','spot1','spd',8000);
+thisR.set('lights','spot1_L','spd',8000);
 
 thisR.show('lights');
 
@@ -83,6 +83,7 @@ piWRS(thisR,'name','Mixture (spot)');
 %% Adjust spread of the spots
 
 % Annoyingly, we can't use 'cone angle'
+% ZLY: I think it works now?
 thisR.set('lights','spot1','coneangle',5);
 thisR.set('lights','spot2','coneangle',5);
 piWRS(thisR,'name','Mixture narrow (spot)');

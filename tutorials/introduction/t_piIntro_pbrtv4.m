@@ -43,14 +43,7 @@ thisR  = piRead(fbxFile);
 
 %%
 % convert scene unit from centimeter to meter
-thisR = piUnitConvert(thisR, 100);
-
-% close up view
-thisR.set('from',[1.9645 0.2464 0.0337]);
-thisR.set('to',  [0.9655 0.2050 0.0198]);
-thisR.set('up',  [0 1 0]);
-
-
+% thisR = piUnitConvert(thisR, 100);
 
 thisR.set('film resolution',[600 600]/2);
 thisR.set('rays per pixel',32);
@@ -69,7 +62,7 @@ newLight = piLightCreate(lightName,...
                         'type','infinite',...
                         'spd',[0.4 0.3 0.3],...
                         'specscale',1);
-thisR.set('light', 'add', newLight);
+thisR.set('light', newLight, 'add');
 
 %% write the data out
 

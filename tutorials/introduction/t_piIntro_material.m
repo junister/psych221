@@ -23,15 +23,15 @@ sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 
 % convert scene unit from centimeter to meter
-thisR = piUnitConvert(thisR, 100);
+% thisR = piUnitConvert(thisR, 100);
 
 % Create an environmental light source (distant light) that is a 9K
 % blackbody radiator.
 distLight = piLightCreate('new dist light',...
-    'type', 'distant',...
-    'spd', 9000,... % blackbody
-    'cameracoordinate', true);
-thisR.set('light', 'add', distLight);
+                            'type', 'distant',...
+                            'spd', 9000,...
+                            'cameracoordinate', true);
+thisR.set('light', distLight, 'add');
 
 thisR.set('film resolution',[200 150]*2);
 thisR.set('rays per pixel',64);
@@ -106,8 +106,9 @@ thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 % For standard environment lights, we want something like
 %
 % Add an environmental light
-thisR.set('light', 'delete', 'all');
-[~, rmLight] = thisR.set('skymap','room.exr','rotation val', {[0 0 1 0], [-90 1 0 0]});
+thisR.set('light', 'all', 'delete');
+thisR.set('skymap', 'room.exr');
+
 % doing this now in set, as I think it has to happen
 % before the light is added???
 %rmLight = piLightSet(rmLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});

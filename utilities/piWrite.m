@@ -188,9 +188,11 @@ piWriteBlocks(thisR,fileID);
 piIncludeLines(thisR,fileID);
 
 %% Write out the lights
-if ~isempty(thisR.lights)
+%{
+if ~isequal(exporter,'Copy')
     piLightWrite(thisR);
 end
+%}
 
 %% Close the main PBRT scene file
 fclose(fileID);
@@ -198,12 +200,12 @@ fclose(fileID);
 %% Write scene_materials.pbrt
 
 % Even when copying, we extract the materials and textures
-if ~isempty(thisR.materials.list)    
+if ~isempty(thisR.materials.list)
     piWriteMaterials(thisR,overwritematerials);
 end
 
 %% Overwrite geometry.pbrt
-if ~isequal(exporter,'Copy')    
+if ~isequal(exporter,'Copy')
     piWriteGeometry(thisR,overwritegeometry);
 end
 
@@ -618,7 +620,7 @@ if isequal(thisR.exporter, 'Copy')
                 isempty(lineMaterials) &&...
                 ~isempty(thisR.materials)
             % Insert the materials file
-            fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));   
+            fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
         end
         if piContains(thisR.world{ii}, 'WorldBegin') &&...
                 isempty(lineLights) &&...
@@ -681,7 +683,7 @@ for ii = 1:length(thisR.world)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
     end
-    
+
     if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));

@@ -120,7 +120,7 @@ thisR = piRecipeDefault('scene name','flatsurface');
 distantLight = piLightCreate('distant','type','distant',...
     'spd', [6500 0.001], ...
     'cameracoordinate', true);
-thisR.set('light','add',distantLight);
+thisR.set('light',distantLight,'add');
 
 %% Aim the camera at the object and bring it closer.
 thisR.set('to',  xyz -   [0,5,0]);

@@ -23,6 +23,9 @@ function lght = piLightCreate(lightName, varargin)
 %   In addition to creating a light struct, various light properties can be
 %   specified in key/val pairs.
 %
+%   The 'spd spectrum' property reads a file from ISETCam/data/lights
+%   that defines a light spectrum.  For example, Tungsten or D50.
+%
 % Returns
 %   lght   - light struct
 %
@@ -81,12 +84,13 @@ switch ieParamFormat(lght.type)
     case 'distant'
         lght.cameracoordinate = true;
 
-        lght.from.type = 'point';
-        lght.from.value = [];
+        lght.from.type = 'point3';
+        lght.from.value = [0 0 0];
 
-        lght.to.type = 'to';
-        lght.to.value = [];
+        lght.to.type = 'point3';
+        lght.to.value = [0 0 1];
 
+        %{
         % Potentially has rotation, transformation or concatransformaiton
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
@@ -99,6 +103,7 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        %}
 
     case 'goniometric'
         lght.mapname.type = 'string';
@@ -112,7 +117,8 @@ switch ieParamFormat(lght.type)
         % V4 for infinite lights
         lght.mapname.type = 'string';
         lght.mapname.value = '';
-
+        
+        %{
         % Potentially has rotation, transformation or concatransformaiton
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
@@ -125,12 +131,14 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        %}
     case 'point'
         lght.cameracoordinate = true;
 
         lght.from.type = 'point';
-        lght.from.value = [];
-
+        lght.from.value = [0 0 0];
+        
+        %{
         % Potentially has rotation, transformation or concatransformaiton
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
@@ -143,6 +151,7 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        %}
 
     case 'projection'
         lght.fov.type = 'float';
@@ -154,18 +163,19 @@ switch ieParamFormat(lght.type)
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
 
-        lght.from.type = 'point';
-        lght.from.value = [];
+        lght.from.type = 'point3';
+        lght.from.value = [0 0 0];
 
-        lght.to.type = 'to';
-        lght.to.value = [];
+        lght.to.type = 'point3';
+        lght.to.value = [0 0 1];
 
         lght.coneangle.type = 'float';
         lght.coneangle.value = [];
 
         lght.conedeltaangle.type = 'float';
         lght.conedeltaangle.value = [];
-
+        
+        %{
         % Potentially has rotation, transformation or concatransformaiton
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
@@ -178,6 +188,7 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        %}
 
     case {'area', 'arealight'}
         lght.twosided.type = 'bool';
@@ -188,7 +199,8 @@ switch ieParamFormat(lght.type)
 
         lght.shape.type = 'shape';
         lght.shape.value = [];
-
+        
+        %{
         % Potentially has rotationation, transformation or concatransformaiton
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
@@ -201,6 +213,7 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
+        %}
 
         lght.ReverseOrientation.type = 'ReverseOrientation';
         lght.ReverseOrientation.value = false;

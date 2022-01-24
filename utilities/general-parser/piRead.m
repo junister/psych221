@@ -165,9 +165,11 @@ if(flip)
 end
 
 % Read the light sources and delete them in world
+%{
 if ~isequal(exporter,'Copy')
     thisR = piLightRead(thisR);
 end
+%}
 
 % Read Scale, if it exists
 % Because PBRT is a LHS and many object models are exported with a RHS,

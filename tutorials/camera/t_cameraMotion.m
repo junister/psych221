@@ -49,7 +49,7 @@ thisR.set('fov',45);
 % you are willing to accept ZL's mapping into materials based on
 % automobile parts. 
 % piMaterialGroupAssign(thisR);
-
+thisR.set('light', 'Sky1', 'rotate', [-90 0 0]);
 %% Write out the pbrt scene file, based on thisR.
 piWrite(thisR);
 

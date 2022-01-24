@@ -1,7 +1,7 @@
 function txt = piLightGenerateTransformText(lght)
 % Check translation
 txt = {};
-
+%{
 [~, rotationTxt] = piLightGet(lght, 'rotation val', 'pbrt text', true);
 [~, translationTxt] = piLightGet(lght, 'translation val', 'pbrt text', true);
 [~, ctformTxt] = piLightGet(lght, 'ctform val', 'pbrt text', true);
@@ -20,6 +20,7 @@ end
 if ~isempty(sclTxt)
     txt = [txt sclTxt];
 end
+%}
 
 %% Old version
 % This part has been moved to piLightGet.

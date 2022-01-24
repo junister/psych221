@@ -304,7 +304,7 @@ end
 
 % Add an infinite light corresponding to mid-day sunlight
 lgt = piLightCreate('infiniteBlender','type','infinite','spd','D65');
-thisR.set('light','add',lgt);
+thisR.set('light',lgt,'add');
 
 % thisR = piLightAdd(thisR,'type','infinite','light spectrum','D65');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

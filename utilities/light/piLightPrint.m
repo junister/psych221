@@ -30,7 +30,7 @@ position = zeros(nLights,3);
 fprintf('\nLights\n');
 fprintf('-------------------------------\n');
 for ii =1:numel(lightNames)
-    thisLight = thisR.lights{ii};
+    thisLight = thisR.get('light', lightNames{ii}, 'lght');
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;

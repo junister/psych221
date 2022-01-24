@@ -44,6 +44,20 @@ if isscalar(val)
     thisAsset = {assets.get(val)};
     return;
 end
+
+%% Check two 
+id = [];
+thisAsset = {};
+
+if isKey(assets.mapFullName2Idx, val)
+    id = assets.mapFullName2Idx(val);
+    thisAsset = assets.get(id);
+elseif isKey(assets.mapShortName2Idx, val)
+    id = assets.mapShortName2Idx(val);
+    thisAsset = {assets.get(id)};
+end
+%% Old tree traversal method
+%{
 %%
 nodeList = 0; % 0 is always the index for root node
 
@@ -88,5 +102,6 @@ while curIdx <= numel(nodeList)
 
     curIdx = curIdx + 1;
 end
+%}
 
 end

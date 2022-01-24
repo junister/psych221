@@ -42,9 +42,19 @@ if ischar(assetInfo)
 end
 %% Remove node
 if ~isempty(thisR.assets.get(assetInfo))
+    while true
+        % First get the parrent of current node
+        parentID = thisR.assets.Parent(assetInfo);
+        
         thisR.assets = thisR.assets.removenode(assetInfo);
         % warning('Removing node might change remaining node ids.')
         % [thisR.assets, ~] = thisR.assets.uniqueNames;
+        if isempty(thisR.assets.getchildren(parentID))
+            assetInfo = parentID;
+        else
+            break;
+        end
+    end
 else
     warning('Node: %d is not in the tree, returning.', assetInfo);
 end
