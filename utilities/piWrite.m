@@ -572,7 +572,8 @@ for ofns = outerFields'
                     lineFormat = '  "%s %s" [%f] \n';
                 end
             elseif(strcmp(currType,'integer'))
-                lineFormat = '  "%s %s" [%i] \n';
+                %if we use %i, we can get exponents which pbrt hates
+                lineFormat = '  "%s %s" [%12.0f] \n';
             elseif (strcmp(currType,'bool'))
                 lineFormat = '  "%s %s" %s \n';
             end
