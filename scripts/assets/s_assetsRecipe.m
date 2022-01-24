@@ -67,7 +67,7 @@ save(oFile,'mergeNode','-append');
 %
 
 [thisR, mergeNode] = piChartCreate('EIA');
-thisR.set('lights','delete','all');
+thisR.set('lights','all','delete');
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
 %{

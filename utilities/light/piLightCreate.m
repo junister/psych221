@@ -29,6 +29,8 @@ function lght = piLightCreate(lightName, varargin)
 % Returns
 %   lght   - light struct
 %
+%  lgt = piLightCreate('blueSpot', 'type','spot','spd',[9000]);
+%
 % See also
 %   piLightSet, piLightGet, piLightProperties
 %
