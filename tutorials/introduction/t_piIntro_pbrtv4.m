@@ -1,19 +1,17 @@
 %% pbrt v4 introduction 
 %
-% The proper versions of these containers need to be on the machine
-% where they will execute.  Typically the GPU containers are already
+% The proper versions of Docker image(s) need to be on the machine
+% where they will execute.  Typically GPU images are already
 % installed on the remote machine.
 %
-% Users typically pull their own copy of the CPU docker image(s):
+% If Docker doesn't pull the CPU image needed for local operations,
+% you can do it manually:
 %
 %     docker pull camerasimulation/pbrt-v4-cpu
 %
-% EXPERIMENTAL FOR GPU SUPPORT!
-%
-% and/or     docker pull digitalprodev/pbrt-v4-gpu-ampere-bg
-% and/or     docker pull camcerasimulation/pbrt-v4-t4  
+% To have rendering occur on a remote GPU see the Wiki page:
+%   https://github.com/ISET/iset3d-v4/wiki/Remote-Rendering-with-PBRT-v4
 % 
-% CPU only
 % blender uses a coordinate system like this:
 %    
 %                 z
