@@ -75,7 +75,7 @@ spdRef = piMaterialCreateSPD(wave, reflectance);
 thisR.set('material', redMatte, 'reflectance value', spdRef);
 
 %% Set the material
-assetName = 'Sphere_O';
+assetName = '001_Sphere_O';
 thisR.set('asset',assetName,'material name',redMatte.name);
 
 % Show that we set it
@@ -95,7 +95,7 @@ end
 %    'mapname', 'room.exr');
 
 % Make the sphere a little smaller
-assetName = 'Sphere_O';
+assetName = '001_Sphere_O';
 thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
 
 %thisR.set('light', 'add', rmLight);

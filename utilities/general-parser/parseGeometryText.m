@@ -54,14 +54,23 @@ while i <= length(txt)
 
     if strcmp(currentLine,'AttributeBegin')
         % This is an Attribute inside an Attribute
+        % When we read the following text, it always returns a branch node
+        % and the object node.
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
-
+        
+        % Since the subnodes include a branch node and an object node, we
+        % check the second node, if it is an object node we add the object
+        % index in the front to avoid naming ambiguity.
+        % Note this labelling is different from creating instances. For
+        % instances we change the node name extension from '_O' to '_I'.
+        % Here we descriminate each component of a group object with the
+        % object index.
         % Add object index: index_objectname_O
-        if strcmp(subnodes.Node{1}.type, 'object')
+        if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
             objectIndex = objectIndex+1;
-            thisNode = subnodes.Node{1};
+            thisNode = subnodes.Node{2};
             thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
-            subnodes = subnodes.set(1, thisNode);
+            subnodes = subnodes.set(2, thisNode);
         end
 
         subtrees = cat(1, subtrees, subnodes);

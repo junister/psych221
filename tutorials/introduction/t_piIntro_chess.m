@@ -1,8 +1,4 @@
-%% pbrt v4 introduction 
-% Users need to pull the docker image(s):
-%     Current temporary locations
-%     docker pull camerasimulation/pbrt-v4-cpu
-%     docker pull digitalprodev/pbrt-v4-cpu
+%% Introducing iset3d calculations with the Chess Set
 %
 % Brief description:
 %  This script renders the chess set scene.  
@@ -32,11 +28,11 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% piRead support FBX and PBRT
-% FBX is converted into PBRT or you can use a PBRT file
-pbrtFile = fullfile(piRootPath,'data','V4','ChessSet','ChessSet.pbrt');
-%% 
-thisR  = piRead(pbrtFile);
+%% Read the recipe
+
+thisR = piRecipeDefault('scene name','chessset');
+
+%% Set the render quality
 
 % There are many rendering parameters.  This is the just an introductory
 % script, so we set a minimal number of parameters.  Much of what is
@@ -73,7 +69,7 @@ piWRS(thisR,'name','Point light');
 
 %% Add a skymap
 
-thisR.set('skymap','room.exr');
+[~, skyMap] = thisR.set('skymap','room.exr');
 
 thisR.get('light print');
 
@@ -81,7 +77,7 @@ piWRS(thisR, 'name', 'Point light and skymap');
 
 %% Rotate the skymap
 
-thisR.set('light','skymap_L','rotate',[30 0 0]);
+thisR.set('light',skyMap.name,'rotate',[30 0 0]);
 
 piWRS(thisR, 'name','Rotate skymap');
 

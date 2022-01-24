@@ -26,14 +26,13 @@ thisR.set('fov',40);
 % Add a light with bright windows
 % fileName = 'cathedral_interior.exr';
 fileName = 'room.exr';
-envLight = piLightCreate('background', ...
-    'type', 'infinite',...
-    'mapname', fileName);
-thisR.set('lights', 'add', envLight);     
+[~, skyMap] = thisR.set('skymap', fileName);
+% thisR.set('lights', envLight, 'add');     
 
 % thisR.set('lights','background','rotation val',{[0 0 5 0], [0 1 0 0]});
-thisR.set('lights','background','rotation val',{[0 0 5 0], [135 1 0 0]});
 
+% thisR.set('lights',skyMap.name,'rotate',[0 0 5]); % {[0 0 5 0], [135 1 0 0]});
+thisR.set('lights',skyMap.name,'rotate',[-90 0 0]);
 % Insert the materials
 thisR = piMaterialsInsert(thisR,'mtype',{'all'});
 

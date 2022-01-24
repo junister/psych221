@@ -24,7 +24,7 @@ if ~piDockerExists, piDockerConfig; end
 % meter size at location 0,0,0 (BW)
 % {
 thisR = piRecipeDefault('scene name','sphere');
-thisR.set('asset','Sphere_O','scale',2/380);
+thisR.set('asset','001_Sphere_O','scale',2/380);
 % Put the camera 3 meters away
 thisR.set('from',[0 0 3]);
 %}
