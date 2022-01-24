@@ -193,7 +193,7 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                if contains(obj.dockerImageName, 'shared')
+                if contains(obj.remoteImage, 'shared')
                     % we don't need to mount libraries
                     cudalib = '';
                 else
