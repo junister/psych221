@@ -51,7 +51,7 @@ shape = objectNode.shape;
 %% Create a new node to replace the object node
 lightNode = piAssetCreate('type', 'light');
 lightNode.lght = {lght}; % Convert the light to cell
-lightNode.name = objectName;
+lightNode.name = [objectName(1:end-2), '_L'];
 if isequal(lght.type, 'area')
     lightNode.lght{1} = piLightSet(lightNode.lght{1}, 'shape val', shape);
 end
