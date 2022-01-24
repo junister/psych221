@@ -81,7 +81,8 @@ for ii = 1:length(recipelist)
             
             % Graft the asset three into the scene.  We graft it onto the root
             % of the main scene.
-            sceneR.set('asset', 'root', 'graft', thisOBJsubtree);
+            % Changed to root_B on Jan 23, 2022.  Worried (BW).
+            sceneR.set('asset', 'root_B', 'graft', thisOBJsubtree);
         end
         
         % Copy meshes from objects folder to scene folder here
