@@ -7,5 +7,5 @@ docker build --tag digitalprodev/pbrt-v4-gpu-pascal-shared `pwd`
 
 
 # if you have permission to push, and know what you are doing...
-# docker push digitalprodev/pbrt-v4-gpu-pascal
+# docker push digitalprodev/pbrt-v4-gpu-pascal-shared
 
