@@ -177,10 +177,10 @@ while i <= length(txt)
                 
                 subtrees = cat(1, subtrees, tree(resLight));
                 % trees = subtrees;
-            end
+            
             
             % This is a branch or an object
-            if exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
+            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
                 % This path if it is an object
                 resObject = piAssetCreate('type', 'object');
                 if exist('name','var')
