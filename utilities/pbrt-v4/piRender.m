@@ -259,10 +259,12 @@ elseif isempty(thisR.metadata)
 else
     ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
 end
-%% We used to name here, but apparently not needed any more
 
 % Why are we updating the wave?  Is that ever needed?
 if isstruct(ieObject)
+    % It might be helpful to preserve the recipe used
+    ieObject.recipeUsed = thisR;
+    
     switch ieObject.type
         case 'scene'
             % names = strsplit(fileparts(thisR.inputFile),'/');
