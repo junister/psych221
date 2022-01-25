@@ -2,17 +2,31 @@
 %
 %  In ISETCam scripts we create the sensor
 %
+% This script is failing in V4.  It fails with the omni camera and
+% microlens.
+%
+%{
+See the file LICENSE.txt for the conditions of the license.
+
+[1m[31mWarning[0m: Specified aperture radius 0.0025000002 is greater than maximum possible 0.00051150005.  Clamping it.
+
+terminate called after throwing an instance of 'nlohmann::detail::type_error'
+
+  what():  [json.exception.type_error.302] type must be number, but is array
+%}
+%
 % See also
 %  s_sensorDPAF (ISETCam)
 
 %% Initialize a scene and oi
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-chdir(fullfile(piRootPath,'local'));
 
 %%  Get the chess set scene
 
 thisR = piRecipeDefault('scene name','chessSet');
+
+% piWRS(thisR);
 
 %% Set up the combined imaging and microlens array
 
@@ -26,6 +40,8 @@ nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensHeight,nMicrolens);
 
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
+
+% piWRS(thisR);
 
 %% Set up the film parameters
 %
@@ -43,6 +59,7 @@ filmheight = nMicrolens(1)*uLens.get('diameter','mm');       % mm
 filmresolution = [filmheight, filmwidth]/pixelSize;
 
 dRange = thisR.get('depth range');
+
 thisR.set('focus distance',dRange(2));
 
 %{
@@ -62,6 +79,8 @@ thisR.set('aperture diameter',10);
 thisR.set('rays per pixel',32);
 
 thisR.get('depth range') % This calls the docker container to get the depth
+
+% piWRS(thisR);
 
 %% Make a dual pixel sensor that has rectangular pixels
 %
