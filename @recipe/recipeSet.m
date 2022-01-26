@@ -872,18 +872,19 @@ switch param
         % Create a sky light with default params.
         [~, f, ~] = fileparts(skymapFileName);
         
-        envLight = piLightCreate(f, ...
+        lName = [f '-L'];
+        envLight = piLightCreate(lName, ...
             'type', 'infinite',...
             'mapname', skymapFileName);
+        thisR.set('lights', envLight, 'add');
                         
         if ~isempty(varargin) && isequal(varargin{1},'rotation val')
-            thisR.set('light', envLight.name, 'rotate', varargin{2});
+            thisR.set('light', lName, 'rotate', varargin{2});
         else
-            rLight = piLightRotate(envLight, [-90 0 0]);
+            piLightRotate(envLight, [-90 0 0]);
         end
-        thisR.set('light', rLight, 'add');
 
-        out = rLight;
+        % out = rLight;
         % We need to return rLight to our caller!
 
     case {'light', 'lights'}
