@@ -39,7 +39,6 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-% p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu:latest',@ischar);
 
 % You can over-ride the render type with this argument
 p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
