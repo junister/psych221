@@ -90,10 +90,10 @@ disp('t_piIntro_meshLabel')
 t_piIntro_meshLabel
 %}
 
-%%  Not clearly needed, but it is fast
+%%  test our skymap specific API
 disp('*** SKYMAPS -- t_skymapDaylight')
 setpref('ISET3d', 'tvskymapStart', tic);
-t_skymapDaylight;
+v_skymap;
 setpref('ISET3d', 'tvskymapTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
 
 %% Textures
