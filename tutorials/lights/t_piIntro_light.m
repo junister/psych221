@@ -193,25 +193,26 @@ piWRS(thisR,'name','Blue (distant)');
 
 thisR.set('light', 'all', 'delete');
 
-fileName = 'pngExample.png';
+fileName = 'room.exr';
 exampleEnvLight = piLightCreate('room_light_L', ...
     'type', 'infinite',...
     'mapname', fileName);
 
-thisR.set('lights', exampleEnvLight, 'add');   
-thisR.set('light', 'room_light_L', 'rotation', [0 0 1 ]);
-thisR.set('light', 'room_light_L', 'rotation', [-90 1 0]);
+thisR.set('lights', exampleEnvLight, 'add');
 
-% Check the light list
-thisR.get('light print');
+% Put the window behind the checkerboard.
+thisR.set('light', 'room_light_L', 'rotation', [-90 0 0]);
+thisR.set('light', 'room_light_L', 'rotation', [0 0 90]);
 
-% Zoom out a bit 
-piCameraTranslate(thisR,'z shift', -10); 
+piWRS(thisR);
 
-% Rotate around x and y axis
-piCameraRotate(thisR, 'y rot', -10);
-piCameraRotate(thisR, 'x rot', 10);
+%%  Now rotate the skymap around the z dimension.  
 
-piWRS(thisR,'name','Environment light');
+% As is often the case, the X Y Z dimensions are annoying to interpret.  We
+% need better tools
+for ii=1:3
+    thisR.set('light', 'room_light_L', 'rotation', [0 0 10]);
+    piWRS(thisR,'name','Environment light');
+end
 
 %% END
