@@ -48,9 +48,9 @@ setpref('ISET3d', 'tvlightStart', tic);
 t_piIntro_light;
 setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
 
-disp('t_piIntro_pbrtv4')
+disp('*** INTRO -- t_piIntro')
 setpref('ISET3d', 'tvpbrtStart', tic);
-t_piIntro_pbrtv4;
+t_piIntro;
 setpref('ISET3d', 'tvpbrtTime', toc(getpref('ISET3d', 'tvpbrtStart', 0)));
 
 %%  Check that the scenes in the data directory still run
