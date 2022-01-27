@@ -59,7 +59,13 @@ thisR.set('render type',renderType);
 
 piWrite(thisR);
 
-[obj,results] = piRender(thisR, 'ourdocker', ourDocker);
+[~,username] = system('whoami');
+
+if strncmp(username,'zhenyi',6)
+    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
+else
+    [obj,results] = piRender(thisR, 'ourdocker', ourDocker);
+end
 
 switch obj.type
     case 'scene'

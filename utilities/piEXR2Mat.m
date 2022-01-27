@@ -24,8 +24,14 @@ basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
 
 if ~ispc
-    dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
-    [status,result] = system(dockercmd);
+    [~,username] = system('whoami');
+    if strncmp(username,'zhenyi',6)
+        localcmd = sprintf('/Users/zhenyi/git_repo/PBRT_code/pbrt_zhenyi/pbrt_gpu/pbrt-v4/build/%s',cmd);
+        [status,result] = system(localcmd);
+    else
+        dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
+        [status,result] = system(dockercmd);
+    end
 else
     ourDocker = dockerWrapper();
     ourDocker.command = ['imgtool convert --exr2bin ' channelname];
