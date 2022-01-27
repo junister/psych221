@@ -125,10 +125,11 @@ for ii = 1:numel(label)
             end
 
         case 'coordinates'
-            % Should the coordinates be in an ieObject?
+            % Doesn't work on many scenes
             otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
 
         case 'material'
+            % Doesn't work yet
             otherData.materialID = piReadEXR(inputFile, 'data type','material');
 
         case 'normal'
