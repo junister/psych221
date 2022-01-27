@@ -155,7 +155,11 @@ fprintf('------\n');
 %% Remember where you started 
 
 % Basic docker command
-dockerCommand   = 'docker run -ti --rm';
+if ispc
+    dockerCommand   = 'docker run -i --rm';
+else
+    dockerCommand   = 'docker run -ti --rm';
+end
 
 % Where you want the output file
 outputFolder  = pwd;
@@ -189,7 +193,10 @@ end
 
 % Need to add the other parameters
 lensToolCommand = sprintf('lenstool insertmicrolens -xdim %d -ydim %d -filmheight %f -filmwidth %f %s %s %s',...
-    xdim,ydim,filmheight,filmwidth,imagingLens,microLens,combinedLens);
+    xdim,ydim,filmheight,filmwidth,...
+    dockerWrapper.pathToLinux(imagingLens),...
+    dockerWrapper.pathToLinux(microLens),...
+    dockerWrapper.pathToLinux(combinedLens));
 
 cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, lensToolCommand);
 fprintf('Mounting folder %s\n',outputFolder);

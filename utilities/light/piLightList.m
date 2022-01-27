@@ -15,9 +15,10 @@ if nLights == 0
 else
     disp('---------------------')
     disp('*****Light Type******')
-    for ii = 1:numel(thisR.lights)
+    lightNames = thisR.get('light', 'names');
+    for ii = 1:numel(lightNames)
         fprintf('%d: name: %s     type: %s\n', ii,...
-            thisR.lights{ii}.name,thisR.lights{ii}.type);
+            lightNames{ii}, thisR.get('light', lightNames{ii}, 'type'));
     end
     disp('*********************')
     disp('---------------------')

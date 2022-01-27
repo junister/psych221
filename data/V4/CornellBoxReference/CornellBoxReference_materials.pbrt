@@ -1,0 +1,29 @@
+MakeNamedMaterial "ShieldMat"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.1 ]
+    "rgb reflectance" [ 0 0 0 ]
+MakeNamedMaterial "areaLightMat"
+    "string type" [ "coateddiffuse" ]
+    "float roughness" [ 0.1 ]
+    "rgb reflectance" [ 0 0 0 ]
+MakeNamedMaterial "CubeSmall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "CubeLarge"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "TopWall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "BackWall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "BottomWall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.60382736 0.60382736 0.60382736 ]
+MakeNamedMaterial "RightWall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.08859374 0.76776874 0.116680965 ]
+MakeNamedMaterial "LeftWall"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.8900054 0 0 ]

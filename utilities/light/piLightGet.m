@@ -112,7 +112,7 @@ if pbrtText && ~isempty(val) &&...
                     % supposed to be in spds/lights. Otherwise, the spd
                     % file exists from the input folder already, it should
                     % be copied in the target directory.
-                    lightSpectrum = sprintf('"spds/lights/%s_%f.spd"', lght.spd.value, spectrumScale);
+                    lightSpectrum = sprintf('"spds/lights/%s_%f.spd"', ieParamFormat(lght.spd.value), spectrumScale);
                 else
                     lightSpectrum = sprintf('"%s"', lght.spd.value);
                 end

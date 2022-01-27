@@ -34,7 +34,7 @@ sceneWindow(scene);
 %}
 %{
 thisR = piRecipeDefault;
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 thisR = piLightGroupAssign(thisR, 'shape','circle',...
                                   'radius',0.5,...
                                   'number', 6,...
@@ -48,7 +48,7 @@ sceneWindow(scene);
 
 %{
 thisR = piRecipeDefault;
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 thisR = piLightGroupAssign(thisR, 'shape','circle',...
                                   'radius',0.5,...
                                   'number', 6,...
@@ -124,7 +124,7 @@ for ii = 1:numel(degrees)
                                          curTrans(2),...
                                          'z shift',...
                                          curTrans(3));
-    thisR.set('light', 'add', lght);
+    thisR.set('light', lght, 'add');
 end
 %% older version
 %{

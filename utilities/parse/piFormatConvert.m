@@ -71,7 +71,6 @@ while ii <= nLines
             newlines{nn,1}=thisLine; nn=nn+1;
         end
     end
-    
     ii=ii+1;
 end
 

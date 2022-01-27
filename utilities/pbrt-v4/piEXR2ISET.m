@@ -1,4 +1,4 @@
-function ieObject = piEXR2ISET(inputFile, varargin)
+function [ieObject, otherData] = piEXR2ISET(inputFile, varargin)
 % Read an exr-file rendered by PBRT, and return an ieObject or a
 % metadataMap
 %       ieObject =  piEXR2ISET(inputFile, varagin)
@@ -24,6 +24,8 @@ function ieObject = piEXR2ISET(inputFile, varargin)
 %             if label is radiance with other types of lens: scene;
 %             else, a metadatMap
 %
+%   otherData- A place to put return values that don't (currently)
+%              fit neatly into a scene or oi object
 %
 % Zhenyi, 2021
 %
@@ -63,6 +65,21 @@ meanLuminance         = p.Results.meanluminance;
 % wave                  = p.Results.wave;
 %%
 
+% initialize our return struct to empty
+otherData.materialID = [];
+otherData.coordinates = [];
+otherData.instanceID = [];
+
+% we assume we can work through a cell array, but don't always get one
+if ~iscell(label)
+    label = {label};
+end
+
+% As written we have to get radiance or the routine fails
+if max(contains(label,'radiance')) == 0
+    label{end+1} = 'radiance';
+end
+
 for ii = 1:numel(label)
 
     switch label{ii}
@@ -76,11 +93,6 @@ for ii = 1:numel(label)
                 data_wave = 400:10:700;
             end
             photons  = Energy2Quanta(data_wave,energy);
-
-
-            % case 'depth'
-            %    try
-            %        depthImage = piReadEXR(inputFile, 'data type','depth');
 
         case {'depth', 'zdepth'}
             try
@@ -112,16 +124,12 @@ for ii = 1:numel(label)
                 continue
             end
 
-            % case 'zdepth'
-            %    depthImage = piReadEXR(inputFile, 'data type','zdepth');
-
         case 'coordinates'
-            % Should the coordinates be ieObject?
-            coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
+            % Should the coordinates be in an ieObject?
+            otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
 
         case 'material'
-            % Should the materialID be ieObject?
-            materialID = piReadEXR(inputFile, 'data type','material');
+            otherData.materialID = piReadEXR(inputFile, 'data type','material');
 
         case 'normal'
             % to add
@@ -130,7 +138,7 @@ for ii = 1:numel(label)
 
         case 'instance'
             % Should the instanceID be ieObject?
-            instanceID = piReadEXR(inputFile, 'data type','instanceId');
+            otherData.instanceID = piReadEXR(inputFile, 'data type','instanceId');
     end
 end
 
@@ -298,7 +306,7 @@ switch lower(cameraType)
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
-if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var')
+if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
 

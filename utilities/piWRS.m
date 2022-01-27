@@ -6,6 +6,9 @@ function [obj,results] = piWRS(thisR,varargin)
 %   sequence, allowing the user to set a few parameters.  It is possible to
 %   control some of the parameters in key/val options.
 %
+%   If you set the render type in the calling argument, we just adjust the
+%   recipe locally.  The recipe will not be changed upon return.
+%
 % Synopsis
 %   [isetObj, results] = piWRS(thisR, varargin)
 %
@@ -18,7 +21,7 @@ function [obj,results] = piWRS(thisR,varargin)
 %           ... others).  If it is a char, then we convert it to a cell.
 %   'show'  -  Call a window to show the object (default) and insert it in
 %           the vcSESSION database
-%   'docker image name' - Specify the docker image
+%   'our docker' - Specify the docker image passed to piRender
 %
 % Returns
 %   obj     - a scene or oi
@@ -36,8 +39,10 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-% p.addParameter('dockerimagename','camerasimulation/pbrt-v4-cpu:latest',@ischar);
-p.addParameter('rendertype','radiance',@(x)(ischar(x) || iscell(x)));
+
+% You can over-ride the render type with this argument
+p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
+
 p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
@@ -45,9 +50,11 @@ p.addParameter('show',true,@islogical);
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
 
+% Determine whether we over-ride or not
 renderType = p.Results.rendertype;
-if ischar(renderType)
-    renderType = {renderType};
+if isempty(renderType),     renderType = thisR.get('render type'); % Use the recipe render type
+elseif ischar(renderType),  renderType = {renderType};     % Turn a string to cell
+elseif iscell(renderType)        % Good to go  
 end
 
 name = p.Results.name;
@@ -55,6 +62,10 @@ show = p.Results.show;
 
 %% In version 4 we set the render type this way
 
+% We preserve the render type in the recipe.
+oldRenderType = thisR.get('render type');
+
+% But the user may have given us a new render type
 thisR.set('render type',renderType);
 
 piWrite(thisR);
@@ -75,5 +86,7 @@ switch obj.type
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show, oiWindow(obj); end
 end
+
+thisR.set('render type',oldRenderType);
 
 end

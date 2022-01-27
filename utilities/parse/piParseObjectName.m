@@ -66,6 +66,6 @@ else
 end
 name = erase(name,'"');
 name = erase(name,' ');
-if strcmp(name(end),' '), name(end)='';end
+% if strcmp(name(end),' '), name(end)='';end
 
 end

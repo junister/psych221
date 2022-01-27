@@ -1,20 +1,8 @@
 %% Introducing iset3d calculations with the Chess Set
 %
 % Brief description:
-%  This script renders the chess set scene in the data directory of the ISET3d
-%  repository.
+%  This script renders the chess set scene.  
 % 
-% Dependencies:
-%    ISET3d and either ISETCam or ISETBio
-%
-%  Check that you have the latest docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
-%
-% Description:
-%  This script introduces how to read one of the ISET3d default scenes to
-%  create a recipe for rendering via PBRT.  
-%
 %  This script:
 %
 %    * Initializes the recipe
@@ -23,10 +11,12 @@
 %    * Loads the returned radiance and depth map into an ISET Scene structure.
 %    * Adds a point light
 %
-% Authors
-%  TL, BW, ZL, ZLy SCIEN 2017
-% Updates
-%  10/16/21 djc Cleanup comments
+% Dependencies:
+%    ISET3d and either ISETCam or ISETBio
+%
+%  Check that you have the latest docker image by running
+%
+%    docker pull vistalab/pbrt-v3-spectral
 %
 % See also
 %   t_piIntro_*, piRecipeDefault, @recipe
@@ -49,30 +39,47 @@ thisR = piRecipeDefault('scene name','chessset');
 % described in other scripts expands on this section.
 thisR.set('film resolution',[256 256]);
 thisR.set('rays per pixel',64);
-thisR.set('n bounces',3); % Number of bounces traced for each ray
+thisR.set('n bounces',4); % Number of bounces traced for each ray
 
-%% Save the recipe
-piWrite(thisR);
-
-% There is no lens, just a pinhole.  In that case, we are rendering a
-% scene. If we had a lens, we would be rendering an optical image.
-scene = piRender(thisR);
-sceneWindow(scene);
+thisR.set('render type',{'radiance','depth'});
+piWRS(thisR);
 
 %% By default, we have also computed the depth map, so we can render it
+scene = ieGetObject('scene');
+
 scenePlot(scene,'depth map');
 
 %% Add a bright point light near the front where the camera is
 
+thisR.get('light print');
+thisR.set('light','all','delete');
+
 % First create the light
-pointLight = piLightCreate('point','type','point','cameracoordinate', true);
+pointLight = piLightCreate('point',...
+    'type','point',...
+    'cameracoordinate', true);
 
 % Then add it to our scene
-thisR.set('light','add',pointLight);
+thisR.set('light',pointLight,'add');
 
-% Write out our modified scene, render it, and view it
-piWrite(thisR);
-[scene, result] = piRender(thisR);
-sceneWindow(scene);
+% For now only radiance. Because we can.
+thisR.set('render type',{'radiance'});
+
+piWRS(thisR,'name','Point light');
+
+%% Add a skymap
+
+[~, skyMap] = thisR.set('skymap','room.exr');
+
+thisR.get('light print');
+
+piWRS(thisR, 'name', 'Point light and skymap');
+
+%% Rotate the skymap
+
+thisR.set('light',skyMap.name,'rotate',[30 0 0]);
+
+piWRS(thisR, 'name','Rotate skymap');
+
 
 %% END

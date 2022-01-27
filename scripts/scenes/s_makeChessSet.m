@@ -18,7 +18,7 @@
 thisR = piRecipeDefault('scene name','ChessSet');
 
 % Clear the default lights
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 fileName = 'sunlight.exr';
 dLight = piLightCreate('distant light', ...

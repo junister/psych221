@@ -34,7 +34,7 @@ if ~piDockerExists, piDockerConfig; end
 thisR = piRecipeDefault;
 
 % Delete the lights
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all', 'delete');
 
 % Add an equal energy distant light
 lName = 'new dist light';
@@ -43,7 +43,7 @@ newDistLight = piLightCreate(lName,...
                             'type', 'distant',...
                             'spd', lightSpectrum,...
                             'cameracoordinate', true);
-thisR.set('light', 'add', newDistLight);           
+thisR.set('light', newDistLight, 'add');           
 
 % Render
 piWrite(thisR);

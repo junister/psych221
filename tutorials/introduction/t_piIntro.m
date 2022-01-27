@@ -46,7 +46,7 @@ thisR = piRecipeDefault('scene name','sphere');
 
 % Add a point light, needed by this scene.
 pointLight = piLightCreate('point','type','point','cameracoordinate', true);
-thisR.set('light','add',pointLight);
+thisR.set('light',pointLight, 'add');
 
 %{
 % You can also try this light if you like, which is more blue and distant

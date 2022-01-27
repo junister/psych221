@@ -15,7 +15,8 @@ function lght = piLightSet(lght, param, val, varargin)
 %
 %      https://www.pbrt.org/fileformat-v3.html#lights
 %
-% Here is a partial list and there are some examples below
+% Here is a partial list and there are some examples below.  We seem to be
+% missing the 'Projection' light type from our use cases (BW).
 %
 %  'type'  - The type of light source to insert. Can be the following:
 %             'point'   - Casts the same amount of illumination in all
@@ -28,9 +29,11 @@ function lght = piLightSet(lght, param, val, varargin)
 %             'area'    - convert an object into an area light. (TL: Needs
 %                         more documentation; I'm not sure how it's used at
 %                         the moment.)
-%             'infinite' - an infinitely far away light source that
+%             'infinite' - A global illumination, infinitely far away, that
 %                          potentially casts illumination from all
-%                          directions. Takes no parameters.
+%                          directions. Takes no parameters.  Sometimes
+%                          called a skymap and based on an exr file
+%                          (mapname).
 %
 %  'spectrum' - The spectrum that the light will emit. Read
 %                          from ISETCam/ISETBio light data. See
@@ -127,10 +130,15 @@ if isfield(lght, pName)
         % Changing property type if the user doesn't specify it.
         if isequal(pName, 'spd') || isequal(pName, 'scale')
             if numel(val) == 3 && ~ischar(val)
+                % User sent in 3 values, so this is an rgb type light
                 lght.(pName).type = 'rgb';
             elseif numel(val) == 1 && ~ischar(val)
+                % User sent in 1 value so this is blackbody temperature
                 lght.(pName).type = 'blackbody';
             elseif (numel(val) > 3 && mod(numel(val), 2) == 0)|| ischar(val)
+                % User sent in a vector of (wave, val, wave, val) pairs or
+                % a string that defines a spectrum.  The possible strings I
+                % know about now are Equal Energy, Tungsten, ...
                 lght.(pName).type = 'spectrum';
             end
             return;

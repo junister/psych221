@@ -108,6 +108,8 @@ if true
                 else
                     material.(pName).type = 'string';
                 end
+            elseif isequal(pName, 'normalmap')
+                material.(pName).type = 'string';
             else
                 material.(pName).type = 'texture';
             end

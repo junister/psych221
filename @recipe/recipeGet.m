@@ -121,6 +121,7 @@ function val = recipeGet(thisR, param, varargin)
 %     'n subpixels'      - 2 vector, row,col
 %
 %    % Properties of how PBRT does the rendering
+%      'render type'   -  Cell array indicating 'radiance','depth', ...
 %      'integrator'
 %      'rays per pixel'
 %      'n bounces'
@@ -278,7 +279,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         %   so  v + 'from' = 'to'
         val = thisR.lookAt.to - thisR.lookAt.from;
         val = val/norm(val);
-
+    case {'rendertype','filmrendertype'}
+        % A cell array of the radiance and other metadata types
+        val = thisR.metadata.rendertype;
+        
         % Camera fields
     case {'camera'}
         % The whole struct
@@ -1109,6 +1113,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         cnt = 1;
         for ii=ids
             thisAsset = thisR.get('asset',ii);
+            if iscell(thisAsset), thisAsset = thisAsset{1}; end
             leafNames{cnt} = thisAsset.name;
             leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
             cnt = cnt + 1;
@@ -1188,6 +1193,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = zeros(nObjects,3);
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
+            if iscell(thisNode), thisNode = thisNode{1}; end
             val(ii,:) = thisR.get('assets',thisNode.name,'world position');
         end
     case {'objectsizes'}
@@ -1198,11 +1204,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = zeros(nObjects,3);
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
+            if iscell(thisNode), thisNode = thisNode{1}; end
             thisScale = thisR.get('assets',Objects(ii),'world scale');
 
             % All the object points
-            if isfield(thisNode.shape,'pointp')
-                pts = thisNode.shape.pointp;
+            if isfield(thisNode.shape,'point3p')
+                pts = thisNode.shape.point3p;
                 if ~isempty(pts)
                     % Range of points times any scale factors on the path
                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
@@ -1219,15 +1226,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
 
-        % Lights
+    % Lights
     case{'light', 'lights'}
         if isempty(varargin)
+            % Treat this same as get names
+            %{
             if isprop(thisR, 'lights')
                 val = thisR.lights;
             else
                 warning('No lights in this recipe')
                 val = {};
             end
+            %}
+            val = thisR.assets.mapLgtShortName2Idx.keys;
             return;
         end
 
@@ -1239,51 +1250,95 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         switch varargin{1}
             case 'names'
-                n = numel(thisR.lights);
-                val = cell(1, n);
-                for ii=1:n
-                    val{ii} = thisR.lights{ii}.name;
-                end
+                % thisR.get('lights','names')
+                val = thisR.assets.mapLgtShortName2Idx.keys;
+
             otherwise
-                % The first argument indicates the material name and there
-                % must be a second argument for the property
+                % The first argument indicates the light name and there
+                % must be a second argument for the light property
                 if isnumeric(varargin{1}) && ...
-                        varargin{1} <= numel(thisR.lights)
-                    % Search by index.  Get the material directly.
+                        varargin{1} <= thisR.get('nlights')
+                    % Search by index. 
+                    %{
                     lgtIdx = varargin{1};
                     thisLight = thisR.lights{lgtIdx};
                     val = thisLight;
+                    %}
+                    lgtNames = thisR.assets.mapLgtShortName2Idx.keys;
+                    lgtIdx = varargin{1};
+                    thisLight = thisR.get('asset', lgtNames{lgtIdx});
+                    val = thisLight;
                 elseif isstruct(varargin{1})
+                    % ZLY: I think it should not be here?
                     % The user sent in the material.  We hope.
                     % We should have a slot in material that identifies itself as a
                     % material.  Maybe a test like "material.type ismember valid
                     % materials."
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
-                    % Search by name, find the index
+                    % Search for the light by name, find its index
+                    %{
                     [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
                     val = thisLight;
+                    %}
+                    varargin{1} = piLightNameFormat(varargin{1});
+                    thisLight = thisR.get('asset', varargin{1});
+                    
+                    % thisLight = thisLight.lght{1};
                 end
 
                 if isempty(thisLight)
                     warning('Could not find light. Return.')
                     return;
                 end
+                % Get a 
+                if numel(varargin) == 1
+                    val = thisLight;
+                end
                 if numel(varargin) >= 2
-                    % Return the material property
-                    % thisR.get('material', material/idx/name, property)
-                    % Return the material property
-                    val = piLightGet(thisLight, varargin{2});
+                    % thisR.get('light',idx,'position');
+                    %
+                    % Return the light property
+                    % Return the light property
+                    thisLgtStruct = thisLight.lght{1};
+                    switch varargin{2}
+                        case 'position'
+                            % thisR.get('light',idx,'position')                            
+                            if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
+                                % The position may be at the camera, so we need
+                                % this special case.
+                                val = thisR.get('from');
+                            elseif isfield(thisLgtStruct,'from')
+                                val = thisLgtStruct.from.value;
+                            elseif isequal(thisLgtStruct.type,'infinite')
+                                val = Inf;
+                            elseif isequal(thisLgtStruct.type,'area')
+                                % Area light will need a different approach
+                                val = thisR.get('asset', thisLight.name, 'world position');
+                            else
+                                val = Inf;
+                            end
+                        case 'name'
+                            val = thisLight.name;
+                        case {'light', 'lght'}
+                            val = thisLight.lght{1};
+                        otherwise
+                            % Most light properties use this method
+                            val = piLightGet(thisLgtStruct, varargin{2});
+                    end
                 end
         end
     case {'nlight', 'nlights', 'light number', 'lights number'}
         % thisR.get('n lights')
         % Number of lights in this scene.
+        val = numel(thisR.get('light', 'names'));
+        %{
         if isprop(thisR, 'lights')
             val = numel(thisR.lights);
         else
             val = 0;
         end
+        %}
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
         piLightList(thisR);
@@ -1300,13 +1355,22 @@ switch ieParamFormat(param)  % lower case, no spaces
         % assets.  We think of an asset now as, say, a car with all of
         % its parts.  A node is the node in a tree that contains
         % multiple assets. (BW, Sept 2021).
-
-        [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
-        % If only one asset matches, turn it from cell to struct.
-        if numel(thisAsset) == 1
-            thisAsset = thisAsset{1};
+        
+        if ischar(varargin{1})  
+            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+            % If only one asset matches, turn it from cell to struct.
+        else
+            if numel(varargin{1}) > 1
+                id = varargin{1}(1);
+            else
+                id = varargin{1};
+            end
+            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
         end
-        if isempty(id), error('Could not find asset %s\n',varargin{1}); end
+        if isempty(id)
+            error('Could not find asset %s\n',varargin{1}); 
+        end
+        if iscell(thisAsset), thisAsset = thisAsset{1}; end
         if length(varargin) == 1
             val = thisAsset;
             return;

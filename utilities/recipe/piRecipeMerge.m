@@ -81,7 +81,8 @@ for ii = 1:length(recipelist)
             
             % Graft the asset three into the scene.  We graft it onto the root
             % of the main scene.
-            sceneR.set('asset', 'root', 'graft', thisOBJsubtree);
+            % Changed to root_B on Jan 23, 2022.  Worried (BW).
+            sceneR.set('asset', 'root_B', 'graft', thisOBJsubtree);
         end
         
         % Copy meshes from objects folder to scene folder here
@@ -90,11 +91,12 @@ for ii = 1:length(recipelist)
         
         % Copy the assets from source to destination
         sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
-        if exist(sourceAssets, 'dir')&& ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
+        if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
             dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
             copyfile(sourceAssets, dstAssets);
         else
-            if exist(sourceDir, 'dir')
+            if isfolder(sourceDir)
+                if ~isfolder(dstDir), mkdir(dstDir), end;
                 copyfile(sourceDir, dstDir);
             end
         end

@@ -16,19 +16,38 @@ if nLights == 0
     return;
 end
 
+%% Initialize
 lightNames = thisR.get('light', 'names');
 rows = cell(nLights,1);
 names = rows;
 types = rows;
+spdT = rows;
 
+positionT = rows;
+position = zeros(nLights,3);
+
+%% Get data
 fprintf('\nLights\n');
 fprintf('-------------------------------\n');
 for ii =1:numel(lightNames)
+    thisLight = thisR.get('light', lightNames{ii}, 'lght');
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
-    types{ii,:} = thisR.lights{ii}.type;
+    types{ii,:} = thisLight.type;
+    position(ii,:) = thisR.get('light',ii,'position');
+    if isempty(thisLight.mapname)
+        spdT{ii} = num2str(thisLight.spd.value);
+    else
+        spdT{ii} = thisLight.mapname.value;
+    end
 end
-T = table(categorical(names), categorical(types),'VariableNames',{'name','type'}, 'RowNames',rows);
+
+%% Display the table
+
+for ii=1:numel(names), positionT{ii} = num2str(position(ii,:)); end
+
+T = table(categorical(names), categorical(types),positionT,spdT,'VariableNames',{'name','type','position','spd'}, 'RowNames',rows);
+
 disp(T);
 fprintf('-------------------------------\n');
 

@@ -47,13 +47,13 @@ piWRS(thisChart);
 
 chartR = piRecipeDefault('scene name','flatsurface');
 chartR.set('asset','Camera_B','delete');
-chartR.set('lights','delete','all');
+chartR.set('lights','all','delete');
 
 % Add a light.
 distantLight = piLightCreate('distant','type','distant',...
     'spd', [6000 0.001], ...
     'cameracoordinate', true);
-chartR.set('light','add',distantLight);
+chartR.set('light',distantLight,'add');
 
 % Aim the camera at the object and bring it closer.
 chartR.set('from',[0,0,0]);
@@ -90,7 +90,7 @@ fprintf('Geometry nodes:  %d\n',numel(id) - 1);
 if (numel(id)-1 == 0)
     geometryNode = piAssetCreate('type','branch');
     geometryNode.name = '001_Cube_G';
-    chartR.set('asset','root','add',geometryNode);
+    chartR.set('asset','root_B','add',geometryNode);
     chartR.set('asset',surfaceName,'parent',geometryNode.name);
 end
 

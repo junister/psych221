@@ -46,9 +46,9 @@ for ii=1:numel(mType)
     
     if ismember(mType{ii},{'all','glass'})
         
-        thisMaterialName = 'glass_architectural';   % barcelona-pavilion
+        thisMaterialName = 'glass_frosted';   % barcelona-pavilion
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric');
-        thisMaterial = piMaterialSet(thisMaterial,'roughness',0);  % 0
+        thisMaterial = piMaterialSet(thisMaterial,'roughness',0.0001);  % 0
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
         
@@ -64,7 +64,7 @@ for ii=1:numel(mType)
         materialNames{end+1} = thisMaterialName;
         
         % contemporary-bathroom line 72 et seq
-        thisMaterialName = 'glass_ewt_window';   % Line 72
+        thisMaterialName = 'glass';   % Line 72
         thisMaterial = piMaterialCreate(thisMaterialName, 'type', 'dielectric');
         thisMaterial = piMaterialSet(thisMaterial,'eta',1.5);  
         thisR.set('material', 'add', thisMaterial);

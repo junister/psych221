@@ -28,6 +28,11 @@ classdef tree
         % equal to 0.
         Parent = [ 0 ]; %#ok<NBRAK>
         
+        % ZLY: four maps that helps quick inquiry of idx based on name
+        mapFullName2Idx;
+        mapShortName2Idx;
+        mapLgtFullName2Idx;
+        mapLgtShortName2Idx;
     end
     
     methods
@@ -82,6 +87,11 @@ classdef tree
                 root_ID = 1;
             end
             
+            % ZLY: added an empty map
+            obj.mapFullName2Idx = containers.Map;
+            obj.mapShortName2Idx = containers.Map;
+            obj.mapLgtFullName2Idx = containers.Map;
+            obj.mapLgtShortName2Idx = containers.Map;
         end
         
         
@@ -395,6 +405,10 @@ classdef tree
             % tree. 
             
             % Update all nodes
+            obj.mapFullName2Idx = containers.Map;
+            obj.mapShortName2Idx = containers.Map;
+            obj.mapLgtFullName2Idx = containers.Map;
+            obj.mapLgtShortName2Idx = containers.Map;
             if ~exist('id','var') || isempty(id)
                 % Some nodes may already have an ID.  So we strip the ID
                 % from all the nodes.
@@ -414,6 +428,14 @@ classdef tree
                     else
                         obj.Node{ii} = sprintf('%04dID_%s', ii, stripNames{ii});
                         names{ii} = obj.Node{ii};
+                    end
+                    
+                    obj.mapFullName2Idx(names{ii}) = ii;
+                    obj.mapShortName2Idx(stripNames{ii}) = ii;
+                    
+                    if isequal(obj.Node{ii}.type, 'light')
+                        obj.mapLgtFullName2Idx(names{ii}) = ii;
+                        obj.mapLgtShortName2Idx(stripNames{ii}) = ii;
                     end
                 end
                 return;

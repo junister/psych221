@@ -97,11 +97,10 @@ if ~isempty(obj.remoteMachine)
         fprintf(" With Result: %s", result);
     elseif verbose == 1
         [status, result] = system(containerRender);
-        fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
         if status == 0
-            fprintf('Success!\n');
+            fprintf('Successfuly rendered remotely in: %6.2f\n', toc(renderStart))
         else
-            fprintf(" With Error: %s", result);
+            fprintf("Error Rendering: %s", result);
         end
     else
         [status, result] = system(containerRender);
@@ -131,7 +130,7 @@ else
     renderStart = tic;
     [status, result] = system(containerRender);
     if verbose > 0
-        fprintf('Rendered using default in: %6.2f\n', toc(renderStart))
+        fprintf('Rendered locally in: %6.2f\n', toc(renderStart))
     end
 end
 end

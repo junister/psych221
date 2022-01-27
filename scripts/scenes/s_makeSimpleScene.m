@@ -16,13 +16,13 @@ lgt = piLightCreate('outdoors light', ...
 % The image in the light exr file needs to be rotated around so the camera
 % sees good stuff 
 lgt = piLightSet(lgt, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-thisR.set('light','add',lgt);
+thisR.set('light',lgt,'add');
 
 %{
 fileName = 'clouds-sky.exr';
 lgt = piLightCreate('infinite light', ...
     'type', 'distant');
-thisR.set('light','add',lgt);
+thisR.set('light',lgt,'add');
 thisR.show('lights');
 %}
 %{
@@ -30,7 +30,7 @@ thisR.show('lights');
 %
 lgt = piLightCreate('blue point', 'type','point',...
     'rgb spd',[0.5 0.7 1]);
-thisR.set('light','add',lgt);
+thisR.set('light',lgt,'add');
 %}
 
 % Render
