@@ -46,13 +46,15 @@ function [ieObject, result] = piRender(thisR,varargin)
 % Examples
 %{
    % Renders both radiance and depth
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
 %}
 %{
    % Render radiance and depth separately
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   % Currently this means running the render twice, which isn't very
+   % efficient
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile,'render type','radiance');
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
    dmap = piRender(pbrtFile,'render type','depth');
@@ -72,11 +74,16 @@ function [ieObject, result] = piRender(thisR,varargin)
   % scene.  If there is no surface a zero is returned.  This should
   % probably either a Inf or a NaN when there is no surface.  We might
   % replace those with a black color or something.
-  thisR = piRecipeDefault; piWrite(thisR);
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
   [coords, result] = piRender(thisR, 'render type','coordinates');
   ieNewGraphWin; imagesc(coords(:,:,1));
   ieNewGraphWin; imagesc(coords(:,:,2));
   ieNewGraphWin; imagesc(coords(:,:,3));
+%}
+%{
+% get materials
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  [aScene, metadata] = piRender(thisR, 'render type','material');
 %}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model
