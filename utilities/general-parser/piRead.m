@@ -186,11 +186,8 @@ end
 world = thisR.world;
 if any(piContains(world, 'Include'))
     % If we have an Include file in the world section, the txt lines in the
-    % file will be merged into thisR.world.  Then we will parse the
-    % information in those include files with the information in the world
-    % section.
-    %
-
+    % file is merged into thisR.world.  
+    
     % Find all the lines in world that have an 'Include'
     inputDir = thisR.get('inputdir');
     IncludeIdxList = find(piContains(world, 'Include'));
@@ -226,12 +223,14 @@ else
     fprintf('Read %d materials.\n', materialLists.Count);
     fprintf('Read %d textures.\n', textureList.Count);
     
-    [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
-    if ~isempty(trees)
-        parsedUntil(parsedUntil>numel(thisR.world))=numel(thisR.world);
-        % remove parsed line from world
-        thisR.world(2:parsedUntil)=[];
-    end
+    [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
+    thisR.world = newWorld;
+%     [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
+%     if ~isempty(trees)
+%         parsedUntil(parsedUntil>numel(thisR.world))=numel(thisR.world);
+%         % remove parsed line from world
+%         thisR.world(2:parsedUntil)=[];
+%     end
     thisR.materials.list = materialLists;
     %     thisR.materials.inputFile_materials = inputFile_materials;
     

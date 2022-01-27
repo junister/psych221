@@ -38,21 +38,17 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % children = [];
 subtrees = {};
 
-i = 1;         objectIndex = 0;
+i = 1;         objectIndex = 0;     
 while i <= length(txt)
 
     currentLine = txt{i};
-    % ZLY: an emergency patch for Brian's presentation tomorrow If we found
-    % ObjectBegin, that means we won't parse anything
-    if piContains(currentLine, 'ObjectBegin') && ~strcmp(currentLine(1),'#')
-        trees = {};
-        parsedUntil = i;
-        return;
+
+    if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
+        InstanceName = erase(currentLine(16:end),'"');
     end
 
     % Return if we've reached the end of current attribute
-
-    if strcmp(currentLine,'AttributeBegin') && ~strcmp(currentLine(1),'#')
+    if strcmp(currentLine,'AttributeBegin') 
         % This is an Attribute inside an Attribute
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
 
@@ -65,24 +61,32 @@ while i <= length(txt)
         end
 
         subtrees = cat(1, subtrees, subnodes);
-        i =  i + retLine;
-    elseif strncmp(currentLine,'#ObjectName', 11)
+        i =  i + retLine;   
+        
+    elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'})&&...
+            strcmp(currentLine(1),'#')
+      
         [name, sz] = piParseObjectName(currentLine);
 
     elseif strncmp(currentLine,'Transform ',10) ||...
-            piContains(currentLine,'ConcatTransform') && ~strcmp(currentLine(1),'#')
+            piContains(currentLine,'ConcatTransform') 
+
         [translation, rot, scale] = parseTransform(currentLine);
+        
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
         medium = currentLine;
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
+        
         mat = piParseGeometryMaterial(currentLine);
 
     elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
+        
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
+        
         areaLight = currentLine;
 
     elseif piContains(currentLine,'LightSource') ||...
@@ -111,9 +115,8 @@ while i <= length(txt)
 %             shape.filename = newPlyName;
 %         end
 
-    elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
-
-        % Assemble all the read attributes into either a groub object, or a
+    elseif strcmp(currentLine,'AttributeEnd')
+        % Assemble all the read attributes into either a group object, or a
         % geometry object. Only group objects can have subnodes (not
         % children). This can be confusing but is somewhat similar to
         % previous representation.
@@ -203,7 +206,6 @@ while i <= length(txt)
                             resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
                         end
                     end
-
                 end
 
                 if exist('shape','var')
@@ -227,6 +229,10 @@ while i <= length(txt)
 
                 % If present populate fields.
                 if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
+                if exist('InstanceName','var') 
+                    resCurrent.referenceObject = InstanceName;
+%                   resCurrent.type = 'instance';
+                end
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
                 if exist('translation','var'), resCurrent.translation = {translation}; end
@@ -238,7 +244,6 @@ while i <= length(txt)
                     trees = trees.graft(1, subtrees(ii));
                 end
             end
-
         elseif exist('name','var')
             % Create a branch, add it to the main tree.
             resCurrent = piAssetCreate('type', 'branch');
@@ -251,7 +256,6 @@ while i <= length(txt)
 
         parsedUntil = i;
         return;
-
     else
        %  warning('Current line skipped: %s', currentLine);
     end

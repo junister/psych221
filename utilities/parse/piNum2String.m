@@ -33,4 +33,11 @@ else
     string = num2str(num(:)', formatSpec);
 end
 
+% remove extra space from num2str function
+stringSplits = strsplit(string,' ');
+string = stringSplits{1};
+for ii = 2:numel(stringSplits)
+    space = ' ';
+    string = [string, space, stringSplits{ii}];
+end
 end
