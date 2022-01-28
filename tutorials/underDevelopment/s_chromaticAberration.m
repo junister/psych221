@@ -1,22 +1,21 @@
-%% s_chromaticAberrationv3.m
+%% s_chromaticAberration.m
 %
 % Demonstrate the chromatic aberration present in lens rendering. Adapted
 % from a sample scene
 %
 % TL SCIEN Team, 2018
-% v4 version D.Cardinal 2022
+% v4 version initial work D.Cardinal 2022
 
 %% Initialize ISET and Docker
-
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the pbrt scene
 % Read the main scene pbrt file.  Return it as a recipe
-% used to use textured plane, but it's not in v4 (yet?)
+% (used to use textured plane, but it's not in v4)
 useScene = 'cornell_box';
 thisR = piRecipeDefault('scene name', useScene);
-% add a light
+% add a light so we can see
 pointLight = piLightCreate('point','type','point','cameracoordinate', true);
 thisR.set('light',pointLight, 'add');
 
