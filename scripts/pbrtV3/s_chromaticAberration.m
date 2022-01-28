@@ -11,43 +11,38 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the pbrt scene
-fname = fullfile(piRootPath,'data','V3','texturedPlane','texturedPlane.pbrt');
-
 % Read the main scene pbrt file.  Return it as a recipe
-thisR = piRead(fname,'version',3);
-
-% Setup working folder
-workingDir = fullfile(piRootPath,'local','texturedPlane');
-if(~isfolder(workingDir))
-    mkdir(workingDir);
-end
+useScene = 'cornell_box';
+thisR = piRecipeDefault('scene name', useScene);
+% add a light
+pointLight = piLightCreate('point','type','point','cameracoordinate', true);
+thisR.set('light',pointLight, 'add');
 
 %% Scale and translate the plane
-
 scale = 0.5; % 1*0.5 = 0.5 m
 translate = 1; % m
 
-% The textured plane has specifically been named "Plane" in this scene. We
+% The (textured) plane has specifically been named "Plane" in this scene. We
 % also know that our camera is located at the origin and looking down the
 % positive y-axis. 
 % Note: The order of scaling and translating matters!
-piObjectTransform(thisR,'Plane','Scale',[scale scale scale]); % The plane is oriented in the x-z plane
-piObjectTransform(thisR,'Plane','Translate',[0 0 translate]); 
+%piAssetScale(thisR,'Checkerboard_B',[scale scale scale]); % The plane is oriented in the x-z plane
+%piAssetTranslate(thisR,'Checkerboard_B',[0 0 translate]); 
 
 %% Attach a desired texture
-imageName = 'squareResolutionChart.exr';
-imageFile = fullfile(piRootPath,'data','imageTextures',imageName);
+%imageName = 'squareResolutionChart.exr';
+%imageFile = fullfile(piRootPath,'data','imageTextures',imageName);
 
-copyfile(imageFile,workingDir);
-thisR = piWorldFindAndReplace(thisR,'dummyTexture.exr',imageName);
+%copyfile(imageFile,workingDir);
+%thisR = piWorldFindAndReplace(thisR,'dummyTexture.exr',imageName);
 
 %% Attach a lens
 
-thisR.set('camera','omni');     % Has a lens
+thisR.set('camera',piCameraCreate('omni'));     % Has a lens
 thisR.set('aperture',2);             % mm
 thisR.set('film resolution',128);    % Spatial samples
 thisR.set('rays per pixel',128);     % Rendering samples
-thisR.set('diagonal', 1);            % Size of film in mm
+thisR.set('film diagonal', 10);            % Size of film in mm
 thisR.set('focusdistance',1)
 
 fprintf('Rendering with lens:   %s\n',thisR.get('lens file'));
@@ -68,8 +63,8 @@ oiWindow(oiCA);
 
 thisR.set('chromatic aberration',false);
 
-[p,n,e] = fileparts(fname); 
-thisR.outputFile = fullfile(workingDir,[n,e]);
+% the old version did a file copy here, but
+% I'm not sure we need it?
 piWrite(thisR);
 
 [oi, results] = piRender(thisR,'render type','radiance');

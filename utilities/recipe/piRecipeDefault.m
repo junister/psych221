@@ -333,6 +333,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'BlenderScene';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Blender';   % Blender
+    case {'testplane'}
+        sceneDir = 'testplane';
+        sceneFile = [sceneDir, '.fbx'];
+        exporter = 'Copy';
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
 end

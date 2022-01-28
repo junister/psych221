@@ -527,7 +527,7 @@ switch param
         if isequal(val,false)
             % Use path, not spectralpath, integrator and set nunCABand to
             % 1.
-            thisR.camera.chromaticAberrationEnabled.value = 'false';
+            thisR.camera.chromaticAberrationEnabled.value = false;
             thisR.set('integrator subtype','path');
             thisR.set('integrator num ca bands',1);
             return;
@@ -535,7 +535,7 @@ switch param
 
         % User sent in true or an integer number of bands which implies
         % true.
-        thisR.camera.chromaticAberrationEnabled.value = 'true';
+        thisR.camera.chromaticAberrationEnabled.value = true;
 
         % This is the integrator that manages chromatic aberration.
         thisR.set('integrator subtype','spectralpath');
