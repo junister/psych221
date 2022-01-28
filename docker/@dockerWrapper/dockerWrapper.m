@@ -101,6 +101,9 @@ classdef dockerWrapper < handle
                 dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-CPU',''));
                 dockerWrapper.staticVar('set', 'PBRT-CPU', '');
             end
+            dockerWrapper.staticVar('set', 'cpuContainer', '');
+            dockerWrapper.staticVar('set', 'gpuContainer', '');            
+            dockerWrapper.staticVar('set', 'renderContext', '');            
         end
 
         function cleanup(containerName)
@@ -193,7 +196,7 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                if contains(obj.remoteImage, 'shared')
+                if contains(useImage, 'shared')
                     % we don't need to mount libraries
                     cudalib = '';
                 else
@@ -348,8 +351,10 @@ classdef dockerWrapper < handle
                         case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                             %dockerContainerName = 'pbrt-gpu';
-                        case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                        case {'geforcertx3070', 'nvidiageforcertx3070'}
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
+                        case {'geforcertx3090', 'nvidiageforcertx3090'}
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
                             %dockerContainerName = 'pbrt-gpu';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
