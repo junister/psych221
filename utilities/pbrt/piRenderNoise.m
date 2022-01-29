@@ -49,7 +49,8 @@ p = inputParser;
 varargin = ieParamFormat(varargin);
 
 % p.addParameter('recipe',[],@(x)(isa(x,'recipe')));
-p.addParameter('sensor',sensorCreateIdeal,@(x)(isequal(x.type,'sensor')));
+%p.addParameter('sensor',sensorCreateIdeal,@(x)(isequal(x.type,'sensor')));
+p.addParameter('sensor', sensorCreate()); % make a sensor if we need one
 p.addParameter('polydeg',1,@isnumeric);
 p.addParameter('lensname','dgauss.22deg.12.5mm.json',@(x)(exist(x,'file') || isequal(x,'pinhole')));
 
@@ -97,11 +98,6 @@ else
             areaLight = piLightCreate('lamp', 'type', 'area');
             lightName = 'D65';
             areaLight = piLightSet(areaLight, 'spd val', lightName);
-
-            assetName = '001_AreaLight_O';
-            % Move area light above by 0.5 cm
-            thisR.set('asset', assetName, 'world translate', [0 -0.005 0]);
-            thisR.set('asset', assetName, 'obj2light', areaLight);
 
             assetNameCube = '001_CubeLarge_O';
             thisR.set('asset', assetNameCube, 'scale', [1 1.2 1]);
