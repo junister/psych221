@@ -62,7 +62,7 @@ sceneSet(scene, 'render flag', 'hdr');
 %% Graft the subtree back onto the root and render
 
 % We can do this because we snagged it before chopping
-assetName = 'root';
+assetName = 'root_B';
 thisR.set('asset', assetName, 'graft', mirrorSubtree);
 
 piWrite(thisR);
@@ -83,9 +83,9 @@ lightingSubtree.show;
 sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
 blueLight = piLightCreate('blueLight','type', 'distant', ...
-    'spd', [9000 0.001],...
+    'spd', 9000,...
     'cameracoordinate', true);
-thisR.set('light','add',blueLight);
+thisR.set('light',blueLight, 'add');
 
 thisR.assets.show;
 
@@ -96,7 +96,7 @@ sceneWindow(scene);
 
 %% Add first scene lighting to the sphere scene
 
-assetName = 'root';
+assetName = 'root_B';
 thisR.set('asset', assetName, 'graft', lightingSubtree); 
 thisR.assets.show;
 
