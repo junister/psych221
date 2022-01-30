@@ -884,9 +884,8 @@ switch param
             thisR.set('light', lName, 'rotate', [-90 0 0]);
         end
 
-        % out = rLight;
-        % We need to return rLight to our caller!
-
+        out = envLight;
+        
     case {'light', 'lights'}
         % Examples
         % After making light consistant with assets:
