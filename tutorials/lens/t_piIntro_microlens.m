@@ -3,11 +3,7 @@
 %   Set up to work with the Chess Set scene.
 %
 % Dependencies:
-%    ISET3d, ISETCam, JSONio, isetlens
-%
-% Check that you have the updated docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
+%    ISET3d-v4, ISETCam, isetlens
 %
 % This script uses the docker container in two ways.  Once to build the
 % lens file and a second way to render radiance and depth. 

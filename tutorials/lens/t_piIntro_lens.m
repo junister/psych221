@@ -1,19 +1,10 @@
 %% Render using a lens
 %
 % Dependencies:
-%    ISET3d, ISETCam, isetlens, JSONio
-%
-% Check that you have the updated docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
+%    ISET3d-v4, ISETCam, isetlens
 %
 % For more information about PBRT lens and camera formats:
 %
-% Generally
-%   https://www.pbrt.org/fileformat-v3.html#overview
-% 
-% And specifically
-%   https://www.pbrt.org/fileformat-v3.html#cameras
 %
 % Z Liu, BW 2018
 %
