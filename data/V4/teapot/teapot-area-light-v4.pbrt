@@ -38,7 +38,7 @@ AttributeBegin
         "rgb I" [ 5000 5000 6000 ]
 AttributeEnd
 NamedMaterial "material1"
-    "string type" "coateddiffuse"
+    Material "coateddiffuse"
     "float roughness" [ 0.1 ]
     "rgb reflectance" [ 0.5 0.3 0.8 ]
 
@@ -165,7 +165,7 @@ Shape "trianglemesh"
     "point3 P" [ 2.66667 4 0 4 4 0 4 2.66667 0 2.66667 2.66667 0 ]
     "integer indices" [ 0 2 1 0 3 2 ]
     AttributeEnd
-    ArributeBegin
+    AttributeBegin
 
     NamedMaterial "material2"
 Shape "trianglemesh"
