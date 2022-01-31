@@ -169,7 +169,7 @@ switch ieParamFormat(sceneDir)
         exporter = 'C4D';
     case 'teapot'
         sceneDir = 'teapot';
-        sceneFile = 'teapot-area-light.pbrt';
+        sceneFile = 'teapot-area-light-v4.pbrt';
         exporter = 'Copy';
     case 'slantedbar'
         % In sceneEye cases we were using piCreateSlantedBarScene.  But
