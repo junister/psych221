@@ -17,7 +17,7 @@
 %
 % Dependencies:
 %
-%    ISET3d, (ISETCam or ISETBio), JSONio
+%    ISET3d, (ISETCam or ISETBio)
 %
 % Author:
 %   ZLY, BW, 2020

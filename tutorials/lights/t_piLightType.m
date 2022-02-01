@@ -53,7 +53,7 @@ thisR.show('lights');
 
 thisR.set('render type',{'radiance','depth'});
 
-piWRS(thisR,'name',sprintf('EE spot %d %d %d',val));
+piWRS(thisR,'name','EE spot');
 
 %%  Narrow the cone angle of the spot light a lot
 thisR.set('light', 'spotWhite', 'coneangle', 10);
@@ -87,7 +87,7 @@ thisR.set('light', roomLight, 'add');
 
 thisR.show('lights');
 
-piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val));
+piWRS(thisR,'name',sprintf('EE infinite'));
 
 %% One more example
 thisR.set('light', 'all', 'delete');
@@ -117,7 +117,7 @@ thisR.set('light', roomLight, 'add');
 
 thisR.show('lights');
 
-piWRS(thisR,'name',sprintf('EE infinite [%d,%d,%d]',val))
+piWRS(thisR,'name',sprintf('EE infinite'))
 
 %% Rotate the skymap
 

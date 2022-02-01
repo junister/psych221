@@ -13,9 +13,9 @@ MakeNamedMaterial "GLASS"
     "string type" [ "dielectric" ]
     "float eta" [ 1.333 ]
 MakeNamedMaterial "mirror"
-    "string type" [ "coateddiffuse" ]
+    "string type" [ "conductor" ]
     "float roughness" [ 0.67357874 ]
-    "rgb reflectance" [ 0 0 0 ]
+    "rgb reflectance" [ 1 1 1 ]
 Texture "checkerboard_color" "spectrum" "imagemap"
     "string filename" [ "textures/checkerboard.png" ]
 MakeNamedMaterial "Material"

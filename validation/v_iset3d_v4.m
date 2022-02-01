@@ -2,7 +2,7 @@
 %
 %    v_iset3d_v4
 %
-% Tutorial scripts.  When these all run, it is a partial validation of the
+% Validation and Tutorial scripts.  When these all run, it is a partial validation of the
 % code.  More specific tests are still needed.
 %
 % Validations in this script do not involve calculations that require using
@@ -28,7 +28,6 @@ try
 catch
     disp('Macbeth failed');
 end
-
 setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Zmap
@@ -36,6 +35,12 @@ disp('t_piIntro_macbeth_zmap')
 setpref('ISET3d', 'tvzmapStart', tic);
 t_piIntro_macbeth_zmap;          % Get the zmap
 setpref('ISET3d', 'tvzmapTime', toc(getpref('ISET3d', 'tvzmapStart', 0)));
+
+%% Assets
+disp('t_assets')
+setpref('ISET3d', 'tvassetsStart', tic);
+t_assets;          % Get the zmap
+setpref('ISET3d', 'tvassetsTime', toc(getpref('ISET3d', 'tvassetsStart', 0)));
 
 %% Demo working with materials
 disp('*** MATERIALS -- t_piIntro_material')
@@ -113,6 +118,7 @@ disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
 fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
 fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
+fprintf("Assets:     %5.1f seconds.\n", getpref('ISET3d','tvassetsTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
 fprintf("PBRT:       %5.1f seconds.\n", getpref('ISET3d','tvpbrtTime'));
