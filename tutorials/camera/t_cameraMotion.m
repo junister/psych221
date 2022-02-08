@@ -7,10 +7,6 @@
 %
 %    ISET3d, ISETCam 
 %
-%  Check that you have the updated docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
-%    docker pull vistalab/pbrt-v3-spectral:test
 %
 % Zhenyi SCIEN 2019
 %
