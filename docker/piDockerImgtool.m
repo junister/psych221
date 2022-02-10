@@ -60,7 +60,7 @@ p = inputParser;
 
 p.addRequired('command',@(x)(ismember(x,{'makesky','makeequiarea','help'})));
 p.addParameter('infile','',@ischar);
-p.addParameter('dockerimage','camerasimulation/pbrt-v4-cpu:latest',@ischar);
+p.addParameter('dockerimage','camerasimulation/pbrt-v4-cpu',@ischar);
 p.addParameter('helpparameter','',@ischar);
 p.addParameter('verbose',true,@islogical);
 
