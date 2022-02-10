@@ -38,10 +38,11 @@ p = inputParser;
 p.addRequired('command',@(x)(ismember(x,{'help', 'convert', 'insertmicrolens'})));
 p.addParameter('dockerimage','digitalprodev/pbrt-v4-cpu-lenstool:latest',@ischar);
 p.addParameter('helpparameter','',@ischar);
-p.addParameter('xdim',100, @isnumeric);
-p.addParameter('ydim',100, @isnumeric);
-p.addParameter('filmwidth',100, @isnumeric);
-p.addParameter('filmheight',100, @isnumeric);
+p.addParameter('xdim',16, @isnumeric);
+p.addParameter('ydim',16, @isnumeric);
+p.addParameter('filmwidth',20.0, @isnumeric);
+p.addParameter('filmheight',20.0, @isnumeric);
+p.addParameter('filmtolens', 50.0, @isnumeric);
 p.addParameter('microlens','', @ischar);
 p.addParameter('imaginglens','', @ischar);
 p.addParameter('combinedlens','', @ischar);
@@ -67,21 +68,36 @@ switch command
             runDocker, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
             p.Results.outputfolder, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
             dockerImage);
-        partialcmd = sprintf('%s --xdim %d --ydim %d --filmheight %d --filmwidth %d ', ...
+        partialcmd = sprintf('%s --xdim %d --ydim %d --filmheight %d --filmwidth %d --filmtolens %d ', ...
             basecmd, p.Results.xdim, p.Results.ydim, ...
-            p.Results.filmheight, p.Results.filmwidth);
+            p.Results.filmheight, p.Results.filmwidth, p.Results.filmtolens);
         cmd = sprintf('%s %s %s %s ',...
             partialcmd, dockerWrapper.pathToLinux(p.Results.imaginglens), ...
             dockerWrapper.pathToLinux(p.Results.microlens), ...
             dockerWrapper.pathToLinux(p.Results.combinedlens));
-    case 'help'
-        basecmd = [runDocker ' %s %s'];
-        if isempty(p.Results.helpparameter)
-            cmd = sprintf('lenstool ');
-        else % not sure if this works for lenstool?
-            cmd = sprintf('lenstool help %s ',p.Results.helpparameter);
-        end
+    case 'convert'
+        error('Convert not implemented.');
+        % only an initial stab!
+        basecmd = sprintf('%s  --workdir=%s --volume="%s":"%s" %s lenstool convert ', ...
+            runDocker, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
+            p.Results.outputfolder, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
+            dockerImage);
+        partialcmd = sprintf('%s --inputscale %d --implicitdefaults %s ', ...
+            basecmd, p.Results.inputscale, p.Results.implicitdefaults);
+        cmd = sprintf('%s %s %s %s ',...
+            partialcmd, dockerWrapper.pathToLinux(p.Results.imaginglens), ...
+            dockerWrapper.pathToLinux(p.Results.microlens), ...
+            dockerWrapper.pathToLinux(p.Results.combinedlens));
         
+    case 'help'
+        if isempty(p.Results.helpparameter)
+            helpCmd = sprintf('lenstool ');
+        else % not sure if this works for lenstool?
+            helpCmd = sprintf('lenstool help %s ',p.Results.helpparameter);
+        end
+        cmd = sprintf('%s %s %s ', ...
+            runDocker, dockerImage, helpCmd);       
+        system(cmd);
 end
 
 % Run it and show any result.  Maybe
