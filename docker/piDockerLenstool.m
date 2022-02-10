@@ -36,7 +36,7 @@ varargin = ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('command',@(x)(ismember(x,{'help', 'convert', 'insertmicrolens'})));
-p.addParameter('dockerimage','digitalprodev/pbrt-v4-cpu:latest',@ischar);
+p.addParameter('dockerimage','digitalprodev/pbrt-v4-cpu-lenstool:latest',@ischar);
 p.addParameter('helpparameter','',@ischar);
 p.addParameter('xdim',100, @isnumeric);
 p.addParameter('ydim',100, @isnumeric);
