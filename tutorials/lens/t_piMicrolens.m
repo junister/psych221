@@ -4,6 +4,7 @@
 %   isetlens toolbox
 %
 % Wandell, 2019
+% v4 update Cardinal 2022
 %
 % See also
 %   t_piIntro_microlens, piCameraInsertMicrolens, 
@@ -25,7 +26,12 @@ if isempty(which('lensC')), error('Add isetlens to your path'); end
 
 %% Help command for the lenstool insertmicrolens
 %
-status = system('docker run -ti --rm vistalab/pbrt-v3-spectral lenstool');
+if ispc
+    dFlags = '-i';
+else
+    dFlags = '-ti';
+end 
+status = system(['docker run ' dFlags ' --rm digitalprodev/pbrt-v4-cpu-lenstool lenstool']);
 
 %% Shows the lenses
 
@@ -46,6 +52,10 @@ imagingLens.draw;
 
 %% Call lenstool from Docker container and set special parameters
 
+localDir = fullfile(piRootPath,'local','microlens');
+if ~isdir(localDir) 
+    mkdir(localDir);
+end
 chdir(fullfile(piRootPath,'local','microlens'));
 
 % Small dimensions to speed up the calculation

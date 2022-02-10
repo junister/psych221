@@ -167,7 +167,8 @@ dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, pathToLinux(outputFo
 dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, pathToLinux(outputFolder));
 
 % What you want to run
-dockerImageName = 'vistalab/pbrt-v3-spectral:latest';
+%dockerImageName = 'vistalab/pbrt-v3-spectral:latest';
+dockerImageName = 'digitalprodev/pbrt-v4-cpu-lenstool';
 
 %% Copy the imaging and microlens to the output folder
 
@@ -192,19 +193,11 @@ end
 %% Set up the lens tool command to run
 
 % Need to add the other parameters
-lensToolCommand = sprintf('lenstool insertmicrolens -xdim %d -ydim %d -filmheight %f -filmwidth %f %s %s %s',...
-    xdim,ydim,filmheight,filmwidth,...
-    dockerWrapper.pathToLinux(imagingLens),...
-    dockerWrapper.pathToLinux(microLens),...
-    dockerWrapper.pathToLinux(combinedLens));
+[combinedLens, cmd] = piDockerLenstool('insertmicrolens', 'xdim', xdim, 'ydim', ydim, ...
+    'filmheight', filmheight, 'filmwidth', filmwidth, ...
+    'imaginglens', imagingLens, 'microLens', microLens, ...
+    'combinedlens', combinedLens, 'outputfolder', outputFolder);
 
-cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, lensToolCommand);
-fprintf('Mounting folder %s\n',outputFolder);
-
-status = system(cmd);
-if status
-    error('Docker command problem: %s\n',cmd);
-end
 
 %%  Check the JSON file
 % edit(combinedLens)
