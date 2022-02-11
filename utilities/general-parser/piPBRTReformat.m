@@ -68,7 +68,7 @@ piCopyFolder(inputdir, outputDir);
 [volume, ~, ~] = fileparts(fname);
 
 % Which docker image we run
-dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
+dockerimage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
 
 % Give a name to docker container
 % make sure we don't have the same container numbers every time

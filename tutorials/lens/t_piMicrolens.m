@@ -31,7 +31,7 @@ if ispc
 else
     dFlags = '-ti';
 end 
-status = system(['docker run ' dFlags ' --rm digitalprodev/pbrt-v4-cpu-lenstool lenstool']);
+status = system(['docker run ' dFlags '--platform linux/amd64 --rm digitalprodev/pbrt-v4-cpu-lenstool lenstool']);
 
 %% Shows the lenses
 

@@ -168,7 +168,7 @@ dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, pa
 
 % What you want to run
 %dockerImageName = 'vistalab/pbrt-v3-spectral:latest';
-dockerImageName = 'digitalprodev/pbrt-v4-cpu-lenstool';
+dockerImageName = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu-lenstool';
 
 %% Copy the imaging and microlens to the output folder
 

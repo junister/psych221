@@ -57,8 +57,8 @@ classdef dockerWrapper < handle
     properties
         dockerContainerName = '';
         dockerContainerID = '';
-        % default image is cpu
-        dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
+        % default image is cpu on x64 architecture
+        dockerImageName =  '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
@@ -361,7 +361,7 @@ classdef dockerWrapper < handle
                             %dockerContainerName = 'pbrt-gpu';
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                            dockerImageName = 'digitalprodev/pbrt-v4-cpu';
+                            dockerImageName = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu';
                             %dockerContainerName = '';
                     end
 

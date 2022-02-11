@@ -29,7 +29,7 @@ cd(nativeDir);
 %% Runs assimp command
 
 % build docker base cmd
-dockerimage = 'camerasimulation/pbrt-v4-cpu';
+dockerimage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu';
 rng('shuffle');
 dockercontainerName = ['Assimp-',num2str(randi(20000))];
 

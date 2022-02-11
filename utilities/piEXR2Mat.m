@@ -19,7 +19,7 @@ function data = piEXR2Mat(inputFile, channelname)
 persistent ourDocker;
 [indir, fname,~] = fileparts(inputFile);
 
-dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
+dockerimage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
