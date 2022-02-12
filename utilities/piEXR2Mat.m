@@ -19,7 +19,15 @@ function data = piEXR2Mat(inputFile, channelname)
 persistent ourDocker;
 [indir, fname,~] = fileparts(inputFile);
 
-dockerimage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
+thisCPU = cpuinfo;
+switch thisCPU.CPUName
+    case 'Apple M1 Pro'
+        dockerimage = '--platform linux/arm64 camerasimulation/pbrt-v4-cpu-arm:latest';
+
+    otherwise
+        dockerimage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
+end
+
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];

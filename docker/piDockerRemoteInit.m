@@ -1,5 +1,5 @@
 function renderString = piDockerRemoteInit(varargin)
-%Initialize the docker preference for remote executation
+%Initialize the docker preference for remote execution
 %
 % These are the key/value options that we pass in piRender when
 % running with the GPU
@@ -13,7 +13,7 @@ function renderString = piDockerRemoteInit(varargin)
   s = piDockerRemoteInit;
   s{8}
 %}
-p = inputPar        
+p = inputParser;   
 renderString = {'gpuRendering', true, ...
     'remoteMachine', 'muxreconrt.stanford.edu',...
     'renderContext', 'wandell-v4',...
