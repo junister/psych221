@@ -7,7 +7,7 @@ function success = v_DockerClass()
 
     % cd([piRootPath '/local']);
     ourDocker = dockerWrapper();
-    ourDocker.containerName = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu pbrt:latest';
+    ourDocker.containerName = dockerWrapper.localImage();
     ourDocker.workingDirectory = '/sphere';
     ourDocker.localVolumePath = 'c:/iset/iset3d-v4/local/sphere';
     ourDocker.targetVolumePath = '/sphere';

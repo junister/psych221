@@ -22,7 +22,7 @@ if ~exist('outFile','var'), outFile = ''; end
 
 [sceneDir, fname,ext] = fileparts(inFile);
 dockerCMD = 'docker run -ti --rm';
-dockerImage = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu';
+dockerImage = dockerWrapper.localImage();
 
 % Use default name for outFile
 if isempty(outFile)

@@ -58,7 +58,7 @@ classdef dockerWrapper < handle
         dockerContainerName = '';
         dockerContainerID = '';
         % default image is cpu on x64 architecture
-        dockerImageName =  '--platform linux/amd64 digitalprodev/pbrt-v4-cpu:latest';
+        dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
@@ -88,6 +88,8 @@ classdef dockerWrapper < handle
 
     methods (Static)
 
+        dockerImage = localImage();
+        
         [dockerExists, status, result] = exists() % separate file
                 
         function reset()
@@ -361,7 +363,7 @@ classdef dockerWrapper < handle
                             %dockerContainerName = 'pbrt-gpu';
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                            dockerImageName = '--platform linux/amd64 digitalprodev/pbrt-v4-cpu';
+                            dockerImageName = dockerWrapper.localImage();
                             %dockerContainerName = '';
                     end
 
