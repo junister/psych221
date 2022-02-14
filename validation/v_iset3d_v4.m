@@ -31,10 +31,10 @@ end
 setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Zmap
-disp('t_piIntro_macbeth_zmap')
-setpref('ISET3d', 'tvzmapStart', tic);
-t_piIntro_macbeth_zmap;          % Get the zmap
-setpref('ISET3d', 'tvzmapTime', toc(getpref('ISET3d', 'tvzmapStart', 0)));
+% disp('t_piIntro_macbeth_zmap')
+% setpref('ISET3d', 'tvzmapStart', tic);
+% t_piIntro_macbeth_zmap;          % Get the zmap
+% setpref('ISET3d', 'tvzmapTime', toc(getpref('ISET3d', 'tvzmapStart', 0)));
 
 %% Assets
 disp('t_assets')
@@ -117,7 +117,7 @@ disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " s
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
 fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
-fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
+%fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
 fprintf("Assets:     %5.1f seconds.\n", getpref('ISET3d','tvassetsTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
