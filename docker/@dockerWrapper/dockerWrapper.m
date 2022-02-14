@@ -58,7 +58,7 @@ classdef dockerWrapper < handle
         dockerContainerName = '';
         dockerContainerID = '';
         % default image is cpu on x64 architecture
-        dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
+        dockerImageName =  dockerWrapper.localImage();
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
@@ -200,7 +200,8 @@ classdef dockerWrapper < handle
             end
                 % This needs to be updated, as all our new images
                 % have these libraries...
-                if contains(useImage, 'shared')
+                legacyImages = false;
+                if ~legacyImages %contains(useImage, 'shared')
                     % we don't need to mount libraries
                     cudalib = '';
                 else
