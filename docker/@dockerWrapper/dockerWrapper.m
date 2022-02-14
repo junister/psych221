@@ -198,8 +198,7 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                % This needs to be updated, as all our new images
-                % have these libraries...
+                % All our new images currently have libraries pre-loaded
                 legacyImages = false;
                 if ~legacyImages %contains(useImage, 'shared')
                     % we don't need to mount libraries
