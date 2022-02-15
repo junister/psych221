@@ -1,9 +1,10 @@
 
-# Dockerize Vistalabs pbrt-v4 for GPU.
+# Dockerize Vistalab's pbrt-v4 for GPU.
 
 FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
 
 MAINTAINER Zhenyi Liu <zhenyiliu@stanford.edu>
+MAINTAINER David Cardinal <david.cardinal@stanford.edu>
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -41,7 +42,7 @@ RUN apt-get purge cmake -y && apt autoremove -y \
 && tar -xzvf cmake-3.18.1.tar.gz \
 && cd cmake-3.18.1 \
 && ./bootstrap \
-&& make -j4 \
+&& make -j8 \
 && make install
 
 
@@ -61,7 +62,7 @@ RUN apt-get update -yq && apt-get install -y git \
 && mkdir build \
 && cd build \
 && cmake .. \
-&& make \
+&& make -j8 \
 && make install
 
 # try to build-in libs -- but they may need to be symlinked for this to work
@@ -70,7 +71,7 @@ COPY libnvidia-rtcore.so.1 /usr/lib/x86_64-linux-gnu/libnnvidia-rtcore.so.1
 
 WORKDIR /pbrt/pbrt-v4/build
 RUN cmake -DCMAKE_BUILD_TYPE=MINSIZEREL -DPBRT_OPTIX7_PATH=/pbrt/NVIDIA-OptiX-SDK-7.2.0-linux64-x86_64/ .. \
-&& make -j8
+&& make -j12
 
 ENV PATH $PATH:/pbrt/pbrt-v4/build
 

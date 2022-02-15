@@ -334,7 +334,7 @@ classdef dockerWrapper < handle
             if isequal(processorType, 'GPU')
 
                 % Check whether GPU is available
-                [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
+                [GPUCheck, GPUModel] = system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
                 try
                     ourGPU = gpuDevice();
                     if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
@@ -351,7 +351,7 @@ classdef dockerWrapper < handle
                     % really should enumerate and look for the best one, I think
                     gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
-                    switch gpuModels{obj.whichGPU + 1} % find the model of our GPU
+                    switch gpuModels{1} % find the model of our GPU
                         case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                         case {'geforcertx3070', 'nvidiageforcertx3070'}
@@ -359,7 +359,7 @@ classdef dockerWrapper < handle
                         case {'geforcertx3090', 'nvidiageforcertx3090'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
                         case {'geforcertx2080', 'nvidiageforcertx2080', ...
-                                'geforcertx2080ti', 'nvidiageforcetx2080ti'}
+                                'geforcertx2080ti', 'nvidiageforcertx2080ti'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
