@@ -351,18 +351,18 @@ classdef dockerWrapper < handle
                     % really should enumerate and look for the best one, I think
                     gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
-                    switch gpuModels{1}
+                    switch gpuModels{obj.whichGPU + 1} % find the model of our GPU
                         case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
-                            %dockerContainerName = 'pbrt-gpu';
                         case {'geforcertx3070', 'nvidiageforcertx3070'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
                         case {'geforcertx3090', 'nvidiageforcertx3090'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
-                            %dockerContainerName = 'pbrt-gpu';
+                        case {'geforcertx2080', 'nvidiageforcertx2080', ...
+                                'geforcertx2080ti', 'nvidiageforcetx2080ti'}
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
-                            %dockerContainerName = 'pbrt-gpu';
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
                             dockerImageName = dockerWrapper.localImage();
