@@ -1,0 +1,28 @@
+% Test case for merging assets into recipes
+ieInit;
+
+parentRecipe = piRecipeDefault('scene name','cornell_box');
+lightName = 'from camera';
+ourLight = piLightCreate(lightName,...
+                        'type','distant',...
+                        'cameracoordinate', true);
+recipeSet(parentRecipe,'lights', ourLight,'add');
+piWRS(parentRecipe);
+
+assetFiles = dir([fullfile(piRootPath,'data','assets'),filesep(),'*.mat']);
+report = '';
+for ii = 1:numel(assetFiles)
+    assetName = assetFiles(ii).name;
+    try
+        ourAsset = piAssetLoad(assetName);
+        combinedR = piRecipeMerge(parentRecipe, ourAsset.thisR);
+        piWRS(combinedR);
+        report = [report sprintf("Asset: %s Succeeded.\n", assetName)]; %#ok<AGROW> 
+    catch
+        dockerWrapper.cleanup(); 
+        report = [report sprintf("Asset: %s failed", assetName)]; %#ok<AGROW> 
+    end
+
+    fprintf("Asset validation results: \n %s", report);
+end
+
