@@ -34,7 +34,7 @@ setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 disp('v_omni')
 setpref('ISET3d', 'tvomniStart', tic);
 disp('Run omni once fixed');
-% v_omni;          
+v_omni;          
 setpref('ISET3d', 'tvomniTime', toc(getpref('ISET3d', 'tvomniStart', 0)));
 
 %% Assets
