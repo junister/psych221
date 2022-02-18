@@ -17,9 +17,11 @@ thisR.camera = piCameraCreate('pinhole');
 piWRS(thisR);
 
 thisR.camera = piCameraCreate('omni');
+recipeSet(thisR,'lights', ourLight,'add');
 piWRS(thisR);
 
 thisR.camera = piCameraCreate('omni', 'lensFile','dgauss.22deg.3.0mm.json');
+recipeSet(thisR,'lights', ourLight,'add');
 piWRS(thisR);
 
 
