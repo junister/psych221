@@ -78,37 +78,44 @@ end
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
-% (2) path to each children geometry files which store the shape and other
-%     geometry info.
+% (2) path to each childr geometry files 
+%     which store the shape and other geometry info.
 %
-% The process will be:
-%   (1) Get the children of this node
-%   (2) For each child, check if it is an 'object' or 'light' node. If so,
-%   write it out.
+% The process is:
+%   (1) Get the children of the current node
+%   (2) For each child, check if it is an 'object' or 'light' node. 
+%       If it is, write it out.
 %   (3) If the child is a 'branch' node, put it in a list which will be
-%   recursively checked in next level.
+%       recursively checked in the next level of our traverse.
 
-%% Get children of thisNode
+%% Get children of our current Node (thisNode)
 children = obj.getchildren(nodeID);
 
-%% Loop through all children at this level
+%% Loop through all children of our current node (thisNode)
 % If 'object' node, write out. If 'branch' node, put in the list
 
 % Create a list for next level recursion
 nodeList = [];
 
 for ii = 1:numel(children)
+
+    % set our current node to each of the child nodes
     thisNode = obj.get(children(ii));
-    % If node, put id in the nodeList
+    
+    % If a branch, put id in the nodeList
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
-        % Define object node
+    
+    % Define object node
     elseif isequal(thisNode.type, 'object')
+        % strip the ID number to get a more general node name
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
             thisNode.name = thisNode.name(8:end);
         end
+
+        % tell pbrt we are starting an object definition
         fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
 
         % Write out mediumInterface
@@ -116,7 +123,7 @@ for ii = 1:numel(children)
             fprintf(fid, strcat("MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
         end
 
-        % Write out material
+        % Write out materials used in the object
         if ~isempty(thisNode.material)
             %{
             % From dev branch
@@ -141,6 +148,9 @@ for ii = 1:numel(children)
                 [~,output] = fileparts(thisNode.output);
                 fprintf(fid, 'Include "scene/PBRT/pbrt-geometry/%s.pbrt" \n', output);
         %}
+
+        % Object geometry is in the shape slot
+        % We write it out here
         if ~isempty(thisNode.shape)
 
             shapeText = piShape2Text(thisNode.shape);
