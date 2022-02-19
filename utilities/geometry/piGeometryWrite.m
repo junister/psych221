@@ -78,7 +78,7 @@ end
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
-% (2) path to each childr geometry files 
+% (2) path to each child geometry file
 %     which store the shape and other geometry info.
 %
 % The process is:
@@ -155,7 +155,7 @@ for ii = 1:numel(children)
 
             shapeText = piShape2Text(thisNode.shape);
 
-            if ~isempty(thisNode.shape.filename)
+            if isfield(thisNode.shape,'filename') && ~isempty(thisNode.shape.filename)
                 % If the shape has ply info, do this
                 % Convert shape struct to text
                 [~, ~, e] = fileparts(thisNode.shape.filename);
@@ -189,12 +189,14 @@ for ii = 1:numel(children)
                 geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
                 fprintf(geometryFile,'%s',shapeText);
                 fclose(geometryFile);
+                % Note, assume Linux-style path names for renderer
                 fprintf(fid, 'Include "geometry/%s.pbrt" \n', name);
             end
         end
 
         fprintf(fid, 'ObjectEnd\n\n');
 
+    % NOTE: We now process lights separately?    
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
     else
@@ -203,6 +205,8 @@ for ii = 1:numel(children)
     end
 end
 
+% Now what we've build up a list of branch nodes that we need to
+% process, pick one and recurse through it
 for ii = 1:numel(nodeList)
     recursiveWriteNode(fid, obj, nodeList(ii), rootPath, outFilePath);
 end
@@ -234,12 +238,12 @@ for ii = 1:numel(children)
     fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
 
     if isequal(thisNode.type, 'branch')
-        % get stripID for this Node
+        % get the name after stripping ID for this Node
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
             thisNode.name = thisNode.name(8:end);
         end
-        % Write info
+        % Write the object's dimensions
         fprintf(fid, strcat(spacing, indentSpacing,...
             sprintf('#ObjectName %s:Dimension:[%.4f %.4f %.4f)',thisNode.name,...
             thisNode.size.l,...
