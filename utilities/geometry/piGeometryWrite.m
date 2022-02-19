@@ -249,9 +249,9 @@ for ii = 1:numel(children)
             thisNode.size.l,...
             thisNode.size.w,...
             thisNode.size.h), '\n'));
+        
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.
-
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
