@@ -34,43 +34,42 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 
 p.parse(thisR,varargin{:});
 
-% These were used but seem to be no longer used
-%
-% lightsFlag  = p.Results.lightsFlag;
-% thistrafficflow = p.Results.thistrafficflow;
-
 %% Create the default file name
 
+% Get the fullname of the geometry file to write
 [Filepath,scene_fname] = fileparts(thisR.outputFile);
 fname = fullfile(Filepath,sprintf('%s_geometry.pbrt',scene_fname));[~,n,e]=fileparts(fname);
 
 % Get the assets from the recipe
 obj = thisR.assets;
 
-%% Wrote the geometry file.
+%% Write the geometry file...
 
 fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
-% Open and write out the objects
+% Open the file and write out the assets
 fid_obj = fopen(fname_obj,'w');
 fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
 
-% Traverse the tree from root
+% Traverse the asset tree beginning at the root
 rootID = 1;
-% Write object and light definition in main geoemtry and children geometry
-% file
+
+% Write object and light definitions in the main geometry
+% and any needed child geometry files
 if ~isempty(obj)
     recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile);
 
-    % Write tree structure in main geometry file
+    % Write the tree structure in the main geometry file
     lvl = 0;
     recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile);
 else
+    % if no assets were found
     for ii = numel(thisR.world)
         fprintf(fid_obj, thisR.world{ii});
     end
 end
 fclose(fid_obj);
+
 % Not sure we want this most of the time, can un-comment as needed
 %fprintf('%s is written out \n', fname_obj);
 
