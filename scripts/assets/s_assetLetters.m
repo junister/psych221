@@ -25,7 +25,6 @@ for ii=1:numel(letters)
         thisR.set('asset', '001_A_O', 'world position', [0 0 1]);
     else
         thisR.set('asset','001_A_O','delete');
-        thisR.set('asset','A_B','delete');
     end
     % thisR.show;
     
@@ -33,7 +32,6 @@ for ii=1:numel(letters)
         thisR.set('asset', '001_B_O', 'world position', [0 0 1]);
     else
         thisR.set('asset','001_B_O','delete');
-        thisR.set('asset','B_B','delete');
     end
     % thisR.show;
     
@@ -41,7 +39,6 @@ for ii=1:numel(letters)
         thisR.set('asset', '001_C_O', 'world position', [0 0 1]);
     else
         thisR.set('asset','001_C_O','delete');
-        thisR.set('asset','C_B','delete');
     end
     
     % thisR.show;
@@ -52,15 +49,15 @@ for ii=1:numel(letters)
     % thisR.show();
     
     %{
-% I checked the letters this way
-%
-l = piLightCreate('distant','type','distant');
-thisR.set('light','add',l);
-piAssetGeometry(thisR);
-thisR.show('objects')
-thisR.get('asset','001_B_O','material')
-thisR.set('material','White','kd',[0 0 0]);
-piWRS(thisR);
+     % I checked the letters this way
+     %
+        l = piLightCreate('distant','type','distant');
+        thisR.set('light',l,'add');
+        piAssetGeometry(thisR);
+        thisR.show('objects')
+        thisR.get('asset','001_C_O','material')
+        thisR.set('material','White','reflectance',[.5 .5 .5]);
+        piWRS(thisR);
     %}
     
     %

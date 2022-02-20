@@ -36,6 +36,39 @@ save(oFile,'mergeNode','-append');
 
 sceneName = 'coordinate';
 thisR = piRecipeDefault('scene name', sceneName);
+oNames = thisR.get('object names no id');
+
+%
+% thisR.set('asset',assetName,'merge branches');
+%
+for oo=1:numel(oNames)
+    wpos    = thisR.get('asset',oNames{oo},'world position');
+    wscale  = thisR.get('asset',oNames{oo},'world scale');
+    wrotate = thisR.get('asset',oNames{oo},'world rotation angle');
+    
+    id = thisR.get('asset',oNames{oo},'path to root');
+    fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+    for ii=2:numel(id)
+        thisR.set('asset',id(ii),'delete');
+    end
+    id = thisR.get('asset',oNames{oo},'path to root');
+    fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+    
+    if (numel(id)-1 == 0)
+        % disp('Adding a geometry and root node')
+        geometryNode = piAssetCreate('type','branch');
+        geometryNode.name = '001_x_B';
+        thisR.set('asset','root_B','add',geometryNode);
+        thisR.set('asset',oNames{oo},'parent',geometryNode.name);
+    end
+    
+    piAssetSet(thisR, geometryNode.name, 'translate',wpos);
+    piAssetSet(thisR, geometryNode.name, 'scale',wscale);
+    rotMatrix = [wrotate; fliplr(eye(3))];
+    piAssetSet(thisR, geometryNode.name, 'rotation', rotMatrix);
+    
+end
+
 thisR.set('asset',10,'delete');
 thisR.set('asset',7,'delete');
 thisR.set('asset',4,'delete');
@@ -67,7 +100,7 @@ save(oFile,'mergeNode','-append');
 %
 
 [thisR, mergeNode] = piChartCreate('EIA');
-thisR.set('lights','all','delete');
+% thisR.set('lights','all','delete');
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
 %{
