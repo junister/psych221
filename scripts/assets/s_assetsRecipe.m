@@ -38,42 +38,23 @@ sceneName = 'coordinate';
 thisR = piRecipeDefault('scene name', sceneName);
 oNames = thisR.get('object names no id');
 
-%
-% thisR.set('asset',assetName,'merge branches');
-%
+% Put a merge node (branch type) above all the objects
+geometryNode = piAssetCreate('type','branch');
+geometryNode.name = 'mergeNode_B';
+thisR.set('asset','root_B','add',geometryNode);
+
+% Merge the multiple branches above each object
+% Then attach each object to the merge node.
 for oo=1:numel(oNames)
-    wpos    = thisR.get('asset',oNames{oo},'world position');
-    wscale  = thisR.get('asset',oNames{oo},'world scale');
-    wrotate = thisR.get('asset',oNames{oo},'world rotation angle');
-    
-    id = thisR.get('asset',oNames{oo},'path to root');
-    fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-    for ii=2:numel(id)
-        thisR.set('asset',id(ii),'delete');
-    end
-    id = thisR.get('asset',oNames{oo},'path to root');
-    fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-    
-    if (numel(id)-1 == 0)
-        % disp('Adding a geometry and root node')
-        geometryNode = piAssetCreate('type','branch');
-        geometryNode.name = '001_x_B';
-        thisR.set('asset','root_B','add',geometryNode);
-        thisR.set('asset',oNames{oo},'parent',geometryNode.name);
-    end
-    
-    piAssetSet(thisR, geometryNode.name, 'translate',wpos);
-    piAssetSet(thisR, geometryNode.name, 'scale',wscale);
-    rotMatrix = [wrotate; fliplr(eye(3))];
-    piAssetSet(thisR, geometryNode.name, 'rotation', rotMatrix);
-    
+    thisR.set('asset',oNames{oo},'merge branches');
+    thisR.set('asset',strrep(oNames{oo},'_O','_B'),'parent',geometryNode.name);
 end
 
-thisR.set('asset',10,'delete');
-thisR.set('asset',7,'delete');
-thisR.set('asset',4,'delete');
+% Move the axes by adjusting the mergeNode_B.
+thisR.set('asset','mergeNode_B','translate',[0 0 1]);
+
 % piWRS(thisR);
-mergeNode = 'Coordinate_B';
+mergeNode = geometryNode.name;
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');
 

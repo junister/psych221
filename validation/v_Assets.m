@@ -10,6 +10,7 @@
 
 %% Initialize ISETCam and ISET3d-V4
 ieInit;
+if ~piDockerExists, piDockerConfig; end
 
 %% Render the base Cornell box scene
 %  
@@ -35,14 +36,14 @@ Asset: EIA.mat Succeeded.
 Asset: bunny.mat Succeeded.
 Asset: coordinate.mat Succeeded.
 Asset: face.mat Succeeded.
-Asset: glasses.mat failed 
+Asset: glasses.mat failed % Zheng special case.
 Asset: gridlines.mat Succeeded.
 Asset: letterA.mat Succeeded.
 Asset: letterB.mat Succeeded.
 Asset: letterC.mat Succeeded.
 Asset: macbeth.mat Succeeded.
-Asset: mccCB.mat failed 
-Asset: plane.mat failed 
+Asset: mccCB.mat failed   % Zheng special case.
+Asset: plane.mat failed   % Not sure what this is yet.
 Asset: pointarray512.mat Succeeded.
 Asset: ringsrays.mat Succeeded.
 Asset: slantedbar.mat Succeeded.
@@ -59,7 +60,7 @@ for ii = 1:numel(assetFiles)
         'cameracoordinate', true);
     recipeSet(parentRecipe,'lights', ourLight,'add');
     assetName = assetFiles(ii).name;
-    disp(assetName);
+    fprintf('\n\nTesting: %s\n_________\n',assetName);
     
     try
         % Load the asset
