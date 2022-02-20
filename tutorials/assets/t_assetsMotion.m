@@ -79,6 +79,7 @@ piWrite(thisR);
 scene = piRender(thisR, 'render type', 'radiance');
 scene = sceneSet(scene,'name','motionblur: Rotation');
 sceneWindow(scene);
+sceneSet(scene,'render flag','hdr');
 
 %% END
 
