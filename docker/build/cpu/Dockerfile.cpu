@@ -1,8 +1,8 @@
 
-# Dockerize Vistalab’s pbrt-v4 for GPU.
+# Dockerize Vistalab’s pbrt-v4 for CPU only.
 
-#FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
-# CPU only
+# CPU only -- much smaller docker image
+# Used for assimp and exr2bin even when running with remote GPU
 FROM ubuntu:20.04
 
 MAINTAINER Zhenyi Liu <zhenyiliu@stanford.edu>
@@ -57,7 +57,8 @@ WORKDIR /pbrt/
 # get optiX for GPU
 # COPY NVIDIA-OptiX-SDK-7.2.0-linux64-x86_64 /pbrt/NVIDIA-OptiX-SDK-7.2.0-linux64-x86_64
 
-# Pull the git directory
+# Pull the git repos and make them
+# added ldconfig as otherwise assimp can't always find its .so
 RUN apt-get update -yq && apt-get install -y git \
 && git clone -b omni --recursive https://github.com/scienstanford/pbrt-v4.git \
 && git clone https://github.com/Zhenyi-Liu/assimp.git \
