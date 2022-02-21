@@ -17,7 +17,15 @@ function status = piDockerConfig(varargin)
 %    [status] = piDockerConfig('machine', 'default', 'debug', true);
 %
 % Notes:
-%  Initializing for remote GPU rendering
+%  Initializing for remote GPU rendering requires specifying the docker
+%  image on the remote site, and also which GPU on that site.  These
+%  combinations work on muxreconrt:
+%
+%   ‘whichGPU’, 0, ‘remoteImage’, ‘digitalprodev/pbrt-v4-gpu-ampere-mux-shared’
+%   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
+%
+%  We should probably make a list of working ones and keep it updated here.
+%  Or in dockerWrapper.
 %
 %  renderString = {'gpuRendering', true, ...
 %                'remoteMachine', <machine name>,...

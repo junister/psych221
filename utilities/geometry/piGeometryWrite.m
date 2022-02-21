@@ -34,43 +34,42 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 
 p.parse(thisR,varargin{:});
 
-% These were used but seem to be no longer used
-%
-% lightsFlag  = p.Results.lightsFlag;
-% thistrafficflow = p.Results.thistrafficflow;
-
 %% Create the default file name
 
+% Get the fullname of the geometry file to write
 [Filepath,scene_fname] = fileparts(thisR.outputFile);
 fname = fullfile(Filepath,sprintf('%s_geometry.pbrt',scene_fname));[~,n,e]=fileparts(fname);
 
 % Get the assets from the recipe
 obj = thisR.assets;
 
-%% Wrote the geometry file.
+%% Write the geometry file...
 
 fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
-% Open and write out the objects
+% Open the file and write out the assets
 fid_obj = fopen(fname_obj,'w');
 fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
 
-% Traverse the tree from root
+% Traverse the asset tree beginning at the root
 rootID = 1;
-% Write object and light definition in main geoemtry and children geometry
-% file
+
+% Write object and light definitions in the main geometry
+% and any needed child geometry files
 if ~isempty(obj)
     recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile);
 
-    % Write tree structure in main geometry file
+    % Write the tree structure in the main geometry file
     lvl = 0;
     recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile);
 else
+    % if no assets were found
     for ii = numel(thisR.world)
         fprintf(fid_obj, thisR.world{ii});
     end
 end
 fclose(fid_obj);
+
 % Not sure we want this most of the time, can un-comment as needed
 %fprintf('%s is written out \n', fname_obj);
 
@@ -79,37 +78,44 @@ end
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
-% (2) path to each children geometry files which store the shape and other
-%     geometry info.
+% (2) path to each child geometry file
+%     which store the shape and other geometry info.
 %
-% The process will be:
-%   (1) Get the children of this node
-%   (2) For each child, check if it is an 'object' or 'light' node. If so,
-%   write it out.
+% The process is:
+%   (1) Get the children of the current node
+%   (2) For each child, check if it is an 'object' or 'light' node. 
+%       If it is, write it out.
 %   (3) If the child is a 'branch' node, put it in a list which will be
-%   recursively checked in next level.
+%       recursively checked in the next level of our traverse.
 
-%% Get children of thisNode
+%% Get children of our current Node (thisNode)
 children = obj.getchildren(nodeID);
 
-%% Loop through all children at this level
+%% Loop through all children of our current node (thisNode)
 % If 'object' node, write out. If 'branch' node, put in the list
 
 % Create a list for next level recursion
 nodeList = [];
 
 for ii = 1:numel(children)
+
+    % set our current node to each of the child nodes
     thisNode = obj.get(children(ii));
-    % If node, put id in the nodeList
+    
+    % If a branch, put id in the nodeList
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
-        % Define object node
+    
+    % Define object node
     elseif isequal(thisNode.type, 'object')
+        % strip the ID number to get a more general node name
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
             thisNode.name = thisNode.name(8:end);
         end
+
+        % tell pbrt we are starting an object definition
         fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
 
         % Write out mediumInterface
@@ -117,7 +123,7 @@ for ii = 1:numel(children)
             fprintf(fid, strcat("MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
         end
 
-        % Write out material
+        % Write out materials used in the object
         if ~isempty(thisNode.material)
             %{
             % From dev branch
@@ -142,11 +148,14 @@ for ii = 1:numel(children)
                 [~,output] = fileparts(thisNode.output);
                 fprintf(fid, 'Include "scene/PBRT/pbrt-geometry/%s.pbrt" \n', output);
         %}
+
+        % Object geometry is in the shape slot
+        % We write it out here
         if ~isempty(thisNode.shape)
 
             shapeText = piShape2Text(thisNode.shape);
 
-            if ~isempty(thisNode.shape.filename)
+            if isfield(thisNode.shape,'filename') && ~isempty(thisNode.shape.filename)
                 % If the shape has ply info, do this
                 % Convert shape struct to text
                 [~, ~, e] = fileparts(thisNode.shape.filename);
@@ -180,12 +189,14 @@ for ii = 1:numel(children)
                 geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
                 fprintf(geometryFile,'%s',shapeText);
                 fclose(geometryFile);
+                % Note, assume Linux-style path names for renderer
                 fprintf(fid, 'Include "geometry/%s.pbrt" \n', name);
             end
         end
 
         fprintf(fid, 'ObjectEnd\n\n');
 
+    % NOTE: We now process lights separately?    
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
     else
@@ -194,6 +205,8 @@ for ii = 1:numel(children)
     end
 end
 
+% Now what we've build up a list of branch nodes that we need to
+% process, pick one and recurse through it
 for ii = 1:numel(nodeList)
     recursiveWriteNode(fid, obj, nodeList(ii), rootPath, outFilePath);
 end
@@ -225,20 +238,20 @@ for ii = 1:numel(children)
     fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
 
     if isequal(thisNode.type, 'branch')
-        % get stripID for this Node
+        % get the name after stripping ID for this Node
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
             thisNode.name = thisNode.name(8:end);
         end
-        % Write info
+        % Write the object's dimensions
         fprintf(fid, strcat(spacing, indentSpacing,...
             sprintf('#ObjectName %s:Dimension:[%.4f %.4f %.4f)',thisNode.name,...
             thisNode.size.l,...
             thisNode.size.w,...
             thisNode.size.h), '\n'));
+        
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.
-
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));

@@ -36,11 +36,25 @@ save(oFile,'mergeNode','-append');
 
 sceneName = 'coordinate';
 thisR = piRecipeDefault('scene name', sceneName);
-thisR.set('asset',10,'delete');
-thisR.set('asset',7,'delete');
-thisR.set('asset',4,'delete');
+oNames = thisR.get('object names no id');
+
+% Put a merge node (branch type) above all the objects
+geometryNode = piAssetCreate('type','branch');
+geometryNode.name = 'mergeNode_B';
+thisR.set('asset','root_B','add',geometryNode);
+
+% Merge the multiple branches above each object
+% Then attach each object to the merge node.
+for oo=1:numel(oNames)
+    thisR.set('asset',oNames{oo},'merge branches');
+    thisR.set('asset',strrep(oNames{oo},'_O','_B'),'parent',geometryNode.name);
+end
+
+% Move the axes by adjusting the mergeNode_B.
+thisR.set('asset','mergeNode_B','translate',[0 0 1]);
+
 % piWRS(thisR);
-mergeNode = 'Coordinate_B';
+mergeNode = geometryNode.name;
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');
 
@@ -67,7 +81,7 @@ save(oFile,'mergeNode','-append');
 %
 
 [thisR, mergeNode] = piChartCreate('EIA');
-thisR.set('lights','all','delete');
+% thisR.set('lights','all','delete');
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
 %{
