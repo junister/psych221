@@ -1229,24 +1229,10 @@ switch ieParamFormat(param)  % lower case, no spaces
     % Lights
     case{'light', 'lights'}
         if isempty(varargin)
-            % Treat this same as get names
-            %{
-            if isprop(thisR, 'lights')
-                val = thisR.lights;
-            else
-                warning('No lights in this recipe')
-                val = {};
-            end
-            %}
             val = thisR.assets.mapLgtShortName2Idx.keys;
             return;
         end
 
-        %{
-        if ischar(varargin{1})
-            varargin{1} = ieParamFormat(varargin{1});
-        end
-        %}
 
         switch varargin{1}
             case 'names'
@@ -1318,6 +1304,11 @@ switch ieParamFormat(param)  % lower case, no spaces
                             else
                                 val = Inf;
                             end
+                        case {'rotate','rotation'}
+                            % Pull out the three rotation parameters
+                            % from the stored matrices with respect to
+                            % world coordinates.
+                            val = thisR.get('asset', thisLight.name, 'world rotation angle');
                         case 'name'
                             val = thisLight.name;
                         case {'light', 'lght'}
@@ -1451,10 +1442,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                     end
                 case 'rotation'
                     if thisR.assets.isleaf(id)
-
+                        parentID = thisR.get('asset parent id', id);
+                        val = thisR.get('asset', parentID, 'rotation');
                     else
-                        val = piAsseGet(thisAsset, 'rotation');
+                        val = piAssetGet(thisAsset, 'rotation');
                     end
+                   
                 case 'size'
                     % thisR.get('asset',objectName,'size');
                     % Size of one object in meters

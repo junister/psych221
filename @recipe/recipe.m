@@ -198,16 +198,18 @@ classdef recipe < matlab.mixin.Copyable
                 case 'skymap'
                     % Brings up image of the skymap (global
                     % illumination)
-                    nLights = numel(obj.lights);
+                    lNames = obj.get('light','names');
+                    nLights = numel(lNames);
                     for ii=1:nLights
-                        if isequal(obj.get('light',ii,'type'),'infinite')
-                            mapname = obj.get('light',ii,'mapname');
+                        if isequal(obj.get('light',lNames{ii},'type'),'infinite')
+                            mapname = obj.get('light',lNames{ii},'mapname');
                             if ~isempty(mapname)
                                 mapname = fullfile(obj.get('outputdir'),mapname);
                                 img = exrread(mapname);
                                 ieNewGraphWin;
                                 imagesc(img.^0.6);
-                                title(mapname);
+                                [~,str,ext] = fileparts(mapname);
+                                title([str,ext]); axis image; axis off
                             end
                         end
                     end
