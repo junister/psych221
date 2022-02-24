@@ -954,6 +954,17 @@ switch param
                 thisLgtAsset.name = val.name;
                 thisR.set('asset', lghtName, thisLgtAsset);
                 return;
+            case {'worldrotation', 'worldrotate'}
+                thisR.set('asset', lghtName, 'world rotation', val);
+                return;
+            case {'worldtranslation', 'worldtranslate'}
+                % Shouldn't be applied to infinite light but could be for
+                % area light.
+                thisR.set('asset', lghtName, 'world translation', val);
+                return;
+            case {'worldorientation'}
+                thisR.set('asset', lghtName, 'world orientation', val);
+                return;
             case {'rotate', 'rotation'}
                 % Rotate the direction, angle in degrees
                 % thisR.set('light', lghtName, 'rotate', [XROT, YROT, ZROT], ORDER)
@@ -1146,12 +1157,19 @@ switch param
 
                 %thisR.assets.Node{id}.rotation = val;
             case {'worldrotate', 'worldrotation'}
+                % It adds rotation in the world space
                 % Get current rotation matrix
                 curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
                 [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
                 
                 % BW: Removed many comments Feb 19 2022
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
+            case {'worldorientation'}
+                % curRot = thisR.get('asset', assetName, 'worldrotationangle');
+                curM = thisR.get('asset', assetName, 'worldrotationmatrix');
+                invDeg = piTransformRotM2Degs(inv(curM));
+                thisR.set('asset', assetName, 'world rotation', invDeg);
+                thisR.set('asset', assetName, 'world rotation', val(:)');
             case {'worldposition'}
                 % thisR.set('asset', assetName, 'world position', [1 2 3]);
                 % First get the position

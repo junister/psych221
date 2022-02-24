@@ -21,7 +21,7 @@ function status = piDockerConfig(varargin)
 %  image on the remote site, and also which GPU on that site.  These
 %  combinations work on muxreconrt:
 %
-%   ‘whichGPU’, 0, ‘remoteImage’, ‘digitalprodev/pbrt-v4-gpu-ampere-mux-shared’
+%   ‘whichGPU’, 0, ‘remoteImage’, ‘digitalprodev/pbrt-v4-gpu-ampere-mux’
 %   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
 %
 %  We should probably make a list of working ones and keep it updated here.

@@ -77,5 +77,9 @@ thisR.set('light',skyMap.name,'rotate',[30 0 0]);
 
 piWRS(thisR, 'name','Rotated skymap');
 
+%% World orientation
+thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
+thisR.get('light', skyMap.name, 'world orientation')
 
+piWRS(thisR, 'name','No rotation skymap');
 %% END
