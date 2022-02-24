@@ -1165,8 +1165,11 @@ switch param
                 % BW: Removed many comments Feb 19 2022
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
             case {'worldorientation'}
-                curRot = thisR.get('asset', assetName, 'worldrotationangle');
-                thisR.set('asset', assetName, 'world rotation', -curRot + val(:)');
+                % curRot = thisR.get('asset', assetName, 'worldrotationangle');
+                curM = thisR.get('asset', assetName, 'worldrotationmatrix');
+                invDeg = piTransformRotM2Degs(inv(curM));
+                thisR.set('asset', assetName, 'world rotation', invDeg);
+                thisR.set('asset', assetName, 'world rotation', val(:)');
             case {'worldposition'}
                 % thisR.set('asset', assetName, 'world position', [1 2 3]);
                 % First get the position
