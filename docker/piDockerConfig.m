@@ -23,6 +23,7 @@ function status = piDockerConfig(varargin)
 %
 %   ‘whichGPU’, 0, ‘remoteImage’, ‘digitalprodev/pbrt-v4-gpu-ampere-mux’
 %   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
+%   ‘whichGPU’ ,2, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
 %
 %  We should probably make a list of working ones and keep it updated here.
 %  Or in dockerWrapper.
