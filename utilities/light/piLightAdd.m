@@ -75,7 +75,7 @@ function thisR = piLightAdd(thisR, varargin)
 %}
 
 %%
-error('piLightAdd has been deprecated.  Use thisR.set(''light'',''add'',newLight)');
+error('piLightAdd has been deprecated.  Use thisR.set(''light'',newLight,''add'')');
 
 %% Parse inputs
 varargin = ieParamFormat(varargin);  % Allow spaces and capitalization
