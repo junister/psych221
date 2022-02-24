@@ -25,6 +25,13 @@ function status = piDockerConfig(varargin)
 %   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
 %   ‘whichGPU’ ,2, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
 %
+%   If you have a local GPU, ISET will attempt to find the correct GPU
+%   image, if available. Otherwise it will default to:
+%       digitalprodev/pbrt-v4-cpu
+%
+% NOTE: We are attempting to maintain both a :latest and a :stable
+%       tag for the GPU and CPU images.
+%
 %  We should probably make a list of working ones and keep it updated here.
 %  Or in dockerWrapper.
 %
