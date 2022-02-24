@@ -207,7 +207,8 @@ classdef recipe < matlab.mixin.Copyable
                                 mapname = fullfile(obj.get('outputdir'),mapname);
                                 img = exrread(mapname);
                                 ieNewGraphWin;
-                                imagesc(img.^0.6);
+                                img = abs(img .^0.6);
+                                imagesc(img);
                                 [~,str,ext] = fileparts(mapname);
                                 title([str,ext]); axis image; axis off
                             end
