@@ -300,36 +300,32 @@ for ii = 1:numel(children)
         % Write out motion
         %
         if ~isempty(thisNode.motion)
-            for jj = 1:size(thisNode.translation, 2)
-                fprintf(fid, strcat(spacing, indentSpacing,...
-                    'ActiveTransform EndTime \n'));
+            fprintf(fid, strcat(spacing, indentSpacing,...
+                'ActiveTransform EndTime \n'));
+            for jj = 1:size(thisNode.motion, 1)
 
                 % First write out the same translation and rotation
                 piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
 
-                if isfield(thisNode.motion, 'translation')
-                    if isempty(thisNode.motion.translation(jj, :))
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            'Translate 0 0 0\n'));
-                    else
-                        pos = thisNode.motion.translation(jj,:);
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Translate %f %f %f', pos(1),...
-                            pos(2),...
-                            pos(3)), '\n'));
-                    end
+                % Now write the end position
+                if isfield(thisNode.motion(jj), 'translation')
+                    pos = thisNode.motion(jj).translation;
+                    fprintf(fid, strcat(spacing, indentSpacing,...
+                        sprintf('Translate %f %f %f', pos(1),...
+                        pos(2),...
+                        pos(3)), '\n'));
+                    
                 end
 
-                if isfield(thisNode.motion, 'rotation') &&...
-                        ~isempty(thisNode.motion.rotation)
-                    rot = thisNode.motion.rotation;
+                if isfield(thisNode.motion(jj), 'rotation')
+                    rot = thisNode.motion(jj).rotation;
                     % Write out rotation
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3-2)), '\n')); % Z
+                        sprintf('Rotate %f %f %f %f',rot(:,3-2)), '\n')); % Z
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3-1)),'\n')); % Y
+                        sprintf('Rotate %f %f %f %f',rot(:,3-1)),'\n')); % Y
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3)), '\n'));   % X
+                        sprintf('Rotate %f %f %f %f',rot(:,3)), '\n'));   % X
                 end
             end
         end
