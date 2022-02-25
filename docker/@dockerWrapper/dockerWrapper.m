@@ -2,7 +2,7 @@ classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
     % In principle, when simply used for render acceleration
-    % on a GPU, it should be user-transparent by default.
+    % on a local GPU, it should be user-transparent by default.
     %
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
@@ -22,6 +22,8 @@ classdef dockerWrapper < handle
     % remoteUser -- username on remote machine (that has key support)
     % remoteContext -- name of docker context pointing to renderer
     % remoteImage -- GPU-specific docker image on remote machine
+    %  EXPERIMENTAL: CPU image on remote machine for offloading large
+    %                CPU-only renders
     % remoteRoot -- needed if different from local piRoot
     %
     % localRoot -- only for WSL -- the /mnt path to the Windows piRoot
@@ -230,10 +232,6 @@ classdef dockerWrapper < handle
                 else
                     mountData = fullfile(obj.localRoot, 'local');
                 end
-                % I don't think we want this for the local case!
-                %if ispc && isequal(obj.dockerContainerType, 'linux')
-                %    mountData = dockerWrapper.pathToLinux(mountData);
-                %end
             end
             mountData = strrep(mountData,'//','/');
             % is our mount point always the same?
@@ -244,18 +242,18 @@ classdef dockerWrapper < handle
             placeholderCommand = 'bash';
 
             % set up the baseline command
+            if isempty(dockerWrapper.staticVar('get','renderContext'))
+                contextFlag = '';
+            else
+                contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
+            end
             if isequal(processorType, 'GPU')
-                if isempty(dockerWrapper.staticVar('get','renderContext'))
-                    contextFlag = '';
-                else
-                    contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
-                end
                 % want: --gpus '"device=#"'
                 gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
                 dCommand = sprintf('docker %s run -d -it %s --name %s  %s', contextFlag, gpuString, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
-                dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
+                dCommand = sprintf('docker %s run -d -it --name %s %s', contextFlag, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s', dCommand, useImage, placeholderCommand);
             end
 
@@ -309,7 +307,13 @@ classdef dockerWrapper < handle
                         %containerPBRTCPU = obj.startPBRT('CPU');
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    [status, result] = system(sprintf("docker ps | grep %s", obj.staticVar('get','PBRT-CPU', '')));
+                    % Need to switch to render context here!
+                    if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                        cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
+                    else
+                        cFlag = '';
+                    end
+                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
@@ -379,6 +383,7 @@ classdef dockerWrapper < handle
 
         function output = convertPathsInFile(obj, input)
             % for depth or other files that have embedded "wrong" paths
+            % implemented someplace, need to find the code!
         end
 
     end
