@@ -1,0 +1,3 @@
+[submodule "vistalab"]
+	path = vistalab
+	url = https://github.com/digital-pro/vistalab
