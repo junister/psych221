@@ -9,13 +9,13 @@ function [status,result] = piDockerImgtool(command,varargin)
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
-%   msparms:   albedo, elevation, outfile, turbidity, resolution
+%   msparms:  albedo, elevation, outfile, turbidity, resolution
 %
 % Uses the Docker Container to execuate
 %
 %   piDockerImgtool('help')
 %   piDockerImgtool('equiarea','infile',fullpathname);
-%   piDockerImgtool('makesky','infile', fullpathname);
+%   piDockerImgtool('makesky','infile', fullpathname); % NYI
 % 
 %  imgtool makeequiarea old.exr --outfile new.exr
 %
