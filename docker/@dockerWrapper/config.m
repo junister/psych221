@@ -35,8 +35,10 @@ p.addParameter('remoteRoot','',@ischar); % for different remote path
 p.addParameter('localRoot','',@ischar); % for Windows/wsl
 p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
 p.addParameter('verbosity', 1, @isnumeric); % 
+p.addParameter('settings', '', @ischar);
 
-p.parse(varargin{:})
+
+p.parse(varargin{:});
 
 args = p.Results;
 
@@ -50,6 +52,9 @@ obj.whichGPU = args.whichGPU;
 
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;
+end
+if ~isempty(args.remoteUser)
+    obj.remoteUser = args.remoteUser;
 end
 if ~isempty(args.localRoot)
     obj.localRoot = args.localRoot;

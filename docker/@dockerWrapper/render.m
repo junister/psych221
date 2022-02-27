@@ -38,6 +38,7 @@ if ~isempty(obj.remoteMachine)
         rSync = 'rsync';
     end
     if isempty(obj.remoteRoot)
+        obj.remoteRoot = '~';
         % if no remote root, then we need to look up our local root and use it!
     end
     if ~isempty(obj.remoteUser)
@@ -84,8 +85,8 @@ if ~isempty(obj.remoteMachine)
     shortOut = [obj.relativeScenePath sceneDir];
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',useContext, flags, useContainer, shortOut, renderCommand);
-    % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
+        useContext, flags, useContainer, shortOut, renderCommand);
     if verbose > 0
         fprintf("Render: %s\n", containerRender);
     end

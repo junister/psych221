@@ -118,8 +118,12 @@ persistent renderDocker;
 
 % try and set the default to a server if we aren't passed one:
 if isempty(ourDocker)
-    renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-    ourDocker = dockerWrapper(renderPrefs{:});
+    if ~isempty(which('getRenderer'))
+        ourDocker =  getRenderer();
+    else
+        renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
+        ourDocker = dockerWrapper(renderPrefs{:});
+    end
 end
 
 % Extensive Example:
