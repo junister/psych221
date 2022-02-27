@@ -90,7 +90,9 @@ classdef dockerWrapper < handle
 
     methods (Static)
 
+        % Need to list ones that are in a separate file if they are static
         dockerImage = localImage();
+        setGPU();
         
         [dockerExists, status, result] = exists() % separate file
                 
