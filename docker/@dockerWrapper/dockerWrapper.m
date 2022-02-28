@@ -71,6 +71,7 @@ classdef dockerWrapper < handle
         remoteUser = ''; % use for rsync & ssh/docker
 
         remoteImage = '';
+        remoteImageTag = 'latest';
         remoteRoot = ''; % we need to know where to map on the remote system
         localRoot = ''; % for the Windows/wsl case (sigh)
         workingDirectory = '';

@@ -31,6 +31,7 @@ p.addParameter('renderContext', '', @ischar); % experimental
 p.addParameter('remoteMachine','',@ischar); % for data sync
 p.addParameter('remoteUser','',@ischar); % for data sync
 p.addParameter('remoteImage', '', @ischar); % image to use for remote render
+p.addParameter('remoteImageTag', 'latest', @ischar); % image to use for remote render
 p.addParameter('remoteRoot','',@ischar); % for different remote path
 p.addParameter('localRoot','',@ischar); % for Windows/wsl
 p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
@@ -75,6 +76,9 @@ if ~isempty(args.renderContext)
     % currently we need to have that passed in as well
     if ~isempty(args.remoteImage)
         obj.remoteImage = args.remoteImage;
+    end
+    if ~contains(obj.remoteImage,':') % add tag
+        obj.remoteImage = [obj.remoteImage ':' obj.remoteImageTag];
     end
 end
 
