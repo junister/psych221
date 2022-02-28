@@ -3,7 +3,7 @@ function  setParams(options)
 
 arguments
     options.whichGPU {mustBeNumeric} = 0;
-    options.gpuRendering;
+    options.gpuRendering = '';
 
     % these relate to remote/server rendering
     % they overlap while we learn the best way to organize them
@@ -18,7 +18,9 @@ arguments
 end
 setpref('docker','whichGPU', options.whichGPU);
 
-options.gpuRendering;
+if isnumeric(options.gpuRendering)
+    setpref('docker','gpuRendering', options.gpuRendering);
+end
 if ~isempty(options.remoteUser)
     setpref('docker', 'remoteUser', options.remoteUser);
 end
