@@ -362,9 +362,9 @@ classdef dockerWrapper < handle
                         case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
                         case {'geforcertx3070', 'nvidiageforcertx3070'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                         case {'geforcertx3090', 'nvidiageforcertx3090'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                         case {'geforcertx2080', 'nvidiageforcertx2080', ...
                                 'geforcertx2080ti', 'nvidiageforcertx2080ti'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';

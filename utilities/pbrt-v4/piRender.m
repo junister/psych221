@@ -116,7 +116,9 @@ renderType       = p.Results.rendertype;
 %% try to support docker servers
 persistent renderDocker;
 
-% try and set the default to a server if we aren't passed one:
+% try and set the default to a server if we aren't passed one.
+% getRender() is an optional function that can be created and maintained
+% on a per-site basis to specify local machines, GPUs, and other data.
 if isempty(ourDocker)
     if ~isempty(which('getRenderer'))
         ourDocker =  getRenderer();
