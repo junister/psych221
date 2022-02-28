@@ -1,4 +1,4 @@
-function  setDocker(options)
+function  setParams(options)
 %SETDocker set Docker rendering options
 
 arguments

@@ -93,7 +93,7 @@ classdef dockerWrapper < handle
 
         % Need to list ones that are in a separate file if they are static
         dockerImage = localImage();
-        setGPU();
+        setParams();
         
         [dockerExists, status, result] = exists() % separate file
                 
