@@ -255,6 +255,7 @@ for ii = 1:numel(children)
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
+            obj.hasActiveTransform = true;
         end
 
         % Transformation section
