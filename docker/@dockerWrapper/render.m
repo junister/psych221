@@ -2,9 +2,12 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 
 verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
+% Currently we have an issue where GPU rendering ignores objects
+% that have ActiveTranforms. Maybe scan for those & set container back
+% to CPU (perhaps ideally a beefy, remote, CPU).
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');
-    % okay this is a hack!
+    % okay this is sort of a hack
     renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
 else
     useContainer = obj.getContainer('PBRT-CPU');
@@ -107,8 +110,9 @@ if ~isempty(obj.remoteMachine)
         [status, result] = system(containerRender);
     end
     if status == 0 && ~isempty(obj.remoteMachine)
-    % sync data back
-    % try just using the renderings sub-folder
+
+    % sync data back -- renderings sub-folder
+    % This assumes that all output is in that folder!
     getOutput = tic;
     pullCommand = sprintf('%s -r %s %s',rSync, ...
         [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
