@@ -22,6 +22,11 @@ if ~piDockerExists, piDockerConfig; end
 % This is the PBRT scene file inside the output directory
 % thisR  = piRecipeDefault();
 thisR  = piRecipeDefault('scene name','chessSet');
+lightName = 'from camera';
+ourLight = piLightCreate(lightName,...
+                        'type','distant',...
+                        'cameracoordinate', true);
+recipeSet(thisR,'lights', ourLight,'add');
 
 %% Set render quality
 
