@@ -35,7 +35,7 @@ p.addParameter('remoteImageTag', 'latest', @ischar); % image to use for remote r
 p.addParameter('remoteRoot','',@ischar); % for different remote path
 p.addParameter('localRoot','',@ischar); % for Windows/wsl
 p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
-p.addParameter('verbosity', 1, @isnumeric); %
+p.addParameter('verbosity', 0, @isnumeric); %
 p.addParameter('settings', '', @ischar);
 
 
