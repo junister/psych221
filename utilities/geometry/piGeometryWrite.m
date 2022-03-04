@@ -61,7 +61,7 @@ if ~isempty(obj)
 
     % Write the tree structure in the main geometry file
     lvl = 0;
-    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile);
+    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, thisR);
 else
     % if no assets were found
     for ii = numel(thisR.world)
@@ -213,7 +213,7 @@ end
 
 end
 
-function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath)
+function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, thisR)
 % Write attribute sections. The logic is:
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
@@ -255,7 +255,7 @@ for ii = 1:numel(children)
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
-            obj.hasActiveTransform = true;
+            thisR.hasActiveTransform = true;
         end
 
         % Transformation section
@@ -331,7 +331,7 @@ for ii = 1:numel(children)
             end
         end
 
-        recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath);
+        recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath, thisR);
 
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 8 &&...

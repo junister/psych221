@@ -6,7 +6,8 @@
 % For more information about PBRT lens and camera formats:
 %
 %
-% Z Liu, BW 2018
+% Z Liu, B
+% W 2018
 %
 % See also
 %   t_piIntro_start, isetlens, 
