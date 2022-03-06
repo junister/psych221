@@ -31,6 +31,11 @@ if ~ispc
 else
 
     if isempty(ourDocker), ourDocker = dockerWrapper(); end
+    if getpref('docker','verbosity', 1) > 0
+        stdout = '';
+    else
+        stdout = ' > /dev/null ';
+    end
     ourDocker.command = ['imgtool convert --exr2bin ' channelname];
     ourDocker.dockerImageName = dockerimage;
     ourDocker.localVolumePath = indir;
