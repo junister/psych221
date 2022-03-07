@@ -1,9 +1,23 @@
 function  setParams(options)
-%%
-% SETParams: Optionally set Docker rendering options
+% setParams: Set remote docker rendering options
 %
-% Underlying mechanism is setpref(), getpref() so changes are 
-% persistent across Matlab sessions.
+% Syntax
+%    dockerWrapper.setParams(key/val pairs)
+%
+% Brief synopsis
+%   Set docker parameters for remote rendering
+%
+% Inputs
+%   N/A
+%
+% Key/Val pairs
+%
+% Return
+%   N/A
+%
+% Description
+% Underlying mechanism is setpref(), getpref() so changes are persistent
+% across Matlab sessions. 
 %
 %   dockerWrapper.setParams('docker','remoteUser',<remoteUser>);
 %   dockerWrapper.setParams('docker','remoteRoot',<remoteRoot>); % where we will put the iset tree
