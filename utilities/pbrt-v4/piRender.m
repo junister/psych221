@@ -242,8 +242,9 @@ preRender = tic;
 
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
-fprintf("Complete render took: %6.2d seconds.", elapsedTime);
-
+if getpref('docker','verbosity',0) > 0
+    fprintf("Complete render took: %6.2d seconds.", elapsedTime);
+end
 
 %% Check the return
 
