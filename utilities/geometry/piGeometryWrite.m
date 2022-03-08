@@ -105,19 +105,21 @@ for ii = 1:numel(children)
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
-        if thisNode.isInstancer ==1
-            %             nodeList = [nodeList children(ii)];
-            fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
-            lvl = 1;
-            writeGeometryFlag = 1;
-            recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag);
-            fprintf(fid, 'ObjectEnd\n\n');
-            % nodeID == 1 is rootID.
-            if nodeID ~=1, return; end
+        if isfield(thisNode,'isInstancer')
+            if thisNode.isInstancer ==1
+                %             nodeList = [nodeList children(ii)];
+                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
+                lvl = 1;
+                writeGeometryFlag = 1;
+                recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag);
+                fprintf(fid, 'ObjectEnd\n\n');
+                % nodeID == 1 is rootID.
+                if nodeID ~=1, return; end
+            end
         end
-        
 %         % Define object node
-%     elseif isequal(thisNode.type, 'object')
+    elseif isequal(thisNode.type, 'object')
+        % Deal with this in recursiveWriteAttributes;
 %         
 %         while numel(thisNode.name) >= 8 &&...
 %                 isequal(thisNode.name(5:6), 'ID')
@@ -318,7 +320,9 @@ for ii = 1:numel(children)
             end
             thisNode.name = thisNode.name(8:endIndex);
         end
-        if writeGeometryFlag
+        
+        % if this is an arealight or object without instance
+        if writeGeometryFlag || isempty(referenceObjectExist)
             % find parent node
             thisNodeId = piAssetFind(obj,'name',thisNode.name);
             thisNodeParentId = obj.getparent(thisNodeId);
@@ -331,6 +335,7 @@ for ii = 1:numel(children)
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.name), '\n'));
         end
+        
     elseif isequal(thisNode.type, 'light')
         % Create a tmp recipe
         tmpR = recipe;
