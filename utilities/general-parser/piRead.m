@@ -6,7 +6,7 @@ function thisR = piRead(fname,varargin)
 %
 % Description
 %  piREAD parses a pbrt scene file and returns the full set of rendering
-%  information in the slots of the "recipe" object. The recipe object
+%  information in the slots of the "x@J8HDaCMm3LxM3Lrecipe" object. The recipe object
 %  contains all the information used by PBRT to render the scene.
 %
 %  We extract blocks with these names from the text prior to WorldBegin

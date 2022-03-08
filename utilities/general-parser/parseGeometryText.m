@@ -44,11 +44,11 @@ while i <= length(txt)
     currentLine = txt{i};
     % ZLY: an emergency patch for Brian's presentation tomorrow If we found
     % ObjectBegin, that means we won't parse anything
-    if piContains(currentLine, 'ObjectBegin') && ~strcmp(currentLine(1),'#')
-        trees = {};
-        parsedUntil = i;
-        return;
-    end
+    %     if piContains(currentLine, 'ObjectBegin') && ~strcmp(currentLine(1),'#')
+    %         trees = {};
+    %         parsedUntil = i;
+    %         return;
+    %     end
 
     % Return if we've reached the end of current attribute
 
