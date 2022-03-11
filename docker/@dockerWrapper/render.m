@@ -62,7 +62,7 @@ if ~isempty(obj.remoteMachine)
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
-    if ismac
+    if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation
         % (DJC)
         putCommand = sprintf('%s -r -t %s %s',rSync, [nativeFolder,'/'], remoteScene);
