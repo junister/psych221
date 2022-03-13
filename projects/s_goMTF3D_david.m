@@ -31,10 +31,10 @@ inFile = which([n,e]);
 if isempty(inFile), error('Cannot find the PBRT input file %s\n',chessR.inputFile); end
 chessR.set('input file',inFile);
 
-% Adjust the input slot in the recipe for the local user
+% Adjust the outpus slot in the recipe for the local user
 [p,n,e] = fileparts(chessR.get('output file'));
 temp=split(p,filesep());
-outFile=fullfile(piRootPath,'local',temp{end});
+outFile=fullfile(piRootPath,'local',temp{end}, [n e]);
 chessR.set('output file',outFile);
 
 
@@ -56,35 +56,35 @@ initialScale = chessR.get('asset',sbar.mergeNode,'scale');
 
 
 % Render the scene
-thisDocker = 'vistalab/pbrt-v3-spectral:raytransfer-spectral';
+%thisDocker = 'vistalab/pbrt-v3-spectral:raytransfer-spectral';
 
 
 %%
 
 %% Add a lens and render.
 %camera = piCameraCreate('omni','lensfile','dgauss.22deg.12.5mm.json');
-cameraOmni = piCameraCreate('omni','lensfile','dgauss.22deg.3.0mm_aperture0.6_spectral.json')
-cameraOmni.filmdistance.type='float'
+cameraOmni = piCameraCreate('omni','lensfile','dgauss.22deg.3.0mm.json');
+cameraOmni.filmdistance.type='float';
 cameraOmni.filmdistance.value=0.002167;
-cameraOmni = rmfield(cameraOmni,'focusdistance')
-cameraOmni.aperturediameter.value=0.6
+cameraOmni = rmfield(cameraOmni,'focusdistance');
+cameraOmni.aperturediameter.value=0.6;
 
 
-cameraRTF = piCameraCreate('raytransfer','lensfile','dgauss.22deg.3.0mm.json-raytransfer-spectral.json')
-cameraRTF = piCameraCreate('raytransfer','lensfile','dgauss.22deg.50.0mm_aperture6.0.json-raytransfer.json')
-cameraRTF.aperturediameter.value=0.6
-cameraRTF.aperturediameter.type='float'
+%cameraRTF = piCameraCreate('omni','lensfile','dgauss.22deg.3.0mm.json');
+cameraRTF = piCameraCreate('omni','lensfile','dgauss.22deg.50.0mm.json');
+cameraRTF.aperturediameter.value = 0.6;
+cameraRTF.aperturediameter.type ='float';
 
-chessR.set('pixel samples',50)
-
-
-thisR.set('film diagonal',2,'mm');
+chessR.set('pixel samples',50);
 
 
-chessR.integrator.subtype='spectralpath'
+chessR.set('film diagonal',2,'mm');
+
+
+chessR.integrator.subtype = 'spectralpath';
 
 chessR.integrator.numCABands.type = 'integer';
-chessR.integrator.numCABands.value =1
+chessR.integrator.numCABands.value = 1;
 
 
 %% Change the focal distance
@@ -95,15 +95,14 @@ chessR.set('focal distance',0.2);   % Original distance z value of the slanted b
 
 % Omni
 chessR.set('camera',cameraOmni);
-oiOmni = piWRS(chessR,'render type','radiance','dockerimagename',thisDocker);
+oiOmni = piWRS(chessR);
 
 % RTF
-chessR.set('camera',cameraRTF);
-oiRTF = piWRS(chessR,'render type','radiance','dockerimagename',thisDocker);
-
-
-oiList = {oiOmni,oiRTF};
-
+%chessR.set('camera',cameraRTF);
+%oiRTF = piWRS(chessR,'render type','radiance','dockerimagename',thisDocker);
+% we don't have RTF yet
+%oiList = {oiOmni,oiRTF};
+oiList = {oiOmni};
 
 %save('simulation_2000samples.mat')
 return
