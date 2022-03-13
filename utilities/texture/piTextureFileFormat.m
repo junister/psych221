@@ -35,12 +35,11 @@ for ii = 1:numel(textureList)
         if exist(thisImgPath, 'file')
             
             outputPath = fullfile(inputDir, path, [name,'.png']);
-            
             if ~exist(outputPath,'file')
                 thisImg = imread(thisImgPath);
                 imwrite(thisImg,outputPath);
             end
-            
+
             % update texture slot
             textureList{ii}.filename.value = fullfile(path, [name,'.png']);
             thisR.textures.list(textureList{ii}.name) = textureList{ii};
@@ -91,8 +90,13 @@ for ii = 1:numel(matKeys)
     if exist(thisImgPath, 'file') && ~isempty(normalImgPath)
         
         [path, name, ext] = fileparts(dockerWrapper.pathToLinux(normalImgPath));
+        if strcmp(ext, '.exr')
+            % do nothing with exr
+            continue;
+        end
         
         thisImg = imread(thisImgPath);
+
         outputPath = fullfile(inputDir, path, [name,'.png']);
         
         imwrite(thisImg,outputPath);

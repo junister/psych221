@@ -309,5 +309,5 @@ end
 if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
-
+ieObject.metadata = otherData;
 end
