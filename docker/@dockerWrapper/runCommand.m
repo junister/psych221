@@ -62,7 +62,8 @@ else
     builtCommand = [builtCommand ' ' obj.dockerImageName];
 end
 if ~isequal(obj.command, '')
-    if getpref('docker','verbosity', 0) == 0 && contains(obj.command,'exr2bin')
+    % we put the redirect in the wrong place, so disable for now.
+    if false; % getpref('docker','verbosity', 0) == 0 && contains(obj.command,'exr2bin')
         builtCommand = [builtCommand ' ' [obj.command ' > /dev/null']];
     else
         builtCommand = [builtCommand ' ' obj.command];
