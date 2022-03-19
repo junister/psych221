@@ -19,20 +19,14 @@ function data = piEXR2Mat(inputFile, channelname)
 persistent ourDocker;
 [indir, fname,~] = fileparts(inputFile);
 
-dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
+dockerimage = 'camerasimulation/pbrt-v4-cpu-arm:latest';
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
 
 if ~ispc
-    [~,username] = system('whoami');
-    if strncmp(username,'zhenyi',6)
-        localcmd = sprintf('/Users/zhenyi/git_repo/PBRT_code/pbrt_zhenyi/pbrt_gpu/pbrt-v4/build/%s',cmd);
-        [status,result] = system(localcmd);
-    else
-        dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
-        [status,result] = system(dockercmd);
-    end
+    dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
+    [status,result] = system(dockercmd);
 else
 
     if isempty(ourDocker), ourDocker = dockerWrapper(); end

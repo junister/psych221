@@ -107,8 +107,51 @@ for ii = 1:numel(children)
         nodeList = [nodeList children(ii)];
         if isfield(thisNode,'isInstancer')
             if thisNode.isInstancer ==1
+                indentSpacing = "    ";
                 %             nodeList = [nodeList children(ii)];
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
+                if ~isempty(thisNode.motion)
+                    fprintf(fid, strcat(spacing, indentSpacing,...
+                        'ActiveTransform StartTime \n'));
+                end
+                piGeometryTransformWrite(fid, thisNode, "", indentSpacing, 0);
+%               arealight = 0;              
+                % Write out motion
+                %
+                if ~isempty(thisNode.motion)
+                    for jj = 1:size(thisNode.translation, 2)
+                        fprintf(fid, strcat(spacing, indentSpacing,...
+                            'ActiveTransform EndTime \n'));
+                        
+                        % First write out the same translation and rotation
+                        piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
+                        
+                        if isfield(thisNode.motion, 'translation')
+                            if isempty(thisNode.motion.translation(jj, :))
+                                fprintf(fid, strcat(spacing, indentSpacing,...
+                                    'Translate 0 0 0\n'));
+                            else
+                                pos = thisNode.motion.translation(jj,:);
+                                fprintf(fid, strcat(spacing, indentSpacing,...
+                                    sprintf('Translate %f %f %f', pos(1),...
+                                    pos(2),...
+                                    pos(3)), '\n'));
+                            end
+                        end
+                        
+                        if isfield(thisNode.motion, 'rotation') &&...
+                                ~isempty(thisNode.motion.rotation)
+                            rot = thisNode.motion.rotation;
+                            % Write out rotation
+                            fprintf(fid, strcat(spacing, indentSpacing,...
+                                sprintf('Rotate %f %f %f %f',rot(:,jj*3-2)), '\n')); % Z
+                            fprintf(fid, strcat(spacing, indentSpacing,...
+                                sprintf('Rotate %f %f %f %f',rot(:,jj*3-1)),'\n')); % Y
+                            fprintf(fid, strcat(spacing, indentSpacing,...
+                                sprintf('Rotate %f %f %f %f',rot(:,jj*3)), '\n'));   % X
+                        end
+                    end
+                end
                 lvl = 1;
                 writeGeometryFlag = 1;
                 recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag);
@@ -117,20 +160,20 @@ for ii = 1:numel(children)
                 if nodeID ~=1, return; end
             end
         end
-%         % Define object node
+        %         % Define object node
     elseif isequal(thisNode.type, 'object')
         % Deal with this in recursiveWriteAttributes;
-%         
-%         while numel(thisNode.name) >= 8 &&...
-%                 isequal(thisNode.name(5:6), 'ID')
-%             thisNode.name = thisNode.name(8:end);
-%         end
-%         
-%         fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
-%         % write out objects
-%         ObjectWrite(fid, thisNode, rootPath, "", "");
-%         fprintf(fid,'\n');
-%         fprintf(fid, 'ObjectEnd\n\n');
+        %
+        %         while numel(thisNode.name) >= 8 &&...
+        %                 isequal(thisNode.name(5:6), 'ID')
+        %             thisNode.name = thisNode.name(8:end);
+        %         end
+        %
+        %         fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
+        %         % write out objects
+        %         ObjectWrite(fid, thisNode, rootPath, "", "");
+        %         fprintf(fid,'\n');
+        %         fprintf(fid, 'ObjectEnd\n\n');
         
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
@@ -169,7 +212,7 @@ arealight = 0;
 
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
-
+    
     
     if isfield(thisNode, 'isInstancer')
         if thisNode.isInstancer ==1 && ~writeGeometryFlag
@@ -188,7 +231,7 @@ for ii = 1:numel(children)
         end
     end
     referenceObjectExist = [];
-    if isfield(thisNode,'referenceObject') 
+    if isfield(thisNode,'referenceObject')
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
         % If this Node has no child node, it is an Instance
         %             if isempty(thisNodeChildId) ||...
@@ -299,12 +342,12 @@ for ii = 1:numel(children)
             end
         end
         
-
+        
         if ~isempty(referenceObjectExist)
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
-
+        
         
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath,writeGeometryFlag);
         
@@ -324,10 +367,10 @@ for ii = 1:numel(children)
         % if this is an arealight or object without instance
         if writeGeometryFlag || isempty(referenceObjectExist)
             % find parent node
-            thisNodeId = piAssetFind(obj,'name',thisNode.name);
-            thisNodeParentId = obj.getparent(thisNodeId);
-            thisNodeParent = obj.get(thisNodeParentId);
-            piGeometryTransformWrite(fid, thisNodeParent, spacing, indentSpacing, arealight);
+%             thisNodeId = piAssetFind(obj,'name',thisNode.name);
+%             thisNodeParentId = obj.getparent(thisNodeId);
+%             thisNodeParent = obj.get(thisNodeParentId);
+%             piGeometryTransformWrite(fid, thisNodeParent, spacing,indentSpacing, arealight); % wheather we need this???
             [rootPath,~] = fileparts(outFilePath);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
             fprintf(fid,'\n');
@@ -428,42 +471,43 @@ if ~isempty(thisNode.mediumInterface)
 end
 
 % Write out material
-if ~isempty(thisNode.material)
-
+% if ~isempty(thisNode.material)
+for nMat = 1:numel(thisNode.material) % object can contain multiple material and shapes
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
-            thisNode.material.namedmaterial, '"', '\n'));
+            thisNode.material{nMat}.namedmaterial, '"', '\n'));
     catch
-        materialTxt = piMaterialText(thisNode.material);
+        materialTxt = piMaterialText(thisNode.material{nMat});
         fprintf(fid, strcat(materialTxt, '\n'));
     end
-end
-
-if ~isempty(thisNode.shape)
     
-    shapeText = piShape2Text(thisNode.shape);
+    % end
     
-    if ~isempty(thisNode.shape.filename)
+    % if ~isempty(thisNode.shape)
+    thisShape = thisNode.shape{nMat};
+    shapeText = piShape2Text(thisShape);
+    
+    if ~isempty(thisShape.filename)
         % If the shape has ply info, do this
         % Convert shape struct to text
-        [~, ~, e] = fileparts(thisNode.shape.filename);
-        if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.ply','.pbrt')),'file')
-            if ~exist(fullfile(rootPath, strrep(thisNode.shape.filename,'.pbrt','.ply')),'file')
-                error('%s not exist',thisNode.shape.filename);
+        [~, ~, e] = fileparts(thisShape.filename);
+        if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
+            if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
+                error('%s not exist',thisShape.filename);
             else
-                thisNode.shape.filename = strrep(thisNode.shape.filename,'.pbrt','.ply');
-                thisNode.shape.meshshape = 'plymesh';
-                shapeText = piShape2Text(thisNode.shape);
+                thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                thisShape.meshshape = 'plymesh';
+                shapeText = piShape2Text(thisShape);
             end
         else
             if isequal(e, '.ply')
-                thisNode.shape.filename = strrep(thisNode.shape.filename,'.ply','.pbrt');
-                thisNode.shape.meshshape = 'trianglemesh';
-                shapeText = piShape2Text(thisNode.shape);
+                thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
+                thisShape.meshshape = 'trianglemesh';
+                shapeText = piShape2Text(thisShape);
             end
         end
         if isequal(e, '.ply')
-            fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s',shapeText)),'\n');
+            fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
         else
             % In this case it is a .pbrt file, we will write it
             % out.
@@ -479,6 +523,8 @@ if ~isempty(thisNode.shape)
         fclose(geometryFile);
         fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
     end
+    fprintf(fid,'\n');
+    % end
 end
 end
 

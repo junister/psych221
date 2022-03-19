@@ -38,7 +38,8 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % children = [];
 subtrees = {};
 
-i = 1;         objectIndex = 0;     
+i = 1;          objectIndex = 0;     
+nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one object.
 while i <= length(txt)
 
     currentLine = txt{i};
@@ -87,8 +88,8 @@ while i <= length(txt)
         medium = currentLine;
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
-        
-        mat = piParseGeometryMaterial(currentLine);
+        nMaterial = nMaterial+1;
+        mat{nMaterial} = piParseGeometryMaterial(currentLine);
 
     elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
         
@@ -111,7 +112,8 @@ while i <= length(txt)
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         % Not a comment.  Contains a shape.
-        shape = piParseShape(currentLine);
+        nShape = nShape+1;
+        shape{nShape} = piParseShape(currentLine);
 
 %         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
 %             inputfile = thisR.get('input file');

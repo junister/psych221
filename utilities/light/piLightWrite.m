@@ -348,13 +348,22 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
             % Attach shape
-            if isfield(thisLight.shape,'value')
-                [~, shpTxt] = piLightGet(thisLight, 'shape val', 'pbrt text', true);
-            else
-                [~, shpTxt] = piLightGet(thisLight, 'shape struct', 'pbrt text', true);
+            
+            
+            for nshape = 1:numel(thisLight.shape) % allow multiple shape
+                if ~iscell(thisLight.shape)
+                    dummylight.shape = thisLight.shape;
+                else
+                    dummylight.shape = thisLight.shape{nshape};
+                end
+                if isfield(dummylight.shape,'value')
+                    [~, shpTxt] = piLightGet(dummylight, 'shape val', 'pbrt text', true);
+                else
+                    [~, shpTxt] = piLightGet(dummylight, 'shape struct', 'pbrt text', true);
+                end
+                
+                lightSourceText{ii}.line = [lightSourceText{ii}.line shpTxt];
             end
-
-            lightSourceText{ii}.line = [lightSourceText{ii}.line shpTxt];
     end
     lightSourceText{ii}.line{end+1} = 'AttributeEnd';
 
