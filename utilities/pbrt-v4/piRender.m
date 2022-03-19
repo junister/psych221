@@ -113,6 +113,10 @@ wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
 renderType       = p.Results.rendertype;
 
+if ~isempty(verbosity)
+    setpref('docker','verbosity', verbosity);
+end
+
 %% try to support docker servers
 persistent renderDocker;
 
