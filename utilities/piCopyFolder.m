@@ -35,7 +35,7 @@ for i=1:length(sources)
     else
         % Selectively copy the files in the scene root folder
         [~, ~, extension] = fileparts(sources(i).name);
-        if ~(piContains(extension,'zip') || piContains(extension,'json'))
+        if ~(piContains(extension,'zip') || piContains(extension,'json') || piContains(extension,'pbrt'))
             thisFile = fullfile(sources(i).folder, sources(i).name);
             fprintf('Copying %s\n',thisFile)
             status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));

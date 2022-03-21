@@ -48,14 +48,17 @@ end
 %% Check two 
 id = [];
 thisAsset = {};
+keyNames = keys(assets.mapFullName2Idx);
 
-if isKey(assets.mapFullName2Idx, val)
-    id = assets.mapFullName2Idx(val);
+if isKey(assets.mapFullName2Idx, val)|| ~isempty(find(contains(keyNames,val),1))
+    val = keyNames(contains(keyNames,val));
+    id = assets.mapFullName2Idx(val{1});
     thisAsset = assets.get(id);
 elseif isKey(assets.mapShortName2Idx, val)
     id = assets.mapShortName2Idx(val);
     thisAsset = {assets.get(id)};
 end
+
 %% Old tree traversal method
 %{
 %%

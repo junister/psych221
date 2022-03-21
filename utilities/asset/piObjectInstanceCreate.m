@@ -40,7 +40,7 @@ rotation = p.Results.rotation;
 motion   = p.Results.motion;
 %%
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
-if ~strcmp(asset{1}.type, 'branch')
+if ~strcmp(asset.type, 'branch')
     warning('Only branch name is supported.');
     return;
 end
@@ -69,31 +69,36 @@ thisR.assets = thisR.assets.set(idx, OBJsubtree_branch);
 
 InstanceSuffix = sprintf('_I_%d',indexCount);
 if ~isempty(position)
-    OBJsubtree_branch.translation = position;
+    OBJsubtree_branch.translation{1} = position(:);
 end
 if ~isempty(rotation)
-    OBJsubtree_branch.rotation    = rotation;
+    OBJsubtree_branch.rotation{1}    = rotation;
 end
 if ~isempty(motion)
     OBJsubtree_branch.motion.position = motion.position;
     OBJsubtree_branch.motion.rotation = motion.rotation;
 end
+OBJsubtreeNew = tree();
 for ii = 1:numel(OBJsubtree.Node)
+    if ~strcmp(OBJsubtree.Node{ii}.type,'branch')
+        continue;
+    end
     thisNode      = OBJsubtree.Node{ii};
     thisNode.name = strcat(OBJsubtree.Node{ii}.name, InstanceSuffix);
-    if strcmp(OBJsubtree.Node{ii}.type,'object')
-        thisNode.type = 'instance';
-        thisNode.referenceObject = OBJsubtree.Node{ii}.name;
-    end
-    OBJsubtree = OBJsubtree.set(ii, thisNode);
+%     if strcmp(OBJsubtree.Node{ii}.type,'object')
+%         thisNode.type = 'instance';
+%         thisNode.referenceObject = OBJsubtree.Node{ii}.name;
+%     end
+    OBJsubtreeNew = OBJsubtreeNew.set(ii, thisNode);
 end
-OBJsubtree_branch.referencebranch = OBJsubtree_branch.name;
-
+OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
+OBJsubtree_branch.isInstancer = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
 % replace branch
-OBJsubtree = OBJsubtree.set(1, OBJsubtree_branch);
+OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
 % graft object tree to scene tree
 % thisR.assets = thisR.assets.graft(1, OBJsubtree);
-thisR = thisR.set('asset', 1, 'graft', OBJsubtree);
+thisR = thisR.set('asset', 1, 'graft', OBJsubtreeNew);
+
 instanceBranchName = OBJsubtree_branch.name;
 end

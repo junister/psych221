@@ -45,7 +45,7 @@ materialFlag = p.Results.material;
 textureFlag  = p.Results.texture;
 assetFlag    = p.Results.asset;
 nodeName     = p.Results.nodename;
-
+copyTextureFlag = 1;
 %%  The objects can be a cell or a recipe
 
 if ~iscell(objectRs)
@@ -96,8 +96,9 @@ for ii = 1:length(recipelist)
             copyfile(sourceAssets, dstAssets);
         else
             if isfolder(sourceDir)
-                if ~isfolder(dstDir), mkdir(dstDir), end;
-                copyfile(sourceDir, dstDir);
+                if ~isfolder(dstDir), mkdir(dstDir), end
+                piCopyFolder(sourceDir, dstDir);
+                copyTextureFlag = 0;
             end
         end
     end
@@ -118,13 +119,14 @@ for ii = 1:length(recipelist)
         else
             sceneR.textures = thisR.textures;
         end
-        
-        % Copy texture files
-        sourceDir = thisR.get('output dir');
-        dstDir    = sceneR.get('output dir');        
-        sourceTextures = fullfile(sourceDir, 'textures');        
-        if exist(sourceTextures, 'dir')
-            copyfile(sourceTextures, dstDir);
+        if copyTextureFlag
+            % Copy texture files
+            sourceDir = thisR.get('output dir');
+            dstDir    = sceneR.get('output dir');
+            sourceTextures = fullfile(sourceDir, 'textures');
+            if exist(sourceTextures, 'dir')
+                piCopyFolder(sourceTextures, dstDir);
+            end
         end
     end
 end
