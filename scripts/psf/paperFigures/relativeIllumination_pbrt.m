@@ -5,8 +5,11 @@ thisR=piRecipeDefault('scene','flatSurface');
 % Set illuminant: make sure it is infinite
 % Set Light that is all around the world, so do not depend on the size of the target
 % This is especially important for wide angle lenses
-thisR.set('light','#1_Light_type:point','type','infinite');
-
+%thisR.set('light','#1_Light_type:point','type','infinite');
+lightName = 'from camera';
+ourLight = piLightCreate(lightName,...
+                        'type','infinite');
+recipeSet(thisR,'lights', ourLight,'add');
 
 
 %% Define Camera (Change this to whatever camera setup you use
