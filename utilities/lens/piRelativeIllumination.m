@@ -1,23 +1,26 @@
-%% Obtain the relative illumination for a an arbitrary camea
+function piRelativeIlluminance(options)
+%% Obtain the relative illumination for a specific lens
 
 % Created by Thomas Goossens, Stanford University, 2022
 % Adapted for iset3d-v4, D.Cardinal
+arguments
+    options.lensfile = 'dgauss.22deg.50.0mm.json';
+    options.figure
+end
 
 %% Define receipe with white surface
 thisR = piRecipeDefault('scene','flatSurface');
 
-% Set illuminant: make sure it is infinite
-% Set Light that is all around the world, so do not depend on the size of the target
+% Set illuminant: make sure it is infinite, so it does not depend on the size of the target
 % This is especially important for wide angle lenses
-%thisR.set('light','#1_Light_type:point','type','infinite');
-lightName = 'from camera';
+lightName = 'ourinfinite';
 ourLight = piLightCreate(lightName,...
                         'type','infinite');
 recipeSet(thisR,'lights', ourLight,'add');
 
 
 %% Define Camera (Change this to whatever camera setup you use
-camera = piCameraCreate('omni','lensfile','dgauss.22deg.50.0mm.json');
+camera = piCameraCreate('omni','lensfile',options.lensfile);
 thisR.set('camera',camera);
 thisR.set('focal distance',3); % DO this or adjust film distance
 
