@@ -8,6 +8,15 @@ arguments
     options.figure = figure(1);
 end
 
+if isa(options.figure,'double') 
+    % User sent in a 3-vector describing the subplot dimensions and panel
+    assert(numel(options.figure) == 3);
+    ieNewGraphWin;
+    subplot(options.figure(1), options.figure(2), options.figure(3));    
+else
+    options.figure;
+end
+
 %% Define receipe with white surface
 thisR = piRecipeDefault('scene','flatSurface');
 
@@ -39,7 +48,7 @@ piWrite(thisR);
 [oiTemp,result] = piRender(thisR,'render type','radiance');
 
 %% Make Relative illumination plot
-options.figure;
+ourFigure;
 clf; 
 hold on;
 
