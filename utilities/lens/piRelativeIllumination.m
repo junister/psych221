@@ -5,7 +5,7 @@ function piRelativeIlluminance(options)
 % Adapted for iset3d-v4, D.Cardinal
 arguments
     options.lensfile = 'dgauss.22deg.50.0mm.json';
-    options.figure
+    options.figure = figure(1);
 end
 
 %% Define receipe with white surface
@@ -27,7 +27,7 @@ thisR.set('focal distance',3); % DO this or adjust film distance
 
 % You don't need much resolution because relative illumination is relatively slow in variation
 filmresolution = [300 1];
-sensordiagonal_mm = [65]; % Adjust to your liking
+sensordiagonal_mm = 65; % Adjust to your liking
 pixelsamples = 600;  % Adjust to your liking to reduce noise
 
 thisR.set('pixel samples',pixelsamples);
@@ -39,7 +39,9 @@ piWrite(thisR);
 [oiTemp,result] = piRender(thisR,'render type','radiance');
 
 %% Make Relative illumination plot
-fig=figure(1);clf; hold on;
+options.figure;
+clf; 
+hold on;
 
 % Read horizontal line and normalize by maximum value
 maxnorm = @(x)x/max(x);
