@@ -40,7 +40,7 @@ rotation = p.Results.rotation;
 motion   = p.Results.motion;
 %%
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
-if ~strcmp(asset.type, 'branch')
+if ~strcmp(asset{1}.type, 'branch')
     warning('Only branch name is supported.');
     return;
 end
@@ -75,12 +75,13 @@ if ~isempty(rotation)
     OBJsubtree_branch.rotation{1}    = rotation;
 end
 if ~isempty(motion)
-    OBJsubtree_branch.motion.position = motion.position;
+    OBJsubtree_branch.motion.translation = motion.translation;
     OBJsubtree_branch.motion.rotation = motion.rotation;
 end
 OBJsubtreeNew = tree();
 for ii = 1:numel(OBJsubtree.Node)
-    if ~strcmp(OBJsubtree.Node{ii}.type,'branch')
+    if ~strcmp(OBJsubtree.Node{ii}.type,'branch') || ...
+            OBJsubtree.Node{ii}.isInstancer==0
         continue;
     end
     thisNode      = OBJsubtree.Node{ii};
@@ -96,9 +97,35 @@ OBJsubtree_branch.isInstancer = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
 % replace branch
 OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
+
+% apply transformation to lights
+extraNode = OBJsubtree_branch.extraNode;
+
+extraNodeNew = extraNode;
+for nLightsNode = 1:numel(extraNode.Node)
+    thisLightNode = extraNode.Node{nLightsNode};
+    if strcmp(thisLightNode.type,'light')
+        if ~strcmp(thisLightNode.lght{1}.type,'area')
+            % only area light need to modify
+            continue;
+        end
+        ParentId = extraNode.Parent(nLightsNode);
+        ParentNode = extraNode.Node{ParentId};
+        ParentNode.translation{end+1} = OBJsubtree_branch.translation{1};
+        ParentNode.transorder(end+1) = 'T';
+        ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
+        ParentNode.transorder(end+1) = 'R';
+        extraNodeNew = extraNodeNew.set(ParentId,ParentNode);
+    end
+end
+% graft lightsNode
+OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 % graft object tree to scene tree
 % thisR.assets = thisR.assets.graft(1, OBJsubtree);
-thisR = thisR.set('asset', 1, 'graft', OBJsubtreeNew);
-
+try
+    thisR = thisR.set('asset', 1, 'graft', OBJsubtreeNew);
+catch
+    disp('ERROR');
+end
 instanceBranchName = OBJsubtree_branch.name;
 end

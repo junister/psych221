@@ -269,10 +269,30 @@ else
         disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
     end
     
+
+    
 end
 
 disp('***Scene parsed.')
-
+%%  Additional information for instanced objects
+% PBRT does not allow instance lights, however in the cases that
+% we would like to instance an object with some lights on it, we will
+% need to save that additional information to it, and then repeatly
+% write that attributes when the objectInstance is used in attribute
+% pairs. --Zhenyi
+for ii  = 1:numel(thisR.assets.Node)
+    thisNode = thisR.assets.Node{ii};
+    if isfield(thisNode, 'isInstancer') && isfield(thisNode, 'referenceObject')
+        if isempty(thisNode.referenceObject) || thisNode.isInstancer == 1
+            continue
+        end
+        [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
+        ParentNode = ParentNode{1};
+        ParentNode.extraNode = thisR.get('asset', ii, 'subtree');
+        ParentNode.camera = thisR.lookAt;
+        thisR.assets = thisR.assets.set(ParentId, ParentNode);
+    end
+end
 
 end
 

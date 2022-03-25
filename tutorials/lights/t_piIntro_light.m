@@ -15,7 +15,6 @@
 % See also
 %   The PBRT book definitions for lights are:
 %      https://www.pbrt.org/fileformat-v3.html#lights
-%
 
 %% Initialize ISET and Docker and read a file
 
