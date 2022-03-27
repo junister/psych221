@@ -11,10 +11,11 @@ end
 if isa(options.figure,'double') 
     % User sent in a 3-vector describing the subplot dimensions and panel
     assert(numel(options.figure) == 3);
-    %ieNewGraphWin;
+    %we want to be in a subplot, so what if we don't create a new figure?
+    %ourFigure = ieNewGraphWin;
     subplot(options.figure(1), options.figure(2), options.figure(3));    
 else
-    options.figure;
+    ourFigure = options.figure;
 end
 
 %% Define receipe with white surface
