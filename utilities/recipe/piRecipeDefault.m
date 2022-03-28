@@ -337,6 +337,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'testplane';
         sceneFile = [sceneDir, '.fbx'];
         exporter = 'Copy';
+    case {'stepfunction'}
+        sceneDir = 'stepfunction';
+        sceneFile = [sceneDir, '.pbrt'];
+        exporter = 'Copy';
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
 end
