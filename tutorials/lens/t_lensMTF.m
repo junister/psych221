@@ -18,8 +18,8 @@ camera.focusdistance.value =1;  % As measured from film in meters
 
 
     filmwidth_mm=0.01;
- [MTF,LSF,ESF]=calculateMTFDavid('camera',camera,'filmwidth',filmwidth_mm,'distances',chartDistancesFromFilm_mm,...
-    'resolution',2000,'rays',1000)
+ [MTF,LSF,ESF] = piCalculateMTF('camera',camera,'filmwidth',filmwidth_mm,'distances',chartDistancesFromFilm_mm,...
+    'resolution',2000,'rays',1000);
 
 
 %% Comparison off all three quantities: ESF, LSF, MTF
