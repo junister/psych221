@@ -287,8 +287,9 @@ for ii  = 1:numel(thisR.assets.Node)
             continue
         end
         [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
+        if isempty(ParentNode), continue;end
         ParentNode = ParentNode{1};
-        ParentNode.extraNode = thisR.get('asset', ii, 'subtree');
+        ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
         ParentNode.camera = thisR.lookAt;
         thisR.assets = thisR.assets.set(ParentId, ParentNode);
     end

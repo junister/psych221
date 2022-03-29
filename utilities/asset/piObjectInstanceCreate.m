@@ -79,19 +79,21 @@ if ~isempty(motion)
     OBJsubtree_branch.motion.rotation = motion.rotation;
 end
 OBJsubtreeNew = tree();
-for ii = 1:numel(OBJsubtree.Node)
-    if ~strcmp(OBJsubtree.Node{ii}.type,'branch') || ...
-            OBJsubtree.Node{ii}.isInstancer==0
-        continue;
-    end
-    thisNode      = OBJsubtree.Node{ii};
-    thisNode.name = strcat(OBJsubtree.Node{ii}.name, InstanceSuffix);
-%     if strcmp(OBJsubtree.Node{ii}.type,'object')
-%         thisNode.type = 'instance';
-%         thisNode.referenceObject = OBJsubtree.Node{ii}.name;
+% for ii = 1:numel(OBJsubtree.Node)
+    
+%     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
+%             OBJsubtree.Node{1}.isInstancer==0
+%         continue;
 %     end
-    OBJsubtreeNew = OBJsubtreeNew.set(ii, thisNode);
-end
+
+% thisNode      = OBJsubtree.Node{1};
+% thisNode.name = strcat(OBJsubtree.Node{1}.name, InstanceSuffix);
+% %     if strcmp(OBJsubtree.Node{ii}.type,'object')
+% %         thisNode.type = 'instance';
+% %         thisNode.referenceObject = OBJsubtree.Node{ii}.name;
+% %     end
+% OBJsubtreeNew = OBJsubtreeNew.set(1, thisNode);
+% end
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
 OBJsubtree_branch.isInstancer = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
@@ -115,7 +117,10 @@ for nLightsNode = 1:numel(extraNode.Node)
         ParentNode.transorder(end+1) = 'T';
         ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
         ParentNode.transorder(end+1) = 'R';
-        extraNodeNew = extraNodeNew.set(ParentId,ParentNode);
+        extraNodeNew = extraNodeNew.set(ParentId, ParentNode);
+    elseif isfield(thisLightNode,'referenceObject')
+        thisLightNode = rmfield(thisLightNode,'referenceObject');
+        extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
     end
 end
 % graft lightsNode
@@ -123,7 +128,10 @@ OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 % graft object tree to scene tree
 % thisR.assets = thisR.assets.graft(1, OBJsubtree);
 try
-    thisR = thisR.set('asset', 1, 'graft', OBJsubtreeNew);
+    id = thisR.get('node', 'root', 'id');
+%     rootSTID = thisR.assets.nnodes + 1;
+    thisR.assets = thisR.assets.graft(id, OBJsubtreeNew);
+%     thisR.set('asset', 1, 'graft', OBJsubtreeNew);
 catch
     disp('ERROR');
 end

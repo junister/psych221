@@ -36,7 +36,7 @@ p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 p.addParameter('material',true);
 p.addParameter('texture',true);
 p.addParameter('asset',true);
-p.addParameter('objectInstance',false);
+p.addParameter('objectInstance',true);
 p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
 
 p.parse(sceneR, objectRs, varargin{:});

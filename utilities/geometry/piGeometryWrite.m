@@ -342,8 +342,8 @@ for ii = 1:numel(children)
             end
         end
         
-        
-        if ~isempty(referenceObjectExist)
+        % There is an reference object and also it's an instance
+        if ~isempty(referenceObjectExist) && isfield(thisNode,'referenceObject')
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
