@@ -1,5 +1,5 @@
 # PBRT file created with piWrite on 2022/3/4 9:47:28.42 
-# PBRT version = 3 
+# PBRT version = 4 -- Updated
 
 LookAt 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 
 
@@ -29,7 +29,6 @@ Include "stepfunction_geometry.pbrt"
 AttributeBegin
 Translate 000 0.000 0.000
 AreaLightSource "diffuse" "rgb L" [1             1             1]
-Shape "trianglemesh"  "integer indices" [0 1 2 2 3 0 ] "point P" [-200.0 -200.0 0    -200.0  200 0   0 200 0   0 -200 0 ]
+Shape "trianglemesh"  "integer indices" [0 1 2 2 3 0 ] "point2 P" [-200.0 -200.0 0    -200.0  200 0   0 200 0   0 -200 0 ]
 AttributeEnd
 
-WorldEnd  
