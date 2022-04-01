@@ -242,7 +242,7 @@ switch ieParamFormat(cameraType)
 
         % Status of the chromatic aberration during rendering.  This slows
         % the calculation, so we start with it off.
-        camera.chromaticAberrationEnabled.value = 'false';
+        camera.chromaticAberrationEnabled.value = false;
         camera.chromaticAberrationEnabled.type  = 'bool';
 
         % These are index of refraction files for the navarro model

@@ -11,8 +11,10 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %   thisR - Recipe
 %
 % Output
-%   thisR - Recipe now has additional materials attached
-%   materialNames - cell array, but use thisR.get('print  materials')
+%   thisR - Iset3d recipe. It is returned with additional materials
+%   materialNames - cell array, but to see the full list use
+%
+%           thisR.get('print  materials')
 %
 % Description
 %   We add materials with textures, colors, some plastics.  It gives a list
@@ -22,6 +24,7 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %     thisR = piMaterialsInsert(thisR,{'glass','mirror'});
 %
 % See also
+%    t_piIntro_materialInsert
 
 %% Need variable checking
 varargin = ieParamFormat(varargin);

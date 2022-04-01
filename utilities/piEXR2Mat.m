@@ -19,7 +19,8 @@ function data = piEXR2Mat(inputFile, channelname)
 persistent ourDocker;
 [indir, fname,~] = fileparts(inputFile);
 
-dockerimage = 'camerasimulation/pbrt-v4-cpu-arm:latest';
+dockerimage = dockerWrapper.localImage();
+
 basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
 
 cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
@@ -30,6 +31,11 @@ if ~ispc
 else
 
     if isempty(ourDocker), ourDocker = dockerWrapper(); end
+    if getpref('docker','verbosity', 1) > 0
+        stdout = '';
+    else
+        stdout = ' > /dev/null ';
+    end
     ourDocker.command = ['imgtool convert --exr2bin ' channelname];
     ourDocker.dockerImageName = dockerimage;
     ourDocker.localVolumePath = indir;
@@ -51,7 +57,7 @@ fileList = [];
 % In an error case there might be additional files
 % This code is designed to help with that if needed
 baseName = '';
-height = 0; 
+height = 0;
 width = 0;
 
 for ii = 1:numel(allFiles)
@@ -64,7 +70,7 @@ for ii = 1:numel(allFiles)
         Nparts = numel(nameparts);
         if height == 0, height = str2double(nameparts{Nparts-2}); end
         if width == 0, width= str2double(nameparts{Nparts-1}); end
-        if isempty(fileList), fileList = [dataFile]; 
+        if isempty(fileList), fileList = [dataFile];
         else
             fileList(end+1) = dataFile;
         end

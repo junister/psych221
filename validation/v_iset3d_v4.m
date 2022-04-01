@@ -2,7 +2,7 @@
 %
 %    v_iset3d_v4
 %
-% Tutorial scripts.  When these all run, it is a partial validation of the
+% Validation and Tutorial scripts.  When these all run, it is a partial validation of the
 % code.  More specific tests are still needed.
 %
 % Validations in this script do not involve calculations that require using
@@ -28,14 +28,20 @@ try
 catch
     disp('Macbeth failed');
 end
-
 setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
-%% Zmap
-disp('t_piIntro_macbeth_zmap')
-setpref('ISET3d', 'tvzmapStart', tic);
-t_piIntro_macbeth_zmap;          % Get the zmap
-setpref('ISET3d', 'tvzmapTime', toc(getpref('ISET3d', 'tvzmapStart', 0)));
+%% Omni camera (e.g. one with a lens)
+disp('v_omni')
+setpref('ISET3d', 'tvomniStart', tic);
+disp('Run omni once fixed');
+v_omni;          
+setpref('ISET3d', 'tvomniTime', toc(getpref('ISET3d', 'tvomniStart', 0)));
+
+%% Assets
+disp('t_assets')
+setpref('ISET3d', 'tvassetsStart', tic);
+t_assets;          % Get the zmap
+setpref('ISET3d', 'tvassetsTime', toc(getpref('ISET3d', 'tvassetsStart', 0)));
 
 %% Demo working with materials
 disp('*** MATERIALS -- t_piIntro_material')
@@ -48,9 +54,9 @@ setpref('ISET3d', 'tvlightStart', tic);
 t_piIntro_light;
 setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
 
-disp('t_piIntro_pbrtv4')
+disp('*** INTRO -- t_piIntro')
 setpref('ISET3d', 'tvpbrtStart', tic);
-t_piIntro_pbrtv4;
+t_piIntro;
 setpref('ISET3d', 'tvpbrtTime', toc(getpref('ISET3d', 'tvpbrtStart', 0)));
 
 %%  Check that the scenes in the data directory still run
@@ -112,7 +118,8 @@ disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " s
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
 fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
-fprintf("ZMap:       %5.1f seconds.\n", getpref('ISET3d','tvzmapTime'));
+fprintf("Omni:       %5.1f seconds.\n", getpref('ISET3d','tvomniTime'));
+fprintf("Assets:     %5.1f seconds.\n", getpref('ISET3d','tvassetsTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
 fprintf("PBRT:       %5.1f seconds.\n", getpref('ISET3d','tvpbrtTime'));

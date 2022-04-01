@@ -52,6 +52,7 @@ classdef recipe < matlab.mixin.Copyable
         metadata;
         recipeVer = 2;
 
+        hasActiveTransform = false; % flag to allow CPU rendering until GPU support works
         verbose = 2;    % default for how much debugging output to emit.
     end
 
@@ -198,16 +199,19 @@ classdef recipe < matlab.mixin.Copyable
                 case 'skymap'
                     % Brings up image of the skymap (global
                     % illumination)
-                    nLights = numel(obj.lights);
+                    lNames = obj.get('light','names');
+                    nLights = numel(lNames);
                     for ii=1:nLights
-                        if isequal(obj.get('light',ii,'type'),'infinite')
-                            mapname = obj.get('light',ii,'mapname');
+                        if isequal(obj.get('light',lNames{ii},'type'),'infinite')
+                            mapname = obj.get('light',lNames{ii},'mapname');
                             if ~isempty(mapname)
                                 mapname = fullfile(obj.get('outputdir'),mapname);
                                 img = exrread(mapname);
                                 ieNewGraphWin;
-                                imagesc(img.^0.6);
-                                title(mapname);
+                                img = abs(img .^0.6);
+                                imagesc(img);
+                                [~,str,ext] = fileparts(mapname);
+                                title([str,ext]); axis image; axis off
                             end
                         end
                     end

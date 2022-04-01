@@ -1,21 +1,13 @@
 %% Render using a lens
 %
 % Dependencies:
-%    ISET3d, ISETCam, isetlens, JSONio
-%
-% Check that you have the updated docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
+%    ISET3d-v4, ISETCam, isetlens
 %
 % For more information about PBRT lens and camera formats:
 %
-% Generally
-%   https://www.pbrt.org/fileformat-v3.html#overview
-% 
-% And specifically
-%   https://www.pbrt.org/fileformat-v3.html#cameras
 %
-% Z Liu, BW 2018
+% Z Liu, B
+% W 2018
 %
 % See also
 %   t_piIntro_start, isetlens, 
@@ -31,6 +23,11 @@ if ~piDockerExists, piDockerConfig; end
 % This is the PBRT scene file inside the output directory
 % thisR  = piRecipeDefault();
 thisR  = piRecipeDefault('scene name','chessSet');
+lightName = 'from camera';
+ourLight = piLightCreate(lightName,...
+                        'type','distant',...
+                        'cameracoordinate', true);
+recipeSet(thisR,'lights', ourLight,'add');
 
 %% Set render quality
 

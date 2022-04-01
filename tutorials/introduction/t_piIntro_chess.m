@@ -14,10 +14,6 @@
 % Dependencies:
 %    ISET3d and either ISETCam or ISETBio
 %
-%  Check that you have the latest docker image by running
-%
-%    docker pull vistalab/pbrt-v3-spectral
-%
 % See also
 %   t_piIntro_*, piRecipeDefault, @recipe
 %
@@ -79,7 +75,11 @@ piWRS(thisR, 'name', 'Point light and skymap');
 
 thisR.set('light',skyMap.name,'rotate',[30 0 0]);
 
-piWRS(thisR, 'name','Rotate skymap');
+piWRS(thisR, 'name','Rotated skymap');
 
+%% World orientation
+thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
+thisR.get('light', skyMap.name, 'world orientation')
 
+piWRS(thisR, 'name','No rotation skymap');
 %% END

@@ -2,7 +2,7 @@ classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
     % In principle, when simply used for render acceleration
-    % on a GPU, it should be user-transparent by default.
+    % on a local GPU, it should be user-transparent by default.
     %
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
@@ -22,6 +22,8 @@ classdef dockerWrapper < handle
     % remoteUser -- username on remote machine (that has key support)
     % remoteContext -- name of docker context pointing to renderer
     % remoteImage -- GPU-specific docker image on remote machine
+    %  EXPERIMENTAL: CPU image on remote machine for offloading large
+    %                CPU-only renders
     % remoteRoot -- needed if different from local piRoot
     %
     % localRoot -- only for WSL -- the /mnt path to the Windows piRoot
@@ -57,8 +59,8 @@ classdef dockerWrapper < handle
     properties
         dockerContainerName = '';
         dockerContainerID = '';
-        % default image is cpu
-        dockerImageName =  'digitalprodev/pbrt-v4-cpu:latest';
+        % default image is cpu on x64 architecture
+        dockerImageName =  dockerWrapper.localImage();
         dockerImageRender = ''; % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
         gpuRendering = true;
@@ -69,6 +71,7 @@ classdef dockerWrapper < handle
         remoteUser = ''; % use for rsync & ssh/docker
 
         remoteImage = '';
+        remoteImageTag = 'latest';
         remoteRoot = ''; % we need to know where to map on the remote system
         localRoot = ''; % for the Windows/wsl case (sigh)
         workingDirectory = '';
@@ -88,6 +91,10 @@ classdef dockerWrapper < handle
 
     methods (Static)
 
+        % Need to list ones that are in a separate file if they are static
+        dockerImage = localImage();
+        setParams();
+        
         [dockerExists, status, result] = exists() % separate file
                 
         function reset()
@@ -101,6 +108,9 @@ classdef dockerWrapper < handle
                 dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-CPU',''));
                 dockerWrapper.staticVar('set', 'PBRT-CPU', '');
             end
+            dockerWrapper.staticVar('set', 'cpuContainer', '');
+            dockerWrapper.staticVar('set', 'gpuContainer', '');            
+            dockerWrapper.staticVar('set', 'renderContext', '');            
         end
 
         function cleanup(containerName)
@@ -193,7 +203,9 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                if contains(obj.remoteImage, 'shared')
+                % All our new images currently have libraries pre-loaded
+                legacyImages = false;
+                if ~legacyImages %contains(useImage, 'shared')
                     % we don't need to mount libraries
                     cudalib = '';
                 else
@@ -223,10 +235,6 @@ classdef dockerWrapper < handle
                 else
                     mountData = fullfile(obj.localRoot, 'local');
                 end
-                % I don't think we want this for the local case!
-                %if ispc && isequal(obj.dockerContainerType, 'linux')
-                %    mountData = dockerWrapper.pathToLinux(mountData);
-                %end
             end
             mountData = strrep(mountData,'//','/');
             % is our mount point always the same?
@@ -237,18 +245,18 @@ classdef dockerWrapper < handle
             placeholderCommand = 'bash';
 
             % set up the baseline command
+            if isempty(dockerWrapper.staticVar('get','renderContext'))
+                contextFlag = '';
+            else
+                contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
+            end
             if isequal(processorType, 'GPU')
-                if isempty(dockerWrapper.staticVar('get','renderContext'))
-                    contextFlag = '';
-                else
-                    contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
-                end
                 % want: --gpus '"device=#"'
                 gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
                 dCommand = sprintf('docker %s run -d -it %s --name %s  %s', contextFlag, gpuString, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
-                dCommand = sprintf('docker run -d -it --name %s %s', ourContainer, volumeMap);
+                dCommand = sprintf('docker %s run -d -it --name %s %s', contextFlag, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s', dCommand, useImage, placeholderCommand);
             end
 
@@ -302,7 +310,13 @@ classdef dockerWrapper < handle
                         %containerPBRTCPU = obj.startPBRT('CPU');
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
-                    [status, result] = system(sprintf("docker ps | grep %s", obj.staticVar('get','PBRT-CPU', '')));
+                    % Need to switch to render context here!
+                    if ~isempty(dockerWrapper.staticVar('get','renderContext'))
+                        cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
+                    else
+                        cFlag = '';
+                    end
+                    [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
@@ -327,7 +341,7 @@ classdef dockerWrapper < handle
             if isequal(processorType, 'GPU')
 
                 % Check whether GPU is available
-                [GPUCheck, GPUModel] = system('nvidia-smi --query-gpu=name --format=csv,noheader');
+                [GPUCheck, GPUModel] = system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
                 try
                     ourGPU = gpuDevice();
                     if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
@@ -344,19 +358,21 @@ classdef dockerWrapper < handle
                     % really should enumerate and look for the best one, I think
                     gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
-                    switch gpuModels{1}
+                    switch gpuModels{1} % find the model of our GPU
                         case {'teslat4', 'quadrot2000'}
                             dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
-                            %dockerContainerName = 'pbrt-gpu';
-                        case {'geforcertx3070', 'geforcertx3090', 'nvidiageforcertx3070', 'nvidiageforcertx3090'}
+                        case {'geforcertx3070', 'nvidiageforcertx3070'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
-                            %dockerContainerName = 'pbrt-gpu';
+                        case {'geforcertx3090', 'nvidiageforcertx3090'}
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                        case {'geforcertx2080', 'nvidiageforcertx2080', ...
+                                'geforcertx2080ti', 'nvidiageforcertx2080ti'}
+                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                         case {'geforcegtx1080',  'nvidiageforcegtx1080'}
                             dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
-                            %dockerContainerName = 'pbrt-gpu';
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                            dockerImageName = 'digitalprodev/pbrt-v4-cpu';
+                            dockerImageName = dockerWrapper.localImage();
                             %dockerContainerName = '';
                     end
 
@@ -370,6 +386,7 @@ classdef dockerWrapper < handle
 
         function output = convertPathsInFile(obj, input)
             % for depth or other files that have embedded "wrong" paths
+            % implemented someplace, need to find the code!
         end
 
     end

@@ -2,9 +2,12 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 
 verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
+% Currently we have an issue where GPU rendering ignores objects
+% that have ActiveTranforms. Maybe scan for those & set container back
+% to CPU (perhaps ideally a beefy, remote, CPU).
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');
-    % okay this is a hack!
+    % okay this is sort of a hack
     renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
 else
     useContainer = obj.getContainer('PBRT-CPU');
@@ -38,6 +41,7 @@ if ~isempty(obj.remoteMachine)
         rSync = 'rsync';
     end
     if isempty(obj.remoteRoot)
+        obj.remoteRoot = '~';
         % if no remote root, then we need to look up our local root and use it!
     end
     if ~isempty(obj.remoteUser)
@@ -58,7 +62,7 @@ if ~isempty(obj.remoteMachine)
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
-    if ismac
+    if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation
         % (DJC)
         putCommand = sprintf('%s -r -t %s %s',rSync, [nativeFolder,'/'], remoteScene);
@@ -84,8 +88,8 @@ if ~isempty(obj.remoteMachine)
     shortOut = [obj.relativeScenePath sceneDir];
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',useContext, flags, useContainer, shortOut, renderCommand);
-    % containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && %s"',useContext, flags, useContainer, remoteScenePath, renderCommand);
+    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
+        useContext, flags, useContainer, shortOut, renderCommand);
     if verbose > 0
         fprintf("Render: %s\n", containerRender);
     end
@@ -106,8 +110,9 @@ if ~isempty(obj.remoteMachine)
         [status, result] = system(containerRender);
     end
     if status == 0 && ~isempty(obj.remoteMachine)
-    % sync data back
-    % try just using the renderings sub-folder
+
+    % sync data back -- renderings sub-folder
+    % This assumes that all output is in that folder!
     getOutput = tic;
     pullCommand = sprintf('%s -r %s %s',rSync, ...
         [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
@@ -134,3 +139,4 @@ else
     end
 end
 end
+

@@ -34,44 +34,43 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 
 p.parse(thisR,varargin{:});
 
-% These were used but seem to be no longer used
-%
-% lightsFlag  = p.Results.lightsFlag;
-% thistrafficflow = p.Results.thistrafficflow;
-
 %% Create the default file name
 
+% Get the fullname of the geometry file to write
 [Filepath,scene_fname] = fileparts(thisR.outputFile);
 fname = fullfile(Filepath,sprintf('%s_geometry.pbrt',scene_fname));[~,n,e]=fileparts(fname);
 
 % Get the assets from the recipe
 obj = thisR.assets;
 
-%% Wrote the geometry file.
+%% Write the geometry file...
 
 fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
-% Open and write out the objects
+% Open the file and write out the assets
 fid_obj = fopen(fname_obj,'w');
 fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
 
-% Traverse the tree from root
+% Traverse the asset tree beginning at the root
 rootID = 1;
-% Write object and light definition in main geoemtry and children geometry
-% file
+
+% Write object and light definitions in the main geometry
+% and any needed child geometry files
 if ~isempty(obj)
     recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile);
-    
+
     % Write tree structure in main geometry file
     lvl = 0;
     writeGeometryFlag = 0;
     recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag);
 else
+    % if no assets were found
     for ii = numel(thisR.world)
         fprintf(fid_obj, thisR.world{ii});
     end
 end
 fclose(fid_obj);
+
 % Not sure we want this most of the time, can un-comment as needed
 %fprintf('%s is written out \n', fname_obj);
 
@@ -80,28 +79,31 @@ end
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
-% (2) path to each children geometry files which store the shape and other
-%     geometry info.
+% (2) path to each child geometry file
+%     which store the shape and other geometry info.
 %
-% The process will be:
-%   (1) Get the children of this node
-%   (2) For each child, check if it is an 'object' or 'light' node. If so,
-%   write it out.
+% The process is:
+%   (1) Get the children of the current node
+%   (2) For each child, check if it is an 'object' or 'light' node.
+%       If it is, write it out.
 %   (3) If the child is a 'branch' node, put it in a list which will be
-%   recursively checked in next level.
+%       recursively checked in the next level of our traverse.
 
-%% Get children of thisNode
+%% Get children of our current Node (thisNode)
 children = obj.getchildren(nodeID);
 
-%% Loop through all children at this level
+%% Loop through all children of our current node (thisNode)
 % If 'object' node, write out. If 'branch' node, put in the list
 
 % Create a list for next level recursion
 nodeList = [];
 
 for ii = 1:numel(children)
+
+    % set our current node to each of the child nodes
     thisNode = obj.get(children(ii));
-    % If node, put id in the nodeList
+
+    % If a branch, put id in the nodeList
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
@@ -122,10 +124,10 @@ for ii = 1:numel(children)
                     for jj = 1:size(thisNode.translation, 2)
                         fprintf(fid, strcat(spacing, indentSpacing,...
                             'ActiveTransform EndTime \n'));
-                        
+
                         % First write out the same translation and rotation
                         piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
-                        
+
                         if isfield(thisNode.motion, 'translation')
                             if isempty(thisNode.motion.translation(jj, :))
                                 fprintf(fid, strcat(spacing, indentSpacing,...
@@ -138,7 +140,7 @@ for ii = 1:numel(children)
                                     pos(3)), '\n'));
                             end
                         end
-                        
+
                         if isfield(thisNode.motion, 'rotation') &&...
                                 ~isempty(thisNode.motion.rotation)
                             rot = thisNode.motion.rotation;
@@ -169,7 +171,7 @@ for ii = 1:numel(children)
                         isequal(thisNode.name(5:6), 'ID')
                     thisNode.name = thisNode.name(8:end);
                 end
-        
+
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
                 % write out objects
                 ObjectWrite(fid, thisNode, rootPath, "", "");
@@ -184,6 +186,8 @@ for ii = 1:numel(children)
     end
 end
 
+% Now what we've build up a list of branch nodes that we need to
+% process, pick one and recurse through it
 for ii = 1:numel(nodeList)
     recursiveWriteNode(fid, obj, nodeList(ii), rootPath, outFilePath);
 end
@@ -214,14 +218,14 @@ arealight = 0;
 
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
-    
+
     if isfield(thisNode, 'isInstancer')
         if thisNode.isInstancer ==1 && ~writeGeometryFlag
             % This node is an object instance node, skip;
             continue;
         end
     end
-    
+
     thisNodeChildId = obj.getchildren(children(ii));
     if ~isempty(thisNodeChildId)
         thisNodeChild = obj.get(thisNodeChildId);
@@ -234,28 +238,30 @@ for ii = 1:numel(children)
     if isfield(thisNode,'referenceObject')
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
     end
-    
+
     fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
     if isequal(thisNode.type, 'branch')
-        % get stripID for this Node
+        % get the name after stripping ID for this Node
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
             thisNode.name = thisNode.name(8:end);
         end
-        % Write info
+        % Write the object's dimensions
         fprintf(fid, strcat(spacing, indentSpacing,...
             sprintf('#MeshName: "%s" #Dimension:[%.4f %.4f %.4f]',thisNode.name,...
             thisNode.size.l,...
             thisNode.size.w,...
             thisNode.size.h), '\n'));
+
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.
-        
+
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
+            thisR.hasActiveTransform = true;
         end
-        
+
         % Transformation section
         if ~isempty(thisNode.rotation)
             % Zheng: I think it is always this case, but maybe it is rarely
@@ -272,7 +278,7 @@ for ii = 1:numel(children)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         end
-        
+
         %{
         % This is the old transformation section
         % Rotation
@@ -296,17 +302,18 @@ for ii = 1:numel(children)
         fprintf(fid, strcat(spacing, indentSpacing,...
             sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         %}
-        
+
         % Write out motion
         %
         if ~isempty(thisNode.motion)
+            fprintf(fid, strcat(spacing, indentSpacing,...
+                'ActiveTransform EndTime \n'));
             for jj = 1:size(thisNode.translation, 2)
-                fprintf(fid, strcat(spacing, indentSpacing,...
-                    'ActiveTransform EndTime \n'));
-                
+
+
                 % First write out the same translation and rotation
                 piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
-                
+
                 if isfield(thisNode.motion, 'translation')
                     if isempty(thisNode.motion.translation(jj, :))
                         fprintf(fid, strcat(spacing, indentSpacing,...
@@ -319,30 +326,30 @@ for ii = 1:numel(children)
                             pos(3)), '\n'));
                     end
                 end
-                
+
                 if isfield(thisNode.motion, 'rotation') &&...
                         ~isempty(thisNode.motion.rotation)
                     rot = thisNode.motion.rotation;
                     % Write out rotation
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3-2)), '\n')); % Z
+                        sprintf('Rotate %f %f %f %f',rot(:,3-2)), '\n')); % Z
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3-1)),'\n')); % Y
+                        sprintf('Rotate %f %f %f %f',rot(:,3-1)),'\n')); % Y
                     fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,jj*3)), '\n'));   % X
+                        sprintf('Rotate %f %f %f %f',rot(:,3)), '\n'));   % X
                 end
             end
         end
-        
+
         % There is an reference object and also it's an instance
         if ~isempty(referenceObjectExist) && isfield(thisNode,'referenceObject')
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
-        
-        
+
+
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath,writeGeometryFlag);
-        
+
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
@@ -355,7 +362,7 @@ for ii = 1:numel(children)
             end
             thisNode.name = thisNode.name(8:endIndex);
         end
-        
+
         % if this is an arealight or object without a reference
         if writeGeometryFlag || isempty(referenceObjectExist)
             [rootPath,~] = fileparts(outFilePath);
@@ -366,14 +373,14 @@ for ii = 1:numel(children)
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.name), '\n'));
         end
-        
+
     elseif isequal(thisNode.type, 'light')
         % Create a tmp recipe
         tmpR = recipe;
         tmpR.outputFile = outFilePath;
         tmpR.lights = thisNode.lght;
         lightText = piLightWrite(tmpR, 'writefile', false);
-        
+
         for jj = 1:numel(lightText)
             for kk = 1:numel(lightText{jj}.line)
                 fprintf(fid,sprintf('%s%s%s\n',spacing, indentSpacing,...
@@ -384,8 +391,8 @@ for ii = 1:numel(children)
         % Hopefully we never get here.
         warning('Unknown node type %s\n',thisNode.type);
     end
-    
-    
+
+
     fprintf(fid, strcat(spacing, 'AttributeEnd\n'));
 end
 
@@ -474,9 +481,9 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         materialTxt = piMaterialText(material);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
-    
+
     % end
-    
+
     % if ~isempty(thisNode.shape)
     if ~iscell(thisNode.shape)
         thisShape = thisNode.shape;
@@ -484,7 +491,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         thisShape = thisNode.shape{nMat};
     end
     shapeText = piShape2Text(thisShape);
-    
+
     if ~isempty(thisShape.filename)
         % If the shape has ply info, do this
         % Convert shape struct to text
@@ -525,6 +532,3 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
     % end
 end
 end
-
-
-

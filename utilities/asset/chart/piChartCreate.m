@@ -49,11 +49,13 @@ chartR = piRecipeDefault('scene name','flatsurface');
 chartR.set('asset','Camera_B','delete');
 chartR.set('lights','all','delete');
 
+%{
 % Add a light.
 distantLight = piLightCreate('distant','type','distant',...
     'spd', [6000 0.001], ...
     'cameracoordinate', true);
 chartR.set('light',distantLight,'add');
+%}
 
 % Aim the camera at the object and bring it closer.
 chartR.set('from',[0,0,0]);
@@ -63,19 +65,23 @@ chartR.set('up',  [0,1,0]);
 % Find the position of the surface
 surfaceName = '001_Cube_O';
 
-chartR.set('asset',surfaceName,'world position',[0 0 4]);
+% We place the surface assuming the camera is at 0,0,0 and pointed in the
+% positive direction.  So we put the object 1 meter away from the camera.
+chartR.set('asset',surfaceName,'world position',[0 0 1]);
+
+% We scale the surface size to be 1,1,1 meter.
 sz = chartR.get('asset',surfaceName,'size');
-% flatR.set('asset',surfaceName,'rotate',[0 0 0]);
 chartR.set('asset',surfaceName,'scale', (1 ./ sz));
 
-% This simplifies the tree.
+% The flat surface comes in with a bunch of branch nodes.
+% We get rid of them, simplifying the tree 
 wpos    = chartR.get('asset',surfaceName,'world position');
 wscale  = chartR.get('asset',surfaceName,'world scale');
 wrotate = chartR.get('asset',surfaceName,'world rotation angle');
 
-% How many geometry nodes (branches) are from the object to the root?
-% All the nodes up the path are geometry nodes.  Object nodes are
-% always leafs.
+% How many geometry nodes (branches) are between the object to the root?
+% All the nodes up the path are geometry nodes.  Object nodes are always
+% leafs.  We find the geometry nodes and we will delete them.
 id = chartR.get('asset',surfaceName,'path to root');
 fprintf('Geometry nodes:  %d\n',numel(id) - 1);
 
@@ -88,12 +94,14 @@ id = chartR.get('asset',surfaceName,'path to root');
 fprintf('Geometry nodes:  %d\n',numel(id) - 1);
 
 if (numel(id)-1 == 0)
+    % disp('Adding a geometry and root node')
     geometryNode = piAssetCreate('type','branch');
-    geometryNode.name = '001_Cube_G';
+    geometryNode.name = '001_Cube_B';
     chartR.set('asset','root_B','add',geometryNode);
     chartR.set('asset',surfaceName,'parent',geometryNode.name);
 end
 
+% Now set the parameters in the one geometry node.
 piAssetSet(chartR, geometryNode.name, 'translate',wpos);
 piAssetSet(chartR, geometryNode.name, 'scale',wscale);
 rotMatrix = [wrotate; fliplr(eye(3))];
@@ -156,22 +164,21 @@ chartTexture = piTextureCreate(textureName,...
 chartR.set('texture', 'add', chartTexture);
 
 % Specify the texture as part of the material
-chartR.set('material', surfaceMaterial.name, 'kd val', textureName);
+chartR.set('material', surfaceMaterial.name, 'reflectance val', textureName);
 
 % chartR.get('material print');
 % chartR.show('objects');
 
 %% Name the object and geometry node
-oName = textureName;
+oName = sprintf('%s_O',textureName);
 chartR.set('asset',surfaceName,'name',oName);
 
 % Specify the chart as having this material
 chartR.set('asset',oName,'material name',surfaceMaterial.name);
 
 parent = chartR.get('asset parent id',oName); 
-gName = sprintf('%s_G',oName);
+gName = sprintf('%s_B',textureName);
 chartR.set('asset',parent,'name',gName);
-
 
 %% Copy the texture file to the output dir
 

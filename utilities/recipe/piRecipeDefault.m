@@ -169,7 +169,7 @@ switch ieParamFormat(sceneDir)
         exporter = 'C4D';
     case 'teapot'
         sceneDir = 'teapot';
-        sceneFile = 'teapot-area-light.pbrt';
+        sceneFile = 'teapot-area-light-v4.pbrt';
         exporter = 'Copy';
     case 'slantedbar'
         % In sceneEye cases we were using piCreateSlantedBarScene.  But
@@ -333,6 +333,14 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'BlenderScene';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Blender';   % Blender
+    case {'testplane'}
+        sceneDir = 'testplane';
+        sceneFile = [sceneDir, '.fbx'];
+        exporter = 'Copy';
+    case {'stepfunction'}
+        sceneDir = 'stepfunction';
+        sceneFile = [sceneDir, '.pbrt'];
+        exporter = 'Copy';
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
 end

@@ -46,13 +46,15 @@ function [ieObject, result] = piRender(thisR,varargin)
 % Examples
 %{
    % Renders both radiance and depth
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
 %}
 %{
    % Render radiance and depth separately
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   % Currently this means running the render twice, which isn't very
+   % efficient
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile,'render type','radiance');
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
    dmap = piRender(pbrtFile,'render type','depth');
@@ -72,11 +74,16 @@ function [ieObject, result] = piRender(thisR,varargin)
   % scene.  If there is no surface a zero is returned.  This should
   % probably either a Inf or a NaN when there is no surface.  We might
   % replace those with a black color or something.
-  thisR = piRecipeDefault; piWrite(thisR);
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
   [coords, result] = piRender(thisR, 'render type','coordinates');
   ieNewGraphWin; imagesc(coords(:,:,1));
   ieNewGraphWin; imagesc(coords(:,:,2));
   ieNewGraphWin; imagesc(coords(:,:,3));
+%}
+%{
+% get materials
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  [aScene, metadata] = piRender(thisR, 'render type','material');
 %}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model
@@ -106,13 +113,23 @@ wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
 renderType       = p.Results.rendertype;
 
+if ~isempty(verbosity)
+    setpref('docker','verbosity', verbosity);
+end
+
 %% try to support docker servers
 persistent renderDocker;
 
-% try and set the default to a server if we aren't passed one:
+% try and set the default to a server if we aren't passed one.
+% getRender() is an optional function that can be created and maintained
+% on a per-site basis to specify local machines, GPUs, and other data.
 if isempty(ourDocker)
-    renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-    ourDocker = dockerWrapper(renderPrefs{:});
+    if ~isempty(which('getRenderer'))
+        ourDocker =  getRenderer();
+    else
+        renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
+        ourDocker = dockerWrapper(renderPrefs{:});
+    end
 end
 
 % Extensive Example:
@@ -229,8 +246,9 @@ preRender = tic;
 
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
-fprintf("Complete render took: %6.2d seconds.", elapsedTime);
-
+if getpref('docker','verbosity',0) > 0
+    fprintf("Complete render took: %6.2d seconds.", elapsedTime);
+end
 
 %% Check the return
 
@@ -238,9 +256,8 @@ if status
     warning('Docker did not run correctly');
     % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
-    fprintf('Status:\n'); disp(status)
-    fprintf('Result:\n'); disp(result)
-    pause;
+    fprintf('Status:\n'); disp(status);
+    fprintf('Result:\n'); disp(result);
 end
 
 fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);

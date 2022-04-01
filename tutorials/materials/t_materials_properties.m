@@ -12,6 +12,9 @@
 %   t_materials.m, tls_materials.mlx, t_assets, t_piIntro*,
 %   piMaterialCreate.m
 %
+% Updated to v4: D.Cardinal, Jan, 2022
+%
+
 %% Initialize
 ieInit;
 if ~piDockerExists, piDockerConfig; end
@@ -19,7 +22,7 @@ if ~piDockerExists, piDockerConfig; end
 %% Create recipe
 
 thisR = piRecipeDefault('scene name', 'sphere');
-thisR.set('light', 'delete', 'all');
+thisR.set('light', 'all','delete');
 
 %% Set the render quality
 % A low resolution rendering for speed
@@ -35,7 +38,7 @@ distLight = piLightCreate('new dist',...
                            'spd', [1 1 1],...
                            'specscale float', 10,...
                            'cameracoordinate', true);
-thisR.set('light', 'add', distLight);                       
+thisR.set('light', distLight, 'add');                       
 
 % Environment Light
 % An environment light starts from an image, in this case pngExample.png
@@ -50,7 +53,7 @@ imshow(fileName); % show image map
 exampleEnvLight = piLightCreate('field light','type', 'infinite',...
     'mapname', fileName);
 exampleEnvLight = piLightSet(exampleEnvLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-thisR.set('lights', 'add', exampleEnvLight); 
+thisR.set('lights', exampleEnvLight, 'add'); 
 thisR.get('lights print');
 
 %% Understanding the environment light
@@ -58,7 +61,7 @@ thisR.get('lights print');
 % sphere to a mirror sphere
 % Creating mirror material
 mirrorName = 'mirror';
-mirror = piMaterialCreate(mirrorName, 'type', 'mirror');
+mirror = piMaterialCreate(mirrorName, 'type', 'conductor');
 thisR.set('material', 'add', mirror);
 
 % Assigning mirror to sphere
@@ -104,24 +107,29 @@ scale = 100/meanlum;
 scene = sceneSet(scene, 'meanluminance', meanlum*scale);
 sceneWindow(scene);
 
-%% Matte properties: Setting kd using RGB values
+%% Matte properties: Setting diffuse reflectance using RGB values
+% In pbrt-v4 matte materials are now type diffuse
 % The material type 'matte' has two main properties: the diffuse
-% reflectivity (kd) and the sigma parameter (sigma) of the Oren-Nayar model
+% reflectivity (reflectance) and the sigma parameter (roughness) of the Oren-Nayar model
 
 % We'll start by getting the current the kd value
-matte_kd_orig = thisR.get('material', 'white', 'kd value');
+matte_kd_orig = thisR.get('material', 'white', 'reflectance');
 
+% However, white is of type diffuse, which doesn't allow roughness
+% so we will create a new material that is coateddiffuse
+coatedMaterial = piMaterialCreate('coated', 'type', 'coateddiffuse');
+thisR.set('material', 'add', coatedMaterial);
 % Change value of kd to reflect a green color using RGB values
-thisR.set('material', 'white', 'kd value', [0 0.4 0]);
+thisR.set('material', coatedMaterial, 'reflectance', [0 0.4 0]);
 
-% Set value of sigma to 0, surface will have pure Lambertian reflection
-thisR.set('material', 'white', 'sigma value', 0);
+% Set value of roughness to 0, surface will have pure Lambertian reflection
+thisR.set('material', coatedMaterial, 'roughness', 0);
 
 piWrite(thisR);
 scene = piRender(thisR, 'render type', 'radiance', 'meanluminance', -1);
 meanlum = sceneGet(scene, 'meanluminance');
 scene = sceneSet(scene, 'meanluminance',meanlum*scale);
-scene = sceneSet(scene, 'name', 'Matte: kd = green, sigma=0');
+scene = sceneSet(scene, 'name', 'Matte: reflectance = [0 1 0]');
 sceneWindow(scene);
 
 % To get the radiance of the sphere, either choose your own rectangles or
@@ -153,14 +161,14 @@ title('Matte - using RGB values');
 legend('Center', 'Fringe'); ylim([0 2*10^-3]);
 hold off;
 
-%% Matte properties: setting kd using spectral reflectance values
+%% Matte properties: setting diffuse reflectance using spectral reflectance values
 
 % Change value of kd value to reflect a green color using spectral
 % reflectance values
 kd_val = zeros(1,length(wave));
 kd_val(wave>480 & wave<600)=0.4;
 spd = piMaterialCreateSPD(wave, kd_val);
-thisR.set('material', 'white', 'kd value', spd);
+thisR.set('material', 'white', 'reflectance', spd);
 
 piWrite(thisR);
 scene = piRender(thisR, 'render type', 'radiance', 'meanluminance', -1);
@@ -183,13 +191,13 @@ hold off;
 %% Matte Properties: Sigma value
 
 % Set value of signma to 100, making the surface rougher
-thisR.set('material', 'white', 'sigma value', 100);
+thisR.set('material', coatedMaterial, 'roughness', 100);
 
 piWrite(thisR);
 scene = piRender(thisR, 'render type', 'radiance', 'meanluminance', -1);
 meanlum = sceneGet(scene, 'meanluminance');
 scene = sceneSet(scene, 'meanluminance',meanlum*scale);
-scene = sceneSet(scene, 'name', 'Matte: kd = green, sigma=100');
+scene = sceneSet(scene, 'name', 'Matte: reflectance=[0 1 0]');
 
 
 sceneWindow(scene);
@@ -201,11 +209,17 @@ radMean_2 = sceneGet(scene, 'roimeanenergy', fringeROI);
 ieNewGraphWin; hold on; grid on;
 plot(wave, radMean_1); plot(wave, radMean_2);
 xlabel(xlab); ylabel(ylab); ylim([0 2*10^-3]);
-title('Matte - Sigma = 100');
+title('Matte');
 legend('Center', 'Fringe');
 hold off;
 
+%% V4 ends here:)
+% Below sections rely heavily on pbrt-v3 materials
+% which have been dramatically changed for v4
+% So this code is here in case the concepts are of value
+% and someone wants to update it...
 
+%{
 %% Set sphere to Uber
 % Now we'll explore the properties of uber. 
 
@@ -461,5 +475,5 @@ xlabel(xlab); ylabel(ylab);
 title('Glass - Ground reflections'); 
 legend('Ground','Bottom','No Reflections','Location','SouthEast'); 
 hold off;
-
+%}
 % END

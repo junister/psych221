@@ -62,7 +62,12 @@ else
     builtCommand = [builtCommand ' ' obj.dockerImageName];
 end
 if ~isequal(obj.command, '')
-    builtCommand = [builtCommand ' ' obj.command];
+    % we put the redirect in the wrong place, so disable for now.
+    if false; % getpref('docker','verbosity', 0) == 0 && contains(obj.command,'exr2bin')
+        builtCommand = [builtCommand ' ' [obj.command ' > /dev/null']];
+    else
+        builtCommand = [builtCommand ' ' obj.command];
+    end
 end
 
 %in cases where we don't use an of prefix then inputfile comes before

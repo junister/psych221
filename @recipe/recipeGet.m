@@ -1229,24 +1229,10 @@ switch ieParamFormat(param)  % lower case, no spaces
     % Lights
     case{'light', 'lights'}
         if isempty(varargin)
-            % Treat this same as get names
-            %{
-            if isprop(thisR, 'lights')
-                val = thisR.lights;
-            else
-                warning('No lights in this recipe')
-                val = {};
-            end
-            %}
             val = thisR.assets.mapLgtShortName2Idx.keys;
             return;
         end
 
-        %{
-        if ischar(varargin{1})
-            varargin{1} = ieParamFormat(varargin{1});
-        end
-        %}
 
         switch varargin{1}
             case 'names'
@@ -1296,13 +1282,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = thisLight;
                 end
                 if numel(varargin) >= 2
-                    % thisR.get('light',idx,'position');
+                    % thisR.get('light',idx,'worldposition');
                     %
                     % Return the light property
                     % Return the light property
                     thisLgtStruct = thisLight.lght{1};
-                    switch varargin{2}
-                        case 'position'
+                    switch ieParamFormat(varargin{2})
+                        case 'worldposition'
                             % thisR.get('light',idx,'position')                            
                             if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
                                 % The position may be at the camera, so we need
@@ -1318,6 +1304,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                             else
                                 val = Inf;
                             end
+                        case {'rotate','rotation'}
+                            % Pull out the three rotation parameters
+                            % from the stored matrices with respect to
+                            % world coordinates.
+                            val = thisR.get('asset', thisLight.name, 'rotation');
+                        case {'worldrotationangle', 'worldorientation', 'worldrotation'}
+                            val = thisR.get('asset', thisLight.name, 'world rotation angle');
                         case 'name'
                             val = thisLight.name;
                         case {'light', 'lght'}
@@ -1424,7 +1417,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % rotation effects of ALL rotation action.
                     nodeToRoot = thisR.assets.nodetoroot(id);
                     [val, ~] = piTransformWorld2Obj(thisR, nodeToRoot);
-                case 'worldrotationangle'
+                case {'worldrotationangle', 'worldorientation', 'worldrotation'}
                     rotM = thisR.get('asset', id, 'world rotation matrix');
                     val = piTransformRotM2Degs(rotM);
                 case {'worldtranslation', 'worldtranslationmatrix'}
@@ -1451,10 +1444,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                     end
                 case 'rotation'
                     if thisR.assets.isleaf(id)
-
+                        parentID = thisR.get('asset parent id', id);
+                        val = thisR.get('asset', parentID, 'rotation');
                     else
-                        val = piAsseGet(thisAsset, 'rotation');
+                        val = piAssetGet(thisAsset, 'rotation');
                     end
+                   
                 case 'size'
                     % thisR.get('asset',objectName,'size');
                     % Size of one object in meters
