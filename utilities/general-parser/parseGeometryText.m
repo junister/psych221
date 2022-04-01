@@ -115,17 +115,6 @@ while i <= length(txt)
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
 
-%         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
-%             inputfile = thisR.get('input file');
-%             [inputDir,sceneName,~] = fileparts(inputfile);
-%             [folder, filename, ext]=fileparts(shape.filename);
-%             newPlyName = sprintf('%s_%s%s',sceneName,filename, ext);
-%             if ~exist(fullfile(inputDir,newPlyName), 'file')
-%                 movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,folder,newPlyName));
-%             end
-%             shape.filename = newPlyName;
-%         end
-
     elseif strcmp(currentLine,'AttributeEnd')
         % Assemble all the read attributes into either a group object, or a
         % geometry object. Only group objects can have subnodes (not
@@ -204,6 +193,7 @@ while i <= length(txt)
                     %   (2) Check if named material exists
                     %   (3) (Worst case) Only material type exists
                     else
+                        shape = shape{1};% tmp fix
                         if ~isempty(shape.filename)
                             [~, n, ~] = fileparts(shape.filename);
 
@@ -219,7 +209,7 @@ while i <= length(txt)
                             % object.  We want them unique.  So for now, we
                             % just pick a random number.  Some chance of a
                             % duplicate, but not much.
-
+                            mat = mat{1}; % tmp fix
                             resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
                         end
                     end

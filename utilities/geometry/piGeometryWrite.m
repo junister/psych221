@@ -108,16 +108,16 @@ for ii = 1:numel(children)
         if isfield(thisNode,'isInstancer')
             if thisNode.isInstancer ==1
                 indentSpacing = "    ";
-                %             nodeList = [nodeList children(ii)];
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
                 if ~isempty(thisNode.motion)
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'ActiveTransform StartTime \n'));
                 end
+
+                arealight = 0; % light can't be used as instance.
                 piGeometryTransformWrite(fid, thisNode, "", indentSpacing, 0);
-%               arealight = 0;              
+
                 % Write out motion
-                %
                 if ~isempty(thisNode.motion)
                     for jj = 1:size(thisNode.translation, 2)
                         fprintf(fid, strcat(spacing, indentSpacing,...
@@ -163,18 +163,19 @@ for ii = 1:numel(children)
         %         % Define object node
     elseif isequal(thisNode.type, 'object')
         % Deal with this in recursiveWriteAttributes;
-        %
-        %         while numel(thisNode.name) >= 8 &&...
-        %                 isequal(thisNode.name(5:6), 'ID')
-        %             thisNode.name = thisNode.name(8:end);
-        %         end
-        %
-        %         fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
-        %         % write out objects
-        %         ObjectWrite(fid, thisNode, rootPath, "", "");
-        %         fprintf(fid,'\n');
-        %         fprintf(fid, 'ObjectEnd\n\n');
+        % I am not sure whether this will fail at some case.--Zhenyi
+        %{
+                while numel(thisNode.name) >= 8 &&...
+                        isequal(thisNode.name(5:6), 'ID')
+                    thisNode.name = thisNode.name(8:end);
+                end
         
+                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
+                % write out objects
+                ObjectWrite(fid, thisNode, rootPath, "", "");
+                fprintf(fid,'\n');
+                fprintf(fid, 'ObjectEnd\n\n');
+        %}
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
     else
@@ -206,6 +207,7 @@ end
 
 % indent spacing
 indentSpacing = "    ";
+
 % indicate wheather the child node is an arealight, arealight use 'Transfom'
 % other objects use 'ConcatTransform', not sure why yet. --Zhenyi
 arealight = 0;
@@ -213,14 +215,12 @@ arealight = 0;
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
     
-    
     if isfield(thisNode, 'isInstancer')
         if thisNode.isInstancer ==1 && ~writeGeometryFlag
             % This node is an object instance node, skip;
             continue;
         end
     end
-    
     
     thisNodeChildId = obj.getchildren(children(ii));
     if ~isempty(thisNodeChildId)
@@ -233,14 +233,6 @@ for ii = 1:numel(children)
     referenceObjectExist = [];
     if isfield(thisNode,'referenceObject')
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
-        % If this Node has no child node, it is an Instance
-        %             if isempty(thisNodeChildId) ||...
-        %                     (~isempty(referenceObjectExist) && ~strcmp(thisNodeChild.type,'branch'))
-        %                 referenceNode = obj.get(referenceObjectExist);
-        %                 thisNode.translation = referenceNode.translation;
-        %                 thisNode.rotation    = referenceNode.rotation;
-        %                 thisNode.scale       = referenceNode.scale;
-        %             end
     end
     
     fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
@@ -364,17 +356,13 @@ for ii = 1:numel(children)
             thisNode.name = thisNode.name(8:endIndex);
         end
         
-        % if this is an arealight or object without instance
+        % if this is an arealight or object without a reference
         if writeGeometryFlag || isempty(referenceObjectExist)
-            % find parent node
-%             thisNodeId = piAssetFind(obj,'name',thisNode.name);
-%             thisNodeParentId = obj.getparent(thisNodeId);
-%             thisNodeParent = obj.get(thisNodeParentId);
-%             piGeometryTransformWrite(fid, thisNodeParent, spacing,indentSpacing, arealight); % wheather we need this???
             [rootPath,~] = fileparts(outFilePath);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
             fprintf(fid,'\n');
         else
+            % use reference object
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.name), '\n'));
         end
@@ -473,18 +461,28 @@ end
 % Write out material
 % if ~isempty(thisNode.material)
 for nMat = 1:numel(thisNode.material) % object can contain multiple material and shapes
+    if iscell(thisNode.material)
+        material = thisNode.material{nMat};
+    else
+        material = thisNode.material;
+    end
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
-            thisNode.material{nMat}.namedmaterial, '"', '\n'));
+            material.namedmaterial, '"', '\n'));
     catch
-        materialTxt = piMaterialText(thisNode.material{nMat});
+        % we should never go here
+        materialTxt = piMaterialText(material);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
     
     % end
     
     % if ~isempty(thisNode.shape)
-    thisShape = thisNode.shape{nMat};
+    if ~iscell(thisNode.shape)
+        thisShape = thisNode.shape;
+    else
+        thisShape = thisNode.shape{nMat};
+    end
     shapeText = piShape2Text(thisShape);
     
     if ~isempty(thisShape.filename)
