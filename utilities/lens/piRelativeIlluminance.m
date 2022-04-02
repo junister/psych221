@@ -13,9 +13,11 @@ if isa(options.figure,'double')
     assert(numel(options.figure) == 3);
     %we want to be in a subplot, so what if we don't create a new figure?
     %ourFigure = ieNewGraphWin;
-    subplot(options.figure(1), options.figure(2), options.figure(3));    
+    subplot(options.figure(1), options.figure(2), options.figure(3));
+    useSubplot = true;
 else
     ourFigure = options.figure;
+    useSubplot = false;
 end
 
 %% Define receipe with white surface
@@ -49,8 +51,10 @@ piWrite(thisR);
 [oiTemp,result] = piRender(thisR,'render type','radiance');
 
 %% Make Relative illumination plot
-%ourFigure;
-clf; 
+if useSubplot == false
+    ourFigure;
+    clf;
+end
 hold on;
 
 % Read horizontal line and normalize by maximum value
