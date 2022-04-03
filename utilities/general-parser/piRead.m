@@ -219,12 +219,12 @@ end
 thisR.world = piFormatConvert(thisR.world);
 
 if strcmpi(exporter, 'Copy')
-    disp('Scene will not be parsed. Maybe we can parse in the future');
+    % what does this mean since we then parse it?
+    %disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
-    fprintf('Read %d materials.\n', materialLists.Count);
-    fprintf('Read %d textures.\n', textureList.Count);
+    fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
     
     thisR.materials.list = materialLists;
     
@@ -241,8 +241,7 @@ else
     % Read material and texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
-    fprintf('Read %d materials.\n', materialLists.Count);
-    fprintf('Read %d textures.\n', textureList.Count);
+    fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
     
     [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
     if ~isempty(trees)
@@ -364,7 +363,10 @@ else
 end
 %}
 
-disp('***Scene parsed.')
+verbosity = 0;
+if verbosity > 0
+    disp('***Scene parsed.');
+end
 
 
 end

@@ -7,6 +7,7 @@ arguments
     options.lensfile = 'dgauss.22deg.50.0mm.json';
     options.figure = figure(1);
     options.sensorSize = 36;
+    options.focalDistance = 3;
 end
 
 if isa(options.figure,'double') 
@@ -35,7 +36,7 @@ recipeSet(thisR,'lights', ourLight,'add');
 %% Define Camera (Change this to whatever camera setup you use
 camera = piCameraCreate('omni','lensfile',options.lensfile);
 thisR.set('camera',camera);
-thisR.set('focal distance',3); % DO this or adjust film distance
+thisR.set('focal distance', options.focalDistance); % DO this or adjust film distance
 
 
 % You don't need much resolution because relative illumination is relatively slow in variation

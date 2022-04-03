@@ -43,7 +43,7 @@ p.parse(varargin{:});
 camera= p.Results.camera;
 
 filmwidth_mm = p.Results.filmwidth;
-distancesFromFilm_mm = p.Results.distances; % mm to meter
+distancesFromFilm_mm = p.Results.distances*1000; % mm to meter
 nbRaysPerPixel=p.Results.rays;
 resolution=p.Results.resolution;
 
