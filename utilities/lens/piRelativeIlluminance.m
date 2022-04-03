@@ -6,6 +6,7 @@ function piRelativeIlluminance(options)
 arguments
     options.lensfile = 'dgauss.22deg.50.0mm.json';
     options.figure = figure(1);
+    options.sensorSize = 36;
 end
 
 if isa(options.figure,'double') 
@@ -39,7 +40,7 @@ thisR.set('focal distance',3); % DO this or adjust film distance
 
 % You don't need much resolution because relative illumination is relatively slow in variation
 filmresolution = [300 1];
-sensordiagonal_mm = 65; % Adjust to your liking
+sensordiagonal_mm = options.sensorSize;
 pixelsamples = 600;  % Adjust to your liking to reduce noise
 
 thisR.set('pixel samples',pixelsamples);

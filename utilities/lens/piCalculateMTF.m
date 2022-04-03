@@ -31,14 +31,13 @@ function [MTF,LSF,ESF] = piCalculateMTF(varargin)
 %    
 % Thomas Goossens
 
-
 varargin = ieParamFormat(varargin);
 p = inputParser;
 p.addParameter('camera',@isstruct);
 p.addParameter('rays',2000, @isnumeric);
 p.addParameter('filmwidth', @isnumeric);
 p.addParameter('resolution',1000,@isnumeric);
-p.addParameter('distances',[1000],@isnumeric) % Array with chart distances measured from the film position
+p.addParameter('distances',[1000],@isnumeric); % Array with chart distances measured from the film position
 p.parse(varargin{:});
 
 camera= p.Results.camera;
@@ -65,7 +64,7 @@ cameras={camera};
 %% Loop over different chart distances, as measured from film
 for c=1:numel(cameras)
     for i=1:numel(distancesFromFilm_meter)
-        disp(['Render Camera ' num2str(c) ' position ' num2str(i)])
+        disp(['Render Camera ' num2str(c) ' position ' num2str(i)]);
         
         % Build the scene
         thisR=piRecipeDefault('scene name','stepfunction');
@@ -84,7 +83,7 @@ for c=1:numel(cameras)
         % Write and render
         piWrite(thisR);
         oiESF{i} = piRender(thisR,'render type','radiance','dockerimagename','vistalab/pbrt-v3-spectral:latest');
-        oiESF{i}.name=['Chart distance from film: ' num2str(distancesFromFilm_meter(i))]
+        oiESF{i}.name=['Chart distance from film: ' num2str(distancesFromFilm_meter(i))];
         %oiWindow(oiESF)
         
     end
@@ -96,8 +95,8 @@ end
 %% Generate ESF matrix
 clear esf
 filmWidth=oiGet(oiESF{1},'width','mm');
-pixels_micron = 1e3*linspace(-filmWidth/2,filmWidth/2,oiGet(oiESF{1},'cols'))
-smooth = @(x)conv(x,[1 1 1 1 1]/5,'same' )
+pixels_micron = 1e3*linspace(-filmWidth/2,filmWidth/2,oiGet(oiESF{1},'cols'));
+smooth = @(x)conv(x,[1 1 1 1 1]/5,'same' );
 for i=1:numel(distancesFromFilm_meter)
     edgePBRT=oiESF{i}.data.photons(end,:,1); % Take horizontal line in center
     esf(:,i)=edgePBRT/max(smooth(edgePBRT));
@@ -109,20 +108,20 @@ end
 %% Calculate MTF using FFT
 
 % STEP 1 : Calculate Linespread (LSF) from ESF by differentation
-lsf=-diff(esf,1) % Take derivative
+lsf=-diff(esf,1); % Take derivative
 pixelsLSF=pixels_micron(1:end-1); % One less because of diff
 
 
 % STEP 2: Calculate MTF by applying FFT
 nbPoints = numel(pixelsLSF);
-deltaMicron =diff(pixelsLSF(1:2))
+deltaMicron = diff(pixelsLSF(1:2));
 freqNyquist = 1/(2*deltaMicron);
 frequencies = linspace(-freqNyquist/2,freqNyquist/2,nbPoints);
 cyclespermilimeter = frequencies*1000;
 
 %% Trick to get rid of rendering noise where we know es fshould be one
 
-OneIndex = find(esf<0.98,1,'first')
+OneIndex = find(esf<0.98,1,'first');
 esf(1:OneIndex,:)=1;
 
 
@@ -147,7 +146,7 @@ end
 % camera.
     function thisR = setChartDistance(thisR,distanceFromFilm)
         thisR.lookAt.from= [0 0 -distanceFromFilm];
-        thisR.lookAt.to= [0 0 1] ;
+        thisR.lookAt.to= [0 0 1];
         thisR.lookAt.up=[ 0 1 0];
     end
 
