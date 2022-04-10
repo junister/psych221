@@ -8,6 +8,7 @@ arguments
     options.figure = figure(1);
     options.sensorSize = 36;
     options.focalDistance = 3;
+    options.pixelSampls = 600; % adjust to reduce noise if desired
 end
 
 if isa(options.figure,'double') 
@@ -42,9 +43,8 @@ thisR.set('focal distance', options.focalDistance); % DO this or adjust film dis
 % You don't need much resolution because relative illumination is relatively slow in variation
 filmresolution = [300 1];
 sensordiagonal_mm = options.sensorSize;
-pixelsamples = 600;  % Adjust to your liking to reduce noise
 
-thisR.set('pixel samples',pixelsamples);
+thisR.set('pixel samples',options.pixelSamples);
 thisR.set('film diagonal',sensordiagonal_mm,'mm');
 thisR.set('film resolution',filmresolution);
 
@@ -54,7 +54,7 @@ piWrite(thisR);
 
 %% Make Relative illumination plot
 if useSubplot == false
-    ourFigure;
+    is ~isempty(ourFigure) ourFigure;
     clf;
 end
 hold on;
@@ -64,8 +64,8 @@ maxnorm = @(x)x/max(x);
 relativeIllumPBRT = maxnorm(oiTemp.data.photons(1,:,1));
 
 % Construct x axis [-filmwidth/2 .. filmwidth/2] for given film resolution
-resolution=thisR.get('film resolution');resolution=resolution(1);
-xaxis = 0.5*thisR.get('filmwidth') *linspace(-1,1,resolution);
+resolution = thisR.get('film resolution'); resolution=resolution(1);
+xaxis = 0.5 * thisR.get('filmwidth') * linspace(-1,1,resolution);
 
 % Plot the relativ illumination
 hpbrt = plot(xaxis,relativeIllumPBRT,'color',[0.83 0 0 ],'linewidth',2);

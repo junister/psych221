@@ -19,19 +19,19 @@ function  setParams(options)
 % Underlying mechanism is setpref(), getpref() so changes are persistent
 % across Matlab sessions. 
 %
-%   dockerWrapper.setParams('docker','remoteUser',<remoteUser>);
-%   dockerWrapper.setParams('docker','remoteRoot',<remoteRoot>); % where we will put the iset tree
-%   dockerWrapper.setParams('docker','localRoot',<localRoot>); % only needed for WSL if not \mnt\c
+%   dockerWrapper.setParams('remoteUser',<remoteUser>);
+%   dockerWrapper.setParams('remoteRoot',<remoteRoot>); % where we will put the iset tree
+%   dockerWrapper.setParams('localRoot',<localRoot>); % only needed for WSL if not \mnt\c
 %
 % Other options you can specify:
 % If you need to turn-off GPU Rendering set to false
-%  dockerWrapper.setParams('docker','gpuRendering',false);
+%  dockerWrapper.setParams('gpuRendering',false);
 %
 % If you are having issues with :latest, you can go back to :stable
-% dockerWrapper.setParams('docker', 'remoteImageTag','stable');
+% dockerWrapper.setParams('remoteImageTag','stable');
 %
 % Change which gpu to use on a server
-% dockerWrapper.setParams('docker', 'whichGPU', <#>); % default is 0
+% dockerWrapper.setParams('whichGPU', <#>); % default is 0
 %
 
 arguments
@@ -51,7 +51,7 @@ arguments
 end
 setpref('docker','whichGPU', options.whichGPU);
 
-if isnumeric(options.gpuRendering)
+if ~isempty(options.gpuRendering)
     setpref('docker','gpuRendering', options.gpuRendering);
 end
 if ~isempty(options.remoteUser)

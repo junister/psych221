@@ -1,7 +1,8 @@
 function [MTF,LSF,ESF] = piCalculateMTF(varargin)
 % Calculate The MTF, LSF and, ESF
 % A vertical step function (black/white edge) is placed at a given
-% distance, this requires the 'stepfunction' scene. The scene is simulate for one horizontal line to allow for high
+% distance, this requires the 'stepfunction' scene. 
+% The scene is simulated for one horizontal line to allow for high
 % resolution. This gives the edge spread function (ESF) from which the
 % linespread (LSF) is calculated using differentation. The MTF is then
 % obtained as the Fourier Transform of the Linespread function.
@@ -33,32 +34,33 @@ function [MTF,LSF,ESF] = piCalculateMTF(varargin)
 
 varargin = ieParamFormat(varargin);
 p = inputParser;
+
+%  required
 p.addParameter('camera',@isstruct);
-p.addParameter('rays',2000, @isnumeric);
 p.addParameter('filmwidth', @isnumeric);
+
+% optional
+p.addParameter('rays',2000, @isnumeric);
 p.addParameter('resolution',1000,@isnumeric);
+
+% Orig code seems to put chart at 1000 meters. Is that deliberate
 p.addParameter('distances',[1000],@isnumeric); % Array with chart distances measured from the film position
 p.parse(varargin{:});
 
-camera= p.Results.camera;
-
+camera= p.Results.camera; 
 filmwidth_mm = p.Results.filmwidth;
-distancesFromFilm_mm = p.Results.distances*1000; % mm to meter
-nbRaysPerPixel=p.Results.rays;
-resolution=p.Results.resolution;
 
+distancesFromFilm_mm = p.Results.distances; % passed in as mm
+nbRaysPerPixel = p.Results.rays;
+resolution = p.Results.resolution;
 
 
 %%  Setup distances from film
 % Positions of chart as measured from the film
-distancesFromFilm_meter =1e-3* (distancesFromFilm_mm);
-
-
+distancesFromFilm_meter = 1e-3* (distancesFromFilm_mm);
 
 %% Create A camera for each polynomial degree
 cameras={camera};
-
-
 
 
 %% Loop over different chart distances, as measured from film
