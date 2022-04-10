@@ -8,7 +8,7 @@ arguments
     options.figure = figure(1);
     options.sensorSize = 36;
     options.focalDistance = 3;
-    options.pixelSampls = 600; % adjust to reduce noise if desired
+    options.pixelSamples = 600; % adjust to reduce noise if desired
 end
 
 if isa(options.figure,'double') 
