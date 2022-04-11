@@ -20,15 +20,15 @@ function [MTF,LSF,ESF] = piCalculateMTF(varargin)
 % OUTPUT
 % The output parameters are structs
 %
-% ESF = matrix , each colum corresponding to a chart distance
+% ESF = matrix , each column corresponding to a chart distance
 % ESF.pixelsMicron;
 %
-% LSF.LSF: matrix , each colum corresponding to a chart distance
+% LSF.LSF: matrix , each column corresponding to a chart distance
 % LSF.pixelsMicron = pixelsLSF;%
 %
 % MTF =struct;
-% MTF.cyclespermilimeter=cyclespermilimeter;
-% MTF.MTF: matrix , each colum corresponding to a chart distance
+% MTF.cyclespermillimeter=cyclespermillimeter;
+% MTF.MTF: matrix , each column corresponding to a chart distance
 %    
 % Thomas Goossens
 
@@ -42,8 +42,8 @@ p.addParameter('filmwidth', @isnumeric);
 % optional
 p.addParameter('rays',2000, @isnumeric);
 p.addParameter('resolution',1000,@isnumeric);
+p.addParameter('quiet',false,@islogical);
 
-% Orig code seems to put chart at 1000 meters. Is that deliberate
 p.addParameter('distances',[1000],@isnumeric); % Array with chart distances measured from the film position
 p.parse(varargin{:});
 
@@ -66,8 +66,9 @@ cameras={camera};
 %% Loop over different chart distances, as measured from film
 for c=1:numel(cameras)
     for i=1:numel(distancesFromFilm_meter)
-        disp(['Render Camera ' num2str(c) ' position ' num2str(i)]);
-        
+        if ~p.Results.quiet
+            disp(['Render Camera ' num2str(c) ' position ' num2str(i)]);
+        end
         % Build the scene
         thisR=piRecipeDefault('scene name','stepfunction');
         
@@ -84,7 +85,7 @@ for c=1:numel(cameras)
         
         % Write and render
         piWrite(thisR);
-        oiESF{i} = piRender(thisR,'render type','radiance','dockerimagename','vistalab/pbrt-v3-spectral:latest');
+        oiESF{i} = piRender(thisR,'render type','radiance'); %,'dockerimagename','vistalab/pbrt-v3-spectral:latest');
         oiESF{i}.name=['Chart distance from film: ' num2str(distancesFromFilm_meter(i))];
         %oiWindow(oiESF)
         
@@ -121,7 +122,7 @@ freqNyquist = 1/(2*deltaMicron);
 frequencies = linspace(-freqNyquist/2,freqNyquist/2,nbPoints);
 cyclespermilimeter = frequencies*1000;
 
-%% Trick to get rid of rendering noise where we know es fshould be one
+%% Trick to get rid of rendering noise where we know esf should be one
 
 OneIndex = find(esf<0.98,1,'first');
 esf(1:OneIndex,:)=1;
