@@ -97,13 +97,17 @@ end
 
 %% Generate ESF matrix
 clear esf
-filmWidth=oiGet(oiESF{1},'width','mm');
+filmWidth = oiGet(oiESF{1},'width','mm');
 pixels_micron = 1e3*linspace(-filmWidth/2,filmWidth/2,oiGet(oiESF{1},'cols'));
-smooth = @(x)conv(x,[1 1 1 1 1]/5,'same' );
-for i=1:numel(distancesFromFilm_meter)
-    edgePBRT=oiESF{i}.data.photons(end,:,1); % Take horizontal line in center
-    esf(:,i)=edgePBRT/max(smooth(edgePBRT));
-    
+
+% define a smoothing function to help filter out noise
+smoothingFactor = 5; % originally 5 in Thomas's paper
+smooth = @(x)conv(x,[1 1 1 1 1]/smoothingFactor, 'same');
+
+for i = 1:numel(distancesFromFilm_meter)
+    edgePBRT = oiESF{i}.data.photons(end,:,1); % Take horizontal line in center
+    % apply our smoothing function
+    esf(:,i) = edgePBRT/max(smooth(edgePBRT)); %#ok<AGROW> 
 end
 
 
@@ -111,8 +115,8 @@ end
 %% Calculate MTF using FFT
 
 % STEP 1 : Calculate Linespread (LSF) from ESF by differentation
-lsf=-diff(esf,1); % Take derivative
-pixelsLSF=pixels_micron(1:end-1); % One less because of diff
+lsf = -diff(esf,1); % Calculate differences (approximate the derivative)
+pixelsLSF = pixels_micron(1:end-1); % One less because of we only have n-1 differences
 
 
 % STEP 2: Calculate MTF by applying FFT
