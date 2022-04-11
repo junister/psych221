@@ -47,8 +47,14 @@ arguments
     options.remoteImageTag = '';
     options.remoteRoot = ''; % we need to know where to map on the remote system
     options.localRoot = ''; % for the Windows/wsl case (sigh)
+    options.forceLocal;
 
 end
+
+if ~isempty(options.forceLocal)
+    setpref('docker','forceLocal', options.forceLocal);
+end
+
 setpref('docker','whichGPU', options.whichGPU);
 
 if ~isempty(options.gpuRendering)

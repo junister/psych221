@@ -1,5 +1,5 @@
 function [names,lst] = list(obj)
-% Show the directories in data/V3
+% Show the directories in data/V4
 %
 % Synopsis
 %   thisR.list
@@ -17,7 +17,7 @@ function [names,lst] = list(obj)
 % See also
 %   recipeSet, recipeGet
 
-v3Dir = fullfile(piRootPath,'data','V3');
+v3Dir = fullfile(piRootPath,'data','V4');
 lst = dir(v3Dir);
 names = cell(numel(lst)-2,1);
 kk = 1;
@@ -37,7 +37,7 @@ e = cellfun(vFunc,names);
 names = names(e);
 lst = lst(e);
 
-fprintf('\nPBRT directories in your iset3d/data/V3\n');
+fprintf('\nPBRT directories in your iset3d/data/V4\n');
 fprintf('----------------------------------------\n');
 
 for ii=1:numel(names)
