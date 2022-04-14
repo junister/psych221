@@ -21,12 +21,17 @@ function status = piDockerConfig(varargin)
 %  image on the remote site, and also which GPU on that site.  These
 %  combinations work on muxreconrt:
 %
-%   ‘whichGPU’, 0, ‘remoteImage’, ‘digitalprodev/pbrt-v4-gpu-ampere-mux’
-%   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
-%   ‘whichGPU’ ,2, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
+%{
+%  These docker files are no longer accurate - BW
+%
+   'whichGPU' ,0, 'remoteImage, 'digitalprodev/pbrt-v4-gpu-ampere-mux'
+   ‘whichGPU’ ,1, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
+   ‘whichGPU’ ,2, ‘remoteImage', ‘digitalprodev/pbrt-v4-gpu-volta-mux’
+%}
 %
 %   If you have a local GPU, ISET will attempt to find the correct GPU
 %   image, if available. Otherwise it will default to:
+%
 %       digitalprodev/pbrt-v4-cpu
 %
 % NOTE: We are attempting to maintain both a :latest and a :stable
@@ -34,18 +39,6 @@ function status = piDockerConfig(varargin)
 %
 %  We should probably make a list of working ones and keep it updated here.
 %  Or in dockerWrapper.
-%
-%  renderString = {'gpuRendering', true, ...
-%                'remoteMachine', <machine name>,...
-%                'renderContext', <docker context>,...
-%                'remoteImage',  'digitalprodev/pbrt-v4-gpu-ampere-mux', ...
-%                'remoteRoot',<homedir>, ...
-%                'remoteUser', uName, ...
-%                'whichGPU', <#>};
-%   setpref('docker', 'renderString', renderString);
-%
-%   Another option for windows
-%                'localRoot', <for WSL>, ...
 %
 %   You can check that docker context exists this way
 %
