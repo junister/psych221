@@ -47,7 +47,7 @@ arguments
     options.remoteImageTag = '';
     options.remoteRoot = ''; % we need to know where to map on the remote system
     options.localRoot = ''; % for the Windows/wsl case (sigh)
-    options.forceLocal;
+    options.forceLocal = false;
 
 end
 
