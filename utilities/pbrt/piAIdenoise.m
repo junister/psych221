@@ -55,11 +55,18 @@ switch object.type
     otherwise
         error('Should never get here.  %s\n',object.type);
 end
+% % get normal
+% if isfield(object.data,'normalMap') && ~isempty(object.data.normalMap)
+%     normalFlag = 1;
+%     normalmap = object.data.normalMap;
+%     normal_pth = fullfile(piRootPath,'local','tmp_input_normal.pfm');
+%     writePFM(normalmap, normal_pth);
+% end
 
 %% Set up the denoiser path information
 
 if ismac
-    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.1.x86_64.macos', 'bin');
+    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 else
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
 end
@@ -74,7 +81,7 @@ for ii = 1:chs
     img_sp(:,:,2) = img_sp(:,:,1);
     img_sp(:,:,3) = img_sp(:,:,1);
     writePFM(img_sp, outputTmp);
-    cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp, ' -o ',DNImg_pth];
+    cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
     [~, results] = system(cmd);
     [status, results] = system(cmd);
     if status
@@ -91,5 +98,6 @@ object.data.photons = NewPhotons;
 
 if exist(DNImg_pth,'file'), delete(DNImg_pth); end
 if exist(outputTmp,'file'), delete(outputTmp); end
+% if exist(normal_pth,'file'), delete(normal_pth); end
 
 end
