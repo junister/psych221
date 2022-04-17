@@ -10,28 +10,40 @@ function  setParams(options)
 % Inputs
 %   N/A
 %
-% Key/Val pairs
+% Key/Val pairs - hopefully meaning is clear (see examples below)
+%
+%   remoteUser
+%   remoteRoot
+%   localRoot
+%   gpuRendering
+%   remoteImageTag
+%   whichGPU
 %
 % Return
 %   N/A
 %
 % Description
-% Underlying mechanism is setpref(), getpref() so changes are persistent
-% across Matlab sessions. 
 %
-%   dockerWrapper.setParams('docker','remoteUser',<remoteUser>);
-%   dockerWrapper.setParams('docker','remoteRoot',<remoteRoot>); % where we will put the iset tree
-%   dockerWrapper.setParams('docker','localRoot',<localRoot>); % only needed for WSL if not \mnt\c
+%  Interface to setpref(), getpref() so changes are persistent across
+%  Matlab sessions.  
 %
-% Other options you can specify:
-% If you need to turn-off GPU Rendering set to false
-%  dockerWrapper.setParams('docker','gpuRendering',false);
+% Main examples:
 %
-% If you are having issues with :latest, you can go back to :stable
-% dockerWrapper.setParams('docker', 'remoteImageTag','stable');
+%   dockerWrapper.setParams('remoteUser',<remoteUser>);
+%   dockerWrapper.setParams('remoteRoot',<remoteRoot>); % where we will put the iset tree
 %
-% Change which gpu to use on a server
-% dockerWrapper.setParams('docker', 'whichGPU', <#>); % default is 0
+%  Used on Windows
+%   dockerWrapper.setParams('localRoot',<localRoot>); % only needed for WSL if not \mnt\c
+%
+% Other options:
+%
+%  dockerWrapper.setParams('gpuRendering',false); % Turn off gpu rendering
+%
+% Default tag is :latest.  You might go back to :stable
+%  dockerWrapper.setParams('remoteImageTag','stable');
+%
+% Which gpu to use 
+%  dockerWrapper.setParams('whichGPU', <#>); % on muxreonrt defaults to 0
 %
 
 arguments
@@ -47,11 +59,17 @@ arguments
     options.remoteImageTag = '';
     options.remoteRoot = ''; % we need to know where to map on the remote system
     options.localRoot = ''; % for the Windows/wsl case (sigh)
+    options.forceLocal = false;
 
 end
+
+if ~isempty(options.forceLocal)
+    setpref('docker','forceLocal', options.forceLocal);
+end
+
 setpref('docker','whichGPU', options.whichGPU);
 
-if isnumeric(options.gpuRendering)
+if ~isempty(options.gpuRendering)
     setpref('docker','gpuRendering', options.gpuRendering);
 end
 if ~isempty(options.remoteUser)

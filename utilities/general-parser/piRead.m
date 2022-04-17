@@ -76,7 +76,7 @@ p.addParameter('exporter', 'C4D', @ischar); % deal with this later
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
 % Not sure whether other type of FBX file has this problem.
-% p.addParameter('convertunit',false,@islogical); 
+% p.addParameter('convertunit',false,@islogical);
 
 p.parse(fname,varargin{:});
 
@@ -88,7 +88,7 @@ thisR.version = 4;
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
-   
+
     disp('Formating PBRT file...')
     infile = piPBRTReformat(pbrtFile);
 else
@@ -188,26 +188,26 @@ end
 world = thisR.world;
 if any(piContains(world, 'Include'))
     % If we have an Include file in the world section, the txt lines in the
-    % file is merged into thisR.world.  
-    
+    % file is merged into thisR.world.
+
     % Find all the lines in world that have an 'Include'
     inputDir = thisR.get('inputdir');
     IncludeIdxList = find(piContains(world, 'Include'));
-    
+
     % For each of those lines ....
     for IncludeIdx = 1:numel(IncludeIdxList)
         % Find the include file
         IncStrSplit = strsplit(world{IncludeIdxList(IncludeIdx)},' ');
         IncFileName = erase(IncStrSplit{2},'"');
         IncFileNamePath = fullfile(inputDir, IncFileName);
-        
+
         % Read the text from the include file
         [IncLines, ~] = piReadText(IncFileNamePath);
-        
+
         % Erase the include line.
         thisR.world{IncludeIdxList(IncludeIdx)} = [];
-        
-        % Add the text to the world section 
+
+        % Add the text to the world section
         thisR.world = {thisR.world, IncLines};
         thisR.world = cat(1, thisR.world{:});
     end
@@ -216,31 +216,30 @@ end
 thisR.world = piFormatConvert(thisR.world);
 
 if strcmpi(exporter, 'Copy')
-    disp('Scene will not be parsed. Maybe we can parse in the future');
+    % what does this mean since we then parse it?
+    %disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
-    fprintf('Read %d materials.\n', materialLists.Count);
-    fprintf('Read %d textures.\n', textureList.Count);
-    
+    fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
+
     thisR.materials.list = materialLists;
-    
+
     % Call material lib
     thisR.materials.lib = piMateriallib;
-    
+
     thisR.textures.list = textureList;
-    
+
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);
-    
+
     thisR.world = newWorld;
 else
     % Read material and texture
     [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
-    fprintf('Read %d materials.\n', materialLists.Count);
-    fprintf('Read %d textures.\n', textureList.Count);
-    
+    fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
+
     [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
     thisR.world = newWorld;
 %     [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
@@ -250,12 +249,12 @@ else
 %         thisR.world(2:parsedUntil)=[];
 %     end
     thisR.materials.list = materialLists;
-    
+
     % Call material lib
     thisR.materials.lib = piMateriallib;
-    
+
     thisR.textures.list = textureList;
-    
+
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);
 
@@ -268,12 +267,16 @@ else
         % shape ...
         disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
     end
-    
 
-    
+
+
 end
 
-disp('***Scene parsed.')
+verbosity = 0;
+if verbosity > 0
+    disp('***Scene parsed.');
+end
+
 %%  Additional information for instanced objects
 % PBRT does not allow instance lights, however in the cases that
 % we would like to instance an object with some lights on it, we will
@@ -403,7 +406,7 @@ if(~isempty(concatTBlock))
     values = textscan(concatTBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
     values = cell2mat(values(2:end));
     concatTransform = reshape(values,[4 4]);
-    
+
     % Apply transform and update lookAt
     lookAtTransform = piLookat2Transform(from,to,up);
     [from,to,up,flip] = piTransform2LookAt(lookAtTransform*concatTransform);
@@ -435,7 +438,7 @@ while ii<=nline
         % If the blockLine matches the BlockName, do something
         if strncmp(blockLine, blockName, length(blockName))
             s=[];
-            
+
             % If it is Transform, do this and then return
             if (strcmp(blockName,'Transform') || ...
                     strcmp(blockName,'LookAt')|| ...
@@ -443,12 +446,12 @@ while ii<=nline
                     strcmp(blockName,'Scale'))
                 return;
             end
-            
+
             % It was not Transform.  So figure it out.
             thisLine = strrep(blockLine,'[','');  % Get rid of [
             thisLine = strrep(thisLine,']','');   % Get rid of ]
             thisLine = textscan(thisLine,'%q');   % Find individual words into a cell array
-            
+
             % thisLine is a cell of 1.
             % It contains a cell array with the individual words.
             thisLine = thisLine{1};
@@ -457,7 +460,7 @@ while ii<=nline
             blockSubtype = thisLine{2};
             s = struct('type',blockType,'subtype',blockSubtype);
             dd = 3;
-            
+
             % Build a struct that will be used for representing this type
             % of Option (Camera, Sampler, Integrator, Film, ...)
             % This builds the struct and assigns the values of the
@@ -474,7 +477,7 @@ while ii<=nline
                     valueName = C{2};
                 end
                 value = thisLine{dd+1};
-                
+
                 % Convert value depending on type
                 if(isempty(valueType))
                     continue;
@@ -485,7 +488,7 @@ while ii<=nline
                 else
                     error('Did not recognize value type, %s, when parsing PBRT file!',valueType);
                 end
-                
+
                 tempStruct = struct('type',valueType,'value',value);
                 s.(valueName) = tempStruct;
                 dd = dd+2;
@@ -499,5 +502,3 @@ end
 end
 
 %% END
-
-
