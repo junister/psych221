@@ -103,7 +103,7 @@ if pbrtText && ~isempty(val) &&...
             
             % Maybe fix specscale earlier and more gnerally.
             if isempty(spectrumScale), spectrumScale = 1; end
-            
+            spectrumScale = 1; % tmp, we scale spd with a seperate paramter.
             if ischar(lght.spd.value)
                 [~, ~, ext] = fileparts(lght.spd.value);
                 if ~isequal(ext, '.spd')
@@ -191,6 +191,10 @@ if pbrtText && ~isempty(val) &&...
             for ii=1:numel(val)
                 txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
             end
+        case 'specscale'
+%             if ~iscell(val), val = {val};end
+            txt = sprintf(' "float scale" [%.5f]',val);
+             
     end
 end
 

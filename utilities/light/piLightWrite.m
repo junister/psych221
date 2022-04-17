@@ -128,7 +128,12 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(fromTxt)
                 lghtDef = strcat(lghtDef, fromTxt);
             end
-
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
+            end
+            
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'distant'
@@ -159,7 +164,12 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(toTxt)
                 lghtDef = strcat(lghtDef, toTxt);
             end
-
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
+            end
+            
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
 
@@ -177,6 +187,11 @@ for ii = 1:numel(thisR.lights)
             [~, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
             if ~isempty(mapnameTxt)
                 lghtDef = strcat(lghtDef, mapnameTxt);
+            end
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
             end
 
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
@@ -219,17 +234,22 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, nsamplesTxt);
             end
 
-            % mapname
-            [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
-            if ~isempty(mapnameTxt)
-                lghtDef = strcat(lghtDef, mapnameTxt);
+%             % mapname
+%             [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+%             if ~isempty(mapnameTxt)
+%                 lghtDef = strcat(lghtDef, mapnameTxt);
+% 
+%                 if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
+%                     mapFile = which(mapName);
+%                     copyfile(mapFile,thisR.get('output dir'))
+%                 end
+%             end
 
-                if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
-                    mapFile = which(mapName);
-                    copyfile(mapFile,thisR.get('output dir'))
-                end
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
             end
-
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'projection'
@@ -300,6 +320,12 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, conedeltaangleTxt);
             end
 
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
+            end
+            
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
 
