@@ -1,4 +1,8 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
+% When a properly formed dockerWrapper exists, we render this way
+%
+% See also
+%
 
 verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
@@ -14,10 +18,8 @@ else
 end
 
 % Windows doesn't seem to like the t flag
-if ispc
-    flags = '-i ';
-else
-    flags = '-it ';
+if ispc,     flags = '-i ';
+else,        flags = '-it ';
 end
 
 [~, sceneDir, ~] = fileparts(outputFolder);

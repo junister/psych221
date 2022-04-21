@@ -21,14 +21,24 @@ function [ieObject, result] = piRender(thisR,varargin)
 %  scalePupilArea
 %             - if true, scale the mean illuminance by the pupil
 %               diameter in piDat2ISET (default is true)
+%
 %  reuse      - Boolean. Indicate whether to use an existing file if one of
 %               the correct size exists (default is false)
+%
+%  ourdocker  - Specify which docker to use
+%
+%  reflectancerender -  NYI
+%
+%  rendertype - Any combination of these strings
+%        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
 %
 %  verbose    - Level of desired output:
 %               0 Silent
 %               1 Minimal
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
+%
+% wave      -
 %
 % RETURN
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -41,9 +51,22 @@ function [ieObject, result] = piRender(thisR,varargin)
 % Zhenyi, 2021
 %
 % See also
-%   s_piReadRender*.m, piRenderResult
+%   s_piReadRender*.m, piRenderResult, dockerWrapper
 
 % Examples
+%{
+% These are examples of how to set the dockerWrapper parameters
+%
+% ourDocker = dockerWrapper('gpuRendering', true, ...
+%     'renderContext', 'remote-render','remoteImage', ...
+%     'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
+%     'remoteMachine', 'beluga.psych.upenn.edu', ...
+%     'remoteUser', 'david81', 'localRoot', '/mnt/c', 'whichGPU', 1);
+%
+% to run it using the CPU container
+%
+% ourDocker = dockerWrapper('gpuRendering', false);
+%}
 %{
    % Renders both radiance and depth
    pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
@@ -99,16 +122,16 @@ p.addParameter('meanluminance',0,@isnumeric);
 p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
-p.addParameter('reflectancerender', false, @islogical);
+% p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker',''); % to specify a specific docker container
 p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 p.addParameter('rendertype', []); % if none we use what is in the recipe
 
 p.parse(thisR,varargin{:});
-ourDocker = p.Results.ourdocker;
-scalePupilArea = p.Results.scalepupilarea;
-meanLuminance    = p.Results.meanluminance;
+ourDocker        = p.Results.ourdocker;
+scalePupilArea   = p.Results.scalepupilarea;  % Fix this
+meanLuminance    = p.Results.meanluminance;   % And this
 wave             = p.Results.wave;
 verbosity        = p.Results.verbose;
 renderType       = p.Results.rendertype;
@@ -120,36 +143,45 @@ end
 %% try to support docker servers
 persistent renderDocker;
 
-% try and set the default to a server if we aren't passed one.
-% getRender() is an optional function that can be created and maintained
-% on a per-site basis to specify local machines, GPUs, and other data.
+% If ourDocker is empty, we have to guess what the user wants. By
+% default, we control the rendering using a dockerWrapper object
+% returned by getRenderer(), part of the vistalab repository. The
+% dockerWrapper returned by getRenderer is controlled by the user, who
+% can establish dockerWrapper.setParams() calls.
 if isempty(ourDocker)
     if ~isempty(which('getRenderer'))
-        ourDocker =  getRenderer();
+        % getRenderer is in the vistalab repository.  It returns a
+        % dockerTemplate that is used for rendering.
+        renderDocker =  getRenderer();
     else
+        % This user does not have the vistalab code with getRenderer.
+        % So, we try our best with the Matlab prefs.
+        disp('Using Matlab docker prefs to determine rendering.')
         renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-        ourDocker = dockerWrapper(renderPrefs{:});
+        renderDocker = dockerWrapper(renderPrefs{:});
     end
+elseif isa(ourDocker,'dockerWrapper')
+    % The user already told us what they want, so do nothing.
+    renderDocker = ourDocker; % use the one we are passed
+elseif ischar(ourDocker)
+    % The user is allowed to send a string that defines a container to
+    % be run locally on their computer
+    % We send the user off to run the local docker command from here.
+    disp('Running local docker command.')
+    % We might reset the dockerWrapper, or build a special
+    % dockerWrapper, for the local run.
+else
+    error('Unable to interpret ourDocker');
 end
 
-% Extensive Example:
-% renderString = {'gpuRendering', true, 'remoteMachine', <machine name>,'renderContext', <docker context>,'remoteImage', 'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot',<homedir>, 'remoteUser', uName, 'localRoot', <for WSL>, 'whichGPU', <#>};
-% setpref('docker', 'renderString', renderString);
-
-% or you can create one directly:
-% ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
-%    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
-%     'remoteMachine', 'beluga.psych.upenn.edu', ...
-%     'remoteUser', 'david81', 'localRoot', '/mnt/c', 'whichGPU', 1);
-
-% to run it using a typical local container
-%ourDocker = dockerWrapper('gpuRendering', false);
-
+%{
+% No longer needed, we think.
 if ~isempty(ourDocker)
     renderDocker = ourDocker; % use the one we are passed
 elseif isempty(renderDocker)
     renderDocker = dockerWrapper(); % accept defaults
 end
+%}
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 

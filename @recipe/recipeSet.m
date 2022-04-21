@@ -1355,6 +1355,8 @@ switch param
         end
         thisR.materials.list.(matName).floatconcentration = val{2};
     case {'rendertype','filmrendertype'}
+        % piRender(thisR,'render type',{list of types});
+        % piRender(thisR,'render type',{'radiance','depth','instance'});        
         thisR.metadata.rendertype = val;
         for ii = 1:numel(val)
             switch val{ii}
