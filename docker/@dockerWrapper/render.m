@@ -1,4 +1,6 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
+% Called by the docker wrapper
+%
 
 verbose = getpref('docker','verbosity',1); % 0, 1, 2
 

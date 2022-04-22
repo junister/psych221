@@ -1,6 +1,12 @@
 classdef dockerWrapper < handle
     %DOCKER Class providing accelerated pbrt on GPU performance
     %
+    % NOTE:  We seem to be leaving a lot of exited docker containers in the
+    % docker space.  These are imgtool functions.  Maybe we can stop
+    % leaving them around.  In any event, to get rid of them we can run
+    %
+    %    docker container prune
+    %
     % In principle, when simply used for render acceleration
     % on a local GPU, it should be user-transparent by default.
     %
@@ -18,15 +24,15 @@ classdef dockerWrapper < handle
     %
     % Parameters used for Remote Rendering
     %
-    % remoteMachine -- name of remote machine to render on
-    % remoteUser -- username on remote machine (that has key support)
-    % remoteContext -- name of docker context pointing to renderer
-    % remoteImage -- GPU-specific docker image on remote machine
-    %  EXPERIMENTAL: CPU image on remote machine for offloading large
+    %   remoteMachine -- name of remote machine to render on
+    %   remoteUser    -- username on remote machine (that has key support)
+    %   remoteContext -- name of docker context pointing to renderer
+    %   remoteImage   -- GPU-specific docker image on remote machine
+    %   EXPERIMENTAL: CPU image on remote machine for offloading large
     %                CPU-only renders
-    % remoteRoot -- needed if different from local piRoot
+    %   remoteRoot -- needed if different from local piRoot
     %
-    % localRoot -- only for WSL -- the /mnt path to the Windows piRoot
+    %   localRoot -- only for WSL -- the /mnt path to the Windows piRoot
     % 
     % Additional Render-specific parameters
     %
@@ -49,8 +55,9 @@ classdef dockerWrapper < handle
     %     and any new docker containers will use that.
     %
     % Example of local CPU rendering:
-    % ourDocker = dockerWrapper('gpuRendering', false);
-
+    %
+    %    ourDocker = dockerWrapper('gpuRendering', false);
+    %
     % Example of what we need to generate prior to running from scratch
     % -- Not needed for rendering
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
@@ -59,6 +66,7 @@ classdef dockerWrapper < handle
     properties
         dockerContainerName = '';
         dockerContainerID = '';
+        
         % default image is cpu on x64 architecture
         dockerImageName =  dockerWrapper.localImage();
         dockerImageRender = ''; % set based on local machine
