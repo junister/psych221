@@ -36,17 +36,17 @@ p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 p.addParameter('material',true);
 p.addParameter('texture',true);
 p.addParameter('asset',true);
-p.addParameter('objectInstance',true);
+p.addParameter('objectinstance',true);
 p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
 
 p.parse(sceneR, objectRs, varargin{:});
 
-sceneR        = p.Results.sceneR;
-materialFlag  = p.Results.material;
-textureFlag   = p.Results.texture;
-assetFlag     = p.Results.asset;
-objectInstance=p.Results.objectInstance;
-nodeName      = p.Results.nodename;
+sceneR         = p.Results.sceneR;
+materialFlag   = p.Results.material;
+textureFlag    = p.Results.texture;
+assetFlag      = p.Results.asset;
+objectInstance = p.Results.objectinstance;
+nodeName       = p.Results.nodename;
 copyTextureFlag = 1;
 %%  The objects can be a cell or a recipe
 

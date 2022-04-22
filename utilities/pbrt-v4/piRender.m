@@ -270,7 +270,7 @@ else  % Linux & Mac
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
         % Legacy
-        %dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
+        % dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
 end
 
@@ -335,8 +335,5 @@ if isstruct(ieObject)
             error('Unknown struct type %s\n',ieObject.type);
     end
 end
-
-
-
 
 
