@@ -173,6 +173,7 @@ if getpref('docker','localRender')
     % Set local rendering
     renderDocker =  getRenderer();
     renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
+    renderDocker.remoteMachine = '';
 else
     % Set
     if isempty(ourDocker)
