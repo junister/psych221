@@ -68,11 +68,7 @@ classdef dockerWrapper < handle
     properties
         dockerContainerName = '';
         dockerContainerID = '';
-<<<<<<< Updated upstream
-        
-=======
 
->>>>>>> Stashed changes
         % default image is cpu on x64 architecture
         dockerImageName   =  dockerWrapper.localImage();
         dockerImageRender = '';        % set based on local machine
