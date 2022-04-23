@@ -21,11 +21,13 @@ function [obj,results] = piWRS(thisR,varargin)
 %           ... others).  If it is a char, then we convert it to a cell.
 %   'show'  -  Call a window to show the object (default) and insert it in
 %           the vcSESSION database
+%   'rgb'   - Return an RGB image from the scene or oi
 %   'our docker' - Specify the docker image passed to piRender
 %
 % Returns
 %   obj     - a scene or oi
-%   results - The piRender text outputs
+%   results - Struct that contains the piRender text outputs and, if
+%             requested, an rgb image of the object
 %
 % Description
 %   
@@ -46,6 +48,7 @@ p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
 p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
+p.addParameter('rgb',true,@islogical);
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
@@ -59,6 +62,7 @@ end
 
 name = p.Results.name;
 show = p.Results.show;
+rgb  = p.Results.rgb;
 
 %% In version 4 we set the render type this way
 
@@ -70,15 +74,17 @@ thisR.set('render type',renderType);
 
 piWrite(thisR);
 
-[obj,results] = piRender(thisR, 'ourdocker', ourDocker);
+[obj,results.text] = piRender(thisR, 'ourdocker', ourDocker);
 
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
         if show, sceneWindow(obj); end
+        if rgb, results.rgb = sceneGet(obj,'rgb'); end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show, oiWindow(obj); end
+        if rgb, results.rgb = oiGet(obj,'rgb'); end
 end
 
 thisR.set('render type',oldRenderType);

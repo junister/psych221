@@ -10,28 +10,40 @@ function  setParams(options)
 % Inputs
 %   N/A
 %
-% Key/Val pairs
+% Key/Val pairs - hopefully meaning is clear (see examples below)
+%
+%   remoteUser
+%   remoteRoot
+%   localRoot
+%   gpuRendering
+%   remoteImageTag
+%   whichGPU
 %
 % Return
 %   N/A
 %
 % Description
-% Underlying mechanism is setpref(), getpref() so changes are persistent
-% across Matlab sessions. 
+%
+%  Interface to setpref(), getpref() so changes are persistent across
+%  Matlab sessions.  
+%
+% Main examples:
 %
 %   dockerWrapper.setParams('remoteUser',<remoteUser>);
 %   dockerWrapper.setParams('remoteRoot',<remoteRoot>); % where we will put the iset tree
+%
+%  Used on Windows
 %   dockerWrapper.setParams('localRoot',<localRoot>); % only needed for WSL if not \mnt\c
 %
-% Other options you can specify:
-% If you need to turn-off GPU Rendering set to false
-%  dockerWrapper.setParams('gpuRendering',false);
+% Other options:
 %
-% If you are having issues with :latest, you can go back to :stable
-% dockerWrapper.setParams('remoteImageTag','stable');
+%  dockerWrapper.setParams('gpuRendering',false); % Turn off gpu rendering
 %
-% Change which gpu to use on a server
-% dockerWrapper.setParams('whichGPU', <#>); % default is 0
+% Default tag is :latest.  You might go back to :stable
+%  dockerWrapper.setParams('remoteImageTag','stable');
+%
+% Which gpu to use 
+%  dockerWrapper.setParams('whichGPU', <#>); % on muxreonrt defaults to 0
 %
 
 arguments
