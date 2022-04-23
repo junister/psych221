@@ -46,10 +46,12 @@ classdef dockerWrapper < handle
     % Original by David Cardinal, Stanford University, September, 2021.
 
     % Example of remote GPU rendering initialization from a Windows client:
+    %
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
     %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 0);
+    %
     % NOTE: For ease of use you can simply do:
     %   setpref('docker', 'renderString', <same arguments>)
     %     and any new docker containers will use that.
@@ -66,44 +68,55 @@ classdef dockerWrapper < handle
     properties
         dockerContainerName = '';
         dockerContainerID = '';
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         % default image is cpu on x64 architecture
-        dockerImageName =  dockerWrapper.localImage();
-        dockerImageRender = ''; % set based on local machine
+        dockerImageName   =  dockerWrapper.localImage();
+        dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
+
         gpuRendering = true;
+        whichGPU = -1; % for multiple GPU configs, or -1 for any
 
         % these relate to remote/server rendering
         % they overlap while we learn the best way to organize them
-        remoteMachine = ''; % for syncing the data
-        remoteUser = ''; % use for rsync & ssh/docker
-
-        remoteImage = '';
+        remoteMachine  = ''; % for syncing the data
+        remoteUser     = ''; % use for rsync & ssh/docker
+        remoteImage    = '';
         remoteImageTag = 'latest';
-        remoteRoot = ''; % we need to know where to map on the remote system
+        remoteRoot     = ''; % we need to know where to map on the remote system
+        
         localRoot = ''; % for the Windows/wsl case (sigh)
+                
         workingDirectory = '';
-        localVolumePath = '';
+        localVolumePath  = '';
         targetVolumePath = '';
-        whichGPU = -1; % for multiple GPU configs, or -1 for any
-
-        %
+        % This is set for muxreconrt, but when we are local perhaps it
+        % should be something else.
         relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static
+
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
         dockerFlags = '';
         command = 'pbrt';
         inputFile = '';
         outputFile = 'pbrt_output.exr';
         outputFilePrefix = '--outfile';
+
+        localRender = false;
+        localImageTag = 'latest';
+
     end
 
     methods (Static)
 
-        % Need to list ones that are in a separate file if they are static
+        % These are function definitions. Need to list functions that
+        % are defined in a separate file when those functions are static 
         dockerImage = localImage();
-        setParams();
-        
-        [dockerExists, status, result] = exists() % separate file
+        setParams();        
+        [dockerExists, status, result] = exists();  % Like piDockerExists
                 
         function reset()
             % we should remove any existing containers here

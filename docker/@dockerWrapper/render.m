@@ -1,9 +1,12 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
-% When a properly formed dockerWrapper exists, we render this way
+% Render using the dockerWrapper method
+%
+% obj - a dockerWrapper
 %
 % See also
-%
+%  piRender
 
+%%
 verbose = getpref('docker','verbosity',1); % 0, 1, 2
 
 % Currently we have an issue where GPU rendering ignores objects
@@ -33,9 +36,10 @@ else
 end
 % container is Linux, so convert
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
-        
+
 % sync data over
 if ~isempty(obj.remoteMachine)
+    % There is a remote machine
     if ispc
         rSync = 'wsl rsync';
         nativeFolder = [obj.localRoot outputFolder '/'];
@@ -71,7 +75,7 @@ if ~isempty(obj.remoteMachine)
     else
         putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
     end
-    
+
     if verbose > 0
         fprintf(" Rsync Put: %s\n", putCommand);
     end
@@ -113,32 +117,44 @@ if ~isempty(obj.remoteMachine)
     end
     if status == 0 && ~isempty(obj.remoteMachine)
 
-    % sync data back -- renderings sub-folder
-    % This assumes that all output is in that folder!
-    getOutput = tic;
-    pullCommand = sprintf('%s -r %s %s',rSync, ...
-        [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
-    if verbose > 0
-        fprintf(" Rsync Pull: %s\n", pullCommand);
-    end
+        % sync data back -- renderings sub-folder
+        % This assumes that all output is in that folder!
+        getOutput = tic;
+        pullCommand = sprintf('%s -r %s %s',rSync, ...
+            [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
+        if verbose > 0
+            fprintf(" Rsync Pull: %s\n", pullCommand);
+        end
 
-    % bring back results
-    system(pullCommand);
-    if verbose > 0
-        fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
-    end
+        % bring back results
+        system(pullCommand);
+        if verbose > 0
+            fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
+        end
     end
 else
     % our output folder path starts from root, not from where the volume is
     % mounted -- sort of weenie as this is the Windows path while on
     % windows
-    shortOut = [obj.relativeScenePath sceneDir];
+    % {
+       dockerCommand = 'docker run -ti --rm';
+       if ~isempty(outputFolder)
+            if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
+            dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
+        end
+        dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);       
+        containerRender = sprintf('%s %s %s', dockerCommand, obj.dockerImageName, renderCommand);
+    %}
+    %{
+    shortOut = fullfile(obj.relativeScenePath,sceneDir);
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
+    %}
     renderStart = tic;
     [status, result] = system(containerRender);
     if verbose > 0
         fprintf('Rendered locally in: %6.2f\n', toc(renderStart))
     end
 end
+
 end
 

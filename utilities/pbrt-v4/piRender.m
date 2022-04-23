@@ -68,7 +68,7 @@ function [ieObject, result] = piRender(thisR,varargin)
 % ourDocker = dockerWrapper('gpuRendering', false);
 %}
 %{
-   % Renders both radiance and depth
+   % Renders both radiance and depth by default.
    pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
@@ -80,15 +80,18 @@ function [ieObject, result] = piRender(thisR,varargin)
    pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile,'render type','radiance');
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
+
    dmap = piRender(pbrtFile,'render type','depth');
    scene = sceneSet(scene,'depth map',dmap);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
 %}
 %{
-  % Separately calculate the illuminant and the radiance
-  thisR = piRecipeDefault; piWrite(thisR);
-  [scene, result]      = piRender(thisR);
-  [illPhotons, result] = piRender(thisR);
+  % Separately calculate the illuminant and the radiance-
+  % We are not sure this works or is right!
+  thisR = piRecipeDefault; 
+  piWrite(thisR);
+  [scene, result]      = piRender(thisR,'render type','radiance');
+  [illPhotons, result] = piRender(thisR,'render type','illuminance');
   scene = sceneSet(scene,'illuminant photons',illPhotons);
   sceneWindow(scene);
 %}
@@ -108,6 +111,15 @@ function [ieObject, result] = piRender(thisR,varargin)
   thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
   [aScene, metadata] = piRender(thisR, 'render type','material');
 %}
+%{
+% Render locally with your CPU machine
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  scene = piRender(thisR,'local',true,'our docker','digitalprodev/pbrt-v4-cpu');
+  
+  dockerWrapper.setParams('local',true);
+  dockerWrapper.setParams('local image','digitalprodev/pbrt-v4-cpu');
+  scene = piRender(thisR);
+%}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model
 
@@ -123,10 +135,17 @@ p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 % p.addParameter('reflectancerender', false, @islogical);
-p.addParameter('ourdocker',''); % to specify a specific docker container
-p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
+p.addParameter('ourdocker','');    % to specify a docker image
+
+% This passed to piDat2ISET, which is where we do the construction.
+p.addParameter('wave', 400:10:700, @isnumeric); 
+
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 p.addParameter('rendertype', []); % if none we use what is in the recipe
+
+% If you would to render on your local machine, set this to true.  And
+% make sure that 'ourdocker' is set to the container you want to run.
+p.addParameter('localrender',false,@islogical);
 
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
@@ -143,35 +162,37 @@ end
 %% try to support docker servers
 persistent renderDocker;
 
+% This code sets up renderDocker, a dockerWrapper class.
+%
 % If ourDocker is empty, we have to guess what the user wants. By
 % default, we control the rendering using a dockerWrapper object
 % returned by getRenderer(), part of the vistalab repository. The
 % dockerWrapper returned by getRenderer is controlled by the user, who
 % can establish dockerWrapper.setParams() calls.
-if isempty(ourDocker)
-    if ~isempty(which('getRenderer'))
-        % getRenderer is in the vistalab repository.  It returns a
-        % dockerTemplate that is used for rendering.
-        renderDocker =  getRenderer();
-    else
-        % This user does not have the vistalab code with getRenderer.
-        % So, we try our best with the Matlab prefs.
-        disp('Using Matlab docker prefs to determine rendering.')
-        renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-        renderDocker = dockerWrapper(renderPrefs{:});
-    end
-elseif isa(ourDocker,'dockerWrapper')
-    % The user already told us what they want, so do nothing.
-    renderDocker = ourDocker; % use the one we are passed
-elseif ischar(ourDocker)
-    % The user is allowed to send a string that defines a container to
-    % be run locally on their computer
-    % We send the user off to run the local docker command from here.
-    disp('Running local docker command.')
-    % We might reset the dockerWrapper, or build a special
-    % dockerWrapper, for the local run.
+if getpref('docker','localRender')
+    % Set local rendering
+    renderDocker =  getRenderer();
+    renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
 else
-    error('Unable to interpret ourDocker');
+    % Set
+    if isempty(ourDocker)
+        if ~isempty(which('getRenderer'))
+            % getRenderer is in the vistalab repository.  It returns a
+            % dockerTemplate that is used for rendering.
+            renderDocker =  getRenderer();
+        else
+            % This user does not have the vistalab code with getRenderer.
+            % So, we try our best with the Matlab prefs.
+            disp('Using Matlab docker prefs to determine rendering.')
+            renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
+            renderDocker = dockerWrapper(renderPrefs{:});
+        end
+    elseif isa(ourDocker,'dockerWrapper')
+        % The user already told us what they want, so do nothing.
+        renderDocker = ourDocker; % use the one we are passed
+    else
+        error('Unable to interpret remote render variable for ourDocker');
+    end
 end
 
 %{
@@ -264,8 +285,10 @@ else  % Linux & Mac
     % With V4 we need EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-    folderBreak = split(outputFolder, filesep());
-    shortOut = strcat('/', char(folderBreak(end)));
+
+    % Unused, so commented out (BW/ZL April 22)
+    % folderBreak = split(outputFolder, filesep());
+    % shortOut = strcat('/', char(folderBreak(end)));
 
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end

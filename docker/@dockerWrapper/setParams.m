@@ -50,6 +50,7 @@ arguments
     options.whichGPU {mustBeNumeric} = 0;
     options.gpuRendering = '';
 
+    % Remote options
     % these relate to remote/server rendering
     % they overlap while we learn the best way to organize them
     options.remoteMachine = ''; % for syncing the data
@@ -59,7 +60,14 @@ arguments
     options.remoteImageTag = '';
     options.remoteRoot = ''; % we need to know where to map on the remote system
     options.localRoot = ''; % for the Windows/wsl case (sigh)
+
+    % We do not yet understand this.  Maybe it is the same as
+    % localRender?
     options.forceLocal = false;
+
+    % When we run on the user's computer
+    options.localRender   = false;
+    options.localImageTag = 'latest';
 
 end
 
@@ -84,10 +92,25 @@ end
 if ~isempty(options.remoteRoot)
     setpref('docker', 'remoteRoot', options.remoteRoot);
 end
+
 if ~isempty(options.localRoot)
+    % We think this is the local root on either the remote machine or
+    % the local machine.  It is local w.r.t. the container.
     setpref('docker', 'localRoot', options.localRoot);
 end
 
+if ~isempty(options.localRender)
+    % Run the container on the user's local machine.  This is a
+    % logical variables, default's to false.
+    setpref('docker', 'localRender', options.localRender);
+end
+if ~isempty(options.localImageTag)
+    % By default this will be 'latest'
+    setpref('docker', 'localImageTag', options.localImageTag);
+end
+
+
 dockerWrapper.reset;
+
 end
 
