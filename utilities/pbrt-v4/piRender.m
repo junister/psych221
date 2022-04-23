@@ -169,7 +169,7 @@ persistent renderDocker;
 % returned by getRenderer(), part of the vistalab repository. The
 % dockerWrapper returned by getRenderer is controlled by the user, who
 % can establish dockerWrapper.setParams() calls.
-if getpref('docker','localRender')
+if getpref('docker','localRender',false)
     % Set local rendering
     renderDocker =  getRenderer();
     renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
