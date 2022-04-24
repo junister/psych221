@@ -3,9 +3,14 @@ classdef dockerWrapper < handle
     %
     % NOTE:  We seem to be leaving a lot of exited docker containers in the
     % docker space.  These are imgtool functions.  Maybe we can stop
-    % leaving them around.  In any event, to get rid of them we can run
+    % leaving them around. (Yes:)) In any event, to get rid of them we can run
     %
     %    docker container prune
+    %
+    % NOTE: If you are remote rendering you need to prune using
+    %       the same remote docker context you are using for rendering.
+    %
+    % (or wait for me to prune them on the server every few days:))
     %
     % In principle, when simply used for render acceleration
     % on a local GPU, it should be user-transparent by default.
@@ -42,6 +47,13 @@ classdef dockerWrapper < handle
     % FUTURE: Potenially unified way to call docker containers for iset
     %   as an attempt to resolve at least some of the myriad platform issues
     %
+
+    % NOTE on site-specific settings:
+    %   The dockerWrapper will look for a getRenderer() function first.
+    %   If it finds one it will use it to set the renderer.
+    %   One is not provided directly in ISET3D-v4, so that sites
+    %   or organizations can provide their own with local settings,
+    %   such as preferred server(s), GPU selection, etc.
 
     % Original by David Cardinal, Stanford University, September, 2021.
 
