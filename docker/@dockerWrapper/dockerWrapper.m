@@ -7,8 +7,11 @@ classdef dockerWrapper < handle
     %
     %    docker container prune
     %
-    % NOTE: If you are remote rendering you need to prune using
-    %       the same remote docker context you are using for rendering.
+    % NOTE: That works for imgtool stranded containers.
+    %       There can sometimes be stranded rendering containers
+    %       which may be on your rendering server -- in the event
+    %       that Matlab doesn't shut down properly. Those can
+    %       be pruned by running the same command on the server.
     %
     % (or wait for me to prune them on the server every few days:))
     %
