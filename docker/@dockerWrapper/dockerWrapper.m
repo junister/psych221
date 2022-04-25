@@ -1,22 +1,16 @@
 classdef dockerWrapper < handle
-    %DOCKER Class providing accelerated pbrt on GPU performance
+    %DOCKERWRAPPER Class manages rendering methods
     %
-    % NOTE:  We seem to be leaving a lot of exited docker containers in the
-    % docker space.  These are imgtool functions.  Maybe we can stop
-    % leaving them around. (Yes:)) In any event, to get rid of them we can run
+    % This class is designed to help manage running ISET3d-v4 in
+    % various ways. We hope to include rendering on
     %
-    %    docker container prune
-    %
-    % NOTE: That works for imgtool stranded containers.
-    %       There can sometimes be stranded rendering containers
-    %       which may be on your rendering server -- in the event
-    %       that Matlab doesn't shut down properly. Those can
-    %       be pruned by running the same command on the server.
-    %
-    % (or wait for me to prune them on the server every few days:))
-    %
-    % In principle, when simply used for render acceleration
-    % on a local GPU, it should be user-transparent by default.
+    %   * a remote server with a GPU, a
+    %   * a remote server with a CPU, 
+    %   * your local computer with a GPU, and
+    %   * your local computer with a CPU
+    %   * your local computer with PBRT installed and no docker at all.
+    % 
+    % As of this date, this remains a work-in-prgress.
     %
     % It operates by having piRender() call it to determine the
     % best docker image to run (ideally one with GPU support).
@@ -50,17 +44,31 @@ classdef dockerWrapper < handle
     % FUTURE: Potenially unified way to call docker containers for iset
     %   as an attempt to resolve at least some of the myriad platform issues
     %
-
-    % NOTE on site-specific settings:
+    % NOTES: 
+    %   1. We seem to be leaving a lot of exited docker containers in the
+    % docker space.  These are imgtool functions.  Maybe we can stop
+    % leaving them around. (Yes:)) In any event, to get rid of them we can run
+    %
+    %    docker container prune
+    %
+    % That works for imgtool stranded containers. There can sometimes
+    % be stranded rendering containers which may be on your rendering
+    % server -- in the event that Matlab doesn't shut down properly.
+    % Those can be pruned by running the same command on the server.
+    %(or wait for DJC to prune them on the server every few days:))
+    %
+    % 2. On site-specific settings:
     %   The dockerWrapper will look for a getRenderer() function first.
     %   If it finds one it will use it to set the renderer.
     %   One is not provided directly in ISET3D-v4, so that sites
     %   or organizations can provide their own with local settings,
     %   such as preferred server(s), GPU selection, etc.
-
+    %
     % Original by David Cardinal, Stanford University, September, 2021.
-
-    % Example of remote GPU rendering initialization from a Windows client:
+    %
+    % Examples (needs updates)
+    % 
+    %   1. Remote GPU rendering initialization from a Windows client:
     %
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
     %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
@@ -71,7 +79,7 @@ classdef dockerWrapper < handle
     %   setpref('docker', 'renderString', <same arguments>)
     %     and any new docker containers will use that.
     %
-    % Example of local CPU rendering:
+    %   2. Example of local CPU rendering:
     %
     %    ourDocker = dockerWrapper('gpuRendering', false);
     %
