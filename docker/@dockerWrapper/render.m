@@ -38,7 +38,7 @@ end
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
 
 % sync data over
-if ~isempty(obj.remoteMachine)
+if ~isempty(obj.remoteMachine) && ~getpref('docker','localRender')
     % There is a remote machine
     if ispc
         rSync = 'wsl rsync';
