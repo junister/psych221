@@ -20,6 +20,8 @@ function status = config(obj, varargin)
 %
 % Remote server code added by D. Cardinal 2021
 %
+% See also
+%   piDockerConfig
 
 %% Parse input arguments
 
@@ -98,7 +100,7 @@ if ~isempty(args.remoteMachine)
 end
 
 
-%% Configure Matlab ENV for the machine
+%% Configure Matlab ENV for the machine - based on piDockerConfig.
 
 % MAC OSX
 if ismac

@@ -1,30 +1,36 @@
 classdef dockerWrapper < handle
-    %DOCKERWRAPPER Class manages rendering methods
+    %DOCKERWRAPPER A class that manages rendering methods
     %
     % This class is designed to help manage running ISET3d-v4 in
     % various ways. We hope to include rendering on
     %
-    %   * a remote server with a GPU, a
-    %   * a remote server with a CPU, 
-    %   * your local computer with a GPU, and
-    %   * your local computer with a CPU
+    %   * a remote server with a GPU,
+    %   * a remote server with a CPU,
+    %   * your local computer with a GPU,
+    %   * your local computer with a CPU, and
     %   * your local computer with PBRT installed and no docker at all.
-    % 
-    % As of this date, this remains a work-in-prgress.
     %
-    % It operates by having piRender() call it to determine the
-    % best docker image to run (ideally one with GPU support).
+    % As of this date, this remains a work-in-progress.
     %
-    % If the GPU is local, this should be pretty straightforward.
-    % Running on a remote GPU is more complex. See below for
-    % more information on the required parameters.
+    % This class is used by piRender() to determine the way to run
+    % PBRT. The need for this class is that running on remote GPUs or
+    % selecting the right Docker container for a particular GPU or a
+    % CPU can be complex.
     %
-    % Either way, we start an image as a persistent, named, container.
-    % Calls to piRender() will then use dockerWrapper to do the
-    % rendering in the running container, avoiding startup overhead
-    % (which is nearly 20 seconds per render without this approach).
+    % Please note:
+    % To run on a remote machine someone must have set up the
+    % environment on the machine to match the expectations of ISET3d.
     %
-    % Parameters used for Remote Rendering
+    % See below for more information on the required parameters.
+    %
+    % Running remotely
+    %  When run on a remote machine, we launch a Docker image as a
+    %  persistent, named, container. Calls to piRender() will use
+    %  dockerWrapper to store the name and status of the remote
+    %  container.  By running in a persistent container, we avoid the
+    %  startup overhead (which is more than 20 seconds).
+    %
+    %  Parameters used for Remote Rendering
     %
     %   remoteMachine -- name of remote machine to render on
     %   remoteUser    -- username on remote machine (that has key support)
@@ -35,16 +41,20 @@ classdef dockerWrapper < handle
     %   remoteRoot -- needed if different from local piRoot
     %
     %   localRoot -- only for WSL -- the /mnt path to the Windows piRoot
-    % 
+    %
     % Additional Render-specific parameters
     %
     % whichGPU -- for multi-gpu rendering systems
     %   use device number (e.g. 0, 1, etc.) or -1 for don't care
-    % 
+    %
     % FUTURE: Potenially unified way to call docker containers for iset
     %   as an attempt to resolve at least some of the myriad platform issues
     %
-    % NOTES: 
+    % Running locally
+    %
+    %
+    %
+    % Additional NOTES:
     %   1. We seem to be leaving a lot of exited docker containers in the
     % docker space.  These are imgtool functions.  Maybe we can stop
     % leaving them around. (Yes:)) In any event, to get rid of them we can run
@@ -67,7 +77,7 @@ classdef dockerWrapper < handle
     % Original by David Cardinal, Stanford University, September, 2021.
     %
     % Examples (needs updates)
-    % 
+    %
     %   1. Remote GPU rendering initialization from a Windows client:
     %
     % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
@@ -88,6 +98,28 @@ classdef dockerWrapper < handle
     %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
     %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
+    % Scratch for how this should work
+    %{
+        % Read the current prefs under docker and set the
+        % dockerWrapper variables
+        thisDocker = dockerWrapper();
+
+        % These should both work on individual parameters
+        thisDocker.setParams
+        thisDocker.getParams
+
+        % The dockerWrapper should coordinate with getRenderer.  That
+        function should be able to access the information about the
+        local  computers and GPUs stored in (some local configuration
+        function or maybe a file). 
+
+        % To reset to the local defaults we might have
+        thisDocker.init;
+
+        % Save current parameters in the matlab prefs ('docker')
+        thisDocker.save  
+
+    %}
     properties
         dockerContainerName = '';
         dockerContainerID = '';
@@ -107,9 +139,9 @@ classdef dockerWrapper < handle
         remoteImage    = '';
         remoteImageTag = 'latest';
         remoteRoot     = ''; % we need to know where to map on the remote system
-        
+
         localRoot = ''; % for the Windows/wsl case (sigh)
-                
+
         workingDirectory = '';
         localVolumePath  = '';
         targetVolumePath = '';
@@ -129,16 +161,40 @@ classdef dockerWrapper < handle
 
     end
 
+    methods
+
+        % Constructor method
+    function obj = dockerWrapper(varargin)
+            %Docker Construct an instance of this class
+            %   Detailed explanation goes here
+            % default for flags
+            if ispc
+                obj.dockerFlags = '-i --rm';
+            else
+                obj.dockerFlags = '-ti --rm';
+            end
+            
+            obj.config(varargin{:});
+
+        end
+    end
+
+
     methods (Static)
 
-        % These are function definitions. Need to list functions that
-        % are defined in a separate file when those functions are static 
+        % These are function definitions. Matlab requires listing
+        % static functions that are defined in a separate file.
         dockerImage = localImage();
-        setParams();        
+        setParams();
         [dockerExists, status, result] = exists();  % Like piDockerExists
-                
+
+        % reset - Resets the running Docker containers
         function reset()
-            % we should remove any existing containers here
+            % Calls the method 'cleanup' and sets several parameters
+            % to empty.  The cleanup is called if there is a static
+            % variable defined for PBRT-GPU and/or PBRT-CPU.
+
+            % TODO: We should remove any existing containers here
             % to sweep up after ourselves.
             if ~isempty(dockerWrapper.staticVar('get','PBRT-GPU',''))
                 dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-GPU',''));
@@ -148,30 +204,37 @@ classdef dockerWrapper < handle
                 dockerWrapper.cleanup(dockerWrapper.staticVar('get','PBRT-CPU',''));
                 dockerWrapper.staticVar('set', 'PBRT-CPU', '');
             end
+
+            % Empty out the static variables
             dockerWrapper.staticVar('set', 'cpuContainer', '');
-            dockerWrapper.staticVar('set', 'gpuContainer', '');            
-            dockerWrapper.staticVar('set', 'renderContext', '');            
+            dockerWrapper.staticVar('set', 'gpuContainer', '');
+            dockerWrapper.staticVar('set', 'renderContext', '');
         end
 
+        % cleanup
         function cleanup(containerName)
             if ~isempty(dockerWrapper.staticVar('get','renderContext'))
                 contextFlag = sprintf(' --context %s ', dockerWrapper.staticVar('get','renderContext'));
             else
                 contextFlag = '';
             end
+
+            % Removes the Docker container in renderContext
             cleanupCmd = sprintf('docker %s rm -f %s', ...
                 contextFlag, containerName);
             [status, result] = system(cleanupCmd);
+
             if status == 0
-                disp("cleaned up container");
+                sprintf('Removed container %s\n',containerName);
             else
-                disp("Failed to cleanup: %s", result);
+                disp("Failed to cleanup.\n System message:\n %s", result);
             end
         end
 
         % for now we want containers to be global, so we hacked this
         % in because Matlab doesn't support static @ class level
         % and so we can switch to making them per instance if wanted.
+        % ??
         function retVal = staticVar(action, varname, value)
             persistent gpuContainer;
             persistent cpuContainer;
@@ -195,7 +258,8 @@ classdef dockerWrapper < handle
             end
         end
 
-        function output = pathToLinux(inputPath)
+        % Can we use fullfile and fileparts instead of requiring this?
+        function output = pathToLinux(inputPath)            
 
             if ispc
                 if isequal(fullfile(inputPath), inputPath)
@@ -226,10 +290,12 @@ classdef dockerWrapper < handle
         end
 
     end
-    
+
     methods
 
-            function ourContainer = startPBRT(obj, processorType)
+        function ourContainer = startPBRT(obj, processorType)
+            %
+
             verbose = getpref('docker','verbosity',1);
             if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
@@ -243,16 +309,16 @@ classdef dockerWrapper < handle
             else
                 uName = [getenv('USER') int2str(uniqueid)];
             end
-                % All our new images currently have libraries pre-loaded
-                legacyImages = false;
-                if ~legacyImages %contains(useImage, 'shared')
-                    % we don't need to mount libraries
-                    cudalib = '';
-                else
-                    cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
-                        '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
-                        '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
-                end
+            % All our new images currently have libraries pre-loaded
+            legacyImages = false;
+            if ~legacyImages %contains(useImage, 'shared')
+                % we don't need to mount libraries
+                cudalib = '';
+            else
+                cudalib = ['-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.1:/usr/lib/x86_64-linux-gnu/libnvoptix.so.1 ',...
+                    '-v /usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvoptix.so.470.57.02 ',...
+                    '-v /usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02:/usr/lib/x86_64-linux-gnu/libnvidia-rtcore.so.470.57.02'];
+            end
             if isequal(processorType, 'GPU')
                 ourContainer = ['pbrt-gpu-' uName];
             else
@@ -312,19 +378,7 @@ classdef dockerWrapper < handle
             end
         end
 
-        function obj = dockerWrapper(varargin)
-            %Docker Construct an instance of this class
-            %   Detailed explanation goes here
-            % default for flags
-            if ispc
-                obj.dockerFlags = '-i --rm';
-            else
-                obj.dockerFlags = '-ti --rm';
-            end
-            obj.config(varargin{:});
-
-        end
-
+        
         function containerName = getContainer(obj,containerType)
             % persistent containerPBRTGPU;
             %persistent containerPBRTCPU;

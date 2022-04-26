@@ -3,6 +3,13 @@ function status = piDockerConfig(varargin)
 %
 %   status = piDockerConfig(varargin)
 %
+% Description:
+%   Sets up the Matlab environment to run Docker containers for
+%   ISET3d. 
+%
+%   This function calls dockerWrapper to configure the Matlab prefs.
+%   Added by DJC.
+%
 % INPUTS:
 %    'machine' - [Optional, type=char, default='default']
 %                Name of the docker-machine on OSX. Should exist.
@@ -34,7 +41,7 @@ function status = piDockerConfig(varargin)
 %
 %       digitalprodev/pbrt-v4-cpu
 %
-% NOTE: We are attempting to maintain both a :latest and a :stable
+% NOTES: We are attempting to maintain both a :latest and a :stable
 %       tag for the GPU and CPU images.
 %
 %  We should probably make a list of working ones and keep it updated here.
