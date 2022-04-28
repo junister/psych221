@@ -7,8 +7,6 @@ function status = piDockerConfig(varargin)
 %   Sets up the Matlab environment to run Docker containers for
 %   ISET3d. 
 %
-%   This function calls dockerWrapper to configure the Matlab prefs.
-%   Added by DJC.
 %
 % INPUTS:
 %    'machine' - [Optional, type=char, default='default']
@@ -44,8 +42,6 @@ function status = piDockerConfig(varargin)
 % NOTES: We are attempting to maintain both a :latest and a :stable
 %       tag for the GPU and CPU images.
 %
-%  We should probably make a list of working ones and keep it updated here.
-%  Or in dockerWrapper.
 %
 %   You can check that docker context exists this way
 %
@@ -188,7 +184,7 @@ if ismac
         if args.debug
             disp('Docker configured successfully!');
         end
-        dockerWrapper.config(args);
+        % dockerWrapper.config(args);
     else
         error('Docker could not be configured: %s', result);
     end
@@ -200,7 +196,7 @@ elseif isunix
     [status, result] = system('docker ps -a');
     if status == 0
         if args.debug; disp('Docker configured successfully!'); end
-        dockerWrapper.config(args);
+        % dockerWrapper.config(args);
     else
         if (args.debug); fprintf('Docker status: %d\n',status); end
         error('Docker not configured: %s', result);
@@ -210,7 +206,7 @@ elseif ispc
     [status, result] = system('docker ps -a');
     if status == 0
         if args.debug; disp('Docker configured successfully!'); end
-        dockerWrapper.config(args);
+        % dockerWrapper.config(args);
     else
         if (args.debug); fprintf('Docker status: %d\n',status); end
         error('Docker not configured: %s', result);

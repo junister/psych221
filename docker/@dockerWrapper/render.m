@@ -14,7 +14,6 @@ verbose = getpref('docker','verbosity',1); % 0, 1, 2
 % to CPU (perhaps ideally a beefy, remote, CPU).
 if obj.gpuRendering == true
     useContainer = obj.getContainer('PBRT-GPU');
-    % okay this is sort of a hack
     renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
 else
     useContainer = obj.getContainer('PBRT-CPU');
@@ -38,7 +37,7 @@ end
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
 
 % sync data over
-if ~isempty(obj.remoteMachine) && ~getpref('docker','localRender')
+if ~isempty(obj.remoteMachine) && ~obj.localRender
     % There is a remote machine
     if ispc
         rSync = 'wsl rsync';
@@ -100,7 +99,6 @@ if ~isempty(obj.remoteMachine) && ~getpref('docker','localRender')
         fprintf("Render: %s\n", containerRender);
     end
 
-    % This is dorky. My bad:)
     if verbose > 1
         [status, result] = system(containerRender, '-echo');
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))

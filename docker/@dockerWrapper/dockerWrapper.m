@@ -124,21 +124,21 @@ classdef dockerWrapper < handle
         dockerContainerName = '';
         dockerContainerID = '';
 
+        % these are local things
         % default image is cpu on x64 architecture
         dockerImageName   =  dockerWrapper.localImage();
         dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
 
         gpuRendering = true;
-        whichGPU = -1; % for multiple GPU configs, or -1 for any
+        whichGPU = getpref('docker','whichGPU',-1); 
 
         % these relate to remote/server rendering
-        % they overlap while we learn the best way to organize them
-        remoteMachine  = ''; % for syncing the data
-        remoteUser     = ''; % use for rsync & ssh/docker
+        remoteMachine  = getpref('docker','remoteMachine'); % for syncing the data
+        remoteUser     = getpref('docker','remoteUser'); % use for rsync & ssh/docker
         remoteImage    = '';
         remoteImageTag = 'latest';
-        remoteRoot     = ''; % we need to know where to map on the remote system
+        remoteRoot     = getpref('docker','remoteRoot'); % we need to know where to map on the remote system
 
         localRoot = ''; % for the Windows/wsl case (sigh)
 
@@ -173,8 +173,13 @@ classdef dockerWrapper < handle
             else
                 obj.dockerFlags = '-ti --rm';
             end
-            
-            obj.config(varargin{:});
+
+            if isempty(varargin), return;
+            else
+                for ii=1:2:numel(varargin)
+                    obj.(varargin{ii}) = varargin{ii+1};
+                end
+            end
 
         end
     end
@@ -236,6 +241,13 @@ classdef dockerWrapper < handle
         % and so we can switch to making them per instance if wanted.
         % ??
         function retVal = staticVar(action, varname, value)
+            % Actions are 'set' or anything else.  When using 'get' the
+            % value of one of the persistent variables is returned.
+            %
+            % These variables are 'set' by getRenderer, I think.  We
+            % should probably move that 'vistalab' repository and
+            % 'getRenderer' into dockerWrapper land (BW).
+
             persistent gpuContainer;
             persistent cpuContainer;
             persistent renderContext;
@@ -380,6 +392,8 @@ classdef dockerWrapper < handle
 
         
         function containerName = getContainer(obj,containerType)
+            % I don't understand this.  More comments (BW).
+
             % persistent containerPBRTGPU;
             %persistent containerPBRTCPU;
             switch containerType

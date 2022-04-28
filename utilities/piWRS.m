@@ -1,4 +1,4 @@
-function [obj,results] = piWRS(thisR,varargin)
+function [obj, results, thisD] = piWRS(thisR,varargin)
 % Write, Render, Show a scene specified by a recipe (thisR).
 %
 % Brief description:
@@ -21,11 +21,12 @@ function [obj,results] = piWRS(thisR,varargin)
 %           ... others).  If it is a char, then we convert it to a cell.
 %   'show'  -  Call a window to show the object (default) and insert it in
 %           the vcSESSION database
-%   'our docker' - Specify the docker image passed to piRender
+%   'our docker' - Specify the docker wrapper we will pass to piRender
 %
 % Returns
 %   obj     - a scene or oi
 %   results - The piRender text outputs
+%   thisD   - a dockerWrapper with the parameters for this run
 %
 % Description
 %   
@@ -75,7 +76,7 @@ piWrite(thisR);
 if strncmp(username,'zhenyi',6)
     [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
 else
-    [obj,results] = piRender(thisR, 'ourdocker', ourDocker);
+    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
 end
 
 switch obj.type

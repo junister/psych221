@@ -1,7 +1,7 @@
-function status = config(obj, varargin)
+function config(obj, varargin)
 % Configure the Matlab environment and initiate the docker-machine
 %
-%   status = dockerWrapper.config(varargin)
+%   dockerWrapper.config(varargin)
 %
 % INPUTS:
 %    'machine' - [Optional, type=char, default='default']
@@ -52,7 +52,6 @@ end
 if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end
-obj.whichGPU = args.whichGPU;
 
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;
@@ -99,7 +98,9 @@ if ~isempty(args.remoteMachine)
     obj.remoteUser = args.remoteUser;
 end
 
+piDockerConfig;
 
+%{
 %% Configure Matlab ENV for the machine - based on piDockerConfig.
 
 % MAC OSX
@@ -234,3 +235,4 @@ elseif ispc
 end
 
 % now that we have docker ready to go, ...
+%}

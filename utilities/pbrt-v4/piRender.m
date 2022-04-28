@@ -1,4 +1,4 @@
-function [ieObject, result] = piRender(thisR,varargin)
+function [ieObject, result, thisD] = piRender(thisR,varargin)
 % Read a PBRT scene file, run the docker command, return the ieObject.
 %
 % updated version using dockerWrapper for render -- D. Cardinal
@@ -25,7 +25,8 @@ function [ieObject, result] = piRender(thisR,varargin)
 %  reuse      - Boolean. Indicate whether to use an existing file if one of
 %               the correct size exists (default is false)
 %
-%  ourdocker  - Specify which docker to use
+%  ourdocker  - Specify the docker wrapper to use.  Default is build
+%               from scratch using Matlab getprefs('docker')
 %
 %  reflectancerender -  NYI
 %
@@ -159,51 +160,52 @@ if ~isempty(verbosity)
     setpref('docker','verbosity', verbosity);
 end
 
-%% try to support docker servers
+%% Set up the dockerWrapper
 persistent renderDocker;
 
-% This code sets up renderDocker, a dockerWrapper class.
-%
-% If ourDocker is empty, we have to guess what the user wants. By
-% default, we control the rendering using a dockerWrapper object
-% returned by getRenderer(), part of the vistalab repository. The
-% dockerWrapper returned by getRenderer is controlled by the user, who
-% can establish dockerWrapper.setParams() calls.
-if getpref('docker','localRender',false)
-    % Set local rendering
-    renderDocker =  getRenderer();
-    renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
-    renderDocker.remoteMachine = '';
+% If the user has sent in a dockerWrapper (ourDocker) we should use it
+if ~isempty(ourDocker)
+    renderDocker = ourDocker;
 else
-    % Set
-    if isempty(ourDocker)
-        if ~isempty(which('getRenderer'))
-            % getRenderer is in the vistalab repository.  It returns a
-            % dockerTemplate that is used for rendering.
-            renderDocker =  getRenderer();
-        else
-            % This user does not have the vistalab code with getRenderer.
-            % So, we try our best with the Matlab prefs.
-            disp('Using Matlab docker prefs to determine rendering.')
-            renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-            renderDocker = dockerWrapper(renderPrefs{:});
-        end
-    elseif isa(ourDocker,'dockerWrapper')
-        % The user already told us what they want, so do nothing.
-        renderDocker = ourDocker; % use the one we are passed
+    % Set up the persistent renderDocker, a dockerWrapper class.
+    %
+    % If ourDocker is empty, we have to guess what the user wants. By
+    % default, we control the rendering using a dockerWrapper object
+    % returned by getRenderer(), part of the vistalab repository. The
+    % dockerWrapper returned by getRenderer is controlled by the user, who
+    % can establish dockerWrapper.setParams() calls.
+
+    % This is not good.  We need to check the ourDocker, not the matlab
+    % prefs.  But if there is no ourDocker, then we must check
+    % the matlab prefs.
+    if getpref('docker','localRender',false)
+        % Set local rendering
+        renderDocker = getRenderer();
+        renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
+        renderDocker.remoteMachine = '';
     else
-        error('Unable to interpret remote render variable for ourDocker');
+        % Set
+        if isempty(ourDocker)
+            if ~isempty(which('getRenderer'))
+                % getRenderer is in the vistalab repository.  It returns a
+                % dockerTemplate that is used for rendering.
+                renderDocker =  getRenderer();
+            else
+                % This user does not have the vistalab code with getRenderer.
+                % So, we try our best with the Matlab prefs.
+                disp('Using Matlab docker prefs to determine rendering.')
+                renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
+                renderDocker = dockerWrapper(renderPrefs{:});
+            end
+        elseif isa(ourDocker,'dockerWrapper')
+            % The user already told us what they want, so do nothing.
+            renderDocker = ourDocker; % use the one we are passed
+        else
+            error('Unable to interpret remote render variable for ourDocker');
+        end
     end
 end
 
-%{
-% No longer needed, we think.
-if ~isempty(ourDocker)
-    renderDocker = ourDocker; % use the one we are passed
-elseif isempty(renderDocker)
-    renderDocker = dockerWrapper(); % accept defaults
-end
-%}
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 
@@ -298,15 +300,21 @@ else  % Linux & Mac
     end
 end
 
+% renderDocker is a dockerWrapper and its parameters.  The parameters
+% control on which machine and with what parameters the docker
+% container is invoked.  I am not sure why it is a persistent
+% variable (BW).
 preRender = tic;
-
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
 if getpref('docker','verbosity',0) > 0
     fprintf("Complete render took: %6.2d seconds.", elapsedTime);
 end
 
-%% Check the return
+% The user wants the dockerWrapper.
+if nargout > 2, thisD = renderDocker; end
+
+%% Check the returned rendering image.
 
 if status
     warning('Docker did not run correctly');
