@@ -1,8 +1,8 @@
 classdef dockerWrapper < handle
-    %DOCKERWRAPPER A class that manages rendering methods
+    %DOCKERWRAPPER A class that manages ISET3d-v4 rendering methods
     %
-    % This class is designed to help manage running ISET3d-v4 in
-    % various ways. We hope to include rendering on
+    % This class manages how we run PBRT docker containers in
+    % ISET3d-v4. At present, we manage these cases:
     %
     %   * a remote server with a GPU,
     %   * a remote server with a CPU,
@@ -10,16 +10,16 @@ classdef dockerWrapper < handle
     %   * your local computer with a CPU, and
     %   * your local computer with PBRT installed and no docker at all.
     %
-    % As of this date, this remains a work-in-progress.
+    % The source code is still under active development (May 1, 2022).
     %
-    % This class is used by piRender() to determine the way to run
-    % PBRT. The need for this class is that running on remote GPUs or
-    % selecting the right Docker container for a particular GPU or a
-    % CPU can be complex.
+    % The dockerWrapper class is used by piWRS() and piRender(). These
+    % functions use this class to set up the docker images that run
+    % either locally or remotely. For instructions on how to set up
+    % your computer to use this class, see the ISET3d-v4 wiki pages.
     %
     % Please note:
-    % To run on a remote machine someone must have set up the
-    % environment on the machine to match the expectations of ISET3d.
+    %   To run on a remote machine someone must have set up the
+    %   environment on the machine to match the expectations of ISET3d.
     %
     % See below for more information on the required parameters.
     %
@@ -675,7 +675,7 @@ classdef dockerWrapper < handle
                         % If we do not have it, create it
                         % e.g. ssh://david@muxreconrt.stanford.edu
                         contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            getUserName(obj), vistalabDefaultServer);
+                            getUserName(obj), obj.vistalabDefaultServer);
                         createContext = sprintf('docker context create %s %s',...
                             contextString, 'remote-mux');
 
