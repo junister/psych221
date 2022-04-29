@@ -9,22 +9,23 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 %%
 verbose = obj.verbosity; % 0, 1, 2
 
+% Let's simplify these lines
 % Currently we have an issue where GPU rendering ignores objects
 % that have ActiveTranforms. Maybe scan for those & set container back
 % to CPU (perhaps ideally a beefy, remote, CPU).
-if obj.gpuRendering == true
+if obj.gpuRendering
     useContainer = obj.getContainer('PBRT-GPU');
     renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
 else
     useContainer = obj.getContainer('PBRT-CPU');
 end
 
-% Windows doesn't seem to like the t flag
+%% Windows doesn't seem to like the t flag
 if ispc,     flags = '-i ';
 else,        flags = '-it ';
 end
 
-[~, sceneDir, ~] = fileparts(outputFolder);
+% [~, sceneDir, ~] = fileparts(outputFolder);
 
 % ASSUME that if we supply a context it is on a Linux server
 nativeFolder = outputFolder;
@@ -37,8 +38,8 @@ end
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
 
 % sync data over
-if ~isempty(obj.remoteMachine) && ~obj.localRender
-    % There is a remote machine
+if ~obj.localRender
+    % Running remotely.
     if ispc
         rSync = 'wsl rsync';
         nativeFolder = [obj.localRoot outputFolder '/'];
@@ -131,6 +132,8 @@ if ~isempty(obj.remoteMachine) && ~obj.localRender
         end
     end
 else
+    % Running locally.
+    
     % our output folder path starts from root, not from where the volume is
     % mounted -- sort of weenie as this is the Windows path while on
     % windows

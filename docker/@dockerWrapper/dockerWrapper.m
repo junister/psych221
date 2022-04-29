@@ -254,8 +254,9 @@ classdef dockerWrapper < handle
             end
         end
 
-        % Can we use fullfile and fileparts instead of requiring this?
         function output = pathToLinux(inputPath)
+            % Can we use fullfile and fileparts instead of requiring this?
+            % (BW) 
 
             if ispc
                 if isequal(fullfile(inputPath), inputPath)
@@ -275,7 +276,7 @@ classdef dockerWrapper < handle
 
         end
 
-        % for switching docker to other (typically remote) context
+        % For switching docker to other (typically remote) context
         % and then back. Static as it is system-wide
         function setContext(useContext)
             if ~isempty(useContext)
@@ -307,7 +308,7 @@ classdef dockerWrapper < handle
             end
             % All our new images currently have libraries pre-loaded
             legacyImages = false;
-            if ~legacyImages %contains(useImage, 'shared')
+            if ~legacyImages % contains(useImage, 'shared')
                 % we don't need to mount libraries
                 cudalib = '';
             else
@@ -321,21 +322,19 @@ classdef dockerWrapper < handle
                 ourContainer = ['pbrt-cpu-' uName];
             end
 
-            % remove any existing container with the same name as it might
-            % be old
-            %[status, result] = system(sprintf('docker container rm -f %s', gpuContainer));
-
             % Starting as background we need to allow for all scenes
             % if remote then need to figure out correct path
-            if ~isempty(obj.remoteRoot)
-                mountData = [obj.remoteRoot obj.relativeScenePath];
-            elseif ~isempty(obj.remoteMachine)
-                mountData = [obj.remoteRoot obj.relativeScenePath];
-            else
+            if obj.localRender
                 if isempty(obj.localRoot)
                     mountData = fullfile(piRootPath(), 'local');
                 else
                     mountData = fullfile(obj.localRoot, 'local');
+                end
+            else
+                if ~isempty(obj.remoteRoot)
+                    mountData = [obj.remoteRoot obj.relativeScenePath];
+                elseif ~isempty(obj.remoteMachine)
+                    mountData = [obj.remoteRoot obj.relativeScenePath];
                 end
             end
             mountData = strrep(mountData,'//','/');
@@ -346,12 +345,18 @@ classdef dockerWrapper < handle
             volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
             placeholderCommand = 'bash';
 
-            % set up the baseline command
-            if isempty(dockerWrapper.staticVar('get','renderContext'))
+            % We do not use context for local docker containers
+            if obj.localRender
                 contextFlag = '';
             else
-                contextFlag = [' --context ' dockerWrapper.staticVar('get','renderContext')];
+                % Rendering remotely.
+                if isempty(obj.staticVar('get','renderContext'))
+                    contextFlag = '';
+                else
+                    contextFlag = [' --context ' obj.staticVar('get','renderContext')];
+                end
             end
+
             if isequal(processorType, 'GPU')
                 % want: --gpus '"device=#"'
                 gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
@@ -364,7 +369,7 @@ classdef dockerWrapper < handle
 
             [status, result] = system(cmd);
             if verbose > 0
-                fprintf("Started Docker with %d: %s\n", status, cmd);
+                fprintf("Started Docker (status %d): %s\n", status, cmd);
             end
             if status == 0
                 obj.dockerContainerID = result; % hex name for it
@@ -376,38 +381,46 @@ classdef dockerWrapper < handle
 
 
         function containerName = getContainer(obj,containerType)
-            % I don't understand this.  More comments (BW).
-
-            % persistent containerPBRTGPU;
-            %persistent containerPBRTCPU;
+            % Get the container name for different types of docker runs.  Either PBRT
+            % with a GPU or a CPU
             switch containerType
                 case 'PBRT-GPU'
                     if isempty(obj.staticVar('get', 'PBRT-GPU', ''))
-                        %containerPBRTGPU = obj.startPBRT('GPU');
+                        % Start the container and set its name
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
-                    % Need to switch to render context here!
+                    
+                    % If there is a render context, get it. 
                     if ~isempty(dockerWrapper.staticVar('get','renderContext'))
                         cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
                     else
                         cFlag = '';
                     end
+
+                    % Figure out the container name using a docker ps call
+                    % in the context.
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-GPU', '')));
-                    if strlength(result) == 0 % doesn't exist, so start one
+                    
+                    if strlength(result) == 0 
+                        % Couldn't find it.  So try starting it. Not sure
+                        % why we would ever be here?
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
                     containerName = obj.staticVar('get','PBRT-GPU', '');
+
                 case 'PBRT-CPU'
+                    % Similar logic to above.
                     if isempty(obj.staticVar('get', 'PBRT-CPU', ''))
-                        %containerPBRTCPU = obj.startPBRT('CPU');
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
+
                     % Need to switch to render context here!
                     if ~isempty(dockerWrapper.staticVar('get','renderContext'))
                         cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
                     else
                         cFlag = '';
                     end
+                    
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
@@ -420,77 +433,83 @@ classdef dockerWrapper < handle
         end
 
         function dockerImageName = getPBRTImage(obj, processorType)
-            % The remote image should already be set in most cases of
-            % running remotely. If we are running locally, we ask the
-            % NVidia method to give us some local options.  Mostly
-            % there won't be any.
+            % Returns the name of the docker image, both for the case of
+            % local and remote execution.
 
-            % if we are told to run on a remote machine with a
-            % particular image, that takes precedence.
-            if ~isempty(obj.remoteImage)
-                % User already set the remote image
-                dockerImageName = obj.remoteImage;
-                return;
-            elseif ~obj.localRender
-                % Figure out the remote image with this method.
-                obj.getRenderer;
-                dockerImageName = obj.remoteImage;
-                return;
-            end
-
-            % Apparently we are running locally.  Try to figure out the
-            % local GPU situation.            
-            if isequal(processorType, 'GPU')
-
-                % Check whether GPU is available
-                [GPUCheck, GPUModel] = system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
-                try
-                    ourGPU = gpuDevice();
-                    if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
-                        GPUCheck = -1;
-                    end
-                catch
-                    % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
-                end
-
-                if ~GPUCheck
-
-                    % GPU is available
-                    % switch based on first GPU available
-                    % really should enumerate and look for the best one, I think
-                    gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
-
-                    switch gpuModels{1} % find the model of our GPU
-                        case {'teslat4', 'quadrot2000'}
-                            dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
-                        case {'geforcertx3070', 'nvidiageforcertx3070'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
-                        case {'geforcertx3090', 'nvidiageforcertx3090'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
-                        case {'geforcertx2080', 'nvidiageforcertx2080', ...
-                                'geforcertx2080ti', 'nvidiageforcertx2080ti'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
-                        case {'geforcegtx1080',  'nvidiageforcegtx1080'}
-                            dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
-                        otherwise
-                            warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
-                            dockerImageName = dockerWrapper.localImage();
-                    end
-
+            if ~obj.localRender
+                % We are running remotely, we try to figure out which
+                % docker image to use.
+                if ~isempty(obj.remoteImage)
+                    % If a remoteImage is already set, that is what we use
+                    dockerImageName = obj.remoteImage;
+                    return;
                 else
-                    % Might be error conditions.
-                    dockerImageName = '';
+                    % Try to figure it out and return it.
+                    obj.getRenderer;
+                    dockerImageName = obj.remoteImage;
+                    return;
                 end
             else
-                
-                dockerImageName = obj.dockerImageName;
+                % If we are here, we are running locally.
+                if ~isempty(obj.dockerImageName)
+                    % If this is set, use it.                    
+                    dockerImageName = obj.dockerImageName;
+                    return;
+                else
+                    % Running locally and no advice from the user.
+                    if isequal(processorType, 'GPU')
+                        % They have asked for a GPU, so we try to figure
+                        % out the local GPU situation.
+                        [GPUCheck, GPUModel] = ...
+                            system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
+                        try
+                            ourGPU = gpuDevice();
+                            if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+                                GPUCheck = -1;
+                            end
+                        catch
+                            % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
+                        end
+
+                        if ~GPUCheck
+                            % A GPU is available.
+                            obj.gpuRendering = true;
+
+                            % Switch based on first GPU available
+                            % really should enumerate and look for the best one, I think
+                            gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
+
+                            switch gpuModels{1} % find the model of our GPU
+                                case {'teslat4', 'quadrot2000'}
+                                    dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+                                case {'geforcertx3070', 'nvidiageforcertx3070'}
+                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                                case {'geforcertx3090', 'nvidiageforcertx3090'}
+                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                                case {'geforcertx2080', 'nvidiageforcertx2080', ...
+                                        'geforcertx2080ti', 'nvidiageforcertx2080ti'}
+                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
+                                case {'geforcegtx1080',  'nvidiageforcegtx1080'}
+                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
+                                otherwise
+                                    warning('No compatible docker image for GPU model: %s, running on CPU', GPUModel);
+                                    obj.gpuRendering = false;
+                                    dockerImageName = dockerWrapper.localImage();
+                            end
+                        end
+                    elseif isequal(processorType, 'CPU')
+                        obj.gpuRendering = false;
+                        dockerImageName = obj.localImage;
+                    end
+                end
             end
         end
 
-        function output = convertPathsInFile(obj, input)
+        % Not yet defined.
+        %function output = convertPathsInFile(obj, input)
             % for depth or other files that have embedded "wrong" paths
             % implemented someplace, need to find the code!
-        end
+        %end
 
         %% Moved in from getRenderer
         function getRenderer(thisD)
@@ -552,10 +571,8 @@ classdef dockerWrapper < handle
             % forceLocal = getpref('docker','forceLocal', false);
 
             if thisD.localRender
-                % Running locally whether there is a GPU or not
-                % This is probably not yet correct (BW).
-                % But nothing to be done with the remote stuff if we are running
-                % locally.
+                % Running locally whether there is a GPU or not                
+                thisD.dockerImageName = thisD.localImage;
                 return;                
 
             else
@@ -567,16 +584,13 @@ classdef dockerWrapper < handle
                 % make sure we know the correct remote home dir:
                 if ispc
                     thisD.remoteRoot = getpref('docker','remoteRoot',getUserName(thisD));
-                else
-                    % No longer needed.
-                    % thisD.remoteRoot = getpref('docker','remoteRoot',expanduser('~'));
                 end
 
                 if isempty(thisD.remoteMachine)
                     % The remoteMachine should be probably be set in prefs.  The
                     % user may have multiple opportunities for this.  For now we
                     % default to the vistalabDefaultServer.
-                    thisD.remoteMachine = vistalabDefaultServer();
+                    thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
                 if isempty(thisD.remoteImage)
@@ -641,16 +655,15 @@ classdef dockerWrapper < handle
 
         end
 
-
-
         
-        function useContext = getRenderContext(dockerTemplate, serverName)
+        function useContext = getRenderContext(obj, serverName)
             % Get or set-up the rendering context for the docker container
             %
             % A docker context ('docker context create ...') is a set of
-            % parameters we define to address the remote docker container from our
-            % local computer.
+            % parameters we define to address the remote docker container
+            % from our local computer.
             %
+            if ~exist('serverName','var'), serverName = obj.remoteMachine; end
 
             switch serverName
                 case 'muxreconrt.stanford.edu'
@@ -662,7 +675,7 @@ classdef dockerWrapper < handle
                         % If we do not have it, create it
                         % e.g. ssh://david@muxreconrt.stanford.edu
                         contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            getUserName(dockerTemplate), vistalabDefaultServer);
+                            getUserName(obj), vistalabDefaultServer);
                         createContext = sprintf('docker context create %s %s',...
                             contextString, 'remote-mux');
 

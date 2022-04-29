@@ -167,6 +167,14 @@ if renderDocker.localRender
     % It is local so use this local rendering
     renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
     renderDocker.remoteMachine = '';
+
+    % If the local docker is a GPU type, OK.  Otherwise, set gpuRendering
+    % false.
+    str = renderDocker.localImage;
+    if contains(str,'gpu'), renderDocker.gpuRendering = true;
+    else, renderDocker.gpuRendering = false;
+    end
+
 end
 
 %% We have a radiance recipe and we have written the pbrt radiance file
