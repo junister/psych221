@@ -280,9 +280,11 @@ end
 %%  Additional information for instanced objects
 % PBRT does not allow instance lights, however in the cases that
 % we would like to instance an object with some lights on it, we will
-% need to save that additional information to it, and then repeatly
-% write that attributes when the objectInstance is used in attribute
+% need to save that additional information to it, and then repeatedly
+% write the attributes when the objectInstance is used in attribute
 % pairs. --Zhenyi
+% OK, but this code breaks on the teapot because there are no assets.  So
+% need to check that there are assets. -- BW
 for ii  = 1:numel(thisR.assets.Node)
     thisNode = thisR.assets.Node{ii};
     if isfield(thisNode, 'isInstancer') && isfield(thisNode, 'referenceObject')
