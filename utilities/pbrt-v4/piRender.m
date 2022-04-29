@@ -136,7 +136,7 @@ p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
 % p.addParameter('reflectancerender', false, @islogical);
-p.addParameter('ourdocker','');    % to specify a docker image
+p.addParameter('ourdocker','',@(x)(isa(x,'dockerWrapper')) || isempty(x));    % to specify a docker image
 
 % This passed to piDat2ISET, which is where we do the construction.
 p.addParameter('wave', 400:10:700, @isnumeric); 
@@ -163,49 +163,21 @@ end
 %% Set up the dockerWrapper
 persistent renderDocker;
 
-% If the user has sent in a dockerWrapper (ourDocker) we should use it
+% If the user has sent in a dockerWrapper (ourDocker) we use it
 if ~isempty(ourDocker)
     renderDocker = ourDocker;
 else
-    % Set up the persistent renderDocker, a dockerWrapper class.
-    %
-    % If ourDocker is empty, we have to guess what the user wants. By
-    % default, we control the rendering using a dockerWrapper object
-    % returned by getRenderer(), part of the vistalab repository. The
-    % dockerWrapper returned by getRenderer is controlled by the user, who
-    % can establish dockerWrapper.setParams() calls.
-
-    % This is not good.  We need to check the ourDocker, not the matlab
-    % prefs.  But if there is no ourDocker, then we must check
-    % the matlab prefs.
-    if getpref('docker','localRender',false)
-        % Set local rendering
-        renderDocker = getRenderer();
-        renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
-        renderDocker.remoteMachine = '';
-    else
-        % Set
-        if isempty(ourDocker)
-            if ~isempty(which('getRenderer'))
-                % getRenderer is in the vistalab repository.  It returns a
-                % dockerTemplate that is used for rendering.
-                renderDocker =  getRenderer();
-            else
-                % This user does not have the vistalab code with getRenderer.
-                % So, we try our best with the Matlab prefs.
-                disp('Using Matlab docker prefs to determine rendering.')
-                renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-                renderDocker = dockerWrapper(renderPrefs{:});
-            end
-        elseif isa(ourDocker,'dockerWrapper')
-            % The user already told us what they want, so do nothing.
-            renderDocker = ourDocker; % use the one we are passed
-        else
-            error('Unable to interpret remote render variable for ourDocker');
-        end
-    end
+    % Otherwise we use the default
+    renderDocker = dockerWrapper;
 end
 
+% Set up the persistent renderDocker, a dockerWrapper class.
+
+if renderDocker.localRender
+    % It is local so use this local rendering
+    renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
+    renderDocker.remoteMachine = '';
+end
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 
