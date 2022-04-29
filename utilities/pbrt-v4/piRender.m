@@ -153,25 +153,15 @@ ourDocker        = p.Results.ourdocker;
 scalePupilArea   = p.Results.scalepupilarea;  % Fix this
 meanLuminance    = p.Results.meanluminance;   % And this
 wave             = p.Results.wave;
-verbosity        = p.Results.verbose;
 renderType       = p.Results.rendertype;
-
-if ~isempty(verbosity)
-    setpref('docker','verbosity', verbosity);
-end
 
 %% Set up the dockerWrapper
 persistent renderDocker;
 
 % If the user has sent in a dockerWrapper (ourDocker) we use it
-if ~isempty(ourDocker)
-    renderDocker = ourDocker;
-else
-    % Otherwise we use the default
-    renderDocker = dockerWrapper;
+if ~isempty(ourDocker),   renderDocker = ourDocker;
+else,                     renderDocker = dockerWrapper;
 end
-
-% Set up the persistent renderDocker, a dockerWrapper class.
 
 if renderDocker.localRender
     % It is local so use this local rendering
@@ -240,17 +230,17 @@ if ispc  % Windows
     % With V4 we need EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-    folderBreak = split(outputFolder, filesep());
-    shortOut = strcat('/', char(folderBreak(end)));
+    
+    % folderBreak = split(outputFolder, filesep());
+    % shortOut = strcat('/', char(folderBreak(end)));
     
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
     end
 
     %fix for non - C drives
     %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
-    linuxOut = char(join(folderBreak,"/"));
+    % linuxOut = char(join(folderBreak,"/"));
 
     % legacy
     %dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
@@ -267,8 +257,6 @@ else  % Linux & Mac
 
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        % Legacy
-        % dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
 end
 

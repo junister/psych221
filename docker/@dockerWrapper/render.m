@@ -7,7 +7,7 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 %  piRender
 
 %%
-verbose = getpref('docker','verbosity',1); % 0, 1, 2
+verbose = obj.verbosity; % 0, 1, 2
 
 % Currently we have an issue where GPU rendering ignores objects
 % that have ActiveTranforms. Maybe scan for those & set container back

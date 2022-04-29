@@ -137,6 +137,7 @@ classdef dockerWrapper < handle
         localRender = false;
         localImageTag = 'latest';
 
+        verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
     end
 
     methods
@@ -289,9 +290,9 @@ classdef dockerWrapper < handle
     methods
 
         function ourContainer = startPBRT(obj, processorType)
-            %
+            % Start the docker container remotely
 
-            verbose = getpref('docker','verbosity',1);
+            verbose = obj.verbosity;
             if isequal(processorType, 'GPU')
                 useImage = obj.getPBRTImage('GPU');
             else
@@ -427,14 +428,18 @@ classdef dockerWrapper < handle
             % if we are told to run on a remote machine with a
             % particular image, that takes precedence.
             if ~isempty(obj.remoteImage)
+                % User already set the remote image
                 dockerImageName = obj.remoteImage;
                 return;
-            else
-                disp('No remote image defined.  Assuming we should run locally.')
-            end            
+            elseif ~obj.localRender
+                % Figure out the remote image with this method.
+                obj.getRenderer;
+                dockerImageName = obj.remoteImage;
+                return;
+            end
 
-            % otherwise we are local and will look for the correct
-            % container
+            % Apparently we are running locally.  Try to figure out the
+            % local GPU situation.            
             if isequal(processorType, 'GPU')
 
                 % Check whether GPU is available
@@ -470,7 +475,6 @@ classdef dockerWrapper < handle
                         otherwise
                             warning('No compatible docker image for GPU model: %s, will run on CPU', GPUModel);
                             dockerImageName = dockerWrapper.localImage();
-                            %dockerContainerName = '';
                     end
 
                 else
@@ -582,9 +586,9 @@ classdef dockerWrapper < handle
                     % image is needed for each, sigh.
                     %
                     % We should probably catch
-                    if isequal(thisD.remoteMachine, vistalabDefaultServer)
+                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
                         % Right now we only allow one remote render context
-                        thisD.staticVar('set','renderContext', getRenderContext(thisD, vistalabDefaultServer));
+                        thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
                         switch thisD.whichGPU
                             case {0, -1}
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
