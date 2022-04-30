@@ -47,9 +47,11 @@ p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
 p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
+p.addParameter('gamma',[],@isnumeric);
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
+g          = p.Results.gamma;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
@@ -82,10 +84,14 @@ end
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
-        if show, sceneWindow(obj); end
+        if show, sceneWindow(obj);
+            if ~isempty(g), sceneSet(obj,'gamma',g); end
+        end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
-        if show, oiWindow(obj); end
+        if show, oiWindow(obj); 
+            if ~isempty(g), oiSet(obj,'gamma',g); end
+        end
 end
 
 thisR.set('render type',oldRenderType);
