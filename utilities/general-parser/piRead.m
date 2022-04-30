@@ -285,18 +285,20 @@ end
 % pairs. --Zhenyi
 % OK, but this code breaks on the teapot because there are no assets.  So
 % need to check that there are assets. -- BW
-for ii  = 1:numel(thisR.assets.Node)
-    thisNode = thisR.assets.Node{ii};
-    if isfield(thisNode, 'isInstancer') && isfield(thisNode, 'referenceObject')
-        if isempty(thisNode.referenceObject) || thisNode.isInstancer == 1
-            continue
+if ~isempty(thisR.assets)
+    for ii  = 1:numel(thisR.assets.Node)
+        thisNode = thisR.assets.Node{ii};
+        if isfield(thisNode, 'isInstancer') && isfield(thisNode, 'referenceObject')
+            if isempty(thisNode.referenceObject) || thisNode.isInstancer == 1
+                continue
+            end
+            [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
+            if isempty(ParentNode), continue;end
+            ParentNode = ParentNode{1};
+            ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
+            ParentNode.camera = thisR.lookAt;
+            thisR.assets = thisR.assets.set(ParentId, ParentNode);
         end
-        [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
-        if isempty(ParentNode), continue;end
-        ParentNode = ParentNode{1};
-        ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
-        ParentNode.camera = thisR.lookAt;
-        thisR.assets = thisR.assets.set(ParentId, ParentNode);
     end
 end
 
