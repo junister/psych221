@@ -11,7 +11,6 @@ p.addRequired('material', @isstruct);
 p.parse(material, varargin{:});
 
 %% Concatatenate string
-
 if ~strcmp(material.name, '')
     valName = sprintf('MakeNamedMaterial "%s" ',material.name);
     if isfield(material,'type')

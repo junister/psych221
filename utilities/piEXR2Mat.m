@@ -57,7 +57,7 @@ fileList = [];
 % In an error case there might be additional files
 % This code is designed to help with that if needed
 baseName = '';
-height = 0; 
+height = 0;
 width = 0;
 
 for ii = 1:numel(allFiles)
@@ -70,7 +70,7 @@ for ii = 1:numel(allFiles)
         Nparts = numel(nameparts);
         if height == 0, height = str2double(nameparts{Nparts-2}); end
         if width == 0, width= str2double(nameparts{Nparts-1}); end
-        if isempty(fileList), fileList = [dataFile]; 
+        if isempty(fileList), fileList = [dataFile];
         else
             fileList(end+1) = dataFile;
         end

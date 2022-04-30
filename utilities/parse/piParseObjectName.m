@@ -20,14 +20,15 @@ function [name, sz] = piParseObjectName(txt)
 
 
 % Find the location of #ObjectName in the string
-patternList = {'#ObjectName','#object name', '#collection name'};
-for ii = 1:3
+patternList = {'#ObjectName','#object name','#CollectionName',...
+    '#Instance MeshName','#MeshName','#Instance CollectionName','#Instance Parent'};
+
+for ii = 1:numel(patternList)
     pattern = patternList{ii};
     loc = strfind(txt,pattern);
     if isempty(loc)
         continue;
     else
-        
         loc_dimenstion = strfind(txt,'#Dimension');
         break;
     end

@@ -38,17 +38,15 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % children = [];
 subtrees = {};
 
-i = 1;         objectIndex = 0;
+i = 1;          objectIndex = 0;
+nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one object.
 while i <= length(txt)
 
     currentLine = txt{i};
-    % ZLY: an emergency patch for Brian's presentation tomorrow If we found
-    % ObjectBegin, that means we won't parse anything
-    %     if piContains(currentLine, 'ObjectBegin') && ~strcmp(currentLine(1),'#')
-    %         trees = {};
-    %         parsedUntil = i;
-    %         return;
-    %     end
+
+    if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
+        InstanceName = erase(currentLine(16:end),'"');
+    end
 
     % Return if we've reached the end of current attribute
 
@@ -57,7 +55,7 @@ while i <= length(txt)
         % When we read the following text, it always returns a branch node
         % and the object node.
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
-        
+
         % Since the subnodes include a branch node and an object node, we
         % check the second node, if it is an object node we add the object
         % index in the front to avoid naming ambiguity.
@@ -75,24 +73,30 @@ while i <= length(txt)
 
         subtrees = cat(1, subtrees, subnodes);
         i =  i + retLine;
-    elseif contains(currentLine,{'#ObjectName','#object name','#collection name'})&&...
+
+    elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'})&&...
             strcmp(currentLine(1),'#')
+
         [name, sz] = piParseObjectName(currentLine);
 
     elseif strncmp(currentLine,'Transform ',10) ||...
-            piContains(currentLine,'ConcatTransform') 
+            piContains(currentLine,'ConcatTransform')
         [translation, rot, scale] = parseTransform(currentLine);
+
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
         medium = currentLine;
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
-        mat = piParseGeometryMaterial(currentLine);
+        nMaterial = nMaterial+1;
+        mat{nMaterial} = piParseGeometryMaterial(currentLine);
 
     elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
+
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
+
         areaLight = currentLine;
 
     elseif piContains(currentLine,'LightSource') ||...
@@ -108,21 +112,10 @@ while i <= length(txt)
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         % Not a comment.  Contains a shape.
-        shape = piParseShape(currentLine);
+        nShape = nShape+1;
+        shape{nShape} = piParseShape(currentLine);
 
-%         if ~isempty(shape.filename) && strncmp(shape.filename, 'mesh',4)
-%             inputfile = thisR.get('input file');
-%             [inputDir,sceneName,~] = fileparts(inputfile);
-%             [folder, filename, ext]=fileparts(shape.filename);
-%             newPlyName = sprintf('%s_%s%s',sceneName,filename, ext);
-%             if ~exist(fullfile(inputDir,newPlyName), 'file')
-%                 movefile(fullfile(inputDir,shape.filename), fullfile(inputDir,folder,newPlyName));
-%             end
-%             shape.filename = newPlyName;
-%         end
-
-    elseif strcmp(currentLine,'AttributeEnd') && ~strcmp(currentLine(1),'#')
-
+    elseif strcmp(currentLine,'AttributeEnd')
         % Assemble all the read attributes into either a group object, or a
         % geometry object. Only group objects can have subnodes (not
         % children). This can be confusing but is somewhat similar to
@@ -138,9 +131,9 @@ while i <= length(txt)
 
         if exist('areaLight','var') || exist('lght','var') || exist('rot','var') || exist('translation','var') || ...
                 exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
-            
+
             % This is a 'light' node
-            if exist('areaLight','var') || exist('lght','var')    
+            if exist('areaLight','var') || exist('lght','var')
                 resLight = piAssetCreate('type', 'light');
                 if exist('lght','var')
                     % Wrap the light text into attribute section
@@ -152,7 +145,7 @@ while i <= length(txt)
                     if exist('shape', 'var')
                         resLight.lght{1}.shape = shape;
                     end
-                    
+
                     %{
                     if exist('rot', 'var')
                         resLight.lght{1}.rotation.type = 'rotation';
@@ -167,18 +160,18 @@ while i <= length(txt)
                         resLight.lght{1}.translation.value = {translation};
                     end
                     %}
-                    
+
                 end
-                
+
                 if exist('name', 'var')
-                    resLight.name = sprintf('%s_L', name); 
+                    resLight.name = sprintf('%s_L', name);
                     resLight.lght{1}.name = resLight.name;
                 end
-                
+
                 subtrees = cat(1, subtrees, tree(resLight));
                 % trees = subtrees;
-            
-            
+
+
             % This is a branch or an object
             elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
                 % This path if it is an object
@@ -200,6 +193,7 @@ while i <= length(txt)
                     %   (2) Check if named material exists
                     %   (3) (Worst case) Only material type exists
                     else
+                        shape = shape{1};% tmp fix
                         if ~isempty(shape.filename)
                             [~, n, ~] = fileparts(shape.filename);
 
@@ -215,11 +209,10 @@ while i <= length(txt)
                             % object.  We want them unique.  So for now, we
                             % just pick a random number.  Some chance of a
                             % duplicate, but not much.
-
+                            mat = mat{1}; % tmp fix
                             resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
                         end
                     end
-
                 end
 
                 if exist('shape','var')
@@ -236,11 +229,15 @@ while i <= length(txt)
                 subtrees = cat(1, subtrees, tree(resObject));
                 % trees = subtrees;
             end
-            
+
             % This path if it is a 'branch' node
             resCurrent = piAssetCreate('type', 'branch');
             % If present populate fields.
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
+            if exist('InstanceName','var')
+                resCurrent.referenceObject = InstanceName;
+%               resCurrent.type = 'instance';
+            end
             if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
@@ -252,7 +249,7 @@ while i <= length(txt)
                 % TODO: solve the empty node name problem here
                 trees = trees.graft(1, subtrees(ii));
             end
-        
+
         elseif exist('name','var')
             % Create a branch, add it to the main tree.
             resCurrent = piAssetCreate('type', 'branch');
@@ -262,10 +259,9 @@ while i <= length(txt)
                 trees = trees.graft(1, subtrees(ii));
             end
         end
-        
+
         parsedUntil = i;
         return;
-
     else
        %  warning('Current line skipped: %s', currentLine);
     end

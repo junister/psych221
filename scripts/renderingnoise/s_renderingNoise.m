@@ -56,7 +56,7 @@ thisR.set('n bounces',3);
 [rn, pn, idealSensor] = piRenderNoise('rays',rays,'recipe',thisR);
 
 % Other options could be samplers: {'halton', 'solbol', 'stratified'}
-thisR.set('sampler subtype', 'solbol');
+thisR.set('sampler subtype', 'sobol');
 [rn, pn, idealSensor] = piRenderNoise('rays',rays,'recipe',thisR);
 
 %% Try with the Cornell box.  Here the bounces are relevant

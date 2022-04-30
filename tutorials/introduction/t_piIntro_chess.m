@@ -38,10 +38,10 @@ thisR.set('rays per pixel',64);
 thisR.set('n bounces',4); % Number of bounces traced for each ray
 
 thisR.set('render type',{'radiance','depth'});
-piWRS(thisR);
+scene = piWRS(thisR);
+scene = sceneSet(scene,'render flag','hdr');
 
 %% By default, we have also computed the depth map, so we can render it
-scene = ieGetObject('scene');
 
 scenePlot(scene,'depth map');
 

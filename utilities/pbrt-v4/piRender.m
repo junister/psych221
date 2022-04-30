@@ -1,4 +1,4 @@
-function [ieObject, result] = piRender(thisR,varargin)
+function [ieObject, result, thisD] = piRender(thisR,varargin)
 % Read a PBRT scene file, run the docker command, return the ieObject.
 %
 % updated version using dockerWrapper for render -- D. Cardinal
@@ -21,14 +21,25 @@ function [ieObject, result] = piRender(thisR,varargin)
 %  scalePupilArea
 %             - if true, scale the mean illuminance by the pupil
 %               diameter in piDat2ISET (default is true)
+%
 %  reuse      - Boolean. Indicate whether to use an existing file if one of
 %               the correct size exists (default is false)
+%
+%  ourdocker  - Specify the docker wrapper to use.  Default is build
+%               from scratch using Matlab getprefs('docker')
+%
+%  reflectancerender -  NYI
+%
+%  rendertype - Any combination of these strings
+%        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
 %
 %  verbose    - Level of desired output:
 %               0 Silent
 %               1 Minimal
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
+%
+% wave      -
 %
 % RETURN
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -41,11 +52,24 @@ function [ieObject, result] = piRender(thisR,varargin)
 % Zhenyi, 2021
 %
 % See also
-%   s_piReadRender*.m, piRenderResult
+%   s_piReadRender*.m, piRenderResult, dockerWrapper
 
 % Examples
 %{
-   % Renders both radiance and depth
+% These are examples of how to set the dockerWrapper parameters
+%
+% ourDocker = dockerWrapper('gpuRendering', true, ...
+%     'renderContext', 'remote-render','remoteImage', ...
+%     'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
+%     'remoteMachine', 'beluga.psych.upenn.edu', ...
+%     'remoteUser', 'david81', 'localRoot', '/mnt/c', 'whichGPU', 1);
+%
+% to run it using the CPU container
+%
+% ourDocker = dockerWrapper('gpuRendering', false);
+%}
+%{
+   % Renders both radiance and depth by default.
    pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
@@ -57,15 +81,18 @@ function [ieObject, result] = piRender(thisR,varargin)
    pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
    scene = piRender(pbrtFile,'render type','radiance');
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
+
    dmap = piRender(pbrtFile,'render type','depth');
    scene = sceneSet(scene,'depth map',dmap);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
 %}
 %{
-  % Separately calculate the illuminant and the radiance
-  thisR = piRecipeDefault; piWrite(thisR);
-  [scene, result]      = piRender(thisR);
-  [illPhotons, result] = piRender(thisR);
+  % Separately calculate the illuminant and the radiance-
+  % We are not sure this works or is right!
+  thisR = piRecipeDefault; 
+  piWrite(thisR);
+  [scene, result]      = piRender(thisR,'render type','radiance');
+  [illPhotons, result] = piRender(thisR,'render type','illuminance');
   scene = sceneSet(scene,'illuminant photons',illPhotons);
   sceneWindow(scene);
 %}
@@ -85,6 +112,15 @@ function [ieObject, result] = piRender(thisR,varargin)
   thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
   [aScene, metadata] = piRender(thisR, 'render type','material');
 %}
+%{
+% Render locally with your CPU machine
+  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  scene = piRender(thisR,'local',true,'our docker','digitalprodev/pbrt-v4-cpu');
+  
+  dockerWrapper.setParams('local',true);
+  dockerWrapper.setParams('local image','digitalprodev/pbrt-v4-cpu');
+  scene = piRender(thisR);
+%}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model
 
@@ -99,56 +135,46 @@ p.addParameter('meanluminance',0,@isnumeric);
 p.addParameter('meanilluminancepermm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
-p.addParameter('reflectancerender', false, @islogical);
-p.addParameter('ourdocker',''); % to specify a specific docker container
-p.addParameter('wave', 400:10:700, @isnumeric); % This is the past to piDat2ISET, which is where we do the construction.
+% p.addParameter('reflectancerender', false, @islogical);
+p.addParameter('ourdocker','',@(x)(isa(x,'dockerWrapper')) || isempty(x));    % to specify a docker image
+
+% This passed to piDat2ISET, which is where we do the construction.
+p.addParameter('wave', 400:10:700, @isnumeric); 
+
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 p.addParameter('rendertype', []); % if none we use what is in the recipe
 
+% If you would to render on your local machine, set this to true.  And
+% make sure that 'ourdocker' is set to the container you want to run.
+p.addParameter('localrender',false,@islogical);
+
 p.parse(thisR,varargin{:});
-ourDocker = p.Results.ourdocker;
-scalePupilArea = p.Results.scalepupilarea;
-meanLuminance    = p.Results.meanluminance;
+ourDocker        = p.Results.ourdocker;
+scalePupilArea   = p.Results.scalepupilarea;  % Fix this
+meanLuminance    = p.Results.meanluminance;   % And this
 wave             = p.Results.wave;
-verbosity        = p.Results.verbose;
 renderType       = p.Results.rendertype;
 
-if ~isempty(verbosity)
-    setpref('docker','verbosity', verbosity);
-end
-
-%% try to support docker servers
+%% Set up the dockerWrapper
 persistent renderDocker;
 
-% try and set the default to a server if we aren't passed one.
-% getRender() is an optional function that can be created and maintained
-% on a per-site basis to specify local machines, GPUs, and other data.
-if isempty(ourDocker)
-    if ~isempty(which('getRenderer'))
-        ourDocker =  getRenderer();
-    else
-        renderPrefs = getpref('docker','renderString', {'gpuRendering', false});
-        ourDocker = dockerWrapper(renderPrefs{:});
-    end
+% If the user has sent in a dockerWrapper (ourDocker) we use it
+if ~isempty(ourDocker),   renderDocker = ourDocker;
+else,                     renderDocker = dockerWrapper;
 end
 
-% Extensive Example:
-% renderString = {'gpuRendering', true, 'remoteMachine', <machine name>,'renderContext', <docker context>,'remoteImage', 'digitalprodev/pbrt-v4-gpu-ampere-mux', 'remoteRoot',<homedir>, 'remoteUser', uName, 'localRoot', <for WSL>, 'whichGPU', <#>};
-% setpref('docker', 'renderString', renderString);
+if renderDocker.localRender
+    % It is local so use this local rendering
+    renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
+    renderDocker.remoteMachine = '';
 
-% or you can create one directly:
-% ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
-%    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
-%     'remoteMachine', 'beluga.psych.upenn.edu', ...
-%     'remoteUser', 'david81', 'localRoot', '/mnt/c', 'whichGPU', 1);
+    % If the local docker is a GPU type, OK.  Otherwise, set gpuRendering
+    % false.
+    str = renderDocker.localImage;
+    if contains(str,'gpu'), renderDocker.gpuRendering = true;
+    else, renderDocker.gpuRendering = false;
+    end
 
-% to run it using a typical local container
-%ourDocker = dockerWrapper('gpuRendering', false);
-
-if ~isempty(ourDocker)
-    renderDocker = ourDocker; % use the one we are passed
-elseif isempty(renderDocker)
-    renderDocker = dockerWrapper(); % accept defaults
 end
 
 %% We have a radiance recipe and we have written the pbrt radiance file
@@ -212,17 +238,17 @@ if ispc  % Windows
     % With V4 we need EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-    folderBreak = split(outputFolder, filesep());
-    shortOut = strcat('/', char(folderBreak(end)));
+    
+    % folderBreak = split(outputFolder, filesep());
+    % shortOut = strcat('/', char(folderBreak(end)));
     
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        dockerCommand = sprintf('%s -w %s', dockerCommand, shortOut);
     end
 
     %fix for non - C drives
     %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
-    linuxOut = char(join(folderBreak,"/"));
+    % linuxOut = char(join(folderBreak,"/"));
 
     % legacy
     %dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
@@ -232,25 +258,31 @@ else  % Linux & Mac
     % With V4 we need EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-    folderBreak = split(outputFolder, filesep());
-    shortOut = strcat('/', char(folderBreak(end)));
+
+    % Unused, so commented out (BW/ZL April 22)
+    % folderBreak = split(outputFolder, filesep());
+    % shortOut = strcat('/', char(folderBreak(end)));
 
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-        % Legacy
-        %dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
     end
 end
 
+% renderDocker is a dockerWrapper and its parameters.  The parameters
+% control on which machine and with what parameters the docker
+% container is invoked.  I am not sure why it is a persistent
+% variable (BW).
 preRender = tic;
-
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 elapsedTime = toc(preRender);
 if getpref('docker','verbosity',0) > 0
     fprintf("Complete render took: %6.2d seconds.", elapsedTime);
 end
 
-%% Check the return
+% The user wants the dockerWrapper.
+if nargout > 2, thisD = renderDocker; end
+
+%% Check the returned rendering image.
 
 if status
     warning('Docker did not run correctly');
@@ -303,8 +335,5 @@ if isstruct(ieObject)
             error('Unknown struct type %s\n',ieObject.type);
     end
 end
-
-
-
 
 

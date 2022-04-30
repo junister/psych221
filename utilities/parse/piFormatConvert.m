@@ -17,7 +17,8 @@ nn=1;ii=1;
 txtLines = txtLines(~cellfun('isempty',txtLines));
 
 %% remove lines start with '#' except '#ObjectName'
-txtLines = txtLines(or(~strncmp(txtLines,'#',1), contains(txtLines,{'#ObjectName','#object name','#collection name'})));
+parseStrings = {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'};
+txtLines = txtLines(or(~strncmp(txtLines,'#',1), contains(txtLines,parseStrings)));
 tokenlist = {'A', 'C' , 'F', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T'};
 txtLines = regexprep(txtLines, '\t', ' ');
 

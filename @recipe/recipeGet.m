@@ -1127,8 +1127,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = (tmp.leafMaterial)';
     case {'objects'}
         % Indices to the objects
-        nnodes = thisR.assets.nnodes;
         val = [];
+        if isempty(thisR.assets), return; end
+        nnodes = thisR.assets.nnodes;
         for ii=1:nnodes
             thisNode = thisR.assets.Node{ii};
             if isfield(thisNode,'type') && isequal(thisNode.type,'object')
@@ -1137,6 +1138,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
     case {'objectnames'}
         % Names of the objects
+        val = [];
+        if isempty(thisR.assets), return; end
         ids = thisR.get('objects');
         names = thisR.assets.names;
         val = cell(1,numel(ids));

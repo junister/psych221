@@ -66,7 +66,7 @@ for ii=1:numel(textureParams)
                     thisText = '';
                     val = strrep(val,'imagemap', 'constant');
                     val = strcat(val, ' "rgb value" [0.7 0.7 0.7]');
-                    warning('Texture %s not found! Changing it to defuse', thisVal);
+                    warning('Texture %s not found! Changing it to difuse', thisVal);
 
                 else
                     if ispc % try to fix filename for the Linux docker container                        

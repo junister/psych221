@@ -81,7 +81,11 @@ for ii = 1:nLights
         % Spectrum
         spec = piParameterGet(thisLine, 'L');
         thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+        
+        % Spectrum Scale
+        specscale = piParameterGet(thisLine, 'float scale');
+        thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
+        
         % Twosided
         twoside = piParameterGet(thisLine, 'bool twosided');
         if twoside
@@ -121,7 +125,7 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
 
                 % Spectrum Scale
-                specscale = piParameterGet(thisLine, 'float specscale');
+                specscale = piParameterGet(thisLine, 'float scale');
                 thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
 
                 % n samples
@@ -136,7 +140,11 @@ for ii = 1:nLights
                 % Spectrum
                 spec = piParameterGet(thisLine, 'I');
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+                
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float scale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
+                
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
                 if ~isempty(from)
@@ -160,7 +168,11 @@ for ii = 1:nLights
                 % Spectrum
                 spec = piParameterGet(thisLine, 'I');
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+        
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float scale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
+        
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
                 if ~isempty(from)
@@ -171,7 +183,9 @@ for ii = 1:nLights
                 % Spectrum
                 spec = piParameterGet(thisLine, 'I');
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float scale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
                 % mapname
                 mapname = piParameterGet(thisLine, 'string mapname');
                 thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
@@ -180,7 +194,9 @@ for ii = 1:nLights
                 % Spectrum
                 spec = piParameterGet(thisLine, 'L');
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float scale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
                 % from
                 from = piParameterGet(thisLine, 'point3 from');
                 if ~isempty(from)
@@ -196,7 +212,9 @@ for ii = 1:nLights
                 % Spectrum
                 spec = piParameterGet(thisLine, 'I');
                 thisLightSource = piLightSet(thisLightSource, 'spd val', spec);
-
+                % Spectrum Scale
+                specscale = piParameterGet(thisLine, 'float scale');
+                thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
                 % FOV
                 fov = piParameterGet(thisLine, 'float fov');
                 thisLightSource = piLightSet(thisLightSource, 'fov val', fov);

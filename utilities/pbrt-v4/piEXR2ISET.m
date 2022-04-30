@@ -171,8 +171,9 @@ switch lower(cameraType)
         % luminance parameter (default is 100 cd/m2).
         if meanLuminance > 0
             ieObject = sceneAdjustLuminance(ieObject,meanLuminance);
+            ieObject = sceneSet(ieObject,'luminance',sceneCalculateLuminance(ieObject));
         end
-        ieObject = sceneSet(ieObject,'luminance',sceneCalculateLuminance(ieObject));
+        
 
         %{
         % Pinhole and perspective mean the same thing.
@@ -310,5 +311,5 @@ end
 if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
-
+ieObject.metadata = otherData;
 end

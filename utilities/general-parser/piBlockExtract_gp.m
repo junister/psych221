@@ -1,4 +1,4 @@
-function [blockList, blockLinesList]  = piBlockExtract(txtLines,varargin)
+function [blockList, blockLinesList]  = piBlockExtract_gp(txtLines,varargin)
 % Parse text in a scene file, returning the info as a structure 
 %
 % Syntax

@@ -160,6 +160,10 @@ classdef recipe < matlab.mixin.Copyable
                     disp(T);
                 case {'objects'}
                     % Tabular summary of object materials, positions, sizes
+                    if isempty(obj.assets)
+                        disp('No assets in this recipe.')
+                        return;
+                    end
                     names = obj.get('object names')';
                     matT   = obj.get('object materials');
                     coords = obj.get('object coordinates');

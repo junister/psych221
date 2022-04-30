@@ -1,4 +1,4 @@
-function [obj,results] = piWRS(thisR,varargin)
+function [obj, results, thisD] = piWRS(thisR,varargin)
 % Write, Render, Show a scene specified by a recipe (thisR).
 %
 % Brief description:
@@ -21,13 +21,12 @@ function [obj,results] = piWRS(thisR,varargin)
 %           ... others).  If it is a char, then we convert it to a cell.
 %   'show'  -  Call a window to show the object (default) and insert it in
 %           the vcSESSION database
-%   'rgb'   - Return an RGB image from the scene or oi
-%   'our docker' - Specify the docker image passed to piRender
+%   'our docker' - Specify the docker wrapper we will pass to piRender
 %
 % Returns
 %   obj     - a scene or oi
-%   results - Struct that contains the piRender text outputs and, if
-%             requested, an rgb image of the object
+%   results - The piRender text outputs
+%   thisD   - a dockerWrapper with the parameters for this run
 %
 % Description
 %   
@@ -48,10 +47,11 @@ p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
 p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
-p.addParameter('rgb',true,@islogical);
+p.addParameter('gamma',[],@isnumeric);
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
+g          = p.Results.gamma;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
@@ -62,7 +62,6 @@ end
 
 name = p.Results.name;
 show = p.Results.show;
-rgb  = p.Results.rgb;
 
 %% In version 4 we set the render type this way
 
@@ -74,17 +73,25 @@ thisR.set('render type',renderType);
 
 piWrite(thisR);
 
-[obj,results.text] = piRender(thisR, 'ourdocker', ourDocker);
+[~,username] = system('whoami');
+
+if strncmp(username,'zhenyi',6)
+    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
+else
+    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
+end
 
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
-        if show, sceneWindow(obj); end
-        if rgb, results.rgb = sceneGet(obj,'rgb'); end
+        if show, sceneWindow(obj);
+            if ~isempty(g), sceneSet(obj,'gamma',g); end
+        end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
-        if show, oiWindow(obj); end
-        if rgb, results.rgb = oiGet(obj,'rgb'); end
+        if show, oiWindow(obj); 
+            if ~isempty(g), oiSet(obj,'gamma',g); end
+        end
 end
 
 thisR.set('render type',oldRenderType);

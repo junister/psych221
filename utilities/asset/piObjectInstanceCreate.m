@@ -69,31 +69,71 @@ thisR.assets = thisR.assets.set(idx, OBJsubtree_branch);
 
 InstanceSuffix = sprintf('_I_%d',indexCount);
 if ~isempty(position)
-    OBJsubtree_branch.translation = position;
+    OBJsubtree_branch.translation{1} = position(:);
 end
 if ~isempty(rotation)
-    OBJsubtree_branch.rotation    = rotation;
+    OBJsubtree_branch.rotation{1}    = rotation;
 end
 if ~isempty(motion)
-    OBJsubtree_branch.motion.position = motion.position;
+    OBJsubtree_branch.motion.translation = motion.translation;
     OBJsubtree_branch.motion.rotation = motion.rotation;
 end
-for ii = 1:numel(OBJsubtree.Node)
-    thisNode      = OBJsubtree.Node{ii};
-    thisNode.name = strcat(OBJsubtree.Node{ii}.name, InstanceSuffix);
-    if strcmp(OBJsubtree.Node{ii}.type,'object')
-        thisNode.type = 'instance';
-        thisNode.referenceObject = OBJsubtree.Node{ii}.name;
-    end
-    OBJsubtree = OBJsubtree.set(ii, thisNode);
-end
-OBJsubtree_branch.referencebranch = OBJsubtree_branch.name;
+OBJsubtreeNew = tree();
+% for ii = 1:numel(OBJsubtree.Node)
+    
+%     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
+%             OBJsubtree.Node{1}.isInstancer==0
+%         continue;
+%     end
 
+% thisNode      = OBJsubtree.Node{1};
+% thisNode.name = strcat(OBJsubtree.Node{1}.name, InstanceSuffix);
+% %     if strcmp(OBJsubtree.Node{ii}.type,'object')
+% %         thisNode.type = 'instance';
+% %         thisNode.referenceObject = OBJsubtree.Node{ii}.name;
+% %     end
+% OBJsubtreeNew = OBJsubtreeNew.set(1, thisNode);
+% end
+OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
+OBJsubtree_branch.isInstancer = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
 % replace branch
-OBJsubtree = OBJsubtree.set(1, OBJsubtree_branch);
+OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
+
+% apply transformation to lights
+extraNode = OBJsubtree_branch.extraNode;
+
+extraNodeNew = extraNode;
+for nLightsNode = 1:numel(extraNode.Node)
+    thisLightNode = extraNode.Node{nLightsNode};
+    if strcmp(thisLightNode.type,'light')
+        if ~strcmp(thisLightNode.lght{1}.type,'area')
+            % only area light need to modify
+            continue;
+        end
+        ParentId = extraNode.Parent(nLightsNode);
+        ParentNode = extraNode.Node{ParentId};
+        ParentNode.translation{end+1} = OBJsubtree_branch.translation{1};
+        ParentNode.transorder(end+1) = 'T';
+        ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
+        ParentNode.transorder(end+1) = 'R';
+        extraNodeNew = extraNodeNew.set(ParentId, ParentNode);
+    elseif isfield(thisLightNode,'referenceObject')
+        thisLightNode = rmfield(thisLightNode,'referenceObject');
+        extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
+    end
+end
+% graft lightsNode
+OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 % graft object tree to scene tree
 % thisR.assets = thisR.assets.graft(1, OBJsubtree);
-thisR = thisR.set('asset', 1, 'graft', OBJsubtree);
+try
+    id = thisR.get('node', 'root', 'id');
+%     rootSTID = thisR.assets.nnodes + 1;
+    thisR.assets = thisR.assets.graft(id, OBJsubtreeNew);
+%     thisR.set('asset', 1, 'graft', OBJsubtreeNew);
+catch
+    disp('ERROR');
+end
 instanceBranchName = OBJsubtree_branch.name;
 end

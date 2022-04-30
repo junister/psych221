@@ -1,7 +1,7 @@
-function status = config(obj, varargin)
+function config(obj, varargin)
 % Configure the Matlab environment and initiate the docker-machine
 %
-%   status = dockerWrapper.config(varargin)
+%   dockerWrapper.config(varargin)
 %
 % INPUTS:
 %    'machine' - [Optional, type=char, default='default']
@@ -20,6 +20,8 @@ function status = config(obj, varargin)
 %
 % Remote server code added by D. Cardinal 2021
 %
+% See also
+%   piDockerConfig
 
 %% Parse input arguments
 
@@ -37,7 +39,8 @@ p.addParameter('localRoot','',@ischar); % for Windows/wsl
 p.addParameter('whichGPU', -1, @isnumeric); % select gpu, -1 for default
 p.addParameter('verbosity', 0, @isnumeric); %
 p.addParameter('settings', '', @ischar);
-
+p.addParameter('localRender',false,@islogical);
+p.addParameter('localImageTag','latest',@ischar);
 
 p.parse(varargin{:});
 
@@ -49,7 +52,6 @@ end
 if ~isempty(args.gpuRendering)
     obj.gpuRendering = args.gpuRendering;
 end
-obj.whichGPU = args.whichGPU;
 
 if ~isempty(args.remoteRoot)
     obj.remoteRoot = args.remoteRoot;
@@ -59,6 +61,12 @@ if ~isempty(args.remoteUser)
 end
 if ~isempty(args.localRoot)
     obj.localRoot = args.localRoot;
+end
+if ~isempty(args.localRender)
+    obj.localRender = args.localRender;
+end
+if ~isempty(args.localImageTag)
+    obj.localImageTag = args.localImageTag;
 end
 
 if args.whichGPU == -1 % theoretically any, but now just 0
@@ -90,8 +98,10 @@ if ~isempty(args.remoteMachine)
     obj.remoteUser = args.remoteUser;
 end
 
+piDockerConfig;
 
-%% Configure Matlab ENV for the machine
+%{
+%% Configure Matlab ENV for the machine - based on piDockerConfig.
 
 % MAC OSX
 if ismac
@@ -225,3 +235,4 @@ elseif ispc
 end
 
 % now that we have docker ready to go, ...
+%}

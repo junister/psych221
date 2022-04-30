@@ -36,16 +36,18 @@ p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 p.addParameter('material',true);
 p.addParameter('texture',true);
 p.addParameter('asset',true);
+p.addParameter('objectinstance',true);
 p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
 
 p.parse(sceneR, objectRs, varargin{:});
 
-sceneR       = p.Results.sceneR;
-materialFlag = p.Results.material;
-textureFlag  = p.Results.texture;
-assetFlag    = p.Results.asset;
-nodeName     = p.Results.nodename;
-
+sceneR         = p.Results.sceneR;
+materialFlag   = p.Results.material;
+textureFlag    = p.Results.texture;
+assetFlag      = p.Results.asset;
+objectInstance = p.Results.objectinstance;
+nodeName       = p.Results.nodename;
+copyTextureFlag = 1;
 %%  The objects can be a cell or a recipe
 
 if ~iscell(objectRs)
@@ -72,17 +74,32 @@ for ii = 1:length(recipelist)
                 % Get the asset names in the object
                 % The problem with this is we don't get the geometry node above
                 % it.
-                names = thisR.get('assetnames');
-                nodeName = names{2};
+%                 names = thisR.get('assetnames');
+%                 nodeName = names{2};
+                
             end
-            
+            children = thisR.assets.getchildren(1);
             % Get the subtree starting just below the specified node
-            thisOBJsubtree = thisR.get('asset', nodeName, 'subtree');
+%             thisOBJsubtree = thisR.get('asset', nodeName, 'subtree');
             
             % Graft the asset three into the scene.  We graft it onto the root
             % of the main scene.
             % Changed to root_B on Jan 23, 2022.  Worried (BW).
-            sceneR.set('asset', 'root_B', 'graft', thisOBJsubtree);
+            for nChild = 1:numel(children)
+                thisNodeTree = thisR.get('asset', children(nChild), 'subtree');
+                [~,thisNode] = piAssetFind(thisR.assets, 'asset',children(nChild));
+                if objectInstance && isfield(thisNode{1},'isInstancer')
+                    if thisNode{1}.isInstancer ==1
+                        % For an asset tree, we save the parent object and set
+                        % isInstancer flag to be 1, when the instance is called
+                        % the node's isInstancer flag is 0;
+                        % In this case, when we merge the scene, we would like
+                        % to only merge the parent object, we will add instance
+                        % later using piObjectInstanceCreate. --Zhenyi
+                        sceneR = sceneR.set('asset', 1, 'graft', thisNodeTree);
+                    end
+                end
+            end
         end
         
         % Copy meshes from objects folder to scene folder here
@@ -96,8 +113,9 @@ for ii = 1:length(recipelist)
             copyfile(sourceAssets, dstAssets);
         else
             if isfolder(sourceDir)
-                if ~isfolder(dstDir), mkdir(dstDir), end;
-                copyfile(sourceDir, dstDir);
+                if ~isfolder(dstDir), mkdir(dstDir), end
+                piCopyFolder(sourceDir, dstDir);
+                copyTextureFlag = 0;
             end
         end
     end
@@ -118,13 +136,14 @@ for ii = 1:length(recipelist)
         else
             sceneR.textures = thisR.textures;
         end
-        
-        % Copy texture files
-        sourceDir = thisR.get('output dir');
-        dstDir    = sceneR.get('output dir');        
-        sourceTextures = fullfile(sourceDir, 'textures');        
-        if exist(sourceTextures, 'dir')
-            copyfile(sourceTextures, dstDir);
+        if copyTextureFlag
+            % Copy texture files
+            sourceDir = thisR.get('output dir');
+            dstDir    = sceneR.get('output dir');
+            sourceTextures = fullfile(sourceDir, 'textures');
+            if exist(sourceTextures, 'dir')
+                piCopyFolder(sourceTextures, dstDir);
+            end
         end
     end
 end

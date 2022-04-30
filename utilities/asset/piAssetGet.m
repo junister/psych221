@@ -62,7 +62,18 @@ switch thisAsset.type
                     % Possibly a light or a marker or mislabeled.
                     return;
                 else
-                    val = thisAsset.material.namedmaterial;
+                    if iscell(thisAsset.material)
+                        % This needs to be resolved between Zhenyi and
+                        % Zheng and me.  We need to decide if we allow the
+                        % materials to be a cell, or we just make sure we
+                        % put any transforms in the tree above the multiple
+                        % parts.  Also, notice, we would have to specify
+                        % which of the materials in the list.  We did this
+                        % now only to make the auto demonstration run.
+                        val = thisAsset.material{1}.namedmaterial;
+                    else
+                        val = thisAsset.material.namedmaterial;
+                    end
                 end
             case {'shape'}
                 val = thisAsset.shape;

@@ -7,6 +7,9 @@ closeidx = strfind(txt,']');
 tmp = sscanf(txt(openidx(1):closeidx(1)), '[%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
 T = reshape(tmp,[4,4]);
 
+[translation, rotation, scale] = piTransformDecompose(T);
+%{
+% This part goes into piTransformDecompose.m
 % Extract translation from the transformation matrix
 translation = reshape(T(13:15),[3,1]);
 
@@ -63,4 +66,5 @@ S = R\T;
 
 % Set up scale parameters in pbrt format
 scale = [S(1,1) S(2,2), S(3,3)];
+%}
 end
