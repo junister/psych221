@@ -55,9 +55,7 @@ classdef dockerWrapper < handle
     %
     %
     % Additional NOTES:
-    %   1. We seem to be leaving a lot of exited docker containers in the
-    % docker space.  These are imgtool functions.  Maybe we can stop
-    % leaving them around. (Yes:)) In any event, to get rid of them we can run
+    % 1. To get rid of any stranded local containers we can run
     %
     %    docker container prune
     %
