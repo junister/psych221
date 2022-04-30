@@ -164,10 +164,11 @@ classdef dockerWrapper < handle
     end
 
 
-    methods (Static)
+    methods (Static=true)
 
-        % These are function definitions. Matlab requires listing
-        % static functions that are defined in a separate file.
+        % Matlab requires listing static functions that are defined in a
+        % separate file.  Here are the definitions.  (Static functions do
+        % not have an 'obj' argument.
         dockerImage = localImage();
         setParams();
         [dockerExists, status, result] = exists();  % Like piDockerExists
@@ -220,10 +221,6 @@ classdef dockerWrapper < handle
             end
         end
 
-        % for now we want containers to be global, so we hacked this
-        % in because Matlab doesn't support static @ class level
-        % and so we can switch to making them per instance if wanted.
-        % ??
         function retVal = staticVar(action, varname, value)
             % Actions are 'set' or anything else.  When using 'get' the
             % value of one of the persistent variables is returned.
@@ -288,7 +285,8 @@ classdef dockerWrapper < handle
 
     end
 
-    methods
+    methods (Static = false)
+        % These functions are not static; they have an obj argument.
 
         function ourContainer = startPBRT(obj, processorType)
             % Start the docker container remotely
@@ -511,16 +509,18 @@ classdef dockerWrapper < handle
             % implemented someplace, need to find the code!
         %end
 
-        %% Moved in from getRenderer
+        % Inserted from getRenderer.  thisD is a dockerWrapper (obj)
         function getRenderer(thisD)
-            %GETRENDERER Creates a dockerWrapper with the user's preferences.
+            %GETRENDERER uses the 'docker' parameters to insert the
+            %renderer
             %
             % Description
-            %  The initial dockerWrapper is filled in with the user's preferences
-            %  from (getpref('docker')).  This method builds on those to set a few
-            %  additional parameters that are site-specific.
+            %  The initial dockerWrapper is filled in with the user's
+            %  preferences from (getpref('docker')).  This method builds on
+            %  those to set a few additional parameters that are
+            %  site-specific.
             %
-            %  VISTALAB:
+            %  VISTALAB GPU Information
             %   The default uses the 3070 on muxreconrt.stanford.edu.
             %   This approach requires having an ssh-key based user login as
             %   described on the wiki page. Specifically, your username & homedir
@@ -571,37 +571,42 @@ classdef dockerWrapper < handle
             % forceLocal = getpref('docker','forceLocal', false);
 
             if thisD.localRender
-                % Running locally whether there is a GPU or not                
+                % Running on the user's local machine, whether there is a
+                % GPU or not.
                 thisD.dockerImageName = thisD.localImage;
                 return;                
 
             else
-                % Rendering on a remote GPU
-                % This sets dockerWrapper parameters that were not already set.
-                % It appears to create the context, too.                
+                % Rendering on a remote machine.
+
+                % This sets dockerWrapper parameters that were not already
+                % set and creates the docker context.  
 
                 % Docker doesn't allow use of ~ in volume mounts, so we need to
                 % make sure we know the correct remote home dir:
                 if ispc
+                    % This probably should use the thisD.remoteRoot, not
+                    % the getpref() method.
                     thisD.remoteRoot = getpref('docker','remoteRoot',getUserName(thisD));
                 end
 
                 if isempty(thisD.remoteMachine)
-                    % The remoteMachine should be probably be set in prefs.  The
-                    % user may have multiple opportunities for this.  For now we
-                    % default to the vistalabDefaultServer.
+                    % If the remoteMachine was not set in prefs, we get the
+                    % default. The user may have multiple opportunities
+                    % for this.  For now we default to the
+                    % vistalabDefaultServer.
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
                 if isempty(thisD.remoteImage)
-                    % If we know the remote machine, but not the remote image, at
-                    % Vistalab we can fill in the remote Docker image to use.  We
-                    % do this depending on the machine and the GPU.  A different
-                    % image is needed for each, sigh.
+                    % If we know the remote machine, but not the remote
+                    % image, we try fill in the remote Docker image to
+                    % use.  We do this depending on the machine and the
+                    % GPU.  A different image is needed for each, sigh.
                     %
                     % We should probably catch
                     if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
-                        % Right now we only allow one remote render context
+                        % We allow one remote render context
                         thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
                         switch thisD.whichGPU
                             case {0, -1}
@@ -612,14 +617,14 @@ classdef dockerWrapper < handle
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                         end
 
-                        % If the user specified a different tag for the docker
-                        % image, use the one they specified.
+                        % If the user specified a different tag for the
+                        % docker image, use the one they specified.
                         if ~isempty(thisD.remoteImage) && ~contains(thisD.remoteImage,':') % add tag
                             thisD.remoteImage = [thisD.remoteImage, ':', thisD.remoteImageTag];
                         end
                     else
                         % This seems like a problem to me (BW).
-                        warning('Not able to identify the remoteImage');
+                        warning('Unable to identify the remoteImage');
                     end
                 end
             end
@@ -627,8 +632,8 @@ classdef dockerWrapper < handle
         end
         
         function userName = getUserName(obj)
-            % Reads the user name from a docker wrapper object, or from the system and
-            % then sets it in the docker wrapper object.
+            % Reads the user name from a docker wrapper object, or from the
+            % system and then sets it in the docker wrapper object.
 
             % Different methods are needed for different systems.
             if ~isempty(obj.remoteUser)
