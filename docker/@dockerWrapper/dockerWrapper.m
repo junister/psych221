@@ -112,13 +112,13 @@ classdef dockerWrapper < handle
         whichGPU = getpref('docker','whichGPU',-1);
 
         % these relate to remote/server rendering
-        remoteMachine  = getpref('docker','remoteMachine'); % for syncing the data
-        remoteUser     = getpref('docker','remoteUser'); % use for rsync & ssh/docker
+        remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
+        remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
         remoteImage    = '';
         remoteImageTag = 'latest';
         remoteRoot     = getpref('docker','remoteRoot'); % we need to know where to map on the remote system
 
-        localRoot = ''; % for the Windows/wsl case (sigh)
+        localRoot = '/mnt/c'; % for the Windows/wsl case (sigh)
 
         workingDirectory = '';
         localVolumePath  = '';
