@@ -43,6 +43,9 @@ classdef dockerWrapper < handle
     %
     %   remoteMachine -- name of remote machine to render on
     %   remoteImage   -- GPU-specific docker image on remote machine
+    %   whichGPU      -- Select a specific GPU
+    %       -1 will use any, but if there are multiple different
+    %       architectures, probably better to specify along with imagename.
     %
     % ADDITIONAL OPTIONS in case you want or need to change the defaults
     %
@@ -97,12 +100,12 @@ classdef dockerWrapper < handle
     %
     %   1. Remote GPU rendering initialization from a Windows client:
     %
-    % ourDocker = dockerWrapper('gpuRendering', true, 'renderContext', 'remote-render','remoteImage', ...
-    %    'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/<username>/', ...
+    % ourDocker = dockerWrapper('gpuRendering', true,'remoteImage', ...
+    %    <suitable Docker image>, 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
-    %     'remoteUser', '<remote uname>', 'localRoot', '/mnt/c', 'whichGPU', 0);
+    %     'remoteUser', '<remote uname>', 'localRoot', <'/mnt/c'>, 'whichGPU', <0>);
     %
-    % NOTE: For ease of use you can simply do:
+    % NOTE: LEGACY Support -- For ease of use you can simply do:
     %   setpref('docker', 'renderString', <same arguments>)
     %     and any new docker containers will use that.
     %
@@ -110,10 +113,6 @@ classdef dockerWrapper < handle
     %
     %    ourDocker = dockerWrapper('gpuRendering', false);
     %
-    % Example of what we need to generate prior to running from scratch
-    % -- Not needed for rendering
-    %     'docker run -ti --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt'
-    %   "docker run -i --rm -w /sphere -v C:/iset/iset3d-v4/local/sphere:/sphere camerasimulation/pbrt-v4-cpu pbrt --outfile renderings/sphere.exr sphere.pbrt"
 
     properties
         dockerContainerName = '';
@@ -125,8 +124,8 @@ classdef dockerWrapper < handle
         dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
 
-        gpuRendering = true;
-        whichGPU = getpref('docker','whichGPU',-1);
+        gpuRendering = true; % the default
+        whichGPU = getpref('docker','whichGPU',-1); % use any
 
         % these relate to remote/server rendering
         remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
