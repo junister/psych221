@@ -30,12 +30,26 @@ classdef dockerWrapper < handle
     %  container.  By running in a persistent container, we avoid the
     %  startup overhead (which is more than 20 seconds).
     %
-    %  Parameters used for Remote Rendering
+    %  NOTE: Parameters will also be retrieved from prefs using
+    %       getpref('docker',<paramName>,[default value]);
+    %
+    %  Parameter(s) useful for all rendering:
+    %
+    %   gpuRendering    -- set to true to force GPU rendering
+    %                   -- set to false to force CPU rendering
+    %                   -- by default will use a local GPU if available
+    %
+    %  Parameters needed for Remote Rendering:
     %
     %   remoteMachine -- name of remote machine to render on
-    %   remoteUser    -- username on remote machine (that has key support)
-    %   remoteContext -- name of docker context pointing to renderer
     %   remoteImage   -- GPU-specific docker image on remote machine
+    %
+    % ADDITIONAL OPTIONS in case you want or need to change the defaults
+    %
+    %   remoteUser    -- username on remote machine if different
+    %           from your username on current machine
+    %   remoteContext -- name of docker context pointing to renderer
+    %           if different from the default that is created for you
     %   EXPERIMENTAL: CPU image on remote machine for offloading large
     %                CPU-only renders
     %   remoteRoot -- needed if different from local piRoot
@@ -46,6 +60,11 @@ classdef dockerWrapper < handle
     %
     % whichGPU -- for multi-gpu rendering systems
     %   use device number (e.g. 0, 1, etc.) or -1 for don't care
+    %
+    % Optional docker image tags to select a different version:
+    %   remoteImageTag -- defaults to :latest
+    %   localImageTag -- defaults to :latest
+    %
     %
     % FUTURE: Potenially unified way to call docker containers for iset
     %   as an attempt to resolve at least some of the myriad platform issues
