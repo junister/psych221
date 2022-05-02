@@ -55,9 +55,7 @@ classdef dockerWrapper < handle
     %
     %
     % Additional NOTES:
-    %   1. We seem to be leaving a lot of exited docker containers in the
-    % docker space.  These are imgtool functions.  Maybe we can stop
-    % leaving them around. (Yes:)) In any event, to get rid of them we can run
+    % 1. To get rid of any stranded local containers we can run
     %
     %    docker container prune
     %
@@ -112,13 +110,17 @@ classdef dockerWrapper < handle
         whichGPU = getpref('docker','whichGPU',-1);
 
         % these relate to remote/server rendering
-        remoteMachine  = getpref('docker','remoteMachine'); % for syncing the data
-        remoteUser     = getpref('docker','remoteUser'); % use for rsync & ssh/docker
-        remoteImage    = '';
+        remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
+        remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
+        remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
         remoteImageTag = 'latest';
-        remoteRoot     = getpref('docker','remoteRoot'); % we need to know where to map on the remote system
-
-        localRoot = ''; % for the Windows/wsl case (sigh)
+        remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+        
+        % A render context is important for the case where we want to
+        % access multiple servers over time (say beluga & mux, or mux &
+        % gray, etc)
+        renderContext = getpref('docker','renderContext','');
+        localRoot = getpref('docker','localRoot','/mnt/c'); % for the Windows/wsl case (sigh)
 
         workingDirectory = '';
         localVolumePath  = '';
@@ -153,7 +155,15 @@ classdef dockerWrapper < handle
                 obj.dockerFlags = '-ti --rm';
             end
 
-            if isempty(varargin), return;
+            % I don't think we should fail in a pure default case?
+            % Also allow renderString pref for backward compatibility
+            if isempty(varargin)
+                if ~isempty(getpref('docker','renderString',''))
+                    rString = getpref('docker','renderString','');
+                    for ii = 1:2:numel(rString)
+                        obj.(rString{ii}) = rString{ii+1};
+                    end
+                end
             else
                 for ii=1:2:numel(varargin)
                     obj.(varargin{ii}) = varargin{ii+1};
@@ -348,8 +358,12 @@ classdef dockerWrapper < handle
                 contextFlag = '';
             else
                 % Rendering remotely.
+                % Have to track user set context somehow
+                % probably static var should be set from prefs
+                % automatically...
                 if isempty(obj.staticVar('get','renderContext'))
-                    contextFlag = '';
+                    contextFlag = [' --context ' getpref('docker','renderContext','')];
+                    obj.staticVar('set','renderContext',getpref('docker','renderContext'));
                 else
                     contextFlag = [' --context ' obj.staticVar('get','renderContext')];
                 end

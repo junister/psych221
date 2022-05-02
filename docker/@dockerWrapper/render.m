@@ -32,7 +32,7 @@ nativeFolder = outputFolder;
 if ~isempty(dockerWrapper.staticVar('get','renderContext',''))
     useContext = dockerWrapper.staticVar('get','renderContext','');
 else
-    useContext = 'default';
+    useContext = getpref('docker','renderContext','');
 end
 % container is Linux, so convert
 outputFolder = dockerWrapper.pathToLinux(outputFolder);

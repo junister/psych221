@@ -71,6 +71,10 @@ if true % ~ispc -- wrapper doesn't work right here.
     % can't use native filesep as we want linux version always
     cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [fname,'-converted.pbrt'], nativeDir);
     [status_copy, result ] = system(cpcmd);
+
+    % we tend to leave un-used containers around, so let's try to delete
+    delCommand = sprintf('docker rm %s', dockercontainerName);
+    [status_del,result] = system(delCommand);
 else
     cpDocker = dockerWrapper();
     cpDocker.dockerImageName = ''; % use running container
