@@ -1,0 +1,233 @@
+ObjectBegin "Camera_m"
+#Instance MeshName: "Camera"
+ObjectEnd
+
+ObjectBegin "Area.002_m"
+#Instance MeshName: "Area.002"
+ObjectEnd
+
+ObjectBegin "AreaLightRectangle.001_m"
+#Instance MeshName: "AreaLightRectangle.001"
+ObjectEnd
+
+ObjectBegin "Area.003_m"
+#Instance MeshName: "Area.003"
+ObjectEnd
+
+ObjectBegin "AreaLightRectangle_m"
+#Instance MeshName: "AreaLightRectangle"
+ObjectEnd
+
+ObjectBegin "Plane_m"
+#Instance MeshName: "Plane"
+	AttributeBegin
+	#MeshName: "Plane" #Dimension:[35.54429626464844 35.54429626464844 0.0]" 
+		Transform [17.772148 0.000000 0.000000 0.000000 0.000000 17.772148 0.000000 0.000000 0.000000 0.000000 17.772148 0.000000 0.000000 -11.053160 0.291840 1.000000 ]
+		AttributeBegin
+			NamedMaterial "Material.001"
+			Shape "trianglemesh"
+			"point3 P" [
+			-1.0 -1.0 0.0 1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 1.0 0.0			
+			]
+			"normal N" [
+			0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0			
+			]
+			"point2 uv" [
+			0.0 0.0 
+			1.0 0.0 
+			1.0 1.0 
+			0.0 0.0 
+			1.0 1.0 
+			0.0 1.0 
+			]
+			"integer indices" [
+			0 1 2 3 4 5 
+			]
+		AttributeEnd
+	AttributeEnd
+ObjectEnd
+
+ObjectBegin "AreaLightRectangle.002_m"
+#Instance MeshName: "AreaLightRectangle.002"
+ObjectEnd
+
+ObjectBegin "AreaLightRectangle.003_m"
+#Instance MeshName: "AreaLightRectangle.003"
+ObjectEnd
+
+ObjectBegin "Area_m"
+#Instance MeshName: "Area"
+ObjectEnd
+
+ObjectBegin "Area.001_m"
+#Instance MeshName: "Area.001"
+ObjectEnd
+
+AttributeBegin
+#CollectionName: "Scene Collection"
+	AttributeBegin
+	#CollectionName: "Collection"
+		AttributeBegin
+		#MeshName: "Camera"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Camera_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Plane"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Plane_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Area.001"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Area.001_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Area.002"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Area.002_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Area"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Area_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Area.003"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Area.003_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "AreaLightRectangle.001"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "AreaLightRectangle.001_m"
+			AttributeBegin
+			#MeshName: "AreaLightRectangle.001" #Dimension:[0.4999999701976776 0.5 0.0]" 
+				AttributeBegin
+					Transform [0.250000 0.000000 0.000000 0.000000 0.000000 -0.000000 -0.250000 0.000000 0.000000 0.000002 -0.000000 0.000000 3.454411 0.000000 0.150356 1.000000 ]
+					AreaLightSource "diffuse"					
+					"rgb L" [ 1.0 0.012521782889962196 0.03447873145341873]					
+					"float scale" [ 100.0 ]					
+					"float spread" [ 60.0 ]					
+					Shape "trianglemesh"
+					"point3 P" [
+					-1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 1.0 -1.0 0.0					
+					]
+					"normal N" [
+					0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0					
+					]
+					"point2 uv" [
+					0.0 0.0 
+					0.0 1.0 
+					1.0 1.0 
+					0.0 0.0 
+					1.0 1.0 
+					1.0 0.0 
+					]
+					"integer indices" [
+					0 1 2 3 4 5 
+					]
+				AttributeEnd
+			AttributeEnd
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "AreaLightRectangle.002"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "AreaLightRectangle.002_m"
+			AttributeBegin
+			#MeshName: "AreaLightRectangle.002" #Dimension:[0.9999999403953552 1.0 0.0]" 
+				AttributeBegin
+					Transform [0.500000 0.000000 0.000000 0.000000 0.000000 -0.000000 -0.500000 0.000000 0.000000 0.000005 -0.000000 0.000000 10.072488 0.027281 0.135390 1.000000 ]
+					AreaLightSource "diffuse"					
+					"rgb L" [ 0.1279274970293045 1.0 0.0934164971113205]					
+					"float scale" [ 100.0 ]					
+					"float spread" [ 90.0 ]					
+					Shape "trianglemesh"
+					"point3 P" [
+					-1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 1.0 -1.0 0.0					
+					]
+					"normal N" [
+					0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0					
+					]
+					"point2 uv" [
+					0.0 0.0 
+					0.0 1.0 
+					1.0 1.0 
+					0.0 0.0 
+					1.0 1.0 
+					1.0 0.0 
+					]
+					"integer indices" [
+					0 1 2 3 4 5 
+					]
+				AttributeEnd
+			AttributeEnd
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "AreaLightRectangle.003"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "AreaLightRectangle.003_m"
+			AttributeBegin
+			#MeshName: "AreaLightRectangle.003" #Dimension:[0.9999999403953552 1.0 0.0]" 
+				AttributeBegin
+					Transform [0.500000 0.000000 0.000000 0.000000 0.000000 -0.000000 -0.500000 0.000000 0.000000 0.000005 -0.000000 0.000000 -10.020552 0.026915 0.145423 1.000000 ]
+					AreaLightSource "diffuse"					
+					"rgb L" [ 1.0 0.8230292201042175 0.045944731682538986]					
+					"float scale" [ 100.0 ]					
+					"float spread" [ 5.0 ]					
+					Shape "trianglemesh"
+					"point3 P" [
+					-1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 1.0 -1.0 0.0					
+					]
+					"normal N" [
+					0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0					
+					]
+					"point2 uv" [
+					0.0 0.0 
+					0.0 1.0 
+					1.0 1.0 
+					0.0 0.0 
+					1.0 1.0 
+					1.0 0.0 
+					]
+					"integer indices" [
+					0 1 2 3 4 5 
+					]
+				AttributeEnd
+			AttributeEnd
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "AreaLightRectangle"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "AreaLightRectangle_m"
+			AttributeBegin
+			#MeshName: "AreaLightRectangle" #Dimension:[0.9999999403953552 1.0 0.0]" 
+				AttributeBegin
+					Transform [0.500000 0.000000 0.000000 0.000000 0.000000 -0.000000 -0.500000 0.000000 0.000000 0.000005 -0.000000 0.000000 -3.658890 0.000000 0.150356 1.000000 ]
+					AreaLightSource "diffuse"					
+					"rgb L" [ 0.02099422737956047 0.01631198078393936 1.0]					
+					"float scale" [ 100.0 ]					
+					"float spread" [ 30.0 ]					
+					Shape "trianglemesh"
+					"point3 P" [
+					-1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 1.0 -1.0 0.0					
+					]
+					"normal N" [
+					0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0					
+					]
+					"point2 uv" [
+					0.0 0.0 
+					0.0 1.0 
+					1.0 1.0 
+					0.0 0.0 
+					1.0 1.0 
+					1.0 0.0 
+					]
+					"integer indices" [
+					0 1 2 3 4 5 
+					]
+				AttributeEnd
+			AttributeEnd
+		AttributeEnd
+	AttributeEnd
+AttributeEnd

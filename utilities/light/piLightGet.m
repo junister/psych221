@@ -194,7 +194,9 @@ if pbrtText && ~isempty(val) &&...
         case 'specscale'
 %             if ~iscell(val), val = {val};end
             txt = sprintf(' "float scale" [%.5f]',val);
-             
+            
+        case 'spread'
+            txt = sprintf(' "float spread" [%.2f]',val);
     end
 end
 

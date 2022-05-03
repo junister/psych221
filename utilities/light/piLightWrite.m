@@ -360,6 +360,18 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, nsamplesTxt);
             end
 
+            % scale
+            [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
+            if ~isempty(specscaleTxt)
+                lghtDef = strcat(lghtDef, specscaleTxt);
+            end
+
+                        % scale
+            [~, spreadTxt] = piLightGet(thisLight, 'spread val', 'pbrt text', true);
+            if ~isempty(spreadTxt)
+                lghtDef = strcat(lghtDef, spreadTxt);
+            end
+
             % twosided
             [~, twosidedTxt] = piLightGet(thisLight, 'twosided val', 'pbrt text', true);
             if ~isempty(twosidedTxt)

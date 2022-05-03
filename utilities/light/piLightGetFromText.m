@@ -99,6 +99,10 @@ for ii = 1:nLights
         % n samples
         nSamples = piParameterGet(thisLine, 'integer nsamples');
         thisLightSource = piLightSet(thisLightSource, 'nsamples val', nSamples);
+
+        % spread angle
+        spread = piParameterGet(thisLine, 'float spread');
+        thisLightSource = piLightSet(thisLightSource, 'spread val', spread);
     else
         % Assign type
         lightType = lightLines{piContains(lightLines,'LightSource')};
