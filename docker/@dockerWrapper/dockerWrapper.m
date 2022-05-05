@@ -1,7 +1,7 @@
 classdef dockerWrapper < handle
-    %DOCKERWRAPPER A class that manages ISET3d-v4 rendering methods
+    %DOCKERWRAPPER A class to manage ISET3d-v4 rendering
     %
-    % This class manages how we run PBRT docker containers in
+    % This class manages how we run PBRT - mainly in docker containers - in
     % ISET3d-v4. At present, we manage these cases:
     %
     %   * a remote server with a GPU,
@@ -10,74 +10,76 @@ classdef dockerWrapper < handle
     %   * your local computer with a CPU, and
     %   * your local computer with PBRT installed and no docker at all.
     %
-    % The source code is still under active development (May 1, 2022).
+    % The source code is under active development (May 1, 2022).
     %
     % The dockerWrapper class is used by piWRS() and piRender(). These
-    % functions use this class to set up the docker images that run
-    % either locally or remotely. For instructions on how to set up
-    % your computer to use this class, see the ISET3d-v4 wiki pages.
+    % functions specify the docker images that run either locally or
+    % remotely. For instructions on how to set up a computer to run
+    % on a remote, see the ISET3d-v4 wiki pages.
     %
-    % Please note:
-    %   To run on a remote machine someone must have set up the
-    %   environment on the machine to match the expectations of ISET3d.
+    % ** N.B. To run on a remote machine someone must have set up the
+    % environment on that machine to match the expectations of ISET3d. 
     %
     % See below for more information on the required parameters.
     %
-    % Running remotely
-    %  When run on a remote machine, we launch a Docker image as a
-    %  persistent, named, container. Calls to piRender() will use
-    %  dockerWrapper to store the name and status of the remote
-    %  container.  By running in a persistent container, we avoid the
-    %  startup overhead (which is more than 20 seconds).
+    % Overview
     %
-    %  NOTE: Parameters will also be retrieved from prefs using
-    %       getpref('docker',<paramName>,[default value]);
+    % To run on a remote machine, we launch a Docker image on that
+    % machine as a persistent, named, container. Calls to piRender()
+    % use dockerWrapper to store the name and status of the remote
+    % container.  By running in a persistent container, we avoid the
+    % startup overhead (which is more than 20 seconds).
     %
-    %  Parameter(s) useful for all rendering:
+    % Because we often use the same remote machine and GPU across
+    % multiple days/sessions, the default parameters for docker
+    % execution are stored in the Matlab prefs.  These are saved by
+    % Matlab between sessions. You can set and get these parameters
+    % using the Matlab setpref/getpref commands.
+    %    
+    % For the moment, we are storing these parameters within the
+    % string 'docker', though we are discussing storing them within
+    % sthe string 'iset3d'.
     %
+    % Default parameters will also be retrieved from prefs using
+    %
+    %   getpref('docker',<paramName>,[default value]); 
+    % 
+    %    (or maybe in the future we will shift to)
+    %
+    %   getpref('iset3d',<paramName>,[default value]);
+    %
+    % Required parameters
+    %
+    %   remoteMachine -- name of remote machine to render on
+    %   remoteImage   -- GPU-specific docker image on remote machine
     %   gpuRendering    -- set to true to force GPU rendering
     %                   -- set to false to force CPU rendering
     %                   -- by default will use a local GPU if available
     %
-    %  Parameters needed for Remote Rendering:
-    %
-    %   remoteMachine -- name of remote machine to render on
-    %   remoteImage   -- GPU-specific docker image on remote machine
-    %   whichGPU      -- Select a specific GPU
-    %       -1 will use any, but if there are multiple different
-    %       architectures, probably better to specify along with imagename.
-    %
-    % ADDITIONAL OPTIONS in case you want or need to change the defaults
-    %
-    %   remoteUser    -- username on remote machine if different
-    %           from your username on current machine
-    %   remoteContext -- name of docker context pointing to renderer
-    %           if different from the default that is created for you
-    %   EXPERIMENTAL: CPU image on remote machine for offloading large
+    % Optional parameters
+    %  localRender -- To render on your local machine (default false)
+    %  whichGPU    -- for multi-gpu rendering systems, select a specific
+    %             GPU on the remote machine. Use device number (e.g.
+    %             0, 1, etc.) THe choice -1 defaults, but it is
+    %             probably best for you to choose.
+    %  remoteUser  -- username on remote machine if different
+    %         from the username on the local machine
+    %  remoteContext -- docker context pointing to renderer if
+    %         different from the default that is created for you 
+    %  remoteRoot  -- needed if different from local piRootPath
+    %  localRoot   -- (only for WSL) the /mnt path to the Windows piRoot
+    %  remoteImageTag -- defaults to :latest
+    %  localImageTag  -- defaults to :latest
+    %  EXPERIMENTAL: CPU image on remote machine for offloading large
     %                CPU-only renders
-    %   remoteRoot -- needed if different from local piRoot
-    %
-    %   localRoot -- only for WSL -- the /mnt path to the Windows piRoot
-    %
-    % Additional Render-specific parameters
-    %
-    % whichGPU -- for multi-gpu rendering systems
-    %   use device number (e.g. 0, 1, etc.) or -1 for don't care
-    %
-    % Optional docker image tags to select a different version:
-    %   remoteImageTag -- defaults to :latest
-    %   localImageTag -- defaults to :latest
-    %
     %
     % FUTURE: Potenially unified way to call docker containers for iset
-    %   as an attempt to resolve at least some of the myriad platform issues
+    %   as an attempt to resolve at least some of the myriad platform
+    %   issues
     %
-    % Running locally
-    %
-    %
-    %
-    % Additional NOTES:
-    % 1. To get rid of any stranded local containers we can run
+    % Additional NOTES
+    % 1. To get rid of any stranded local containers, run on the
+    % command line
     %
     %    docker container prune
     %
@@ -85,14 +87,7 @@ classdef dockerWrapper < handle
     % be stranded rendering containers which may be on your rendering
     % server -- in the event that Matlab doesn't shut down properly.
     % Those can be pruned by running the same command on the server.
-    %(or wait for DJC to prune them on the server every few days:))
-    %
-    % 2. On site-specific settings:
-    %   The dockerWrapper will look for a getRenderer() function first.
-    %   If it finds one it will use it to set the renderer.
-    %   One is not provided directly in ISET3D-v4, so that sites
-    %   or organizations can provide their own with local settings,
-    %   such as preferred server(s), GPU selection, etc.
+    % (or wait for DJC to prune them on the server every few days:))
     %
     % Original by David Cardinal, Stanford University, September, 2021.
     %
