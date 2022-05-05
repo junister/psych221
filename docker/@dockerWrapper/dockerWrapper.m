@@ -57,27 +57,30 @@ classdef dockerWrapper < handle
     %                   -- by default will use a local GPU if available
     %
     % Optional parameters
-    %  localRender -- To render on your local machine (default false)
+    %  localRender -- Render on your local machine (default false)
+    %
+    %  remoteUser  -- username on remote machine if different from the
+    %                   username on the local machine 
+    %  remoteContext -- a docker context that defines the remote
+    %                   renderer; only set this if it is  different
+    %                   from the default that is created for you
+    %                   (unusual)
+    %  remoteRoot     -- needed if differs from the return from
+    %                    piRootPath 
+    %  remoteImageTag -- defaults to :latest
     %  whichGPU    -- for multi-gpu rendering systems, select a specific
     %             GPU on the remote machine. Use device number (e.g.
     %             0, 1, etc.) THe choice -1 defaults, but it is
     %             probably best for you to choose.
-    %  remoteUser  -- username on remote machine if different
-    %         from the username on the local machine
-    %  remoteContext -- docker context pointing to renderer if
-    %         different from the default that is created for you 
-    %  remoteRoot  -- needed if different from local piRootPath
-    %  localRoot   -- (only for WSL) the /mnt path to the Windows piRoot
-    %  remoteImageTag -- defaults to :latest
+    %
     %  localImageTag  -- defaults to :latest
+    %  localRoot   -- (only for WSL) the /mnt path to the Windows piRoot
+    %
     %  EXPERIMENTAL: CPU image on remote machine for offloading large
     %                CPU-only renders
     %
-    % FUTURE: Potenially unified way to call docker containers for iset
-    %   as an attempt to resolve at least some of the myriad platform
-    %   issues
-    %
     % Additional NOTES
+    %
     % 1. To get rid of any stranded local containers, run on the
     % command line
     %
@@ -88,6 +91,10 @@ classdef dockerWrapper < handle
     % server -- in the event that Matlab doesn't shut down properly.
     % Those can be pruned by running the same command on the server.
     % (or wait for DJC to prune them on the server every few days:))
+    %
+    % TODO: Potenially unified way to call docker containers for iset
+    %   as an attempt to resolve at least some of the myriad platform
+    %   issues
     %
     % Original by David Cardinal, Stanford University, September, 2021.
     %
@@ -133,7 +140,7 @@ classdef dockerWrapper < handle
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc)
         renderContext = getpref('docker','renderContext','');
-        localRoot = getpref('docker','localRoot','/mnt/c'); % for the Windows/wsl case (sigh)
+        localRoot     = getpref('docker','localRoot',''); % Linux/Mac default
 
         workingDirectory = '';
         localVolumePath  = '';
@@ -172,6 +179,8 @@ classdef dockerWrapper < handle
             % Also allow renderString pref for backward compatibility
             if isempty(varargin)
                 if ~isempty(getpref('docker','renderString',''))
+                    disp('renderString to be deprecated.  Use "docker" pref.')
+                    % This is probably a mistake and should go away.
                     rString = getpref('docker','renderString','');
                     for ii = 1:2:numel(rString)
                         obj.(rString{ii}) = rString{ii+1};
@@ -182,6 +191,56 @@ classdef dockerWrapper < handle
                     obj.(varargin{ii}) = varargin{ii+1};
                 end
             end
+
+            % Handling special case of Windows/WSL for DJC
+            if ispc && isempty(obj.localRoot)
+                obj.localRoot = '/mnt/c';
+            end
+
+        end
+
+        function prefsave(obj)
+            % Save the current dockerWrapper settings in the Matlab
+            % prefs under iset3d.  We should probably check if there
+            % is a 'docker' prefs and do something about that.
+
+            disp('Saving prefs to "docker"');
+            setpref('docker','localRender',obj.localRender);
+
+            setpref('docker','remoteMachine',obj.remoteMachine);
+            setpref('docker','remoteRoot',obj.remoteRoot);
+            setpref('docker','remoteUser',obj.remoteUser);
+            setpref('docker','remoteImageTag',obj.remoteImageTag);
+
+            setpref('docker','gpuRendering',obj.gpuRendering);
+            setpref('docker','whichGPU',obj.whichGPU);
+
+            setpref('docker','localImageTag',obj.localImageTag);
+            setpref('docker','localRoot',obj.localRoot);
+
+            setpref('docker','verbosity',obj.verbosity);
+
+        end
+
+        function prefread(obj)
+            % Save the current dockerWrapper settings in the Matlab
+            % prefs under iset3d.  We should probably check if there
+            % is a 'docker' prefs and do something about that.
+
+            disp('Reading prefs from "docker"');
+            obj.localRender = getpref('docker','localRender',0);
+
+            obj.remoteMachine = getpref('docker','remoteMachine','');
+            obj.remoteRoot    = getpref('docker','remoteRoot','');
+            obj.remoteUser    = getpref('docker','remoteUser','');
+            obj.remoteImageTag= getpref('docker','remoteImageTag','latest');
+
+            obj.gpuRendering = getpref('docker','gpuRendering',1);
+            obj.whichGPU     = getpref('docker','whichGPU',0);
+
+            obj.localImageTag = getpref('docker','localImageTag','latest');
+            
+            obj.verbosity = getpref('docker','verbosity',1);
 
         end
     end

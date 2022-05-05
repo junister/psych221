@@ -138,24 +138,6 @@ scene = piWRS(thisR, 'name', 'Change sphere to glass');
 if piCamBio, sceneSet(scene,'render flag','hdr');
 else,        sceneSet(scene,'gamma',0.6);
 end
-%% Change the camera position
-
-% Where is the sphere ...
-origFrom = thisR.get('from');
-origTo = thisR.get('to');
-assetPosition = thisR.get('asset',assetName,'world position');
-thisR.set('to',assetPosition);
-% piAssetGeometry(thisR);
-
-thisR.set('from',origFrom + [1 2 0]);
-
-% Set the camera from position a little higher and closer
-
-scene = piWRS(thisR, 'name', 'Change camera position');
-
-if piCamBio, sceneSet(scene,'render flag','hdr');
-else,        sceneSet(scene,'gamma',0.6);
-end
 
 %% Change the sphere to a mirror
 

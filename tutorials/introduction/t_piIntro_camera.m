@@ -59,6 +59,9 @@ thisR.set('film diagonal',5,'mm');
 thisR.get('fov')
 
 %% Write, render and denoise
+
+[oi, res] = piWRS(thisR);
+
 piWrite(thisR);
 oi = piRender(thisR);
 

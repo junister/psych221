@@ -150,10 +150,10 @@ else
     shortOut = fullfile(obj.relativeScenePath,sceneDir);
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     %}
-    renderStart = tic;
+    tic;
     [status, result] = system(containerRender);
     if verbose > 0
-        fprintf('Rendered locally in: %6.2f\n', toc(renderStart))
+        fprintf('Rendered time %6.2f\n', toc)
     end
 end
 

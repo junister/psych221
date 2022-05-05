@@ -1,5 +1,5 @@
 function thisR = piAssetSet(thisR, assetInfo, param, val, varargin)
-%%
+% Set an asset property.
 %
 % Synopsis:
 %   thisR = piAssetSet(thisR, assetInfo, param, val, varargin);
@@ -16,6 +16,7 @@ function thisR = piAssetSet(thisR, assetInfo, param, val, varargin)
 % Returns:
 %   thisR     - modified recipe.
 %
+% See also:
 %
 
 % Examples:
@@ -66,9 +67,22 @@ switch thisNode.type
             case {'mediuminterface'}
                 thisNode.mediumInterface = val;
             case {'material'}
-                thisNode.material = val;
+                % This may be a cell or a struct. How to handle?? (BW)
+                if iscell(thisNode.material) && iscell(val)
+                    thisNode.material = val;
+                else
+                    warning('material is cell.  val is struct.  Setting material{1} but we need a solution.')
+                    thisNode.material{1} = val;
+                end
             case {'materialname'}
-                thisNode.material.namedmaterial = val;
+                if iscell(thisNode.material)
+                    if numel(thisNode.material) > 1
+                        warning('Setting material 1.  We need an additional parameter for cell materials.')
+                    end
+                    thisNode.material{1}.namedmaterial = val;
+                else
+                    thisNode.material.namedmaterial = val;
+                end
             case {'shape'}
                 thisNode.shape = val;
             case {'output'}
