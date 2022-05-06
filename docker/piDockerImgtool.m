@@ -1,8 +1,8 @@
-function [status,result] = piDockerImgtool(command,varargin)
+function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 % Use imgtool for various PBRT related tasks 
 %
 % Synopsis
-%   [status,result] = piDockerImgtool(command,varargin)
+%   [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %
 % Inputs
 %   command:  The imgtool command.  Options are
@@ -11,11 +11,16 @@ function [status,result] = piDockerImgtool(command,varargin)
 %   infile:   Full path to the input file
 %   msparms:  albedo, elevation, outfile, turbidity, resolution
 %
+% Outputs
+%   status - 0 means success
+%   result - Text returned by the command
+%   dockercmd - The docker command
+%
 % Uses the Docker Container to execuate
 %
 %   piDockerImgtool('help')
-%   piDockerImgtool('equiarea','infile',fullpathname);
-%   piDockerImgtool('makesky','infile', fullpathname); % NYI
+%   piDockerImgtool('make equiarea','infile',fullpathname);
+%   piDockerImgtool('make sky','infile', fullpathname); % NYI
 % 
 %  imgtool makeequiarea old.exr --outfile new.exr
 %
@@ -117,7 +122,8 @@ switch command
         --resolution <r>   Resolution of generated environment map. Default: 2048
        %}              
         % piDockerImgtool('makesky', ... params ...)
-        disp('NYI')
+        disp('makesky:  Not yet implemented');
+        return;
     case 'denoise-optix'
         % piDockerImgtool('denoise-optix','infile',fullPathFile)
         disp('NYI')

@@ -34,7 +34,13 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
-    position(ii,:) = thisR.get('light',ii,'position');
+    if isequal(thisLight.type,'distant') || ...
+            isequal(thisLight.type,'infinite')
+        position(ii,:) = Inf;
+    else
+        position(ii,:) = thisR.get('light',ii,'position');
+    end
+
     % not sure we even have mapnames anymore, but in case...
     if ~isfield(thisLight,'mapname') || isempty(thisLight.mapname)
         spdT{ii} = num2str(thisLight.spd.value);

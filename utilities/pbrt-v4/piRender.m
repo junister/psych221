@@ -1,23 +1,30 @@
 function [ieObject, result, thisD] = piRender(thisR,varargin)
 % Read a PBRT scene file, run the docker command, return the ieObject.
 %
-% updated version using dockerWrapper for render -- D. Cardinal
-
+% Synopsis
+%   [ieObject, result, thisD] = piRender(thisR,varargin)
+%
 % Syntax:
 %  [oi or scene or metadata] = piRender(thisR,varargin)
 %
-% REQUIRED input
+% Input
 %  thisR - A recipe, whose outputFile specifies the file, OR a string that
 %          is a full path to a scene pbrt file.
 %
-% OPTIONAL input parameter/val
-%  oi/scene   - You can use parameters from oiSet or sceneSet that
-%               will be applied to the rendered ieObject prior to return.
+% OPTIONAL key/val pairs
+%
+%  rendertype - Any combination of these strings
+%        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
+%
+%  oi/scene params - You can use parameters from oiSet or sceneSet that
+%            will be applied to the rendered ieObject prior to return.
 %
 %  mean luminance -  If a scene, this mean luminance. If set to a negative
-%                    value values returned by the renderer are used.
-%                    (default 100 cd/m2)
+%            value values returned by the renderer are used.
+%            (default 100 cd/m2)
+%
 %  mean illuminance per mm2 - default is 5 lux
+%
 %  scalePupilArea
 %             - if true, scale the mean illuminance by the pupil
 %               diameter in piDat2ISET (default is true)
@@ -26,12 +33,9 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               the correct size exists (default is false)
 %
 %  ourdocker  - Specify the docker wrapper to use.  Default is build
-%               from scratch using Matlab getprefs('docker')
+%               from scratch with defaults in the Matlab getprefs('docker')
 %
 %  reflectancerender -  NYI
-%
-%  rendertype - Any combination of these strings
-%        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
 %
 %  verbose    - Level of desired output:
 %               0 Silent
@@ -41,18 +45,23 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %
 % wave      -
 %
-% RETURN
+% Returns
 %   ieObject - an ISET scene, oi, or a metadata image
-%   result   - PBRT output from the terminal.  This can be vital for
-%              debugging! The result contains useful parameters about
-%              the optics, too, including the distance from the back
-%              of the lens to film and the in-focus distance given the
+%   result   - PBRT output from the terminal. The result is very
+%              useful for debugging because it contains Warnings and Errors.
+%              The text also contains parameters about the
+%              optics, including the distance from the back of
+%              the lens to film and the in-focus distance given the 
 %              lens-film distance.
-%
-% Zhenyi, 2021
+%   thisD    - the dockerWrapper used for the rendering.
 %
 % See also
 %   s_piReadRender*.m, piRenderResult, dockerWrapper
+%
+% TODO: 
+%   The parameters are not yet all correctly handled, including
+% meanluminance and scalepupilarea.  These are important for ISETBio.
+%
 
 % Examples
 %{
@@ -180,7 +189,8 @@ end
 %% We have a radiance recipe and we have written the pbrt radiance file
 
 % Set up the output folder.  This folder will be mounted by the Docker
-% image if run locally.  When run remotely, we are using rsynch and different mount points.
+% image if run locally.  When run remotely, we are using rsynch and
+% different mount points.
 outputFolder = fileparts(thisR.outputFile);
 if(~exist(outputFolder,'dir'))
     error('We need an absolute path for the working folder.');
@@ -235,33 +245,19 @@ if ispc  % Windows
     copyfile(tFileName, currFile);
     delete(tFileName);
 
-    % With V4 we need EXR not Dat
+    % With V4 the output is EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-    
-    % folderBreak = split(outputFolder, filesep());
-    % shortOut = strcat('/', char(folderBreak(end)));
-    
+        
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
     end
 
-    %fix for non - C drives
-    %linuxOut = strcat('/c', strrep(erase(outputFolder, 'C:'), '\', '/'));
-    % linuxOut = char(join(folderBreak,"/"));
-
-    % legacy
-    %dockerCommand = sprintf('%s -v %s:%s', dockerCommand, linuxOut, shortOut);
-    %cmd = sprintf('%s %s %s', dockerCommand, dockerImageName, renderCommand);
 else  % Linux & Mac
 
-    % With V4 we need EXR not Dat
+    % With V4 the output is EXR not Dat
     outF = strcat('renderings/',currName,'.exr');
     renderCommand = sprintf('pbrt --outfile %s %s', outF, strcat(currName, '.pbrt'));
-
-    % Unused, so commented out (BW/ZL April 22)
-    % folderBreak = split(outputFolder, filesep());
-    % shortOut = strcat('/', char(folderBreak(end)));
 
     if ~isempty(outputFolder)
         if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
@@ -274,6 +270,10 @@ end
 % variable (BW).
 preRender = tic;
 [status, result] = renderDocker.render(renderCommand, outputFolder);
+
+% Append the renderCommand and output file
+sprintf('%s\nOutput file:  %s\n',result,outF);
+
 elapsedTime = toc(preRender);
 if getpref('docker','verbosity',0) > 0
     fprintf("Complete render took: %6.2d seconds.", elapsedTime);

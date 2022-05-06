@@ -44,6 +44,28 @@ thisR.get('fov')
 % query.
 thisR.get('film diagonal','mm')
 
+% Have a look
+thisR.set('rays per pixel', 256);
+thisR.set('film diagonal',5,'mm');
+thisR.set('n bounces',5);
+
+%% Set up the lights and scene.
+thisR.show('lights')
+
+thisR.set('light','MoonLight_L','delete');
+thisR.set('light','Sky1_L','delete');
+thisR.set('light','_L','delete');
+thisR.set('light','Sunlight_L','delete');
+
+thisR.set('skymap','room.exr');
+thisR.set('light','room_L','specscale',0.03);
+
+thisR.show('objects');
+thisR.set('asset','001_glass_O','delete');
+% thisR.set('asset','001_mirror_O','delete');
+scene = piWRS(thisR);
+sceneWindow(scene);
+
 %% Pinhole cameras aren't everything
 % Here is how we add a lens to our camera
 
@@ -55,18 +77,17 @@ fprintf('Using lens: %s\n',lensfile);
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 % Set the film so that the field of view makes sense
-thisR.set('film diagonal',5,'mm');
 thisR.get('fov')
 
 %% Write, render and denoise
 
 [oi, res] = piWRS(thisR);
 
-piWrite(thisR);
-oi = piRender(thisR);
+% piWrite(thisR);
+% oi = piRender(thisR);
 
 % show the result
-oiWindow(oi);
+% oiWindow(oi);
 
 % If you are running with ISETBio, there is no render flag.  Yet.
 if piCamBio, oiSet(oi,'render flag','hdr'); end
