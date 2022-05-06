@@ -192,7 +192,7 @@ classdef dockerWrapper < handle
                 end
             end
 
-            % Handling special case of Windows/WSL for DJC
+            % Handling special case of Windows/WSL
             if ispc && isempty(obj.localRoot)
                 obj.localRoot = '/mnt/c';
             end
