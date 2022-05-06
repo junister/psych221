@@ -755,7 +755,7 @@ classdef dockerWrapper < handle
             if ~exist('serverName','var'), serverName = obj.remoteMachine; end
 
             switch serverName
-                case vistalabDefaultServer()
+                case obj.vistalabDefaultServer()
                     % Check that the Docker context exists.
                     checkContext = sprintf('docker context list');
                     [status, result] = system(checkContext);
