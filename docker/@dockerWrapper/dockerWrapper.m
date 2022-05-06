@@ -201,7 +201,7 @@ classdef dockerWrapper < handle
 
         function prefsave(obj)
             % Save the current dockerWrapper settings in the Matlab
-            % prefs under iset3d.  We should probably check if there
+            % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
             disp('Saving prefs to "docker"');
@@ -223,8 +223,8 @@ classdef dockerWrapper < handle
         end
 
         function prefread(obj)
-            % Save the current dockerWrapper settings in the Matlab
-            % prefs under iset3d.  We should probably check if there
+            % Read the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
             disp('Reading prefs from "docker"');
@@ -647,8 +647,6 @@ classdef dockerWrapper < handle
             %     (gray??)
             %     (black??)
             %
-            % Beluga (not supported by this wrapper yet
-            %
             % See also
             %   dockerWrapper
 
@@ -757,7 +755,7 @@ classdef dockerWrapper < handle
             if ~exist('serverName','var'), serverName = obj.remoteMachine; end
 
             switch serverName
-                case 'muxreconrt.stanford.edu'
+                case vistalabDefaultServer()
                     % Check that the Docker context exists.
                     checkContext = sprintf('docker context list');
                     [status, result] = system(checkContext);
