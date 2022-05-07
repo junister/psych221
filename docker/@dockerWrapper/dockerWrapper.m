@@ -127,7 +127,7 @@ classdef dockerWrapper < handle
         dockerContainerType = 'linux'; % default, even on Windows
 
         gpuRendering = true; % the default
-        whichGPU = getpref('docker','whichGPU',-1); % use any
+        whichGPU = getpref('docker','whichGPU',0); % use any
 
         % these relate to remote/server rendering
         remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
@@ -140,7 +140,7 @@ classdef dockerWrapper < handle
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc)
         renderContext = getpref('docker','renderContext','');
-        localRoot     = getpref('docker','localRoot',''); % Linux/Mac default
+        localRoot     = defaultLocalRoot();
 
         workingDirectory = '';
         localVolumePath  = '';
@@ -190,11 +190,6 @@ classdef dockerWrapper < handle
                 for ii=1:2:numel(varargin)
                     obj.(varargin{ii}) = varargin{ii+1};
                 end
-            end
-
-            % Handling special case of Windows/WSL
-            if ispc && isempty(obj.localRoot)
-                obj.localRoot = '/mnt/c';
             end
 
         end
@@ -260,6 +255,13 @@ classdef dockerWrapper < handle
             useServer = 'muxreconrt.stanford.edu';
         end
 
+        function localRoot = defaultLocalRoot()
+            if ispc
+                getpref('docker','localRoot','/mnt/c'); % Windows default            
+            else
+                localRoot = getpref('docker','localRoot',''); % Linux/Mac default
+            end
+        end
         % reset - Resets the running Docker containers
         function reset()
             % Calls the method 'cleanup' and sets several parameters
@@ -336,7 +338,9 @@ classdef dockerWrapper < handle
         function output = pathToLinux(inputPath)
             % Can we use fullfile and fileparts instead of requiring this?
             % (BW) 
-
+            % Unfortunately, not. The problem is that on Windows the Docker
+            % paths are Linux-format, so the native fullfile and fileparts
+            % don't work right. 
             if ispc
                 if isequal(fullfile(inputPath), inputPath)
                     if numel(inputPath) > 3 && isequal(inputPath(2:3),':\')
