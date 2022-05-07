@@ -140,7 +140,7 @@ classdef dockerWrapper < handle
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc)
         renderContext = getpref('docker','renderContext','');
-        localRoot     = defaultLocalRoot();
+        localRoot     = dockerWrapper.defaultLocalRoot();
 
         workingDirectory = '';
         localVolumePath  = '';
@@ -257,7 +257,7 @@ classdef dockerWrapper < handle
 
         function localRoot = defaultLocalRoot()
             if ispc
-                getpref('docker','localRoot','/mnt/c'); % Windows default            
+                localRoot = getpref('docker','localRoot','/mnt/c'); % Windows default            
             else
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
