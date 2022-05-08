@@ -478,7 +478,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             material.namedmaterial, '"', '\n'));
     catch
         % we should never go here
-        materialTxt = piMaterialText(material);
+        materialTxt = piMaterialText(material, thisR);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
 

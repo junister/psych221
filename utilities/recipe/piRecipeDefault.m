@@ -23,6 +23,8 @@ function thisR = piRecipeDefault(varargin)
 %       chessSetScaled
 %       teapot
 %       numbers at depth
+%       materialball
+%       materialball_cloth
 %
 %   write      -  Call piWrite (default is false). Immediately writes into
 %                 iset3d/local, without any editing.
@@ -230,6 +232,16 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'cornell_box';
         sceneFile = ['cornell_box','.pbrt'];
         exporter = 'C4D';
+    case {'materialball'}
+        sceneDir = 'materialball';
+        sceneFile = ['materialball','.pbrt'];
+        exporter = 'C4D';
+
+     case {'materialball_cloth'}
+        sceneDir = 'materialball_cloth';
+        sceneFile = ['materialball_cloth','.pbrt'];
+        exporter = 'C4D';
+
     case {'cornellboxbunnychart'}
         if loadrecipe && exist('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','file')
             load('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','thisR');

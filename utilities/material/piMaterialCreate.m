@@ -188,32 +188,32 @@ switch tp
         material.thickness.type = 'float';
         material.thickness.value = [];
 
-        material.interface_eta.type = 'float';
-        material.interface_eta.value = [];
+        material.interfaceeta.type = 'float';
+        material.interfaceeta.value = [];
 
-        material.interface_roughness.type = 'float';
-        material.interface_roughness.value = [];
+        material.interfaceroughness.type = 'float';
+        material.interfaceroughness.value = [];
 
-        material.interface_uroughness.type = 'float';
-        material.interface_uroughness.value = [];
+        material.interfaceuroughness.type = 'float';
+        material.interfaceuroughness.value = [];
 
-        material.interface_vroughness.type = 'float';
-        material.interface_vroughness.value = [];
+        material.interfacevroughness.type = 'float';
+        material.interfacevroughness.value = [];
 
-        material.conductor_k.type = 'float';
-        material.conductor_k.value = [];
+        material.conductork.type = 'float';
+        material.conductork.value = [];
 
-        material.conductor_eta.type = 'float';
-        material.conductor_eta.value = [];
+        material.conductoreta.type = 'float';
+        material.conductoreta.value = [];
 
-        material.conductor_roughness.type = 'float';
-        material.conductor_roughness.value = [];
+        material.conductorroughness.type = 'float';
+        material.conductorroughness.value = [];
 
-        material.conductor_uroughness.type = 'float';
-        material.conductor_uroughness.value = [];
+        material.conductoruroughness.type = 'float';
+        material.conductoruroughness.value = [];
 
-        material.conductor_vroughness.type = 'float';
-        material.conductor_vroughness.value = [];
+        material.conductorvroughness.type = 'float';
+        material.conductorvroughness.value = [];
 
     case 'diffusetransmission'
         material.type = 'diffusetransmission';
@@ -402,7 +402,6 @@ for ii=1:2:numel(varargin)
     else
         keyName = ieParamFormat(keyTypeName{1});
     end
-
 
     if isfield(material, keyName)
         material = piMaterialSet(material, sprintf('%s value', keyName),...

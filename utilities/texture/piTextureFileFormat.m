@@ -31,6 +31,11 @@ for ii = 1:numel(textureList)
     texSlotName = textureList{ii}.filename.value;
     thisImgPath = fullfile(inputDir, texSlotName);
 
+    if ~exist(thisImgPath,'file')
+        % It could be the material presets
+        thisImgPath = which(texSlotName); 
+    end
+
     if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
         if exist(thisImgPath, 'file')
             
@@ -82,7 +87,10 @@ for ii = 1:numel(matKeys)
     thisMat.normalmap.type = 'string';
     thisImgPath = fullfile(inputDir, normalImgPath);
     
-    
+    if ~exist(thisImgPath,'file')
+        % It could be the material presets
+        thisImgPath = which(normalImgPath); 
+    end
     if isempty(normalImgPath)
         continue;
     end
@@ -90,7 +98,7 @@ for ii = 1:numel(matKeys)
     if exist(thisImgPath, 'file') && ~isempty(normalImgPath)
         
         [path, name, ext] = fileparts(dockerWrapper.pathToLinux(normalImgPath));
-        if strcmp(ext, '.exr')
+        if strcmp(ext, '.exr') || strcmp(ext, '.png')
             % do nothing with exr
             continue;
         end

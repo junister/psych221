@@ -1,0 +1,23 @@
+Film "gbuffer" "integer xresolution" [1280] "integer yresolution" [900] "string filename" "output.exr"
+PixelFilter "box" "float xradius" [0.5] "float yradius" [0.5] 
+Accelerator "bvh" 
+"string splitmethod" "sah"
+"integer maxnodeprims" [4]
+Sampler "halton"
+"integer pixelsamples" [100]
+
+Integrator "path"
+"integer maxdepth" [10]
+
+Scale -1 1 1 #avoid the 'flipped image' bug..
+LookAt	7.787381649017334 -7.012022495269775 4.21237850189209
+	7.1358232498168945 -6.397851943969727 3.7671070098876953
+	-0.32401347160339355 0.305420845746994 0.8953956365585327
+
+Camera "perspective"
+"float fov" [28.409271737803895]
+WorldBegin
+
+Include "materialball_materials.pbrt"
+Include "materialball_texture.pbrt"
+Include "materialball_geometry.pbrt"

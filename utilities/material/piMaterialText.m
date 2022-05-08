@@ -1,4 +1,4 @@
-function val = piMaterialText(material, varargin)
+function val = piMaterialText(material, thisR, varargin)
 %% function that converts the struct to text
 % For each type of material, we have a method to write a line in the
 % material file.
@@ -7,8 +7,9 @@ function val = piMaterialText(material, varargin)
 %% Parse input
 p = inputParser;
 p.addRequired('material', @isstruct);
+p.addRequired('thisR', @(x)(isa(x,'recipe')));
 
-p.parse(material, varargin{:});
+p.parse(material, thisR, varargin{:});
 
 %% Concatatenate string
 if ~strcmp(material.name, '')
@@ -32,35 +33,52 @@ for ii=1:numel(matParams)
     if ~isequal(matParams{ii}, 'name') && ...
             ~isequal(matParams{ii}, 'type') && ...
             ~isempty(material.(matParams{ii}).value)
-         thisType = material.(matParams{ii}).type;
-         thisVal = material.(matParams{ii}).value;
+        thisType = material.(matParams{ii}).type;
+        thisVal = material.(matParams{ii}).value;
 
-         if piContains(matParams{ii}, 'conductor')
-             matParams{ii} = strcat('conductor.',strrep(matParams{ii},'conductor',''));
-         end
-         if piContains(matParams{ii}, 'interface')
-             matParams{ii} = strcat('interface.',strrep(matParams{ii},'interface',''));
-         end
-         if ischar(thisVal)
-             thisText = sprintf(' "%s %s" "%s" ',...
-                 thisType, matParams{ii}, thisVal);
-         elseif isnumeric(thisVal)
-             if isequal(thisType, 'photolumi')
-                 % Fluorescence EEM needs more precision
-                 thisText = sprintf(' "%s %s" [%s] ',...
-                     thisType, matParams{ii}, num2str(thisVal, '%.10f '));
-             else
+        if piContains(matParams{ii}, 'conductor')
+            matParams{ii} = strcat('conductor.',strrep(matParams{ii},'conductor',''));
+        end
+        if piContains(matParams{ii}, 'interface')
+            matParams{ii} = strcat('interface.',strrep(matParams{ii},'interface',''));
+        end
+        if ischar(thisVal)
+            thisText = sprintf(' "%s %s" "%s" ',...
+                thisType, matParams{ii}, thisVal);
+        elseif isnumeric(thisVal)
+            if isequal(thisType, 'photolumi')
+                % Fluorescence EEM needs more precision
                 thisText = sprintf(' "%s %s" [%s] ',...
-                     thisType, matParams{ii}, num2str(thisVal, '%.4f '));
-             end
-         elseif iscell(thisVal)
-             thisText = sprintf(' "%s %s" [ "%s" "%s" ] ',thisType, matParams{ii}, thisVal{1}, thisVal{2});
-         end
+                    thisType, matParams{ii}, num2str(thisVal, '%.10f '));
+            else
+                thisText = sprintf(' "%s %s" [%s] ',...
+                    thisType, matParams{ii}, num2str(thisVal, '%.4f '));
+            end
+        elseif iscell(thisVal)
+            thisText = sprintf(' "%s %s" [ "%s" "%s" ] ',thisType, matParams{ii}, thisVal{1}, thisVal{2});
+        end
 
-         val = strcat(val, thisText);
+        val = strcat(val, thisText);
 
+
+        if strcmp(matParams{ii},'normalmap')
+            if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
+                imgFile = which(thisVal);
+                if isempty(imgFile)||isequal(imgFile,'')
+                    error('Normal Map %s not found! Changing it to difuse', thisVal);
+                else
+                    if ispc % try to fix filename for the Linux docker container
+                        imgFile = dockerWrapper.pathToLinux(imgFile);
+                    end
+
+                    % In the future we might want to copy the texture files
+                    % into a folder.
+                    % thisText = strrep(thisText,thisVal, imgFile);
+                    %                     piTextureFileFormat(imgFile);
+                    copyfile(imgFile,thisR.get('output dir'));
+                end
+            end
+        end
     end
 end
-
-
 end

@@ -62,7 +62,7 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialKeys= keys(thisR.materials.list);
     for ii=1:length(materialTxt)
         % Converts the material struct to text
-        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}));
+        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);
     end
 else
     materialTxt{1} = '';
