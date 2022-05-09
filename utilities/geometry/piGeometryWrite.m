@@ -107,8 +107,8 @@ for ii = 1:numel(children)
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
-        if isfield(thisNode,'isInstancer')
-            if thisNode.isInstancer ==1
+        if isfield(thisNode,'isInstance')
+            if thisNode.isInstance ==1
                 indentSpacing = "    ";
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
                 if ~isempty(thisNode.motion)
@@ -219,8 +219,8 @@ arealight = 0;
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
 
-    if isfield(thisNode, 'isInstancer')
-        if thisNode.isInstancer ==1 && ~writeGeometryFlag
+    if isfield(thisNode, 'isInstance')
+        if thisNode.isInstance ==1 && ~writeGeometryFlag
             % This node is an object instance node, skip;
             continue;
         end
@@ -434,7 +434,7 @@ scale = ones(1,3);
 for tt = 1:numel(thisNode.transorder)
     switch thisNode.transorder(tt)
         case 'T'
-            translation = translation + thisNode.translation{pointerT};
+            translation = translation + thisNode.translation{pointerT}(:);
             pointerT = pointerT + 1;
         case 'R'
             rotation = rotation + thisNode.rotation{pointerR};
@@ -478,7 +478,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             material.namedmaterial, '"', '\n'));
     catch
         % we should never go here
-        materialTxt = piMaterialText(material);
+        materialTxt = piMaterialText(material, thisR);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
 

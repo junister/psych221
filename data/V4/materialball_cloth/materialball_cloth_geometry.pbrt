@@ -1,0 +1,138 @@
+ObjectBegin "InnerBall_m"
+#Instance MeshName: "InnerBall"
+	AttributeBegin
+	#MeshName: "InnerBall" #Dimension:[1.5384941101074219 1.53971266746521 1.548109769821167]" 
+		Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 -0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 2.844341 -2.493076 1.000001 1.000000 ]
+		AttributeBegin
+			NamedMaterial "InnerBall"
+			Shape "plymesh" "string filename" ["geometry/InnerBall_mat0.ply"]
+		AttributeEnd
+	AttributeEnd
+ObjectEnd
+
+ObjectBegin "Light_m"
+#Instance MeshName: "Light"
+ObjectEnd
+
+ObjectBegin "OuterBall_m"
+#Instance MeshName: "OuterBall"
+	AttributeBegin
+	#MeshName: "OuterBall" #Dimension:[1.9690511226654053 1.9299647808074951 1.974437952041626]" 
+		Transform [0.828656 0.559759 0.000000 0.000000 -0.559759 0.828656 -0.000000 0.000000 -0.000000 0.000000 1.000000 0.000000 2.844341 -2.493076 1.000001 1.000000 ]
+		AttributeBegin
+			NamedMaterial "OuterBall"
+			Shape "plymesh" "string filename" ["geometry/OuterBall_mat0.ply"]
+		AttributeEnd
+	AttributeEnd
+ObjectEnd
+
+ObjectBegin "Plane_m"
+#Instance MeshName: "Plane"
+	AttributeBegin
+	#MeshName: "Plane" #Dimension:[32.00343704223633 32.00343704223633 0.06000000238418579]" 
+		Transform [16.001719 0.000000 0.000000 0.000000 0.000000 16.001719 0.000000 0.000000 0.000000 0.000000 16.001719 0.000000 -2.029712 0.423154 0.000000 1.000000 ]
+		AttributeBegin
+			NamedMaterial "Ground"
+			Shape "trianglemesh"
+			"point3 P" [
+			-1.0 -1.0 0.0 1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 1.0 0.0			
+			]
+			"normal N" [
+			0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0			
+			]
+			"point2 uv" [
+			0.0 0.0 
+			1.0 0.0 
+			1.0 1.0 
+			0.0 0.0 
+			1.0 1.0 
+			0.0 1.0 
+			]
+			"integer indices" [
+			0 1 2 3 4 5 
+			]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat1.ply"]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat2.ply"]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat3.ply"]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat4.ply"]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat5.ply"]
+		AttributeEnd
+		AttributeBegin
+			NamedMaterial "Letter"
+			Shape "plymesh" "string filename" ["geometry/Plane_mat6.ply"]
+		AttributeEnd
+	AttributeEnd
+ObjectEnd
+
+ObjectBegin "Camera_m"
+#Instance MeshName: "Camera"
+ObjectEnd
+
+ObjectBegin "Plane.001_m"
+#Instance MeshName: "Plane.001"
+	AttributeBegin
+	#MeshName: "Plane.001" #Dimension:[2.625297784805298 2.5257911682128906 1.9862024784088135]" 
+		Transform [2.270453 0.000000 0.000000 0.000000 0.000000 2.270453 0.000000 0.000000 0.000000 0.000000 2.270453 0.000000 2.930005 -2.532587 2.478701 1.000000 ]
+		AttributeBegin
+			NamedMaterial "cloth"
+			Shape "plymesh" "string filename" ["geometry/Plane.001_mat0.ply"]
+		AttributeEnd
+	AttributeEnd
+ObjectEnd
+
+AttributeBegin
+#CollectionName: "Scene Collection"
+	AttributeBegin
+	#CollectionName: "Collection"
+		AttributeBegin
+		#MeshName: "Light"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Light_m"
+			AttributeBegin
+				#lightName: "Light"
+				LightSource "point" "point3 from" [4.076245307922363 0.5030681490898132 5.903861999511719]
+				"rgb I" [1.0 1.0 1.0] "float scale" [1000.0]
+			AttributeEnd
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Camera"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Camera_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "InnerBall"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "InnerBall_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "OuterBall"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "OuterBall_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Plane"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Plane_m"
+		AttributeEnd
+		AttributeBegin
+		#MeshName: "Plane.001"
+			Transform [1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 ]
+			ObjectInstance "Plane.001_m"
+		AttributeEnd
+	AttributeEnd
+AttributeEnd

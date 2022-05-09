@@ -35,7 +35,8 @@ for ii =1:numel(lightNames)
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
     if isequal(thisLight.type,'distant') || ...
-            isequal(thisLight.type,'infinite')
+            isequal(thisLight.type,'infinite') || ...
+            isequal(thisLight.type,'area')
         position(ii,:) = Inf;
     else
         position(ii,:) = thisR.get('light',ii,'position');

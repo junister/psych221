@@ -71,7 +71,7 @@ if true
 
     % Set parameter type
     if isequal(pTypeVal, 'type')
-        material.(pName).type = type;
+        material.(pName).type = val;
         return;
     end
 
