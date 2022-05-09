@@ -108,7 +108,7 @@ for ii = 1:numel(children)
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
         if isfield(thisNode,'isInstance')
-            if thisNode.isInstancer ==1
+            if thisNode.isInstance ==1
                 indentSpacing = "    ";
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
                 if ~isempty(thisNode.motion)

@@ -2,7 +2,8 @@
 ieInit;
 piDockerConfig;
 %%
-sceneName = 'materialball';
+sceneName = 'materialball'; 
+material_name = 'OuterBall'; 
 thisR = piRecipeDefault('scene name',sceneName);
 thisR.set('filmresolution',[1200,900]/1.5);
 thisR.set('pixelsamples',512);
@@ -29,8 +30,6 @@ thisR.set('material','InnerBall','reflectance val', checkerboard.name);
 piMaterialPresets('listmaterial');
 mat_type = 'metal-spotty-discoloration'; 
 % replace this material
-% material_name = 'OuterBall';
-material_name = 'OuterBall'; 
 
 [new_material, ~] = piMaterialPresets(mat_type,material_name);
 
@@ -41,6 +40,26 @@ if isfield(new_material, 'texture') && ~isempty(new_material.texture)
         thisR.set('texture','add',new_material.texture{ii});
     end
 end
+
+thisR = piTextureFileFormat(thisR);
+
+scene = piWRS(thisR,'gamma',0.85,'name',mat_type);
+%% red glass
+mat_type = 'red-glass';
+[new_material, ~] = piMaterialPresets(mat_type,material_name);
+
+if isfield(new_material, 'texture') && ~isempty(new_material.texture)
+    for ii = 1:numel(new_material.texture)
+        thisR.set('texture','add',new_material.texture{ii});
+    end
+end
+
+if isfield(new_material, 'mixMat') && ~isempty(new_material.mixMat)
+    for ii = 1:numel(new_material.mixMat)
+        thisR.set('material','add',new_material.mixMat{ii});
+    end
+end
+thisR.set('material','replace', material_name, new_material.material);
 
 thisR = piTextureFileFormat(thisR);
 

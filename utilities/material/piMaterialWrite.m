@@ -63,13 +63,14 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     for ii=1:length(materialTxt)
         % Converts the material struct to text
         materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);
+        matTypeList{ii} = thisR.materials.list(materialKeys{ii}).type;
     end
 else
     materialTxt{1} = '';
 end
 
 % check mix material, make sure mix material reference the material after the definition
-mixMatIndex = piContains(materialTxt,'mix');
+mixMatIndex = piContains(matTypeList,'mix');
 mixMaterialText = materialTxt(mixMatIndex);
 nonMixMaterialText = materialTxt(~mixMatIndex);
 
