@@ -25,9 +25,19 @@ assetDir = fullfile(piRootPath,'data','assets');
 %% A few more scenes as assets
 sceneName = 'bunny';
 thisR = piRecipeDefault('scene name', sceneName);
+
 thisR.set('from',[0 0 0]);
 thisR.set('to',[0 0 1]);
-thisR.set('asset', 'Bunny_B', 'world position', [0 0 1]);
+
+oNames = thisR.get('object names no id');
+
+% The bunny has two geometry branch nodes with the same name.  we have to
+% delete one of them.
+id = thisR.get('asset parent id',oNames{1});
+thisR.set('asset',3,'delete');
+% thisR.show;
+
+thisR.set('asset', oNames{1}, 'world position', [0 0 1]);
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 mergeNode = 'Bunny_B';
 save(oFile,'mergeNode','-append');

@@ -1,8 +1,14 @@
 function thisR = piAssetRemoveLastTrans(thisR, assetName, varargin)
+% Edit the transformations for this asset
+%
+% thisR = piAssetRemoveLastTrans(thisR, assetName, varargin)
 %
 % Inputs:
 %   thisR     - recipe
 %   assetName - node info
+%
+% Optional key/val
+%   N/A
 %
 % Outputs:
 %   thisR     - modified recipe
