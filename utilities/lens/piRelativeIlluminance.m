@@ -11,14 +11,13 @@ arguments
     options.pixelSamples = 600; % adjust to reduce noise if desired
 end
 
-if isa(options.figure,'double') 
+if isa(options.figure,'double')
     % User sent in a 3-vector describing the subplot dimensions and panel
     assert(numel(options.figure) == 3);
-    %we want to be in a subplot, so what if we don't create a new figure?
-    %ourFigure = ieNewGraphWin;
     subplot(options.figure(1), options.figure(2), options.figure(3));
     useSubplot = true;
 else
+    % Create our own figure
     ourFigure = options.figure;
     useSubplot = false;
 end
@@ -30,15 +29,13 @@ thisR = piRecipeDefault('scene','flatSurface');
 % This is especially important for wide angle lenses
 lightName = 'ourinfinite';
 ourLight = piLightCreate(lightName,...
-                        'type','infinite');
+    'type','infinite');
 recipeSet(thisR,'lights', ourLight,'add');
 
-
-%% Define Camera (Change this to whatever camera setup you use
+%% Define a Camera
 camera = piCameraCreate('omni','lensfile',options.lensfile);
 thisR.set('camera',camera);
 thisR.set('focal distance', options.focalDistance); % DO this or adjust film distance
-
 
 % You don't need much resolution because relative illumination is relatively slow in variation
 filmresolution = [300 1];
@@ -67,8 +64,9 @@ relativeIllumPBRT = maxnorm(oiTemp.data.photons(1,:,1));
 resolution = thisR.get('film resolution'); resolution=resolution(1);
 xaxis = 0.5 * thisR.get('filmwidth') * linspace(-1,1,resolution);
 
-% Plot the relativ illumination
+% Plot the relative illumination
 hpbrt = plot(xaxis,relativeIllumPBRT,'color',[0.83 0 0 ],'linewidth',2);
 
+ylim([0 1]); % show on full scale for comparison with other lenses
 xlim([0 inf]); % Only show positive x values because of symmetry
 xlabel('Image height  on film (mm)');
