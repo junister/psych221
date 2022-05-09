@@ -68,7 +68,7 @@ switch ieParamFormat(type)
         obj.concattransform=[];
         obj.motion = [];
         obj.transorder = ['T', 'R', 'S']; % Order of translation, rotation and scale
-        obj.isInstancer = false; % switch to true if the branch has been used more than once.
+        obj.isInstance = false; % switch to true if the branch has been used more than once.
     case 'object'
         obj.name = 'object';
         obj.mediumInterface = [];

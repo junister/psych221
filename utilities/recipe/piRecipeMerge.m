@@ -3,15 +3,15 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %
 % Synopsis:
 %   sceneR = piRecipeMerge(sceneR, objects, varargin)
-% 
+%
 % Brief description:
 %   Merges objects information (material, texture, assets) from two recipes
-%   into one. 
+%   into one.
 %
 % Inputs:
 %   sceneR    - scene recipe
 %   objectRs  - a single object recipe or a cell array of object recipes
-%   
+%
 % Optional key/val pairs
 %   material  -  The user can decide to NOT add materials.  Default is true
 %                meaning (add)
@@ -34,7 +34,7 @@ p.addRequired('sceneR', @(x)isequal(class(x),'recipe'));
 p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 
 % So far, we add materials, textures, and assets.  We have not yet
-% addressed lights.  The user can 
+% addressed lights.  The user can
 p.addParameter('material',true);
 p.addParameter('texture',true);
 p.addParameter('asset',true);
@@ -64,9 +64,9 @@ end
 
 for ii = 1:length(recipelist)
     thisR = recipelist{ii};
-    
+
     if assetFlag
-        
+
         if isempty(sceneR.assets)
             % Main scene has no assets.  Add in the assets from the object.
             % Then we also have to set the nodeName for the return.
@@ -83,7 +83,7 @@ for ii = 1:length(recipelist)
             children = thisR.assets.getchildren(1);
             % Get the subtree starting just below the specified node
             % thisOBJsubtree = thisR.get('asset', nodeName, 'subtree');
-            
+
             % Graft the asset three into the scene.  We graft it onto the root
             % of the main scene.
             % Changed to root_B on Jan 23, 2022.  Worried (BW).
@@ -96,7 +96,7 @@ for ii = 1:length(recipelist)
                 thisNodeTree = thisR.get('asset', children(nChild), 'subtree');
                 [~,thisNode] = piAssetFind(thisR.assets, 'asset',children(nChild));
                 if objectInstance && isfield(thisNode{1},'isInstancer')
-                    if thisNode{1}.isInstancer == 1
+                    if thisNode{1}.isInstance == 1
                         % For an asset tree, we save the parent object and
                         % set isInstancer flag to be 1, when the instance
                         % is called the node's isInstancer flag is 0; In
@@ -106,14 +106,17 @@ for ii = 1:length(recipelist)
                         % --Zhenyi
                         sceneR = sceneR.set('asset', 1, 'graft', thisNodeTree);
                     end
+                else
+%                     thisNode{1}.isInstance = 0;
+                    sceneR = sceneR.set('asset', 1, 'graft', thisNodeTree);
                 end
             end
         end
-        
+
         % Copy meshes from objects folder to scene folder here
         sourceDir = thisR.get('input dir');
         dstDir    = sceneR.get('output dir');
-        
+
         % Copy the assets from source to destination
         sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
         if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
@@ -127,7 +130,7 @@ for ii = 1:length(recipelist)
             end
         end
     end
-    
+
     if materialFlag
         % Combines the material lists in the two recipes
         if ~isempty(sceneR.materials)
@@ -136,7 +139,7 @@ for ii = 1:length(recipelist)
             sceneR.materials = thisR.materials;
         end
     end
-    
+
     if textureFlag
         % Combines the lists in the recipes, and then the files
         if ~isempty(sceneR.textures)
@@ -157,4 +160,3 @@ for ii = 1:length(recipelist)
 end
 
 end
-

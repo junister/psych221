@@ -288,8 +288,8 @@ end
 if ~isempty(thisR.assets)
     for ii  = 1:numel(thisR.assets.Node)
         thisNode = thisR.assets.Node{ii};
-        if isfield(thisNode, 'isInstancer') && isfield(thisNode, 'referenceObject')
-            if isempty(thisNode.referenceObject) || thisNode.isInstancer == 1
+        if isfield(thisNode, 'isInstance') && isfield(thisNode, 'referenceObject')
+            if isempty(thisNode.referenceObject) || thisNode.isInstance == 1
                 continue
             end
             [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
