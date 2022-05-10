@@ -25,10 +25,11 @@ setpref('ISET3d', 'tvdepthStart', tic);
 try
     % seems to have broken?
     t_piIntro_macbeth;               % Gets the depth map
+    setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 catch
     disp('Macbeth failed');
+    setpref('ISET3d', 'tvdepthTime', -1);
 end
-setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 
 %% Omni camera (e.g. one with a lens)
 disp('v_omni')
@@ -51,8 +52,13 @@ setpref('ISET3d', 'tvmaterialTime', toc(getpref('ISET3d', 'tvmaterialStart', 0))
 
 disp('*** LIGHTS -- t_piIntro_light')
 setpref('ISET3d', 'tvlightStart', tic);
-t_piIntro_light;
-setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
+try
+    t_piIntro_light;
+    setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
+catch
+    disp('piIntro_Light failed');
+    setpref('ISET3d', 'tvlightTime', -1);
+end
 
 disp('*** INTRO -- t_piIntro')
 setpref('ISET3d', 'tvpbrtStart', tic);
