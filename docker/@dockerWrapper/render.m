@@ -25,7 +25,7 @@ if ispc,     flags = '-i ';
 else,        flags = '-it ';
 end
 
-% [~, sceneDir, ~] = fileparts(outputFolder);
+[~, sceneDir, ~] = fileparts(outputFolder);
 
 % ASSUME that if we supply a context it is on a Linux server
 nativeFolder = outputFolder;
@@ -137,7 +137,8 @@ else
     % our output folder path starts from root, not from where the volume is
     % mounted -- sort of weenie as this is the Windows path while on
     % windows
-    % {
+    %{
+    %
        dockerCommand = 'docker run -ti --rm';
        if ~isempty(outputFolder)
             if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
@@ -146,7 +147,7 @@ else
         dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);       
         containerRender = sprintf('%s %s %s', dockerCommand, obj.dockerImageName, renderCommand);
     %}
-    %{
+    % {
     shortOut = fullfile(obj.relativeScenePath,sceneDir);
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     %}

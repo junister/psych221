@@ -179,7 +179,7 @@ if renderDocker.localRender
 
     % If the local docker is a GPU type, OK.  Otherwise, set gpuRendering
     % false.
-    str = renderDocker.localImage;
+    str = renderDocker.getPBRTImage('GPU');
     if contains(str,'gpu'), renderDocker.gpuRendering = true;
     else, renderDocker.gpuRendering = false;
     end

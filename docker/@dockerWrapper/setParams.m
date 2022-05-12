@@ -48,7 +48,7 @@ function  setParams(options)
 
 arguments
     options.whichGPU {mustBeNumeric} = 0;
-    options.gpuRendering = '';
+    options.gpuRendering = true;
 
     % Remote options
     % these relate to remote/server rendering

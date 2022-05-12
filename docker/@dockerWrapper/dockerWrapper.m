@@ -122,13 +122,13 @@ classdef dockerWrapper < handle
 
         % these are local things
         % default image is cpu on x64 architecture
-        dockerImageName   =  dockerWrapper.localImage();
+        dockerImageName   =  getpref('docker','localImage','');
         dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
 
         gpuRendering = true; % the default
         whichGPU = getpref('docker','whichGPU',0); % use any
-
+        
         % these relate to remote/server rendering
         remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
         remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
@@ -156,7 +156,7 @@ classdef dockerWrapper < handle
         outputFile = 'pbrt_output.exr';
         outputFilePrefix = '--outfile';
 
-        localRender = false;
+        localRender = getpref('docker','localRender',false);
         localImageTag = 'latest';
 
         verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
@@ -189,6 +189,13 @@ classdef dockerWrapper < handle
             else
                 for ii=1:2:numel(varargin)
                     obj.(varargin{ii}) = varargin{ii+1};
+                end
+            end
+            if isempty(obj.dockerImageName)
+                if obj.gpuRendering
+                    obj.dockerImageName = obj.getPBRTImage('GPU');
+                else
+                    obj.dockerImageName = obj.getPBRTImage('CPU');
                 end
             end
 
@@ -246,8 +253,8 @@ classdef dockerWrapper < handle
         % Matlab requires listing static functions that are defined in a
         % separate file.  Here are the definitions.  (Static functions do
         % not have an 'obj' argument.
-        dockerImage = localImage();
         setParams();
+        dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
         
         % Default servers
@@ -587,7 +594,7 @@ classdef dockerWrapper < handle
                         end
                     elseif isequal(processorType, 'CPU')
                         obj.gpuRendering = false;
-                        dockerImageName = obj.localImage;
+                        dockerImageName = dockerWrapper.localImage;
                     end
                 end
             end
