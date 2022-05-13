@@ -107,8 +107,8 @@ for ii = 1:numel(children)
     if isequal(thisNode.type, 'branch')
         % do not write object instance repeatedly
         nodeList = [nodeList children(ii)];
-        if isfield(thisNode,'isInstance')
-            if thisNode.isInstance ==1
+        if isfield(thisNode,'isObjectInstance')
+            if thisNode.isObjectInstance ==1
                 indentSpacing = "    ";
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
                 if ~isempty(thisNode.motion)
@@ -219,8 +219,8 @@ arealight = 0;
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
 
-    if isfield(thisNode, 'isInstance')
-        if thisNode.isInstance ==1 && ~writeGeometryFlag
+    if isfield(thisNode, 'isObjectInstance')
+        if thisNode.isObjectInstance ==1 && ~writeGeometryFlag
             % This node is an object instance node, skip;
             continue;
         end
@@ -363,7 +363,7 @@ for ii = 1:numel(children)
             thisNode.name = thisNode.name(8:endIndex);
         end
 
-        % if this is an arealight or object without a reference
+        % if this is an arealight or object without a reference object
         if writeGeometryFlag || isempty(referenceObjectExist)
             [rootPath,~] = fileparts(outFilePath);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);

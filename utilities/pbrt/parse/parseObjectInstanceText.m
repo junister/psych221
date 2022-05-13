@@ -15,7 +15,7 @@ for objIndex = 1:numel(objBeginLocs)
     if ~isempty(subnodes)
         subtree = subnodes.subtree(2);
         branchNode = subtree.Node{1};
-        branchNode.isInstance = 1;
+        branchNode.isObjectInstance = 1;
         branchNode.name = sprintf('%s_B',name);
         subtree = subtree.set(1, branchNode);
         trees = trees.graft(1, subtree);

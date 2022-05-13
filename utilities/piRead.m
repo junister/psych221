@@ -268,7 +268,33 @@ else
         disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
     end
 
+    %%  Additional information for instanced objects
+    % PBRT does not allow instance lights, however in the cases that
+    % we would like to instance an object with some lights on it, we will
+    % need to save that additional information to it, and then repeatedly
+    % write the attributes when the objectInstance is used in attribute
+    % pairs. --Zhenyi
+    % OK, but this code breaks on the teapot because there are no assets.  So
+    % need to check that there are assets. -- BW
+    if ~isempty(thisR.assets)
+        for ii  = 1:numel(thisR.assets.Node)
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode, 'isObjectInstance') && isfield(thisNode, 'referenceObject')
+                if isempty(thisNode.referenceObject) || thisNode.isObjectInstance == 1
+                    continue
+                end
 
+                [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
+
+                if isempty(ParentNode), continue;end
+
+                ParentNode = ParentNode{1};
+                ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
+                ParentNode.camera = thisR.lookAt;
+                thisR.assets = thisR.assets.set(ParentId, ParentNode);
+            end
+        end
+    end
 
 end
 
@@ -277,30 +303,7 @@ if verbosity > 0
     disp('***Scene parsed.');
 end
 
-%%  Additional information for instanced objects
-% PBRT does not allow instance lights, however in the cases that
-% we would like to instance an object with some lights on it, we will
-% need to save that additional information to it, and then repeatedly
-% write the attributes when the objectInstance is used in attribute
-% pairs. --Zhenyi
-% OK, but this code breaks on the teapot because there are no assets.  So
-% need to check that there are assets. -- BW
-if ~isempty(thisR.assets)
-    for ii  = 1:numel(thisR.assets.Node)
-        thisNode = thisR.assets.Node{ii};
-        if isfield(thisNode, 'isInstance') && isfield(thisNode, 'referenceObject')
-            if isempty(thisNode.referenceObject) || thisNode.isInstance == 1
-                continue
-            end
-            [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
-            if isempty(ParentNode), continue;end
-            ParentNode = ParentNode{1};
-            ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
-            ParentNode.camera = thisR.lookAt;
-            thisR.assets = thisR.assets.set(ParentId, ParentNode);
-        end
-    end
-end
+
 
 end
 

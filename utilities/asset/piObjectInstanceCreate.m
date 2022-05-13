@@ -82,7 +82,7 @@ OBJsubtreeNew = tree();
 % for ii = 1:numel(OBJsubtree.Node)
     
 %     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
-%             OBJsubtree.Node{1}.isInstance==0
+%             OBJsubtree.Node{1}.isObjectInstance==0
 %         continue;
 %     end
 
@@ -95,7 +95,7 @@ OBJsubtreeNew = tree();
 % OBJsubtreeNew = OBJsubtreeNew.set(1, thisNode);
 % end
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
-OBJsubtree_branch.isInstance = 0;
+OBJsubtree_branch.isObjectInstance = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
 % replace branch
 OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);

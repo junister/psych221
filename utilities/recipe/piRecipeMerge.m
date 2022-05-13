@@ -18,7 +18,8 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   texture   -  Same as material
 %   asset     -  Same as material
 %   node name -  Top node of the subtree. Default is the node with id = 2.
-%   object instance - Probably added by Zhenyi.  Needs a comment.
+%   object instance - Add object as an object instance, then we 
+%                can reuse(instance) it by function piObjectInstanceCreate.
 %
 % Returns:
 %   sceneR   - scene recipe with added objects
@@ -38,7 +39,7 @@ p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 p.addParameter('material',true);
 p.addParameter('texture',true);
 p.addParameter('asset',true);
-p.addParameter('objectinstance',true);
+p.addParameter('objectinstance',false); 
 p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
 
 p.parse(sceneR, objectRs, varargin{:});
@@ -87,7 +88,7 @@ for ii = 1:length(recipelist)
             % Graft the asset three into the scene.  We graft it onto the root
             % of the main scene.
             % Changed to root_B on Jan 23, 2022.  Worried (BW).
-            % The new field 'isInstancer' broke reading in one of the
+            % The new field 'isObjectInstancer' broke reading in one of the
             % assets.  I do not understand that field from its name; the
             % comment below has me confused, so I will ask Zhenyi about it.
             % For the moment merging some assets (like the bunny) does not
@@ -95,11 +96,11 @@ for ii = 1:length(recipelist)
             for nChild = 1:numel(children)
                 thisNodeTree = thisR.get('asset', children(nChild), 'subtree');
                 [~,thisNode] = piAssetFind(thisR.assets, 'asset',children(nChild));
-                if objectInstance && isfield(thisNode{1},'isInstance')
-                    if thisNode{1}.isInstance == 1
+                if objectInstance && isfield(thisNode{1},'isObjectInstance')
+                    if thisNode{1}.isObjectInstance == 1
                         % For an asset tree, we save the parent object and
-                        % set isInstancer flag to be 1, when the instance
-                        % is called the node's isInstancer flag is 0; In
+                        % set isObjectInstancer flag to be 1, when the instance
+                        % is called the node's isObjectInstancer flag is 0; In
                         % this case, when we merge the scene, we would like
                         % to only merge the parent object, we will add
                         % instance later using piObjectInstanceCreate.
@@ -107,7 +108,6 @@ for ii = 1:length(recipelist)
                         sceneR = sceneR.set('asset', 1, 'graft', thisNodeTree);
                     end
                 else
-%                     thisNode{1}.isInstance = 0;
                     sceneR = sceneR.set('asset', 1, 'graft', thisNodeTree);
                 end
             end

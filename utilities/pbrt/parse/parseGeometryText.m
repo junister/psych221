@@ -234,6 +234,7 @@ while i <= length(txt)
             resCurrent = piAssetCreate('type', 'branch');
             % If present populate fields.
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
+            
             if exist('InstanceName','var')
                 resCurrent.referenceObject = InstanceName;
 %               resCurrent.type = 'instance';
