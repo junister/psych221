@@ -119,7 +119,6 @@ materiallib.plastic.rgbks = [0.25 0.25 0.25];
 materiallib.plastic.floatroughness = 0.1;
 
 %% glass
-
 % Standard glass appearance
 materiallib.glass_measured.type = 'dielectric';
 materiallib.glass_measured.eta  = 'glass-BK7';
