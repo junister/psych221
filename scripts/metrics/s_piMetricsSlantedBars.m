@@ -165,7 +165,7 @@ thisScale = kitchenR.get('asset',eiachart.mergeNode,'scale');
 piAssetSet(kitchenR,eiachart.mergeNode,'scale',thisScale*0.3);
 
 kitchenR.show('objects')
-kitchenR.exporter = 'C4D';
+kitchenR.exporter = 'PARSE';
 
 %  Include "scene_geometry.pbrt" which is output by piWrite()
 worldEnd = kitchenR.world{end};
@@ -183,7 +183,7 @@ scene = piWRS(kitchenR);
 %% White room
 
 whiteR = piRecipeDefault('scene name','white-room');
-whiteR.exporter = 'C4D';
+whiteR.exporter = 'PARSE';
 
 piRecipeMerge(whiteR,mcc.thisR,'node name',mcc.mergeNode);
 

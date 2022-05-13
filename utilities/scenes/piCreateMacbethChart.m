@@ -62,7 +62,7 @@ macbethRecipe.integrator.subtype = 'directlighting';
 
 macbethRecipe.set('chromatic aberration',true);
 
-macbethRecipe.exporter = 'C4D';
+macbethRecipe.exporter = 'PARSE';
 
 %% Create a cube
 dx = inputs.width/2;

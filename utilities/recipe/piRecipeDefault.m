@@ -118,40 +118,40 @@ switch ieParamFormat(sceneDir)
     case 'macbethchecker'
         sceneDir = 'MacBethChecker';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'macbethcheckerbox'
         sceneDir = 'MacBethCheckerBox';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'macbethcheckercus'
         sceneDir = 'MacBethCheckerCus';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case {'macbethcheckercb', 'mcccb'}
         sceneDir = 'mccCB';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
 
     case 'whiteboard'
         sceneDir = 'WhiteBoard';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'simplescene'
         sceneDir = 'SimpleScene';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'car'
         sceneDir = 'car';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'chessset'
         sceneDir = 'ChessSet';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'chesssetpieces'
         sceneDir = 'ChessSetPieces';
         sceneFile = ['ChessSet','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'chessset_2'
         sceneDir = 'ChessSet_2';
         sceneFile = ['chessSet2','.pbrt'];
@@ -164,11 +164,11 @@ switch ieParamFormat(sceneDir)
     case 'checkerboard'
         sceneDir = 'checkerboard';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'coloredcube'
         sceneDir = 'coloredCube';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'teapot'
         sceneDir = 'teapot';
         sceneFile = 'teapot-area-light-v4.pbrt';
@@ -183,64 +183,64 @@ switch ieParamFormat(sceneDir)
         % other tools for controlling position, texture, and so forth.
         sceneDir = 'slantedBar';
         sceneFile = 'slantedBar.pbrt';
-        exporter = 'C4D';
-    case 'slantedbarc4d'
-        sceneDir = 'slantedBarC4D';
-        sceneFile = 'slantedBarC4D.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
+    case 'slantedbarPARSE'
+        sceneDir = 'slantedBarPARSE';
+        sceneFile = 'slantedBarPARSE.pbrt';
+        exporter = 'PARSE';
     case 'slantedbarasset'
         sceneDir = 'slantedbarAsset';
         sceneFile = 'slantedbarAsset.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'flatsurface'
         sceneDir = 'flatSurface';
         sceneFile = 'flatSurface.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'sphere'
         sceneDir = 'sphere';
         sceneFile = 'sphere.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'flatsurfacewhitetexture'
         sceneDir = 'flatSurfaceWhiteTexture';
         sceneFile = 'flatSurfaceWhiteTexture.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'flatsurfacerandomtexture'
         sceneDir = 'flatSurfaceRandomTexture';
         sceneFile = 'flatSurfaceRandomTexture.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'flatsurfacemcctexture'
         sceneDir = 'flatSurfaceMCCTexture';
         sceneFile = 'flatSurfaceMCCTexture.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'simplescenelight'
         sceneDir = 'SimpleSceneLight';
         sceneFile = 'SimpleScene.pbrt';
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'macbethcheckercuslight'
         sceneDir = 'MacBethCheckerCusLight';
         sceneFile = ['MacBethCheckerCus','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'bunny'
         sceneDir = 'bunny';
         sceneFile = ['bunny','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'coordinate'
         sceneDir = 'coordinate';
         sceneFile = ['coordinate','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case {'cornellbox', 'cornell_box'}
         sceneDir = 'cornell_box';
         sceneFile = ['cornell_box','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case {'materialball'}
         sceneDir = 'materialball';
         sceneFile = ['materialball','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
 
      case {'materialball_cloth'}
         sceneDir = 'materialball_cloth';
         sceneFile = ['materialball_cloth','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
 
     case {'cornellboxbunnychart'}
         if loadrecipe && exist('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','file')
@@ -249,16 +249,16 @@ switch ieParamFormat(sceneDir)
         end
         sceneDir = 'Cornell_BoxBunnyChart';
         sceneFile = ['Cornell_Box_Multiple_Cameras_Bunny_charts','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case {'cornellboxreference'}
         % Main Cornell Box
         sceneDir = 'CornellBoxReference';
         sceneFile = ['CornellBoxReference','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case {'cornellboxlamp'}
         sceneDir = 'CornellBoxLamp';
         sceneFile = ['CornellBoxLamp','.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'snellenatdepth'
         sceneDir = 'snellenAtDepth';
         sceneFile = ['snellen','.pbrt'];
@@ -271,7 +271,7 @@ switch ieParamFormat(sceneDir)
     case 'lettersatdepth'
         sceneDir = 'lettersAtDepth';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'C4D';
+        exporter = 'PARSE';
     case 'bathroom'
         sceneDir = 'bathroom';
         sceneFile = 'scene.pbrt';
@@ -382,10 +382,10 @@ end
 %% If we are here, we found the file.  So create the recipe.
 
 % Parse the file contents into the ISET3d recipe and identify the type of
-% parser.  C4D has special status.  In other cases, such as the scenes from
+% parser.  PARSE has special status.  In other cases, such as the scenes from
 % the PBRT and Benedikt sites, we just copy the files into ISET3d/local.
 switch exporter
-    case {'C4D','Copy'}
+    case {'PARSE','Copy'}
         thisR = piRead(fname, 'exporter', exporter);
     case 'Blender'
         thisR = piRead_Blender(fname,'exporter',exporter);

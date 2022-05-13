@@ -67,7 +67,7 @@ switch (sceneName)
         pbrtName = 'scene';
         exporter = 'Copy';
     case 'cornell_box'
-        exporter = 'C4D';
+        exporter = 'PARSE';
         pbrtName = 'cornell_box';
     otherwise
         error('Unknown scene %s\n',sceneName);
