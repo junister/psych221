@@ -1,7 +1,8 @@
 function dockerImage = localImage()
-%LOCALIMAGE Find the right Docker image
+%LOCALIMAGE Find the right Docker image for our CPU type
 %
-% Returns a string with information about the local Docker image.
+% Returns a string with information about the local Docker image
+% that is right for our CPU -- it does not look for GPUs.
 %
 % Currently pbrt is architecture specific, so we need to launch the
 % correct Docker Image.  We will add to this list as the number of

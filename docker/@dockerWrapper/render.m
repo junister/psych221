@@ -148,7 +148,8 @@ else
         containerRender = sprintf('%s %s %s', dockerCommand, obj.dockerImageName, renderCommand);
     %}
     % {
-    shortOut = fullfile(obj.relativeScenePath,sceneDir);
+    % Output directory is always in Linux/docker land
+    shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
     containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     %}
     tic;

@@ -8,6 +8,8 @@ classdef dockerWrapper < handle
     %   * a remote server with a CPU,
     %   * your local computer with a GPU,
     %   * your local computer with a CPU, and
+
+    %   [FUTURE, TBD:]
     %   * your local computer with PBRT installed and no docker at all.
     %
     % The source code is under active development (May 1, 2022).
@@ -126,7 +128,7 @@ classdef dockerWrapper < handle
         dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
 
-        gpuRendering = true; % the default
+        gpuRendering = getpref('docker', 'gpuRendering', true); % the default
         whichGPU = getpref('docker','whichGPU',0); % use any
         
         % these relate to remote/server rendering
@@ -413,27 +415,33 @@ classdef dockerWrapper < handle
                 ourContainer = ['pbrt-cpu-' uName];
             end
 
-            % Starting as background we need to allow for all scenes
-            % if remote then need to figure out correct path
+            % Because we are now running Docker as a background task,
+            % we need to be able to re-use it for all scenes
+            % so we need to volume map all of /local
+            %
+            % if running Docker remotely then need to figure out correct path
+            %
+            % One tricky bit is that on Windows, the mount point is the
+            % remote server path, but later we need to use the WSL path for rsync
+            %
+            % mountPoint is the host fs for iset3d-v4/local
+            % mountData is the container path for iset3d-v4/local (normally
+            % under /iset)
+            %
             if obj.localRender
-                if isempty(obj.localRoot)
-                    mountData = fullfile(piRootPath(), 'local');
-                else
-                    mountData = fullfile(obj.localRoot, 'local');
-                end
+                mountPoint = fullfile(piRootPath(), 'local/');
             else
                 if ~isempty(obj.remoteRoot)
-                    mountData = [obj.remoteRoot obj.relativeScenePath];
+                    mountPoint = [obj.remoteRoot obj.relativeScenePath];
                 elseif ~isempty(obj.remoteMachine)
-                    mountData = [obj.remoteRoot obj.relativeScenePath];
+                    mountPoint = [obj.remoteRoot obj.relativeScenePath];
+                    warning("Remote mount point for Docker doesn't seem right!");
                 end
             end
-            mountData = strrep(mountData,'//','/');
-            % is our mount point always the same?
-            mountPoint = obj.relativeScenePath;
-            %mountPoint = dockerWrapper.pathToLinux(mountData);
 
-            volumeMap = sprintf("-v %s:%s", mountData, mountPoint);
+            mountData = dockerWrapper.pathToLinux(obj.relativeScenePath);
+
+            volumeMap = sprintf("-v %s:%s", mountPoint, mountData);
             placeholderCommand = 'bash';
 
             % We do not use context for local docker containers
@@ -552,7 +560,7 @@ classdef dockerWrapper < handle
                     return;
                 else
                     % Running locally and no advice from the user.
-                    if isequal(processorType, 'GPU')
+                    if isequal(processorType, 'GPU') && obj.gpuRendering == true
                         % They have asked for a GPU, so we try to figure
                         % out the local GPU situation.
                         [GPUCheck, GPUModel] = ...
