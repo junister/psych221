@@ -1,4 +1,4 @@
-function [blockList, blockLinesList]  = piBlockExtract_gp(txtLines,varargin)
+function [s, blockLines ] = piBlockExtract(txtLines,varargin)
 % Parse text in a scene file, returning the info as a structure 
 %
 % Syntax
@@ -20,8 +20,8 @@ function [blockList, blockLinesList]  = piBlockExtract_gp(txtLines,varargin)
 %                    the syntax given by the exporter is different.   
 %
 % Return
-%   blockList           - a struct containing information from the block of text
-%   blockLinesList
+%   s           - a struct containing information from the block of text
+%   blockLines  - extracted text lines directly (without parsing)
 %   readSummary - Any warnings about unread sections returned here.
 %
 % Types of blocks we have tried to extract successfully, particularly with
@@ -53,17 +53,25 @@ p.addRequired('txtLines',@(x)(iscell(txtLines) && ~isempty(txtLines)));
 
 % We need a valid list of potential block names here.
 addParameter(p,'blockname','Camera',@ischar);
+addParameter(p,'exporter','PARSE',@ischar);
 p.parse(txtLines,varargin{:});
 
 blockName = p.Results.blockname;
+exporter  = p.Results.exporter;
 
 % Initialize
+s = [];
 
+%% If the exporter flag is true, use piBlockExtractC4D instead of this function.
+if isequal(exporter,'PARSE')
+    [s,blockLines] = piBlockExtractC4D(txtLines,'blockName',blockName);
+    return;
+end
 
 %% Extract lines that correspond to specified keyword
 
+blockBegin = []; blockEnd = [];
 nLines = length(txtLines);
-blockList=[]; blockLinesList=[];nn=1; 
 for ii=1:nLines
     thisLine = txtLines{ii};
     if length(thisLine) >= length(blockName)
@@ -73,41 +81,30 @@ for ii=1:nLines
             blockBegin = ii;
             % Keep adding lines whose first symbol is a double quote (")
             for jj=(ii+1):nLines
-                if isempty(txtLines{jj}) || ~isequal(txtLines{jj}(1),'"') || jj==nLines % isempty(txtLines{jj})
+                if isempty(txtLines{jj}) || ~isequal(txtLines{jj}(1),'"') % isempty(txtLines{jj})
                     % Some other character, so get out.
-                    if isempty(txtLines{jj}) || isempty(str2num(txtLines{jj}(1:2)))
                     blockEnd = jj;
-                    blockLines = txtLines(blockBegin:(blockEnd-1));
-                    blockLinesList{nn} = blockLines;
-                    switch blockName
-                        case {'MakeNamedMaterial','Material'}
-                            blockList{nn} = parseBlockMaterial(blockLines);
-                        case 'Texture'
-                            blockList{nn} = parseBlockTexture(texLines,ii);
-                        otherwise
-                            blockList{nn} = parseBlock(blockLines, blockName);
-                            blockLinesList{nn} = blockLines;
-                    end
-                    nn=nn+1;
                     break;
-                end
                 end
             end
         end
     end
 end
 
-if numel(blockList)==1 && ...
-        ~(strcmp(blockName, 'Texture') || ...
-        strcmp(blockName, 'MakeNamedMaterial'))
-    blockList = blockList{1};
-    blockLinesList = blockLinesList{1}; 
-end
+% If not blockBegin/End return empty
+blockLines = [];  
+
+% Otherwise, use the textlines
+if(~isempty('blockBegin') && ~isempty('blockEnd'))
+    blockLines = txtLines(blockBegin:(blockEnd-1));
 end
 
-function s = parseBlock(blockLines, blockName)
+%% If nothing was read in, return nothing
+if(isempty(blockLines)) 
+    return;
+end
 %% If it's a transform, automatically return without parsing
-s=[];
+
 if(strcmp(blockName,'Transform') || ...
         strcmp(blockName,'LookAt')|| ...
         strcmp(blockName,'ConcatTransform')|| ...
@@ -189,21 +186,6 @@ for ii = 2:nLines
     end
 
 end
+
+
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

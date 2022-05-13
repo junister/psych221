@@ -97,31 +97,6 @@ classdef recipe < matlab.mixin.Copyable
             save(oFile,'thisR');
         end
 
-        function jsonFile = savejson(thisR,varargin)
-            % Save the recipe in a mat-file.
-            % By default, save it as sceneName-recipe.mat  in the input
-            % directory.
-            %
-            % recipe.save('recipeFileName');
-
-            if ~isempty(varargin)
-                jsonFile = varargin{1};
-            else
-                jsonFile = thisR.get('input basename');
-                jsonFile = sprintf('%s-recipe',jsonFile);
-
-                oDir = thisR.get('input dir');
-                jsonFile = fullfile(oDir,jsonFile);
-            end
-
-            [p,n,e] = fileparts(jsonFile);
-            if ~isequal(e,'.json')
-                disp('Adding json extension to file name');
-                jsonFile = fullfile(p,[n,'.json']);
-            end
-            jsonwrite(jsonFile,thisR);
-        end
-
         function T = show(obj,varargin)
             %
             % thisR.show('assets) - Brings up a window

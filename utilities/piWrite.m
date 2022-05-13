@@ -113,9 +113,6 @@ p.addParameter('overwritegeometry',true,@islogical);
 % % Read trafficflow variable
 % p.addParameter('thistrafficflow',[]);
 
-% Store JSON recipe for the traffic scenes
-p.addParameter('overwritejson',false,@islogical);
-
 p.addParameter('verbose', 0, @isnumeric);
 
 p.parse(thisR,varargin{:});
@@ -130,7 +127,6 @@ overwritegeometry   = p.Results.overwritegeometry;
 
 % lightsFlag          = p.Results.lightsflag;
 % thistrafficflow     = p.Results.thistrafficflow;
-overwritejson       = p.Results.overwritejson;
 verbosity           = p.Results.verbose;
 
 exporter = thisR.get('exporter');
@@ -209,13 +205,6 @@ if ~isequal(exporter,'Copy')
     piWriteGeometry(thisR,overwritegeometry);
 end
 
-%% Overwrite xxx.json - For traffic scenes
-
-if overwritejson
-    [~,scene_fname,~] = fileparts(thisR.outputFile);
-    jsonFile = fullfile(workingDir,sprintf('%s.json',scene_fname));
-    jsonwrite(jsonFile,thisR);
-end
 
 end   % End of piWrite
 

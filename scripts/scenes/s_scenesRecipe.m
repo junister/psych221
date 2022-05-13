@@ -6,6 +6,9 @@
 %
 % We save these recipes in the original folder with a scene-recipe.mat file
 % name.
+% Because we save materials/textures in matlab key/value map and assets in
+% tree structure, json format can no longer preserve the properties of new
+% reicpe, we only save recipe in mat in the future. --Zhenyi, 05-2022
 
 %% Init
 ieInit;

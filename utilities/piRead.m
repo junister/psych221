@@ -52,7 +52,7 @@ function thisR = piRead(fname,varargin)
 % TL, ZLy, BW Scienstanford 2017-2020
 % Zhenyi, 2020
 % See also
-%   piWrite, piRender, piBlockExtract_gp
+%   piWrite, piRender, piBlockExtract
 
 % Examples:
 %{
@@ -71,7 +71,7 @@ varargin =ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('fname', @(x)(exist(fname,'file')));
-p.addParameter('exporter', 'C4D', @ischar); % deal with this later
+p.addParameter('exporter', 'PARSE', @ischar); % deal with this later
 
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
@@ -380,7 +380,7 @@ function [flip,thisR] = piReadLookAt(thisR,txtLines)
 flip = 0;
 
 % Get the block
-% [~, lookAtBlock] = piBlockExtract_gp(txtLines,'blockName','LookAt');
+% [~, lookAtBlock] = piBlockExtract(txtLines,'blockName','LookAt');
 [~, lookAtBlock] = piParseOptions(txtLines,'LookAt');
 if(isempty(lookAtBlock))
     % If it is empty, use the default
@@ -395,7 +395,7 @@ else
 end
 
 % If there's a transform, we transform the LookAt. % to change
-[~, transformBlock] = piBlockExtract_gp(txtLines,'blockName','Transform');
+[~, transformBlock] = piBlockExtract(txtLines,'blockName','Transform');
 if(~isempty(transformBlock))
     values = textscan(transformBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
     values = cell2mat(values(2:end));
@@ -405,7 +405,7 @@ end
 
 % If there's a concat transform, we use it to update the current camera
 % position. % to change
-[~, concatTBlock] = piBlockExtract_gp(txtLines,'blockName','ConcatTransform');
+[~, concatTBlock] = piBlockExtract(txtLines,'blockName','ConcatTransform');
 if(~isempty(concatTBlock))
     values = textscan(concatTBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
     values = cell2mat(values(2:end));
