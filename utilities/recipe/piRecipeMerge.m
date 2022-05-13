@@ -95,7 +95,7 @@ for ii = 1:length(recipelist)
             for nChild = 1:numel(children)
                 thisNodeTree = thisR.get('asset', children(nChild), 'subtree');
                 [~,thisNode] = piAssetFind(thisR.assets, 'asset',children(nChild));
-                if objectInstance && isfield(thisNode{1},'isInstancer')
+                if objectInstance && isfield(thisNode{1},'isInstance')
                     if thisNode{1}.isInstance == 1
                         % For an asset tree, we save the parent object and
                         % set isInstancer flag to be 1, when the instance
