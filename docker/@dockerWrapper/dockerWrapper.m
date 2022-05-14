@@ -142,7 +142,7 @@ classdef dockerWrapper < handle
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc)
         renderContext = getpref('docker','renderContext','');
-        localRoot     = dockerWrapper.defaultLocalRoot();
+        localRoot     = ''; % dockerWrapper.defaultLocalRoot();
 
         workingDirectory = '';
         localVolumePath  = '';
@@ -162,42 +162,34 @@ classdef dockerWrapper < handle
         localImageTag = 'latest';
 
         verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
+        setPropertyDefaults = true;
     end
 
     methods
 
         % Constructor method
-        function obj = dockerWrapper(varargin)
+        function aDocker = dockerWrapper(varargin)
             %Docker Construct an instance of this class
             %   Detailed explanation goes here
             % default for flags
             if ispc
-                obj.dockerFlags = '-i --rm';
+                aDocker.dockerFlags = '-i --rm';
             else
-                obj.dockerFlags = '-ti --rm';
+                aDocker.dockerFlags = '-ti --rm';
             end
 
             % I don't think we should fail in a pure default case?
             % Also allow renderString pref for backward compatibility
-            if isempty(varargin)
-                if ~isempty(getpref('docker','renderString',''))
-                    disp('renderString to be deprecated.  Use "docker" pref.')
-                    % This is probably a mistake and should go away.
-                    rString = getpref('docker','renderString','');
-                    for ii = 1:2:numel(rString)
-                        obj.(rString{ii}) = rString{ii+1};
-                    end
-                end
-            else
+            if ~isempty(varargin)
                 for ii=1:2:numel(varargin)
-                    obj.(varargin{ii}) = varargin{ii+1};
+                    aDocker.(varargin{ii}) = varargin{ii+1};
                 end
             end
-            if isempty(obj.dockerImageName)
-                if obj.gpuRendering
-                    obj.dockerImageName = obj.getPBRTImage('GPU');
+            if isempty(aDocker.dockerImageName)
+                if aDocker.gpuRendering
+                    aDocker.dockerImageName = aDocker.getPBRTImage('GPU');
                 else
-                    obj.dockerImageName = obj.getPBRTImage('CPU');
+                    aDocker.dockerImageName = aDocker.getPBRTImage('CPU');
                 end
             end
 
@@ -574,7 +566,8 @@ classdef dockerWrapper < handle
                             % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
                         end
 
-                        if ~GPUCheck
+                        % WE CAN ONLY USE GPUs ON LINUX FOR NOW
+                        if ~GPUCheck && ~ispc
                             % A GPU is available.
                             obj.gpuRendering = true;
 
