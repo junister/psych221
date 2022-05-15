@@ -84,16 +84,16 @@ setpref('ISET3d', 'tvcampositionStart', tic);
 t_cameraPosition;
 setpref('ISET3d', 'tvcampositionTime', toc(getpref('ISET3d', 'tvcampositionStart', 0)));
 
-%% Try a lens
+%% Various renders of the Chess Set
 
-disp('*** FISHEYE LENS -- t_piIntro_fisheyelens')
-setpref('ISET3d', 'tvfisheyeStart', tic);
+disp('*** CHESS SET -- t_piIntro_chess')
+setpref('ISET3d', 'tvchessStart', tic);
 try
-    t_piIntro_fisheyelens;
+    t_piIntro_chess;
 catch
-    disp('fisheye failed')
+    disp('chess set failed')
 end
-setpref('ISET3d', 'tvfisheyeTime', toc(getpref('ISET3d', 'tvfisheyeStart', 0)));
+setpref('ISET3d', 'tvchessTime', toc(getpref('ISET3d', 'tvchessStart', 0)));
 
 
 %% It runs, but we are not happy
@@ -131,7 +131,7 @@ fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
 fprintf("PBRT:       %5.1f seconds.\n", getpref('ISET3d','tvpbrtTime'));
 fprintf("Cam Motion: %5.1f seconds.\n", getpref('ISET3d','tvcammotionTime'));
 fprintf("Cam Pos.:   %5.1f seconds.\n", getpref('ISET3d','tvcampositionTime'));
-fprintf("Fisheye:    %5.1f seconds.\n", getpref('ISET3d','tvfisheyeTime'));
+fprintf("Chess Set:  %5.1f seconds.\n", getpref('ISET3d','tvchessTime'));
 fprintf("Skymap:     %5.1f seconds.\n", getpref('ISET3d','tvskymapTime'));
 
 %% END
