@@ -75,13 +75,14 @@ for ii = 1:numel(thisR.lights)
                 % Saving the light information in the spd sub-directory
                 outputDir = thisR.get('output dir');
                 lightSpdDir = fullfile(outputDir, 'spds', 'lights');
+
                 thisLightfile = fullfile(lightSpdDir,...
-                    sprintf('%s_%f.spd', ieParamFormat(specVal), spectrumScale));
+                    sprintf('%s.spd', ieParamFormat(specVal)));
                 if ~exist(lightSpdDir, 'dir'), mkdir(lightSpdDir); end
 
                 fid = fopen(thisLightfile, 'w');
                 for jj = 1: length(data)
-                    fprintf(fid, '%d %d \n', wavelength(jj), data(jj)*spectrumScale);
+                    fprintf(fid, '%d %d \n', wavelength(jj), data(jj));
                 end
                 fclose(fid);
 
