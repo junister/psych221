@@ -235,7 +235,7 @@ for ii = 1:numel(children)
         end
     end
     referenceObjectExist = [];
-    if isfield(thisNode,'referenceObject')
+    if isfield(thisNode,'referenceObject') && ~isempty(thisNode.referenceObject)
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
     end
 
