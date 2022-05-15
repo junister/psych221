@@ -209,7 +209,9 @@ pbrtFile = thisR.outputFile;
 %
 
 %% Build the docker command
-dockerCommand   = 'docker run -ti --rm';
+
+% Not used any more?  (BW)
+% dockerCommand   = 'docker run -ti --rm';
 
 [~,currName,~] = fileparts(pbrtFile);
 
@@ -275,8 +277,8 @@ preRender = tic;
 sprintf('%s\nOutput file:  %s\n',result,outF);
 
 elapsedTime = toc(preRender);
-if getpref('docker','verbosity',0) > 0
-    fprintf("Complete render took: %6.2d seconds.", elapsedTime);
+if renderDocker.verbosity
+    fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 end
 
 % The user wants the dockerWrapper.
@@ -284,15 +286,20 @@ if nargout > 2, thisD = renderDocker; end
 
 %% Check the returned rendering image.
 
+
 if status
     warning('Docker did not run correctly');
+    
     % The status may contain a useful error message that we should
     % look up.  The ones we understand should offer help here.
     fprintf('Status:\n'); disp(status);
     fprintf('Result:\n'); disp(result);
+    ieObject = [];
+    
+    % Did not work, so we might as well return.
+    return;
 end
 
-fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
 
 % not sure what we should return with 'all' but this is a start
 % as I'm not sure coordinates is working

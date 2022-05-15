@@ -81,6 +81,8 @@ else
     [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
 end
 
+if isempty(obj),  error('Render failed.'); end
+
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
