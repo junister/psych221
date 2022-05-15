@@ -119,37 +119,41 @@ classdef dockerWrapper < handle
     %
 
     properties
+
+        % NOTE: Any property defaults set here should be ones we always
+        % want. For ones the user might over-ride, just declare the
+        % property here, and set the default value in the Constructor.
+
         dockerContainerName = '';
         dockerContainerID = '';
 
         % these are local things
         % default image is cpu on x64 architecture
-        dockerImageName   =  getpref('docker','localImage','');
+        dockerImageName;
         dockerImageRender = '';        % set based on local machine
         dockerContainerType = 'linux'; % default, even on Windows
 
-        gpuRendering = getpref('docker', 'gpuRendering', true); % the default
-        whichGPU = getpref('docker','whichGPU',0); % use any
+        gpuRendering; 
+        whichGPU;
         
         % these relate to remote/server rendering
-        remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
-        remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
-        remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
-        remoteImageTag = 'latest';
-        remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+        remoteMachine; % for syncing the data
+        remoteUser; % use for rsync & ssh/docker
+        remoteImage; % use to specify a GPU-specific image on server
+        remoteImageTag;
+        remoteRoot; % we need to know where to map on the remote system
         
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc)
-        renderContext = getpref('docker','renderContext','');
+        renderContext;
         localRoot     = ''; % dockerWrapper.defaultLocalRoot();
 
         workingDirectory = '';
         localVolumePath  = '';
         targetVolumePath = '';
-        % This is set for muxreconrt, but when we are local perhaps it
-        % should be something else.
-        relativeScenePath = '/iset/iset3d-v4/local/'; % essentially static
+
+        relativeScenePath;
 
         dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
         dockerFlags = '';
@@ -158,11 +162,10 @@ classdef dockerWrapper < handle
         outputFile = 'pbrt_output.exr';
         outputFilePrefix = '--outfile';
 
-        localRender = getpref('docker','localRender',false);
-        localImageTag = 'latest';
+        localRender;
+        localImageTag;
 
-        verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
-        setPropertyDefaults = true;
+        verbosity;  % 0,1 or 2.  How much to print.  Might change
     end
 
     methods
@@ -170,8 +173,31 @@ classdef dockerWrapper < handle
         % Constructor method
         function aDocker = dockerWrapper(varargin)
             %Docker Construct an instance of this class
-            %   Detailed explanation goes here
-            % default for flags
+            %   NOTE: All dynamic properties should be initialized here!
+            %         If they are initialized in properties they get messed
+            %         up.
+            aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
+            aDocker.dockerImageName   =  getpref('docker','localImage','');
+
+            aDocker.whichGPU = getpref('docker','whichGPU',0); % -1 is use any
+
+            % these relate to remote/server rendering
+            aDocker.remoteMachine  = getpref('docker','remoteMachine',''); % for syncing the data
+            aDocker.remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
+            aDocker.remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
+            aDocker.remoteImageTag = 'latest';
+            aDocker.remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+
+            aDocker.renderContext = getpref('docker','renderContext','');
+            aDocker.relativeScenePath = '/iset/iset3d-v4/local/';
+        
+            aDocker.localRender = getpref('docker','localRender',false);
+            aDocker.localImageTag = 'latest';
+            aDocker.localRoot = getpref('docker','localRoot',false);
+
+            aDocker.verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
+
+        % default for flags
             if ispc
                 aDocker.dockerFlags = '-i --rm';
             else
