@@ -172,10 +172,13 @@ classdef dockerWrapper < handle
 
         % Constructor method
         function aDocker = dockerWrapper(varargin)
-            %Docker Construct an instance of this class
-            %   NOTE: All dynamic properties should be initialized here!
-            %         If they are initialized in properties they get messed
-            %         up.
+            %Docker Construct an instance of the dockerWrapper class
+            %
+            %  All dynamic properties should be initialized here!
+            %  If they are initialized in properties they get messed up
+            %  (DJC).
+            %
+
             aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
             aDocker.dockerImageName   =  getpref('docker','localImage','');
 
@@ -211,12 +214,18 @@ classdef dockerWrapper < handle
                     aDocker.(varargin{ii}) = varargin{ii+1};
                 end
             end
+
             if isempty(aDocker.dockerImageName)
+                % I think this is the docker image if we run locally.  If
+                % the local machine does not have a local Nvidia GPU, we
+                % should not try to set with 'GPU'.
+                %
                 if aDocker.gpuRendering
                     aDocker.dockerImageName = aDocker.getPBRTImage('GPU');
                 else
                     aDocker.dockerImageName = aDocker.getPBRTImage('CPU');
                 end
+                % Check for local consistency here.
             end
 
         end
@@ -556,6 +565,11 @@ classdef dockerWrapper < handle
         function dockerImageName = getPBRTImage(obj, processorType)
             % Returns the name of the docker image, both for the case of
             % local and remote execution.
+            %
+            % I think this logic is broken (BW).  
+            % The problem on my machine is that dockerImageName is not
+            % correct.  That probably happens on dockerWrapper constructor
+            % call.
 
             if ~obj.localRender
                 % We are running remotely, we try to figure out which
