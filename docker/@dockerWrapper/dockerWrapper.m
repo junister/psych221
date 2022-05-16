@@ -129,6 +129,28 @@ classdef dockerWrapper < handle
         inputFile = '';
         outputFile = 'pbrt_output.exr';
         outputFilePrefix = '--outfile';
+
+        % The containers (which are the running images) always mount
+        % piRootPath/local onto /iset/iset3d-v4/local.
+        %
+        % We then have to execute on these containers on specific
+        % scene.  As an example, suppose you have the assets on your
+        % computer in
+        %
+        %    /Users/me/Matlab/iset3d-v4/local/thisScene
+        %
+        % This string should be
+        %
+        %   'thisScene'
+        %
+        %   If your assets are in
+        %
+        %   /Users/me/Matlab/isetauto/local/thisScene 
+        %
+        % that would be bad.
+        %
+        relativeScenePath;
+
     end
 
     properties (SetAccess = protected)
@@ -169,7 +191,6 @@ classdef dockerWrapper < handle
         localVolumePath  = '';
         targetVolumePath = '';
 
-        relativeScenePath;
 
         localRender;
         localImageTag;
@@ -460,9 +481,12 @@ classdef dockerWrapper < handle
             % One tricky bit is that on Windows, the mount point is the
             % remote server path, but later we need to use the WSL path for rsync
             %
-            % mountPoint is the host fs for iset3d-v4/local
-            % mountData is the container path for iset3d-v4/local (normally
-            % under /iset)
+            % mountPoint from the local host is piRootPath/local
+            % mountData is the path within the container to the data,
+            % normally for /iset/iset3d-v4/local
+            %
+            % relativeScenePath stores the name of the subdirectory,
+            % where the scene assets are contained.
             %
             if obj.localRender
                 mountPoint = fullfile(piRootPath(), 'local/');
@@ -644,6 +668,10 @@ classdef dockerWrapper < handle
                         end
                     elseif isequal(processorType, 'CPU')
                         obj.gpuRendering = false;
+
+                        % the localImage method examines the local CPU
+                        % architecture and chooses the image for this
+                        % local machine.
                         dockerImageName = dockerWrapper.localImage;
                     end
                 end
