@@ -15,37 +15,47 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 %
 % Zhenyi, 2021
+% dockerWrapper Support, D. Cardinal, 2022
+%
 %%
-persistent ourDocker;
+persistent imgDocker;
 [indir, fname,~] = fileparts(inputFile);
 
 dockerimage = dockerWrapper.localImage();
 
-basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
-
-cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
 
 if ~ispc
+    basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
+    cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
     dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
     [status,result] = system(dockercmd);
 else
+    basecmd = 'docker run -i --volume="%s":"%s" %s %s';
+    cmd = ['imgtool convert --exr2bin ',channelname, ' ', dockerWrapper.pathToLinux(inputFile)];
+    dockercmd = sprintf(basecmd, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
+    [status,result] = system(dockercmd);
+end
+    % This seems overly complex. See if I can simplify...
+    %{
+    % create a new docker container for imgtool if needed
+    if isempty(imgDocker), imgDocker = dockerWrapper('command',  ['imgtool convert --exr2bin ', channelname, ' ', dockerWrapper.pathToLinux(inputFile) ], ...
+        'dockerImageName', dockerimage, 'localVolumePath', indir, 'targetVolumePath', indir, ...
+        'inputFile', inputFile, 'outputFile', '', 'localRender', true);
+    else
+        % Do we need to change Volumepaths here? I would think they'd have
+        % to be the same if they are the mount points (djc)
+        imgDocker.inputFile = inputFile;
+        imgDocker.command = ['imgtool convert --exr2bin ', channelname, ' ', dockerWrapper.pathToLinux(inputFile) ];
 
-    if isempty(ourDocker), ourDocker = dockerWrapper(); end
+    end
     if getpref('docker','verbosity', 1) > 0
         stdout = '';
     else
         stdout = ' > /dev/null ';
     end
-    ourDocker.command = ['imgtool convert --exr2bin ' channelname];
-    ourDocker.dockerImageName = dockerimage;
-    ourDocker.localVolumePath = indir;
-    ourDocker.targetVolumePath = indir;
-    ourDocker.inputFile = inputFile;
-    ourDocker.outputFile = ''; % imgtool uses a default
-    ourDocker.outputFilePrefix = '';
-
-    [status, result] = ourDocker.runCommand();
+    [status, result] = imgDocker.runCommand();
 end
+    %}
 
 if status
     disp(result);

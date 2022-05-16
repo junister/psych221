@@ -12,7 +12,12 @@ classdef dockerWrapper < handle
     %   [FUTURE, TBD:]
     %   * your local computer with PBRT installed and no docker at all.
     %
-    % The source code is under active development (May 1, 2022).
+    % The source code is under active development (May, 2022).
+    %
+    %
+    % USAGE NOTE: To render on multiple servers or processors, create a new
+    % instance of dockerWrapper for each. Once an instance is created,
+    % it is bound to a specific Docker image and compute context.
     %
     % The dockerWrapper class is used by piWRS() and piRender(). These
     % functions specify the docker images that run either locally or
@@ -118,11 +123,22 @@ classdef dockerWrapper < handle
     %    ourDocker = dockerWrapper('gpuRendering', false);
     %
 
-    properties
+    properties (SetAccess = public)
+        command = 'pbrt';
+
+        inputFile = '';
+        outputFile = 'pbrt_output.exr';
+        outputFilePrefix = '--outfile';
+    end
+
+    properties (SetAccess = protected)
 
         % NOTE: Any property defaults set here should be ones we always
         % want. For ones the user might over-ride, just declare the
         % property here, and set the default value in the Constructor.
+
+        dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
+        dockerFlags = '';
 
         dockerContainerName = '';
         dockerContainerID = '';
@@ -154,13 +170,6 @@ classdef dockerWrapper < handle
         targetVolumePath = '';
 
         relativeScenePath;
-
-        dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
-        dockerFlags = '';
-        command = 'pbrt';
-        inputFile = '';
-        outputFile = 'pbrt_output.exr';
-        outputFilePrefix = '--outfile';
 
         localRender;
         localImageTag;
