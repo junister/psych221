@@ -168,22 +168,21 @@ renderType       = p.Results.rendertype;
 persistent renderDocker;
 
 % If the user has sent in a dockerWrapper (ourDocker) we use it
-if ~isempty(ourDocker),        renderDocker = ourDocker;
-elseif isempty(renderDocker),  renderDocker = dockerWrapper;
+if ~isempty(ourDocker),   renderDocker = ourDocker;
+else,                     renderDocker = dockerWrapper;
 end
 
 if renderDocker.localRender
     % It is local so use this local rendering
     renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
-    % renderDocker.remoteMachine = '';
+    renderDocker.remoteMachine = '';
 
     % If the local docker is a GPU type, OK.  Otherwise, set gpuRendering
     % false.
-    %
-    %     str = renderDocker.getPBRTImage('GPU');
-    %     if contains(str,'gpu'), renderDocker.gpuRendering = true;
-    %     else, renderDocker.gpuRendering = false;
-    %     end
+    str = renderDocker.getPBRTImage('GPU');
+    if contains(str,'gpu'), renderDocker.gpuRendering = true;
+    else, renderDocker.gpuRendering = false;
+    end
 
 end
 
