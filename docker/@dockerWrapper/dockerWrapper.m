@@ -124,10 +124,19 @@ classdef dockerWrapper < handle
     %
 
     properties (SetAccess = public)
-        command = 'pbrt';
+
+        % by default we assume our container is built to run pbrt
+        % this gets changed to run imgtool or assimp, etc.
+        command = 'pbrt'; 
 
         inputFile = '';
+
+        % This should be over-ridden with the appropriate filenams
+        % for example: <scene_name>.exr
         outputFile = 'pbrt_output.exr';
+
+        % This is the flag pbrt needs to specify it's output
+        % Can be over-ridden if the command takes a different output flag
         outputFilePrefix = '--outfile';
     end
 
@@ -147,8 +156,11 @@ classdef dockerWrapper < handle
         % default image is cpu on x64 architecture
         dockerImageName;
         dockerImageRender = '';        % set based on local machine
+
+        % Right now pbrt only supports Linux containers
         dockerContainerType = 'linux'; % default, even on Windows
 
+        % The defaults for these are set in the constructor
         gpuRendering; 
         whichGPU;
         
@@ -156,12 +168,16 @@ classdef dockerWrapper < handle
         remoteMachine; % for syncing the data
         remoteUser; % use for rsync & ssh/docker
         remoteImage; % use to specify a GPU-specific image on server
+        
+        % By default we assume that we want :latest, but :stable is
+        % typically also an option incase something is broken
         remoteImageTag;
         remoteRoot; % we need to know where to map on the remote system
         
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
-        % gray, etc)
+        % gray, etc). Contexts are created via docker on the local system,
+        % and if needed one is created by default
         renderContext;
         localRoot     = ''; % dockerWrapper.defaultLocalRoot();
 
