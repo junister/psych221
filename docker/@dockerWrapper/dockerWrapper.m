@@ -1,8 +1,10 @@
 classdef dockerWrapper < handle
     %DOCKERWRAPPER A class to manage ISET3d-v4 rendering
     %
-    % This class manages how we run PBRT - mainly in docker containers - in
-    % ISET3d-v4. At present, we manage these cases:
+    % D.Cardinal -- Stanford University -- 2021-2022
+    %
+    % This class manages how we run PBRT and other tools in docker containers
+    % in ISET3d. At present, we manage these cases:
     %
     %   * a remote server with a GPU,
     %   * a remote server with a CPU,
@@ -12,7 +14,7 @@ classdef dockerWrapper < handle
     %   [FUTURE, TBD:]
     %   * your local computer with PBRT installed and no docker at all.
     %
-    % The source code is under active development (May, 2022).
+    % This source code is under active development (May, 2022).
     %
     %
     % USAGE NOTE: To render on multiple servers or processors, create a new
@@ -55,10 +57,10 @@ classdef dockerWrapper < handle
     %
     %   getpref('iset3d',<paramName>,[default value]);
     %
-    % Required parameters
+    % Parameters that need to be passed in or set by default:
     %
-    %   remoteMachine -- name of remote machine to render on
-    %   remoteImage   -- GPU-specific docker image on remote machine
+    %   remoteMachine -- (if any) name of remote machine to render on
+    %   remoteImage   -- (if any) GPU-specific docker image on remote machine
     %   gpuRendering    -- set to true to force GPU rendering
     %                   -- set to false to force CPU rendering
     %                   -- by default will use a local GPU if available
@@ -103,7 +105,6 @@ classdef dockerWrapper < handle
     %   as an attempt to resolve at least some of the myriad platform
     %   issues
     %
-    % Original by David Cardinal, Stanford University, September, 2021.
     %
     % Examples (needs updates)
     %
