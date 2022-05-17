@@ -85,9 +85,6 @@ classdef dockerWrapper < handle
     %  localImageTag  -- defaults to :latest
     %  localRoot   -- (only for WSL) the /mnt path to the Windows piRoot
     %
-    %  EXPERIMENTAL: CPU image on remote machine for offloading large
-    %                CPU-only renders
-    %
     % Additional NOTES
     %
     % 1. To get rid of any stranded local containers, run on the
@@ -114,14 +111,6 @@ classdef dockerWrapper < handle
     %    <suitable Docker image>, 'remoteRoot','/home/<username>/', ...
     %     'remoteMachine', '<DNS resolvable host>', ...
     %     'remoteUser', '<remote uname>', 'localRoot', <'/mnt/c'>, 'whichGPU', <0>);
-    %
-    % NOTE: LEGACY Support -- For ease of use you can simply do:
-    %   setpref('docker', 'renderString', <same arguments>)
-    %     and any new docker containers will use that.
-    %
-    %   2. Example of local CPU rendering:
-    %
-    %    ourDocker = dockerWrapper('gpuRendering', false);
     %
 
     properties (SetAccess = public)
