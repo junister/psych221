@@ -171,20 +171,6 @@ if ~isempty(ourDocker),   renderDocker = ourDocker;
 else
     renderDocker = dockerWrapper();
 end
-%{
-if renderDocker.localRender
-    % It is local so use this local rendering
-    renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
-    renderDocker.remoteMachine = '';
-
-    if renderDocker.gpuRendering 
-        str = renderDocker.getPBRTImage('GPU');
-    else
-        str = renderDocker.getPBRTImage('CPU');
-    end
-
-end
-%}
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 
@@ -198,15 +184,6 @@ end
 pbrtFile = thisR.outputFile;
 
 %% Call the Docker for rendering
-
-% This should all go through the dockerWrapper class
-% That requires dealing with:
-%  -- container has a base dir of local, not the scene folder
-%  -- any support for making sure various directories exist have to deal
-%  with that
-%  -- When pbrt is launched it needs to know how to navigate to the
-%  approprite scene
-%
 
 %% Build the docker command
 
@@ -266,10 +243,9 @@ else  % Linux & Mac
     end
 end
 
-% renderDocker is a dockerWrapper and its parameters.  The parameters
+% renderDocker is a dockerWrapper object.  The parameters
 % control on which machine and with what parameters the docker
-% container is invoked.  I am not sure why it is a persistent
-% variable (BW).
+% image/containter is invoked.
 preRender = tic;
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 

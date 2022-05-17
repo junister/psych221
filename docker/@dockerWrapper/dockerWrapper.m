@@ -207,7 +207,7 @@ classdef dockerWrapper < handle
             % You can run scenes from other locations beside
             % iset3d-v4/local by setting this.
             aDocker.localVolumePath = getpref('docker','localVolumePath',fullfile(piRootPath(), 'local/'));
-            aDocker.renderContext = getpref('docker','renderContext','');
+            aDocker.renderContext = getpref('docker','renderContext','remote-mux');
             aDocker.relativeScenePath = '/iset/iset3d-v4/local/';
         
             aDocker.localRender = getpref('docker','localRender',false);
@@ -492,8 +492,8 @@ classdef dockerWrapper < handle
                 % probably static var should be set from prefs
                 % automatically...
                 if isempty(obj.staticVar('get','renderContext'))
-                    contextFlag = [' --context ' getpref('docker','renderContext','')];
-                    obj.staticVar('set','renderContext',getpref('docker','renderContext'));
+                    contextFlag = [' --context ' getpref('docker','renderContext','remote-mux')];
+                    obj.staticVar('set','renderContext',getpref('docker','renderContext','remote-mux'));
                 else
                     contextFlag = [' --context ' obj.staticVar('get','renderContext')];
                 end
@@ -533,8 +533,8 @@ classdef dockerWrapper < handle
                     end
                     
                     % If there is a render context, get it. 
-                    if ~isempty(dockerWrapper.staticVar('get','renderContext'))
-                        cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
+                    if ~isempty(obj.renderContext)
+                        cFlag = ['--context ' obj.renderContext];
                     else
                         cFlag = '';
                     end
@@ -593,8 +593,8 @@ classdef dockerWrapper < handle
                     return;
                 end
             else
-                % If we are here, we are running locally.
-                if ~isempty(obj.localImageName)
+                % If we are here, we are running locally or remote CPU.
+                if obj.localRender && ~isempty(obj.localImageName)
                     % If this is set, use it.                    
                     useDockerImage = obj.localImageName;
                     return;
@@ -644,8 +644,16 @@ classdef dockerWrapper < handle
                             useDockerImage = dockerWrapper.localImage();
                         end
                     elseif isequal(processorType, 'CPU')
-                        % localImage is where we sort out x86 v. ARM
-                        useDockerImage = dockerWrapper.localImage;
+
+                        if obj.localRender
+                            % localImage is where we sort out x86 v. ARM
+                            useDockerImage = dockerWrapper.localImage;
+                        else
+                            % remote CPU!!
+                            % What if it has a different architecture?
+                            useDockerImage = obj.remoteImage;
+                            % need to set context here
+                        end
                     end
                 end
             end
