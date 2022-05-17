@@ -25,7 +25,7 @@ function rgb = piColorPick(color,varargin)
 %   piMaterialAssign
 %
 %{
-for ii = 1:50
+for ii = 1:100
 color = piColorPick('random');
 x = [0 1 1 0];
 y = [ii-1 ii-1 ii ii];
@@ -66,9 +66,9 @@ function rgb = colorswitch(color)
 switch color
     case 'white'
 
-        colorList = ['efede8 f5f5ff fdfef6 fcfcfc f1f3f1'];        
+        colorList = 'efede8 f5f5ff fdfef6 fcfcfc f1f3f1';        
     case 'black'
-        colorList = ['010101 010203 100c08 141414'];
+        colorList = '010101 010203 100c08 141414';
     case 'red'
         % https://encycolorpedia.com/cd4137 
         colorList = ['b32824 bb302a c43931 cd4137 ' ...
@@ -76,7 +76,7 @@ switch color
             'a6322a d03e35 cd3f33'];
     case 'blue'
         colorList = ['003bda 0040e1 0046e8 0e4bef ' ...
-            '2450f6 3356fd 3f5cff 1077d1 1a3bd8 '];
+            '2450f6 3356fd 3f5cff 1077d1 1a3bd8'];
 
     case 'green'
         colorList = ['229658 30a161 3dab6b 49b675 ' ...
@@ -102,6 +102,7 @@ switch color
 end
 
 thisColor = getRandomColor(colorList);
+
 rgb = hex2rgb(thisColor);
 
 
