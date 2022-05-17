@@ -128,7 +128,7 @@ fprintf("Omni:       %5.1f seconds.\n", getpref('ISET3d','tvomniTime'));
 fprintf("Assets:     %5.1f seconds.\n", getpref('ISET3d','tvassetsTime'));
 fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
 fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
-fprintf("PBRT:       %5.1f seconds.\n", getpref('ISET3d','tvpbrtTime'));
+% fprintf("PBRT:       %5.1f seconds.\n", getpref('ISET3d','tvpbrtTime'));
 fprintf("Cam Motion: %5.1f seconds.\n", getpref('ISET3d','tvcammotionTime'));
 fprintf("Cam Pos.:   %5.1f seconds.\n", getpref('ISET3d','tvcampositionTime'));
 fprintf("Chess Set:  %5.1f seconds.\n", getpref('ISET3d','tvchessTime'));
