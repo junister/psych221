@@ -165,26 +165,26 @@ wave             = p.Results.wave;
 renderType       = p.Results.rendertype;
 
 %% Set up the dockerWrapper
-persistent renderDocker;
 
 % If the user has sent in a dockerWrapper (ourDocker) we use it
 if ~isempty(ourDocker),   renderDocker = ourDocker;
-else,                     renderDocker = dockerWrapper;
+else
+    renderDocker = dockerWrapper();
 end
-
+%{
 if renderDocker.localRender
     % It is local so use this local rendering
     renderDocker.relativeScenePath = fileparts(thisR.get('output dir'));
     renderDocker.remoteMachine = '';
 
-    % If the local docker is a GPU type, OK.  Otherwise, set gpuRendering
-    % false.
-    str = renderDocker.getPBRTImage('GPU');
-    if contains(str,'gpu'), renderDocker.gpuRendering = true;
-    else, renderDocker.gpuRendering = false;
+    if renderDocker.gpuRendering 
+        str = renderDocker.getPBRTImage('GPU');
+    else
+        str = renderDocker.getPBRTImage('CPU');
     end
 
 end
+%}
 
 %% We have a radiance recipe and we have written the pbrt radiance file
 

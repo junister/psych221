@@ -3,12 +3,12 @@ classdef dockerWrapper < handle
     %
     % D.Cardinal -- Stanford University -- 2021-2022
     %
-    % This class manages how we run PBRT and other tools in docker containers
-    % in ISET3d. At present, we manage these cases:
+    % This class manages how we run PBRT and other tools in Linux
+    % docker containers in ISET3d. At present, we manage these cases:
     %
-    %   * a remote server with a GPU,
-    %   * a remote server with a CPU,
-    %   * your local computer with a GPU,
+    %   * a remote (Linux) server with a GPU,
+    %   * a remote (Linux) server with a CPU,
+    %   * your local (Linux/Mac) computer with a GPU,
     %   * your local computer with a CPU, and
 
     %   [FUTURE, TBD:]
@@ -37,7 +37,7 @@ classdef dockerWrapper < handle
     % machine as a persistent, named, container. Calls to piRender()
     % use dockerWrapper to store the name and status of the remote
     % container.  By running in a persistent container, we avoid the
-    % startup overhead (which is more than 20 seconds).
+    % startup overhead (which is more than 20 seconds for a GPU image).
     %
     % Because we often use the same remote machine and GPU across
     % multiple days/sessions, the default parameters for docker
@@ -46,10 +46,10 @@ classdef dockerWrapper < handle
     % using the Matlab setpref/getpref commands.
     %    
     % For the moment, we are storing these parameters within the
-    % string 'docker', though we are discussing storing them within
+    % key string 'docker', though we are discussing storing them within
     % sthe string 'iset3d'.
     %
-    % Default parameters will also be retrieved from prefs using
+    % Default parameters can be retrieved from prefs using
     %
     %   getpref('docker',<paramName>,[default value]); 
     % 
@@ -85,6 +85,8 @@ classdef dockerWrapper < handle
     %  localImageTag  -- defaults to :latest
     %  localRoot   -- (only for WSL) the /mnt path to the Windows piRoot
     %
+    %  localVolumePath -- For running scenes outside if /iset3d-v4/local
+    %
     % Additional NOTES
     %
     % 1. To get rid of any stranded local containers, run on the
@@ -97,10 +99,6 @@ classdef dockerWrapper < handle
     % server -- in the event that Matlab doesn't shut down properly.
     % Those can be pruned by running the same command on the server.
     % (or wait for DJC to prune them on the server every few days:))
-    %
-    % TODO: Potenially unified way to call docker containers for iset
-    %   as an attempt to resolve at least some of the myriad platform
-    %   issues
     %
     %
     % Examples (needs updates)
@@ -116,7 +114,7 @@ classdef dockerWrapper < handle
     properties (SetAccess = public)
 
         % by default we assume our container is built to run pbrt
-        % this gets changed to run imgtool or assimp, etc.
+        % this gets changed to run imgtool, assimp, etc.
         command = 'pbrt'; 
 
         inputFile = '';
@@ -144,11 +142,11 @@ classdef dockerWrapper < handle
 
         % these are local things
         % default image is cpu on x64 architecture
-        dockerImageName;
+        localImageName;
         dockerImageRender = '';        % set based on local machine
 
         % Right now pbrt only supports Linux containers
-        dockerContainerType = 'linux'; % default, even on Windows
+        containerType = 'linux'; % default, even on Windows
 
         % The defaults for these are set in the constructor
         gpuRendering; 
@@ -195,7 +193,7 @@ classdef dockerWrapper < handle
             %
 
             aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
-            aDocker.dockerImageName   =  getpref('docker','localImage','');
+            aDocker.localImageName   =  getpref('docker','localImage','');
 
             aDocker.whichGPU = getpref('docker','whichGPU',0); % -1 is use any
 
@@ -206,12 +204,15 @@ classdef dockerWrapper < handle
             aDocker.remoteImageTag = 'latest';
             aDocker.remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
 
+            % You can run scenes from other locations beside
+            % iset3d-v4/local by setting this.
+            aDocker.localVolumePath = getpref('docker','localVolumePath',fullfile(piRootPath(), 'local/'));
             aDocker.renderContext = getpref('docker','renderContext','');
             aDocker.relativeScenePath = '/iset/iset3d-v4/local/';
         
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
-            aDocker.localRoot = getpref('docker','localRoot',false);
+            aDocker.localRoot = getpref('docker','localRoot','');
 
             aDocker.verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
 
@@ -230,17 +231,13 @@ classdef dockerWrapper < handle
                 end
             end
 
-            if isempty(aDocker.dockerImageName)
-                % I think this is the docker image if we run locally.  If
-                % the local machine does not have a local Nvidia GPU, we
-                % should not try to set with 'GPU'.
+            if isempty(aDocker.localImageName)
                 %
                 if aDocker.gpuRendering
-                    aDocker.dockerImageName = aDocker.getPBRTImage('GPU');
+                    aDocker.localImageName = aDocker.getPBRTImage('GPU');
                 else
-                    aDocker.dockerImageName = aDocker.getPBRTImage('CPU');
+                    aDocker.localImageName = aDocker.getPBRTImage('CPU');
                 end
-                % Check for local consistency here.
             end
 
         end
@@ -306,6 +303,8 @@ classdef dockerWrapper < handle
             useServer = 'muxreconrt.stanford.edu';
         end
 
+        % This is used for wsl commands under Windows, which need
+        % to know where to find the drive root. 
         function localRoot = defaultLocalRoot()
             if ispc
                 localRoot = getpref('docker','localRoot','/mnt/c'); % Windows default            
@@ -387,9 +386,7 @@ classdef dockerWrapper < handle
         end
 
         function output = pathToLinux(inputPath)
-            % Can we use fullfile and fileparts instead of requiring this?
-            % (BW) 
-            % Unfortunately, not. The problem is that on Windows the Docker
+            % On Windows the Docker
             % paths are Linux-format, so the native fullfile and fileparts
             % don't work right. 
             if ispc
@@ -466,24 +463,24 @@ classdef dockerWrapper < handle
             % One tricky bit is that on Windows, the mount point is the
             % remote server path, but later we need to use the WSL path for rsync
             %
-            % mountPoint is the host fs for iset3d-v4/local
-            % mountData is the container path for iset3d-v4/local (normally
+            % hostLocalPath is the host fs for <iset3d-v4>/local
+            % containerLocalPath is the container path for <iset3d-v4>/local (normally
             % under /iset)
             %
             if obj.localRender
-                mountPoint = fullfile(piRootPath(), 'local/');
+                hostLocalPath = obj.localVolumePath;
             else
                 if ~isempty(obj.remoteRoot)
-                    mountPoint = [obj.remoteRoot obj.relativeScenePath];
+                    hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
                 elseif ~isempty(obj.remoteMachine)
-                    mountPoint = [obj.remoteRoot obj.relativeScenePath];
+                    hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
                     warning("Remote mount point for Docker doesn't seem right!");
                 end
             end
 
-            mountData = dockerWrapper.pathToLinux(obj.relativeScenePath);
+            containerLocalPath = dockerWrapper.pathToLinux(obj.relativeScenePath);
 
-            volumeMap = sprintf("-v %s:%s", mountPoint, mountData);
+            volumeMap = sprintf("-v %s:%s", hostLocalPath, containerLocalPath);
             placeholderCommand = 'bash';
 
             % We do not use context for local docker containers
@@ -577,33 +574,29 @@ classdef dockerWrapper < handle
             end
         end
 
-        function dockerImageName = getPBRTImage(obj, processorType)
+        function useDockerImage = getPBRTImage(obj, processorType)
             % Returns the name of the docker image, both for the case of
             % local and remote execution.
             %
-            % I think this logic is broken (BW).  
-            % The problem on my machine is that dockerImageName is not
-            % correct.  That probably happens on dockerWrapper constructor
-            % call.
 
-            if ~obj.localRender
-                % We are running remotely, we try to figure out which
+            if ~obj.localRender && obj.gpuRendering
+                % We are running remotely and want GPU, we try to figure out which
                 % docker image to use.
                 if ~isempty(obj.remoteImage)
                     % If a remoteImage is already set, that is what we use
-                    dockerImageName = obj.remoteImage;
+                    useDockerImage = obj.remoteImage;
                     return;
                 else
                     % Try to figure it out and return it.
                     obj.getRenderer;
-                    dockerImageName = obj.remoteImage;
+                    useDockerImage = obj.remoteImage;
                     return;
                 end
             else
                 % If we are here, we are running locally.
-                if ~isempty(obj.dockerImageName)
+                if ~isempty(obj.localImageName)
                     % If this is set, use it.                    
-                    dockerImageName = obj.dockerImageName;
+                    useDockerImage = obj.localImageName;
                     return;
                 else
                     % Running locally and no advice from the user.
@@ -632,25 +625,27 @@ classdef dockerWrapper < handle
 
                             switch gpuModels{1} % find the model of our GPU
                                 case {'teslat4', 'quadrot2000'}
-                                    dockerImageName = 'camerasimulation/pbrt-v4-gpu-t4';
+                                    useDockerImage = 'camerasimulation/pbrt-v4-gpu-t4';
                                 case {'geforcertx3070', 'nvidiageforcertx3070'}
-                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                                 case {'geforcertx3090', 'nvidiageforcertx3090'}
-                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                                 case {'geforcertx2080', 'nvidiageforcertx2080', ...
                                         'geforcertx2080ti', 'nvidiageforcertx2080ti'}
-                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-volta-mux';
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                                 case {'geforcegtx1080',  'nvidiageforcegtx1080'}
-                                    dockerImageName = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-pascal-shared';
                                 otherwise
                                     warning('No compatible docker image for GPU model: %s, running on CPU', GPUModel);
                                     obj.gpuRendering = false;
-                                    dockerImageName = dockerWrapper.localImage();
+                                    useDockerImage = dockerWrapper.localImage();
                             end
+                        else
+                            useDockerImage = dockerWrapper.localImage();
                         end
                     elseif isequal(processorType, 'CPU')
-                        obj.gpuRendering = false;
-                        dockerImageName = dockerWrapper.localImage;
+                        % localImage is where we sort out x86 v. ARM
+                        useDockerImage = dockerWrapper.localImage;
                     end
                 end
             end
