@@ -155,7 +155,7 @@ p.addParameter('wave', 400:10:700, @isnumeric);
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 
 % If this is not set, we use thisR.what is in the recipe
-p.addParameter('rendertype', [],@iscell);  
+p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 
 % If you would to render on your local machine, set this to true.  And
 % make sure that 'ourdocker' is set to the container you want to run.
@@ -169,6 +169,7 @@ meanIlluminance  = p.Results.meanilluminance;   % And this
 
 wave             = p.Results.wave;
 renderType       = p.Results.rendertype;
+if ischar(renderType), renderType = {renderType}; end
 
 %% Set up the dockerWrapper
 
@@ -190,7 +191,9 @@ if isempty(renderType)
         % and depth.
         renderType = {'radiance','depth'};
     end
-elseif isequal(renderType,'all')
+end
+
+if isequal(renderType{1},'all')
     % 'all' is an alias for this.  Not sure we should do it this way.
     renderType = {'radiance','depth'};
 end
