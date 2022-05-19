@@ -544,8 +544,9 @@ classdef dockerWrapper < handle
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-GPU', '')));
                     
                     if strlength(result) == 0 
-                        % Couldn't find it.  So try starting it. Not sure
-                        % why we would ever be here?
+                        % Couldn't find it.  So try starting it. 
+                        % This likely means it got killed, or the server
+                        % rebooted or similar
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
                     containerName = obj.staticVar('get','PBRT-GPU', '');
