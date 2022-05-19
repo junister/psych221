@@ -16,14 +16,15 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %  rendertype - Any combination of these strings
 %        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
 %
-%  oi/scene params - You can use parameters from oiSet or sceneSet that
-%            will be applied to the rendered ieObject prior to return.
+%  {oi or scene} params - You can choose parameters from sceneSet or oiSet
+%            to be applied to the rendered ieObject prior to return.
 %
 %  mean luminance -  If a scene, this mean luminance. If set to a negative
 %            value values returned by the renderer are used.
 %            (default 100 cd/m2)
 %
-%  mean illuminance per mm2 - default is 5 lux
+%  mean illuminance per m2 - If an oi, this is mean illuminance
+%            (default is 5 lux)
 %
 %  scalePupilArea
 %             - if true, scale the mean illuminance by the pupil
@@ -43,7 +44,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
 %
-% wave      -
+% wave      -   Adjust the wavelength sampling of the returne ieObject
 %
 % Returns
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -141,17 +142,20 @@ p.addRequired('recipe',@(x)(isequal(class(x),'recipe') || ischar(x)));
 
 varargin = ieParamFormat(varargin);
 p.addParameter('meanluminance',0,@isnumeric);
-p.addParameter('meanilluminancepermm2',[],@isnumeric);
+p.addParameter('meanilluminance',0,@isnumeric);
+
+% p.addParameter('meanilluminanceperm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
-% p.addParameter('reflectancerender', false, @islogical);
 p.addParameter('ourdocker','',@(x)(isa(x,'dockerWrapper')) || isempty(x));    % to specify a docker image
 
 % This passed to piDat2ISET, which is where we do the construction.
 p.addParameter('wave', 400:10:700, @isnumeric); 
 
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
-p.addParameter('rendertype', []); % if none we use what is in the recipe
+
+% If this is not set, we use thisR.what is in the recipe
+p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 
 % If you would to render on your local machine, set this to true.  And
 % make sure that 'ourdocker' is set to the container you want to run.
@@ -161,15 +165,37 @@ p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
 scalePupilArea   = p.Results.scalepupilarea;  % Fix this
 meanLuminance    = p.Results.meanluminance;   % And this
+meanIlluminance  = p.Results.meanilluminance;   % And this
+
 wave             = p.Results.wave;
 renderType       = p.Results.rendertype;
+if ischar(renderType), renderType = {renderType}; end
 
 %% Set up the dockerWrapper
 
 % If the user has sent in a dockerWrapper (ourDocker) we use it
 if ~isempty(ourDocker),   renderDocker = ourDocker;
-else
-    renderDocker = dockerWrapper();
+else, renderDocker = dockerWrapper();
+end
+
+%% Set up the rendering type.
+
+% TODO:  Perhaps we should reconsider how we specify rendertype in V4.
+% After this bit of logical, renderType is never empty.
+if isempty(renderType)
+    % If renderType is empty, we get the value as a metadata type.
+    if ~isempty(thisR.metadata)
+        renderType = thisR.metadata.rendertype;
+    else
+        % If renderType and thisR.metadata are both empty, we assume radiance
+        % and depth.
+        renderType = {'radiance','depth'};
+    end
+end
+
+if isequal(renderType{1},'all')
+    % 'all' is an alias for this.  Not sure we should do it this way.
+    renderType = {'radiance','depth'};
 end
 
 %% We have a radiance recipe and we have written the pbrt radiance file
@@ -182,8 +208,6 @@ if(~exist(outputFolder,'dir'))
     error('We need an absolute path for the working folder.');
 end
 pbrtFile = thisR.outputFile;
-
-%% Call the Docker for rendering
 
 %% Build the docker command
 
@@ -254,14 +278,13 @@ sprintf('%s\nOutput file:  %s\n',result,outF);
 
 elapsedTime = toc(preRender);
 if renderDocker.verbosity
-    fprintf('*** Rendering time for %s:  %.1f sec ***\n\n',currName,elapsedTime);
+    fprintf('*** Rendering time for this job (%s) was %.1f sec ***\n\n',currName,elapsedTime);
 end
 
 % The user wants the dockerWrapper.
 if nargout > 2, thisD = renderDocker; end
 
 %% Check the returned rendering image.
-
 
 if status
     warning('Docker did not run correctly');
@@ -276,25 +299,37 @@ if status
     return;
 end
 
-
-% not sure what we should return with 'all' but this is a start
-% as I'm not sure coordinates is working
-if isequal(renderType,'all')
-    renderType = {'radiance','depth'};
-end
-
 %% Convert the returned data to an ieObject
-if ~isempty(renderType)
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',renderType);
-elseif isempty(thisR.metadata)
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',{'radiance','depth'});
-else
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,'label',thisR.metadata.rendertype);
-end
 
-% Why are we updating the wave?  Is that ever needed?
+% renderType is a cell array, typically with radiance and depth. But
+% it can also be instance or material.  
+ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
+    'label',renderType, ...
+    'mean luminance',    meanLuminance, ...
+    'mean illuminance',  meanIlluminance, ...
+    'scale pupil area', scalePupilArea);
+
+%{
+% We have worked out renderType above.  So these statement should no
+% longer be necessary.
+if ~isempty(renderType)
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
+        'label',renderType);
+elseif isempty(renderType) && isempty(thisR.metadata)
+    % renderType is empty, but so is thisR.metadata. 
+    % So we treat this as a default radiance/depth case.
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
+        'label',{'radiance','depth'});
+else
+    % Finally, we are in a metadata type rendering situation.
+    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
+        'label',thisR.metadata.rendertype);
+end
+%}
+
+% If it is not a struct, it is metadata (instance, material, ....)
 if isstruct(ieObject)
-    % It might be helpful to preserve the recipe used
+    % It might be helpful to preserve the recipe used    
     ieObject.recipeUsed = thisR;
     
     switch ieObject.type
@@ -317,6 +352,8 @@ if isstruct(ieObject)
         otherwise
             error('Unknown struct type %s\n',ieObject.type);
     end
+end
+
 end
 
 

@@ -1,7 +1,9 @@
 function [ieObject, otherData] = piEXR2ISET(inputFile, varargin)
 % Read an exr-file rendered by PBRT, and return an ieObject or a
 % metadataMap
-%       ieObject =  piEXR2ISET(inputFile, varagin)
+%
+% Synopsis
+%  ieObject =  piEXR2ISET(inputFile, varagin)
 %
 % Brief description:
 %   We take an exr-file from pbrt as input and return an ISET object.
@@ -15,9 +17,13 @@ function [ieObject, otherData] = piEXR2ISET(inputFile, varargin)
 %   recipe           -  The recipe used to create the file
 %   mean luminance   -  Set the mean illuminance, if -1 do not scale values
 %                       returned by the renderer.
-%   mean luminance per mm2 - Set the mean illuminance per square pupil mm
+%   mean illuminance - Set the mean illuminance.  This value is either
+%   interpreted as the mean illuminance, or if scalePupilArea is set
+%   to true, then the value is interpreted as mean illuminance for a 1
+%   mm2 pupil.
+%
 %   scalePupilArea -  if true, we scale the mean illuminance by the pupil
-%                       diameter.
+%                     area.
 %
 % Output
 %   ieObject- if label is radiance with omni/realistic lens: optical image;
@@ -27,9 +33,11 @@ function [ieObject, otherData] = piEXR2ISET(inputFile, varargin)
 %   otherData- A place to put return values that don't (currently)
 %              fit neatly into a scene or oi object
 %
-% Zhenyi, 2021
+% Author: Zhenyi, 2021
 %
-%%
+% See also
+%   piRender
+
 %{
  opticalImage = piEXR2ISET('radiance.exr','label','radiance','recipe',thisR);
 %}
@@ -45,7 +53,7 @@ p.addParameter('recipe',[],@(x)(isequal(class(x),'recipe')));
 % p.addParameter('wave', 400:10:700, @isnumeric);
 
 % For the OI case
-p.addParameter('meanilluminancepermm2',5,@isnumeric);
+p.addParameter('meanilluminance',5,@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 
 % For the pinhole case
@@ -59,11 +67,11 @@ label       = p.Results.label;
 thisR       = p.Results.recipe;
 % verbosity   = p.Results.verbose;
 
-meanIlluminancepermm2 = p.Results.meanilluminancepermm2;
-scalePupilArea        = p.Results.scalepupilarea;
-meanLuminance         = p.Results.meanluminance;
-% wave                  = p.Results.wave;
-%%
+meanLuminance    = p.Results.meanluminance;
+meanIlluminance  = p.Results.meanilluminance;
+scalePupilArea   = p.Results.scalepupilarea;
+
+%%  Initialize for type of data return
 
 % initialize our return struct to empty
 otherData.materialID = [];
@@ -71,9 +79,7 @@ otherData.coordinates = [];
 otherData.instanceID = [];
 
 % we assume we can work through a cell array, but don't always get one
-if ~iscell(label)
-    label = {label};
-end
+if ~iscell(label), label = {label}; end
 
 % As written we have to get radiance or the routine fails
 if max(contains(label,'radiance')) == 0
@@ -134,16 +140,18 @@ for ii = 1:numel(label)
 
         case 'normal'
             % to add
+            disp('Normal NYI')
         case 'albedo'
             % to add; only support rgb for now, spectral albdeo needs to add;
-
+            disp('albedo NYI')
         case 'instance'
             % Should the instanceID be ieObject?
             otherData.instanceID = piReadEXR(inputFile, 'data type','instanceId');
     end
 end
 
-%%
+%% Build the returned ieObject
+
 % Create a name for the ISET object
 if ~isempty(thisR)
     pbrtFile   = thisR.get('output basename');
@@ -154,6 +162,7 @@ else
     cameraType = 'perspective';
 end
 
+% Depending on whether it is a scene or an OI ...
 switch lower(cameraType)
     case {'pinhole','spherical','perspective'}
         % A scene radiance, not an oi
@@ -167,36 +176,22 @@ switch lower(cameraType)
         end
 
         % In this case we cannot scale by the area because the aperture
-        % is a pinhole.  The ieObject is a scene.  So we use the mean
-        % luminance parameter (default is 100 cd/m2).
+        % is a pinhole.  The ieObject is a scene.  We used to set the mean
+        % luminance parameter to a default value of 100 cd/m2.  But
+        % lately, we just have it return an arbitrary mean.  Not sure
+        % what is best.  The user should definitely be checking.
         if meanLuminance > 0
             ieObject = sceneAdjustLuminance(ieObject,meanLuminance);
             ieObject = sceneSet(ieObject,'luminance',sceneCalculateLuminance(ieObject));
         end
         
-
-        %{
-        % Pinhole and perspective mean the same thing.
-        % In this camera type, we consider the data a scene.
-        ieObject = piSceneCreate(photons,'wavelength', data_wave);
-        ieObject = sceneSet(ieObject,'name',ieObjName);
-        if numel(data_wave)<31
-            % interpolate data for gpu rendering
-            ieObject = sceneInterpolateW(ieObject,wave);
-        end
-
-        if ~isempty(thisR)
-            % PBRT may have assigned a field of view
-            ieObject = sceneSet(ieObject,'fov',thisR.get('fov'));
-        end
-        %}
     case {'realisticdiffraction','realistic','omni','raytransfer'}
         % If we used a lens, the ieObject is an optical image (irradiance).
         %
         % We specify the mean illuminance of the OI mean illuminance
         % with respect to a 1 mm^2 aperture. That way, if we change
-        % the aperture, but nothing else, the illuminance level will
-        % scale correctly.
+        % the aperture, but nothing else, the illuminance level scales
+        % correctly.
 
         % We read the lens parameters differently for ray transfer type
         switch(cameraType)
@@ -261,9 +256,9 @@ switch lower(cameraType)
         if(scalePupilArea)
             aperture = oiGet(ieObject,'optics aperture diameter');
             lensArea = pi*(aperture*1e3/2)^2;
-            meanIlluminance = meanIlluminancepermm2*lensArea;
+            meanIlluminance = meanIlluminance*lensArea;
 
-            ieObject        = oiAdjustIlluminance(ieObject,meanIlluminance);
+            ieObject = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
         end
     case {'realisticeye'}
@@ -281,8 +276,8 @@ switch lower(cameraType)
         ieObject = oiSet(ieObject,'optics fnumber',fNumber);
 
         % Calculate and set the oi 'fov'.
-        fov = thisR.get('fov');
-        ieObject    = oiSet(ieObject,'fov',fov);
+        fov      = thisR.get('fov');
+        ieObject = oiSet(ieObject,'fov',fov);
 
         ieObject = oiSet(ieObject,'name',ieObjName);
 
@@ -295,12 +290,12 @@ switch lower(cameraType)
             warning('Render recipe is not specified.');
         end
 
-        % We set meanIlluminance per square millimeter of the lens
+        % We set mean Illuminance per square millimeter of the lens
         % aperture.
         if(scalePupilArea)
             aperture = oiGet(ieObject,'optics aperture diameter');
             lensArea = pi*(aperture*1e3/2)^2;
-            meanIlluminance = meanIlluminancepermm2*lensArea;
+            meanIlluminance = meanIlluminance*lensArea;
 
             ieObject        = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
@@ -308,8 +303,11 @@ switch lower(cameraType)
     otherwise
         error('Unknown optics type %s\n',cameraType);
 end
+
 if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
 end
+
 ieObject.metadata = otherData;
+
 end

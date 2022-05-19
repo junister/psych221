@@ -103,7 +103,7 @@ if ~obj.localRender
     if verbose > 1
         [status, result] = system(containerRender, '-echo');
         fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
-        fprintf(" With Result: %s", result);
+        fprintf('Returned parameter result is\n***\n%s', result);
     elseif verbose == 1
         [status, result] = system(containerRender);
         if status == 0
@@ -132,26 +132,10 @@ if ~obj.localRender
         end
     end
 else
-    % Running locally.
-    
-    % our output folder path starts from root, not from where the volume is
-    % mounted -- sort of weenie as this is the Windows path while on
-    % windows
-    %{
-    %
-       dockerCommand = 'docker run -ti --rm';
-       if ~isempty(outputFolder)
-            if ~exist(outputFolder,'dir'), error('Need full path to %s\n',outputFolder); end
-            dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, outputFolder);
-        end
-        dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, outputFolder);       
-        containerRender = sprintf('%s %s %s', dockerCommand, obj.dockerImageName, renderCommand);
-    %}
-    % {
-    % Output directory is always in Linux/docker land
+    % Running locally.        
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
-    %}
+    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+    
     tic;
     [status, result] = system(containerRender);
     if verbose > 0
