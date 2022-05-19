@@ -38,11 +38,17 @@ piWRS(thisR);
 
 % We need the V4 scenes now.  I think cardinal.stanford.edu has V3
 % scenes.
-fname = fullfile(piRootPath,'data','V4','web','kitchen','scene.pbrt');
+fname = fullfile(piRootPath,'data','V4','web','contemporary-bathroom','contemporary-bathroom.pbrt');
 exist(fname,'file')
-thisR = piRead(fname);
+thisR = piRead(fname,'exporter','PARSE');
 piWRS(thisR);
 
+% We need the V4 scenes now.  I think cardinal.stanford.edu has V3
+% scenes.
+fname = fullfile(piRootPath,'data','V4','web','kitchen','kitchen.pbrt');
+exist(fname,'file')
+thisR = piRead(fname,'exporter','Copy');
+piWRS(thisR);
 %{
 fname = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
 exist(fname,'file')

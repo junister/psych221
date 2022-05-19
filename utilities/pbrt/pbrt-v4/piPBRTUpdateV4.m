@@ -1,18 +1,20 @@
 function outFile = piPBRTUpdateV4(inFile,outFile)
-% Jpdate PBRT file with v3 format to v4 format
+% Update PBRT V3 file to V4 format
 %
+% Synopsis
+%  outFile = piPBRTUpdateV4(inFile,outFile)
 %
 % Inputs
 %   inFile -  PBRT V3 file
 %   outFile - PBRT V4 file
 %
 % Output
-%   outFile
+%   outFile - File name
 %
-% Zhenyi
+% Author: Zhenyi
 %
 % See also
-%   s_updatePBRTFile is the script that manages the conversion
+%   s_updatePBRTFile is a script that manages the conversion
 
 %%
 if ~exist(inFile,'file'), error('Could not find %s',inFile); end

@@ -15,28 +15,38 @@ function thisR = piRead(fname,varargin)
 %    Integrator in V3), Renderer, LookAt, Transform, ConcatTransform,
 %    Scale
 %
-%  After creating the recipe from piRead, we modify the recipe
-%  programmatically.  The modified recipe is then used to write out the
-%  PBRT file (piWrite).  These PBRT files are rendered using piRender,
-%  which executes the PBRT docker image and return an ISETCam scene or oi
-%  format).
+%  After creating this recipe object in Matlab, we can modify it
+%  programmatically.  We use piWrite with the modified recipe to
+%  create an updated version of the PBRT files for rendering. These
+%  updated PBRT files are rendered using piRender, which executes the
+%  PBRT docker image and return an ISETCam scene or oi format).
 %
-%  We also have routines to execute these functions at scale in Google
-%  Cloud (see isetcloud).
+%  Because we have write, render and show, we also have a single
+%  function (piWRS) that performs all three of these functions in a
+%  single call.
 %
 % Required inputs
-%   fname - a full path to a pbrt scene file
+%   fname - full path to a pbrt scene file.  The geometry, materials
+%           and other needed files should be in relative path to the
+%           main scene file.
 %
-% Optional parameter/values
+% Optional key/value pairs
+%
 %   'read materials' - When PBRT scene file is exported by cinema4d,
 %        the exporterflag is set and we read the materials file.  If
 %        you do not want to read that file, set this to false.
 %
-% Return
-%   recipe - A recipe object with the parameters needed to write a new pbrt
-%            scene file
+%   exporter - The exporter determines ... (MORE HERE).  
+%              One of 'PARSE','Copy'.  Default is PARSE.
 %
-% Assumptions:  piRead assumes that
+% Output
+%   recipe - A @recipe object with the parameters needed to write a
+%            new pbrt scene file for rendering.  Normally, we write
+%            out the new files in (piRootPath)/local/scenename
+%
+% Assumptions:  
+% 
+%  piRead assumes that
 %
 %     * There is a block of text before WorldBegin and no more text after
 %     * Comments (indicated by '#' in the first character) and blank lines
@@ -49,14 +59,15 @@ function thisR = piRead(fname,varargin)
 %  Text starting at WorldBegin to the end of the file (not just WorldEnd)
 %  is stored in recipe.world.
 %
-% TL, ZLy, BW Scienstanford 2017-2020
-% Zhenyi, 2020
+% Authors: TL, ZLy, BW, Zhenyi
+%
 % See also
-%   piWrite, piRender, piBlockExtract
+%   piWRS, piWrite, piRender, piBlockExtract
 
 % Examples:
 %{
  thisR = piRecipeDefault('scene name','MacBethChecker');
+ thisR.set('skymap','room.exr');
  % thisR = piRecipeDefault('scene name','SimpleScene');
  % thisR = piRecipeDefault('scene name','teapot');
 
@@ -71,7 +82,8 @@ varargin =ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('fname', @(x)(exist(fname,'file')));
-p.addParameter('exporter', 'PARSE', @ischar); % deal with this later
+validExporters = {'Copy','PARSE'};
+p.addParameter('exporter', 'PARSE', @(x)(ismember(x,validExporters))); 
 
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
@@ -164,13 +176,6 @@ if(flip)
     thisR.scale = [-1 1 1];
 end
 
-% Read the light sources and delete them in world
-%{
-if ~isequal(exporter,'Copy')
-    thisR = piLightRead(thisR);
-end
-%}
-
 % Read Scale, if it exists
 % Because PBRT is a LHS and many object models are exported with a RHS,
 % sometimes we stick in a Scale -1 1 1 to flip the x-axis. If this scaling
@@ -242,12 +247,6 @@ else
 
     [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
     thisR.world = newWorld;
-%     [trees, parsedUntil] = parseGeometryText(thisR, thisR.world,'');
-%     if ~isempty(trees)
-%         parsedUntil(parsedUntil>numel(thisR.world))=numel(thisR.world);
-%         % remove parsed line from world
-%         thisR.world(2:parsedUntil)=[];
-%     end
     thisR.materials.list = materialLists;
 
     % Call material lib
@@ -269,13 +268,15 @@ else
     end
 
     %%  Additional information for instanced objects
+
     % PBRT does not allow instance lights, however in the cases that
     % we would like to instance an object with some lights on it, we will
     % need to save that additional information to it, and then repeatedly
     % write the attributes when the objectInstance is used in attribute
     % pairs. --Zhenyi
-    % OK, but this code breaks on the teapot because there are no assets.  So
-    % need to check that there are assets. -- BW
+    %
+    % OK, but this code breaks on the teapot because there are no
+    % assets.  So need to check that there are assets. -- BW
     if ~isempty(thisR.assets)
         for ii  = 1:numel(thisR.assets.Node)
             thisNode = thisR.assets.Node{ii};
