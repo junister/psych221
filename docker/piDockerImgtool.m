@@ -68,8 +68,11 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 
-p.addRequired('command',@(x)(ismember(x,{'makesky','makeequiarea','help'})));
-p.addParameter('infile','',@ischar);
+validCommands = {'makesky','makeequiarea','convert','denoise','help'};
+p.addRequired('command',@(x)(ismember(x,validCommands)));
+p.addParameter('infile','',@(x)(exist(x,'file')));
+p.addParameter('outfile','',@ischar);
+
 p.addParameter('dockerimage',dockerWrapper.localImage(),@ischar);
 p.addParameter('helpparameter','',@ischar);
 p.addParameter('verbose',true,@islogical);
@@ -108,7 +111,24 @@ switch command
         dockercmd = sprintf(basecmd, dockerimage, cmd);
 
     case 'convert'
-        % piDockerImgtool('convert','infile',fullPathFile >>>)
+        % piDockerImgtool('convert','infile',fullfile(pwd,'pngExample.png'), 'outfile','pngExample.exr')
+        basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
+
+        if isempty(p.Results.outfile)
+            % Assume exr extension with same file name
+        else, outfile = p.Results.outfile;
+        end
+
+        cmd = sprintf('imgtool convert --outfile %s %s ', ...
+            dockerWrapper.pathToLinux(outfile), dockerWrapper.pathToLinux(fname));
+
+        dockercmd = sprintf(basecmd, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            workdir, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            dockerimage, ...
+            cmd);
+
         %{
         usage: imgtool convert [options] <filename>
         options:
@@ -148,7 +168,6 @@ switch command
                       e.g. imgtool convert --exr2bin Radiance --outfile /path/to/dir/filename pbrt.exr
                       Default: all channels at the same directory with pbrt.exr
         %}
-        disp('convert NYI')
     case 'denoise'
         % piDockerImgtool('denoise','infile',fullPathFile >>>)
         %{
