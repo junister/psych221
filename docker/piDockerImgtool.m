@@ -8,11 +8,13 @@ function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %   command:  The imgtool command.  Options are
 %      make equiarea
 %      make sky - Makes an exr skymap with name sky-
+%      convert
+%      denoise (NYI)
 %      help
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
-%   msparms:  albedo, elevation, outfile, turbidity, resolution
+%   msparms:  Select from: {albedo, elevation, outfile, turbidity, resolution}
 %
 % Outputs
 %   status    - 0 means success
@@ -74,8 +76,13 @@ p.addParameter('infile','',@(x)(exist(x,'file')));
 p.addParameter('outfile','',@ischar);
 
 p.addParameter('dockerimage',dockerWrapper.localImage(),@ischar);
+
 p.addParameter('helpparameter','',@ischar);
 p.addParameter('verbose',true,@islogical);
+
+% Maybe outfile should be handled separately as above.
+validMSparams = {'albedo', 'elevation', 'outfile', 'turbidity', 'resolution'};
+p.addParameter('msparams','',@(x)(ismember(x,validMSparams)));
 
 % dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
 p.parse(command,varargin{:});
