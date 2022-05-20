@@ -489,8 +489,14 @@ while ii<=nline
                 % Convert value depending on type
                 if(isempty(valueType))
                     continue;
-                elseif(strcmp(valueType,'string')) || strcmp(valueType,'bool') || strcmp(valueType,'spectrum')
+                elseif(strcmp(valueType,'string')) || strcmp(valueType,'spectrum')
                     % Do nothing.
+                elseif strcmp(valueType,'bool')
+                    if isequal(value, 'true')
+                        value = true;
+                    elseif isequal(value, 'false')
+                        value = false;
+                    end
                 elseif(strcmp(valueType,'float') || strcmp(valueType,'integer'))
                     value = str2double(value);
                 else

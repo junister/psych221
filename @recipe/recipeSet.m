@@ -568,7 +568,7 @@ switch param
         % This can be set for some, but not all integrators.
         % Also, sometimes the integrator slot is empty.  I am not sure what
         % happens then (BW).
-
+        
         if(~strcmp(thisR.integrator.subtype,'path')) &&...
                 (~strcmp(thisR.integrator.subtype,'bdpt'))
             disp('Changing integrator sub type to "bdpt"');
@@ -576,6 +576,7 @@ switch param
             % When multiple bounces are needed, use this integrator
             thisR.integrator.subtype = 'bdpt';
         end
+        
         thisR.integrator.maxdepth.value = val;
         thisR.integrator.maxdepth.type = 'integer';
 
