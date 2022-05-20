@@ -62,9 +62,9 @@ for ss = 3:2:numel(thisLine)-1
                 thisVal = str2num(thisLine{ss + 1});
             end
         case 'bool'
-            if isequal(thisLine{ss + 1}, 'true')
+            if isequal(strrep(thisLine{ss + 1},' ',''), 'true')
                 thisVal = true;
-            elseif isequal(thisLine{ss + 1}, 'false')
+            elseif isequal(strrep(thisLine{ss + 1},' ',''), 'false')
                 thisVal = false;
             end
         case ''

@@ -1,5 +1,6 @@
 function thisR = piTextureFileFormat(thisR)
-% Convert textures to PNG format.
+% Convert textures to PNG format
+%
 %     thisR = piTextureFileFormat(thisR)
 %
 % Brief description:
@@ -41,7 +42,11 @@ for ii = 1:numel(textureList)
             
             outputPath = fullfile(inputDir, path, [name,'.png']);
             if ~exist(outputPath,'file')
-                thisImg = imread(thisImgPath);
+                if isequal(ext,'.tga')
+                    thisImg = tga_read_image(thisImgPath);
+                else
+                    thisImg = imread(thisImgPath);
+                end
                 imwrite(thisImg,outputPath);
             end
 
