@@ -29,7 +29,7 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 %  % Lights
 %    'skymap'     - Name of environmental light exr file
-%    'skymap', 'rotation val', <over-ride default rotatio>
+%    'skymap', 'rotation val', <over-ride default rotation> [x y z] degrees
 %    'skymap, <name>, <optional attribute>, <attribute value>
 %
 %  % Camera
