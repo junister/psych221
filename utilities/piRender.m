@@ -141,8 +141,8 @@ p.KeepUnmatched = true;
 p.addRequired('recipe',@(x)(isequal(class(x),'recipe') || ischar(x)));
 
 varargin = ieParamFormat(varargin);
-p.addParameter('meanluminance',0,@isnumeric);
-p.addParameter('meanilluminance',0,@isnumeric);
+p.addParameter('meanluminance',100,@isnumeric);    % Cd/m2
+p.addParameter('meanilluminance',10,@isnumeric);   % Lux
 
 % p.addParameter('meanilluminanceperm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);

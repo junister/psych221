@@ -53,6 +53,15 @@ thisR.set('film resolution',[300 300]);
 thisR.set('rays per pixel',64);
 thisR.set('n bounces',3);
 [scene, result] = piWRS(thisR);
+
+fname = fullfile(piRootPath,'data','V4','web','kitchen','kitchen.pbrt');
+exist(fname,'file')
+thisR = piRead(fname,'exporter','Copy');
+thisR.set('film resolution',[384 384]);
+thisR.set('rays per pixel',256);
+thisR.set('n bounces',6);
+piWRS(thisR);
+
 %{
 *** Rendering time for this job (pavilion-day) was 3.3 sec ***
 
@@ -82,10 +91,7 @@ Render failed.
 % scenes.  This one fails because of the 'tga' files and perhaps other
 % reasons.  When we ran piPBRTUpdateV4 it put warnings into the PBRT
 % file!
-fname = fullfile(piRootPath,'data','V4','web','kitchen','kitchen.pbrt');
-exist(fname,'file')
-thisR = piRead(fname,'exporter','Copy');
-piWRS(thisR);
+
 %{
 fname = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
 exist(fname,'file')
