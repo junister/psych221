@@ -3,11 +3,19 @@ function newMat = parseBlockMaterial(currentLine)
 %
 % See also
 %
+
+%
 thisLine = strrep(currentLine,'[','');
 thisLine = strrep(thisLine,']','');
 if iscell(thisLine)
     thisLine = thisLine{1};
 end
+
+% Substitute the spaces in material name with _
+dQuotePos = strfind(thisLine, '"');
+thisLine(dQuotePos(1):dQuotePos(2)) = strrep(thisLine(dQuotePos(1):dQuotePos(2)), ' ', '_');
+
+% Continue processing
 thisLine = strsplit(thisLine, {' "', '" ', '"', '  '});
 switch thisLine{1}
     case 'Material'

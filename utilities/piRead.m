@@ -224,17 +224,17 @@ if strcmpi(exporter, 'Copy')
     % what does this mean since we then parse it?
     %disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
-    [materialLists, textureList, newWorld, texNameList] = parseMaterialTexture(thisR.world);
+    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
 
     thisR.materials.list = materialLists;
-
+    thisR.materials.order = matNameList;
     % Call material lib
     thisR.materials.lib = piMateriallib;
 
     thisR.textures.list = textureList;
-    thisR.textures.order = flip(texNameList);
+    thisR.textures.order = texNameList;
 
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);

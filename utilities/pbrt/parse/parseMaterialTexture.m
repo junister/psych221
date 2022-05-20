@@ -1,4 +1,4 @@
-function [materialMap, textureMap, txtLines, texNameList] = parseMaterialTexture(txtLines)
+function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMaterialTexture(txtLines)
 % Parse the txtLines to specify the materials and textures
 %
 % Synopsis
@@ -23,6 +23,7 @@ function [materialMap, textureMap, txtLines, texNameList] = parseMaterialTexture
 textureList    = [];
 materialList  = [];
 texNameList = {};
+matNameList = {};
 
 % Counters for the textures and materials
 t_index = 0;
@@ -57,10 +58,25 @@ for ii = numel(txtLines):-1:1
         m_index = m_index+1;
         
         materialList{m_index}  = parseBlockMaterial(thisLine); %#ok<AGROW>
-        materialMap(materialList{m_index}.name) = materialList{m_index};
+        % Avoid dubplicated material definition
+        if ~isKey(materialMap, materialList{m_index}.name)
+            materialMap(materialList{m_index}.name) = materialList{m_index};
+            matNameList{m_index} = materialList{m_index}.name;
+        else
+            m_index = m_index - 1;
+        end
         txtLines(ii) = [];
-
+    elseif strncmp(thisLine, 'NamedMaterial', length('NamedMaterial'))
+        % We have removed ' ' with '_' in materials, so do the same thing
+        % with NamedMaterial for assets.
+        % Substitute the spaces in material name with _
+        dQuotePos = strfind(thisLine, '"');
+        thisLine(dQuotePos(1):dQuotePos(2)) = strrep(thisLine(dQuotePos(1):dQuotePos(2)), ' ', '_');
+        txtLines{ii} = thisLine;
     end
 end
-
+% Flip the order because we parse the material and texture from back to
+% front.
+matNameList = flip(matNameList);
+texNameList = flip(texNameList);
 end

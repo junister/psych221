@@ -32,7 +32,6 @@ p.parse(thisR);
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
 %     textureTxt = cell(1, thisR.textures.list.Count);
-    % textureKeys = flip(keys(thisR.textures.list));
     textureKeys = thisR.textures.order;
     tt = 1;
     nn = 1;
@@ -60,7 +59,8 @@ end
 %% Create txtLines for the material struct array
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
-    materialKeys= keys(thisR.materials.list);
+    % materialKeys= keys(thisR.materials.list);
+    materialKeys = thisR.materials.order;
     for ii=1:length(materialTxt)
         % Converts the material struct to text
         materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);
