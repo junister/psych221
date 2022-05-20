@@ -514,6 +514,15 @@ while ii<=nline
     ii = ii+1;
 end
 
+if isequal(blockName,'Integrator') && isempty(s)
+    % We did not find an integrator.  So we return a default.
+    s.type = 'Integrator';
+    s.subtype = 'path';
+    s.maxdepth.type = 'integer';
+    s.maxdepth.value= 5;
+    warning('Setting integrator to "path" with 5 bounces.')
+end
+
 end
 
 %% END

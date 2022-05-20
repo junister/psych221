@@ -1,4 +1,8 @@
 function newMat = parseBlockMaterial(currentLine)
+% Parse a line in a scene pbrt file to interpret the material
+%
+% See also
+%
 thisLine = strrep(currentLine,'[','');
 thisLine = strrep(thisLine,']','');
 if iscell(thisLine)

@@ -62,3 +62,4 @@ outFile = fullfile(outputDir,'kitchen.pbrt');
 
 outFile = piPBRTUpdateV4(inFile, outFile);
 dir(fileparts(outFile))
+

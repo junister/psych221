@@ -61,7 +61,23 @@ for ii=1:numel(textureParams)
 
          if isequal(textureParams{ii}, 'filename')
             if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
-                imgFile = which(thisVal);
+                % PBRT V4 files from Matt had references to
+                % ../landscape/mumble ... For the barcelona-pavillion
+                % I copied the files.  But this may happen again.
+                % Very annoying that one scene refers to textures and
+                % geometry from a completely different scene.  This is
+                % a hack, but probably I should fix the original scene
+                % directories. I am worried how often this happens. (BW)
+                [p,n,e] = fileparts(thisVal);
+                if ~isequal('textures',p)
+                    thisVal = fullfile(thisR.get('output dir'),'textures',[n,e]);
+                    if exist(thisVal,'file')
+                        imgFile = thisVal;
+                        warning('Texture file found, but not in specified directory.')
+                    end
+                else
+                    imgFile = which(thisVal);
+                end
                 if isempty(imgFile)||isequal(imgFile,'')
                     thisText = '';
                     val = strrep(val,'imagemap', 'constant');
