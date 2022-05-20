@@ -53,10 +53,8 @@ p.addRequired('val', @(x)(ischar(x) || isstruct(x) || isnumeric(x) || islogical(
 
 p.parse(material, param, val, varargin{:});
 
-%% if obj is a material struct
-% materialInfo has no meaning
-% isfield(material, pName)
-if true
+%% if obj is a possible material struct
+if isfield(material,pName)
     % Set name or type
     if isequal(pName, 'name') || isequal(pName, 'type')
         material.(pName) = val;
