@@ -86,7 +86,9 @@ if isfield(texture, pName)
             [~, ~, e] = fileparts(val); % Check extension
             if isequal(e, '.spd')
                 texture.(pName).type = 'spectrum'; 
-            elseif strcmp(pName,'tex')
+            elseif strcmp(pName,'tex') || strcmp(pName, 'amount') ||...
+                    strcmp(pName, 'tex1') || strcmp(pName, 'tex2') ||...
+                    strcmp(pName, 'scale')
                 texture.(pName).type = 'texture';
             else
                 texture.(pName).type = 'string';

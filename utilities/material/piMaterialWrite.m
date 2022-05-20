@@ -32,7 +32,8 @@ p.parse(thisR);
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
 %     textureTxt = cell(1, thisR.textures.list.Count);
-    textureKeys = keys(thisR.textures.list);
+    % textureKeys = flip(keys(thisR.textures.list));
+    textureKeys = thisR.textures.order;
     tt = 1;
     nn = 1;
     TextureTex = [];

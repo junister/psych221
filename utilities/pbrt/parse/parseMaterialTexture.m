@@ -1,4 +1,4 @@
-function [materialMap, textureMap, txtLines] = parseMaterialTexture(txtLines)
+function [materialMap, textureMap, txtLines, texNameList] = parseMaterialTexture(txtLines)
 % Parse the txtLines to specify the materials and textures
 %
 % Synopsis
@@ -12,7 +12,7 @@ function [materialMap, textureMap, txtLines] = parseMaterialTexture(txtLines)
 %   materialMap - The material key-value pairs map (containers.Map)
 %   textureMap  - The texture key-value pairs map  (containers.Map)
 %   txtLines    -  The txtLines that are NOT material or textures
-%
+%   textureList - TextureName list (order is important for mixed material and textures!!)
 % ZL and ZYL
 %
 % See also
@@ -22,6 +22,7 @@ function [materialMap, textureMap, txtLines] = parseMaterialTexture(txtLines)
 
 textureList    = [];
 materialList  = [];
+texNameList = {};
 
 % Counters for the textures and materials
 t_index = 0;
@@ -44,6 +45,7 @@ for ii = numel(txtLines):-1:1
         t_index = t_index+1;
         textureList{t_index}   = parseBlockTexture(thisLine);  %#ok<AGROW>'
         textureMap(textureList{t_index}.name) = textureList{t_index};
+        texNameList{t_index} = textureList{t_index}.name;
         txtLines(ii) = [];
 
     elseif strncmp(thisLine,'MakeNamedMaterial',length('MakeNamedMaterial')) ||...

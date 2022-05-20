@@ -167,12 +167,12 @@ thisR.integrator = piParseOptions(options,'Integrator');
 % thisR.accelerator = piParseOptions(options,'Accelerator');
 
 % Set thisR.lookAt and determine if we need to flip the image
-flip = piReadLookAt(thisR,options);
+flipping = piReadLookAt(thisR,options);
 
 % Sometimes the axis flip is "hidden" in the concatTransform matrix. In
 % this case, the flip flag will be true. When the flip flag is true, we
 % always output Scale -1 1 1.
-if(flip)
+if(flipping)
     thisR.scale = [-1 1 1];
 end
 
@@ -224,7 +224,7 @@ if strcmpi(exporter, 'Copy')
     % what does this mean since we then parse it?
     %disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
-    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
+    [materialLists, textureList, newWorld, texNameList] = parseMaterialTexture(thisR.world);
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
 
@@ -234,6 +234,7 @@ if strcmpi(exporter, 'Copy')
     thisR.materials.lib = piMateriallib;
 
     thisR.textures.list = textureList;
+    thisR.textures.order = flip(texNameList);
 
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);
@@ -371,7 +372,7 @@ options = txtLines(1:(worldBeginIndex-1));
 end
 
 %% Build the lookAt information
-function [flip,thisR] = piReadLookAt(thisR,txtLines)
+function [flipping,thisR] = piReadLookAt(thisR,txtLines)
 % Reads multiple blocks to create the lookAt field and flip variable
 %
 % The lookAt is built up by reading from, to, up field and transform and
@@ -381,7 +382,7 @@ function [flip,thisR] = piReadLookAt(thisR,txtLines)
 % formatting.
 
 % A flag for flipping from a RHS to a LHS.
-flip = 0;
+flipping = 0;
 
 % Get the block
 % [~, lookAtBlock] = piBlockExtract(txtLines,'blockName','LookAt');
@@ -404,7 +405,7 @@ if(~isempty(transformBlock))
     values = textscan(transformBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
     values = cell2mat(values(2:end));
     transform = reshape(values,[4 4]);
-    [from,to,up,flip] = piTransform2LookAt(transform);
+    [from,to,up,flipping] = piTransform2LookAt(transform);
 end
 
 % If there's a concat transform, we use it to update the current camera
@@ -417,7 +418,7 @@ if(~isempty(concatTBlock))
 
     % Apply transform and update lookAt
     lookAtTransform = piLookat2Transform(from,to,up);
-    [from,to,up,flip] = piTransform2LookAt(lookAtTransform*concatTransform);
+    [from,to,up,flipping] = piTransform2LookAt(lookAtTransform*concatTransform);
 end
 
 % Warn the user if nothing was found
