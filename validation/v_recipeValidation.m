@@ -70,6 +70,16 @@ thisR.set('rays per pixel',1024);
 thisR.set('n bounces',9);
 piWRS(thisR);
 
+
+fname = fullfile(piRootPath,'data','V4','web','bistro','bistro_boulangerie.pbrt');
+exist(fname,'file')
+thisR = piRead(fname,'exporter','Copy');
+thisR.set('film resolution',[384 384]);
+thisR.set('rays per pixel',256);
+thisR.set('n bounces',4);
+piWRS(thisR);
+
+
 %{
 *** Rendering time for this job (pavilion-day) was 3.3 sec ***
 
