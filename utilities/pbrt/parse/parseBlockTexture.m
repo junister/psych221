@@ -1,4 +1,4 @@
-function newTexture = parseBlockTexture(currentLine)
+function newTexture = parseBlockTexture(currentLine,thisR)
 
 thisLine = strrep(currentLine,'[','');
 thisLine = strrep(thisLine,']','');
@@ -63,8 +63,21 @@ for ss = 5:2:numel(thisLine)
             continue;
     end
 
-    newTexture = piTextureSet(newTexture, sprintf('%s value', keyName),...
-        thisVal);
+    if isequal(keyName,'filename')
+        [p,n,e] = fileparts(thisVal);
+        if ~isequal(p,'textures')
+            % Do we have the file in textures?
+            if exist(fullfile(thisR.get('input dir'),'textures',[n,e]),'file')
+                thisVal = fullfile('textures',[n e]);
+            elseif exist(fullfile(thisR.get('input dir'),[n,e]),'file')
+                thisVal = [n e];
+            else
+                error('Cannot find file %s\n',thisVal);
+            end
+        end
+    end
+
+    newTexture = piTextureSet(newTexture, sprintf('%s value', keyName),thisVal);
 end
 end
 

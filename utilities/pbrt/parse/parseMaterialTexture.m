@@ -1,4 +1,4 @@
-function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMaterialTexture(txtLines)
+function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMaterialTexture(thisR)
 % Parse the txtLines to specify the materials and textures
 %
 % Synopsis
@@ -20,6 +20,7 @@ function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMa
 
 %% Initialize the parameters we return
 
+txtLines = thisR.world;
 textureList    = [];
 materialList  = [];
 texNameList = {};
@@ -44,7 +45,7 @@ for ii = numel(txtLines):-1:1
         %     textureMap(textureName) = textureStruct;
         %
         t_index = t_index+1;
-        textureList{t_index}   = parseBlockTexture(thisLine);  %#ok<AGROW>'
+        textureList{t_index}   = parseBlockTexture(thisLine,thisR);  %#ok<AGROW>'
         textureMap(textureList{t_index}.name) = textureList{t_index};
         texNameList{t_index} = textureList{t_index}.name;
         txtLines(ii) = [];

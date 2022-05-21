@@ -224,7 +224,7 @@ if strcmpi(exporter, 'Copy')
     % what does this mean since we then parse it?
     %disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
-    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR.world);
+    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
 

@@ -49,17 +49,17 @@ piWRS(thisR);
 fname = fullfile(piRootPath,'data','V4','web','barcelona-pavilion','pavilion-day.pbrt');
 exist(fname,'file')
 thisR = piRead(fname,'exporter','Copy');
-thisR.set('film resolution',[300 300]);
-thisR.set('rays per pixel',64);
-thisR.set('n bounces',3);
+thisR.set('film resolution',[512 512]);
+thisR.set('rays per pixel',256);
+thisR.set('n bounces',5);
 [scene, result] = piWRS(thisR);
 
 fname = fullfile(piRootPath,'data','V4','web','kitchen','kitchen.pbrt');
 exist(fname,'file')
 thisR = piRead(fname,'exporter','Copy');
 thisR.set('film resolution',[384 384]);
-thisR.set('rays per pixel',256);
-thisR.set('n bounces',6);
+thisR.set('rays per pixel',1024);
+thisR.set('n bounces',9);
 piWRS(thisR);
 
 %{
