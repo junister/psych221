@@ -66,6 +66,9 @@ for ss = 5:2:numel(thisLine)
     newTexture = piTextureSet(newTexture, sprintf('%s value', keyName),...
         thisVal);
 end
+end
+
+
 %{
 %% Parse the string on the material line
 thisLine = currentLine;
@@ -170,4 +173,3 @@ for ss = 3:nStrings
     end
 end
 %}
-end
