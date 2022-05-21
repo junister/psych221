@@ -1,3 +1,4 @@
+function result = v_DockerWrapper(options)
 % v_DockerWrapper()
 %
 % Validate various docker Wrapper calls
@@ -6,13 +7,22 @@
 % 
 %    Variables            Stanford Defaults
 %   ---------------       -----------------
-%   remoteMachine         muxreconrt.stanford.edu
+%   remoteMachine         <servername>.stanford.edu
 %   remoteImage           digitalprodev/XXX
 %   renderContext         remote-mux
 %
 
+arguments
+    options.length = 'short'; % how detailed a test to run
+end
+
 %% Initialize as usual
-ieInit();
+% This is annoying. If we call ieInit() it wipes out our arguments.
+% so trying it without.
+%ieInit();
+
+result = 0; % default is success.
+
 if ~piDockerExists, piDockerConfig; end
 
 %% Default rendering
@@ -25,13 +35,10 @@ try
     % First, clear out any that exist
     dockerWrapper.reset();
     sampleScene = piRecipeDefault('scene name','chess set');
-    piWRS(sampleScene);
-
-    fprintf('succeeded.\n');
-    fprintf('-------------------------------------\n')
 catch
-    fprintf('failed.\n');
+    fprintf('Unable to load sample scene.\n');
     fprintf('-------------------------------------\n')
+    result = -1;
 end
 
 %% Default rendering, verbose
@@ -46,15 +53,15 @@ try
     fprintf('succeeded\n');
     fprintf('-------------------------------------\n')
 catch
-    fprintf('failed\n');
+    fprintf('Sample Scene failed\n');
     fprintf('-------------------------------------\n')
-
+    result = -1;
 end
 
 %% Local rendering CPU
 
 fprintf('*** Local render on CPU ... ***');
-fprintf('-------------------------------------\n\n')
+fprintf('-------------------------------------\n\n');
 
 try
     % test local rendering on CPU
@@ -64,13 +71,15 @@ try
     piWRS(sampleScene,'our docker', ourDocker);
 
     fprintf('succeeded\n');
-    fprintf('-------------------------------------\n')
+    fprintf('-------------------------------------\n');
 
 catch
     fprintf(' failed\n');
-    fprintf('-------------------------------------\n')
+    fprintf('-------------------------------------\n');
+    result = -1;
 end
 
+if isequal(options.length, 'long')
 %% Remote rendering (mux) CPU
 
 fprintf('*** Remote rendering on CPU ... ***\n');
@@ -89,10 +98,13 @@ try
     piWRS(sampleScene,'our docker', ourDocker);
 
     fprintf('succeeded\n');
-    fprintf('-------------------------------------\n')
+    fprintf('-------------------------------------\n');
 catch
     fprintf(' failed\n');
-    fprintf('-------------------------------------\n')
+    fprintf('-------------------------------------\n');
+    result = -1;
+end
+
 end
 
 %% END
