@@ -242,7 +242,7 @@ if strcmpi(exporter, 'Copy')
     thisR.world = newWorld;
 else
     % Read material and texture
-    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR.world);
+    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR);
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
 

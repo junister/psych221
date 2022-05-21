@@ -31,8 +31,18 @@ p.parse(thisR);
 % Texture txt lines creation are moved into piTextureText function.
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
-%     textureTxt = cell(1, thisR.textures.list.Count);
-    textureKeys = thisR.textures.order;
+    
+    % textureKeys = thisR.textures.order;
+    if isfield(thisR.textures,'order')
+        % Added by Zheng Lyu so we can use material and texture
+        % mixtures.
+        textureKeys = thisR.textures.order;
+    else
+        % Some day this might go away, but we do not always have the
+        % order field.  So, BW put this back in.
+        textureKeys= keys(thisR.textures.list);
+    end
+
     tt = 1;
     nn = 1;
     TextureTex = [];
@@ -59,8 +69,17 @@ end
 %% Create txtLines for the material struct array
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
-    % materialKeys= keys(thisR.materials.list);
-    materialKeys = thisR.materials.order;
+    matTypeList = cell(1, thisR.materials.list.Count);
+
+    if isfield(thisR.materials,'order')
+        % Added by Zheng Lyu so we can use material and texture
+        % mixtures.
+        materialKeys = thisR.materials.order;
+    else
+        % Some day this might go away, but we do not always have the
+        % order field.  So, BW put this back in.
+        materialKeys= keys(thisR.materials.list);
+    end
     for ii=1:length(materialTxt)
         % Converts the material struct to text
         materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);

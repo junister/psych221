@@ -131,6 +131,8 @@ txtLines = thisRV2.materials.txtLines;
 
 % We parse the text into the format needed for the materials and textures,
 % separately, in Version 2
-[thisRV2.materials.list, thisRV2.textures.list] = parseMaterialTexture(txtLines);
+% 
+warning('this will probably not work.  Maybe we need to set thisRV2.world = txtLines???')
+[thisRV2.materials.list, thisRV2.textures.list] = parseMaterialTexture(thisRV2);
 
 end
