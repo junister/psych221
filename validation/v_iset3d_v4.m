@@ -5,14 +5,8 @@
 % Validation and Tutorial scripts.  When these all run, it is a partial validation of the
 % code.  More specific tests are still needed.
 %
-% Validations in this script do not involve calculations that require using
-% Flywheel or Google Cloud. There is another validation script, v_piCloud,
-% that should check those functions.
-%
 % ZL,BW, DJC
 %
-% See also
-%   v_piCloud
 
 setpref('ISET3d', 'benchmarkstart', cputime); % if I just put it in a variable it gets cleared:(
 setpref('ISET3d', 'tStart', tic);
