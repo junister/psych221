@@ -242,18 +242,19 @@ if strcmpi(exporter, 'Copy')
     thisR.world = newWorld;
 else
     % Read material and texture
-    [materialLists, textureList, newWorld] = parseMaterialTexture(thisR);
+    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
 
     [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
     thisR.world = newWorld;
     thisR.materials.list = materialLists;
-
+    thisR.materials.order = matNameList;
     % Call material lib
     thisR.materials.lib = piMateriallib;
 
     thisR.textures.list = textureList;
+    thisR.textures.order = texNameList;
 
     % Convert texture file format to PNG
     thisR = piTextureFileFormat(thisR);
