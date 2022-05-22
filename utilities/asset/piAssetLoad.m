@@ -33,13 +33,27 @@ if ~exist('fname','var') || isempty(fname)
     error('The asset name must be specified');
 end
 
-%%
+%% We need a mat-file, preferably from the data/assets directory
+
+% Check the extension
 [p,n,e] = fileparts(fname);
 if isempty(e), e = '.mat'; end
 fname = fullfile(p,[n,e]);
 
-fname = which(fname);
-if ~exist(fname,'file'), error('Could not find %s\n',fname); end
+% If the user did not specify a path, look in the data/assets directory
+if isempty(p)
+    % See if it exists in the data/assets directory.
+    if exist(fullfile(piRootPath,'data','assets',[n e]),'file')
+        fname = fullfile(piRootPath,'data','assets',[n e]);
+    else
+        % See if you can find it anywhere
+        if isempty(which(fname)), error('Could not find %s\n',fname); 
+        else
+            fname = which(fname); 
+            fprintf('Using asset %s\n',fname);
+        end
+    end
+end
 
 asset = load(fname);
 
