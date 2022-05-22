@@ -738,6 +738,7 @@ switch param
                 case {'add'}
                     newMat = varargin{1};
                     thisR.materials.list(newMat.name) = newMat;
+                    thisR.materials.order{end + 1} = newMat.name;
                     return;
                 case {'delete', 'remove'}
                     if isnumeric(varargin{1})
@@ -745,9 +746,11 @@ switch param
                     else
                         remove(thisR.materials.list, varargin{1})
                     end
+                    thisR.materials.order(find(thisR.materials.order, varargin{1})) = [];
                     return;
                 case {'replace'}
                     thisR.materials.list(varargin{1}) = varargin{2};
+                    thisR.materials.order(find(thisR.materials.order, varargin{1})) = varargin{2};
                     return;
                 otherwise
                     % Probably the material name.
@@ -801,14 +804,17 @@ switch param
                 case {'add'}
                     % thisR.set('textures', 'add', texture struct);
                     thisR.textures.list(newTexture.name) = varargin{1};
+                    thisR.textures.order{end + 1} = newTexture.name;
                     return;
                 case {'delete', 'remove'}
                     % thisR.set('texture', 'delete', idxORname);
                     remove(thisR.textures.list, varargin{1}.name)
+                    thisR.textures.order(find(thisR.textures.order, varargin{1})) = [];
                     return;
                 case {'replace'}
                     % thisR.set('texture','replace', idxORname-1, newtexture-2)
                     thisR.textures.list(varargin{1}) = varargin{2};
+                    thisR.textures.order(find(thisR.textures.order, varargin{1})) = varargin{2};
                     return;
                 case {'basis'}
                     % thisR.set('texture', 'basis', tName, wave, basisfunctions)
