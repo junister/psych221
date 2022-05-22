@@ -4,18 +4,12 @@ classdef recipe < matlab.mixin.Copyable
 % Syntax
 %   thisR = recipe;
 %
-% Default version is PBRT version 3.
+% Default version is PBRT version 4.
 %
-% TL Scien Stanford, 2017
+% TL Scien Stanford, 2017, updated to pbrt-v4 2022
 
 %% PROGRAMMING TODO
 %
-%  Perhaps this class should be piRecipe.m
-%
-%  I think we should align the words here with the terms in PBRT.  So, for
-%  example, integrator should be SurfaceIntegrator.  Then we should have
-%  the permissible list of terms included.  Again, for SurfaceIntegrator in
-%  V2 these appear to be described in http://www.pbrt.org/fileformat.html
 
 %%
     properties (GetAccess=public, SetAccess=public)
@@ -43,14 +37,14 @@ classdef recipe < matlab.mixin.Copyable
         inputFile = '';    % Original PBRT input file
         outputFile = '';   % Where outputFile = piWrite(recipe);
         renderedFile = ''; % Where piRender puts the radiance
-        version = 3;     % A PBRTv2 file or a PBRTv3 file
+        version = 4;     % A PBRTv4 file
         materials;       % struct containing info about the materials, parsed from *_material.pbrt file
         textures;        % struct containing info about the textures used in the scene
         assets;          % assets list parsed from *_geometry.pbrt file
         exporter = '';
         media;           % Volumetric rendering media.
         metadata;
-        recipeVer = 2;
+        recipeVer = 2;   % NB: Is this still true?
 
         hasActiveTransform = false; % flag to allow CPU rendering until GPU support works
         verbose = 2;    % default for how much debugging output to emit.
