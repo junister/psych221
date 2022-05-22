@@ -8,10 +8,14 @@
 % ZL,BW, DJC
 %
 
+%%
 setpref('ISET3d', 'benchmarkstart', cputime); % if I just put it in a variable it gets cleared:(
 setpref('ISET3d', 'tStart', tic);
 
 %% Basic
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
 
 %% Quick version of DockerWrapper tests
 disp('*** DOCKER -- v_DockerWrapper');
