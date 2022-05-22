@@ -77,7 +77,11 @@ for ii=1:numel(textureParams)
                     thisVal = fullfile(thisR.get('output dir'),'textures',[n,e]);
                     if exist(thisVal,'file')
                         imgFile = thisVal;
-                        warning('Texture file found, but not in specified directory.')
+                        warning('Texture file found, but not in specified directory.');
+                    else
+                        % impatient "fix" by DJC
+                        imgFile = which([n e]);
+                        % force it
                     end
                 else
                     % See if it is in the root of the scene directory.
