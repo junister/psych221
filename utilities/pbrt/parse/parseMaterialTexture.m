@@ -12,7 +12,8 @@ function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMa
 %   materialMap - The material key-value pairs map (containers.Map)
 %   textureMap  - The texture key-value pairs map  (containers.Map)
 %   txtLines    -  The txtLines that are NOT material or textures
-%   textureList - TextureName list (order is important for mixed material and textures!!)
+%   matNameList - MaterialName list (order is important for mixed material and textures!!)
+%   texNameList - TextureName list (order is important for mixed material and textures!!)
 % ZL and ZYL
 %
 % See also
