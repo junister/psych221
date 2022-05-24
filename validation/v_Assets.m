@@ -25,7 +25,7 @@ recipeSet(parentRecipe,'lights', ourLight,'add');
 piWRS(parentRecipe);
 
 %%  A list of the pre-computed assets
-assetFiles = dir([fullfile(piRootPath,'data','assets'),filesep(),'*.mat']);
+assetFiles = dir([fullfile(piGetDir('assets'),filesep(),'*.mat']);
 report = '';
 fprintf('Found %d assets\n',numel(assetFiles));
 

@@ -20,7 +20,7 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-assetDir = fullfile(piRootPath,'data','assets');
+assetDir = piGetDir('assets');
 
 %% A few more scenes as assets
 sceneName = 'bunny';

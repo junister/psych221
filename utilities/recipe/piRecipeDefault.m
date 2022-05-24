@@ -367,9 +367,11 @@ end
 if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
-    FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+    FilePath = piGetDir('scenes');
     if ~isfolder(FilePath)
         FilePath = fullfile(piRootPath,'data','V4','web',sceneDir);
+    else
+        FilePath = fullfile(FilePath, sceneDir);
     end
 end
 
@@ -398,7 +400,7 @@ thisR.set('exporter',exporter);
 % directory is not part of the git upload area.
 % outFile = fullfile(piRootPath,'local',sceneName,[sceneName,'.pbrt'];
 [~,n,e] = fileparts(fname);
-outFile = fullfile(piRootPath,'local',sceneDir,[n,e]);
+outFile = fullfile(piGetDir('local'),sceneDir,[n,e]);
 thisR.set('outputfile',outFile);
 
 % Set defaults for very low resolution (for testing)

@@ -4,7 +4,7 @@ sceneDir = 'table';
 sceneFile = 'Table-pbrt.pbrt';
 exporter = 'PARSE';
 
-FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+FilePath = fullfile(piGetDir('scenes'),sceneDir);
 fname = fullfile(FilePath,sceneFile);
 exist(fname,'file')
 

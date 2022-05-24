@@ -48,7 +48,7 @@ thisR.set('input file',inFile);
 temp = split(thePath,'/');
 
 % The file name for this user should be
-outFile=fullfile(piRootPath,'local',temp{end},[n,e]);
+outFile=fullfile(piGetDir('local'),temp{end},[n,e]);
 
 thisR.set('output file',outFile);
 

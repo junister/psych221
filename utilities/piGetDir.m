@@ -13,13 +13,17 @@ else
     % Now we can locate specific types of resources
     switch (dirType)
         case 'assets'
-            defaultDir = fullFile(ourData,'assets');
+            defaultDir = fullfile(ourData,'assets');
         case 'lights'
-            defaultDir = fullFile(ourData,'lights');
+            defaultDir = fullfile(ourData,'lights');
         case 'imageTextures'
-            defaultDir = fullFile(ourData,'imageTextures');
+            defaultDir = fullfile(ourData,'imageTextures');
         case 'lens'
-            defaultDir = fullFile(ourData,'lens');
+            defaultDir = fullfile(ourData,'lens');
+        case 'scenes'
+            defaultDir = fullfile(ourData,'V4'); % remove the V4 entry if we promote or move scenes
+        case 'local'
+            defaultDir = fullfile(piRootPath(), 'local');
     end
 end
 

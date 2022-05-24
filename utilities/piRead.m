@@ -114,7 +114,7 @@ exporter = p.Results.exporter;
 thisR.exporter = exporter;
 
 %% Set the default output directory
-outFilepath      = fullfile(piRootPath,'local',inputname);
+outFilepath      = piGetResource('local',inputname);
 outputFile       = fullfile(outFilepath,[inputname,'.pbrt']);
 thisR.set('outputFile',outputFile);
 
