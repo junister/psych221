@@ -44,13 +44,13 @@ function [ieObject, result] = piRenderGPU(thisR,varargin)
 % Examples
 %{
    % Renders both radiance and depth
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light.pbrt');
    scene = piRender(pbrtFile);
    sceneWindow(scene); sceneSet(scene,'gamma',0.5);
 %}
 %{
    % Render radiance and depth separately
-   pbrtFile = fullfile(piRootPath,'data','V3','teapot','teapot-area-light.pbrt');
+   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light.pbrt');
    scene = piRender(pbrtFile,'render type','radiance');
    ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
    dmap = piRender(pbrtFile,'render type','depth');

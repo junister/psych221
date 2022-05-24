@@ -27,7 +27,7 @@ function outputFull = piPBRTReformat(fname,varargin)
 
 % Examples:
 %{
-fname = fullfile(piRootPath,'data','V3','SimpleScene','SimpleScene.pbrt');
+fname = fullfile(piRootPath,'data','V4','SimpleScene','SimpleScene.pbrt');
 formattedFname = piPBRTReformat(fname);
 %}
 
