@@ -746,11 +746,14 @@ switch param
                     else
                         remove(thisR.materials.list, varargin{1})
                     end
-                    thisR.materials.order(find(thisR.materials.order, varargin{1})) = [];
+                    [~,idx] = ismember(varargin{1},thisR.materials.order);
+                    thisR.materials.order(idx) = [];
                     return;
                 case {'replace'}
+                    % thisR.set('materials',matName,'replace',newMaterial)
                     thisR.materials.list(varargin{1}) = varargin{2};
-                    thisR.materials.order(find(thisR.materials.order, varargin{1})) = varargin{2};
+                    [~,idx] = ismember(varargin{1},thisR.materials.order);
+                    thisR.materials.order{idx} = varargin{2}.name;
                     return;
                 otherwise
                     % Probably the material name.
@@ -809,12 +812,14 @@ switch param
                 case {'delete', 'remove'}
                     % thisR.set('texture', 'delete', idxORname);
                     remove(thisR.textures.list, varargin{1}.name)
-                    thisR.textures.order(find(thisR.textures.order, varargin{1})) = [];
+                    [~,idx] = ismember(varargin{1},thisR.textures.order);
+                    thisR.textures.order(idx) = [];
                     return;
                 case {'replace'}
                     % thisR.set('texture','replace', idxORname-1, newtexture-2)
                     thisR.textures.list(varargin{1}) = varargin{2};
-                    thisR.textures.order(find(thisR.textures.order, varargin{1})) = varargin{2};
+                    [~,idx] = ismember(varargin{1},thisR.textures.order);
+                    thisR.textures.order{idx} = varargin{2}.name;
                     return;
                 case {'basis'}
                     % thisR.set('texture', 'basis', tName, wave, basisfunctions)

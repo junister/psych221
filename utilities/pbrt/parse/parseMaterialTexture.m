@@ -47,9 +47,9 @@ for ii = numel(txtLines):-1:1
         %
         t_index = t_index+1;
         textureList{t_index}   = parseBlockTexture(thisLine,thisR);  %#ok<AGROW>'
-        textureMap(textureList{t_index}.name) = textureList{t_index};
-        texNameList{t_index} = textureList{t_index}.name;
-        % Avoid dubplicated material definition
+        % textureMap(textureList{t_index}.name) = textureList{t_index};
+        % texNameList{t_index} = textureList{t_index}.name;
+        % Avoid duplicated material definition
         if ~isKey(textureMap, textureList{t_index}.name)
             textureMap(textureList{t_index}.name) = textureList{t_index};
             texNameList{t_index} = textureList{t_index}.name;
