@@ -1,4 +1,4 @@
-function defaultDir = piGetDir(dirType)
+function defaultDir = piDirGet(dirType)
 %PIGETDIR Return where files/assets of a given type are
 % located by default
 %

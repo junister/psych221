@@ -860,8 +860,8 @@ switch param
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
             
             % If it is not in the local directory, check the data/lights
-            if isfile(fullfile(piGetDir('lights'), skymapFileName))
-                copyfile(fullfile(piGetDir('lights'), skymapFileName),...
+            if isfile(fullfile(piDirGet('lights'), skymapFileName))
+                copyfile(fullfile(piDirGet('lights'), skymapFileName),...
                     thisR.get('output dir'));
             else
                 % Not found yet, look for it on the path

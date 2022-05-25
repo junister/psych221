@@ -435,7 +435,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
                     [~,name,ext] = fileparts(thisR.camera.lensfile.value);
                     baseName = [name,ext];
-                    val = fullfile(piGetDir('lens'),baseName);
+                    val = fullfile(piDirGet('lens'),baseName);
                     if ~exist(val,'file')
                         val = which(baseName);
                         if isempty(val)
@@ -451,7 +451,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % directory unique to this recipe. We copy the lens files from this
         % directory, usually.  There are some complications for navarro and
         % the realisticEye human models.
-        val = piGetDir('lens');
+        val = piDirGet('lens');
     case 'lensdiroutput'
         % Directory where we are stsoring the lens file for rendering
         val = fullfile(thisR.get('outputdir'),'lens');

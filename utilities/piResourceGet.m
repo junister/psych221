@@ -8,7 +8,7 @@ else
 
     % Set these once, in case we ever need to change them
     ourRoot = piRootPath();
-    ourDir = piGetDir(resourceType);
+    ourDir = piDirGet(resourceType);
     
     resourcePath = fullfile(ourDir,resourceName);
 
