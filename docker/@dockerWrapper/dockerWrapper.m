@@ -3,59 +3,45 @@ classdef dockerWrapper < handle
     %
     % D.Cardinal -- Stanford University -- 2021-2022
     %
-    % This class manages how we run PBRT and other tools in Linux
-    % docker containers in ISET3d. At present, we manage these cases:
+    % This class manages how we run PBRT and other tools in Linux docker
+    % containers in ISET3d (version 4). At present, we manage these cases:
     %
     %   * a remote (Linux) server with a GPU,
     %   * a remote (Linux) server with a CPU,
     %   * your local (Linux/Mac) computer with a GPU,
     %   * your local computer with a CPU, and
-
+    %
     %   [FUTURE, TBD:]
     %   * your local computer with PBRT installed and no docker at all.
     %
     % This source code is under active development (May, 2022).
     %
-    %
-    % USAGE NOTE: To render on multiple servers or processors, create a new
-    % instance of dockerWrapper for each. Once an instance is created,
-    % it is bound to a specific Docker image and compute context.
+    % Description:
     %
     % The dockerWrapper class is used by piWRS() and piRender(). These
     % functions specify the docker images that run either locally or
     % remotely. For instructions on how to set up a computer to run
     % on a remote, see the ISET3d-v4 wiki pages.
     %
-    % ** N.B. To run on a remote machine someone must have set up the
-    % environment on that machine to match the expectations of ISET3d. 
-    %
-    % See below for more information on the required parameters.
-    %
-    % Overview
-    %
     % To run on a remote machine, we launch a Docker image on that
     % machine as a persistent, named, container. Calls to piRender()
-    % use dockerWrapper to store the name and status of the remote
+    % use dockerWrapper to store the name and status of that remote
     % container.  By running in a persistent container, we avoid the
     % startup overhead (which is more than 20 seconds for a GPU image).
     %
-    % Because we often use the same remote machine and GPU across
-    % multiple days/sessions, the default parameters for docker
-    % execution are stored in the Matlab prefs.  These are saved by
-    % Matlab between sessions. You can set and get these parameters
-    % using the Matlab setpref/getpref commands.
+    % Users often call the same remote machine and GPU across multiple
+    % days/sessions, the default parameters for docker execution are stored
+    % in the Matlab prefs.  These are saved by Matlab between sessions. You
+    % can set and get these parameters using the Matlab setpref/getpref
+    % commands.
     %    
-    % For the moment, we are storing these parameters within the
-    % key string 'docker', though we are discussing storing them within
-    % sthe string 'iset3d'.
+    % For the moment, we are storing these parameters within the key string
+    % 'docker', though we are discussing storing them within sthe string
+    % 'iset3d'.
     %
     % Default parameters can be retrieved from prefs using
     %
-    %   getpref('docker',<paramName>,[default value]); 
-    % 
-    %    (or maybe in the future we will shift to)
-    %
-    %   getpref('iset3d',<paramName>,[default value]);
+    %   getpref('docker',<paramName>,[default value]);     
     %
     % Parameters that need to be passed in or set by default:
     %
@@ -89,8 +75,7 @@ classdef dockerWrapper < handle
     %
     % Additional NOTES
     %
-    % 1. To get rid of any stranded local containers, run on the
-    % command line
+    % 1. To shut down stranded local containers, run on the command line
     %
     %    docker container prune
     %
@@ -99,7 +84,6 @@ classdef dockerWrapper < handle
     % server -- in the event that Matlab doesn't shut down properly.
     % Those can be pruned by running the same command on the server.
     % (or wait for DJC to prune them on the server every few days:))
-    %
     %
     % Examples (needs updates)
     %
