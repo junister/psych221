@@ -34,14 +34,14 @@ classdef dockerWrapper < handle
     % in the Matlab prefs.  These are saved by Matlab between sessions. You
     % can set and get these parameters using the Matlab setpref/getpref
     % commands.
-    %    
+    %
     % For the moment, we are storing these parameters within the key string
     % 'docker', though we are discussing storing them within sthe string
     % 'iset3d'.
     %
     % Default parameters can be retrieved from prefs using
     %
-    %   getpref('docker',<paramName>,[default value]);     
+    %   getpref('docker',<paramName>,[default value]);
     %
     % Parameters that need to be passed in or set by default:
     %
@@ -55,13 +55,13 @@ classdef dockerWrapper < handle
     %  localRender -- Render on your local machine (default false)
     %
     %  remoteUser  -- username on remote machine if different from the
-    %                   username on the local machine 
+    %                   username on the local machine
     %  remoteContext -- a docker context that defines the remote
     %                   renderer; only set this if it is  different
     %                   from the default that is created for you
     %                   (unusual)
     %  remoteRoot     -- needed if differs from the return from
-    %                    piRootPath 
+    %                    piRootPath
     %  remoteImageTag -- defaults to :latest
     %  whichGPU    -- for multi-gpu rendering systems, select a specific
     %             GPU on the remote machine. Use device number (e.g.
@@ -99,7 +99,7 @@ classdef dockerWrapper < handle
 
         % by default we assume our container is built to run pbrt
         % this gets changed to run imgtool, assimp, etc.
-        command = 'pbrt'; 
+        command = 'pbrt';
 
         inputFile = '';
 
@@ -133,19 +133,19 @@ classdef dockerWrapper < handle
         containerType = 'linux'; % default, even on Windows
 
         % The defaults for these are set in the constructor
-        gpuRendering; 
+        gpuRendering;
         whichGPU;
-        
+
         % these relate to remote/server rendering
         remoteMachine; % for syncing the data
         remoteUser; % use for rsync & ssh/docker
         remoteImage; % use to specify a GPU-specific image on server
-        
+
         % By default we assume that we want :latest, but :stable is
         % typically also an option incase something is broken
         remoteImageTag;
         remoteRoot; % we need to know where to map on the remote system
-        
+
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc). Contexts are created via docker on the local system,
@@ -193,14 +193,14 @@ classdef dockerWrapper < handle
             aDocker.localVolumePath = getpref('docker','localVolumePath',fullfile(piRootPath(), 'local/'));
             aDocker.renderContext = getpref('docker','renderContext','remote-mux');
             aDocker.relativeScenePath = '/iset/iset3d-v4/local/';
-        
+
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
             aDocker.localRoot = getpref('docker','localRoot','');
 
             aDocker.verbosity = 1;  % 0,1 or 2.  How much to print.  Might change
 
-        % default for flags
+            % default for flags
             if ispc
                 aDocker.dockerFlags = '-i --rm';
             else
@@ -266,7 +266,7 @@ classdef dockerWrapper < handle
             obj.whichGPU     = getpref('docker','whichGPU',0);
 
             obj.localImageTag = getpref('docker','localImageTag','latest');
-            
+
             obj.verbosity = getpref('docker','verbosity',1);
 
         end
@@ -281,17 +281,17 @@ classdef dockerWrapper < handle
         setParams();
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
-        
+
         % Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
         end
 
         % This is used for wsl commands under Windows, which need
-        % to know where to find the drive root. 
+        % to know where to find the drive root.
         function localRoot = defaultLocalRoot()
             if ispc
-                localRoot = getpref('docker','localRoot','/mnt/c'); % Windows default            
+                localRoot = getpref('docker','localRoot','/mnt/c'); % Windows default
             else
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
@@ -372,7 +372,7 @@ classdef dockerWrapper < handle
         function output = pathToLinux(inputPath)
             % On Windows the Docker
             % paths are Linux-format, so the native fullfile and fileparts
-            % don't work right. 
+            % don't work right.
             if ispc
                 if isequal(fullfile(inputPath), inputPath)
                     if numel(inputPath) > 3 && isequal(inputPath(2:3),':\')
@@ -515,8 +515,8 @@ classdef dockerWrapper < handle
                         % Start the container and set its name
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
-                    
-                    % If there is a render context, get it. 
+
+                    % If there is a render context, get it.
                     if ~isempty(obj.renderContext)
                         cFlag = ['--context ' obj.renderContext];
                     else
@@ -526,9 +526,9 @@ classdef dockerWrapper < handle
                     % Figure out the container name using a docker ps call
                     % in the context.
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-GPU', '')));
-                    
-                    if strlength(result) == 0 
-                        % Couldn't find it.  So try starting it. 
+
+                    if strlength(result) == 0
+                        % Couldn't find it.  So try starting it.
                         % This likely means it got killed, or the server
                         % rebooted or similar
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
@@ -547,7 +547,7 @@ classdef dockerWrapper < handle
                     else
                         cFlag = '';
                     end
-                    
+
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
@@ -580,7 +580,7 @@ classdef dockerWrapper < handle
             else
                 % If we are here, we are running locally or remote CPU.
                 if obj.localRender && ~isempty(obj.localImageName)
-                    % If this is set, use it.                    
+                    % If this is set, use it.
                     useDockerImage = obj.localImageName;
                     return;
                 else
@@ -646,8 +646,8 @@ classdef dockerWrapper < handle
 
         % Not yet defined.
         %function output = convertPathsInFile(obj, input)
-            % for depth or other files that have embedded "wrong" paths
-            % implemented someplace, need to find the code!
+        % for depth or other files that have embedded "wrong" paths
+        % implemented someplace, need to find the code!
         %end
 
         % Inserted from getRenderer.  thisD is a dockerWrapper (obj)
@@ -713,13 +713,13 @@ classdef dockerWrapper < handle
                 % Running on the user's local machine, whether there is a
                 % GPU or not.
                 thisD.dockerImageName = thisD.localImage;
-                return;                
+                return;
 
             else
                 % Rendering on a remote machine.
 
                 % This sets dockerWrapper parameters that were not already
-                % set and creates the docker context.  
+                % set and creates the docker context.
 
                 % Docker doesn't allow use of ~ in volume mounts, so we need to
                 % make sure we know the correct remote home dir:
@@ -737,16 +737,19 @@ classdef dockerWrapper < handle
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
+                % We allow one remote render context
+                % if the user specifies one, make sure it exists
+                % otherwise create one
+                thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
+
                 if isempty(thisD.remoteImage)
                     % If we know the remote machine, but not the remote
                     % image, we try fill in the remote Docker image to
                     % use.  We do this depending on the machine and the
                     % GPU.  A different image is needed for each, sigh.
                     %
-                    % We should probably catch
+
                     if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
-                        % We allow one remote render context
-                        thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
                         switch thisD.whichGPU
                             case {0, -1}
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
@@ -769,7 +772,7 @@ classdef dockerWrapper < handle
             end
 
         end
-        
+
         function userName = getUserName(obj)
             % Reads the user name from a docker wrapper object, or from the
             % system and then sets it in the docker wrapper object.
@@ -799,8 +802,14 @@ classdef dockerWrapper < handle
 
         end
 
-        
+        % validates rendering context if remote rendering
+        % will try to create one if none is available
         function useContext = getRenderContext(obj, serverName)
+            if isempty(obj.renderContext)
+                ourContext = 'remote-mux';
+            else
+                ourContext = obj.renderContext;
+            end
             % Get or set-up the rendering context for the docker container
             %
             % A docker context ('docker context create ...') is a set of
@@ -815,7 +824,7 @@ classdef dockerWrapper < handle
                     checkContext = sprintf('docker context list');
                     [status, result] = system(checkContext);
 
-                    if status ~= 0 || ~contains(result,'remote-mux')
+                    if status ~= 0 || ~contains(result,ourContext)
                         % If we do not have it, create it
                         % e.g. ssh://<username>@<server>
                         % use the pref for remote username,
@@ -829,18 +838,19 @@ classdef dockerWrapper < handle
                         contextString = sprintf(' --docker host=ssh://%s@%s',...
                             rUser, obj.vistalabDefaultServer);
                         createContext = sprintf('docker context create %s %s',...
-                            contextString, 'remote-mux');
+                            contextString, ourContext);
 
                         [status, result] = system(createContext);
                         if status ~= 0 || numel(result) == 0
-                            warning("Failed to create context: %s -- Might already exist.",'remote-mux');
+                            warning("Failed to create context: %s -- Might already exist.\n",ourContext);
                         else
-                            disp("Created docker context remote-mux for muxreconrt.stanford.edu")
+                            fprintf("Created docker context %s for Vistalab server\n",ourContext);
                         end
                     end
                     useContext = 'remote-mux';
                 otherwise
-                    warning("Unknown server!");
+                    % User is on their own to make sure they have a valid
+                    % context
             end
         end
 
