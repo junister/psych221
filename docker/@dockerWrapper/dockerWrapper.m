@@ -817,9 +817,17 @@ classdef dockerWrapper < handle
 
                     if status ~= 0 || ~contains(result,'remote-mux')
                         % If we do not have it, create it
-                        % e.g. ssh://david@muxreconrt.stanford.edu
+                        % e.g. ssh://<username>@<server>
+                        % use the pref for remote username,
+                        % otherwise assume it is the same as our local user
+                        if isempty(obj.remoteUser)
+                            rUser = getUserName(obj);
+                        else
+                            rUser = obj.remoteUser;
+                        end
+
                         contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            getUserName(obj), obj.vistalabDefaultServer);
+                            rUser, obj.vistalabDefaultServer);
                         createContext = sprintf('docker context create %s %s',...
                             contextString, 'remote-mux');
 
