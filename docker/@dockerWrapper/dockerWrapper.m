@@ -843,6 +843,7 @@ classdef dockerWrapper < handle
                         [status, result] = system(createContext);
                         if status ~= 0 || numel(result) == 0
                             warning("Failed to create context: %s -- Might already exist.\n",ourContext);
+                            disp(result)
                         else
                             fprintf("Created docker context %s for Vistalab server\n",ourContext);
                         end
