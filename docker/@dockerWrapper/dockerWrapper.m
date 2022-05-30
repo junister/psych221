@@ -456,9 +456,11 @@ classdef dockerWrapper < handle
             else
                 if ~isempty(obj.remoteRoot)
                     hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
-                elseif ~isempty(obj.remoteMachine)
-                    hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
-                    warning("Remote mount point for Docker doesn't seem right!");
+                else
+                    %ideally we could get at their local root
+                    %if ~isempty(obj.remoteMachine)
+                    %hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
+                    warning("You need to set remoteRoot\n");
                 end
             end
 
