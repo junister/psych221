@@ -457,10 +457,8 @@ classdef dockerWrapper < handle
                 if ~isempty(obj.remoteRoot)
                     hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
                 else
-                    %ideally we could get at their local root
-                    %if ~isempty(obj.remoteMachine)
-                    %hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
-                    warning("You need to set remoteRoot\n");
+                    hostLocalPath = fullfile(piRootPath(),'local');
+                    warning("Set Remote Root for you to: %s\n",hostLocalPath);
                 end
             end
 
