@@ -195,7 +195,7 @@ classdef dockerWrapper < handle
             % because our Docker image is Linux-based, we need to find
             % our local scene path and then convert to linux if we're on
             % Windows
-            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet'local'));
+            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('local'));
 
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
