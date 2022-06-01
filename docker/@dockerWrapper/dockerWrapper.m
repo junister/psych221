@@ -192,7 +192,10 @@ classdef dockerWrapper < handle
             % iset3d-v4/local by setting this.
             aDocker.localVolumePath = getpref('docker','localVolumePath',fullfile(piRootPath(), 'local/'));
             aDocker.renderContext = getpref('docker','renderContext','remote-mux');
-            aDocker.relativeScenePath = '/iset/iset3d-v4/local/';
+            % because our Docker image is Linux-based, we need to find
+            % our local scene path and then convert to linux if we're on
+            % Windows
+            aDocker.relativeScenePath = dockerWrapper.pathToLinux(fullfile(piRootPath,'local/'));
 
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
