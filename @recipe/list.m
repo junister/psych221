@@ -17,8 +17,8 @@ function [names,lst] = list(obj)
 % See also
 %   recipeSet, recipeGet
 
-v4Dir = fullfile(piRootPath,'data','V4');
-lst = dir(v4Dir);
+sceneDir = fullfile(piGetPath('scenes');
+lst = dir(sceneDir);
 names = cell(numel(lst)-2,1);
 kk = 1;
 for ii = 1:numel(lst)

@@ -53,7 +53,7 @@ sceneWindow(scene);
 inFile = fullfile(piRootPath,'data','V4','web','kitchen','scene.pbrt');
 exist(inFile,'file')
 
-outputDir = fullfile(piRootPath, 'data','v4','web','kitchen');
+outputDir = fullfile(piGetDir('scenes'),'web','kitchen');
 if ~exist(outputDir,'dir'), mkdir(outputDir);end
 
 outFile = fullfile(outputDir,'kitchen.pbrt');
