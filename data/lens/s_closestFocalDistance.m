@@ -9,7 +9,7 @@
 % BW SCIEN Stanford, 2017
 
 %%
-chdir(fullfile(piRootPath,'data','lens'));
+chdir(fullfile(piGetDir('lens')));
 lensFiles = dir('*.mat');
 nFiles = length(lensFiles);
 closest = zeros(nFiles,1);

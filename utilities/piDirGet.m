@@ -1,6 +1,9 @@
 function defaultDir = piDirGet(dirType)
 %PIGETDIR Return where files/assets of a given type are
-% located by default
+% located by default. This is to allow some filepath
+% independence, compared to hard-coding paths
+%
+% D.Cardinal -- Stanford University -- May, 2022
 %
 if isempty(dirType) || ~ischar(dirType)
     error("Please pass a valid asset or resource type");
@@ -12,13 +15,15 @@ else
 
     % Now we can locate specific types of resources
     switch (dirType)
+        case 'data'
+            defaultDir = ourData;
         case 'assets'
             defaultDir = fullfile(ourData,'assets');
         case 'lights'
             defaultDir = fullfile(ourData,'lights');
         case 'imageTextures'
             defaultDir = fullfile(ourData,'imageTextures');
-        case 'lens'
+        case {'lens', 'lenses'}
             defaultDir = fullfile(ourData,'lens');
         case 'scenes'
             defaultDir = fullfile(ourData,'V4'); % remove the V4 entry if we promote or move scenes

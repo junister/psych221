@@ -52,7 +52,7 @@
 
 %%  All the lenses in the pbrt2ISET directory
 
-lensDir = fullfile(piRootPath,'data','lens');
+lensDir = piGetDir('lens');
 
 % wide, tessar, fisheye, dgauss, telephoto, 2el, 2EL
 lensFiles = dir(fullfile(lensDir,'*.json'));   

@@ -20,7 +20,7 @@ sceneDir = 'arch';
 sceneFile = 'Arch3d-pbrt.pbrt';
 exporter = 'PARSE';
 
-FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+FilePath = fullfile(piDirGet('scenes'),sceneDir);
 fname = fullfile(FilePath,sceneFile);
 exist(fname,'file')
 
