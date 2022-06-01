@@ -11,7 +11,7 @@
 sceneName = 'simplescene';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 
-outputDir = fullfile(piRootPath, 'data/v4',sceneName);
+outputDir = fullfile(piDirGet('scenes'),sceneName);
 if ~exist(outputDir,'dir'), mkdir(outputDir);end
 
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);

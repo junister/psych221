@@ -6,7 +6,7 @@ piDockerConfig;
 sceneName = 'chessSet';
 inFile = fullfile(piRootPath,'data','V3',sceneName,[sceneName,'.pbrt']);
 % inFile = '/Users/zhenyi/Documents/SOW/scenes/slantedEdge/slantedEdge.pbrt';
-outputDir = fullfile(piRootPath, 'data/v4',sceneName);
+outputDir = fullfile(piGetDir('scenes'),sceneName);
 if ~exist(outputDir,'dir'), mkdir(outputDir);end
 
 outFile = fullfile(outputDir,[sceneName,'.pbrt']);
