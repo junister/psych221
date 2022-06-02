@@ -28,7 +28,9 @@ else
         case 'scenes'
             defaultDir = fullfile(ourData,'V4'); % remove the V4 entry if we promote or move scenes
         case 'local'
-            defaultDir = fullfile(piRootPath(), 'local/');
+            % Hard to make this one anything besides hard-coded,
+            % at least for now
+            defaultDir = fullfile('/iset/iset3d-v4/local/');
     end
 end
 
