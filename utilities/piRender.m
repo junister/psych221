@@ -274,7 +274,7 @@ preRender = tic;
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 
 % Append the renderCommand and output file
-sprintf('%s\nOutput file:  %s\n',result,outF);
+fprintf('%s\nOutput file:  %s\n',result,outF);
 
 elapsedTime = toc(preRender);
 if renderDocker.verbosity

@@ -30,7 +30,11 @@ else
         case 'local'
             % Hard to make this one anything besides hard-coded,
             % at least for now
-            defaultDir = fullfile('/iset/iset3d-v4/local/');
+            if ispc
+                defaultDir = fullfile(piRootPath(), 'local/');
+            else
+                defaultDir = '/iset/iset3d-v4/local/';
+            end
     end
 end
 
