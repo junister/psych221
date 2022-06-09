@@ -875,8 +875,18 @@ switch param
                     fprintf('Using skymap:  %s\n',exrFile);
                     copyfile(exrFile,thisR.get('output dir'));
                 else
-                    warning("Unable to find skymap: %s\n", skymapFileName);
-                    return % can't create the light
+                    % If skymapFileName exists at different location, we
+                    % move it to the output folder.
+                    if exist(skymapFileName,"file")
+                        [~, filename, ext] = fileparts(skymapFileName);
+                        fprintf('Using skymap:  %s\n',[filename,ext]);
+                        copyfile(skymapFileName,thisR.get('output dir'));
+                        skymapFileName = [filename,ext];
+                    else
+                        warning("Unable to find skymap: %s\n", skymapFileName);
+                        return % can't create the light
+                    end
+                    
                 end
             end
         end
