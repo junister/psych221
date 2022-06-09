@@ -902,8 +902,9 @@ switch param
                         
         if ~isempty(varargin) && isequal(varargin{1},'rotation val')
             thisR.set('light', lName, 'rotate', varargin{2});
-        else
-            thisR.set('light', lName, 'rotate', [-90 0 0]);
+%         else
+%             thisR.set('light', lName, 'rotate', [-90 0 0]);
+        % For V4 we do not need the -90 rotation as we did for PBRTv3
         end
 
         out = envLight;
