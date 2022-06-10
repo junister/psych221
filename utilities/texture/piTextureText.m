@@ -101,11 +101,12 @@ for ii=1:numel(textureParams)
                 else
                     if ispc % try to fix filename for the Linux docker container                        
                         imgFile = dockerWrapper.pathToLinux(imgFile);
+                        
                     end
                     
                     % In the future we might want to copy the texture files
                     % into a folder.
-                    % thisText = strrep(thisText,thisVal, imgFile);
+                    thisText = strrep(thisText, thisVal, imgFile);
                     % piTextureFileFormat(imgFile);
                     % copyfile(imgFile,thisR.get('output dir'));
                 end

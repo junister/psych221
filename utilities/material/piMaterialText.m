@@ -73,7 +73,7 @@ for ii=1:numel(matParams)
 
                     % In the future we might want to copy the texture files
                     % into a folder.
-                    % thisText = strrep(thisText,thisVal, imgFile);
+                    thisText = strrep(thisText,thisVal, imgFile);
                     %                     piTextureFileFormat(imgFile);
                     copyfile(imgFile,thisR.get('output dir'));
                 end

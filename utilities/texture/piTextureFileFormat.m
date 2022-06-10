@@ -51,7 +51,12 @@ for ii = 1:numel(textureList)
             end
 
             % update texture slot
-            textureList{ii}.filename.value = fullfile(path, [name,'.png']);
+            if ispc
+                textureList{ii}.filename.value = dockerWrapper.pathToLinux(fullfile(path, [name,'.png']));
+            else
+                textureList{ii}.filename.value = fullfile(path, [name,'.png']);
+            end
+
             thisR.textures.list(textureList{ii}.name) = textureList{ii};
             
             fprintf('Texture: %s is converted \n',textureList{ii}.filename.value);
@@ -72,7 +77,11 @@ for ii = 1:numel(textureList)
         thisImg = thisImg(:,:,1);
         thisImg(thisImg~=0)=255;
         imwrite(thisImg,outputPath);
-        textureList{ii}.filename.value = fullfile(path, [name,'_alphamap.png']);
+        if ispc
+            textureList{ii}.filename.value = dockerWrapper.pathToLinux(fullfile(path, [name,'_alphamap.png']));
+        else
+            textureList{ii}.filename.value = fullfile(path, [name,'_alphamap.png']);
+        end
         thisR.textures.list(textureList{ii}.name) = textureList{ii};
         
         fprintf('Texture: %s is converted \n',textureList{ii}.filename.value);
