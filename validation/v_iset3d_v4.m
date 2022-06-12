@@ -1,9 +1,10 @@
-%% Gateway to ISET3d validation scripts
+%% ISET3d (v4) validation script
 %
 %    v_iset3d_v4
 %
 % Validation and Tutorial scripts.  When these all run, it is a partial validation of the
-% code.  More specific tests are still needed.
+% code.  More specific tests are still needed. Timing for each script is
+% included. Times of -1 mean that the script failed.
 %
 % ZL,BW, DJC
 %
@@ -24,7 +25,7 @@ try
     v_DockerWrapper('length','short');
     setpref('ISET3d', 'tvdockerTime', toc(getpref('ISET3d', 'tvdockerStart', 0)));
 catch
-    disp('Docker Wrapper test failed');
+    warning('Docker Wrapper test failed');
     disp('Make sure you have a remote image set up before running');
     setpref('ISET3d', 'tvdockerTime', -1);
 end
@@ -36,7 +37,7 @@ try
     t_piIntro_macbeth;               % Gets the depth map
     setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
 catch
-    disp('Macbeth failed');
+    warning('Macbeth failed');
     setpref('ISET3d', 'tvdepthTime', -1);
 end
 
@@ -65,7 +66,7 @@ try
     t_piIntro_light;
     setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
 catch
-    disp('piIntro_Light failed');
+    warning('piIntro_Light failed');
     setpref('ISET3d', 'tvlightTime', -1);
 end
 
@@ -86,10 +87,22 @@ disp('*** CHESS SET -- t_piIntro_chess')
 setpref('ISET3d', 'tvchessStart', tic);
 try
     t_piIntro_chess;
+    setpref('ISET3d', 'tvchessTime', toc(getpref('ISET3d', 'tvchessStart', 0)));
 catch
-    disp('chess set failed')
+    warning('chess set failed')
+    setpref('ISET3d', 'tvchessTime', -1);
 end
-setpref('ISET3d', 'tvchessTime', toc(getpref('ISET3d', 'tvchessStart', 0)));
+
+%% Validate some recipes
+disp('*** RECIPES -- v_recipeValidation')
+setpref('ISET3d', 'tvrecipeStart', tic);
+try
+    v_recipeValidation;
+    setpref('ISET3d', 'tvrecipeTime', toc(getpref('ISET3d', 'tvrecipeStart', 0)));
+catch
+    warning('recipe validation failed');
+    setpref('ISET3d','tvrecipeTime', -1);
+end
 
 
 %% This does not run in v4 yet
@@ -128,6 +141,7 @@ fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
 fprintf("Cam Pos.:   %5.1f seconds.\n", getpref('ISET3d','tvcampositionTime'));
 fprintf("Chess Set:  %5.1f seconds.\n", getpref('ISET3d','tvchessTime'));
 fprintf("Skymap:     %5.1f seconds.\n", getpref('ISET3d','tvskymapTime'));
+fprintf("Recipes:    %5.1f seconds.\n", getpref('ISET3d','tvrecipeTime'));
 
 %% END
 
