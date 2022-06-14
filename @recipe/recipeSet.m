@@ -899,12 +899,19 @@ switch param
             'type', 'infinite',...
             'mapname', skymapFileName);
         thisR.set('lights', envLight, 'add');
-                        
+
         if ~isempty(varargin) && isequal(varargin{1},'rotation val')
             thisR.set('light', lName, 'rotate', varargin{2});
-%         else
-%             thisR.set('light', lName, 'rotate', [-90 0 0]);
-        % For V4 we do not need the -90 rotation as we did for PBRTv3
+        else
+            % For V4 we do not usually need the -90 rotation as we did
+            % for V3. For V4 the 'up' direction seems to mainly be
+            % z-up. But scenes where it is y-up, we need the rotation.
+            % (Check with Zhenyi). 
+            up = thisR.get('up');
+            if up(3) > up(2)
+                % This is a y-up recipe, so by default we rotate the skypmap
+                thisR.set('light', lName, 'rotate', [-90 0 0]);
+            end
         end
 
         out = envLight;

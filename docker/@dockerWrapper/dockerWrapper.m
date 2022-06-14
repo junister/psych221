@@ -112,7 +112,7 @@ classdef dockerWrapper < handle
         outputFilePrefix = '--outfile';
     end
 
-    properties (SetAccess = protected)
+    properties (SetAccess = public)
 
         % NOTE: Any property defaults set here should be ones we always
         % want. For ones the user might over-ride, just declare the
@@ -282,6 +282,9 @@ classdef dockerWrapper < handle
         % separate file.  Here are the definitions.  (Static functions do
         % not have an 'obj' argument.
         setParams();
+        getParams();
+        setPrefs();
+        getPrefs();
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
 
@@ -669,39 +672,27 @@ classdef dockerWrapper < handle
             %  those to set a few additional parameters that are
             %  site-specific.
             %
+            %  You can adjust the default parameters, which are stored
+            %  in the Matlab prefs under 'docker' using the method
+            %
+            %       dockerWrapper.setPrefs(varargin)
+            %
+            %  To list the current prefs you can use
+            %
+            %     dockerWrapper.getPrefs;
+            %
             %  VISTALAB GPU Information
+            %
             %   The default uses the 3070 on muxreconrt.stanford.edu.
-            %   This approach requires having an ssh-key based user login as
-            %   described on the wiki page. Specifically, your username & homedir
-            %   need to be the same on both machines.
-            %
-            % Re-write this with the new changes
-            %
-            %  You can adjust for any differences using dockerWrapper.setParams.
-            %  For example,
-            %
-            %   dockerWrapper.setParams('remoteUser',<remoteUser>);
-            %   dockerWrapper.setParams('remoteRoot',<remoteRoot>); % where we will put the iset tree
-            %   dockerWrapper.setParams('localRoot',<localRoot>);   % only needed for WSL if not \mnt\c
-            %
-            % Other options you can specify:
-            %
-            % If you need to turn-off GPU Rendering set to false
-            %
-            %   dockerWrapper.setParams('gpuRendering',false);
-            %
-            % If you are having issues with :latest, you can go back to :stable
-            %
-            %   dockerWrapper.setParams('remoteImageTag','stable');
-            %
-            % Change which gpu to use on a server
-            %
-            %   dockerWrapper.setParams('whichGPU', <#>); % current default is 0 for mux
+            %   This approach requires having an ssh-key based user
+            %   login as described on the wiki page. Specifically,
+            %   your username & homedir need to be the same on both
+            %   machines.
             %
             % Current GPU Options at vistalab:
             %
             %   muxreconrt:
-            %     GPU 0: Nvidia 3070 -- -ampere -- DEFAULT
+            %     GPU 0: Nvidia 3070 -- -ampere -- (Broken)
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
             %     GPU 2: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 2);
             %
@@ -713,16 +704,14 @@ classdef dockerWrapper < handle
             % See also
             %   dockerWrapper
 
-            % Sometimes we want to force a local machine
-            % This doesn't actually work yet:(
-            % forceLocal = getpref('docker','forceLocal', false);
-
             if thisD.localRender
                 % Running on the user's local machine, whether there is a
-                % GPU or not.
-                thisD.dockerImageName = thisD.localImage;
-                return;
+                % GPU or not.  The container name is probably in
+                % thisD.localImage, or in the software default.
 
+                % This used to be here, but it seemed wrong to BW.
+                % thisD.dockerImageName = thisD.localImage;
+                return;
             else
                 % Rendering on a remote machine.
 

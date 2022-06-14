@@ -64,46 +64,13 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 % meanluminance and scalepupilarea.  These are important for ISETBio.
 %
 
-% Examples
-%{
-% These are examples of how to set the dockerWrapper parameters
-%
-% ourDocker = dockerWrapper('gpuRendering', true, ...
-%     'renderContext', 'remote-render','remoteImage', ...
-%     'digitalprodev/pbrt-v4-gpu-ampere-bg', 'remoteRoot','/home/david81/', ...
-%     'remoteMachine', 'beluga.psych.upenn.edu', ...
-%     'remoteUser', 'david81', 'localRoot', '/mnt/c', 'whichGPU', 1);
-%
-% to run it using the CPU container
-%
-% ourDocker = dockerWrapper('gpuRendering', false);
-%}
-%{
-   % Renders both radiance and depth by default.
-   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
-   scene = piRender(pbrtFile);
-   sceneWindow(scene); sceneSet(scene,'gamma',0.5);
-%}
-%{
-   % Render radiance and depth separately
-   % Currently this means running the render twice, which isn't very
-   % efficient
-   pbrtFile = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
-   scene = piRender(pbrtFile,'render type','radiance');
-   ieAddObject(scene); sceneWindow; sceneSet(scene,'gamma',0.5);
-
-   dmap = piRender(pbrtFile,'render type','depth');
-   scene = sceneSet(scene,'depth map',dmap);
-   sceneWindow(scene); sceneSet(scene,'gamma',0.5);
-%}
+% Examples:
 %{
   % Separately calculate the illuminant and the radiance-
   % We are not sure this works or is right!
   thisR = piRecipeDefault; 
   piWrite(thisR);
   [scene, result]      = piRender(thisR,'render type','radiance');
-  [illPhotons, result] = piRender(thisR,'render type','illuminance');
-  scene = sceneSet(scene,'illuminant photons',illPhotons);
   sceneWindow(scene);
 %}
 %{
@@ -124,12 +91,10 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %}
 %{
 % Render locally with your CPU machine
-  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
-  scene = piRender(thisR,'local',true,'our docker','digitalprodev/pbrt-v4-cpu');
-  
-  dockerWrapper.setParams('local',true);
-  dockerWrapper.setParams('local image','digitalprodev/pbrt-v4-cpu');
-  scene = piRender(thisR);
+  dockerWrapper.setPrefs('gpuRender',false); 
+  dockerWrapper.setPrefs('localRender',true);
+  thisR = piRecipeDefault('scene name', 'ChessSet');
+  scene = piWRS(thisR);
 %}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model
