@@ -288,8 +288,8 @@ classdef dockerWrapper < handle
 
         % setParams();
         % getParams();
-        setPrefs();
-        getPrefs();
+        setPrefs(varargin);
+        getPrefs(varargin);
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
 

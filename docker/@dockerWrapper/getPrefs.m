@@ -50,7 +50,17 @@ if isempty(paramName) || isequal(paramName,'all') || isequal(paramName,'print')
 
 else
     % Return the value.
-    retVal = getpref('docker',paramName, '');
+    valid = {'verbosity','whichGPU','remoteRoot','remoteUser',...
+        'gpuRendering','remoteImageTag','localRoot'...
+        'localRender','localImageTag','remoteMachine','remoteImage',...
+        'localImage','localVolumePath','renderContext'};
+    if ~ismember(paramName,valid)
+        disp('Valid parameters:')
+        disp(valid);
+        error('%s is NOT a valid dockerWrapper default parameter',paramName);
+    else
+        retVal = getpref('docker',paramName, '');
+    end
 end
 
 end
