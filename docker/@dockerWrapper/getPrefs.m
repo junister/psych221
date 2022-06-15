@@ -48,8 +48,14 @@ if isempty(paramName) || isequal(paramName,'all') || isequal(paramName,'print')
     location = retVal.remoteMachine; if retVal.localRender, location='your local machine'; end
     fprintf('\nConfigured for rendering on %s using a %s.\n\n',location, processor);
 
+elseif isequal(paramName,'summary')
+    % Just summarize without all the values
+    retVal = getpref('docker');
+    processor = 'CPU';   if retVal.gpuRendering, processor = 'GPU'; end
+    location = retVal.remoteMachine; if retVal.localRender, location='your local machine'; end
+    fprintf('\nConfigured for rendering on %s using a %s.\n\n',location, processor);
 else
-    % Return the value.
+    % Return a particular parameter value.
     valid = {'verbosity','whichGPU','remoteRoot','remoteUser',...
         'gpuRendering','remoteImageTag','localRoot'...
         'localRender','localImageTag','remoteMachine','remoteImage',...

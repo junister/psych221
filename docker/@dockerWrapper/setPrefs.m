@@ -40,7 +40,7 @@ function  setPrefs(varargin)
 %   dockerWrapper.getPrefs;
 
 p = inputParser;
-p.addParameter('verbosity','',@islogical);
+p.addParameter('verbosity','',@isnumeric);
 p.addParameter('whichGPU','',@isnumeric);
 p.addParameter('gpuRendering','',@islogical);
 p.addParameter('gpuRender','',@islogical);

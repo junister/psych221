@@ -908,7 +908,7 @@ switch param
             % z-up. But scenes where it is y-up, we need the rotation.
             % (Check with Zhenyi). 
             up = thisR.get('up');
-            if up(3) > up(2)
+            if up(2) > up(3)
                 % This is a y-up recipe, so by default we rotate the skypmap
                 thisR.set('light', lName, 'rotate', [-90 0 0]);
             end
