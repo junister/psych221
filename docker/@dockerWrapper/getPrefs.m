@@ -45,8 +45,8 @@ if isempty(paramName) || isequal(paramName,'all') || isequal(paramName,'print')
 
     % Summarize configuration for the user
     processor = 'CPU';   if retVal.gpuRendering, processor = 'GPU'; end
-    location = 'remote'; if retVal.localRender, location='local'; end
-    fprintf('\nConfigured for %s rendering on a %s.\n\n',location, processor);
+    location = retVal.remoteMachine; if retVal.localRender, location='your local machine'; end
+    fprintf('\nConfigured for rendering on %s using a %s.\n\n',location, processor);
 
 else
     % Return the value.

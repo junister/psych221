@@ -75,7 +75,16 @@ classdef dockerWrapper < handle
     %
     % Additional NOTES
     %
-    % 1. To shut down stranded local containers, run on the command line
+    % * Use dockerWrapper.setPrefs and dockerWrapper.getPrefs to
+    % interact with the Matlab prefs that determine the defaults.  The
+    % defaults are used when creating a new dockerWrapper.
+    %
+    % * It is possible to create a dockerWrapper and then manually change
+    % the parameters.  We recently made the variables public, not
+    % private.
+    %
+    % * To shut down stranded local containers, on the command line
+    % run:
     %
     %    docker container prune
     %
@@ -85,15 +94,10 @@ classdef dockerWrapper < handle
     % Those can be pruned by running the same command on the server.
     % (or wait for DJC to prune them on the server every few days:))
     %
-    % Examples (needs updates)
+    % Examples:
     %
-    %   1. Remote GPU rendering initialization from a Windows client:
-    %
-    % ourDocker = dockerWrapper('gpuRendering', true,'remoteImage', ...
-    %    <suitable Docker image>, 'remoteRoot','/home/<username>/', ...
-    %     'remoteMachine', '<DNS resolvable host>', ...
-    %     'remoteUser', '<remote uname>', 'localRoot', <'/mnt/c'>, 'whichGPU', <0>);
-    %
+    % See also
+    %   
 
     properties (SetAccess = public)
 
@@ -281,8 +285,9 @@ classdef dockerWrapper < handle
         % Matlab requires listing static functions that are defined in a
         % separate file.  Here are the definitions.  (Static functions do
         % not have an 'obj' argument.
-        setParams();
-        getParams();
+
+        % setParams();
+        % getParams();
         setPrefs();
         getPrefs();
         dockerImage = localImage();
@@ -457,6 +462,10 @@ classdef dockerWrapper < handle
             % containerLocalPath is the container path for <iset3d-v4>/local (normally
             % under /iset)
             %
+            % BW:  Why do we change the variable name from
+            % localVolumePath to hostLocalPath? Would it be OK to
+            % use hostLocalPath everywhere?  Or is there a distinction
+            % between local/host?  
             if obj.localRender
                 hostLocalPath = obj.localVolumePath;
             else

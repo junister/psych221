@@ -17,9 +17,17 @@ arguments
 end
 
 %% Initialize as usual
-% This is annoying. If we call ieInit() it wipes out our arguments.
+% DJC:  This is annoying. If we call ieInit() it wipes out our arguments.
 % so trying it without.
-%ieInit();
+%
+% BW:  You can set whether or not ieInit clear variables.  To keep the
+% current variables, set initclear to false.  For example.
+%
+    % iClear = getpref('ISET','initclear');
+    setpref('ISET','initclear',0);
+    ieInit;
+%    ...
+%    setpref('ISET','initclear',iClear);
 
 result = 0; % default is success.
 
@@ -42,7 +50,7 @@ catch
 end
 
 %% Default rendering, verbose
-fprintf('*** User default verbose ... ***\n');
+fprintf('*** Rendering with verbosity = 2 ***\n');
 fprintf('-------------------------------------\n\n')
 
 try
@@ -60,14 +68,14 @@ end
 
 %% Local rendering CPU
 
-fprintf('*** Local render on CPU ... ***');
+fprintf('*** Local CPU render, verbosity = 0 ... ***');
 fprintf('-------------------------------------\n\n');
 
 try
     % test local rendering on CPU
     % need to turn off GPU rendering or we've given it conflicting
     % instructions in the case where the GPU is remote
-    ourDocker = dockerWrapper('localRender',true,'gpuRendering', false,'verbosity',2);
+    ourDocker = dockerWrapper('localRender',true,'gpuRendering', false,'verbosity',0);
     piWRS(sampleScene,'our docker', ourDocker);
 
     fprintf('succeeded\n');
@@ -86,8 +94,8 @@ fprintf('*** Remote rendering on CPU ... ***\n');
 fprintf('-------------------------------------\n\n')
 try
     % test remote CPU rendering
-    % currenctly we keep a cache of 1 GPU and 1 CPU container
-    % so creating a second one of either requires a reset
+    % currently we cache 1 GPU and 1 CPU container
+    % Initializing a second one of either requires a reset
     dockerWrapper.reset();
 
     % NOTE: To render remotely, we may need to specify the .remoteImage
