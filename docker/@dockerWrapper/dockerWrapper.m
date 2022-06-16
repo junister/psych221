@@ -410,11 +410,13 @@ classdef dockerWrapper < handle
         % For switching docker to other (typically remote) context
         % and then back. Static as it is system-wide
         function newContext = setContext(useContext)
+            % dummy return values otherwise we get output to console by
+            % default
             if ~isempty(useContext)
-                system(sprintf('docker context use %s', useContext));
+                [~, ~] = system(sprintf('docker context use %s', useContext));
                 newContext = useContext;
             else
-                system('docker context use default');
+                [~, ~] = system('docker context use default');
                 newContext = 'default';
             end
         end
