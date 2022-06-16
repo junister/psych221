@@ -668,7 +668,7 @@ classdef dockerWrapper < handle
                         else
                             % remote CPU!!
                             % What if it has a different architecture?
-                            useDockerImage = dockerWrapper.remoteCPUImage;
+                            useDockerImage = obj.remoteCPUImage;
                         end
                     end
                 end
