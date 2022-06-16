@@ -473,9 +473,9 @@ classdef dockerWrapper < handle
             volumeMap = sprintf("-v %s:%s", hostLocalPath, containerLocalPath);
             placeholderCommand = 'bash';
 
-            % We do not use context for local docker containers
+            % We use the default context for local docker containers
             if obj.localRender
-                contextFlag = '';
+                contextFlag = ' --context default ';
             else
                 % Rendering remotely.
                 % Have to track user set context somehow

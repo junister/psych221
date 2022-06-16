@@ -134,7 +134,7 @@ if ~obj.localRender
 else
     % Running locally.        
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+    containerRender = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
     
     tic;
     [status, result] = system(containerRender);
