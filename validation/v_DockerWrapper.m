@@ -17,11 +17,6 @@ arguments
 end
 
 %% Initialize as usual
-% DJC:  This is annoying. If we call ieInit() it wipes out our arguments.
-% so trying it without.
-%
-% BW:  You can set whether or not ieInit clear variables.  To keep the
-% current variables, set initclear to false.  For example.
 %
     % iClear = getpref('ISET','initclear');
     setpref('ISET','initclear',0);
@@ -55,7 +50,7 @@ fprintf('-------------------------------------\n\n')
 
 try
     dockerWrapper.reset;
-    ourDocker = dockerWrapper('verbosity',2);
+    ourDocker = dockerWrapper('verbosity',2,'gpuRendering',1);
     piWRS(sampleScene, 'our docker', ourDocker);
     
     fprintf('succeeded\n');

@@ -155,6 +155,7 @@ classdef dockerWrapper < handle
         % gray, etc). Contexts are created via docker on the local system,
         % and if needed one is created by default
         renderContext;
+        defaultContext; % docker context used for everything else
         localRoot     = ''; % dockerWrapper.defaultLocalRoot();
 
         workingDirectory = '';
@@ -179,7 +180,10 @@ classdef dockerWrapper < handle
             %  If they are initialized in properties they get messed up
             %  (DJC).
             %
-
+            %
+            % We typically want 'default' to be the docker context
+            % for everything except rendering
+            aDocker.defaultContext = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
             aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
             aDocker.localImageName   =  getpref('docker','localImage','');
 
@@ -328,6 +332,7 @@ classdef dockerWrapper < handle
             dockerWrapper.staticVar('set', 'cpuContainer', '');
             dockerWrapper.staticVar('set', 'gpuContainer', '');
             dockerWrapper.staticVar('set', 'renderContext', '');
+            dockerWrapper.setContext('default'); % in case it has been set
         end
 
         % cleanup
@@ -404,11 +409,13 @@ classdef dockerWrapper < handle
 
         % For switching docker to other (typically remote) context
         % and then back. Static as it is system-wide
-        function setContext(useContext)
+        function newContext = setContext(useContext)
             if ~isempty(useContext)
                 system(sprintf('docker context use %s', useContext));
+                newContext = useContext;
             else
                 system('docker context use default');
+                newContext = 'default';
             end
         end
 
