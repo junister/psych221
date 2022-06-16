@@ -132,7 +132,6 @@ classdef dockerWrapper < handle
         % default image is cpu on x64 architecture
         localImageName;
         dockerImageRender = '';        % set based on local machine
-
         % Right now pbrt only supports Linux containers
         containerType = 'linux'; % default, even on Windows
 
@@ -168,6 +167,9 @@ classdef dockerWrapper < handle
         localImageTag;
 
         verbosity;  % 0,1 or 2.  How much to print.  Might change
+
+        remoteCPUImage;
+
     end
 
     methods
@@ -195,6 +197,7 @@ classdef dockerWrapper < handle
             aDocker.remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
             aDocker.remoteImageTag = 'latest';
             aDocker.remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+            aDocker.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
 
             % You can run scenes from other locations beside
             % iset3d-v4/local by setting this.
@@ -570,7 +573,7 @@ classdef dockerWrapper < handle
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
 
-                    % Need to switch to render context here!
+                    % Need to use render context here!
                     if ~isempty(dockerWrapper.staticVar('get','renderContext'))
                         cFlag = ['--context ' dockerWrapper.staticVar('get','renderContext')];
                     else
@@ -665,8 +668,7 @@ classdef dockerWrapper < handle
                         else
                             % remote CPU!!
                             % What if it has a different architecture?
-                            useDockerImage = obj.remoteImage;
-                            % need to set context here
+                            useDockerImage = dockerWrapper.remoteCPUImage;
                         end
                     end
                 end
