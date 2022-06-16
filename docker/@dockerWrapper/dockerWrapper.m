@@ -289,9 +289,9 @@ classdef dockerWrapper < handle
         % Matlab requires listing static functions that are defined in a
         % separate file.  Here are the definitions.  (Static functions do
         % not have an 'obj' argument.
+        %
+        % Methods in this file do not need to be here.
 
-        % setParams();
-        % getParams();
         setPrefs(varargin);
         getPrefs(varargin);
         dockerImage = localImage();
