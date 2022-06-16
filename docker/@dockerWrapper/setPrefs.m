@@ -2,48 +2,45 @@ function  setPrefs(varargin)
 % Set the Matlab prefs (getpref('docker')) variables.
 %
 % Syntax
-%    dockerWrapper.setPrefs(key/val pairs)
+%    dockerWrapper.setPrefs(varargin)
 %
 % Brief synopsis
-%  Interface to setpref(), getpref().  The Matlab prefs are persistent
-%    across Matlab sessions.  When these parameters are changed,
-%    dockerWrapper.reset() is called.
+%  Interface to Matlab setpref(), getpref().  The Matlab prefs are
+%  persistent across Matlab sessions.  When these parameters are
+%  changed, dockerWrapper.reset() is called.
 %
 % Inputs
 %   N/A
 %
 % Key/Val pairs - hopefully meaning is clear (see examples below)
 %
-%   verbosity
-%   whichGPU
-%   gpuRendering
+%   verbosity - Controls printouts during rendering (0,1 or 2)
+%   whichGPU  - When multiple GPUs are present, selects
+%   gpuRendering - True/False
 %
-%   remoteMachine
-%   remoteUser
-%   remoteRoot
-%   remoteImage
-%   remoteImageTag
+%   remoteMachine - machine (e.g., muxreconrt.stanford.edu)
+%   remoteUser    - User name on remote machine
+%   remoteRoot    - User root directory on remote machine
+%   remoteImage   - Docker image to be used, otherwise default from
+%   ...
+%   remoteImageTag - Usually 'latest'
 %
-%   localRoot
-%   localRender
-%   localVolumePath
+%   localRoot     -  Mainly needed for Windows (WSL).  This is the
+%                    drive root 
+%   localRender   -  True/false  (render remotely or on user's local
+%                    computer)
+%   localVolumePath - Directory that will be mounted by the
+%                     Docker image.  Also called hostLocalPath in the
+%                     dockerWrapper code.
 %
 % Return
-%   N/A
+%   Changes the Matlab prefs
 %
-% Examples:
-%
-%   dockerWrapper.setParams('remoteUser',<remoteUser>);
-%   dockerWrapper.setParams('remoteRoot',<remoteRoot>); % where we will put the iset tree
-%
-%  Used on Windows
-%   dockerWrapper.setParams('localRoot',<localRoot>); % only needed for WSL if not \mnt\c
-%
-% Other p.Results:
-%
+% See also
+%   dockerWrapper.getPrefs;
 
 p = inputParser;
-p.addParameter('verbosity','',@islogical);
+p.addParameter('verbosity','',@isnumeric);
 p.addParameter('whichGPU','',@isnumeric);
 p.addParameter('gpuRendering','',@islogical);
 p.addParameter('gpuRender','',@islogical);
@@ -146,7 +143,7 @@ if ~isempty(p.Results.localImageTag)
 end
 if ~isempty(p.Results.localVolumePath)
     % By default this will be 'latest'
-    setpref('docker', 'localImageTag', p.Results.localVolumePath);
+    setpref('docker', 'localVolumePath', p.Results.localVolumePath);
 end
 % If you change these parameters, we need to reset the dockerWrapper.
 % Not sure I understand this (BW).

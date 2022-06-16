@@ -45,12 +45,28 @@ if isempty(paramName) || isequal(paramName,'all') || isequal(paramName,'print')
 
     % Summarize configuration for the user
     processor = 'CPU';   if retVal.gpuRendering, processor = 'GPU'; end
-    location = 'remote'; if retVal.localRender, location='local'; end
-    fprintf('\nConfigured for %s rendering on a %s.\n\n',location, processor);
+    location = retVal.remoteMachine; if retVal.localRender, location='your local machine'; end
+    fprintf('\nConfigured for rendering on %s using a %s.\n\n',location, processor);
 
+elseif isequal(paramName,'summary')
+    % Just summarize without all the values
+    retVal = getpref('docker');
+    processor = 'CPU';   if retVal.gpuRendering, processor = 'GPU'; end
+    location = retVal.remoteMachine; if retVal.localRender, location='your local machine'; end
+    fprintf('\nConfigured for rendering on %s using a %s.\n\n',location, processor);
 else
-    % Return the value.
-    retVal = getpref('docker',paramName, '');
+    % Return a particular parameter value.
+    valid = {'verbosity','whichGPU','remoteRoot','remoteUser',...
+        'gpuRendering','remoteImageTag','localRoot'...
+        'localRender','localImageTag','remoteMachine','remoteImage',...
+        'localImage','localVolumePath','renderContext'};
+    if ~ismember(paramName,valid)
+        disp('Valid parameters:')
+        disp(valid);
+        error('%s is NOT a valid dockerWrapper default parameter',paramName);
+    else
+        retVal = getpref('docker',paramName, '');
+    end
 end
 
 end
