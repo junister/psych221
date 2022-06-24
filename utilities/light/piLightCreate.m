@@ -135,6 +135,9 @@ switch ieParamFormat(lght.type)
         lght.scale.value = {};
         %}
     case 'point'
+        % Initializes a light at the origin.
+        % Point sources emit in all directions, and have no 'to'.
+        %
         lght.cameracoordinate = true;
 
         lght.from.type = 'point';
