@@ -1,5 +1,5 @@
 function thisR = piRecipeDefault(varargin)
-% Returns a recipe to an ISET3d standard scene
+% Returns a recipe to an ISET3d (v4) standard scene
 %
 % Syntax
 %   thisR = piRecipeDefault(varargin)
@@ -14,7 +14,8 @@ function thisR = piRecipeDefault(varargin)
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name from the data/V4 directory.
-%     Here are some names:
+%
+%    
 %       MacBethChecker (default)
 %       SimpleScene
 %       checkerboard
@@ -26,8 +27,8 @@ function thisR = piRecipeDefault(varargin)
 %       materialball
 %       materialball_cloth
 %
-%   write      -  Call piWrite (default is false). Immediately writes into
-%                 iset3d/local, without any editing.
+%   write -  Use piWrite to immediately save into iset3d/local, without any
+%     editing (default: false)
 %
 % Outputs
 %   thisR - the ISET3d recipe with information from the PBRT scene file.
@@ -367,9 +368,9 @@ end
 if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
-    FilePath = fullfile(piRootPath,'data','V4',sceneDir);
+    FilePath = fullfile(piRootPath,'data','scenes',sceneDir);
     if ~isfolder(FilePath)
-        FilePath = fullfile(piRootPath,'data','V4','web',sceneDir);
+        FilePath = fullfile(piRootPath,'data','scenes','web',sceneDir);
     end
 end
 

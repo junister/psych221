@@ -238,12 +238,17 @@ end
 preRender = tic;
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 
+% Big display, when verbosity is 2.
 % Append the renderCommand and output file
-fprintf('%s\nOutput file:  %s\n',result,outF);
+if renderDocker.verbosity > 0
+    fprintf('\nOutput file:  %s\n',outF);
+if renderDocker.verbosity > 1
+    fprintf('\nPBRT result info:  %s\n',result);
+end
 
 elapsedTime = toc(preRender);
-if renderDocker.verbosity
-    fprintf('*** Rendering time for this job (%s) was %.1f sec ***\n\n',currName,elapsedTime);
+if renderDocker.verbosity > 0
+    fprintf('*** Rendering time (%s) was %.1f sec ***\n\n',currName,elapsedTime);
 end
 
 % The user wants the dockerWrapper.
