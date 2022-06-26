@@ -2,9 +2,11 @@
 %
 %    v_iset3d_v4
 %
-% Validation and Tutorial scripts.  When these all run, it is a partial validation of the
-% code.  More specific tests are still needed. Timing for each script is
-% included. Times of -1 mean that the script failed.
+% Validation and Tutorial scripts.  When these all run, it is a partial
+% validation of the code.  More specific unit tests are still needed.
+%
+% Timing for each script is included. Times of -1 mean that the script
+% failed.  We will be editing the timing methods over time.
 %
 % ZL,BW, DJC
 %
@@ -16,7 +18,6 @@ setpref('ISET3d', 'tStart', tic);
 %% Basic
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-
 
 %% Quick version of DockerWrapper tests
 disp('*** DOCKER -- v_DockerWrapper');

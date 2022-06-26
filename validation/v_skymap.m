@@ -1,13 +1,25 @@
 %% Validate 'skymap' option for adding a skymap
 %
-% 2022, D.Cardinal
+% Try a few sky maps
 %
-% 
+
+%% 
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%%
 thisR = piRecipeDefault('scene name','sphere');
 thisR.set('skymap', 'room.exr');
 piWRS(thisR);
-% add a rotated version
-thisR.set('skymap', 'room.exr','rotation val', [-90 -90 -90]);
-% now we should see two overlapped skymaps
+
+%%
+thisR = piRecipeDefault('scene name','sphere');
+thisR.set('skymap', 'cathedral_interior.exr');
 piWRS(thisR);
 
+%%
+thisR = piRecipeDefault('scene name','sphere');
+thisR.set('skymap', 'equiarea-rainbow.exr');
+piWRS(thisR);
+
+%% END
