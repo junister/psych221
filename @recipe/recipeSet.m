@@ -157,34 +157,16 @@ switch param
     % Rendering and Docker related
     case {'outputfile'}
         % thisR.set('outputfile',fullfilepath);
-        %
-
-        %{
-        % The outputfile has a default initial string.  When we set,
-        % we check that the new directory exists. If not, we make it.
-        % If there were files in the previous directory we copy them
-        % to the new directory.  Maybe there should be an option to
-        % stop the copy.
-        %
-        % I think it is strange that we are doing this in a set. (BW).
-
-        newDir     = fileparts(val);
-        if ~exist(newDir,'dir')
-            if verbosity > 1
-                fprintf('Creating output folder %s\n',newDir);
-            end
-            mkdir(newDir);
-        end
-        %}
-        newDir = fileparts(val);
-
+        % This file may not yet exist.  It is where PBRT will write the
+        % output file.
         thisR.outputFile = val;
 
     case {'inputfile'}
         % thisR.set('input file',filename);
-        val = which(val);
+        % This file should typically exist.  There are cases, however,
+        % where we may set it before the file exists.  I think.
+        if ~isfile(val), warning('Specified input file not found.'); end
         thisR.inputFile = val;
-        if ~exist(val,'file'), warning('No input file found yet'); end
     case {'verbose'}
         thisR.verbose = val;
     case {'exporter'}
@@ -712,6 +694,8 @@ switch param
         % thisR.set('material', 'add', newMaterial);
         % thisR.set('material', 'delete', matName);
         % thisR.set('material', matName, 'PARAM TYPE', VAL);
+        % thisR.set('material', matName,'replace',val);
+
 
         % In this case, we completely replace the material list.
         if isempty(varargin)

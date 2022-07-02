@@ -29,44 +29,24 @@ function lght = piLightTranslate(lght, varargin)
 %    thisR:  The modified recipe
 %
 % See also
-%
+%   t_piIntro_light, piLightCreate
 
-
-% Examples
+% Examples:
 %{
-    ieInit;
-    thisR = piRecipeDefault;
-    thisR = piLightDelete(thisR, 'all');
-    spotLight = piLightCreate('new spot', 'type', 'spot',...
-                'cameracoordinate', true,...
-                'spd val', 'D50',...
-                'coneangle val', 5);
-    spotLight = piLightTranslate(spotLight, 'x shift', 1);
-    thisR.set('light', 'add', spotLight);
+ieInit;
+thisR = piRecipeDefault;
+thisR = piLightDelete(thisR, 'all');
+spotLight = piLightCreate('new spot', 'type', 'spot',...
+    'cameracoordinate', true,...
+    'spd val', 'D50',...
+    'coneangle val', 10);
+thisR.set('light', spotLight,'add');
 
-    piWrite(thisR, 'overwritematerials', true);
-
-    % Render
-    [scene, result] = piRender(thisR, 'render type','radiance');
-    sceneWindow(scene);
+piWRS(thisR);
+thisR.set('light', 'new spot', 'translate',[1, 0, 0]);
+piWRS(thisR);
 %}
-%{
-    ieInit;
-    thisR = piRecipeDefault;
-    thisR = piLightDelete(thisR, 'all');
-    spotLight = piLightCreate('new spot', 'type', 'spot',...
-                'cameracoordinate', true,...
-                'spd val', 'D50',...
-                'coneangle val', 5);
-    thisR.set('light', 'add', spotLight);
-    thisR.set('light', 'new spot', 'translate', [1 0 0]);
 
-    piWrite(thisR, 'overwritematerials', true);
-
-    % Render
-    [scene, result] = piRender(thisR, 'render type','radiance');
-    sceneWindow(scene);
-%}
 %% Parse
 
 % Remove spaces, force lower case
@@ -111,7 +91,7 @@ if isfield(lght, 'to')
     lightX = reshape(lightX, size(direction)); lightY = reshape(lightY, size(direction));
     
 else
-    warning('This light does not have to. Only translating from.');
+    % warning('Some lights do not have ''to''. Only translating from.');
     lightX = reshape([1 0 0], size(from)); lightY = reshape([0 1 0], size(from));
     direction = reshape([0 0 1], size(from));
 end
@@ -121,26 +101,22 @@ shift = xshift*lightX + yshift*lightY + zshift*direction;
 switch fromto
     case 'from'
         lght = piLightSet(lght, 'from val', from + shift);
-    case 'to'
+    case 'to'        
         if isfield(lght, 'to')
             lght = piLightSet(lght, 'to val', lght.to.val + shift);
         else
-            warning('This light does not have to. It cannot be changed');
+            % warning('This light does not have to. It cannot be changed');
         end
     case 'both'
         lght = piLightSet(lght, 'from val', from + shift);
         if isfield(lght, 'to')
             lght = piLightSet(lght, 'to val', lght.to.value + shift);
         else
-            warning('This light does not have to. It cannot be changed');
+            % warning('Some lights do not have ''to''. It cannot be changed');
         end
     otherwise
         error('Unknown "from to" type %s', fromto);
 end
 
-%{
-idx = numel(thisR.lights);
-lightSource = thisR.lights{end};
-%}
 
 end

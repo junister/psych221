@@ -16,12 +16,17 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %   thisR - A recipe
 %
 % Optional key/val pairs
-%   'name'  - Set the Scene or OI name
+%
 %   'render type' - Cell array of render objectives ('radiance','depth',
 %           ... others).  If it is a char, then we convert it to a cell.
-%   'show'  -  Call a window to show the object (default) and insert it in
-%           the vcSESSION database
+%   'show' -  Call a window to show the object and insert it in
+%             the vcSESSION database (Default: true);
 %   'our docker' - Specify the docker wrapper we will pass to piRender
+%
+%   'name'  - Set the Scene or OI name
+%   'gamma'      - Set the display gamma for the window
+%   'render flag' - {'hdr','rgb','gray','clip'}  (default: 'rgb' or
+%                   whatever is already in the window, if it is open.
 %
 % Returns
 %   obj     - a scene or oi
@@ -48,10 +53,12 @@ p.addParameter('ourdocker','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
+p.addParameter('renderflag','',@ischar);
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
+renderFlag = p.Results.renderflag;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
@@ -88,11 +95,13 @@ switch obj.type
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
         if show, sceneWindow(obj);
             if ~isempty(g), sceneSet(obj,'gamma',g); end
+            if ~isempty(renderFlag), sceneSet(obj,'render flag',renderFlag); end
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show, oiWindow(obj); 
             if ~isempty(g), oiSet(obj,'gamma',g); end
+            if ~isempty(renderFlag), oiSet(obj,'render flag',renderFlag); end
         end
 end
 

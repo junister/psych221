@@ -60,14 +60,13 @@ classdef recipe < matlab.mixin.Copyable
         end
 
         function val = get(obj,varargin)
-            % Returns derived parameters of the recipe that require some
-            % computation
+            % Master function to return derived parameters of the recipe.
+            % Many of these require some computation
             val = recipeGet(obj,varargin{:});
         end
 
         function [obj, val] = set(obj,varargin)
-            % Sets parameters of the recipe.  Shortens the set call, mainly, and
-            % does some parameter value checking.
+            % Master function to set the recipe parameters.
             [obj, val] = recipeSet(obj,varargin{:});
         end
 

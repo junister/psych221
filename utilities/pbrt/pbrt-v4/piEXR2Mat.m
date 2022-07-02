@@ -25,12 +25,12 @@ dockerimage = dockerWrapper.localImage();
 
 
 if ~ispc
-    basecmd = 'docker run -ti --volume="%s":"%s" %s %s';
+    basecmd = 'docker --context default run -ti --volume="%s":"%s" %s %s';
     cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
     dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
     [status,result] = system(dockercmd);
 else
-    basecmd = 'docker run -i --volume="%s":"%s" %s %s';
+    basecmd = 'docker --context default run -i --volume="%s":"%s" %s %s';
     cmd = ['imgtool convert --exr2bin ',channelname, ' ', dockerWrapper.pathToLinux(inputFile)];
     dockercmd = sprintf(basecmd, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
     [status,result] = system(dockercmd);

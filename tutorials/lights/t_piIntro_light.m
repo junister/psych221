@@ -19,7 +19,7 @@
 %% Initialize ISET and Docker and read a file
 
 % Start up ISET/ISETBio and check that the user is configured for docker
-clear; close all; ieInit;
+ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name','checkerboard');
@@ -121,7 +121,7 @@ thisR.set('light', 'new_spot_light_L', 'translate',[1, 0, 0]);
 
 piWRS(thisR,'name',sprintf('EE spot %d',coneAngle));
 
-%% Rotate the light
+%% Rotate the direction of the spot light
 
 % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
 thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -5 degree around y axis
@@ -143,7 +143,7 @@ yellowPoint = piLightCreate('yellow_point_L',...
 thisR.set('light', yellowPoint, 'add');
 
 % Move the point closer to the object
-thisR.set('light','yellow_point_L','translate',[0 0 -7])
+thisR.set('light','yellow_point_L','translate',[0 0 -7]);
 thisR.get('light print');
 piWRS(thisR,'name','Tungsten (point)');
 
@@ -193,25 +193,24 @@ piWRS(thisR,'name','Blue (distant)');
 thisR.set('light', 'all', 'delete');
 
 fileName = 'room.exr';
-exampleEnvLight = piLightCreate('room_light_L', ...
-    'type', 'infinite',...
-    'mapname', fileName);
-
-thisR.set('lights', exampleEnvLight, 'add');
-
-% Put the window behind the checkerboard.
-thisR.set('light', 'room_light_L', 'rotation', [-90 0 0]);
-thisR.set('light', 'room_light_L', 'rotation', [0 0 90]);
-
-piWRS(thisR);
+thisR.set('skymap',fileName);
+tmp = thisR.get('lights');
+skyName = tmp{1};
+piWRS(thisR,'Environment original');
 
 %%  Now rotate the skymap around the z dimension.  
 
-% As is often the case, the X Y Z dimensions are annoying to interpret.  We
-% need better tools
-for ii=1:3
-    thisR.set('light', 'room_light_L', 'rotation', [0 0 10]);
-    piWRS(thisR,'name','Environment light');
-end
+% The X Y Z dimensions are annoying to interpret.  We
+% need better tools.  Here, we rotate
+thisR.set('light', skyName, 'rotation', [10 0  0]);
+piWRS(thisR,'name','Environment light rotate X');
+
+%% Put it back
+thisR.set('light', skyName, 'rotation', [-10 0 0]);
+piWRS(thisR,'name','Environment light rotate Z');
+
+%% Rotate around Z
+thisR.set('light', skyName, 'rotation', [0 0 10]);
+piWRS(thisR,'name','Environment light rotate Z');
 
 %% END

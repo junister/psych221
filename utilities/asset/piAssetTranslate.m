@@ -88,31 +88,4 @@ else
     modifiedBranch = piAssetTranslate(thisR, parentNodeID, translation);
 end
 
-%% Commenting out the old code, deprecated in the future
-%{
-%% Put translation onto a new branch node
-newBranch = piAssetCreate('type', 'branch');
-newBranch.name = strcat(thisR.assets.stripID(assetInfo), '_', 'T');
-newBranch.translation = reshape(translation, 1, 3);
-
-if isequal(thisNode.type, 'branch')
-    % If the node is branch
-    % Get the children id of thisNode
-    childID = thisR.assets.getchildren(assetInfo);
-
-    % Add the new node as child of thisNode
-    thisR.set('asset', thisNode.name, 'add', newBranch);
-
-    % Set the parent of children of thisNode be the newBranch
-    for ii=1:numel(childID)
-        thisR.set('asset', childID(ii), 'parent',...
-                thisR.get('asset', thisR.assets.nnodes, 'name'));
-    end
-else
-    % Node is object or light
-    % Insert the newBranch node under its parent
-    thisR.set('asset', assetInfo, 'insert', newBranch);
-end
-%}
-
 end

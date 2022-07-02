@@ -59,23 +59,23 @@ asset = load(fname);
 
 %% Adjust the input slot in the recipe for the local user.
 
-% The problem is that the file is written out for a specific user.  But
-% another user on another system is loading it.  Still, the file should be
-% in the ISET3D directory tree.
+% The file was written out by a specific user.  But another user on another
+% system is loading it. So we need to adjust the location of the input to
+% match this user.
+
+% Find the name of the directory containing the file in the file.
 [thePath,n,e] = fileparts(asset.thisR.get('input file'));
 
-% Find the name of the directory containing the file.
-% Cross-platform issue: Win paths will have \, Linux/Mac /
+% Cross-platform issue: 
+% Window paths will have \, Linux/Mac /.  We need to be able to get the 
 % but we don't know what has been encoded in there.
-if contains(thePath, '/')
-    temp = split(thePath,'/');
-else
-    temp = split(thePath,'\');
+if contains(thePath, '/'),     temp = split(thePath,'/');
+else,                          temp = split(thePath,'\');
 end
 theDir = temp{end};
 
-% Insist that this is a V4 pbrt file.
-inFile = fullfile(piRootPath,'data','V4',theDir,[n,e]);
+% This is the path for the current user.
+inFile = fullfile(piRootPath,'data','scenes',theDir,[n,e]);
 
 % Make sure it exists
 if ~isfile(inFile), error('Cannot find the PBRT input file %s\n',thisR.inputFile); end

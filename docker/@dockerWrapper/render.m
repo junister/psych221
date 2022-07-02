@@ -77,37 +77,36 @@ if ~obj.localRender
     end
 
     if verbose > 0
-        fprintf(" Rsync Put: %s\n", putCommand);
+        fprintf('Put: %s ...\n', putCommand);
     end
     [rStatus, rResult] = system(putCommand);
 
     if verbose > 0
-        fprintf('Pushed scene to remote in: %6.2f\n', toc(putData))
+        fprintf('Done (%4.2f sec)\n', toc(putData))
     end
-    if rStatus ~= 0
-        error(rResult);
-    end
+    if rStatus ~= 0, error(rResult); end
+    
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
-
     shortOut = [obj.relativeScenePath sceneDir];
+
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
     containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
         useContext, flags, useContainer, shortOut, renderCommand);
     if verbose > 0
-        fprintf("Render: %s\n", containerRender);
+        fprintf('Command: %s\n', containerRender);
     end
 
     if verbose > 1
         [status, result] = system(containerRender, '-echo');
-        fprintf('Rendered remotely in: %6.2f\n', toc(renderStart))
+        fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         fprintf('Returned parameter result is\n***\n%s', result);
     elseif verbose == 1
         [status, result] = system(containerRender);
         if status == 0
-            fprintf('Successfuly rendered remotely in: %6.2f\n', toc(renderStart))
+            fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         else
             fprintf("Error Rendering: %s", result);
         end
@@ -122,19 +121,19 @@ if ~obj.localRender
         pullCommand = sprintf('%s -r %s %s',rSync, ...
             [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
         if verbose > 0
-            fprintf(" Rsync Pull: %s\n", pullCommand);
+            fprintf('Pull: %s ...\n', pullCommand);
         end
 
         % bring back results
         system(pullCommand);
         if verbose > 0
-            fprintf('Retrieved output in: %6.2f\n', toc(getOutput))
+            fprintf('done (%6.2f sec)\n', toc(getOutput))
         end
     end
 else
     % Running locally.        
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerRender = sprintf('docker exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+    containerRender = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
     
     tic;
     [status, result] = system(containerRender);
