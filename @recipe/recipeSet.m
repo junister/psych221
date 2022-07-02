@@ -901,8 +901,11 @@ switch param
         out = envLight;
         
     case {'light', 'lights'}
-        % Examples
-        % After making light consistant with assets:
+        % Calling convention, val is lightName, varargin{1} is the
+        % parameter(or action), and varargin{2} is the value, if needed.
+        %
+        % Examples - After making light consistent with assets:
+        %
         % thisR.set('light', newLight, 'add');
         % thisR.set('light', newLightCellArray, 'add');
         % thisR.set('light', lightName, 'delete');
@@ -910,9 +913,10 @@ switch param
         % thisR.set('light', lightName, 'rotate', [XROT, YROT, ZROT], ORDER)
         % thisR.set('light', lghtName, 'translate', [XSFT, YSFT, ZSFT], FROMTO);
         % thisR.set('light', lightname, 'specscale', val);
-        
-        % Calling convention, val is lightName, varargin{1} is the
-        % parameter(or action), and varargin{2} is the value, if needed.
+        % thisR.set('light','AreaLight','spread val',20);
+        %
+        % TODO:  We need to add additional cases for the area light
+
         if isnumeric(val)
             thisLight = thisR.get('light', val);
             lghtName = thisLight.name;
@@ -1079,9 +1083,6 @@ switch param
             thisR.set('asset', lghtName, 'lght', thisLight);
         end
         
-        %
-        % BW: Removed huge commented out section Feb 19, 2022
-        %
     case {'asset', 'assets','node','nodes'}
         % Typical:    thisR.set(param,val)
         % This case:  thisR.set('asset',assetNameOrID, param, val);

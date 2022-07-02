@@ -123,11 +123,17 @@ if isfield(lght, pName)
         lght.cameracoordinate = false;
     end
 
-    % Set parameter value
+    % Set parameter value.  This code uses the pName as the slot in the
+    % struct.  So, if you send in 'spread val' the assignment will be
+    %
+    %   thisStruct.spread = val
+    %
     if isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val')
+        
+        % Set the value, which is all we need for almost all cases
         lght.(pName).value = val;
 
-        % Changing property type if the user doesn't specify it.
+        % Set the property type for the 'spd' or 'scale' case
         if isequal(pName, 'spd') || isequal(pName, 'scale')
             if numel(val) == 3 && ~ischar(val)
                 % User sent in 3 values, so this is an rgb type light
