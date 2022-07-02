@@ -10,6 +10,10 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 % Input
 %   thisR - Recipe
 %
+% Optional key/val
+%   mtype - Material types to insert.  Options are
+%        {'all','diffuse','glass','wood','brick','testpattern','marble'}
+%
 % Output
 %   thisR - Iset3d recipe. It is returned with additional materials
 %   materialNames - cell array, but to see the full list use

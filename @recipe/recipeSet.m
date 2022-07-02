@@ -694,6 +694,8 @@ switch param
         % thisR.set('material', 'add', newMaterial);
         % thisR.set('material', 'delete', matName);
         % thisR.set('material', matName, 'PARAM TYPE', VAL);
+        % thisR.set('material', matName,'replace',val);
+
 
         % In this case, we completely replace the material list.
         if isempty(varargin)
