@@ -34,11 +34,14 @@ ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 %% Show the lights in the file
 thisR.show('lights');
 
+lNames = thisR.get('light','names');
+
 %% Set the light adjust the light properties
-thisR.set('light','AreaLightRectangle_L','spread val',20);
-thisR.set('light','AreaLightRectangle.001_L','spread val',20);
-thisR.set('light','AreaLightRectangle.002_L','spread val',20);
-thisR.set('light','AreaLightRectangle.003_L','spread val',50);
+
+% The spread of car headlights is about 
+for ii=1:numel(lNames)
+    thisR.set('light',lNames{ii},'spread val',60);
+end
 
 scene = piWRS(thisR,'render flag','hdr');
 
@@ -47,6 +50,22 @@ roiLocs = [1 74];
 sz = sceneGet(scene,'size');
 scenePlot(scene,'luminance hline',roiLocs);
 ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
+
+%%  Spectrum of an LED light that might be found in a car headlight
+
+% These appear about right to me (BW).
+%
+% [ledSPD,wave] = ieReadSpectra('LED_3845');
+% [ledSPD,wave] = ieReadSpectra('LED_4613');
+% [ledSPD,wave] = ieReadSpectra('halogen_2913');
+
+ieNewGraphWin; plotRadiance(wave,ledSPD)
+
+XYZ = ieXYZFromEnergy(ledSPD',wave);
+xy = chromaticity(XYZ);
+hold on; plot(xy(1),xy(2),'o');
+
+% It would be good to calculate the CCT
 
 %%
 
