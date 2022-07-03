@@ -58,6 +58,7 @@ ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 % [ledSPD,wave] = ieReadSpectra('LED_3845');
 % [ledSPD,wave] = ieReadSpectra('LED_4613');
 % [ledSPD,wave] = ieReadSpectra('halogen_2913');
+% [ledSPD,wave] = ieReadSpectra('CFL_5780');
 
 ieNewGraphWin; plotRadiance(wave,ledSPD)
 
