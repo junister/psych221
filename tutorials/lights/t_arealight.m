@@ -55,10 +55,12 @@ ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
 % These appear about right to me (BW).
 %
-% [ledSPD,wave] = ieReadSpectra('LED_3845');
-% [ledSPD,wave] = ieReadSpectra('LED_4613');
-% [ledSPD,wave] = ieReadSpectra('halogen_2913');
-% [ledSPD,wave] = ieReadSpectra('CFL_5780');
+[ledSPD,wave] = ieReadSpectra('LED_3845');
+[ledSPD,wave] = ieReadSpectra('LED_4613');
+[ledSPD,wave] = ieReadSpectra('halogen_2913');
+[ledSPD,wave] = ieReadSpectra('CFL_5780');
+
+chromaticityPlot;
 
 ieNewGraphWin; plotRadiance(wave,ledSPD)
 
