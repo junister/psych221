@@ -141,6 +141,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'SimpleScene';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
+    case 'bmw-m6'
+        sceneDir = 'bmw-m6';
+        sceneFile = [sceneDir,'.pbrt'];
+        exporter = 'Copy';
     case 'car'
         sceneDir = 'car';
         sceneFile = [sceneDir,'.pbrt'];
@@ -281,9 +285,13 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'classroom';
         sceneFile = 'scene.pbrt';
         exporter = 'Copy';
+    case 'contemporary-bathroom'
+        sceneDir = 'contemporary-bathroom';
+        sceneFile = 'contemporary-bathroom.pbrt';
+        exporter = 'Copy';
     case 'kitchen'
         sceneDir = 'kitchen';
-        sceneFile = 'scene.pbrt';
+        sceneFile = 'kitchen.pbrt';
         exporter = 'Copy';
     case 'veach-ajar'
         sceneDir = 'veach-ajar';
@@ -362,7 +370,7 @@ switch ieParamFormat(sceneDir)
         error('Can not identify the scene, %s\n',sceneDir);
 end
 
-%% See if we can find the file in data/V4
+%% See if we can find the file in data/scenes/web
 
 % Local
 if isequal(sceneDir,'BlenderScene')
@@ -425,17 +433,17 @@ end
 function fname = piSceneWebTest(sceneName,sceneFile)
 % Check for a web scene
 
-% See if the scene is already in data/V4/web
-FilePath = fullfile(piRootPath,'data','V4','web',sceneName);
+% See if the scene is already in data/scene/web
+FilePath = fullfile(piRootPath,'data','scene','web',sceneName);
 fname = fullfile(FilePath,sceneFile);
 
-% Download the file to data/V4/web
+% Download the file to data/scene/web
 if ~exist(fname,'file') && ~isfolder(FilePath)
     % Download and confirm.
     piWebGet('resourcename', sceneName, 'resourcetype', 'pbrt', 'op', 'fetch', 'unzip', true);
     if ~exist(fname, 'file'), error('File not found'); end
 else
-    fprintf('File found %s in data/V4/web.\n',sceneName)
+    fprintf('File found %s in data/scene/web.\n',sceneName)
 end
 
 end
