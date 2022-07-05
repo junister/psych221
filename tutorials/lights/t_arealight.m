@@ -25,16 +25,39 @@ thisR    = piRead(fileName);
 %% Default properties
 scene = piWRS(thisR,'render flag','hdr');
 
+%% Show the lights in the file and rename them for convenience
+thisR.show('lights');
+
+lNames = thisR.get('light','names');
+
+% The no number is the blue one
+% The 002 light is the green one.
+% The 001 is the red one
+% the 003 must be the yellow one.
+
+% This sets the name in the 'lght' slot.  THere is also a name in the main
+% node.  We need to sort this out.
+thisR.set('light','AreaLightRectangle_L','name','Area_Blue');
+thisR.set('light','AreaLightRectangle.001_L','name','Area_Red');
+thisR.set('light','AreaLightRectangle.002_L','name','Area_Green');
+thisR.set('light','AreaLightRectangle.003_L','name','Area_Yellow');
+
+thisR.show('lights');
+
 %% Plot the luminance across a line
 roiLocs = [1 74];
 sz = sceneGet(scene,'size');
 scenePlot(scene,'luminance hline',roiLocs);
 ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
-%% Show the lights in the file
-thisR.show('lights');
+%% The green light is bright.  Let's reduce its intensity.
 
-lNames = thisR.get('light','names');
+thisR.set('light','AreaLightRectangle.002_L','specscale',40);
+scene = piWRS(thisR,'render flag','hdr');
+roiLocs = [1 74];
+sz = sceneGet(scene,'size');
+scenePlot(scene,'luminance hline',roiLocs);
+ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
 %% Set the light adjust the light properties
 

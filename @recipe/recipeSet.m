@@ -148,7 +148,7 @@ p.addParameter('verbose', thisR.verbose, @isnumeric);
 
 p.parse(thisR, param, val);
 param = ieParamFormat(p.Results.param);
-verbosity = p.Results.verbose;
+% verbosity = p.Results.verbose;
 
 %% Act
 
