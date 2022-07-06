@@ -77,15 +77,28 @@ scenePlot(scene,'luminance hline',roiLocs);
 ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
 %%
-thisR.set('asset', 'Area_Yellow_L', 'rotate', [30, 0, 0]); % -5 degree around y axis
+thisR.set('asset', 'Area_Yellow_L', 'rotate', [-30, 0, 0]); % -5 degree around y axis
 piWRS(thisR,'render flag','hdr');
 
 %%
-thisR.set('asset', 'Area_Red_L', 'rotate', [0, 15, 0]); % -5 degree around y axis
-scene = piWRS(thisR,'render flag','hdr');
+thisR.set('asset', 'Area_Red_L', 'rotate', [0, 0, 30]); % -5 degree around y axis
+piWRS(thisR,'render flag','hdr');
+
+%%
+thisR.set('asset', 'Area_Blue_L', 'rotate', [0, 0, -30]); % -5 degree around y axis
+piWRS(thisR,'render flag','hdr');
 
 %% Set the SPD of one of the lights
-thisR.set('light','Area_Yellow_L','spd',[5000]);
+wave = (400:10:690)';
+
+% halogen = ieReadSpectra('halogen_2913',wave);
+halogen = ieReadSpectra('LED_3845',wave);
+
+tmp = [wave,halogen]';
+
+thisR.set('light','Area_Yellow_L','spd',tmp);
+piWRS(thisR,'render flag','hdr');
+
 %%  Spectrum of an LED light that might be found in a car headlight
 
 % These appear about right to me (BW).
