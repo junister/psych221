@@ -235,17 +235,6 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, nsamplesTxt);
             end
 
-%             % mapname
-%             [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
-%             if ~isempty(mapnameTxt)
-%                 lghtDef = strcat(lghtDef, mapnameTxt);
-% 
-%                 if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
-%                     mapFile = which(mapName);
-%                     copyfile(mapFile,thisR.get('output dir'))
-%                 end
-%             end
-
             % scale
             [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
             if ~isempty(specscaleTxt)
@@ -386,9 +375,7 @@ for ii = 1:numel(thisR.lights)
             %
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
-            % Attach shape
-            
-            
+            % Attach shape            
             for nshape = 1:numel(thisLight.shape) % allow multiple shape
                 if ~iscell(thisLight.shape)
                     dummylight.shape = thisLight.shape;

@@ -89,14 +89,13 @@ thisR.set('asset', 'Area_Blue_L', 'rotate', [0, 0, -30]); % -5 degree around y a
 piWRS(thisR,'render flag','hdr');
 
 %% Set the SPD of one of the lights
-wave = (400:10:690)';
+wave = (400:10:700)';
 
 % halogen = ieReadSpectra('halogen_2913',wave);
-halogen = ieReadSpectra('LED_3845',wave);
+% halogen = ieReadSpectra('LED_3845',wave);
+% 
+thisR.set('light','Area_Yellow_L','spd','halogen_2913');
 
-tmp = [wave,halogen]';
-
-thisR.set('light','Area_Yellow_L','spd',tmp);
 piWRS(thisR,'render flag','hdr');
 
 %%  Spectrum of an LED light that might be found in a car headlight
