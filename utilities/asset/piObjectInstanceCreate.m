@@ -53,7 +53,7 @@ motion   = p.Results.motion;
 if iscell(asset) && ~strcmp(asset{1}.type, 'branch')
     warning('Only branch name is supported.');
     return;
-elseif ~strcmp(asset.type, 'branch')
+elseif ~strcmp(asset{1}.type, 'branch')
     warning('Only branch name is supported.');
     return;
 end
