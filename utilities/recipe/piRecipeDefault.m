@@ -440,7 +440,7 @@ fname = fullfile(FilePath,sceneFile);
 % Download the file to data/scene/web
 if ~exist(fname,'file') && ~isfolder(FilePath)
     % Download and confirm.
-    piWebGet('resourcename', sceneName, 'resourcetype', 'pbrt', 'op', 'fetch', 'unzip', true);
+    ieWebGet('resourcename', sceneName, 'resourcetype', 'pbrtv4', 'unzip', true);
     if ~exist(fname, 'file'), error('File not found'); end
 else
     fprintf('File found %s in data/scene/web.\n',sceneName)

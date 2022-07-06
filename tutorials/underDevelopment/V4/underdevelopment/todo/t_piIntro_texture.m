@@ -2,10 +2,8 @@
 %
 %   Illustrates texture management.  
 %
-% Textures are created and assigned to a flat surface material in the first
-% few examples.  Then we assign the textures to individual assets in the
-% SimpleScene.
-%
+% * Textures are created and assigned to a flat surface material 
+% * assign the textures to individual assets in the SimpleScene.
 %
 % See also
 %  t_piIntro_light, tls_assets.mlx
@@ -14,25 +12,23 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
+thisR = piRecipeDefault('scene name', 'flatSurface');
 
 %% Add a light and render
 
-thisR.get('light')
-newDistLight = piLightCreate('Distant 1',...
+% Get rid of any random lights.
+thisR.set('light','all','delete');
+
+lightName1 = 'Distant 1';
+newDistLight = piLightCreate(lightName1,...
     'type', 'distant',...
     'cameracoordinate', true,...
     'spd', 'equalEnergy');
-thisR.set('light', 'add', newDistLight);
+thisR.set('light', newDistLight,'add');
 thisR.get('light print');
 
-% To Do:
-%   Write this:  piRenderWriteShow(thisR);
-piWrite(thisR, 'overwritematerials', true);
-[scene, ~] = piRender(thisR, 'render type', 'radiance');
-sceneName = 'Random color';
-scene = sceneSet(scene, 'scene name', sceneName);
-sceneWindow(scene);
+%%
+piWRS(thisR,'name','Random color');
 
 %% This is description of the scene
 
@@ -41,7 +37,9 @@ thisR.get('texture print');
 thisR.get('lights print');
 thisR.get('material print');
 
-% There is on material, called 'Mat'.  That material is assigned thetexture
+%% Fix below here.
+
+% There is on material, called 'Mat'.  That material is assigned the texture
 % which gives the scene its main appearance. The texture is the reflectance
 % hcart you see in the window.
 thisR.get('material', 'Mat', 'kd val')
