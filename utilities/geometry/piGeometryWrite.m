@@ -5,13 +5,13 @@ function  piGeometryWrite(thisR,varargin)
 %   piGeometryWrite(thisR,varargin)
 %
 % Input:
-%       thisR: a render recipe
-%       obj:   Returned by piGeometryRead, contains information about objects.
+%   thisR: a render recipe
+%   obj:   Returned by piGeometryRead, contains information about objects.
 %
 % Optional key/value pairs
 %
 % Output:
-%       None for now.
+%   None
 %
 % Description
 %   We need a better description of objects and groups here.  Definitions
@@ -25,13 +25,10 @@ function  piGeometryWrite(thisR,varargin)
 %%
 p = inputParser;
 
-% varargin =ieParamFormat(varargin);
+% Not needed now.
+% varargin = ieParamFormat(varargin);
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-% default is flase, will turn on for night scene
-% p.addParameter('lightsFlag',false,@islogical);
-% p.addParameter('thistrafficflow',[]);
-
 p.parse(thisR,varargin{:});
 
 %% Create the default file name
@@ -277,31 +274,7 @@ for ii = 1:numel(children)
             % Scale
             fprintf(fid, strcat(spacing, indentSpacing,...
                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
-        end
-
-        %{
-        % This is the old transformation section
-        % Rotation
-        if ~isempty(thisNode.rotation)
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Translate %.5f %.5f %.5f', thisNode.translation(1),...
-                thisNode.translation(2),...
-                thisNode.translation(3)), '\n'));
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 1)), '\n'));
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 2)), '\n'));
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation(:, 3)), '\n'));
-        else
-            thisNode.concattransform(13:15) = thisNode.translation(:);
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', thisNode.concattransform(:)), '\n'));
-        end
-        % Scale
-        fprintf(fid, strcat(spacing, indentSpacing,...
-            sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
-        %}
+        end       
 
         % Write out motion
         %
@@ -398,35 +371,10 @@ end
 
 end
 
-
-% Geometry file writing helper
+%% Geometry file writing helper
 function piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight)
-%{
-pointerT = 1; pointerR = 1; pointerS = 1;
-for tt = 1:numel(thisNode.transorder)
-    switch thisNode.transorder(tt)
-        case 'T'
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Translate %.5f %.5f %.5f', thisNode.translation{pointerT}(1),...
-                thisNode.translation{pointerT}(2),...
-                thisNode.translation{pointerT}(3)), '\n'));
-            pointerT = pointerT + 1;
-        case 'R'
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 1)), '\n'));
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 2)), '\n'));
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Rotate %.5f %.5f %.5f %.5f', thisNode.rotation{pointerR}(:, 3)), '\n'));
-            pointerR = pointerR + 1;
-        case 'S'
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Scale %.10f %.10f %.10f', thisNode.scale{pointerS}), '\n'));
-            pointerS = pointerS + 1;
-    end
-end
-%}
 % Zhenyi: export Transform matrix instead of translation/rotation/scale
+
 pointerT = 1; pointerR = 1; pointerS = 1;
 translation = zeros(3,1);
 rotation = piRotationMatrix;
@@ -528,7 +476,6 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         fclose(geometryFile);
         fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
     end
-    fprintf(fid,'\n');
-    % end
+    fprintf(fid,'\n');    
 end
 end

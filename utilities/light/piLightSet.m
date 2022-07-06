@@ -140,11 +140,19 @@ if isfield(lght, pName)
                 lght.(pName).type = 'rgb';
             elseif numel(val) == 1 && ~ischar(val)
                 % User sent in 1 value so this is blackbody temperature
-                lght.(pName).type = 'blackbody';
-            elseif (numel(val) > 3 && mod(numel(val), 2) == 0)|| ischar(val)
-                % User sent in a vector of (wave, val, wave, val) pairs or
-                % a string that defines a spectrum.  The possible strings I
-                % know about now are Equal Energy, Tungsten, ...
+                lght.(pName).type = 'blackbody';            
+            elseif (numel(val) > 3 && mod(numel(val), 2) == 0) || ischar(val)
+                % User sent in either
+                %  * a numerical vector of (wave, val, wave, val)
+                %  pairs or
+                %  * a string that defines a spectrum or a spectral
+                %  file.
+                %
+                % The possible strings include Equal Energy, Tungsten.
+                % We are trying to make it possible the entry to be
+                % any file that can be read by ieReadSpectra().  So,
+                % if 'value' is a string, we read the file and use
+                % piSPDCreate to fill in the data.
                 lght.(pName).type = 'spectrum';
             end
             return;

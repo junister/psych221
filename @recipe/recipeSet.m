@@ -458,9 +458,9 @@ switch param
             else
                 % camera types:  omni, realisticeye,
 
-                % if two fov is given [hor, ver], we should resize film
-                % acoordingly.  This is the current number of spatial
-                % samples for the two dimensions
+                % if two fov values are given [hor, ver], we should
+                % resize film acoordingly.  This is the current number
+                % of spatial samples for the two dimensions
                 filmRes = thisR.get('spatial samples');
 
                 % Set the field of view to the minimum of the two values
