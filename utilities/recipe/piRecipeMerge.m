@@ -41,6 +41,7 @@ p.addParameter('texture',true);
 p.addParameter('asset',true);
 p.addParameter('objectinstance',false); 
 p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
+p.addParameter('copyfiles', 1 , @islogical);
 
 p.parse(sceneR, objectRs, varargin{:});
 
@@ -50,6 +51,7 @@ textureFlag    = p.Results.texture;
 assetFlag      = p.Results.asset;
 objectInstance = p.Results.objectinstance;
 nodeName       = p.Results.nodename;
+copyFiles      = p.Results.copyfiles;
 copyTextureFlag = 1;
 %%  The objects can be a cell or a recipe
 
@@ -112,22 +114,26 @@ for ii = 1:length(recipelist)
                 end
             end
         end
+        
+        if copyFiles
+            % Copy meshes from objects folder to scene folder here
+            sourceDir = thisR.get('input dir');
+            dstDir    = sceneR.get('output dir');
 
-        % Copy meshes from objects folder to scene folder here
-        sourceDir = thisR.get('input dir');
-        dstDir    = sceneR.get('output dir');
-
-        % Copy the assets from source to destination
-        sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
-        if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
-            dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
-            copyfile(sourceAssets, dstAssets);
-        else
-            if isfolder(sourceDir)
-                if ~isfolder(dstDir), mkdir(dstDir), end
-                piCopyFolder(sourceDir, dstDir);
-                copyTextureFlag = 0;
+            % Copy the assets from source to destination
+            sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
+            if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
+                dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
+                copyfile(sourceAssets, dstAssets);
+            else
+                if isfolder(sourceDir)
+                    if ~isfolder(dstDir), mkdir(dstDir), end
+                    piCopyFolder(sourceDir, dstDir);
+                    copyTextureFlag = 0;
+                end
             end
+        else
+            copyTextureFlag = 0;
         end
     end
 
