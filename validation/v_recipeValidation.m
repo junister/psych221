@@ -120,6 +120,7 @@ piWRS(thisR);
 % scenes.  This one fails because of the 'tga' files and perhaps other
 % reasons.  When we ran piPBRTUpdateV4 it put warnings into the PBRT
 % file!
+%}
 
 %{
 fname = fullfile(piRootPath,'data','V4','teapot','teapot-area-light-v4.pbrt');
