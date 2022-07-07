@@ -6,7 +6,7 @@
 % validation of the code.  More specific unit tests are still needed.
 %
 % Timing for each script is included. Times of -1 mean that the script
-% failed.  We will be editing the timing methods over time.
+% failed and the summary line will be printed in red.
 %
 % ZL,BW, DJC
 %
@@ -118,8 +118,8 @@ setpref('ISET3d', 'tvskymapStart', tic);
 v_skymap;
 setpref('ISET3d', 'tvskymapTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
 
-% TEST FOR DEBUGGING COLOR OUTPUT
-setpref('ISET3d', 'tvskymapTime', -1);
+% TEST Line used FOR DEBUGGING COLOR OUTPUT
+% setpref('ISET3d', 'tvskymapTime', -1);
 
 %% Textures
 % THIS DOES NOT WORK IN v4 yet
