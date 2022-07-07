@@ -118,6 +118,9 @@ setpref('ISET3d', 'tvskymapStart', tic);
 v_skymap;
 setpref('ISET3d', 'tvskymapTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
 
+% TEST FOR DEBUGGING COLOR OUTPUT
+setpref('ISET3d', 'tvskymapTime', -1);
+
 %% Textures
 % THIS DOES NOT WORK IN v4 yet
 %{
@@ -133,16 +136,23 @@ disp(strcat("v_ISET3d-v4 (LOCAL) ran  on: ", glData.Vendor, " ", glData.Renderer
 disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " seconds of CPU time."));
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
 disp('===========');
-fprintf("Docker:     %5.1f seconds.\n", getpref('ISET3d','tvdockerTime'));
-fprintf("Depth:      %5.1f seconds.\n", getpref('ISET3d','tvdepthTime'));
-fprintf("Omni:       %5.1f seconds.\n", getpref('ISET3d','tvomniTime'));
-fprintf("Assets:     %5.1f seconds.\n", getpref('ISET3d','tvassetsTime'));
-fprintf("Material:   %5.1f seconds.\n", getpref('ISET3d','tvmaterialTime'));
-fprintf("Light:      %5.1f seconds.\n", getpref('ISET3d','tvlightTime'));
-fprintf("Cam Pos.:   %5.1f seconds.\n", getpref('ISET3d','tvcampositionTime'));
-fprintf("Chess Set:  %5.1f seconds.\n", getpref('ISET3d','tvchessTime'));
-fprintf("Skymap:     %5.1f seconds.\n", getpref('ISET3d','tvskymapTime'));
-fprintf("Recipes:    %5.1f seconds.\n", getpref('ISET3d','tvrecipeTime'));
+vprintf('Docker:     ', getpref('ISET3d','tvdockerTime'));
+vprintf('Depth:      ', getpref('ISET3d','tvdepthTime'));
+vprintf('Omni:       ', getpref('ISET3d','tvomniTime'));
+vprintf('Assets:     ', getpref('ISET3d','tvassetsTime'));
+vprintf('Material:   ', getpref('ISET3d','tvmaterialTime'));
+vprintf('Light:      ', getpref('ISET3d','tvlightTime'));
+vprintf('Cam Pos.:   ', getpref('ISET3d','tvcampositionTime'));
+vprintf('Chess Set:  ', getpref('ISET3d','tvchessTime'));
+vprintf('Skymap:     ', getpref('ISET3d','tvskymapTime'));
+vprintf('Recipes:    ', getpref('ISET3d','tvrecipeTime'));
 
 %% END
 
+function vprintf(aString, aTime)
+    if aTime < 0
+        cprintf('err', sprintf([aString 'FAILED.\n']));
+    else
+        fprintf([aString '%5.1f seconds.\n'], aTime);
+    end
+end
