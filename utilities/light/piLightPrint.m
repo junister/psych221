@@ -35,11 +35,11 @@ for ii =1:numel(lightNames)
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
     if isequal(thisLight.type,'distant') || ...
-            isequal(thisLight.type,'infinite') || ...
-            isequal(thisLight.type,'area')
+            isequal(thisLight.type,'infinite') %
         position(ii,:) = Inf;
     else
-        position(ii,:) = thisR.get('light',ii,'position');
+        % point, spot and area have a position
+        position(ii,:) = thisR.get('light',ii,'world position');
     end
 
     % not sure we even have mapnames anymore, but in case...
