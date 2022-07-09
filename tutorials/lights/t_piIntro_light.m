@@ -196,7 +196,7 @@ fileName = 'room.exr';
 thisR.set('skymap',fileName);
 tmp = thisR.get('lights');
 skyName = tmp{1};
-piWRS(thisR,'Environment original');
+piWRS(thisR,'name','Environment original');
 
 %%  Now rotate the skymap around the z dimension.  
 

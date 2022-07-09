@@ -5,7 +5,17 @@ function vec = piSPDCreate(wave, spd, varargin)
 %   vec = piSPDCreate(wave, spd, varargin)
 %
 % Inputs:
-%   
+%   wave - wavelength samples (nm)
+%   spd  - relative spectral power distribution
+% 
+% Optional key/val pairs
+%  N/A
+%
+% Output
+%   vec - PBRT format is [wave1, spd1, wave2, spd2, ...]
+%
+% See also
+%   t_areaLight
 
 % Examples 
 %{

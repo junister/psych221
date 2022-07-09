@@ -208,7 +208,7 @@ switch ieParamFormat(lght.type)
         lght.spread.type = 'float';
         lght.spread.value = [];
         %{
-        % Potentially has rotationation, transformation or concatransformaiton
+        % Potentially has rotation, transformation or concatransformation
         lght.rotation.type = 'rotation';
         lght.rotation.value = {};
 

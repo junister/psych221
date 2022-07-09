@@ -1,11 +1,21 @@
-function defaultDir = piDirGet(dirType)
-%PIGETDIR Return where files/assets of a given type are
-% located by default. This is to allow some filepath
-% independence, compared to hard-coding paths
+function resourceDir = piDirGet(resourceType)
+%PIGETDIR Returns default directory of a resource type.
+%
+% Synopsis
+%   resourceDir = piDirGet(resourceType)
+%
+% Input
+%   resourceType - One of assets, lights, imageTextures, lens, scenes
+% 
+% Output
+%   resourceDir
 %
 % D.Cardinal -- Stanford University -- May, 2022
 %
-if isempty(dirType) || ~ischar(dirType)
+% See also
+%
+
+if isempty(resourceType) || ~ischar(resourceType)
     error("Please pass a valid asset or resource type");
 else
 
@@ -14,26 +24,26 @@ else
     ourData = fullfile(ourRoot,'data');
 
     % Now we can locate specific types of resources
-    switch (dirType)
+    switch (resourceType)
         case 'data'
-            defaultDir = ourData;
+            resourceDir = ourData;
         case 'assets'
-            defaultDir = fullfile(ourData,'assets');
+            resourceDir = fullfile(ourData,'assets');
         case 'lights'
-            defaultDir = fullfile(ourData,'lights');
+            resourceDir = fullfile(ourData,'lights');
         case 'imageTextures'
-            defaultDir = fullfile(ourData,'imageTextures');
+            resourceDir = fullfile(ourData,'imageTextures');
         case {'lens', 'lenses'}
-            defaultDir = fullfile(ourData,'lens');
+            resourceDir = fullfile(ourData,'lens');
         case 'scenes'
-            defaultDir = fullfile(ourData,'V4'); % remove the V4 entry if we promote or move scenes
+            resourceDir = fullfile(ourData,'scenes'); 
         case 'local'
             % Hard to make this one anything besides hard-coded,
             % at least for now
             if ispc
-                defaultDir = fullfile(piRootPath(), 'local/');
+                resourceDir = fullfile(piRootPath(), 'local/');
             else
-                defaultDir = '/iset/iset3d-v4/local/';
+                resourceDir = '/iset/iset3d-v4/local/';
             end
     end
 end

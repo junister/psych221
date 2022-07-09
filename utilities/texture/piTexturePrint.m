@@ -13,18 +13,24 @@ function piTexturePrint(thisR)
 %
 %%
 
-
-fprintf('\n--- Texture names ---\n');
 textureNames = thisR.get('texture', 'names');
-
-for ii =1:numel(textureNames)
-    rows{ii, :}  = num2str(ii);
-    names{ii,:}  = textureNames{ii};
-    format{ii,:} = thisR.textures.list(textureNames{ii}).format;
-    types{ii,:}  = thisR.textures.list(textureNames{ii}).type;
+fprintf('\n--- Texture names ---\n');
+if isempty(textureNames)
+    disp('No textures')
+    return;
+else
+    nTextures = numel(textureNames);
+    rows = cell(nTextures,1);
+    names = rows; format = rows; types = rows;
+    for ii =1:numel(textureNames)
+        rows{ii, :}  = num2str(ii);
+        names{ii,:}  = textureNames{ii};
+        format{ii,:} = thisR.textures.list(textureNames{ii}).format;
+        types{ii,:}  = thisR.textures.list(textureNames{ii}).type;
+    end
+    T = table(categorical(names), categorical(format),categorical(types),'VariableNames',{'names','format', 'types'}, 'RowNames',rows);
+    disp(T);
 end
-T = table(categorical(names), categorical(format),categorical(types),'VariableNames',{'name','format', 'type'}, 'RowNames',rows);
-disp(T);
 fprintf('---------------------\n');
 
 end

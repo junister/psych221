@@ -1,15 +1,15 @@
 %% Introducing iset3d calculations with the Chess Set
 %
 % Brief description:
-%  This script renders the chess set scene.  
+%  This script renders the chess set scene to illustrate the lighting.  It
+%  does so by changing the materials of the chess set to white, diffuse.
 % 
-%  This script:
-%
 %    * Initializes the recipe
 %    * Sets the film (sensor) resolution parameters
 %    * Calls the renderer that invokes PBRT via docker
 %    * Loads the returned radiance and depth map into an ISET Scene structure.
 %    * Adds a point light
+%    * Adds a skymap
 %
 % Dependencies:
 %    ISET3d and either ISETCam or ISETBio
@@ -58,21 +58,24 @@ end
 
 thisR.show('objects');
 %%
-sceneW = piWRS(thisR,'render flag','hdr');
-%%
 
-photons  = sceneGet(scene,'photons');
-photonsW = sceneGet(sceneW,'photons');
-ref = photons ./ photonsW;
+sceneW = piWRS(thisR,'render flag','hdr','name','reflectance');
+
+%% Divide the original photons by the diffuse white photons
+
+photons  = sceneGet(scene,'photons');    % Original
+photonsW = sceneGet(sceneW,'photons');   % White surfaces
+
+ref = photons ./ photonsW;               % Reflectance of original
+
+% Create the reflectance scene
 sceneR = sceneSet(scene,'photons',ref);
-nWave = sceneGet(sceneR,'n wave');
+nWave  = sceneGet(sceneR,'n wave');
 sceneR = sceneSet(sceneR,'illuminant photons',ones(nWave,1));
 sceneWindow(sceneR);
 
-%% By default, we have also computed the depth map, so we can render it
-
-scenePlot(scene,'depth map');
-
+% We could try this with a point light next.
+%{
 %% Add a bright point light near the front where the camera is
 
 thisR.get('light print');
@@ -110,4 +113,5 @@ thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
 thisR.get('light', skyMap.name, 'world orientation')
 
 piWRS(thisR, 'name','No rotation skymap');
+%}
 %% END

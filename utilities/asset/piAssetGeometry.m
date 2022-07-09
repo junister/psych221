@@ -45,7 +45,6 @@ function [coords,lookat,hdl] = piAssetGeometry(thisR,varargin)
    coords = piAssetGeometry(thisR,'inplane','xz');
 %}
 
-%%
 %%  Check that we have assets
 if isempty(thisR.assets)
     warning('No assets stored in the recipe');
@@ -65,11 +64,45 @@ p.parse(thisR,varargin{:});
 
 %% Find the coordinates of the leafs of the tree (the objects)
 
-coords = thisR.get('object coordinates');   % World coordinates, meters
+coords = thisR.get('object coordinates');   % World coordinates, meters of each object
 names  = thisR.get('object simple names');  % We might do a better job with this.
 shapesize = thisR.get('object sizes');
+
+% These are the notes we attach to the objects.
 notes = cell(size(names));
 for ii=1:numel(notes), notes{ii} = ' '; end   % Start them out empty
+
+%% Find the range of the three axes
+lookat = thisR.get('lookat');
+
+% Equation of the line is start + t*direction
+% We draw the line from to for a lineLength
+% direction  = thisR.get('lookat direction'); % lookat.to - lookat.from;
+start = lookat.from;
+% viewDirection  = lookat.from + direction;
+
+% Equation of the line is start + t*direction
+% We draw the line from to for a lineLength
+upDirection = lookat.up;
+upDirection = upDirection/norm(upDirection);
+upPoint  = lookat.from + upDirection;
+
+% Find the range of each dimension, including the assets and the lookat
+% positions.
+boxMax = zeros(3,1);
+boxMin = boxMax;
+for ii=1:3
+    boxMax(ii) = max([coords(:,ii),lookat.to(ii),lookat.from(ii),upPoint(ii)]);
+    boxMin(ii) = min([coords(:,ii),lookat.to(ii),lookat.from(ii),upPoint(ii)]);
+end
+
+% boxMax = max([max(coords(:,1)),max(coords(:,2)),max(coords(:,3)),max(lookat.to),max(lookat.from)]);
+% boxMin = min([min(coords(:,1)),min(coords(:,2)),min(coords(:,3)),min(lookat.to),min(lookat.from),min(stop)]);
+
+% Increase the directions just a bit.
+delta = (boxMax - boxMin)*0.1;   % One tenth of the range of each axis
+boxMax = boxMax + delta;
+boxMin = boxMin - delta;
 
 %% Include names
 if p.Results.name
@@ -83,7 +116,6 @@ if p.Results.position
     for ii=1:numel(names)
         notes{ii} = sprintf('%s (%.1f %.1f %.1f)p ',notes{ii},coords(ii,1),coords(ii,2),coords(ii,3));
     end
-
 end
 
 %% Add size
@@ -91,8 +123,10 @@ if p.Results.size
     for ii=1:numel(names)
         notes{ii} = sprintf('%s (%.1f %.1f %.1f)s ',notes{ii},shapesize(ii,1),shapesize(ii,2),shapesize(ii,3));
     end
-
 end
+
+% Start out with legend text size equal to the asset names
+legendtext = cell(numel(names,1));
 
 %% Open a figure to plot
 
@@ -104,71 +138,60 @@ sx = (max(coords(:,1)) - min(coords(:,1)))*0.04;
 sy = (max(coords(:,2)) - min(coords(:,2)))*0.04;
 sz = (max(coords(:,3)) - min(coords(:,3)))*0.04;
 
-% The object coords
+% Plot the object coords
 for ii=1:numel(names)
     plot3(coords(ii,1),coords(ii,2),coords(ii,3),'ko','MarkerSize',10,'MarkerFaceColor','k');
-    text(coords(ii,1)+sx,coords(ii,2)+sy,coords(ii,3)+sz,notes{ii},'FontSize',14)
+    text(coords(ii,1)+sx,coords(ii,2)+sy,coords(ii,3)+sz,notes{ii},'FontSize',14);
+    legendtext{ii} = names{ii};
     hold on;
 end
 
-% The camera position (red) and where it is looking (green)
-lookat = thisR.get('lookat');
+%% The camera position (red) and where it is looking (green)
 plot3(lookat.from(1),lookat.from(2),lookat.from(3),'ro',...
     'Markersize',12,...
     'MarkerFaceColor','r');
-text(lookat.from(1)+sx,lookat.from(2)+sy,lookat.from(3),'from','Color','r');
+legendtext{end+1} = 'from';
 
 plot3(lookat.to(1),lookat.to(2),lookat.to(3),'go',...
     'Markersize',12,...
     'MarkerFaceColor','g');
-text(lookat.to(1)+sx,lookat.to(2)+sy,lookat.to(3),'to','Color','g');
-
-%% Dashed line of site
-% Equation of the line is start + t*direction
-% We draw the line from to for a lineLength
-direction = lookat.to - lookat.from;
-lineLength = norm(direction);     % Meters
-direction = direction/norm(direction);
+legendtext{end+1} = 'to';
 
 start = lookat.from;
-stop  = lookat.from + lineLength*direction;
+stop  = start + 5*thisR.get('lookat direction'); 
+% Dashed line of site between them
 line([start(1),stop(1)],...
     [start(2), stop(2)],...
-    [start(3), stop(3)],'Color','r',...
+    [start(3), stop(3)],'Color','k',...
     'Linestyle',':',...
     'Linewidth',2);
+legendtext{end+1} = 'view direction';
+ 
+%% Show the up direction
 
-%% Dashed line in up direction
-
-% Equation of the line is start + t*direction
-% We draw the line from to for a lineLength
-direction = lookat.up;
-direction = direction/norm(direction);
-
-% I make this line shorter.
-start = lookat.from;
-stop  = lookat.from + 0.5*lineLength*direction;
-line([start(1),stop(1)],...
-    [start(2), stop(2)],...
-    [start(3), stop(3)],'Color','r',...
-    'Linestyle',':',...
-    'Linewidth',2);
-
-plot3(stop(1) ,stop(2),stop(3),'bo',...
+plot3(upPoint(1) ,upPoint(2),upPoint(3),'bo',...
     'Markersize',12,...
     'MarkerFaceColor','b');
-text(stop(1)+sx,stop(2)+sy,stop(3),'up','Color','b');
+legendtext{end+1} = 'up';
+
+start = lookat.from;
+stop  = upPoint;
+line([start(1),stop(1)],...
+    [start(2), stop(2)],...
+    [start(3), stop(3)],'Color','m',...
+    'Linestyle',':',...
+    'Linewidth',2);
+legendtext{end+1} = 'up direction';
 
 %% Label the graph
 
 xlabel('x coord (m)'); ylabel('y coord (m)'); zlabel('z coord (m)');
 grid on
-axis equal; % Not sure we want this.  But maybe.
+% axis equal; % Not sure we want this.  But maybe.
 
 bName = thisR.get('input basename');
 oType = thisR.get('optics type');
 title(sprintf('%s (%s)',bName,oType));
-% legend({'objects','camera','to'})
 
 %% By default set the xy plane view
 switch lower(p.Results.inplane)
@@ -179,12 +202,12 @@ switch lower(p.Results.inplane)
         view(-180,0);
 end
 
-%% Square up the axes.
-boxMax = max([max(coords(:,1)),max(coords(:,2)),max(coords(:,3)),max(lookat.to),max(lookat.from)]);
-boxMin = min([min(coords(:,1)),min(coords(:,2)),min(coords(:,3)),min(lookat.to),min(lookat.from),min(stop)]);
-delta = (boxMax - boxMin)*0.1;
-boxMax = boxMax + delta;
-boxMin = boxMin - delta;
-set(gca,'xlim',[boxMin boxMax], 'ylim',[boxMin boxMax], 'zlim',[boxMin boxMax]);
+set(gca,'xlim',[boxMin(1) boxMax(1)], 'ylim',[boxMin(2) boxMax(2)], 'zlim',[boxMin(3) boxMax(3)]);
+
+legend(legendtext);
+
+% text(lookat.from(1)+sx,lookat.from(2)+sy,lookat.from(3),'from','Color','r');
+% text(lookat.to(1)+sx,lookat.to(2)+sy,lookat.to(3),'to','Color','g');
+% text(stop(1)+sx,stop(2)+sy,stop(3),'up','Color','b');
 
 end

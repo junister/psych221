@@ -1231,11 +1231,16 @@ switch ieParamFormat(param)  % lower case, no spaces
 
     % Lights
     case{'light', 'lights'}
+        % thisR.get('lights')
+        % thisR.get('lights',lightName,property)
+        % thisR.get('lights',idx,property)
+        %
+        % TODO: We should implement a get for the skymap (which is of type
+        % 'infinite')
         if isempty(varargin)
             val = thisR.assets.mapLgtShortName2Idx.keys;
             return;
         end
-
 
         switch varargin{1}
             case 'names'
@@ -1328,13 +1333,6 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('n lights')
         % Number of lights in this scene.
         val = numel(thisR.get('light', 'names'));
-        %{
-        if isprop(thisR, 'lights')
-            val = numel(thisR.lights);
-        else
-            val = 0;
-        end
-        %}
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
         piLightList(thisR);

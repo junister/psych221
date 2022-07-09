@@ -27,6 +27,8 @@ if ~piDockerExists, piDockerConfig; end
 % This is the INPUT file name
 % thisR = piRecipeDefault('scene name','cornellbox');
 % thisR = piRecipeDefault('scene name','coloredCube');
+% thisR = piRecipeDefault('scene name','kitchen');
+% thisR = piRecipeDefault('scene name','contemporary-bathroom');
 thisR = piRecipeDefault('scene name','ChessSet');
 
 %% Change render quality

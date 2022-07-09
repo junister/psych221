@@ -1,36 +1,43 @@
 function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, varargin)
-%% Create object instance
+%% Create an object instance (copy)
 %
 % Synopsis:
-%   thisR = piObjectInstanceCreate(thisR, assetname, position, rotation, motion)
+%   [thisR, instanceBranchName]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
 % Brief description:
-%   Create object instance using a different position/rotation/motion.
 %   If a complex object is used repeatedly in a scene, object instancing
 %   may be desirable; this lets the system store a single instance of the
 %   object in memory and just record multiple transformations to place it
-%   in the scene.
+%   in the scene. It is essentially a lightweight method of copying.
 %
 % Inputs:
 %   thisR     - scene recipe
-%   nodetype  - type of asset node
-%   position  - 1x3 position
-%   rotatoin  - 3x4 rotation
-%   motion    - motion struct which contains animated position and rotation
-%   material  - material name for (object type) asset
-%   
-% Output:
-%   thisR     - scene recipe
+%   assetName - The objecct we want to copy
 %
+% Optional key/val
+%   position  - 1x3 position (World position)?
+%   rotation  - 3x4 rotation
+%   motion    - motion struct which contains animated position and rotation
+%
+%   ** deprecated material  - material name for (object type) asset
+%   ** deprecated nodetype  - type of asset node
+%
+% Outputs:
+%   thisR     - scene recipe
+%   instanceBranchName
 %
 % Zhenyi, 2021
-%%
+
+% TODO (BW):  Make work with other regular scenes.  It appears to work with
+% ISETAuto case, but there are problems with SimpleScene.  To fix with
+% Zhenyi or Zheng.
+
+%% Read the parameters
 p = inputParser;
 p.addRequired('thisR', @(x)isequal(class(x),'recipe'));
 p.addParameter('position',[]);
 p.addParameter('rotation',[]);
 p.addParameter('motion',[],@(x)isstruct);
-
 
 p.parse(thisR, varargin{:});
 
@@ -38,13 +45,20 @@ thisR    = p.Results.thisR;
 position = p.Results.position;
 rotation = p.Results.rotation;
 motion   = p.Results.motion;
-%%
+
+%% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
-if ~strcmp(asset{1}.type, 'branch')
+
+% BW had a return that was not a cell, and so he added this
+if iscell(asset) && ~strcmp(asset{1}.type, 'branch')
+    warning('Only branch name is supported.');
+    return;
+elseif ~strcmp(asset{1}.type, 'branch')
     warning('Only branch name is supported.');
     return;
 end
 
+%% We seem to have a good index.
 OBJsubtree = thisR.get('asset', idx, 'subtree','false');
 
 OBJsubtree_branch = OBJsubtree.get(1);
@@ -64,6 +78,7 @@ else
         OBJsubtree_branch.instanceCount = sort([OBJsubtree_branch.instanceCount,indexCount]);
     end
 end
+
 % add instance to parent object
 thisR.assets = thisR.assets.set(idx, OBJsubtree_branch);
 
@@ -79,8 +94,8 @@ if ~isempty(motion)
     OBJsubtree_branch.motion.rotation = motion.rotation;
 end
 OBJsubtreeNew = tree();
-% for ii = 1:numel(OBJsubtree.Node)
-    
+
+% for ii = 1:numel(OBJsubtree.Node)  
 %     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
 %             OBJsubtree.Node{1}.isObjectInstance==0
 %         continue;
@@ -97,10 +112,13 @@ OBJsubtreeNew = tree();
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
 OBJsubtree_branch.isObjectInstance = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
+
 % replace branch
 OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
 
-% apply transformation to lights
+%% Apply transformation to lights
+
+% The code breaks here with the Simple Scene case.
 extraNode = OBJsubtree_branch.extraNode;
 
 extraNodeNew = extraNode;
@@ -123,6 +141,7 @@ for nLightsNode = 1:numel(extraNode.Node)
         extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
     end
 end
+
 % graft lightsNode
 OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 % graft object tree to scene tree
@@ -136,4 +155,5 @@ catch
     disp('ERROR');
 end
 instanceBranchName = OBJsubtree_branch.name;
+
 end

@@ -17,6 +17,7 @@ thisCPU = cpuinfo;
 switch thisCPU.CPUName
     % should include other ARM processors
     case 'Apple M1 Pro'
+        % Created by Zhenyi.
         dockerImage = '--platform linux/arm64 camerasimulation/pbrt-v4-cpu-arm:latest';
 
     otherwise
