@@ -92,12 +92,9 @@ upPoint  = lookat.from + upDirection;
 boxMax = zeros(3,1);
 boxMin = boxMax;
 for ii=1:3
-    boxMax(ii) = max([coords(:,ii),lookat.to(ii),lookat.from(ii),upPoint(ii)]);
-    boxMin(ii) = min([coords(:,ii),lookat.to(ii),lookat.from(ii),upPoint(ii)]);
+    boxMax(ii) = max([coords(:,ii)',lookat.to(ii),lookat.from(ii),upPoint(ii)]);
+    boxMin(ii) = min([coords(:,ii)',lookat.to(ii),lookat.from(ii),upPoint(ii)]);
 end
-
-% boxMax = max([max(coords(:,1)),max(coords(:,2)),max(coords(:,3)),max(lookat.to),max(lookat.from)]);
-% boxMin = min([min(coords(:,1)),min(coords(:,2)),min(coords(:,3)),min(lookat.to),min(lookat.from),min(stop)]);
 
 % Increase the directions just a bit.
 delta = (boxMax - boxMin)*0.1;   % One tenth of the range of each axis
