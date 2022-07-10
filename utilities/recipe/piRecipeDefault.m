@@ -14,22 +14,9 @@ function thisR = piRecipeDefault(varargin)
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name from the data/V4 directory.
-%
-%    
-%       MacBethChecker (default)
-%       SimpleScene
-%       checkerboard
-%       slantedBar
-%       chessSet
-%       chessSetScaled
-%       teapot
-%       numbers at depth
-%       materialball
-%       materialball_cloth
-%
-%   write -  Use piWrite to immediately save into iset3d/local, without any
-%     editing (default: false)
-%
+%      Examples: MacBethChecker (default), SimpleScene, slantedBar,
+%          chessSet, teapot, numbers at depth. materialball,
+%          materialball_cloth 
 % Outputs
 %   thisR - the ISET3d recipe with information from the PBRT scene file.
 %
@@ -42,21 +29,11 @@ function thisR = piRecipeDefault(varargin)
  thisR = recipe; thisR.list;
 %}
 %{
-   thisR = piRecipeDefault; piWrite(thisR);
-   piWrite(thisR);
-   scene = piRender(thisR,'render type','illuminant');
-   sceneWindow(scene);
+   thisR = piRecipeDefault; piWRS(thisR);
 %}
 %{
    thisR = piRecipeDefault('scene name','SimpleScene');
-   piWrite(thisR);
-   scene = piRender(thisR);
-   sceneWindow(scene);
-%}
-%{
-   thisR = piRecipeDefault; piWrite(thisR);
-   scene = piRender(thisR,'render type','all');
-   sceneWindow(scene);
+   piWRS(thisR);
 %}
 %{
    thisR = piRecipeDefault('scene name','checkerboard');
@@ -99,7 +76,7 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
-p.addParameter('write',false,@islogical);
+% p.addParameter('write',false,@islogical);
 p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
 
 % p.addParameter('verbose', 2, @isnumeric);
@@ -107,7 +84,7 @@ p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
 p.parse(varargin{:});
 
 sceneDir   = p.Results.scenename;
-write      = p.Results.write;
+% write      = p.Results.write;
 loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
@@ -237,15 +214,21 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'cornell_box';
         sceneFile = ['cornell_box','.pbrt'];
         exporter = 'PARSE';
+
+
     case {'materialball'}
         sceneDir = 'materialball';
         sceneFile = ['materialball','.pbrt'];
         exporter = 'PARSE';
-
-     case {'materialball_cloth'}
+    case {'materialball_cloth'}
         sceneDir = 'materialball_cloth';
         sceneFile = ['materialball_cloth','.pbrt'];
         exporter = 'PARSE';
+        %     case 'bathroom'
+        %         sceneDir = 'bathroom';
+        %         sceneFile = 'scene.pbrt';
+        %         exporter = 'Copy';
+
 
     case {'cornellboxbunnychart'}
         if loadrecipe && exist('Cornell_Box_Multiple_Cameras_Bunny_charts-recipe.mat','file')
@@ -277,14 +260,8 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'lettersAtDepth';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-    case 'bathroom'
-        sceneDir = 'bathroom';
-        sceneFile = 'scene.pbrt';
-        exporter = 'Copy';
-    case 'classroom'
-        sceneDir = 'classroom';
-        sceneFile = 'scene.pbrt';
-        exporter = 'Copy';
+
+        % Benedikt scenes in V4
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
@@ -292,6 +269,25 @@ switch ieParamFormat(sceneDir)
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
+        exporter = 'Copy';
+    case {'landscape'}
+        sceneDir = 'landscape';
+        sceneFile = 'view-0.pbrt';
+        exporter = 'Copy';
+    case {'bistro'}
+        sceneDir = 'bistro';
+        sceneFile = 'bistro_cafe.pbrt';
+        exporter = 'Copy';
+    case {'head'}
+        sceneDir = 'head';
+        sceneFile = ['head','.pbrt'];
+        exporter = 'Copy';
+         % End Benedikt V4
+         
+        % Maybe deprecated V3?
+    case 'classroom'
+        sceneDir = 'classroom';
+        sceneFile = 'scene.pbrt';
         exporter = 'Copy';
     case 'veach-ajar'
         sceneDir = 'veach-ajar';
@@ -329,7 +325,7 @@ switch ieParamFormat(sceneDir)
     case 'bedroom'
         sceneDir  = 'bedroom';
         sceneFile = 'scene.pbrt';
-        exporter = 'Copy';
+        exporter = 'Copy';        
     case 'colorfulscene'
         % djc -- This scene loads but on my machine pbrt gets an error:
         %        "Unexpected token: "string mapname""
@@ -341,19 +337,15 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'living-room-3';
         sceneFile = 'scene.pbrt';
         exporter = 'Copy';
-    case {'landscape'}
-        sceneDir = 'landscape';
-        sceneFile = 'view-0.pbrt';
-        exporter = 'Copy';
-    case {'bistro'}
-        sceneDir = 'bistro';
-        sceneFile = 'bistro_cafe.pbrt';
-        exporter = 'Copy';
+
     case {'livingroom3mini', 'living-room-3-mini'}    
         % Not running
         sceneDir = 'living-room-3-mini';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Copy';
+        
+        % End V3 to deprecate or update
+
     case {'blenderscene'}
         sceneDir = 'BlenderScene';
         sceneFile = [sceneDir,'.pbrt'];
@@ -423,10 +415,10 @@ end
 %% If requested, write the files now
 
 % Usually, however, we edit the recipe before writing and rendering.
-if write
-    piWrite(thisR);
-    fprintf('%s: Using piWrite to save %s in iset3d/local.\n',mfilename, sceneDir);
-end
+% if write
+%     piWrite(thisR);
+%     fprintf('%s: Using piWrite to save %s in iset3d/local.\n',mfilename, sceneDir);
+% end
 
 end
 

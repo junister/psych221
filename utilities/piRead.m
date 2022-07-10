@@ -475,18 +475,27 @@ while ii<=nline
             % of Option (Camera, Sampler, Integrator, Film, ...)
             % This builds the struct and assigns the values of the
             % parameters
-            %
-            % TODO:
-            % If the parameter is 'float cropwindow' we need to read the
-            % following four entries, not just one.  This might be a
-            % problem in other reads, too, such as spectrum?
             while dd <= nStrings
                 if piContains(thisLine{dd},' ')
                     C = strsplit(thisLine{dd},' ');
                     valueType = C{1};
                     valueName = C{2};
                 end
-                value = thisLine{dd+1};
+
+                % Some parameters have multiple values, most just one.
+                % inserted this switch to handle the cropwindow case.
+                % Maybe others will come up (e.g., spectrum?) (BW)
+                switch valueName
+                    case 'cropwindow'
+                        value = zeros(1,4);
+                        for jj=1:4
+                            value(jj) = str2double(thisLine{dd+jj});
+                        end
+                        dd = dd+5;
+                    otherwise
+                        value = thisLine{dd+1};
+                        dd = dd+2;
+                end
 
                 % Convert value depending on type
                 if(isempty(valueType))
@@ -500,14 +509,17 @@ while ii<=nline
                         value = false;
                     end
                 elseif(strcmp(valueType,'float') || strcmp(valueType,'integer'))
-                    value = str2double(value);
+                    % In cropwindow case, above, value is already converted.
+                    if ischar(value)
+                        value = str2double(value);
+                    end
                 else
                     error('Did not recognize value type, %s, when parsing PBRT file!',valueType);
                 end
 
+                % Assign the type and value to the recipe
                 tempStruct = struct('type',valueType,'value',value);
                 s.(valueName) = tempStruct;
-                dd = dd+2;
             end
             break;
         end
