@@ -274,10 +274,21 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'landscape';
         sceneFile = 'view-0.pbrt';
         exporter = 'Copy';
-    case {'bistro_cafe'}
-        sceneDir = 'bistro_cafe';
-        sceneFile = 'bistro_cafe.pbrt';
+    case {'bistro_vespa'}
+        % Just downloaded from cardinal
+        sceneDir = 'bistro';
+        sceneFile = 'bistro_vespa.pbrt';
         exporter = 'Copy';
+    case {'bistro_boulangerie'}
+        % Just downloaded from cardinal
+        sceneDir = 'bistro';
+        sceneFile = 'bistro_boulangerie.pbrt';
+        exporter = 'Copy';
+    case {'bistro','bistro_cafe'}
+        % Was sitting on my computer.
+        sceneDir = 'bistro';
+        sceneFile = 'bistro_cafe.pbrt';
+        exporter = 'Copy';        
     case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
