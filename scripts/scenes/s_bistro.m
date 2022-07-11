@@ -1,4 +1,8 @@
-%% s_headLens
+%% s_bistro
+%
+% Worked with cardinal download on July 11, 2022
+%
+%
 
 thisR = piRecipeDefault('scene name','bistro');
 thisR.set('rays per pixel',256);
