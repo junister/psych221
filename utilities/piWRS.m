@@ -121,6 +121,10 @@ switch obj.type
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag), oiSet(obj,'render flag',renderFlag); end
         end
+        % Store the recipe camera on the oi.  Not sure why, but it
+        % seems like a good idea.  I considered the film, too, but
+        % that doesn't have much extra.
+        obj.camera = thisR.get('camera');
 end
 
 %% Put parameters back.
