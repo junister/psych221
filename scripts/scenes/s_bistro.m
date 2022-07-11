@@ -40,11 +40,12 @@ piWRS(thisR,'name','DG fov 5m');
 
 %% Another double Gauss
 
-lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
+% lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
+lensfile = 'dgauss.77deg.3.5201mm.json';
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 thisR.set('film resolution',[320 320]*2);
-thisR.set('film diagonal',33);  %% 33 mm is small
+thisR.set('film diagonal',3);  %% 33 mm is small
 thisR.set('object distance',10);  % Move closer. 
 piWRS(thisR,'name','DG fov 10m');
 
