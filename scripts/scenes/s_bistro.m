@@ -29,12 +29,33 @@ scene = piWRS(thisR);
 
 % thisR.set('lens file','fisheye.87deg.100.0mm.json');
 % lensFiles = lensList;
-% lensfile = 'fisheye.87deg.100.0mm.json';
-% lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
-
-fprintf('Using lens: %s\n',lensfile);
+lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
-thisR.set('focal distance',5);
-thisR.set('film diagonal',33);
 
-oi = piWRS(thisR);
+thisR.set('film resolution',[320 320]*2);
+thisR.set('focal distance',10);
+thisR.set('film diagonal',100);  %% 33 mm is small
+thisR.set('object distance',5);  % Move closer. 
+piWRS(thisR,'name','DG fov 5m');
+
+%% Another double Gauss
+
+lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
+thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+
+thisR.set('film resolution',[320 320]*2);
+thisR.set('film diagonal',33);  %% 33 mm is small
+thisR.set('object distance',10);  % Move closer. 
+piWRS(thisR,'name','DG fov 10m');
+
+%% Fisheye
+
+lensfile = 'fisheye.87deg.100.0mm.json';
+thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+
+thisR.set('film resolution',[320 320]*2);
+thisR.set('film diagonal',200);  %% 33 mm is small
+thisR.set('object distance',5);  % Move closer. 
+oi = piWRS(thisR,'name','fisheye 5m');
+
+
