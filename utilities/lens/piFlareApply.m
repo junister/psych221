@@ -32,6 +32,7 @@ p.addParameter('pixelsize',1.5e-6); % Focal length (m)
 p.addParameter('maxluminance',1e6); % max luminance for scene
 p.addParameter('sensorsize',3e-3); % sensorSize;
 p.addParameter('dirtaperture',true);
+p.addParameter('dirtylevel',1);
 p.parse(scene, varargin{:});
 
 scene = p.Results.scene;
@@ -43,6 +44,7 @@ PixelSize = p.Results.pixelsize;
 SensorSize = p.Results.sensorsize;
 maxLuminance = p.Results.maxluminance;
 DirtAperture = p.Results.dirtaperture;
+dirty_level = p.Results.dirtylevel;
 %%
 %% Typical parameters for a smartphone camera.
 % Nominal wavelength (m).
@@ -68,7 +70,7 @@ wavelengths = linspace(400, 700, num_wavelengths) * 1e-9;
 % generate the PSFs
 aperture = aperture_mask;
 if DirtAperture
-    aperture = RandomDirtyAperture(aperture);
+    aperture = RandomDirtyAperture(aperture, dirty_level);
 end
 %% Random defocus.
 defocus = 1;
@@ -84,10 +86,12 @@ for ww = 1:31
     psf = psf/sum(psf(:));
     photons_wl = scene.data.photons(:,:,ww);
     photons_wl(luminance > maxLuminance) = (maxLuminance/max(luminance(:)))* photons_wl(luminance > maxLuminance);
+    photons_wl = photons_wl * (1/(maxLuminance/max(luminance(:)))); % make luminacne consistent
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(photons_wl, psf, 2 );
     %     photons_fl(:,:,ww) = conv2(scene_dn.data.photons(:,:,ww), psf,'same');
 end
 opticalImage = piOICreate(photons_fl,'focalLength',FL);
+opticalImage = oiSet(opticalImage, 'wAngular',2*atand((SensorSize/2)/FL));
 %
 end
 
