@@ -1,5 +1,5 @@
 %  // clang-format off
-function im = RandomDirtyAperture(mask)
+function im = RandomDirtyAperture(mask, dirty_level)
 % RandomDirtyAperture Synthetic dirty aperture with random dots and scratches.
 %
 % im = RandomDirtyAperture(mask)
@@ -16,6 +16,7 @@ function im = RandomDirtyAperture(mask)
 % mask: An [N, N]-logical matrix representing the aperture mask. Typically, this
 %       should be a centered disk of 1 surrounded by 0.
 %
+% dirty_level: above or equal to 0.
 % Returns
 %
 % im: An [N, N]-matrix of values in [0, 1] where 0 means completely opaque and 1
@@ -30,6 +31,7 @@ im = ones(size(mask), 'single');
 
 %% Add dots (circles), simulating dust.
 num_dots = max(0, round(20 + randn * 5));
+num_dots = round(num_dots * dirty_level);
 max_radius = max(0, 5 + randn * 50);
 for i = 1:num_dots
   circle_xyr = rand(1, 3, 'single') .* [n, n, max_radius];
@@ -40,6 +42,7 @@ end
 
 %% Add polylines, simulating scratches.
 num_lines = max(0, round(20 + randn * 5));
+num_lines = round(num_lines * dirty_level);
 % max_width = max(0, round(5 + randn * 5));
 for i = 1:num_lines
   num_segments = randi(16);
