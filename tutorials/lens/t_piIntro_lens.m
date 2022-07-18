@@ -23,17 +23,21 @@ if ~piDockerExists, piDockerConfig; end
 % This is the PBRT scene file inside the output directory
 % thisR  = piRecipeDefault();
 thisR  = piRecipeDefault('scene name','chessSet');
-lightName = 'from camera';
-ourLight = piLightCreate(lightName,...
-                        'type','distant',...
-                        'cameracoordinate', true);
-recipeSet(thisR,'lights', ourLight,'add');
+% lightName = 'from camera';
+% ourLight = piLightCreate(lightName,...
+%                         'type','distant',...
+%                         'cameracoordinate', true);
+% recipeSet(thisR,'lights', ourLight,'add');
+
+thisR.set('render type',{'radiance','depth'});
+
+thisR.set('skymap','room.exr');
 
 %% Set render quality
 
 % Set resolution for speed or quality.
-thisR.set('film resolution',round([600 600]*0.5));  % 2 is high res. 0.25 for speed
-thisR.set('rays per pixel',64);                      % 128 for high quality
+thisR.set('film resolution',round([600 600]*0.5));   % 2 is high res. 0.25 for speed
+thisR.set('rays per pixel',64);                      % 1024 for high quality
 
 %% To determine the range of object depths in the scene
 
@@ -48,6 +52,8 @@ depthRange = [0.1674, 3.3153];  % Chess set distances in meters
 %% Add camera with lens
 
 % lensFiles = lensList;
+% lensfile = 'wide.56deg.50.0mm.json';
+% lensfile = 'fisheye.87deg.50.0mm.json';
 lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
 fprintf('Using lens: %s\n',lensfile);
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
@@ -66,7 +72,7 @@ thisR.set('focal distance',mean(depthRange));
 % This is the size of the film/sensor in millimeters (default 22)
 % From the field of view and the focal length we should be able to
 % calculate the proper size of the film.
-thisR.set('film diagonal',33);
+thisR.set('film diagonal',75);
 
 % Pick out a bit of the image to look at.  Middle dimension is up.
 % Third dimension is z.  I picked a from/to that put the ruler in the
@@ -85,17 +91,14 @@ thisR.set('aperture diameter',1);   % thisR.summarize('all');
 % glass or mirrors, we need to have at least 2 or more.
 % thisR.set('nbounces',4); 
 
+
 %% Render and display
 
-% Change this for depth of field effects.
-piWrite(thisR);
+sName = sprintf('%s',lensfile);
+oi = piWRS(thisR,'name',sName);
 
-oi = piRender(thisR,'render type','radiance');
-oi = oiSet(oi,'name',sprintf('chessSet-%dmm',thisR.get('aperture diameter')));
-oiWindow(oi);
-
-%% Image look noisy?  Try this
-
+% Image look noisy?  Try this.  Requires the oidn from Intel
+%
 % oi = piAIdenoise(oi);
 % oiWindow(oi);
 

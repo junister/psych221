@@ -15,34 +15,58 @@ function [object, results] = piAIdenoise(object,varargin)
 %           denoised is returned
 %
 % Description
-%   This routine is to run a denoiser (oidn_pth) on rendered images when
-%   we only use a small number of rays.  This denoiser makes the images
-%   look better.  It is not used for true simulations of sensor data.
 %
-%   This is a Monte Carlo denoiser based on a trained model from intel open
-%   image denoise: 'https://www.openimagedenoise.org/'.
+% Runs executable for the Intel denoiser (oidn_pth).  The executable
+% must be installed on your machine.
+% 
+% This is a Monte Carlo denoiser based on a trained model from intel
+% open image denoise: 'https://www.openimagedenoise.org/'.  You can
+% download versions for various types of architectures from that page.
+% We expect the directory location on a Mac to be
+% 
+%   fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 %
-%   Ultimately, this will become a docker image that can integrate with
-%   PBRT.
+% Otherwise, we expect the oidnDenoise command to be in
+%
+%   fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
+%
+% We should update this program to allow other paths and other
+% versions.
+%
+% These are used for PBRT rendered images when we only use a small
+% number of rays.  We use it for show, not for accurate simulations
+% of scene or oi data.
+%
+% We should probably embed this in a docker image that can integrate with
+% PBRT.
 %
 % See also
 %   sceneWindow, oiWindow
-%
-% Update History:
-%   10/15/21    djc    Fixed Windows pathing
 
 %% Parse
 p = inputParser;
-p.addRequired('object',@(x)(isequal(x.type,'scene') || isequal(x.type,'opticalimage')));
+p.addRequired('object',@(x)(isequal(x.type,'scene') || isequal(x.type,'opticalimage') ));
 p.addParameter('quiet',false,@islogical);
 
 p.parse(object,varargin{:});
 
 quiet = p.Results.quiet;
 
-%%  Get the data
+%% Set up the denoiser path information and check
 
-% [rows, cols, chs] = size(object.data.photons);
+if ismac
+    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
+else
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
+end
+
+if ~exist(oidn_pth,'dir')
+    error('Could not find the directory:\n%s',oidn_pth);
+end
+
+
+%%  Get the photon data
+
 switch object.type
     case 'opticalimage'
         wave = oiGet(object,'wave');
@@ -55,7 +79,8 @@ switch object.type
     otherwise
         error('Should never get here.  %s\n',object.type);
 end
-% % get normal
+
+% Old code, no longer used. get normal
 % if isfield(object.data,'normalMap') && ~isempty(object.data.normalMap)
 %     normalFlag = 1;
 %     normalmap = object.data.normalMap;
@@ -63,41 +88,49 @@ end
 %     writePFM(normalmap, normal_pth);
 % end
 
-%% Set up the denoiser path information
-
-if ismac
-    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-else
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
-end
-
 outputTmp = fullfile(piRootPath,'local','tmp_input.pfm');
 DNImg_pth = fullfile(piRootPath,'local','tmp_dn.pfm');
-NewPhotons = zeros(rows, cols, chs);
+newPhotons = zeros(rows, cols, chs);
+
+
+
+%% Run it
 
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel denoiser'); end
 for ii = 1:chs
+    % For every channel, get the photon data, normalize it, and
+    % denoise it
     img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
     img_sp(:,:,2) = img_sp(:,:,1);
     img_sp(:,:,3) = img_sp(:,:,1);
+
+    % Write it out into a temporary file
     writePFM(img_sp, outputTmp);
     cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
-    [~, results] = system(cmd);
+    
+    % Run the executable.
     [status, results] = system(cmd);
-    if status
-        error(results);
-    end
+    if status, error(results); end
 
+    % Read the denoised data and scale it back up
     DNImg = readPFM(DNImg_pth);
-    NewPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
+    newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
+
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
 end
 if ~quiet, close(h); end
 
-object.data.photons = NewPhotons;
+%% Set the data into the object
 
+switch object.type
+    case 'scene'
+        object = sceneSet(object,'photons',newPhotons);
+    case 'opticalimage'
+        object = oiSet(object,'photons',newPhotons);
+end
+
+% Clean up the temporary file.
 if exist(DNImg_pth,'file'), delete(DNImg_pth); end
 if exist(outputTmp,'file'), delete(outputTmp); end
-% if exist(normal_pth,'file'), delete(normal_pth); end
 
 end

@@ -1,38 +1,33 @@
 function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 % Use imgtool for various PBRT related tasks
 %
+% Brief description
+%   Uses the Docker Container to run the imgtool.
+%
 % Synopsis
 %   [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %
 % Inputs
 %   command:  The imgtool command.  Options are
+%      help
 %      make equiarea
 %      make sky - Makes an exr skymap with name sky-
 %      convert
-%      denoise (NYI)
-%      help
+%      denoise - We have another denoiser, though this one should work
+%                some day! 
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
-%   msparms:  Select from: {albedo, elevation, outfile, turbidity, resolution}
+%   msparms:  make sky parameters.  Select from: {albedo, elevation,
+%                    outfile, turbidity, resolution} 
 %
 % Outputs
 %   status    - 0 means success
 %   result    - Text returned by the command
 %   dockercmd - The docker command
 %
-% Uses the Docker Container to run the imgtool.  So far we have
-% implemented these commands
-%
-%   piDockerImgtool('help')
-%   piDockerImgtool('make equiarea','infile',fullpathname);
-%   piDockerImgtool('make sky');
-%
-%
-%  imgtool makeequiarea old.exr --outfile new.exr
-%
 % See also
-%
+%   piAIdenose, tev (executable viewer for the exr files)
 
 %{
 % Other imgtool commands
@@ -176,13 +171,25 @@ switch command
                       Default: all channels at the same directory with pbrt.exr
         %}
     case 'denoise'
-        % piDockerImgtool('denoise','infile',fullPathFile >>>)
+        % piDockerImgtool('denoise','infile',fullPathFile)
         %{
             usage: imgtool denoise [options] <filename>
             options: options:
                 --outfile <name>   Filename to use for the denoised image.
         %}
-        disp('denoise NYI')
+
+        % I tried running on a rendered file, but got an error that it
+        % could not find the Pz channel.  To ask - (BW).
+        basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
+        cmd = sprintf('imgtool denoise %s --outfile denoise-%s', ...
+            dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(fname));
+
+        dockercmd = sprintf(basecmd, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            workdir, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            dockerimage, ...
+            cmd);
 
     case 'makeequiarea'
         %  piDockerImgtool('make equiarea','infile',filename);
@@ -232,7 +239,7 @@ switch command
 
 end
 
-% Run it and show any result.  Maybe
+% Run dockercmd and show any result.  Maybe
 [status,result] = system(dockercmd);
 if p.Results.verbose || status ~= 0
     fprintf('Run command:  %s\n',cmd);
