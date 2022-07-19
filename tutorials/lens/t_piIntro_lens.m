@@ -10,7 +10,7 @@
 % W 2018
 %
 % See also
-%   t_piIntro_start, isetlens, 
+%   t_piIntro_start, isetlens,
 %
 
 %% Initialize ISET and Docker
@@ -23,21 +23,23 @@ if ~piDockerExists, piDockerConfig; end
 % This is the PBRT scene file inside the output directory
 % thisR  = piRecipeDefault();
 thisR  = piRecipeDefault('scene name','chessSet');
+
+%{
 % lightName = 'from camera';
 % ourLight = piLightCreate(lightName,...
 %                         'type','distant',...
 %                         'cameracoordinate', true);
 % recipeSet(thisR,'lights', ourLight,'add');
+%}
 
 thisR.set('render type',{'radiance','depth'});
-
 thisR.set('skymap','room.exr');
 
 %% Set render quality
 
 % Set resolution for speed or quality.
-thisR.set('film resolution',round([600 600]*0.5));   % 2 is high res. 0.25 for speed
-thisR.set('rays per pixel',64);                      % 1024 for high quality
+thisR.set('film resolution',round([600 600]));   % 2 is high res. 0.25 for speed
+thisR.set('rays per pixel',256);                     % 1024 for high quality
 
 %% To determine the range of object depths in the scene
 
@@ -51,55 +53,65 @@ depthRange = [0.1674, 3.3153];  % Chess set distances in meters
 
 %% Add camera with lens
 
-% lensFiles = lensList;
-% lensfile = 'wide.56deg.50.0mm.json';
-% lensfile = 'fisheye.87deg.50.0mm.json';
-lensfile  = 'dgauss.22deg.50.0mm.json';    % 30 38 18 10
-fprintf('Using lens: %s\n',lensfile);
-thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+% To see all possible lenses use
+%   lensFiles = lensList;
 
-% Set the focus into the middle of the depth range of the objects in the
-% scene.
+theLenses = {'dgauss.22deg.50.0mm.json','wide.56deg.50.0mm.json','fisheye.87deg.50.0mm.json'};
+for ll=1:numel(theLenses)
+
+    lensfile = theLenses{ll};    
+    fprintf('Using lens: %s\n',lensfile);
+    thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+
+    % Set the focus into the middle of the depth range of the objects in the
+    % scene.
+    %{
+     d = lensFocus(lensfile,max(depthRange*1000));   % Millimeters
+     thisR.set('film distance',d);
+    %}
+    thisR.set('focal distance',mean(depthRange));
+
+    % The FOV is not used for the 'omni' camera.
+    % The FOV is determined by the lens.
+
+    % This is the size of the film/sensor in millimeters (default 22)
+    % From the field of view and the focal length we should be able to
+    % calculate the proper size of the film.
+    thisR.set('film diagonal',85);
+
+    % Pick out a bit of the image to look at.  Middle dimension is up.
+    % Third dimension is z.  I picked a from/to that put the ruler in the
+    % middle.  The in focus is about the pawn or rook.
+    thisR.set('from',[0 0.14 -0.7]);     % Get higher and back away than default
+    thisR.set('to',  [0.05 -0.07 0.5]);  % Look down default compared to default
+
+    % We can use bdpt if you are using the docker with the "test" tag (see
+    % header). Otherwise you must use 'path'
+    thisR.integrator.subtype = 'path';
+    thisR.sampler.subtype    = 'sobol';
+
+    thisR.set('aperture diameter',1);   % thisR.summarize('all');
+
+    % This value determines the number of ray bounces.  If the scene has
+    % glass or mirrors, we need to have at least 2 or more.
+    % thisR.set('nbounces',4);
+
+
+    %% Render and display
+
+    sName = sprintf('%s',lensfile);
+    oi = piWRS(thisR,'name',sName,'render flag','hdr');
+
+end
+
+%% Images noisy?  You can clean them this way
 %{
- d = lensFocus(lensfile,max(depthRange*1000));   % Millimeters
- thisR.set('film distance',d);
+for ll=1:numel(theLenses)
+    oi = ieGetObject('oi',ll);
+    oi = piAIdenoise(oi);
+    ieReplaceObject(oi,ll);
+    oiWindow;
+end
 %}
-thisR.set('focal distance',mean(depthRange));
-
-% The FOV is not used for the 'omni' camera.
-% The FOV is determined by the lens. 
-
-% This is the size of the film/sensor in millimeters (default 22)
-% From the field of view and the focal length we should be able to
-% calculate the proper size of the film.
-thisR.set('film diagonal',75);
-
-% Pick out a bit of the image to look at.  Middle dimension is up.
-% Third dimension is z.  I picked a from/to that put the ruler in the
-% middle.  The in focus is about the pawn or rook.
-thisR.set('from',[0 0.14 -0.7]);     % Get higher and back away than default
-thisR.set('to',  [0.05 -0.07 0.5]);  % Look down default compared to default 
-
-% We can use bdpt if you are using the docker with the "test" tag (see
-% header). Otherwise you must use 'path'
-thisR.integrator.subtype = 'path';  
-thisR.sampler.subtype    = 'sobol';
-
-thisR.set('aperture diameter',1);   % thisR.summarize('all');
-
-% This value determines the number of ray bounces.  If the scene has
-% glass or mirrors, we need to have at least 2 or more.
-% thisR.set('nbounces',4); 
-
-
-%% Render and display
-
-sName = sprintf('%s',lensfile);
-oi = piWRS(thisR,'name',sName);
-
-% Image look noisy?  Try this.  Requires the oidn from Intel
-%
-% oi = piAIdenoise(oi);
-% oiWindow(oi);
 
 %% END
