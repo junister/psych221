@@ -30,16 +30,19 @@ thisR = piRecipeDefault('scene name','chessset');
 
 %% Set the render quality
 
-% There are many rendering parameters.  This is the just an introductory
+% There are many rendering parameters.  This is an introductory
 % script, so we set a minimal number of parameters.  Much of what is
 % described in other scripts expands on this section.
+
 thisR.set('film resolution',[256 256]);
 thisR.set('rays per pixel',64);
 thisR.set('n bounces',4); % Number of bounces traced for each ray
 
 thisR.set('render type',{'radiance','depth'});
-scene = piWRS(thisR);
-scene = sceneSet(scene,'render flag','hdr');
+
+% The main way we write, render and show the recipe.  The render flag
+% is optional, and there are several other optional piWRS flags.
+scene = piWRS(thisR,'render flag','hdr');
 
 %% By default, we have also computed the depth map, so we can render it
 
@@ -82,4 +85,5 @@ thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
 thisR.get('light', skyMap.name, 'world orientation')
 
 piWRS(thisR, 'name','No rotation skymap');
+
 %% END

@@ -1,13 +1,11 @@
-%% Render using a lens
+%% Render an image using a lens model
+%
+% We illustrate three different lens models with the Chess Set scene.
+% These optics models are standard 3mm choices with a 7.5mm film
+% (sensor) diagonal.
 %
 % Dependencies:
 %    ISET3d-v4, ISETCam, isetlens
-%
-% For more information about PBRT lens and camera formats:
-%
-%
-% Z Liu, B
-% W 2018
 %
 % See also
 %   t_piIntro_start, isetlens,
@@ -24,14 +22,6 @@ if ~piDockerExists, piDockerConfig; end
 % thisR  = piRecipeDefault();
 thisR  = piRecipeDefault('scene name','chessSet');
 
-%{
-% lightName = 'from camera';
-% ourLight = piLightCreate(lightName,...
-%                         'type','distant',...
-%                         'cameracoordinate', true);
-% recipeSet(thisR,'lights', ourLight,'add');
-%}
-
 thisR.set('render type',{'radiance','depth'});
 thisR.set('skymap','room.exr');
 
@@ -39,24 +29,29 @@ thisR.set('skymap','room.exr');
 
 % Set resolution for speed or quality.
 thisR.set('film resolution',round([600 600]));   % 2 is high res. 0.25 for speed
-thisR.set('rays per pixel',256);                     % 1024 for high quality
+thisR.set('rays per pixel',512);                 % 1024 for high quality
 
 %% To determine the range of object depths in the scene
 
-% depthRange = thisR.get('depth range');
+%{
+% Run this function
+depthRange = thisR.get('depth range');
+
+% Which just calls this:
 %
-% Runs this function
-%   [depthRange, depthHist] = piSceneDepth(thisR);
-%   histogram(depthHist(:)); xlabel('Depth (m)'); grid on
+% [depthRange, depthHist] = piSceneDepth(thisR);
+% histogram(depthHist(:)); xlabel('Depth (m)'); grid on
 %
-depthRange = [0.1674, 3.3153];  % Chess set distances in meters
+%}
+depthRange = [0.2555    2.7710];  % Chess set distances in meters
 
 %% Add camera with lens
 
 % To see all possible lenses use
 %   lensFiles = lensList;
-
-theLenses = {'dgauss.22deg.50.0mm.json','wide.56deg.50.0mm.json','fisheye.87deg.50.0mm.json'};
+%
+theLenses = {'dgauss.22deg.3.0mm.json','wide.56deg.3.0mm.json','fisheye.87deg.3.0mm.json'};
+% theLenses = {'dgauss.22deg.50.0mm.json','wide.56deg.50.0mm.json','fisheye.87deg.50.0mm.json'};
 for ll=1:numel(theLenses)
 
     lensfile = theLenses{ll};    
@@ -77,7 +72,7 @@ for ll=1:numel(theLenses)
     % This is the size of the film/sensor in millimeters (default 22)
     % From the field of view and the focal length we should be able to
     % calculate the proper size of the film.
-    thisR.set('film diagonal',85);
+    thisR.set('film diagonal',7.5);
 
     % Pick out a bit of the image to look at.  Middle dimension is up.
     % Third dimension is z.  I picked a from/to that put the ruler in the
@@ -90,21 +85,22 @@ for ll=1:numel(theLenses)
     thisR.integrator.subtype = 'path';
     thisR.sampler.subtype    = 'sobol';
 
+    % Increases the depth of field
     thisR.set('aperture diameter',1);   % thisR.summarize('all');
 
-    % This value determines the number of ray bounces.  If the scene has
-    % glass or mirrors, we need to have at least 2 or more.
-    % thisR.set('nbounces',4);
-
-
-    %% Render and display
-
+    % Render and display
     sName = sprintf('%s',lensfile);
     oi = piWRS(thisR,'name',sName,'render flag','hdr');
 
 end
 
-%% Images noisy?  You can clean them this way
+%% Images noisy?  You can clean them using piAIdenoise.
+%
+%  That function requires downloading the Intel denoiser and having
+%  the executable on your path.  Read the documentation at:
+%
+%    doc piAIdenoise
+%  
 %{
 for ll=1:numel(theLenses)
     oi = ieGetObject('oi',ll);

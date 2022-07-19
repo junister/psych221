@@ -21,7 +21,10 @@ function [object, results] = piAIdenoise(object,varargin)
 % 
 % This is a Monte Carlo denoiser based on a trained model from intel
 % open image denoise: 'https://www.openimagedenoise.org/'.  You can
-% download versions for various types of architectures from that page.
+% download versions for various types of architectures from 
+%
+% https://www.openimagedenoise.org/downloads.html
+%
 % We expect the directory location on a Mac to be
 % 
 %   fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
@@ -30,15 +33,17 @@ function [object, results] = piAIdenoise(object,varargin)
 %
 %   fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
 %
-% We should update this program to allow other paths and other
-% versions.
+% We plan to update this program (piAIdenoise) to allow other paths
+% and other versions in the future, after we get some experience with
+% people using the method.
 %
-% These are used for PBRT rendered images when we only use a small
-% number of rays.  We use it for show, not for accurate simulations
-% of scene or oi data.
+% We have used the denoiser to clean up PBRT rendered images when we
+% only use a small number of rays.  We use it for show, not for
+% accurate simulations of scene or oi data.
 %
-% We should probably embed this in a docker image that can integrate with
-% PBRT.
+% We may embed this denoiser in the PBRT docker image that can
+% integrate with PBRT.  We are also considering the denoiser that is
+% part of imgtool, distributed with PBRT.
 %
 % See also
 %   sceneWindow, oiWindow
