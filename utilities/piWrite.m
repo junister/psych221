@@ -183,19 +183,13 @@ piWriteBlocks(thisR,fileID);
 %% Add 'Include' lines for materials, geometry and lights into the scene PBRT file
 piIncludeLines(thisR,fileID);
 
-%% Write out the lights
-%{
-if ~isequal(exporter,'Copy')
-    piLightWrite(thisR);
-end
-%}
-
 %% Close the main PBRT scene file
 fclose(fileID);
 
 %% Write scene_materials.pbrt
 
-% Even when copying, we extract the materials and textures
+% Even if this is the copy type scene, we parse the materials and
+% texture maps and make sure the files are copied to 'local/'.
 if ~isempty(thisR.materials.list)
     piWriteMaterials(thisR,overwritematerials);
 end
@@ -204,7 +198,6 @@ end
 if ~isequal(exporter,'Copy')
     piWriteGeometry(thisR,overwritegeometry);
 end
-
 
 end   % End of piWrite
 
