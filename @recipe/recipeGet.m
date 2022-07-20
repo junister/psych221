@@ -531,6 +531,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('accommodation');   % Diopters
         val = 1 / thisR.get('focal distance','m');
 
+    case 'film'
+        % The whole film struct.
+        val = thisR.film;
+
     case {'filmdistance'}
         % thisR.get('film distance',unit); % Returned in meters
         %

@@ -13,7 +13,7 @@ function piMaterialWrite(thisR)
 %   None
 %
 % Description:
-%   Write the material file from PBRT V3, as input from Cinema 4D
+%   Write the material file from PBRT
 %
 %   The main scene file (scene.pbrt) includes a scene_materials.pbrt
 %   file.  This routine writes out the materials file from the
@@ -89,12 +89,13 @@ else
     materialTxt{1} = '';
 end
 
-% check mix material, make sure mix material reference the material after the definition
+% check for mixture materials.
+% These are two materials that are combined.
 mixMatIndex = piContains(matTypeList,'mix');
 mixMaterialText = materialTxt(mixMatIndex);
 nonMixMaterialText = materialTxt(~mixMatIndex);
 
-%% Write to scene_material.pbrt texture-material file
+%% Write the texture and material information into scene_material.pbrt
 output = thisR.get('materials output file');
 fileID = fopen(output,'w');
 fprintf(fileID,'# Exported by piMaterialWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
@@ -123,11 +124,9 @@ if ~isempty(thisR.media)
     end
 end
 
-
 fclose(fileID);
 
-[~,n,e] = fileparts(output);
-%fprintf('Material file %s written successfully.\n', [n,e]);
+% [~,n,e] = fileparts(output);
 
 end
 

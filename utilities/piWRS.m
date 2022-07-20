@@ -27,6 +27,12 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %   'gamma'      - Set the display gamma for the window
 %   'render flag' - {'hdr','rgb','gray','clip'}  (default: 'rgb' or
 %                   whatever is already in the window, if it is open.
+%   'speed' - Reduces the spatial resolution and other parameters to speed
+%             up the rendering at the cost of precision.  Useful for
+%             checking asset geometry quickly.  Default value: 1 (leaves
+%             the recipe unchanged).  A value of N reduces the resolution
+%             by a factor of N.  Bounces and number of rays are reduced,
+%             too.
 %
 % Returns
 %   obj     - a scene or oi
@@ -54,6 +60,7 @@ p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
+p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 
 p.parse(thisR,varargin{:});
 ourDocker  = p.Results.ourdocker;
@@ -69,6 +76,17 @@ end
 
 name = p.Results.name;
 show = p.Results.show;
+speed = p.Results.speed;
+if ~(speed == 1)
+    fprintf('\n***\nRender speedup %d X. Reducing resolution, bounces, and nrays.\n***\n',speed)
+    % Set the resolution and bounces very low
+    ss = thisR.get('film resolution');
+    thisR.set('film resolution',round(ss/speed));
+    nb = thisR.get('nbounces');
+    thisR.set('nbounces',1);
+    nrays = thisR.get('rays per pixel');
+    thisR.set('rays per pixel',128);
+end
 
 %% In version 4 we set the render type this way
 
@@ -103,8 +121,18 @@ switch obj.type
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag), oiSet(obj,'render flag',renderFlag); end
         end
+        % Store the recipe camera on the oi.  Not sure why, but it
+        % seems like a good idea.  I considered the film, too, but
+        % that doesn't have much extra.
+        obj.camera = thisR.get('camera');
 end
 
+%% Put parameters back.
 thisR.set('render type',oldRenderType);
+if ~(speed == 1)
+    thisR.set('film resolution',ss);
+    thisR.set('nbounces',nb);
+    thisR.set('rays per pixel',nrays);
+end
 
 end
