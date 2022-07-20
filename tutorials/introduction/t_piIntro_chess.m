@@ -27,7 +27,7 @@ if ~piDockerExists, piDockerConfig; end
 %% Read the recipe
 
 thisR = piRecipeDefault('scene name','chessset');
-
+    
 %% Set the render quality
 
 % There are many rendering parameters.  This is an introductory

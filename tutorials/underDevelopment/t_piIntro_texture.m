@@ -14,7 +14,7 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
+thisR = piRecipeDefault('scene name', 'flatSurfaceWhiteTexture');
 
 %% Add a light and render
 
