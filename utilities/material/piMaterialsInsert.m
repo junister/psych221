@@ -11,8 +11,11 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %   thisR - Recipe
 %
 % Optional key/val
-%   mtype - Material types to insert.  Options are
-%        {'all','diffuse','glass','wood','brick','testpattern','marble'}
+%   mtype - Material types to insert.  
+%     Options are
+%        {'all','diffuse','glass','wood','brick','testpattern','marble','single'}
+%     Most are precomputed textures, either stored here or in
+%     piMaterialPresets.
 %
 % Output
 %   thisR - Iset3d recipe. It is returned with additional materials

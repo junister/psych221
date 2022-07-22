@@ -72,7 +72,7 @@ new_material = piMaterialPresets(mat_type,material_name);
 
 %%  This chunk of code should become simpler
 %
-%   It might be something like piMaterialInsert(thisR,new_material);
+%   It might be something like piMaterialsInsert(thisR,new_material);
 %  
 if isfield(new_material, 'texture') && ~isempty(new_material.texture)
     for ii = 1:numel(new_material.texture)
@@ -93,19 +93,20 @@ thisR.set('material','replace', material_name, new_material.material);
 % thisR = piTextureFileFormat(thisR);
 
 %%
-piWRS(thisR,'gamma',0.85,'name',mat_type);
+scene = piWRS(thisR,'gamma',0.85,'name',mat_type);
 
 %{
-scene_rgb = sceneGet(scene,'rgb');
-outfileName = fullfile(piRootPath,'data/materials/previews',[mat_type,'.jpg']);
-imwrite(scene_rgb,outfileName);
+% Sometimes we write out the materials so people can see the expected
+% appearance.
+ scene_rgb = sceneGet(scene,'rgb');
+ outfileName = fullfile(piRootPath,'data/materials/previews',[mat_type,'.jpg']);
+ imwrite(scene_rgb,outfileName);
 %}
 
 %% render cloth material
 
 sceneName = 'materialball_cloth';
 thisR = piRecipeDefault('scene name',sceneName);
-
 
 thisR.set('filmresolution',[1200,900]/1.5);
 thisR.set('pixelsamples',512);

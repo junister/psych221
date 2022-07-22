@@ -1,5 +1,5 @@
-function [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
-% We create a material from some pretuned  cases
+function [newMat, presetList] = piMaterialPresets(keyword,materialName)
+% Create a material from some pretuned  cases
 %
 % Syntax:
 %    [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
@@ -8,12 +8,13 @@ function [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
 %    Return material (some with textures) with keyword.
 %
 % Inputs:
-%    keyword      - Material preset name
+%    keyword      - Material preset name or the special string
+%                   'preview'
 %    materialName - Material name which is used to create new material.
 %
 % Outputs:
-%    newMat              - Material and a list of textures if used.
-%    materialpresetsList - Avaliable material presets.
+%    newMat      - Material and a list of textures if used.
+%    pressetList - Avaliable material presets.
 %
 % Zhenyi, 2022
 %
@@ -39,18 +40,35 @@ function [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
 %% Parameters
 keyword = ieParamFormat(keyword);
 
-% These are the materials we have tuned up.
-materialpresetsList ={'glass','glass-BK7','glass-BAF10','glass-LASF9','glass-F5','glass-F10','glass-F11'...
+% These are the materials we have preset.
+presetList ={'glass','glass-BK7','glass-BAF10','glass-LASF9','glass-F5','glass-F10','glass-F11'...
     'metal-Ag','metal-Al','metal-Au','metal-Cu','metal-CuZn','metal-MgO','metal-TiO2',...
     'red-glass', 'tire','rough-metal','metal-spotty-discoloration','wood-floor-merbau',...
     'fabric-leather-var1','fabric-leather-var2','fabric-leather-var3','tiles-marble-sagegreen-brick'};
 
-% Make sure this is on your path, though honestly, I am not sure why
-% it wouldn't always be.
-addpath(genpath(fullfile(piRootPath,'data/materials')));
+% Make sure this is directory on your path, though honestly, I am not
+% sure why it wouldn't always be (BW).
+materialPath = fullfile(piRootPath,'data/materials');
+addpath(genpath(materialPath));
 
 %% Depending on the key word, go for it.
 switch keyword
+    case 'preview'
+        % piMaterialPresets('preview');  % Directory listing
+        % piMaterialPresets('preview','glass-F11.jpg'); % 
+        if exist('materialName','var') && ~isempty(materialName)
+            fname = fullfile(materialPath,'previews',materialName);
+            if exist(fullfile(materialPath,'previews',materialName), 'file')
+                ieNewGraphWin; im = imread(fname); image(im);
+            else
+                warning('Could not find %s. Here are the files',materialName);
+                dir(fullfile(materialPath,'previews'))
+            end
+        else
+            dir(fullfile(materialPath,'previews'))
+        end
+        return;
+
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
@@ -171,8 +189,8 @@ switch keyword
         newMat = [];
         fprintf('\n---Names of preset materials ---\n');
 
-        for ii = 1:numel(materialpresetsList)
-            fprintf('%d: %s \n',ii, materialpresetsList{ii});
+        for ii = 1:numel(presetList)
+            fprintf('%d: %s \n',ii, presetList{ii});
         end
         fprintf('---------------------\n');
 
