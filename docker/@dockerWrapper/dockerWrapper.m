@@ -552,6 +552,7 @@ classdef dockerWrapper < handle
                     if ~isempty(obj.renderContext)
                         cFlag = ['--context ' obj.renderContext];
                     else
+                        warning('No context flag found.  Consider renderContext to save startup.')
                         cFlag = '';
                     end
 

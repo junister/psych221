@@ -24,6 +24,9 @@ function  setPrefs(varargin)
 %   remoteImage   - Docker image to be used, otherwise default from
 %   ...
 %   remoteImageTag - Usually 'latest'
+%   remoteContext  - Often remote-mux.  You can use
+%                       docker context list
+%                    to see the contexts on your machine
 %
 %   localRoot     -  Mainly needed for Windows (WSL).  This is the
 %                    drive root 
@@ -50,6 +53,8 @@ p.addParameter('remoteImage','',@ischar);
 p.addParameter('remoteImageTag','',@ischar);
 p.addParameter('remoteRoot','',@ischar);
 p.addParameter('remoteRender','',@islogical);  % Inverted form of localRender
+
+p.addParameter('renderContext','',@ischar);
 
 p.addParameter('localRoot','',@ischar);
 p.addParameter('localRender','',@islogical);
@@ -112,6 +117,9 @@ end
 if ~isempty(p.Results.remoteRoot)
     setpref('docker', 'remoteRoot', p.Results.remoteRoot);
 end
+if ~isempty(p.Results.renderContext)
+    setpref('docker', 'renderContext', p.Results.renderContext);
+end
 
 % Local rendering parameters
 if ~isempty(p.Results.localRoot)
@@ -145,6 +153,7 @@ if ~isempty(p.Results.localVolumePath)
     % By default this will be 'latest'
     setpref('docker', 'localVolumePath', p.Results.localVolumePath);
 end
+
 % If you change these parameters, we need to reset the dockerWrapper.
 % Not sure I understand this (BW).
 dockerWrapper.reset;
