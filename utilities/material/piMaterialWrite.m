@@ -28,6 +28,7 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.parse(thisR);
 
 %% Create txtLines for texture struct array
+
 % Texture txt lines creation are moved into piTextureText function.
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
@@ -65,6 +66,7 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
 else
     textureTxt = {};
 end
+
 
 %% Create txtLines for the material struct array
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)

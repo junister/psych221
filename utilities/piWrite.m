@@ -23,16 +23,16 @@ function workingDir = piWrite(thisR,varargin)
 %   thisR: a recipe object describing the rendering parameters.
 %
 % Optional key/value parameters
-% There are too many of these options.  We hope to simplify
 %
-%   overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   overwrite resources - If the resources files exist, overwrite (default true)
-%   overwrite lensfile  - Logical. Default true
+%   Deprecated overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
+%   Deprecated overwrite resources - If the resources files exist, overwrite (default true)
+%   Deprecated overwrite lensfile  - Logical. Default true
 %   Deprecated overwrite materials - Logical. Default true
 %   Deprecated overwrite geometry  - Logical. Default true
-%   overwrite json      - Logical. Default true
-%   lightsFlag
-%   thistrafficflow
+%   Deprecated overwrite json      - Logical. Default true
+%   Deprecated lightsFlag
+%
+%   Deprecated thistrafficflow
 %
 %   verbose -- how chatty we are
 %
@@ -89,6 +89,7 @@ p = inputParser;
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 
+%{
 % Copy over the whole directory
 p.addParameter('overwriteresources', true,@islogical);
 
@@ -103,6 +104,7 @@ p.addParameter('overwritematerials',true,@islogical);
 
 % Overwrite geometry.pbrt
 p.addParameter('overwritegeometry',true,@islogical);
+%}
 
 % Create a new materials.pbrt
 % p.addParameter('creatematerials',false,@islogical);
@@ -117,16 +119,23 @@ p.addParameter('verbose', 0, @isnumeric);
 
 p.parse(thisR,varargin{:});
 
+% We need to get rid of these variables down below.  Until that time,
+% ...
+overwriteresources  = true;
+overwritepbrtfile   = true;
+overwritelensfile   = true;
+overwritematerials  = true;
+overwritegeometry   = true;
+
+%{
 overwriteresources  = p.Results.overwriteresources;
 overwritepbrtfile   = p.Results.overwritepbrtfile;
 overwritelensfile   = p.Results.overwritelensfile;
 overwritematerials  = p.Results.overwritematerials;
 overwritegeometry   = p.Results.overwritegeometry;
+%}
 
 % creatematerials     = p.Results.creatematerials;
-
-% lightsFlag          = p.Results.lightsflag;
-% thistrafficflow     = p.Results.thistrafficflow;
 verbosity           = p.Results.verbose;
 
 exporter = thisR.get('exporter');
@@ -191,6 +200,10 @@ fclose(fileID);
 % Even if this is the copy type scene, we parse the materials and
 % texture maps and make sure the files are copied to 'local/'.
 if ~isempty(thisR.materials.list)
+    % Make sure that the texture files are in PNG format
+    piTextureFileFormat(thisR);
+
+    % Write critical files.
     piWriteMaterials(thisR,overwritematerials);
 end
 

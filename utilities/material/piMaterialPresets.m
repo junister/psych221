@@ -1,5 +1,5 @@
 function [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
-% We create a library of material presets
+% We create a material from some pretuned  cases
 %
 % Syntax:
 %    [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
@@ -15,31 +15,46 @@ function [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
 %    newMat              - Material and a list of textures if used.
 %    materialpresetsList - Avaliable material presets.
 %
-% Example:
+% Zhenyi, 2022
+%
+% See also
+%   piMaterialsInsert
+%
+
+%Examples:
 %{
     % print out material presets names
     piMaterialPresets('listmaterial');
-    % create material
-    [new_material, ~] = piMaterialPresets('glass','material_demo');
 %}
-%
-%
-% Zhenyi, 2022
-
-%%
+%{
+    % A specific material
+    [new_material, ~] = piMaterialPresets('glass','glassDemo');
+%}
+%{
+  newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
+%}
+%{
+  newMat = piMaterialPresets('tiles-marble-sagegreen-brick','GreenMarble');
+%}
+%% Parameters
 keyword = ieParamFormat(keyword);
+
+% These are the materials we have tuned up.
 materialpresetsList ={'glass','glass-BK7','glass-BAF10','glass-LASF9','glass-F5','glass-F10','glass-F11'...
     'metal-Ag','metal-Al','metal-Au','metal-Cu','metal-CuZn','metal-MgO','metal-TiO2',...
     'red-glass', 'tire','rough-metal','metal-spotty-discoloration','wood-floor-merbau',...
-    'fabric-leather-var1','fabric-leather-var2','fabric-leather-var3'};
+    'fabric-leather-var1','fabric-leather-var2','fabric-leather-var3','tiles-marble-sagegreen-brick'};
 
+% Make sure this is on your path, though honestly, I am not sure why
+% it wouldn't always be.
 addpath(genpath(fullfile(piRootPath,'data/materials')));
 
-%%
+%% Depending on the key word, go for it.
 switch keyword
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
+
     case 'red-glass'
         newMat_glass = piMaterialCreate([materialName, '_mix_glass'], ...
             'type', 'dielectric','eta','glass-BK7');
@@ -123,6 +138,9 @@ switch keyword
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-Al-eta','k','metal-Al-k',...
             'uroughness',0.05,'vroughness',0.05);
+
+        % These materials are from the polligon website
+        % https://www.poliigon.com/textures/free
     case 'metal-spotty-discoloration'
         newMat = polligon_materialCreate(materialName,...
             'MetalSpottyDiscoloration001_COL_3K_METALNESS.png','coatedconductor');
@@ -143,10 +161,15 @@ switch keyword
         newMat = polligon_materialCreate(materialName,...
             'FabricLeatherBuffaloRustic001_COL_VAR3_3K.png','coateddiffuse');
 
-    case 'listmaterial'
+    case 'tiles-marble-sagegreen-brick'
+        newMat = polligon_materialCreate(materialName,...
+            'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coateddiffuse');
+
+        % The user wants a lit of all the materials.
+    case {'listmaterial','listmaterials'}
         % do nothing
         newMat = [];
-        fprintf('\n---Material presets names ---\n');
+        fprintf('\n---Names of preset materials ---\n');
 
         for ii = 1:numel(materialpresetsList)
             fprintf('%d: %s \n',ii, materialpresetsList{ii});
@@ -154,17 +177,25 @@ switch keyword
         fprintf('---------------------\n');
 
     otherwise
-        warning('No material presets found!');
+        warning('No material preset found for %s',keyword);
+        piMaterialPresets('list material');
 end
+
 end
 
 function newMat = polligon_materialCreate(materialName, material_ref, materialType)
-% material_ref is diffuse color texture in the folder which user
-% directly unzipped from the zip file downloaded from polligon website.
+% We sometimes download textures from this web-site
 %
 % Polligon website: https://www.poliigon.com/textures/free
+%
+% When we do, they have a number of files that we assign to the
+% variables of the material in this function.
+%
+% material_ref is diffuse color texture in the folder which user
+% directly unzipped from the zip file downloaded from polligon website.
 
-texfile = which(material_ref);
+%%
+texfile = which(material_ref);   % Texture file
 if isempty(texfile)
     error('File is not found! Make sure the file is existed!');
 end
@@ -172,7 +203,6 @@ end
 [texdir] = fileparts(texfile);
 
 filelists = dir(texdir);
-
 
 tex_ref    = piTextureCreate([materialName,'_tex_ref'],...
     'type','imagemap',...
@@ -207,20 +237,24 @@ for ii = 1:numel(filelists)
     end
 end
 
-
+% Parameters based on the material type
 switch materialType
     case 'coateddiffuse'
         material = piMaterialCreate(materialName,...
             'type','coateddiffuse',...
             'reflectance',[materialName,'_tex_ref']);
-        if ~isempty(normal_texture')
-            material.normalmap.value = normal_texture;
+
+        if ~isempty(normal_texture)
+            material = piMaterialSet(material,'normalmap',normal_texture);
+            % material.normalmap.value = normal_texture;
         end
         if ~isempty(tex_roughness)
-            material.roughness.value = [materialName,'_tex_roughness'];
+            material = piMaterialSet(material,'roughness',[materialName,'_tex_roughness']);
+            % material.roughness.value = [materialName,'_tex_roughness'];
         end
         if ~isempty(tex_displacement)
-            material.displacement.value = [materialName,'_tex_displacement'];
+            material = piMaterialSet(material,'displacement',[materialName,'_tex_displacement']);
+            % material.displacement.value = [materialName,'_tex_displacement'];
         end
 
     case 'coatedconductor'
@@ -228,15 +262,20 @@ switch materialType
             'type','coatedconductor',...
             'reflectance',[materialName,'_tex_ref'],...
             'interfaceroughness',0.01);
+
         if ~isempty(normal_texture')
-            material.normalmap.value = normal_texture;
+            material = piMaterialSet(material,'normalmap',normal_texture);
+            % material.normalmap.value = normal_texture;
         end
         if ~isempty(tex_roughness)
-            material.conductorroughness.type  = 'texture';
-            material.conductorroughness.value = [materialName,'_tex_roughness'];
+            material = piMaterialSet(material,'conductorroughness',[materialName,'_tex_roughness']);
+            % material.conductorroughness.type  = 'texture';
+            % material.conductorroughness.value = [materialName,'_tex_roughness'];
         end
+
         if ~isempty(tex_displacement)
-            material.displacement.value = [materialName,'_tex_displacement'];
+            material = piMaterialSet(material,'displacement',[materialName,'_tex_displacement']);
+            % material.displacement.value = [materialName,'_tex_displacement'];
         end
 end
 

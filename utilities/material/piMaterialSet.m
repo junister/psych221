@@ -92,11 +92,17 @@ if isfield(material,pName)
                 material.(pName).type = 'float';
             end
         elseif ischar(val)
-            % It is a file name, so the type has to be spectrum or texture,
-            % depending on the extension
+            % It is a file name. We decode what it is from the
+            % extension and maybe a string in the name itself or the
+            % pName.
+
             [~, ~, e] = fileparts(val); % Check extension
-            pbrtSpecta = load('namedSpectra.mat');
-            if isequal(e, '.spd') || ~isempty(find(piContains(pbrtSpecta.namedSpectra,val), 1))
+
+            % This is a stored list of named spectral.  We are not
+            % sure who is updating this or how this got here.  ZL?
+            pbrtSpectra = load('namedSpectra.mat');
+
+            if isequal(e, '.spd') || ~isempty(find(piContains(pbrtSpectra.namedSpectra,val), 1))
                 material.(pName).type = 'spectrum';
             elseif isequal(e, '.bsdf') % not sure whether other type of files are supported
                 material.(pName).type = 'string';
@@ -112,6 +118,7 @@ if isfield(material,pName)
                 material.(pName).type = 'texture';
             end
         elseif islogical(val)
+            % Logical!
             material.(pName).type = 'bool';
         end
     end
