@@ -24,12 +24,14 @@ function [newMat, presetList] = piMaterialPresets(keyword,materialName)
 
 %Examples:
 %{
-    % print out material presets names
-    piMaterialPresets('listmaterial');
+    piMaterialPresets('list material');
+    piMaterialPresets('preview','fabric-leather-var1.jpg');
+    piMaterialPresets('preview','rough-metal');
+    piMaterialPresets('preview','metal-Ag');  % Mirror
+
 %}
 %{
-    % A specific material
-    [new_material, ~] = piMaterialPresets('glass','glassDemo');
+    new_material = piMaterialPresets('glass','glassDemo');
 %}
 %{
   newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
@@ -54,9 +56,14 @@ addpath(genpath(materialPath));
 %% Depending on the key word, go for it.
 switch keyword
     case 'preview'
-        % piMaterialPresets('preview');  % Directory listing
-        % piMaterialPresets('preview','glass-F11.jpg'); % 
+        % The user wants to see a preview of a material.  Not all
+        % materials have a preview.
+
+        % piMaterialPresets('preview','glass-F11');
         if exist('materialName','var') && ~isempty(materialName)
+            [~,n,e] = fileparts(materialName);
+            if isempty(e), materialName = [n,'.jpg']; end
+
             fname = fullfile(materialPath,'previews',materialName);
             if exist(fullfile(materialPath,'previews',materialName), 'file')
                 ieNewGraphWin; im = imread(fname); image(im);
@@ -69,6 +76,19 @@ switch keyword
         end
         return;
 
+        % The user wants a list of all the materials.
+    case {'listmaterial','listmaterials'}
+        % do nothing
+        newMat = [];
+        fprintf('\n---Names of preset materials ---\n');
+
+        for ii = 1:numel(presetList)
+            fprintf('%d: %s \n',ii, presetList{ii});
+        end
+        fprintf('---------------------\n');
+
+
+        % GLASS
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
@@ -125,6 +145,7 @@ switch keyword
             'type','dielectric',...
             'roughness',0,'eta','glass-F11');
 
+        % METALS
     case 'metal-ag'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-Ag-eta','k','metal-Ag-k');
@@ -149,9 +170,6 @@ switch keyword
     case 'metal-tio2'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-TiO2-eta','k','metal-TiO2-k');
-    case 'tire'
-        newMat.material = piMaterialCreate(materialName, ...
-            'type', 'coateddiffuse','reflectance',[ 0.06394 0.06235 0.06235 ],'roughness',0.1);
     case 'rough-metal'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-Al-eta','k','metal-Al-k',...
@@ -163,10 +181,17 @@ switch keyword
         newMat = polligon_materialCreate(materialName,...
             'MetalSpottyDiscoloration001_COL_3K_METALNESS.png','coatedconductor');
 
+        % Car materials
+    case 'tire'
+        newMat.material = piMaterialCreate(materialName, ...
+            'type', 'coateddiffuse','reflectance',[ 0.06394 0.06235 0.06235 ],'roughness',0.1);
+
+        % Woods
     case 'wood-floor-merbau'
         newMat = polligon_materialCreate(materialName,...
             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
 
+        % Fabrics
     case 'fabric-leather-var1'
         newMat = polligon_materialCreate(materialName,...
             'FabricLeatherBuffaloRustic001_COL_VAR1_3K.png','coateddiffuse');
@@ -178,21 +203,6 @@ switch keyword
     case 'fabric-leather-var3'
         newMat = polligon_materialCreate(materialName,...
             'FabricLeatherBuffaloRustic001_COL_VAR3_3K.png','coateddiffuse');
-
-    case 'tiles-marble-sagegreen-brick'
-        newMat = polligon_materialCreate(materialName,...
-            'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coateddiffuse');
-
-        % The user wants a lit of all the materials.
-    case {'listmaterial','listmaterials'}
-        % do nothing
-        newMat = [];
-        fprintf('\n---Names of preset materials ---\n');
-
-        for ii = 1:numel(presetList)
-            fprintf('%d: %s \n',ii, presetList{ii});
-        end
-        fprintf('---------------------\n');
 
     otherwise
         warning('No material preset found for %s',keyword);
@@ -215,7 +225,16 @@ function newMat = polligon_materialCreate(materialName, material_ref, materialTy
 %%
 texfile = which(material_ref);   % Texture file
 if isempty(texfile)
-    error('File is not found! Make sure the file is existed!');
+    % We should probably go to ieWebGet() for the texture.  See
+    % example just below here.
+    error('File is not found! Make sure the file exists!');
+
+    % This is one I downloaded and we should figure out how to put
+    % these up on the web server and download.
+    %
+    %    case 'tiles-marble-sagegreen-brick'
+    %    newMat = polligon_materialCreate(materialName,...
+    %    'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coateddiffuse');
 end
 
 [texdir] = fileparts(texfile);

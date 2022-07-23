@@ -86,10 +86,10 @@ for ii=1:numel(textureParams)
                 thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
             elseif exist(fullfile(oDir,'textures',thisVal),'file')
                 % Do nothing.  It was already in the textures
-                % subdirectory.  We make sure that the texturePath is
-                % correct.
+                % subdirectory.  We make sure that the string in the
+                % texturePath is correct.
                 if ~isequal(texturePath,'textures')
-                    warning('Texture path in the recipe is not correct.  Adjusting.')
+                    % warning('Texture path in the recipe is not correct.  Adjusting.')
                     thisText = strrep(thisText, fullfile(texturePath,thisVal), ['textures/',thisVal]);
                 end
 

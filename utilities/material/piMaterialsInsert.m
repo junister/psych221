@@ -12,28 +12,30 @@ function [thisR, materialNames] = piMaterialsInsert(thisR,varargin)
 %
 % Optional key/val
 %   mtype - Material types to insert.  
-%     Options are
+%     General classes of materials are
 %        {'all','diffuse','glass','wood','brick','testpattern','marble','single'}
-%     Most are precomputed textures, either stored here or in
-%     piMaterialPresets.
+%
+%     Precomputed materials are either stored here or in piMaterialPresets.
 %
 % Output
-%   thisR - Iset3d recipe. It is returned with additional materials
-%   materialNames - cell array, but to see the full list use
-%
+%   thisR - ISET3d recipe with the additional materials inserted
+%      To see the full list of materials in a recipe use
 %           thisR.get('print  materials')
 %
 % Description
-%   We add materials with textures, colors, some plastics.  It gives a list
+%   We add materials to a recipe.  It gives a list
 %   of materials that we are likely to want.  You can select a group of
 %   materials using a cell array as the first argument.
 %
 %     thisR = piMaterialsInsert(thisR,{'glass','mirror'});
 %
 % See also
-%    t_piIntro_materialInsert
+%    piMaterialPreset, t_piIntro_materialInsert
 
-%% Need variable checking
+% TODO
+%  Deal with integration with piMaterialPresets, polligon, ...
+
+%% Parse
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
@@ -42,9 +44,10 @@ p.addParameter('mtype','all',@(x)(iscell(x) || ischar(x)));
 p.addParameter('verbose',true,@islogical);
 p.parse(thisR,varargin{:});
 
-% Decides which materials to insert
-% Make a char into a single entry cell
+% Decides which class of materials to insert
 mType = p.Results.mtype;
+
+% Make a char into a single entry cell
 if ischar(mType), mType = {mType}; end
 
 % Returned variable
@@ -145,14 +148,7 @@ for ii=1:numel(mType)
         
     end
     
-    %% Materials based on textures
-    
-    % Maybe we should insert the textures first, and then create the
-    % materials.
-    
-    % Like insert textures, and then
-    
-    % Create materials.  Not sure this is done properly for V4.
+    %% Materials defined by their textures
     
     if ismember(mType{ii},{'all','wood'})
         
@@ -226,7 +222,27 @@ for ii=1:numel(mType)
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
     end
-    
+
+    if ismember(mType{ii},{'all','marble'})
+
+        % Marble
+        thisMaterialName = 'marbleBeige';
+        thisTexture = piTextureCreate(thisMaterialName,...
+            'format', 'spectrum',...
+            'type', 'imagemap',...
+            'filename', 'marbleBeige.exr');
+        thisR.set('texture', 'add', thisTexture);
+        thisMaterial = piMaterialCreate(thisMaterialName,'type','coateddiffuse','reflectance val',thisMaterialName);
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
+
+        % Deal with this polligon case (also mentioned in piMaterialPresets).
+        %    case 'tiles-marble-sagegreen-brick'
+        %    newMat = polligon_materialCreate(materialName,...
+        %    'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coateddiffuse');
+    end
+
+    % Test patterns used for specific metrics
     if ismember(mType{ii},{'all','testpattern'})
         
         % Checkerboard
@@ -275,20 +291,7 @@ for ii=1:numel(mType)
         
     end
     
-    if ismember(mType{ii},{'all','marble'})
-        
-        % Marble
-        thisMaterialName = 'marbleBeige';
-        thisTexture = piTextureCreate(thisMaterialName,...
-            'format', 'spectrum',...
-            'type', 'imagemap',...
-            'filename', 'marbleBeige.exr');
-        thisR.set('texture', 'add', thisTexture);
-        thisMaterial = piMaterialCreate(thisMaterialName,'type','coateddiffuse','reflectance val',thisMaterialName);
-        thisR.set('material', 'add', thisMaterial);
-        materialNames{end+1} = thisMaterialName;
-        
-    end
+
 end
 
 %% This will become a parameter some day.

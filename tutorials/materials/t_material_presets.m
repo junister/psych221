@@ -22,11 +22,6 @@ thisR.set('pixelsamples',128);
 fileName = 'room.exr';
 thisR.set('skymap',fileName);
 
-% exampleEnvLight = piLightCreate('skylight', ...
-%     'type', 'infinite',...
-%     'mapname', fileName);
-% thisR.set('light', exampleEnvLight, 'add');
-
 %% Add checkerboard texture to the InnerBall materials
 
 checkerboard = piTextureCreate('checkerboard_texture',...
@@ -87,10 +82,6 @@ if isfield(new_material, 'mixMat') && ~isempty(new_material.mixMat)
 end
 
 thisR.set('material','replace', material_name, new_material.material);
-
-%%
-
-% thisR = piTextureFileFormat(thisR);
 
 %%
 scene = piWRS(thisR,'gamma',0.85,'name',mat_type);
