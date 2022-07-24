@@ -16,12 +16,15 @@ function output = piReadEXR(filename, varargin)
 %
 %
 % Zhenyi, 2020
+% David C., adapt for pbrt-v4, 2021-2022
 % 
-% Make sure openexr functions are compiled: 
-%               (run make.m in ~/iset3d/ext/openexr)
-% 
+% NOTE: As of 2021, openexr is no longer needed in Matlab
+%       as we are using the imgtool available in pbrt-v4 via Docker
+%
 % Get exr channel information
 %{
+      % NOTE: exrinfo() only works if you have a compiled .mex
+      %       version of exrinfo() -- no longer included in iset3d-v4
       data = exrinfo(filename);
       fprintf( '%s \n', data.channels{:} ); fprintf('\n')
 %}   

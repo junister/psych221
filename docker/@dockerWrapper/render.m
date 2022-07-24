@@ -34,7 +34,8 @@ if ~isempty(dockerWrapper.staticVar('get','renderContext',''))
 else
     useContext = getpref('docker','renderContext','');
 end
-% container is Linux, so convert
+% container is Linux, so convert, but keep original
+nativeOutputFolder = outputFolder;
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
 
 % sync data over
@@ -67,6 +68,13 @@ if ~obj.localRender
 
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
+
+    % Need to remove old renders, but make sure we have a folder
+    renderFolder = fullfile(nativeOutputFolder,'renderings/');
+    if isfolder(renderFolder)
+        rmdir(renderFolder,'s');
+        mkdir(renderFolder);
+    end
     putData = tic;
     if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation

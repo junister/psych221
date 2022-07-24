@@ -24,25 +24,42 @@ function data = piEXR2Mat(inputFile, channelname)
 [indir, fname,~] = fileparts(inputFile);
 dockerimage = dockerWrapper.localImage();
 
-if ~ispc
-    % Use the imgtool to convert exr data.
-    basecmd = 'docker --context default run -ti --volume="%s":"%s" %s %s';
-    cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
-    dockercmd = sprintf(basecmd, indir, indir, dockerimage, cmd);
-    [status,result] = system(dockercmd);
+needImgtool = true;
+% Create a clean sub-directory for our channels
+channelDir = fullfile(indir,'channels/');
+if ~isfolder(channelDir)
+    mkdir(channelDir); 
 else
-    basecmd = 'docker --context default run -i --volume="%s":"%s" %s %s';
-    cmd = ['imgtool convert --exr2bin ',channelname, ' ', dockerWrapper.pathToLinux(inputFile)];
-    dockercmd = sprintf(basecmd, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
-    [status,result] = system(dockercmd);
+    % if the channels folder exists we have already rendered our output
+    needImgtool = false;
 end
+outputFile = fullfile(channelDir,fname);
+
+% Use the imgtool to convert exr data.
+if needImgtool
+if ispc 
+    flags = '-i';
+else
+    flags = '-ti';
+end
+basecmd = 'docker --context default run %s --volume="%s":"%s" %s %s';
+% for per-channel retrieval
+%cmd = ['imgtool convert --exr2bin ',channelname, ' ', inputFile];
+cmd = ['imgtool convert --exr2bin --outfile ',dockerWrapper.pathToLinux(outputFile), ' ', dockerWrapper.pathToLinux(inputFile)];
+dockercmd = sprintf(basecmd, flags, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
+[status,result] = system(dockercmd);
+
 %fprintf('piEXR2Mat imgtool: %s\n',toc());
 
 if status
     disp(result);
     error('EXR to Binary conversion failed.')
 end
-allFiles = dir([indir,sprintf('/%s_*',fname)]);
+
+end
+
+% only retrieve the files we need for this channel
+allFiles = dir([channelDir,sprintf('/%s_*%s*',fname,channelname)]);
 fileList = [];
 
 % In an error case there might be additional files
@@ -70,14 +87,14 @@ for ii = 1:numel(allFiles)
         if isempty(fileList)
             fileList = dataFile;
         else
-            fileList(end+1) = dataFile;
+            fileList(end+1) = dataFile; %#ok<AGROW>
         end
     end
 end
 
 
 if strcmp(channelname,'Radiance')
-    
+
     % Radiance data
     data = zeros(height,width,numel(fileList));
 
@@ -87,12 +104,12 @@ if strcmp(channelname,'Radiance')
         fid = fopen(filename, 'r');
         serializedImage = fread(fid, inf, 'float');
         fclose(fid);
-%fprintf('piEXR2Mat Read: %s\n',toc());        
+        %fprintf('piEXR2Mat Read: %s\n',toc());
 
         % We haven't had a warning here in a long time.  Probably safe
         % to delete the try catch that was here.
         data(:,:,ii) = reshape(serializedImage, height, width, 1);
-        
+
         % these channel files sometimes seem to be protected?
         delete(filename);
     end
