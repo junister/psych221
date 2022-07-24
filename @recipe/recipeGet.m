@@ -1130,7 +1130,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         tmp = thisR.get('object material');
         val = (tmp.leafMaterial)';
     case {'objects'}
-        % Indices to the objects
+        % Indices to the objects.
         val = [];
         if isempty(thisR.assets), return; end
         nnodes = thisR.assets.nnodes;
@@ -1141,7 +1141,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
     case {'objectnames'}
-        % Names of the objects
+        % Full names of the objects, including ID and instance.
         val = [];
         if isempty(thisR.assets), return; end
         ids = thisR.get('objects');

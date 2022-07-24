@@ -14,13 +14,13 @@ function data = piEXR2Mat(inputFile, channelname)
 % Output
 %   data - Matlab data.
 %
-%
 % Zhenyi, 2021
 % dockerWrapper Support, D. Cardinal, 2022
 %
-%%
 
-tic();
+% tic
+
+%% Variables
 [indir, fname,~] = fileparts(inputFile);
 dockerimage = dockerWrapper.localImage();
 
@@ -102,7 +102,8 @@ else
     fclose(fid);
     delete(filename);
 end
-fprintf('piEXR2Mat: %s\n',toc());
+
+% fprintf('piEXR2Mat: %s\n',toc());
 
 end
 
