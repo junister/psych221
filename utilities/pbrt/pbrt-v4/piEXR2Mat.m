@@ -20,6 +20,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 %%
 
+
 %tic();
 [indir, fname,~] = fileparts(inputFile);
 dockerimage = dockerWrapper.localImage();
@@ -60,6 +61,18 @@ end
 
 % only retrieve the files we need for this channel
 allFiles = dir([channelDir,sprintf('/%s_*%s*',fname,channelname)]);
+
+%{
+% In some cases we might get R,G,B for Radiance instead of Radiance channels
+% so something like this might be helpful?
+if isempty(allFiles) && strcmp(channelname, 'Radiance')
+    fullFiles = dir([channelDir,sprintf('%s_*',fname)]);
+    allFiles(1) = fullFiles(1);
+    allFiles(2) = fullFiles(2);
+    allFiles(3) = fullFiles(3);
+end
+%}
+
 fileList = [];
 
 % In an error case there might be additional files
