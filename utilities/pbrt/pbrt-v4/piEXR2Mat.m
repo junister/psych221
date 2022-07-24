@@ -20,7 +20,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 %%
 
-tic();
+%tic();
 [indir, fname,~] = fileparts(inputFile);
 dockerimage = dockerWrapper.localImage();
 
@@ -36,6 +36,7 @@ else
     dockercmd = sprintf(basecmd, indir, dockerWrapper.pathToLinux(indir), dockerimage, cmd);
     [status,result] = system(dockercmd);
 end
+%fprintf('piEXR2Mat imgtool: %s\n',toc());
 
 if status
     disp(result);
@@ -86,6 +87,7 @@ if strcmp(channelname,'Radiance')
         fid = fopen(filename, 'r');
         serializedImage = fread(fid, inf, 'float');
         fclose(fid);
+%fprintf('piEXR2Mat Read: %s\n',toc());        
 
         % We haven't had a warning here in a long time.  Probably safe
         % to delete the try catch that was here.
@@ -102,7 +104,7 @@ else
     fclose(fid);
     delete(filename);
 end
-fprintf('piEXR2Mat: %s\n',toc());
+%fprintf('piEXR2Mat: %s\n',toc());
 
 end
 
