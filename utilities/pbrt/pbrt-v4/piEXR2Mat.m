@@ -20,7 +20,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 %%
 
-
+tic();
 [indir, fname,~] = fileparts(inputFile);
 dockerimage = dockerWrapper.localImage();
 
@@ -49,6 +49,7 @@ fileList = [];
 baseName = '';
 height = 0;
 width = 0;
+
 
 for ii = 1:numel(allFiles)
     if ~isempty(strfind(allFiles(ii).name, channelname))
@@ -101,6 +102,7 @@ else
     fclose(fid);
     delete(filename);
 end
+fprintf('piEXR2Mat: %s\n',toc());
 
 end
 
