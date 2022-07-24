@@ -12,7 +12,7 @@ function output = piReadEXR(filename, varargin)
 %
 % Returns
 %  
-% Read .exr image data from the fiven filename.
+% Read .exr image data from the given filename.
 %
 %
 % Zhenyi, 2020
