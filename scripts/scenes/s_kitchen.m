@@ -1,27 +1,15 @@
-%% s_bistro
+%% s_kitchen
 %
 % Worked with cardinal download on July 11, 2022
 %
 %
 
-%%
  
 %%
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-
 %%
-thisR = piRecipeDefault('scene name','bistro');
-thisR.set('rays per pixel',256);
-thisR.set('film resolution',[640 640]);
-thisR.set('render type',{'radiance','depth'});
-
-thisR = piRecipeDefault('scene name','bistro_vespa');
-thisR.set('rays per pixel',256);
-thisR.set('film resolution',[640 640]);
-thisR.set('render type',{'radiance','depth'});
-
-thisR = piRecipeDefault('scene name','bistro_boulangerie');
+thisR = piRecipeDefault('scene name','kitchen');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',[640 640]);
 thisR.set('render type',{'radiance','depth'});
