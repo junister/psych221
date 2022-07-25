@@ -242,7 +242,7 @@ preRender = tic;
 % Append the renderCommand and output file
 if renderDocker.verbosity > 0
     fprintf('\nOutput file:  %s\n',outF);
-if renderDocker.verbosity > 1
+elseif renderDocker.verbosity > 1
     fprintf('\nPBRT result info:  %s\n',result);
 end
 

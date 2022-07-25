@@ -120,6 +120,9 @@ end
 if ~isempty(p.Results.renderContext)
     setpref('docker', 'renderContext', p.Results.renderContext);
 end
+if ~isempty(p.Results.remoteMachine)
+    setpref('docker', 'remoteMachine', p.Results.remoteMachine);
+end
 
 % Local rendering parameters
 if ~isempty(p.Results.localRoot)

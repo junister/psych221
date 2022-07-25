@@ -38,13 +38,7 @@ else
         case 'scenes'
             resourceDir = fullfile(ourData,'scenes'); 
         case 'local'
-            % Hard to make this one anything besides hard-coded,
-            % at least for now
-            if ispc
-                resourceDir = fullfile(piRootPath(), 'local/');
-            else
-                resourceDir = '/iset/iset3d-v4/local/';
-            end
+            resourceDir = fullfile(ourRoot, '/local');
     end
 end
 
