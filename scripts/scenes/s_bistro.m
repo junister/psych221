@@ -4,7 +4,13 @@
 %
 %
 
-resolution = [640 640]*2;
+%%
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%%
+
+resolution = [640 640]*0.5;
 
 thisR = piRecipeDefault('scene name','bistro');
 thisR.set('rays per pixel',256);
