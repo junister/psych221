@@ -22,7 +22,7 @@ scene = piWRS(thisR);
 
 %% Create a second instance if the yellow guy
 
-thisR.get('asset names')
+oNames = thisR.get('object names');
 
 yellowM = '001_figure_6m_O';
 yellowPos = thisR.get('asset',yellowM,'world position');
