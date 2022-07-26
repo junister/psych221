@@ -39,17 +39,9 @@ else
             resourceDir = fullfile(ourData,'scenes');
         case 'local'
             resourceDir = fullfile(ourRoot,'local');
-        case 'local relative'
-            % here we want just the "iset" portion of the /local
-            % path so we can pass it along to a remote renderer
-            isetString = [filesep 'iset' filesep];
-            piRoot = piRootPath();
-            k = strfind(piRoot,isetString,'ForceCellOutput',true);
-            if ~isempty(k{1})
-                resourceDir = piRoot(k{1}:end);  
-            else
-                resourceDir = '/iset/iset3d'; % default
-            end
+        case 'server root'
+                % should really be someplace else!
+                resourceDir = '/iset/iset3d-v4'; % default
     end
 end
 

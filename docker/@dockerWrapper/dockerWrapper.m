@@ -212,7 +212,7 @@ classdef dockerWrapper < handle
             % because our Docker image is Linux-based, we need to find
             % our local scene path and then convert to linux if we're on
             % Windows
-            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('local relative'));
+            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('server root'));
 
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
@@ -488,7 +488,7 @@ classdef dockerWrapper < handle
                 hostLocalPath = obj.localVolumePath;
             else
                 if ~isempty(obj.remoteRoot)
-                    hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
+                    hostLocalPath = dockerWrapper.pathToLinux(fullfile(obj.remoteRoot, obj.relativeScenePath));
                 else
                     hostLocalPath = piDirGet('local');
                     warning("Set Remote Root for you to: %s\n",hostLocalPath);
