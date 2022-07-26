@@ -1,9 +1,14 @@
 %% s_headLens
 
+%%
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%%
 thisR = piRecipeDefault('scene name','head');
 
-thisR.set('rays per pixel',1024);
-thisR.set('film resolution',[320 320]*4);
+thisR.set('rays per pixel',512);
+thisR.set('film resolution',[320 320]*2);
 
 %% This renders
 scene = piWRS(thisR);
