@@ -36,9 +36,16 @@ else
         case {'lens', 'lenses'}
             resourceDir = fullfile(ourData,'lens');
         case 'scenes'
-            resourceDir = fullfile(ourData,'scenes'); 
+            resourceDir = fullfile(ourData,'scenes');
         case 'local'
-            resourceDir = fullfile(ourRoot, '/local');
+            resourceDir = fullfile(ourRoot,'local');
+        case 'local relative'
+            % here we want just the "iset" portion of the /local
+            % path so we can pass it along to a remote renderer
+            isetString = [filesep 'iset' filesep];
+            piRoot = piRootPath();
+            k = strfind(piRoot,isetString,'ForceCellOutput',true);
+            resourceDir = piRoot(k{1}:end);           
     end
 end
 
