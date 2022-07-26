@@ -45,7 +45,11 @@ else
             isetString = [filesep 'iset' filesep];
             piRoot = piRootPath();
             k = strfind(piRoot,isetString,'ForceCellOutput',true);
-            resourceDir = piRoot(k{1}:end);           
+            if ~isempty(k{1})
+                resourceDir = piRoot(k{1}:end);  
+            else
+                resourceDir = '/iset/iset3d'; % default
+            end
     end
 end
 
