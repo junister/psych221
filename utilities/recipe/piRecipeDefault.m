@@ -292,7 +292,7 @@ switch ieParamFormat(sceneDir)
     case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
-        exporter = 'Copy';
+        exporter = 'PARSE';   % Was Copy.  We updated head.pbrt for PARSE.
          % End Benedikt V4
          
         % Maybe deprecated V3?

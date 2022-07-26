@@ -414,7 +414,6 @@ if ~isempty(thisNode.mediumInterface)
 end
 
 % Write out material
-% if ~isempty(thisNode.material)
 for nMat = 1:numel(thisNode.material) % object can contain multiple material and shapes
     if iscell(thisNode.material)
         material = thisNode.material{nMat};
