@@ -196,7 +196,13 @@ classdef dockerWrapper < handle
             aDocker.remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
             aDocker.remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
             aDocker.remoteImageTag = 'latest';
-            aDocker.remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+            if ispc
+                % On Windows can not specify ~ for a mount point, even if
+                % it is actually on a Linux server, so we guess!
+                aDocker.remoteRoot     = getpref('docker','remoteRoot',dockerWrapper.pathToLinux(fullfile('/home',aDocker.getUserName()))); % we need to know where to map on the remote system
+            else
+                aDocker.remoteRoot     = getpref('docker','remoteRoot','~'); % we need to know where to map on the remote system
+            end
             aDocker.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
 
             % You can run scenes from other locations beside
@@ -744,7 +750,7 @@ classdef dockerWrapper < handle
                 if ispc
                     % This probably should use the thisD.remoteRoot, not
                     % the getpref() method.
-                    thisD.remoteRoot = getpref('docker','remoteRoot',getUserName(thisD));
+                    thisD.remoteRoot = getpref('docker','remoteRoot',dockerWrapper.pathToLinux(fullfile('/home',getUserName(thisD))));
                 end
 
                 if isempty(thisD.remoteMachine)

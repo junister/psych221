@@ -533,7 +533,7 @@ if isequal(blockName,'Integrator') && isempty(s)
     s.subtype = 'path';
     s.maxdepth.type = 'integer';
     s.maxdepth.value= 5;
-    warning('Setting integrator to "path" with 5 bounces.')
+    fprintf('Setting integrator to "path" with 5 bounces.')
 end
 
 end
