@@ -61,8 +61,12 @@ quiet = p.Results.quiet;
 
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-else
+elseif isunix
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
+elseif ispc
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
+else
+    warning("No denoise binary found.\n")
 end
 
 if ~isfolder(oidn_pth)
