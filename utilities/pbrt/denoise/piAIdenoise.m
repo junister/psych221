@@ -62,10 +62,10 @@ quiet = p.Results.quiet;
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 else
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
 end
 
-if ~exist(oidn_pth,'dir')
+if ~isfolder(oidn_pth)
     error('Could not find the directory:\n%s',oidn_pth);
 end
 
