@@ -39,9 +39,9 @@ else
             resourceDir = fullfile(ourData,'scenes');
         case 'local'
             resourceDir = fullfile(ourRoot,'local');
-        case 'server root'
+        case 'server local'
                 % should really be someplace else!
-                resourceDir = '/iset/iset3d-v4'; % default
+                resourceDir = '/iset/iset3d-v4/local'; % default
     end
 end
 
