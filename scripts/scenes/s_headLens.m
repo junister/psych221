@@ -15,19 +15,48 @@ thisR.set('n bounces',5);
 %% This renders
 [scene, results] = piWRS(thisR);
 
+%%
 thisR.set('asset','001_head_O','rotate',[5 20 0]);
 [scene, results] = piWRS(thisR);
 
 %% Change the camera position
 oFrom = thisR.get('from');
 oTo = thisR.get('to');
+oUp = thisR.get('up');
 
 thisR.set('object distance', 1.3);
 
 thisR.set('lights','all','delete');
-thisR.set('skymap','room.exr');
+% thisR.set('skymap','sky-brightfences');
+% thisR.set('skymap','glacier_latlong.exr');
+% thisR.set('skymap','sky-sun-clouds.exr');   % Needs rotation
+% thisR.set('skymap','sky-rainbow.exr');
+% thisR.set('skymap','sky-sun-clouds');
+% thisR.set('skymap','sky-sunlight.exr');
+% thisR.set('skymap','ext_LateAfternoon_Mountains_CSP.exr');
+% thisR.set('skymap','sky-cathedral_interior');
+
+% thisR.show('skymap');
+
 % thisR.set('from',oFrom);
 [scene, results] = piWRS(thisR);
+
+coord = piAssetLoad('coordinate');
+thisR = piRecipeMerge(thisR,coord.thisR,'node name',coord.mergeNode,'object instance', false);
+thisR.set('asset','mergeNode_B','world position',thisR.get('from') + -0.5*thisR.get('fromto'));
+thisR.set('asset','mergeNode_B','scale',0.2);
+
+piWRS(thisR);
+
+%% Find the vector in the plane perpendicular to up that gets to From
+nUp = null(oUp);
+
+% y = nUp*[a,b]'
+%
+% Add y to oFrom, and it should bring you to To + alpha Up
+%
+% y + oFrom = oTo + alpha oUp
+% y'* (oTo + alpha oUp) = 0
 
 %% We would like to rotate around the 'up' direction!!!
 
