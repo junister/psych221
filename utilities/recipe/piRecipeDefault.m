@@ -76,15 +76,10 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
-% p.addParameter('write',false,@islogical);
 p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
-
-% p.addParameter('verbose', 2, @isnumeric);
-
 p.parse(varargin{:});
 
 sceneDir   = p.Results.scenename;
-% write      = p.Results.write;
 loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
@@ -265,7 +260,7 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'PARSE';  % Copy
+        exporter = 'PARSE';  % Working towards PARSE
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';

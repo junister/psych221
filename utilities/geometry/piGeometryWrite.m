@@ -274,7 +274,7 @@ for ii = 1:numel(children)
             % Scale
             fprintf(fid, strcat(spacing, indentSpacing,...
                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
-        end       
+        end
 
         % Write out motion
         %
@@ -431,50 +431,55 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
 
     % end
 
-    % if ~isempty(thisNode.shape)
+    % Deal with possibility of a cell array for the shape
     if ~iscell(thisNode.shape)
         thisShape = thisNode.shape;
     else
         thisShape = thisNode.shape{nMat};
     end
-    shapeText = piShape2Text(thisShape);
 
-    if ~isempty(thisShape.filename)
-        % If the shape has ply info, do this
-        % Convert shape struct to text
-        [~, ~, e] = fileparts(thisShape.filename);
-        if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
-            if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
-                error('%s not exist',thisShape.filename);
+    % If there is a shape, act here.
+    if ~isempty(thisShape)
+
+        shapeText = piShape2Text(thisShape);
+
+        if ~isempty(thisShape.filename)
+            % If the shape has ply info, do this
+            % Convert shape struct to text
+            [~, ~, e] = fileparts(thisShape.filename);
+            if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
+                if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
+                    error('%s not exist',thisShape.filename);
+                else
+                    thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                    thisShape.meshshape = 'plymesh';
+                    shapeText = piShape2Text(thisShape);
+                end
             else
-                thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
-                thisShape.meshshape = 'plymesh';
-                shapeText = piShape2Text(thisShape);
+                if isequal(e, '.ply')
+                    thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
+                    thisShape.meshshape = 'trianglemesh';
+                    shapeText = piShape2Text(thisShape);
+                end
             end
-        else
             if isequal(e, '.ply')
-                thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
-                thisShape.meshshape = 'trianglemesh';
-                shapeText = piShape2Text(thisShape);
+                fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
+            else
+                % In this case it is a .pbrt file, we will write it
+                % out.
+                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', thisNode.shape.filename)),'\n');
             end
-        end
-        if isequal(e, '.ply')
-            fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
         else
-            % In this case it is a .pbrt file, we will write it
-            % out.
-            fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', thisNode.shape.filename)),'\n');
+            % If it does not have ply file, do this
+            % There is a shape slot we also open the
+            % geometry file.
+            name = thisNode.name;
+            geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
+            fprintf(geometryFile,'%s',shapeText);
+            fclose(geometryFile);
+            fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
         end
-    else
-        % If it does not have ply file, do this
-        % There is a shape slot we also open the
-        % geometry file.
-        name = thisNode.name;
-        geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
-        fprintf(geometryFile,'%s',shapeText);
-        fclose(geometryFile);
-        fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
+        fprintf(fid,'\n');
     end
-    fprintf(fid,'\n');    
 end
 end
