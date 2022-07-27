@@ -265,7 +265,7 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'Copy';
+        exporter = 'PARSE';  % Copy
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
