@@ -1,6 +1,6 @@
 %% s_headLens
 %
-
+% Brian plays Wizard of Oz with 3d heads
 
 %%
 ieInit;
@@ -27,6 +27,7 @@ oUp = thisR.get('up');
 thisR.set('object distance', 1.3);
 
 thisR.set('lights','all','delete');
+% Need to un-comment one of these or else we don't have a light:
 % thisR.set('skymap','sky-brightfences');
 % thisR.set('skymap','glacier_latlong.exr');
 % thisR.set('skymap','sky-sun-clouds.exr');   % Needs rotation
@@ -71,14 +72,15 @@ thisR.set('from',oFrom + [0 0 0.1]);
 
 %%  Materials
 thisR.set('lights','all','delete');
-thisR.set('skymap','brightfences.exr');
+thisR.set('skymap','sky-brightfences.exr');
 
 [scene, results] = piWRS(thisR);
 thisR.get('print materials')
 piMaterialsInsert(thisR);
 thisR.show('objects')
 
-thisR.set('asset','head','material name','White');
+%this version produces an error:
+%thisR.set('asset','head','material name','White');
 thisR.set('asset','001_head_O','material name','White');
 piWRS(thisR);
 thisR.set('asset','001_head_O','material name','marbleBeige');
@@ -113,6 +115,7 @@ piWRS(thisR);
 % depthRange = thisR.get('depth range');
 % depthRange = [1 1];
 
+% Need to un-comment one lens to have the script run
 % thisR.set('lens file','fisheye.87deg.100.0mm.json');
 % lensFiles = lensList;
 % lensfile = 'fisheye.87deg.100.0mm.json';
