@@ -27,7 +27,7 @@ scene = piWRS(thisR);
 % scenePlot(scene,'depth map');
 % sceneGet(scene,'depth range')
 
-%% Another double Gauss
+%% A double Gauss.  But it is not working!!  We don't know why.
 
 % lensList
 lensfile  = 'dgauss.22deg.3.0mm.json';    % 30 38 18 10
@@ -38,7 +38,8 @@ thisR.set('focal distance',2);    %
 thisR.set('object distance',2);   % Move closer. The distance scaling is weird.
 [oi,results] = piWRS(thisR,'name','DG');
 
-%% Fisheye
+%% Fisheye - this lens does not work either.
+% Yet they both work on other scenes.
 
 lensfile = 'fisheye.87deg.3.0mm.json';
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);

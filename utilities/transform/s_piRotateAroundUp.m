@@ -23,7 +23,7 @@ dx = pFT*[0.5 0]';
 F  = F + dx;
 
 % Choose to rotate around the from to direction
-U = FT;
+rotateAround = FT;
 T = thisR.get('to')';
 
 %}
@@ -31,18 +31,19 @@ T = thisR.get('to')';
 %% Find the plane perpendicular to U through the origin
 
 % Force U to be a row vector
-pU = null(U(:)');
+pU = null(rotateAround(:)');
 
 %  Find the position of F in the coordinate frame defined by pU and U.
 %  The third coordinate is the value along the Up direction.  We
 %  want to preserve that.
-basisU = [pU,U(:)];
+basisU = [pU,rotateAround(:)];
 
 % F = basisU*[uF];
 % basisU is orthonormal
 uF = basisU'*F;
 
-% Rotate the plane in the first two coordinates
+% Rotate the plane in the first two coordinates, around the third
+% coordinate
 nAng = 20;
 ruF = zeros(3,nAng);
 for ii=1:nAng
@@ -58,7 +59,7 @@ rF = basisU*ruF;
 %% Have a look at the various vectors
 
 ieNewGraphWin;
-p = plot3(U(1),U(2),U(3),'ro',...
+p = plot3(rotateAround(1),rotateAround(2),rotateAround(3),'ro',...
     F(1),F(2),F(3),'gs',...
     T(1),T(2),T(3),'kx', ...
     'MarkerSize',10);
