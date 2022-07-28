@@ -183,10 +183,9 @@ pbrtFile = thisR.outputFile;
 
 % Make sure renderings folder exists and is fresh
 if(isfolder(fullfile(outputFolder,'renderings')))
-    delete(fullfile(outputFolder, 'renderings', '*'));
-else
-    mkdir(fullfile(outputFolder,'renderings'));
+    rmdir(fullfile(outputFolder, 'renderings'), 's');
 end
+mkdir(fullfile(outputFolder,'renderings'));
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
@@ -242,7 +241,7 @@ preRender = tic;
 % Append the renderCommand and output file
 if renderDocker.verbosity > 0
     fprintf('\nOutput file:  %s\n',outF);
-if renderDocker.verbosity > 1
+elseif renderDocker.verbosity > 1
     fprintf('\nPBRT result info:  %s\n',result);
 end
 

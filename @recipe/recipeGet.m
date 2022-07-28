@@ -1130,7 +1130,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         tmp = thisR.get('object material');
         val = (tmp.leafMaterial)';
     case {'objects'}
-        % Indices to the objects
+        % Indices to the objects.
         val = [];
         if isempty(thisR.assets), return; end
         nnodes = thisR.assets.nnodes;
@@ -1141,7 +1141,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
     case {'objectnames'}
-        % Names of the objects
+        % Full names of the objects, including ID and instance.
         val = [];
         if isempty(thisR.assets), return; end
         ids = thisR.get('objects');
@@ -1461,7 +1461,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                     if thisR.assets.isleaf(id)
                         % Only objects
                         thisScale = thisR.get('assets',id,'world scale');
-                        pts = thisAsset.shape.point3p;
+                        % We are not sure why this is sometimes a
+                        % cell and sometimes not
+                        if iscell(thisAsset.shape)
+                            pts = thisAsset.shape{1}.point3p;
+                        else
+                            pts = thisAsset.shape.point3p;
+                        end
                         val(1) = range(pts(1:3:end))*thisScale(1);
                         val(2) = range(pts(2:3:end))*thisScale(2);
                         val(3) = range(pts(3:3:end))*thisScale(3);

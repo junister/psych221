@@ -96,7 +96,8 @@ matKeys = keys(thisR.materials.list);
 for ii = 1:numel(matKeys)
     thisMat = thisR.materials.list(matKeys{ii});
 
-    if ~isfield(thisMat, 'normalmap')||isempty(thisMat.normalmap)
+    if ~isfield(thisMat, 'normalmap') || isempty(thisMat.normalmap.value)
+        % No normalmap is set.
         continue;
     end
     normalImgPath = thisMat.normalmap.value;

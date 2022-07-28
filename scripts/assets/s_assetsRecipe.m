@@ -42,6 +42,18 @@ oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 mergeNode = 'Bunny_B';
 save(oFile,'mergeNode','-append');
 
+%% A head - maybe we should scale this to a smaller size
+
+thisR = piRecipeDefault('scene name','head');
+thisR.set('lights','all','delete');
+% Head has a world position of 000
+n = thisR.get('asset names');
+thisR.set('asset',n{2},'name','head_B');
+
+oFile = thisR.save(fullfile(assetDir,'head.mat'));
+mergeNode = 'head_B';
+save(oFile,'mergeNode','-append');
+
 %%  Coordinate axes at 000
 
 sceneName = 'coordinate';

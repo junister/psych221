@@ -43,6 +43,8 @@ nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one o
 while i <= length(txt)
 
     currentLine = txt{i};
+    idx = find(currentLine ~=' ',1,'last');
+    currentLine = currentLine(1:idx);
 
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
         InstanceName = erase(currentLine(16:end),'"');
@@ -145,22 +147,6 @@ while i <= length(txt)
                     if exist('shape', 'var')
                         resLight.lght{1}.shape = shape;
                     end
-
-                    %{
-                    if exist('rot', 'var')
-                        resLight.lght{1}.rotation.type = 'rotation';
-                        resLight.lght{1}.rotation.value = {rot};
-                    end
-                    if exist('ctform', 'var')
-                        resLight.lght{1}.ctform.type  = 'ctform';
-                        resLight.lght{1}.ctform.value = {ctform};
-                    end
-                    if exist('translation', 'var')
-                        resLight.lght{1}.translation.type  = 'translation';
-                        resLight.lght{1}.translation.value = {translation};
-                    end
-                    %}
-
                 end
 
                 if exist('name', 'var')
@@ -192,8 +178,10 @@ while i <= length(txt)
                     %   (1) Check if ply file exists
                     %   (2) Check if named material exists
                     %   (3) (Worst case) Only material type exists
-                    else
-                        shape = shape{1};% tmp fix
+                    elseif exist('shape','var')
+                        if iscell(shape)
+                            shape = shape{1};% tmp fix
+                        end
                         if ~isempty(shape.filename)
                             [~, n, ~] = fileparts(shape.filename);
 

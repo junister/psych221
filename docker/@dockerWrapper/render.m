@@ -59,7 +59,7 @@ if ~obj.localRender
     % in the case of Mac (& Linux?) outputFolder includes both
     % our iset dir and then the relative path
     [~, sceneDir, ~] = fileparts(outputFolder);
-    remoteScenePath = [obj.remoteRoot obj.relativeScenePath sceneDir];
+    remoteScenePath = dockerWrapper.pathToLinux(fullfile(obj.remoteRoot, obj.relativeScenePath, sceneDir));
 
     %remoteScenePath = [obj.remoteRoot outputFolder];
     remoteScenePath = strrep(remoteScenePath, '//', '/');
@@ -89,7 +89,7 @@ if ~obj.localRender
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
-    shortOut = [obj.relativeScenePath sceneDir];
+    shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath, sceneDir));
 
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also

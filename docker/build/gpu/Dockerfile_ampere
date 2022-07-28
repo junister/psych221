@@ -1,4 +1,4 @@
-# Dockerize Stanford Universiay's Vistalab's versio of pbrt-v4 for running on GPUs.
+# Dockerize Stanford University's Vistalab's versio of pbrt-v4 for running on GPUs.
 
 # 11.4 is known to work. 11.6 might also
 FROM nvidia/cuda:11.4.1-devel-ubuntu20.04

@@ -196,7 +196,13 @@ classdef dockerWrapper < handle
             aDocker.remoteUser     = getpref('docker','remoteUser',''); % use for rsync & ssh/docker
             aDocker.remoteImage    = getpref('docker','remoteImage',''); % use to specify a GPU-specific image on server
             aDocker.remoteImageTag = 'latest';
-            aDocker.remoteRoot     = getpref('docker','remoteRoot',''); % we need to know where to map on the remote system
+            if ispc
+                % On Windows can not specify ~ for a mount point, even if
+                % it is actually on a Linux server, so we guess!
+                aDocker.remoteRoot     = getpref('docker','remoteRoot',dockerWrapper.pathToLinux(fullfile('/home',aDocker.getUserName()))); % we need to know where to map on the remote system
+            else
+                aDocker.remoteRoot     = getpref('docker','remoteRoot','~'); % we need to know where to map on the remote system
+            end
             aDocker.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
 
             % You can run scenes from other locations beside
@@ -206,7 +212,7 @@ classdef dockerWrapper < handle
             % because our Docker image is Linux-based, we need to find
             % our local scene path and then convert to linux if we're on
             % Windows
-            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('local'));
+            aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('server local'));
 
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
@@ -482,7 +488,7 @@ classdef dockerWrapper < handle
                 hostLocalPath = obj.localVolumePath;
             else
                 if ~isempty(obj.remoteRoot)
-                    hostLocalPath = [obj.remoteRoot obj.relativeScenePath];
+                    hostLocalPath = dockerWrapper.pathToLinux(fullfile(obj.remoteRoot, obj.relativeScenePath));
                 else
                     hostLocalPath = piDirGet('local');
                     warning("Set Remote Root for you to: %s\n",hostLocalPath);
@@ -744,7 +750,7 @@ classdef dockerWrapper < handle
                 if ispc
                     % This probably should use the thisD.remoteRoot, not
                     % the getpref() method.
-                    thisD.remoteRoot = getpref('docker','remoteRoot',getUserName(thisD));
+                    thisD.remoteRoot = getpref('docker','remoteRoot',dockerWrapper.pathToLinux(fullfile('/home',getUserName(thisD))));
                 end
 
                 if isempty(thisD.remoteMachine)
