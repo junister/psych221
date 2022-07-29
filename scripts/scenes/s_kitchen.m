@@ -10,7 +10,7 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Se6t up the parameters
 
-resolution = [640 640]*0.5;
+resolution = [640 640]*1;
 
 thisR = piRecipeDefault('scene name','kitchen');
 thisR.set('n bounces',5);
