@@ -28,6 +28,8 @@ function pts = piRotateFrom(thisR,direction,varargin)
 
 % Examples:
 %{
+thisR = piRecipeDefault('scene name','chessset');
+
 direction = thisR.get('fromto');
 n = 20;
 pts = piRotateFrom(thisR, direction,'n samples',n, 'show',true);

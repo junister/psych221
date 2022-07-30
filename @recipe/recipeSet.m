@@ -180,7 +180,7 @@ switch param
         thisR.renderedfile = val;
 
         % Scene parameters
-    case 'objectdistance'
+    case {'fromtodistance','objectdistance'}
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.

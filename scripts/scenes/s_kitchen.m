@@ -21,21 +21,31 @@ thisR.set('render type',{'radiance','depth'});
 %% This renders the scene
 
 scene = piWRS(thisR);
+dRange = sceneGet(scene,'depth range');
 
 %% Samples the scene from a few new directions around the current from
 
+% thisR.set('fromto distance',mean(dRange));
+
 direction = thisR.get('fromto');
-pts = piRotateFrom(thisR,direction,'nsamples',4,'radius',0.5);
+direction = direction/norm(direction);
 
-from = thisR.get('from');
-to   = thisR.get('to');
+pts = piRotateFrom(thisR,direction,'nsamples',6,'radius',0.5);
 
+% We to move the 'to' into the middle of the depth range.
+% thisR.set('fromto distance',mean(dRange));
+to   = thisR.get('from') + direction*3;
+thisR.set('to',to);
+thisR.get('fromto distance')
+
+%% 
 for ii=1:size(pts,2)
     thisR.set('from',pts(:,ii));
     thisR.get('to')
     piWRS(thisR);
 end
 
+%%
 thisR.set('from',from); thisR.set('to',to);
 piWRS(thisR);
 
