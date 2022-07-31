@@ -14,14 +14,6 @@ function camera = piCameraCreate(cameraType,varargin)
 %    'human eye'    - For calculating with different physiological
 %                     optics models (navarro, arizona, legrand)
 %
-%  Deprecated
-%    'light field' - microlens array in front of the sensor for a light
-%                    field camera
-%    'realisticDiffraction' - Not sure what that sub type is doing in
-%                                  light field
-%    'realistic'   - This seems to be superseded completely by omni, except
-%                    for some old car scene generation cases that have not
-%                    been updated.
 %
 % For example,
 %   lensname = 'dgauss.22deg.12.5mm.json';
@@ -31,6 +23,16 @@ function camera = piCameraCreate(cameraType,varargin)
 %
 % Output
 %   camera - Camera structure for placement in a recipe
+%
+% Deprecated key/val options
+%
+%    'light field' - microlens array in front of the sensor for a light
+%                    field camera
+%    'realisticDiffraction' - Not sure what that sub type is doing in
+%                                  light field
+%    'realistic'   - This seems to be superseded completely by omni, except
+%                    for some old car scene generation cases that have not
+%                    been updated.
 %
 % TL,BW SCIEN STANFORD 2017
 %
@@ -103,12 +105,6 @@ p.parse(cameraType,varargin{:});
 if isequal(cameraType,'perspective'), cameraType = 'pinhole'; end
 
 lensFile      = p.Results.lensfile;
-if ~exist(lensFile,'file') && (strcmp(cameraType,'omni') || strcmp(cameraType,'realistic'))
-    % This warning could be eliminated after some time.  It arises when we
-    % first create one of the human eye models but the output lens
-    % directory has not yet had the file written out.
-    warning('Lens file not found %s\n',lensFile);
-end
 
 %% Initialize the default camera type
 switch ieParamFormat(cameraType)
@@ -156,16 +152,28 @@ switch ieParamFormat(cameraType)
         camera.type = 'Camera';
         camera.subtype = 'omni';
         camera.lensfile.type = 'string';
-        % check if lensFile exist
-        if isempty(which(lensFile))
-            % The lensFile is not included in iset3d lens folder.
-            % So we move the file into the lens folder.
-            copyfile(lensFile, fullfile(piRootPath,'data/lens'));
-            camera.lensfile.value = [name, '.json'];
+        
+        % lensFile should always be in the isetcam/data/lens directory.
+        % This is new July 30, 2022.  This change may not account for
+        % every case, and I am particularly concerned about the human lens
+        % case. (BW)
+        lensFile = fullfile(isetRootPath,'data','lens',lensFile);
+        if ~exist(lensFile,'file')
+            error('Lens file %s not found',lensFile)
         else
-            % lensFile in matlab path
-            camera.lensfile.value = which(lensFile);
+            camera.lensfile.value = [name, '.json'];
         end
+
+        %         if isempty(which(lensFile))
+        %             % The lensFile is not included in iset3d lens folder.
+        %             % So we copy the file into the lens folder.
+        %             copyfile(lensFile, fullfile(piRootPath,'data/lens'));
+        %             camera.lensfile.value = [name, '.json'];
+        %         else
+        %             % lensFile in matlab path
+        %             camera.lensfile.value = ;
+        %         end
+        
         camera.aperturediameter.type = 'float';
         camera.aperturediameter.value = 5;    % mm
         camera.focusdistance.type = 'float';

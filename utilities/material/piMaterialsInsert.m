@@ -288,7 +288,20 @@ for ii=1:numel(mType)
         thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','reflectance val',thisMaterialName);
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
-        
+
+        % Colored dots
+        thisMaterialName = 'dots';
+        thisTexture = piTextureCreate(thisMaterialName,...
+            'format', 'spectrum',...
+            'type', 'dots',...
+            'uscale', 8,...
+            'vscale', 8, ...
+            'inside', [.1 .5 .9], ...
+            'outside', [.9 .5 .1]);
+        thisR.set('texture', 'add', thisTexture);
+        thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','reflectance val',thisMaterialName);
+        thisR.set('material', 'add', thisMaterial);
+        materialNames{end+1} = thisMaterialName;
     end
     
 

@@ -412,7 +412,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
     case {'lensfile','lensfileinput'}
-        % The lens file from the data/lens directory.
+        % The lens file should be in the isetcam/data/lens directory.
 
         % There are a few different camera types.  Not all have lens files.
         subType = thisR.camera.subtype;
@@ -433,18 +433,19 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % examples in the data/lens directory and avoiding this
                 % problem.
 
-                % Make sure the lensfile is in the data/lens directory.
-                if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
-                    [~,name,ext] = fileparts(thisR.camera.lensfile.value);
+                % Make sure the lensfile is in the isetcam/data/lens directory.
+                
+                if isfield(thisR.camera,'lensfile') 
+                    % The path is irrelevant.  The file must be in
+                    % isetcam/data/lens
+                    lensfile = thisR.camera.lensfile.value;
+                    [~,name,ext] = fileparts(lensfile);
                     baseName = [name,ext];
+
+                    % Check it is there.
                     val = fullfile(piDirGet('lens'),baseName);
                     if ~exist(val,'file')
-                        val = which(baseName);
-                        if isempty(val)
-                            error('Can not find the lens file %s\n',val);
-                        else
-                            % fprintf('Using lens file at %s\n',val);
-                        end
+                        error('Cannot find the lens file %s in isetcam/data/lens.\n',baseName);
                     end
                 end
         end
@@ -1251,14 +1252,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('lights',name or id,property)
         % thisR.get('lights',idx,property)
         %
+        % [idx,names] = thisR.get('lights');
+        %
         % We should implement a get for the skymap (which is of type
         % 'infinite')
         if isempty(varargin)
-            % thisR.get('lights') should return the indices to the
-            % nodes that contain lights, IMHO.  This is returning the
-            % names (no id) of the lights.  To discuss with Zhenyi and
-            % Zheng.
-            names = thisR.assets.mapLgtShortName2Idx.keys;
+            % thisR.get('lights')
+            %
+            % This was returning the names (no id) of the lights.
+            % BW changed it to return a vector of node indices to the
+            % lights.
+            %
+            % To discuss with Zhenyi and Zheng.
+            names = thisR.assets.mapLgtFullName2Idx.keys;
             if isempty(names), disp('No lights.'); return;
             else
                 val = zeros(1,numel(names));
@@ -1273,7 +1279,8 @@ switch ieParamFormat(param)  % lower case, no spaces
             case {'names','namesnoid'}
                 % thisR.get('lights','names')
                 val = thisR.assets.mapLgtShortName2Idx.keys;
-            case {'namesid'}
+            case {'namesid','namesidx'}
+                % thisR.get('lights','names id');
                 val = thisR.assets.mapLgtFullName2Idx.keys;
             otherwise
                 % If we are here, varargin{1} is a light name or id.
@@ -1391,7 +1398,11 @@ switch ieParamFormat(param)  % lower case, no spaces
             return;
         else
             if strncmp(varargin{2},'material',8)
-                material = thisR.materials.list(thisAsset.material.namedmaterial);
+                if iscell(thisAsset.material)
+                    material = thisR.materials.list(thisAsset.material{1}.namedmaterial);
+                else
+                    material = thisR.materials.list(thisAsset.material.namedmaterial);
+                end
             end
             switch ieParamFormat(varargin{2})
                 case 'id'
@@ -1423,9 +1434,6 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = thisR.assets.nodetoroot(id);
 
                     % Get material properties from this asset
-                case 'material'
-                    % thisR.get('asset',assetName,'material');
-                    val = material;
                 case 'materialname'
                     val = material.name;
                 case 'materialtype'

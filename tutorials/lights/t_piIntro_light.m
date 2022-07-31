@@ -194,7 +194,7 @@ thisR.set('light', 'all', 'delete');
 
 fileName = 'room.exr';
 thisR.set('skymap',fileName);
-tmp = thisR.get('lights');
+tmp = thisR.get('lights','names');
 skyName = tmp{1};
 piWRS(thisR,'name','Environment original');
 

@@ -24,16 +24,6 @@ function workingDir = piWrite(thisR,varargin)
 %
 % Optional key/value parameters
 %
-%   Deprecated overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   Deprecated overwrite resources - If the resources files exist, overwrite (default true)
-%   Deprecated overwrite lensfile  - Logical. Default true
-%   Deprecated overwrite materials - Logical. Default true
-%   Deprecated overwrite geometry  - Logical. Default true
-%   Deprecated overwrite json      - Logical. Default true
-%   Deprecated lightsFlag
-%
-%   Deprecated thistrafficflow
-%
 %   verbose -- how chatty we are
 %
 % Return
@@ -46,6 +36,18 @@ function workingDir = piWrite(thisR,varargin)
 %
 % See also
 %   piRead, piRender
+
+% Deprecated key/val
+%   Deprecated overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
+%   Deprecated overwrite resources - If the resources files exist, overwrite (default true)
+%   Deprecated overwrite lensfile  - Logical. Default true
+%   Deprecated overwrite materials - Logical. Default true
+%   Deprecated overwrite geometry  - Logical. Default true
+%   Deprecated overwrite json      - Logical. Default true
+%   Deprecated lightsFlag
+%
+%   Deprecated thistrafficflow
+%
 
 % Examples:
 %{
