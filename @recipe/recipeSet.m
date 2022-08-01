@@ -717,12 +717,35 @@ switch param
                 error('Bad struct.');
             end
         elseif ischar(val)
-            % It is either a special command or the material name
+            % It is either a special command (add, delete, replace) or
+            % the material name
             switch val
                 case {'add'}
                     newMat = varargin{1};
-                    thisR.materials.list(newMat.name) = newMat;
-                    thisR.materials.order{end + 1} = newMat.name;
+                    if isstruct(newMat) && isfield(newMat,'texture')
+                        % This is probably from piMaterialPresets, and
+                        % it may include a material and a cell array
+                        % of textures
+                        if iscell(newMat.texture)
+                            % Cell
+                            for tt=1:numel(newMat.texture)
+                                thisR.set('texture','add',newMat.texture{tt});
+                            end
+                        else
+                            % Plain
+                            thisR.set('texture', 'add', newMat.texture);
+                        end
+
+                        thisR.set('material', 'add', newMat.material);
+                    elseif isstruct(newMat) && isfield(newMat,'material')
+                        thisName = newMat.material.name;
+                        thisR.materials.list(thisName) = newMat.material;
+                        thisR.materials.order{end + 1} = thisName;
+                    else
+                        % Not part of newMat.material, just a material
+                        thisR.materials.list(newMat.name) = newMat;
+                        thisR.materials.order{end + 1} = newMat.name;
+                    end
                     return;
                 case {'delete', 'remove'}
                     if isnumeric(varargin{1})

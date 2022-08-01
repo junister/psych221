@@ -126,6 +126,7 @@ else,        sceneSet(scene,'gamma',0.6);
 end
 %% Make the sphere glass
 
+
 glassName = 'glass';
 glass = piMaterialCreate(glassName, 'type', 'dielectric','eta','glass-BK7');
 thisR.set('material', 'add', glass);

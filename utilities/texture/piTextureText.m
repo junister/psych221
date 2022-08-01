@@ -111,15 +111,15 @@ for ii=1:numel(textureParams)
 
                 % Check whether we have it in
                 % the imageTextures directory.
-                if exist(fullfile(piRootPath,'data','imageTextures',thisVal),'file')
+                if exist(fullfile(piDirGet('textures'),thisVal),'file')
                     % Found it!  We will need to copy it later.
-                    imgFile = fullfile(piRootPath,'data','imageTextures',thisVal);
+                    imgFile = fullfile(piDirGet('textures'),thisVal);
                 else
-                    % Not in imageTextures, look
-                    % anywhere.
+                    % Not in materials/textures, look elsewhere.
                     imgFile = which(thisVal);
                     if ~isempty(imgFile)
-                        warning('Texture file found, but not in specified directory.');
+                        p = fileparts(imgFile);
+                        warning('Texture file found in %s.\n',p);
                     end
                 end
 

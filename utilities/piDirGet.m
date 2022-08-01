@@ -30,8 +30,9 @@ function resourceDir = piDirGet(resourceType)
 %}
 
 %% Parse
+% Planning on deprecating imageTextures.
 valid = {'data','assets', 'lights', 'imageTextures', ...
-    'lens', 'scenes','local','server local'};
+    'textures','lens', 'scenes','local','server local'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -57,8 +58,10 @@ switch (resourceType)
         resourceDir = fullfile(ourData,'assets');
     case 'lights'
         resourceDir = fullfile(ourData,'lights');
-    case 'imageTextures'
-        resourceDir = fullfile(ourData,'imageTextures');
+    case {'imageTextures','textures'}
+        % imageTextures is legacy and should be deprecated
+        % Moved textures inside of materials Aug 1, 2022. (BW).
+        resourceDir = fullfile(ourData,'materials','textures');
     case {'lens', 'lenses'}
         % Changed July 30, 2020 - now in isetcam
         resourceDir = fullfile(isetRootPath,'data','lens');
