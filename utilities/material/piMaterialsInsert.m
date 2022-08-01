@@ -163,16 +163,32 @@ for ii=1:numel(mType)
         thisR.set('material', 'add', thisMaterial);
         materialNames{end+1} = thisMaterialName;
         
+        % New method for inserting.  The materials are made in
+        % piMaterialPresets.  We get the newMat returned here.  It has both
+        % the textures and material slotted in.  We add the textures and
+        % material to the recipe.
+        %
         % Wood grain (light, large grain)
-        thisMaterialName = 'wood002';
-        thisTexture = piTextureCreate(thisMaterialName,...
-            'format', 'spectrum',...
-            'type', 'imagemap',...
-            'filename', 'woodgrain002.exr');
-        thisR.set('texture', 'add', thisTexture);
-        thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','reflectance val',thisMaterialName);
-        thisR.set('material', 'add', thisMaterial);
-        materialNames{end+1} = thisMaterialName;
+        % The newMat can have multiple textures.
+        newMat = piMaterialPresets('wood-light-large-grain','wood-light-large-gran');
+        if iscell(newMat.texture)
+            for tt=1:numel(newMat.texture)
+                thisR.set('texture','add',newMat.texture{tt});
+            end
+        else
+            thisR.set('texture', 'add', newMat.texture);
+        end
+        thisR.set('material', 'add', newMat.material);
+        
+        %         thisMaterialName = 'wood002';
+        %         thisTexture = piTextureCreate(thisMaterialName,...
+        %             'format', 'spectrum',...
+        %             'type', 'imagemap',...
+        %             'filename', 'woodgrain002.exr');
+        %         thisR.set('texture', 'add', thisTexture);
+        %         thisMaterial = piMaterialCreate(thisMaterialName,'type','diffuse','reflectance val',thisMaterialName);
+        %         thisR.set('material', 'add', thisMaterial);
+        %         materialNames{end+1} = thisMaterialName;
         
         % Mahogany
         thisMaterialName = 'mahogany_dark';
