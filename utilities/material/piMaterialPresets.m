@@ -88,7 +88,7 @@ switch keyword
         fprintf('---------------------\n');
 
 
-        % GLASS
+        % ------------ GLASS
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
@@ -145,7 +145,7 @@ switch keyword
             'type','dielectric',...
             'roughness',0,'eta','glass-F11');
 
-        % METALS
+        % ----------- METALS
     case 'metal-ag'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-Ag-eta','k','metal-Ag-k');
@@ -186,10 +186,13 @@ switch keyword
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'coateddiffuse','reflectance',[ 0.06394 0.06235 0.06235 ],'roughness',0.1);
 
-        % Woods
+        % =============      Woods
     case 'wood-floor-merbau'
         newMat = polligon_materialCreate(materialName,...
             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
+
+
+        
 
         % Fabrics
     case 'fabric-leather-var1'
