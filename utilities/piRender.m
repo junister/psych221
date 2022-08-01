@@ -231,13 +231,12 @@ else  % Linux & Mac
     end
 end
 
-% renderDocker is a dockerWrapper object.  The parameters
-% control on which machine and with what parameters the docker
-% image/containter is invoked.
+% renderDocker is a dockerWrapper object.  The parameters control which
+% machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
 [status, result] = renderDocker.render(renderCommand, outputFolder);
 
-% Big display, when verbosity is 2.
+% Lots of output when verbosity is 2.
 % Append the renderCommand and output file
 if renderDocker.verbosity > 0
     fprintf('\nOutput file:  %s\n',outF);
@@ -277,24 +276,6 @@ ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...
     'scale pupil area', scalePupilArea);
-
-%{
-% We have worked out renderType above.  So these statement should no
-% longer be necessary.
-if ~isempty(renderType)
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
-        'label',renderType);
-elseif isempty(renderType) && isempty(thisR.metadata)
-    % renderType is empty, but so is thisR.metadata. 
-    % So we treat this as a default radiance/depth case.
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
-        'label',{'radiance','depth'});
-else
-    % Finally, we are in a metadata type rendering situation.
-    ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
-        'label',thisR.metadata.rendertype);
-end
-%}
 
 % If it is not a struct, it is metadata (instance, material, ....)
 if isstruct(ieObject)

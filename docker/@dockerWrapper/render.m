@@ -1,7 +1,14 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
-% Render using the dockerWrapper method
+% Render radiance and depth using the dockerWrapper method
 %
-% obj - a dockerWrapper
+% Inputs
+%  obj - a dockerWrapper
+%  renderCommand
+%  outputFolder
+%
+% Outputs
+%  status
+%  result
 %
 % See also
 %  piRender
