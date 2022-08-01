@@ -44,7 +44,12 @@ function thisR = piMaterialsInsert(thisR,varargin)
 %}
 %{
  thisR = piRecipeDefault('scene name','chessset');
- piMaterialsInsert(thisR,'group',{'testpatterns'}); 
+ piMaterialsInsert(thisR,'groups',{'testpatterns'}); 
+ thisR.get('print materials');
+%}
+%{
+ thisR = piRecipeDefault('scene name','chessset');
+ piMaterialsInsert(thisR,'groups',{'testpatterns'},'names',{'glass-bk7'}); 
  thisR.get('print materials');
 %}
 
@@ -53,14 +58,14 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-p.addParameter('group','',@(x)(iscell(x) || ischar(x)));
+p.addParameter('groups','',@(x)(iscell(x) || ischar(x)));
 p.addParameter('names','',@(x)(iscell(x) || ischar(x)));
 p.addParameter('verbose',false,@islogical);
 
 p.parse(thisR,varargin{:});
 
 % Decides which class of materials to insert
-mType = p.Results.group;
+mType = p.Results.groups;
 mNames = p.Results.names;
 
 % Make a char into a single entry cell
@@ -137,7 +142,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},'testpattern')
+        if ismember(mType{ii},{'testpatterns'})
             testpattern = {'checkerboard','ringsrays','macbethchart','slantededge','dots'};
             for tp = 1:numel(testpattern)
                 newMat = piMaterialPresets(testpattern{tp},testpattern{tp});

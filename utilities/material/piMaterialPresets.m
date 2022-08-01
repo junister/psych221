@@ -305,7 +305,7 @@ switch keyword
             'format', 'spectrum',...
             'type', 'imagemap',...
             'filename', 'checkerboard.exr');
-        newMat.material = piMaterialCreate(newMat.materialName,'type','diffuse','reflectance val',newMat.texture);
+        newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
         
         % Rings and Rays (Siemens star)
     case 'ringsrays'
@@ -322,7 +322,7 @@ switch keyword
             'type', 'imagemap',...
             'filename', 'macbeth.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
         % Slanted edge
     case 'slantededge'
         newMat.texture = piTextureCreate(materialName,...
