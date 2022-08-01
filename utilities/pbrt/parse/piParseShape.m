@@ -99,7 +99,10 @@ if find(piContains(keyWords, 'Shape '))
         case 'heightfield'
             % todo
         case 'loopsubdiv'
-            % todo
+            % We are not sure we have this fully correct.
+            shape.integerlevels  = piParameterGet(txt,'integer levels');
+            shape.integerindices = piParameterGet(txt,'integer indices');
+            shape.point3p = piParameterGet(txt,'point3 P');
         case 'nurbs'
             % todo
     end

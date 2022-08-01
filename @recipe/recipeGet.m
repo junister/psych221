@@ -264,8 +264,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         else
             val = [];
         end
-    case 'objectdistance'
-        % thisR.get('object distance',units)
+    case {'fromtodistance','objectdistance'}
+        % thisR.get('fromto distance',units)
         diff = thisR.lookAt.from - thisR.lookAt.to;
         val = sqrt(sum(diff.^2));
         % Spatial scale
@@ -282,7 +282,7 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'rendertype','filmrendertype'}
         % A cell array of the radiance and other metadata types
         val = thisR.metadata.rendertype;
-        
+
         % Camera fields
     case {'camera'}
         % The whole struct
@@ -310,11 +310,13 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = thisR.lookAt.to;
     case 'up'
         val = thisR.lookAt.up;
-    case 'fromto'
-        % Vector between from minus to
-        val = thisR.lookAt.from - thisR.lookAt.to;
     case 'tofrom'
-        % Vector between from minus to
+        % Changed this July 29.  Hopefully this is not a big breaking
+        % change.  See BW/ZLY
+        % Vector that starts at 'to' pointing towards 'from'  
+        val = thisR.lookAt.from - thisR.lookAt.to;
+    case 'fromto'
+        % Vector that starts at 'from' pointing towards 'to'
         val = thisR.lookAt.to - thisR.lookAt.from;
     case {'scale'}
         % Change the size (scale) of something.  Almost always 1 1 1
@@ -410,7 +412,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
     case {'lensfile','lensfileinput'}
-        % The lens file from the data/lens directory.
+        % The lens file should be in the isetcam/data/lens directory.
 
         % There are a few different camera types.  Not all have lens files.
         subType = thisR.camera.subtype;
@@ -431,18 +433,19 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % examples in the data/lens directory and avoiding this
                 % problem.
 
-                % Make sure the lensfile is in the data/lens directory.
-                if isfield(thisR.camera,'lensfile') && isfile(thisR.camera.lensfile.value)
-                    [~,name,ext] = fileparts(thisR.camera.lensfile.value);
+                % Make sure the lensfile is in the isetcam/data/lens directory.
+                
+                if isfield(thisR.camera,'lensfile') 
+                    % The path is irrelevant.  The file must be in
+                    % isetcam/data/lens
+                    lensfile = thisR.camera.lensfile.value;
+                    [~,name,ext] = fileparts(lensfile);
                     baseName = [name,ext];
+
+                    % Check it is there.
                     val = fullfile(piDirGet('lens'),baseName);
                     if ~exist(val,'file')
-                        val = which(baseName);
-                        if isempty(val)
-                            error('Can not find the lens file %s\n',val);
-                        else
-                            % fprintf('Using lens file at %s\n',val);
-                        end
+                        error('Cannot find the lens file %s in isetcam/data/lens.\n',baseName);
                     end
                 end
         end
@@ -1099,7 +1102,29 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         piTexturePrint(thisR);
 
+        % Branches
+    case {'branches'}
+        val = [];
+        if isempty(thisR.assets), return; end
+        nnodes = thisR.assets.nnodes;
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'branch')
+                val = [val,ii]; %#ok<AGROW>
+            end
+        end
         % Objects
+    case {'objects'}
+        % Indices to the objects.
+        val = [];
+        if isempty(thisR.assets), return; end
+        nnodes = thisR.assets.nnodes;
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
+                val = [val,ii]; %#ok<AGROW>
+            end
+        end
     case {'objectmaterial','materialobject'}
         % val = thisR.get('object material');
         %
@@ -1129,19 +1154,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         % This and the one above should be merged.
         tmp = thisR.get('object material');
         val = (tmp.leafMaterial)';
-    case {'objects'}
-        % Indices to the objects
-        val = [];
-        if isempty(thisR.assets), return; end
-        nnodes = thisR.assets.nnodes;
-        for ii=1:nnodes
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode,'type') && isequal(thisNode.type,'object')
-                val = [val,ii]; %#ok<AGROW>
-            end
-        end
     case {'objectnames'}
-        % Names of the objects
+        % Full names of the objects, including ID and instance.
         val = [];
         if isempty(thisR.assets), return; end
         ids = thisR.get('objects');
@@ -1151,7 +1165,6 @@ switch ieParamFormat(param)  % lower case, no spaces
             % Includes ids and everything
             val{ii} = names{ids(ii)};
         end
-
     case {'objectnamesnoid'}
         % Names of the objects with the ID stripped.
         % I don't think we are doing this properly.  We need a routine to
@@ -1233,35 +1246,48 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
 
-    % Lights
+        % Lights
     case{'light', 'lights'}
-        % thisR.get('lights')
-        % thisR.get('lights',lightName,property)
+        % thisR.get('lights',varargin)
+        % thisR.get('lights',name or id,property)
         % thisR.get('lights',idx,property)
         %
-        % TODO: We should implement a get for the skymap (which is of type
+        % [idx,names] = thisR.get('lights');
+        %
+        % We should implement a get for the skymap (which is of type
         % 'infinite')
         if isempty(varargin)
-            val = thisR.assets.mapLgtShortName2Idx.keys;
-            return;
+            % thisR.get('lights')
+            %
+            % This was returning the names (no id) of the lights.
+            % BW changed it to return a vector of node indices to the
+            % lights.
+            %
+            % To discuss with Zhenyi and Zheng.
+            names = thisR.assets.mapLgtFullName2Idx.keys;
+            if isempty(names), disp('No lights.'); return;
+            else
+                val = zeros(1,numel(names));
+                for ii=1:numel(names)
+                    val(ii) = piAssetFind(thisR,'name',names{ii});
+                end
+                return;
+            end
         end
 
-        switch varargin{1}
-            case 'names'
+        switch ieParamFormat(varargin{1})
+            case {'names','namesnoid'}
                 % thisR.get('lights','names')
                 val = thisR.assets.mapLgtShortName2Idx.keys;
-
+            case {'namesid','namesidx'}
+                % thisR.get('lights','names id');
+                val = thisR.assets.mapLgtFullName2Idx.keys;
             otherwise
-                % The first argument indicates the light name and there
-                % must be a second argument for the light property
+                % If we are here, varargin{1} is a light name or id.
+                % There may be a varargin{2} for the light property to
+                % return
                 if isnumeric(varargin{1}) && ...
                         varargin{1} <= thisR.get('nlights')
-                    % Search by index. 
-                    %{
-                    lgtIdx = varargin{1};
-                    thisLight = thisR.lights{lgtIdx};
-                    val = thisLight;
-                    %}
                     lgtNames = thisR.assets.mapLgtShortName2Idx.keys;
                     lgtIdx = varargin{1};
                     thisLight = thisR.get('asset', lgtNames{lgtIdx});
@@ -1272,36 +1298,31 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % We should have a slot in material that identifies itself as a
                     % material.  Maybe a test like "material.type ismember valid
                     % materials."
+                    %
+                    % Added on July 29 2022.
+                    warning("We should not be in this code segment.");
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
                     % Search for the light by name, find its index
-                    %{
-                    [~, thisLight] = piLightFind(thisR.lights, 'name', varargin{1});
-                    val = thisLight;
-                    %}
                     varargin{1} = piLightNameFormat(varargin{1});
                     thisLight = thisR.get('asset', varargin{1});
-                    
-                    % thisLight = thisLight.lght{1};
                 end
 
                 if isempty(thisLight)
-                    warning('Could not find light. Return.')
+                    warning('Could not find the light from ')
+                    disp(varargin{1})
                     return;
                 end
-                % Get a 
+
                 if numel(varargin) == 1
+                    % If only one varargin, return the light
                     val = thisLight;
-                end
-                if numel(varargin) >= 2
-                    % thisR.get('light',idx,'worldposition');
-                    %
-                    % Return the light property
-                    % Return the light property
+                elseif numel(varargin) >= 2
+                    % Return the light property in varargin{2}
                     thisLgtStruct = thisLight.lght{1};
                     switch ieParamFormat(varargin{2})
                         case 'worldposition'
-                            % thisR.get('light',idx,'position')                            
+                            % thisR.get('light',idx,'world position')
                             if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
                                 % The position may be at the camera, so we need
                                 % this special case.
@@ -1340,33 +1361,36 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
         piLightList(thisR);
-    % Asset specific gets - more work needed here.
-    case {'asset', 'assets','node','nodes'}
+
+        % Node (asset) gets
+    case {'node','nodes','asset', 'assets'}
+        % thisR.get('asset',varargin)
         %
-        % thisR.get('asset',assetName or ID);  % Returns the asset
-        % thisR.get('asset',assetName,param);  % Returns the param val
+        %   varargin{1} is typically the name or ID
+        %
+        % thisR.get('asset',name or ID);        % Returns the asset
+        % thisR.get('asset',name or ID, param); % Returns the param val
         % thisR.get('asset',name or ID,'world position')
         % thisR.get('asset',name or ID,'size')
 
-        %
-        % We are slowly starting to call nodes nodes, rather than
-        % assets.  We think of an asset now as, say, a car with all of
-        % its parts.  A node is the node in a tree that contains
-        % multiple assets. (BW, Sept 2021).
-        
-        if ischar(varargin{1})  
+        % We are starting to call nodes 'nodes', rather than 'assets'.
+        % We think of an asset as, say, a car with all of its parts. A
+        % node is the node in a tree.  The node may contains multiple
+        % assets in the subtree. (BW, Sept 2021).
+
+        if ischar(varargin{1})
             [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
             % If only one asset matches, turn it from cell to struct.
         else
-            if numel(varargin{1}) > 1
-                id = varargin{1}(1);
-            else
-                id = varargin{1};
+            % Not sure when we send in varargin as an array.  Example?
+            % (BW)
+            if numel(varargin{1}) > 1,  id = varargin{1}(1);
+            else,                       id = varargin{1};
             end
             [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
         end
         if isempty(id)
-            error('Could not find asset %s\n',varargin{1}); 
+            error('Could not find asset %s\n',varargin{1});
         end
         if iscell(thisAsset), thisAsset = thisAsset{1}; end
         if length(varargin) == 1
@@ -1374,7 +1398,11 @@ switch ieParamFormat(param)  % lower case, no spaces
             return;
         else
             if strncmp(varargin{2},'material',8)
-                material = thisR.materials.list(thisAsset.material.namedmaterial);
+                if iscell(thisAsset.material)
+                    material = thisR.materials.list(thisAsset.material{1}.namedmaterial);
+                else
+                    material = thisR.materials.list(thisAsset.material.namedmaterial);
+                end
             end
             switch ieParamFormat(varargin{2})
                 case 'id'
@@ -1406,9 +1434,6 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = thisR.assets.nodetoroot(id);
 
                     % Get material properties from this asset
-                case 'material'
-                    % thisR.get('asset',assetName,'material');
-                    val = material;
                 case 'materialname'
                     val = material.name;
                 case 'materialtype'
@@ -1454,14 +1479,20 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         val = piAssetGet(thisAsset, 'rotation');
                     end
-                   
+
                 case 'size'
                     % thisR.get('asset',objectName,'size');
                     % Size of one object in meters
                     if thisR.assets.isleaf(id)
                         % Only objects
                         thisScale = thisR.get('assets',id,'world scale');
-                        pts = thisAsset.shape.point3p;
+                        % We are not sure why this is sometimes a
+                        % cell and sometimes not
+                        if iscell(thisAsset.shape)
+                            pts = thisAsset.shape{1}.point3p;
+                        else
+                            pts = thisAsset.shape.point3p;
+                        end
                         val(1) = range(pts(1:3:end))*thisScale(1);
                         val(2) = range(pts(2:3:end))*thisScale(2);
                         val(3) = range(pts(3:3:end))*thisScale(3);
@@ -1474,17 +1505,23 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = piAssetGet(thisAsset,varargin{2});
             end
         end
+    case {'nnodes'}
+        % Number of nodes in the asset tree
+        val = numel(thisR.assets.Node);
     case {'nodeid','assetid'}
-        % thisR.get('asset id',assetName);  % ID from name
+        % ID from name
+        % thisR.get('asset id',assetName);
         val = piAssetFind(thisR.assets,'name',varargin{1});
-    case {'assetroot'}
-        % The root of all assets just has a name, not properties.
+    case {'noderoot','assetroot'}
+        % The root of all assets only has a name, no properties.
         val = thisR.assets.get(1);
     case {'nodenames','assetnames'}
         % We have a confusion between nodes and assets.  The assets should
-        % refer to just the objects, not all the nodes IMHO (BW).
+        % refer to the objects, not all the nodes IMHO (BW).
         % The names without the XXXID_ prepended
-        % What about objectnames
+        % What about objectnames and assetnames should be the same
+        % thing.  But somehow nodenames and assetnames became the
+        % same.
         val = thisR.assets.stripID;
     case {'nodeparentid','assetparentid'}
         % thisR.get('asset parent id',assetName or ID);
@@ -1506,25 +1543,6 @@ switch ieParamFormat(param)  % lower case, no spaces
         thisNode = varargin{1};
         parentNode = thisR.get('asset parent id',thisNode);
         val = thisR.assets.Node{parentNode};
-
-        % Delete this stuff when we get ready to merge.
-        %{
-    case {'assetlist'}
-        assetNames = thisR.get('asset names');
-        nn = 1;
-        for ii = 1:numel(assetNames)
-            % we have several branch here, we only need the main branch
-            % which contains size information
-            if piContains(assetNames{ii},'_B') && ...
-                    ~piContains(assetNames{ii},'_T') && ...
-                    ~piContains(assetNames{ii},'_S') && ...
-                    ~piContains(assetNames{ii},'_R')
-
-                val{nn} = thisR.get('assets',assetNames{ii});
-                nn=nn+1;
-            end
-        end
-        %}
 
     otherwise
         error('Unknown parameter %s\n',param);

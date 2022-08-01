@@ -76,15 +76,10 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
-% p.addParameter('write',false,@islogical);
 p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
-
-% p.addParameter('verbose', 2, @isnumeric);
-
 p.parse(varargin{:});
 
 sceneDir   = p.Results.scenename;
-% write      = p.Results.write;
 loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
@@ -265,7 +260,7 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'Copy';
+        exporter = 'PARSE';  % Working towards PARSE
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
@@ -292,7 +287,7 @@ switch ieParamFormat(sceneDir)
     case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
-        exporter = 'Copy';
+        exporter = 'PARSE';   % Was Copy.  We updated head.pbrt for PARSE.
          % End Benedikt V4
          
         % Maybe deprecated V3?
@@ -437,7 +432,7 @@ function fname = piSceneWebTest(sceneName,sceneFile)
 % Check for a web scene
 
 % See if the scene is already in data/scene/web
-FilePath = fullfile(piRootPath,'data','scene','web',sceneName);
+FilePath = fullfile(piRootPath,'data','scenes','web',sceneName);
 fname = fullfile(FilePath,sceneFile);
 
 % Download the file to data/scene/web

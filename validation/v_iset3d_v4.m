@@ -37,8 +37,9 @@ setpref('ISET3d', 'tvdepthStart', tic);
 try
     t_piIntro_macbeth;               % Gets the depth map
     setpref('ISET3d', 'tvdepthTime', toc(getpref('ISET3d', 'tvdepthStart', 0)));
-catch
-    warning('Macbeth failed');
+catch ME
+    warning('Macbeth failed.\n');
+    warning(ME.identifier,'%s',ME.message);
     setpref('ISET3d', 'tvdepthTime', -1);
 end
 
@@ -66,8 +67,9 @@ setpref('ISET3d', 'tvlightStart', tic);
 try
     t_piIntro_light;
     setpref('ISET3d', 'tvlightTime', toc(getpref('ISET3d', 'tvlightStart', 0)));
-catch
+catch ME
     warning('piIntro_Light failed');
+    warning(ME.identifier,'%s',ME.message);
     setpref('ISET3d', 'tvlightTime', -1);
 end
 
@@ -89,8 +91,9 @@ setpref('ISET3d', 'tvchessStart', tic);
 try
     t_piIntro_chess;
     setpref('ISET3d', 'tvchessTime', toc(getpref('ISET3d', 'tvchessStart', 0)));
-catch
+catch ME
     warning('chess set failed')
+    warning(ME.identifier,'%s',ME.message);
     setpref('ISET3d', 'tvchessTime', -1);
 end
 
@@ -100,8 +103,9 @@ setpref('ISET3d', 'tvrecipeStart', tic);
 try
     v_recipeValidation;
     setpref('ISET3d', 'tvrecipeTime', toc(getpref('ISET3d', 'tvrecipeStart', 0)));
-catch
+catch ME
     warning('recipe validation failed');
+    warning(ME.identifier,'%s',ME.message);
     setpref('ISET3d','tvrecipeTime', -1);
 end
 

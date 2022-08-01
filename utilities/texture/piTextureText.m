@@ -76,9 +76,30 @@ for ii=1:numel(textureParams)
             % in the base or in textures/*.  If it does, we do not
             % need to copy it.
             oDir = thisR.get('output dir');
-            if ~exist(fullfile(oDir,thisVal),'file')&& ...
-                    ~exist(fullfile(oDir,'textures',thisVal),'file')
-                % The file was not found, so we locate it and copy it.
+            if exist(fullfile(oDir,thisVal),'file')
+                % If the file is in the root of the scene, move it
+                % into the 'textures' sub-directory and assign the
+                % text to be textures/filename
+                texturesDir = [thisR.get('output dir'),'/textures'];
+                if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
+                movefile(fullfile(oDir,thisVal),fullfile(oDir,'textures'));
+                thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
+            elseif exist(fullfile(oDir,'textures',thisVal),'file')
+                % Do nothing.  It was already in the textures
+                % subdirectory.  We make sure that the string in the
+                % texturePath is correct.
+                if ~isequal(texturePath,'textures')
+                    % warning('Texture path in the recipe is not correct.  Adjusting.')
+                    thisText = strrep(thisText, fullfile(texturePath,thisVal), ['textures/',thisVal]);
+                end
+
+            else 
+                % So we have the case
+                %    ~exist(fullfile(oDir,'textures',thisVal),'file')
+                %
+                % The file was not found either in the base directory
+                % or in the textures directory. So we locate it and
+                % copy it.
 
                 % PBRT V4 files from Matt had references to
                 % ../landscape/mumble ... For the barcelona-pavillion
@@ -117,7 +138,6 @@ for ii=1:numel(textureParams)
                         thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
                     end
 
-                    % piTextureFileFormat(imgFile);
                     texturesDir = [thisR.get('output dir'),'/textures'];
                     if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
                     copyfile(imgFile,texturesDir);
@@ -126,7 +146,6 @@ for ii=1:numel(textureParams)
         end
         val = strcat(val, thisText);
     end
-
 end
 
 end

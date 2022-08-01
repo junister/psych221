@@ -180,7 +180,7 @@ switch param
         thisR.renderedfile = val;
 
         % Scene parameters
-    case 'objectdistance'
+    case {'fromtodistance','objectdistance'}
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.
@@ -839,8 +839,12 @@ switch param
     case {'skymap'} 
         % thisR.set('skypmap',filename)
         % add a skymap by filename
-        
-        skymapFileName = val;
+        % See piDockerImgtool for creating skymaps
+
+        % If no extension passed, we assume an 'exr' extension
+        [~,n,e] = fileparts(val);
+        if isempty(e), e = '.exr'; end
+        skymapFileName = [n,e];
         
         % if the map isn't already in the output dir, we have to copy it
         if ~isfolder(fullfile(thisR.get('output dir')))

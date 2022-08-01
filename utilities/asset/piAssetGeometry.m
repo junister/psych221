@@ -96,8 +96,11 @@ for ii=1:3
     boxMin(ii) = min([coords(:,ii)',lookat.to(ii),lookat.from(ii),upPoint(ii)]);
 end
 
-% Increase the directions just a bit.
-delta = (boxMax - boxMin)*0.1;   % One tenth of the range of each axis
+% Increase the box size just a bit, by default, one tenth of the range of
+% each axis.  But if the min equals the max (happens rarely, but it happens
+% for a plane) then set delta to 0.1;
+delta = (boxMax - boxMin)*0.1;
+delta(delta==0) = 0.1;
 boxMax = boxMax + delta;
 boxMin = boxMin - delta;
 

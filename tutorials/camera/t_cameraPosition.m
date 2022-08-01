@@ -30,7 +30,7 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-% This the MCC scene
+%% This the MCC scene
 thisR = piRecipeDefault;
 
 % Delete the lights
@@ -45,39 +45,33 @@ newDistLight = piLightCreate(lName,...
                             'cameracoordinate', true);
 thisR.set('light', newDistLight, 'add');           
 
-% Render
-piWrite(thisR);
-scene = piRender(thisR, 'render type', 'all');
-sceneWindow(scene);
+% Put the 'to' on the object.
+thisR.set('to',[0 0 0]);
+%% Render
+piWRS(thisR);
+
+% piAssetGeometry(thisR);
 
 %% Translate the camera 5 meters back
 
 % By default, translating the camera shifts both the 'from' and 'to'
 % directions.  You can change this behavior using the 'fromto' flag.
-thisR.get('lookat')
-thisR = piCameraTranslate(thisR, 'z shift', -5);  % meters
-thisR.get('lookat')
+thisR = piCameraTranslate(thisR, 'z shift', 1);  % meters
 
-piWrite(thisR);
-[scene,result] = piRender(thisR);
-sceneWindow(scene);
+piWRS(thisR);
 
-%% Move back, slide to the right, rotate
+%% Move to the right, both the from and to.
 
-thisR.get('lookat')
-thisR = piCameraTranslate(thisR, ...
-    'z shift', 3, ...
-    'x shift', 2);  % meters
+thisR = piCameraTranslate(thisR,'x shift', -2,'fromto','both');
+piWRS(thisR);
 
-% The y-axis is up-down. We will turn the camera direction toward the
-% center of the MCC.
-% Rotating leaves the 'from' value unchanged, but rotates the lookat
-% direction 
+%% The y-axis is up-down. 
+% 
+% Rotate the camera direction toward the center of the MCC. This
+% rotation leaves the 'from' value unchanged, but rotates the 'to'
+% direction
 thisR = piCameraRotate(thisR, 'y rot', -20);  % deg (CCW)
-thisR.get('lookat')
 
-piWrite(thisR);
-scene = piRender(thisR, 'render type', 'all');
-sceneWindow(scene);
+piWRS(thisR);
 
 %% END

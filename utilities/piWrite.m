@@ -23,16 +23,6 @@ function workingDir = piWrite(thisR,varargin)
 %   thisR: a recipe object describing the rendering parameters.
 %
 % Optional key/value parameters
-% There are too many of these options.  We hope to simplify
-%
-%   overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   overwrite resources - If the resources files exist, overwrite (default true)
-%   overwrite lensfile  - Logical. Default true
-%   Deprecated overwrite materials - Logical. Default true
-%   Deprecated overwrite geometry  - Logical. Default true
-%   overwrite json      - Logical. Default true
-%   lightsFlag
-%   thistrafficflow
 %
 %   verbose -- how chatty we are
 %
@@ -46,6 +36,18 @@ function workingDir = piWrite(thisR,varargin)
 %
 % See also
 %   piRead, piRender
+
+% Deprecated key/val
+%   Deprecated overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
+%   Deprecated overwrite resources - If the resources files exist, overwrite (default true)
+%   Deprecated overwrite lensfile  - Logical. Default true
+%   Deprecated overwrite materials - Logical. Default true
+%   Deprecated overwrite geometry  - Logical. Default true
+%   Deprecated overwrite json      - Logical. Default true
+%   Deprecated lightsFlag
+%
+%   Deprecated thistrafficflow
+%
 
 % Examples:
 %{
@@ -89,6 +91,7 @@ p = inputParser;
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 
+%{
 % Copy over the whole directory
 p.addParameter('overwriteresources', true,@islogical);
 
@@ -103,6 +106,7 @@ p.addParameter('overwritematerials',true,@islogical);
 
 % Overwrite geometry.pbrt
 p.addParameter('overwritegeometry',true,@islogical);
+%}
 
 % Create a new materials.pbrt
 % p.addParameter('creatematerials',false,@islogical);
@@ -117,16 +121,23 @@ p.addParameter('verbose', 0, @isnumeric);
 
 p.parse(thisR,varargin{:});
 
+% We need to get rid of these variables down below.  Until that time,
+% ...
+overwriteresources  = true;
+overwritepbrtfile   = true;
+overwritelensfile   = true;
+overwritematerials  = true;
+overwritegeometry   = true;
+
+%{
 overwriteresources  = p.Results.overwriteresources;
 overwritepbrtfile   = p.Results.overwritepbrtfile;
 overwritelensfile   = p.Results.overwritelensfile;
 overwritematerials  = p.Results.overwritematerials;
 overwritegeometry   = p.Results.overwritegeometry;
+%}
 
 % creatematerials     = p.Results.creatematerials;
-
-% lightsFlag          = p.Results.lightsflag;
-% thistrafficflow     = p.Results.thistrafficflow;
 verbosity           = p.Results.verbose;
 
 exporter = thisR.get('exporter');
@@ -191,6 +202,10 @@ fclose(fileID);
 % Even if this is the copy type scene, we parse the materials and
 % texture maps and make sure the files are copied to 'local/'.
 if ~isempty(thisR.materials.list)
+    % Make sure that the texture files are in PNG format
+    piTextureFileFormat(thisR);
+
+    % Write critical files.
     piWriteMaterials(thisR,overwritematerials);
 end
 
@@ -483,19 +498,27 @@ for ofns = outerFields'
             end
 
             %{
-             Many fields are written out in here.
-             Some examples are
-             type, subtype, lensfile retinaDistance
-             retinaRadius pupilDiameter retinaSemiDiam ior1 ior2 ior3 ior4
-             type subtype pixelsamples type subtype xresolution yresolution
-             type subtype maxdepth
+             Many fields are written out in here.  
+             (There is an issue with mmUnits, that I need to discuss
+             with Zheng/Zhenyi.  [1m[31mError[0m:
+             contemporary-bathroom.pbrt:13:2: "mmUnits": unused parameter.
+             Probably a missing implementation V4?  (BW). 
+             Some examples are: 
+               type, subtype, lensfile retinaDistance
+               retinaRadius pupilDiameter retinaSemiDiam ior1 ior2 ior3 ior4
+               pixelsamples xresolution yresolution maxdepth
             %}
 
             currValue = thisR.(ofn).(ifn).value;
             currType  = thisR.(ofn).(ifn).type;
 
-            if(strcmp(currType,'string') || ischar(currValue))
-                % We have a string with some value
+            if (strcmp(currType,'bool'))
+                % Deal with bool first. It has a char currValue but is
+                % written out without the quotation marks.
+                lineFormat = '  "%s %s" %s \n';
+            elseif(strcmp(currType,'string') || ischar(currValue))
+                % We have a string with some value.  Note that bool is
+                % a string so we do not want the quotation marks here.
                 lineFormat = '  "%s %s" "%s" \n';
 
                 % The currValue might be a full path to a file with an
@@ -556,8 +579,6 @@ for ofns = outerFields'
             elseif(strcmp(currType,'integer'))
                 %if we use %i, we can get exponents which pbrt hates
                 lineFormat = '  "%s %s" [%.0f] \n';
-            elseif (strcmp(currType,'bool'))
-                lineFormat = '  "%s %s" %s \n';
             end
 
             if ~islogical(currValue)

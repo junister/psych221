@@ -1,16 +1,17 @@
 function thisR = piTextureFileFormat(thisR)
-% Convert textures to PNG format
+% Convert textures in a recipe to PNG format
 %
 %     thisR = piTextureFileFormat(thisR)
 %
 % Brief description:
-%   We convert any texture files used in the scene to PNG format.
+%   Some texture files are not in PNG format, which is required by
+%   PBRT.  We convert them to PNG format here.
 %
 % Inputs:
-%   thisR: render recipe.
+%   thisR - render recipe.
 %
 % Outputs:
-%   thisR: render recipe with updated textures.
+%   thisR - render recipe with updated textures.
 %
 %
 % Note (Zhenyi): There is a weird case for me, when I use a JPG texture, the
@@ -18,6 +19,7 @@ function thisR = piTextureFileFormat(thisR)
 %                which used a JPG texture is missing.
 %
 % ZL Scien Stanford, 2022
+
 %%
 textureList = values(thisR.textures.list);
 
@@ -94,7 +96,8 @@ matKeys = keys(thisR.materials.list);
 for ii = 1:numel(matKeys)
     thisMat = thisR.materials.list(matKeys{ii});
 
-    if ~isfield(thisMat, 'normalmap')||isempty(thisMat.normalmap)
+    if ~isfield(thisMat, 'normalmap') || isempty(thisMat.normalmap.value)
+        % No normalmap is set.
         continue;
     end
     normalImgPath = thisMat.normalmap.value;
