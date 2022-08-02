@@ -153,15 +153,23 @@ switch ieParamFormat(cameraType)
         camera.subtype = 'omni';
         camera.lensfile.type = 'string';
         
-        % lensFile should always be in the isetcam/data/lens directory.
-        % This is new July 30, 2022.  This change may not account for
-        % every case, and I am particularly concerned about the human lens
-        % case. (BW)
-        lensFile = fullfile(isetRootPath,'data','lens',lensFile);
-        if ~exist(lensFile,'file')
+        % If a full path of the lensFile is not specified, the
+        % lensFile should be in the isetcam/data/lens directory. This
+        % is new July 30, 2022.  This change may not account for every
+        % case, and I am particularly concerned about the human lens
+        % case and now the microlens case.  In the microlens case, we
+        % build the combined lens file in the output directory. (BW)
+        % 
+        % So, we test to see if lensFile is a full path. If it is, we
+        % leave it alone.  We cannot test
+        if ~strncmp(lensFile,'/',1)
+            lensFile = fullfile(isetRootPath,'data','lens',lensFile);
+        end
+        if ~isfile(lensFile)
             error('Lens file %s not found',lensFile)
         else
-            camera.lensfile.value = [name, '.json'];
+            % camera.lensfile.value = [name, '.json'];
+            camera.lensfile.value = lensFile;
         end
 
         %         if isempty(which(lensFile))
@@ -185,11 +193,12 @@ switch ieParamFormat(cameraType)
         % parameters using recipeGet, we will read the JSON file.
         camera.type           = 'Camera';
         camera.subtype        = 'raytransfer';
-        camera.filmdistance.type='float'
+        camera.filmdistance.type ='float';
         camera.filmdistance.value=0.002167;
         camera.lensfile.type  = 'string';
-           [~,name,e] = fileparts(lensFile);
-           % check if lensFile exist
+        [~,name,e] = fileparts(lensFile);
+        % check if lensFile exist.  This may fail.  To check with RTF
+        % calculations (BW, Augu 2 2022).
         if isempty(which(lensFile))
             % The lensFile is not included in iset3d lens folder.
             % So we move the file into the lens folder.

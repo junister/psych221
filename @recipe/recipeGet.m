@@ -436,16 +436,30 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % Make sure the lensfile is in the isetcam/data/lens directory.
                 
                 if isfield(thisR.camera,'lensfile') 
-                    % The path is irrelevant.  The file must be in
-                    % isetcam/data/lens
+                    % We expect the lens file will be in
+                    % isetcam/data/lens. But there are some cases,
+                    % such as microlens calculations, when it may not
+                    % be there, but rather in local.  If the first
+                    % character is a / we suppose the person knows
+                    % what they are doing and we accept the full path.
                     lensfile = thisR.camera.lensfile.value;
-                    [~,name,ext] = fileparts(lensfile);
-                    baseName = [name,ext];
+                    if strncmp(lensfile,'/',1)
+                        % Full path case.  Worried that I didn't
+                        % handle the Windows case correctly (BW).
+                        if isfile(lensfile)
+                            val = lensfile;
+                        end
+                    else
+                        % Not a full path, so look in the default
+                        % directory.
+                        [~,name,ext] = fileparts(lensfile);
+                        baseName = [name,ext];
 
-                    % Check it is there.
-                    val = fullfile(piDirGet('lens'),baseName);
-                    if ~exist(val,'file')
-                        error('Cannot find the lens file %s in isetcam/data/lens.\n',baseName);
+                        % Check it is there.
+                        val = fullfile(piDirGet('lens'),baseName);
+                        if ~exist(val,'file')
+                            error('Cannot find the lens file %s in isetcam/data/lens.\n',baseName);
+                        end
                     end
                 end
         end
