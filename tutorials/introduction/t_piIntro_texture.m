@@ -2,7 +2,7 @@
 %
 % Textures are part of the material definition.  We have routines that
 % create materials with pre-assigned textures, and some of the parameters
-% of these textures can be modified.  This work is ongoing (July 30, 2022).
+% of these textures can be modified. 
 % 
 % This script illustrates how we use piMaterialsInsert to include materials
 % with pre-assigned textures into a recipe. We render the materials on a
@@ -52,7 +52,7 @@ thisR.get('material print');
 % Textures are attached to a material.  The checks, dots and others are
 % created and inserted this way - see the code there if you want to do it
 % yourself.
-thisR = piMaterialsInsert(thisR,'m type','testpattern');
+thisR = piMaterialsInsert(thisR,'names','checkerboard');
 
 % Set the material to the object
 thisR.set('asset','001_Cube_O','material name','checkerboard');
@@ -67,6 +67,7 @@ piWRS(thisR,'name','checks');
 %%  That felt good.  Let's make colored dots.
 
 % Set the material to the object
+thisR = piMaterialsInsert(thisR,'names','dots');
 thisR.set('asset','001_Cube_O','material name','dots');
 
 thisR.get('texture','dots','uscale')
@@ -74,7 +75,7 @@ thisR.get('texture','dots','uscale')
 % Write and render the recipe with the new texture
 piWRS(thisR,'name','dots-orig');
 
-% These scale factor change the dot densities
+%% These scale factor change the dot densities
 % Other parameters change other visual properties.
 thisR.set('texture','dots','vscale',16);
 thisR.set('texture','dots','uscale',16);
@@ -85,7 +86,7 @@ piWRS(thisR,'name','dots16');
 %% Now we change the texture of a material in a more complex scene
 
 thisR = piRecipeDefault('scene name', 'SimpleScene');
-piMaterialsInsert(thisR,'m type','testpattern');
+piMaterialsInsert(thisR,'groups','testpatterns');
 
 oNames = thisR.get('object names no id');
 idx = piContains(oNames,'Plane');
@@ -97,8 +98,10 @@ piWRS(thisR);
 
 %%  We have many more complex textures, including those based on images.
 
-piMaterialsInsert(thisR,'mtype','wood');
-thisR.set('asset',thePlane{1},'material name','wood001');
+% Pull in a couple of wood types
+piMaterialsInsert(thisR,'groups','wood');
+thisR.get('print materials');
+thisR.set('asset',thePlane{1},'material name','wood-medium-knots');
 
 piWRS(thisR);
 
@@ -108,7 +111,7 @@ idx = piContains(oNames,'Sphere');
 theSphere = oNames(idx);
 thisR.set('asset',theSphere{1},'material name','checkerboard');
 
-% We need to figure out what all these parameters do
+% We should figure out what all these parameters do
 %{
 thisR.get('texture','checkerboard')
 %}

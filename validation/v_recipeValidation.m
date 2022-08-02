@@ -36,11 +36,11 @@ piWRS(thisR);
 
 %%
 thisR = piRecipeDefault('scene name','bunny');
-piMaterialsInsert(thisR);
+thisR.set('nbounces',5);
 thisR.set('skymap','room.exr');
 thisR.set('asset','001_Bunny_O','scale',3);
-thisR.set('asset','001_Bunny_O','material name','Red');
-thisR.set('nbounces',5);
+piMaterialsInsert(thisR,'glossy-red');
+thisR.set('asset','001_Bunny_O','material name','glossy-red');
 piWRS(thisR);
 
 %%

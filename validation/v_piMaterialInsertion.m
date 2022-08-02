@@ -3,21 +3,31 @@
 
 %% Red
 thisR = piRecipeDefault('scene name','bunny');
-piMaterialsInsert(thisR);
 
 thisR.set('skymap','room.exr');
 thisR.set('asset','001_Bunny_O','scale',4);
 thisR.set('nbounces',3);
 
 %%
-thisR.set('asset','001_Bunny_O','material name','Red');
+piMaterialsInsert(thisR,'names','glossy-red');
+
+thisR.set('asset','001_Bunny_O','material name','glossy-red');
 piWRS(thisR);
 
 %% 
-thisR.set('asset','001_Bunny_O','material name','Black_glossy');
+piMaterialsInsert(thisR,'names','glossy-black');
+thisR.set('asset','001_Bunny_O','material name','glossy-black');
 piWRS(thisR);
 
-%% Mirror
+%% Now a few at at time
+thisR = piRecipeDefault('scene name','bunny');
+
+thisR.set('skymap','room.exr');
+thisR.set('asset','001_Bunny_O','scale',4);
+thisR.set('nbounces',5);
+
+%% Mirror 
+piMaterialsInsert(thisR,'names',{'mirror','glass'});
 thisR.set('asset','001_Bunny_O','material name','mirror');
 piWRS(thisR);
 
@@ -25,4 +35,4 @@ piWRS(thisR);
 thisR.set('asset','001_Bunny_O','material name','glass');
 piWRS(thisR);
 
-%%
+%% End

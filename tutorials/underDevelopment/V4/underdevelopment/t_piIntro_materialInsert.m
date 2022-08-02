@@ -1,5 +1,7 @@
 %% Insert materials into a recipe
 %
+% Deprecated.  Just use t_piIntro_materials
+%
 % We use piMaterialsInsert to select some materials that we add to a
 % recipe.  In the future this will look like
 %

@@ -1,6 +1,5 @@
 %% s_headLens
 %
-% Brian plays Wizard of Oz with 3d heads
 
 %%
 ieInit;
@@ -35,54 +34,47 @@ thisR.set('lights','all','delete');
 % thisR.set('skymap','sky-sun-clouds');
 % thisR.set('skymap','sky-sunlight.exr');
 % thisR.set('skymap','ext_LateAfternoon_Mountains_CSP.exr');
-% thisR.set('skymap','sky-cathedral_interior');
+thisR.set('skymap','sky-cathedral_interior');
 
 % thisR.show('skymap');
 
 % thisR.set('from',oFrom);
 [scene, results] = piWRS(thisR);
 
+%{
 coord = piAssetLoad('coordinate');
 thisR = piRecipeMerge(thisR,coord.thisR,'node name',coord.mergeNode,'object instance', false);
 thisR.set('asset','mergeNode_B','world position',thisR.get('from') + -0.5*thisR.get('fromto'));
 thisR.set('asset','mergeNode_B','scale',0.2);
-
 piWRS(thisR);
-
-%% Find the vector in the plane perpendicular to up that gets to From
-nUp = null(oUp);
-
-% y = nUp*[a,b]'
-%
-% Add y to oFrom, and it should bring you to To + alpha Up
-%
-% y + oFrom = oTo + alpha oUp
-% y'* (oTo + alpha oUp) = 0
-
-%% We would like to rotate around the 'up' direction!!!
+%}
 
 %% Textures on the head.
 %
 % The white is good for the illumination!
 
-thisR.set('from',oFrom);
-thisR.set('object distance', 1.5);
-thisR.set('from',oFrom + [0 0 0.1]);
-[scene, results] = piWRS(thisR);
-
 %%  Materials
 thisR.set('lights','all','delete');
 thisR.set('skymap','sky-brightfences.exr');
 
-[scene, results] = piWRS(thisR);
-thisR.get('print materials')
-piMaterialsInsert(thisR);
-thisR.show('objects')
-
-%this version produces an error:
-%thisR.set('asset','head','material name','White');
-thisR.set('asset','001_head_O','material name','White');
+piMaterialsInsert(thisR,'name','diffuse-white');
+thisR.set('asset','001_head_O','material name','diffuse-white');
 piWRS(thisR);
+
+%%
+matName = 'tiles-marble-sagegreen-brick';
+piMaterialsInsert(thisR,'name',matName);
+thisR.set('asset','001_head_O','material name',matName);
+piWRS(thisR);
+
+%%
+matName = 'wood-mahogany';
+piMaterialsInsert(thisR,'name',matName);
+thisR.set('asset','001_head_O','material name',matName);
+piWRS(thisR);
+
+%%
+%{
 thisR.set('asset','001_head_O','material name','marbleBeige');
 piWRS(thisR);
 thisR.set('asset','001_head_O','material name','mahogany_dark');
@@ -104,6 +96,7 @@ thisR.set('texture','macbethchart','uscale',10);
 thisR.set('asset','001_head_O','material name','head');
 
 piWRS(thisR);
+%}
 
 
 %%

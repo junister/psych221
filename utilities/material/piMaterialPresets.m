@@ -1,22 +1,39 @@
-function [newMat, presetList] = piMaterialPresets(keyword,materialName)
-% Create a material from some pretuned  cases
+function newMat = piMaterialPresets(keyword,materialName)
+% Create materials that are tuned for appearance (preset)
+%
+% Brief
+%   The material and related textures are returned in a struct. There
+%   are methods for listing all the available preset materials and
+%   returning lists of different types.
 %
 % Syntax:
-%    [newMat, materialpresetsList] = piMaterialPresets(keyword,materialName)
-%
-% Brief description
-%    Return material (some with textures) with keyword.
+%    newMat = piMaterialPresets(keyword,materialName)
 %
 % Inputs:
-%    keyword      - Material preset name or the special string
-%                   'preview'
-%    materialName - Name assigned to the new material.
+%    keyword  - Individual material name, or a material class, or
+%             list, or preview
+%       You can also print out and return the list of materials in a class by
+%       setting the keyword to 'class list', say 'glass list' or
+%       'metal list'.
+%
+%    materialName - Name to assign to the material.
 %
 % Outputs:
 %    newMat      - Struct with material and texture slots
-%    pressetList - Avaliable material presets.
 %
-% Zhenyi, 2022
+% Description
+%  Our knowledge for building specific types of materials is
+%  encapsulated in this function.  These materials are taken from
+%  examples in the PBRT code from other gruops.
+%
+%  To list all the available materials use
+%     piMaterialPresets('list');
+%  To list one class do 
+%     piMaterialPresets('glass list') or 'wood list' or ...
+%  To preview the material appearance use
+%     piMaterialPresets('preview','fabric-leather-var1.jpg');
+%  To see the list of available materials for preview use
+%     piMaterialPresets('preview')
 %
 % See also
 %   piMaterialsInsert
@@ -24,50 +41,43 @@ function [newMat, presetList] = piMaterialPresets(keyword,materialName)
 
 %Examples:
 %{
-  piMaterialPresets('list material');
-  piMaterialPresets('preview','fabric-leather-var1.jpg');
-  piMaterialPresets('preview','rough-metal');
-  piMaterialPresets('preview','metal-Ag');  % Mirror
+  allMaterials = piMaterialPresets('list');
+  piMaterialPresets('wood list')
 %}
 %{
   newMat = piMaterialPresets('glass','glass-demo');
 %}
 %{
   newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
-  newMat = piMaterialPresets('wood-floor-merbau');
+  newMat.material.name
 %}
 %{
+  % Some materials are quite complex
   newMat = piMaterialPresets('tiles-marble-sagegreen-brick','green-marble-tiles');
+%}
+%{
+  % Not yet tested fully and does not work for all materials!
+  piMaterialPresets('preview','fabric-leather-var1.jpg');
+  piMaterialPresets('preview','rough-metal');
+  piMaterialPresets('preview','metal-Ag');  % Mirror
 %}
 %% Parameters
 
 if ~exist('keyword','var'), error('keyword is required.'); end
 if ~exist('materialName','var'), materialName = keyword; end
 
-% These are the materials we have preset.  I added a lot and so this
-% list is now very incomplete.  Thinking of getting the list from
-% piMaterialsInsert.
-presetList ={'glass','glass-BK7','glass-BAF10','glass-LASF9','glass-F5','glass-F10','glass-F11'...
-    'metal-Ag','metal-Al','metal-Au','metal-Cu','metal-CuZn','metal-MgO','metal-TiO2',...
-    'red-glass', 'tire','rough-metal','metal-spotty-discoloration','wood-floor-merbau',...
-    'fabric-leather-var1','fabric-leather-var2','fabric-leather-var3','tiles-marble-sagegreen-brick'};
-
-% Make sure this is directory on your path, though honestly, I am not
-% sure why it wouldn't always be (BW).
-% materialPath = fullfile(piRootPath,'data/materials');
-% addpath(genpath(materialPath));
-
 %% Depending on the key word, go for it.
-switch keyword
+switch ieParamFormat(keyword)
     case 'preview'
         % The user wants to see a preview of a material.  Not all
         % materials have a preview.
+        
+        materialPath = piDirGet('materials');
 
         % piMaterialPresets('preview','glass-F11');
         if exist('materialName','var') && ~isempty(materialName)
             [~,n,e] = fileparts(materialName);
             if isempty(e), materialName = [n,'.jpg']; end
-
             fname = fullfile(materialPath,'previews',materialName);
             if exist(fullfile(materialPath,'previews',materialName), 'file')
                 ieNewGraphWin; im = imread(fname); image(im);
@@ -81,18 +91,27 @@ switch keyword
         return;
 
         % The user wants a list of all the materials.
-    case {'listmaterial','listmaterials'}
+    case {'list','listall','listmaterial','listmaterials'}
         % do nothing
-        newMat = [];
-        fprintf('\n---Names of preset materials ---\n');
+        types = {'diffuse list','glossy list','glass list','metal list','car list','marble list','testpatterns list','wood list'};
+        for tt = 1:numel(types)
+            newList = piMaterialPresets(types{tt});
+            fprintf('\n--- Preset materials in %s ---\n',types{tt});
+            for ii = 1:numel(newList)
+                fprintf('%d: %s \n',ii, newList{ii});
+            end
 
-        for ii = 1:numel(presetList)
-            fprintf('%d: %s \n',ii, presetList{ii});
+            if tt == 1,  presetList = newList;
+            else,        presetList = cellMerge(presetList,newList);
+            end
         end
-        fprintf('---------------------\n');
-
+ 
+        fprintf('\n');
+        newMat = presetList;
 
         % ------------ DIFFUSE
+    case 'diffuselist'
+        newMat = {'diffuse-gray','diffuse-red','diffuse-white'};
     case 'diffuse-gray'
         newMat.material = piMaterialCreate(materialName, 'type', 'diffuse');
         newMat.material = piMaterialSet(newMat.material,'reflectance',[0.2 0.2 0.2]);
@@ -104,6 +123,10 @@ switch keyword
         newMat.material = piMaterialSet(newMat.material,'reflectance',[1 1 1]);
 
         % ------------ GLASS
+    case 'glasslist'
+        newMat = {'glass','red-glass','glass-bk7','glass-baf10','glass-fk51a','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
+        return;
+
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
@@ -164,7 +187,10 @@ switch keyword
             'roughness',0,'eta','glass-F11');
 
         % ----------- METALS
-    case 'metal-ag'
+    case 'metallist'
+        newMat = {'mirror','metal-ag','chrome','rough-metal','metal-au','metal-cu','metal-cuzn','metal-mgo','metal-tio2'}; 
+
+    case {'metal-ag','mirror'}
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'conductor','eta','metal-Ag-eta','k','metal-Ag-k');
 
@@ -194,6 +220,9 @@ switch keyword
             'uroughness',0.05,'vroughness',0.05);
 
        % ----------------  Glossy materials
+    case 'glossylist'
+        newMat = {'glossy-black','glossy-gray','glossy-red','glossy-white'};
+
     case 'glossy-black'    % barcelona-pavilion scene
         newMat.material = piMaterialCreate(materialName, 'type', 'coateddiffuse');
         newMat.material = piMaterialSet(newMat.material,'reflectance',[0.02 0.02 0.02]);
@@ -219,12 +248,17 @@ switch keyword
             'MetalSpottyDiscoloration001_COL_3K_METALNESS.png','coatedconductor');
 
         % -------- Car materials
+    case 'carlist'
+        newMat = {'tire'};
     case 'tire'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'coateddiffuse','reflectance',[ 0.06394 0.06235 0.06235 ],'roughness',0.1);
 
         % =============      Woods
         %{'wood-floor-merbau',wood-medium-knots','wood-light-large-grain','wood-mahogany'}
+    case 'woodlist'
+        newMat = {'wood-floor-merbau','wood-medium-knots','wood-light-large-grain','wood-mahogany'};
+
     case 'wood-floor-merbau'
         newMat = polligon_materialCreate(materialName,...
             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
@@ -251,6 +285,9 @@ switch keyword
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % ---------  Marble
+    case 'marblelist'
+        newMat = {'marble-beige','tiles-marble-sagegreen-brick'};
+
     case 'marble-beige'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
@@ -263,6 +300,9 @@ switch keyword
             'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coatedconductor');
 
         % ---------  Bricks
+    case 'bricklist'
+        newMat = {'brickwall001','brickwall002','brickwall003'};
+
     case 'brickwall001'
         % We need better names
         newMat.texture = piTextureCreate(materialName,...
@@ -286,6 +326,8 @@ switch keyword
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % ---------  Fabrics
+    case 'fabriclist'
+        newMat = {'fabric-leather-var1','fabric-leather-var2','fabric-leather-var3'};
     case 'fabric-leather-var1'
         newMat = polligon_materialCreate(materialName,...
             'FabricLeatherBuffaloRustic001_COL_VAR1_3K.png','coateddiffuse');
@@ -299,7 +341,9 @@ switch keyword
             'FabricLeatherBuffaloRustic001_COL_VAR3_3K.png','coateddiffuse');
 
         % ------------- Test patterns
-        
+    case {'testpatternslist'}
+        newMat = {'checkerboard','ringsrays','macbethchart','slantededge','dots'};
+
     case 'checkerboard'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...

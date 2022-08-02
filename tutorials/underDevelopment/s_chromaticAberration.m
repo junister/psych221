@@ -21,7 +21,7 @@ thisR.set('light',pointLight, 'add');
 
 %% Attach a desired texture to part of the scene
 ourAsset = '001_large_box_O';
-piMaterialsInsert(thisR);
+piMaterialsInsert(thisR,'names','slantededge');
 piAssetTranslate(thisR,ourAsset,[.15 .11 0]);
 thisR.set('asset',ourAsset,'material name','slantededge');
 
@@ -41,11 +41,7 @@ fprintf('Rendering with lens:   %s\n',thisR.get('lens file'));
 % This takes longer because we are using more wavelength samples to
 % trace through the lens (8 bands by default).
 thisR.set('chromatic aberration',true);
-piWrite(thisR);
-
-[oiCA, results] = piRender(thisR,'render type','radiance');
-oiCA = oiSet(oiCA,'name','CA 8 bands');
-oiWindow(oiCA);
+piWRS(thisR,'name','8 CA bands');
 
 %% Render without chromatic aberration
 thisR.set('chromatic aberration',false);

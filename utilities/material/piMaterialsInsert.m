@@ -1,21 +1,20 @@
 function thisR = piMaterialsInsert(thisR,varargin)
-% Insert default materials (V4) into a recipe
+% Insert preset materials into a recipe
 %
 % Synopsis
 %  thisR = piMaterialsInsert(thisR,varargin)
 %
 % Brief description
-%   Add a collection of materials to use for the scene objects.
+%   Add a collection of materials or individual material to use for
+%   a recipe.
 %
 % Input
 %   thisR - Recipe
 %
 % Optional key/val
-%   mtype - Material types to insert.
-%     General classes of materials are
-%        {'all','diffuse','glass','wood','brick','testpattern','marble','single'}
-%
-%     Precomputed materials are either stored here or in piMaterialPresets.
+%   groups - Cell array of material groups
+%   names  - Cell array of specific material names
+%   verbose - Print out
 %
 % Output
 %   thisR - ISET3d recipe with the additional materials inserted
@@ -24,17 +23,20 @@ function thisR = piMaterialsInsert(thisR,varargin)
 %           thisR.get('print  materials')
 %
 % Description
-%   We add materials to a recipe.  It gives a list of materials that
-%   we are likely to want.  You can select a group of materials using
-%   a cell array as the first argument.
+%   The materials are created in piMaterialPresets. That routine
+%   also enables you to list out the available presets by
 %
-%     thisR = piMaterialsInsert(thisR,{'glass','mirror'});
+%       piMaterialPresets('list');
+%
+%   The major categories may change as we get better over time.  The
+%   already include glass, metal, diffuse, glossy, fabric, wood, brick,
+%   marble.
 %
 % See also
 %    piMaterialPresets, t_piIntro_materialInsert
 
 % TODO
-%  Do not over-write when the material exists already.
+%  Check to avoid over-write when the material exists already.
 
 % Examples:
 %{
@@ -87,23 +89,31 @@ if ~isempty(mType{1})
     for ii=1:numel(mType)
 
         if ismember(mType{ii},{'all','glass'})
-            glass = {'glass','red-glass','glass-bk7','glass-baf10','glass-fk51a','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
+            glass = piMaterialPresets('glass list');
             for gg = 1:numel(glass)
                 newMat = piMaterialPresets(glass{gg},glass{gg});
                 thisR.set('material', 'add', newMat);
             end
         end
 
+        if ismember(mType{ii},{'all','metal'})
+            metals = piMaterialPresets('metal list');
+            for me = 1:numel(metals)
+                newMat = piMaterialPresets(metals{me},metals{me});
+                thisR.set('material', 'add', newMat);
+            end
+        end
+
         if ismember(mType{ii},{'all','mirror'})
-            mirror = {'mirror','metal-ag'};
-            for mm = 1:numel(mirror)
-                newMat = piMaterialPresets(mirror{mm},mirror{mm});
+            mirrors = piMaterialPresets('mirror list');
+            for mm = 1:numel(mirrors)
+                newMat = piMaterialPresets(mirrors{mm},mirrors{mm});
                 thisR.set('material', 'add', newMat);
             end
         end
 
         if ismember(mType{ii},{'all','diffuse'})
-            diffuse = {'diffuse-gray','diffuse-red','diffuse-white'};
+            diffuse = piMaterialPresets('diffuse list'); 
             for dd = 1:numel(diffuse)
                 newMat = piMaterialPresets(diffuse{dd},diffuse{dd});
                 thisR.set('material', 'add', newMat);
@@ -111,7 +121,7 @@ if ~isempty(mType{1})
         end
 
         if ismember(mType{ii},{'all','glossy'})
-            glossy = {'glossy-black','glossy-gray','glossy-red','glossy-white'};
+            glossy = piMaterialPresets('glossy list');
             for gl = 1:numel(glossy)
                 newMat = piMaterialPresets(diffuse{gl},diffuse{gl});
                 thisR.set('material', 'add', newMat);
@@ -119,7 +129,7 @@ if ~isempty(mType{1})
         end
 
         if ismember(mType{ii},{'all','wood'})
-            woods = {'wood-floor-merbau','wood-medium-knots','wood-light-large-grain','wood-mahogany'};
+            woods = piMaterialPresets('wood list');
             for ww = 1:numel(woods)
                 newMat = piMaterialPresets(woods{ww},woods{ww});
                 thisR.set('material', 'add', newMat);
@@ -127,7 +137,7 @@ if ~isempty(mType{1})
         end
 
         if ismember(mType{ii},{'all','brick'})
-            bricks = {'brick001','brickwall002','brickwall003'};
+            bricks = piMaterialPresets('brick list');
             for bb = 1:numel(bricks)
                 newMat = piMaterialPresets(bricks{bb},bricks{bb});
                 thisR.set('material', 'add', newMat);
@@ -135,17 +145,17 @@ if ~isempty(mType{1})
         end
 
         if ismember(mType{ii},{'all','marble'})
-            marble = {'marble-beige','tiles-marble-sagegreen-brick'};
-            for mm = 1:numel(marble)
-                newMat = piMaterialPresets(marble{mm},marble{mm});
+            marbles = piMaterialPresets('marble list');
+            for mm = 1:numel(marbles)
+                newMat = piMaterialPresets(marbles{mm},marbles{mm});
                 thisR.set('material', 'add', newMat);
             end
         end
 
         if ismember(mType{ii},{'testpatterns'})
-            testpattern = {'checkerboard','ringsrays','macbethchart','slantededge','dots'};
-            for tp = 1:numel(testpattern)
-                newMat = piMaterialPresets(testpattern{tp},testpattern{tp});
+            testpatterns = piMaterialPresets('testpatterns list');
+            for tp = 1:numel(testpatterns)
+                newMat = piMaterialPresets(testpatterns{tp},testpatterns{tp});
                 thisR.set('material', 'add', newMat);
             end
         end
