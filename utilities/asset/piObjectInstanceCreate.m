@@ -49,11 +49,13 @@ motion   = p.Results.motion;
 %% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
 
-% BW had a return that was not a cell, and so he added this
-if iscell(asset) && ~strcmp(asset{1}.type, 'branch')
-    warning('Only branch name is supported.');
-    return;
-elseif ~strcmp(asset{1}.type, 'branch')
+% ZL only addressed the first entry of the cell.  So, this seems OK.
+if iscell(asset)
+    warning('Multiple assets returned. I think there should just be 1.');
+    asset = asset{1}; 
+end
+
+if ~strcmp(asset.type, 'branch')
     warning('Only branch name is supported.');
     return;
 end

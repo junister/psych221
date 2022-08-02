@@ -82,9 +82,9 @@ otherData.instanceID = [];
 if ~iscell(label), label = {label}; end
 
 % As written we have to get radiance or the routine fails
-if max(contains(label,'radiance')) == 0
-    label{end+1} = 'radiance';
-end
+% if max(contains(label,'radiance')) == 0
+%     label{end+1} = 'radiance';
+% end
 
 for ii = 1:numel(label)
 
@@ -92,6 +92,12 @@ for ii = 1:numel(label)
         case {'radiance','illuminance'}
             energy = piReadEXR(inputFile, 'data type','radiance');
 
+            % For the 'label' case, we seem to go here and this is empty.
+            % Not sure why.
+            if isempty(energy)
+                break;
+            end
+            
             if isempty(find(energy(:,:,17),1))
                 energy = energy(:,:,1:16);
                 data_wave = 400:20:700;
@@ -146,7 +152,10 @@ for ii = 1:numel(label)
             disp('albedo NYI')
         case 'instance'
             % Should the instanceID be ieObject?
-            otherData.instanceID = piReadEXR(inputFile, 'data type','instanceId');
+            otherData = piReadEXR(inputFile, 'data type','instanceId');
+            ieObject.type = 'metadata';
+            ieObject.metadata = otherData;
+            return;
     end
 end
 

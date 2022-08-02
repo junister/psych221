@@ -44,7 +44,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
 %
-% wave      -   Adjust the wavelength sampling of the returne ieObject
+% wave      -   Adjust the wavelength sampling of the returned ieObject
 %
 % Returns
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -58,7 +58,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %
 % See also
 %   s_piReadRender*.m, piRenderResult, dockerWrapper
-%
+
 % TODO: 
 %   The parameters are not yet all correctly handled, including
 % meanluminance and scalepupilarea.  These are important for ISETBio.
@@ -175,9 +175,6 @@ end
 pbrtFile = thisR.outputFile;
 
 %% Build the docker command
-
-% Not used any more?  (BW)
-% dockerCommand   = 'docker run -ti --rm';
 
 [~,currName,~] = fileparts(pbrtFile);
 
@@ -298,6 +295,9 @@ if isstruct(ieObject)
             if ~isequal(curWave(:),wave(:))
                 ieObject = oiSet(ieObject,'wave',wave);
             end
+
+        case 'metadata'
+            % Probably instanceID data
 
         otherwise
             error('Unknown struct type %s\n',ieObject.type);

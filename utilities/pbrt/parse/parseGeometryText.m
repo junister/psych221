@@ -59,24 +59,40 @@ while i <= length(txt)
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
 
         % Since the subnodes include a branch node and an object node, we
-        % check the second node, if it is an object node we add the object
-        % index in the front to avoid naming ambiguity.
+        % check the second node to see if it is an object node. We add
+        % the object (node) index to avoid naming ambiguity.
+        %
         % Note this labelling is different from creating instances. For
         % instances we change the node name extension from '_O' to '_I'.
         % Here we descriminate each component of a group object with the
-        % object index.
-        % Add object index: index_objectname_O
+        % object index. Add object index: index_objectname_O
+        %
+        % Warning:  We are not thinking about cases when there are more
+        % than 2 nodes in this logic. (BW).
         if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
             objectIndex = objectIndex+1;
             thisNode = subnodes.Node{2};
             thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
             subnodes = subnodes.set(2, thisNode);
+
+            % Ask Zheng how we should do this correctly. (BW).
+            % This will fix the ChessSet problem.
+            %{
+              % Name the branch node like the object, but with a _B
+              oName = thisNode.name;
+              thisNode = subnodes.Node{1};
+              thisNode.name = strrep(oName,'_O','_B');
+              subnodes = subnodes.set(1,thisNode);
+            %}
+
+        elseif numel(subnodes.Node) > 2
+            % fprintf('More than 2 subnodes to label.  Line number %d\n',i);
         end
 
         subtrees = cat(1, subtrees, subnodes);
         i =  i + retLine;
 
-    elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'})&&...
+    elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
 
         [name, sz] = piParseObjectName(currentLine);

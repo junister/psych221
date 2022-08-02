@@ -1,4 +1,4 @@
-function [idmap,objectlist,result] = piLabel(thisR)
+function [idmap,objectlist,result] = piLabel(thisRIn)
 % Generate a map that labels (pixel-wise) the scene objects
 %
 % Synopsis
@@ -28,67 +28,90 @@ function [idmap,objectlist,result] = piLabel(thisR)
 
 % Examples:
 %{
-thisR = piRecipeDefault('scene name','chessset');
+% It doesn't find the sphere.
+thisR = piRecipeDefault('scene name','SimpleScene');
 [idMap, oList, result] = piLabel(thisR);
+ieNewGraphWin; imagesc(idMap);
+%}
+%{
+thisR = piRecipeDefault('scene name','ChessSet');
+[idMap, oList, result] = piLabel(thisR);
+ieNewGraphWin; imagesc(idMap);
+%}
+%{
+% The legend method is not correct yet.
+str = '';
+for ii=1:numel(oList)
+    str = addText(str,oList{ii});
+    str = addText(str,', ');
+end
+str = erase(str,'ObjectInstance');
+str = strrep(str,'"','''');
+
+legend(str(3:end-3));
 %}
 
 %% Set up the rendering parameters appropriate for a label render
 
-thisR.set('rays per pixel',8);
+thisR = thisRIn.copy;
+
+thisR.set('rays per pixel',1);
 thisR.set('nbounces',1);
 thisR.set('film render type',{'instance'});
 thisR.set('integrator','path');
+thisR.film.saveRadiance.value = false;
+
+% Add this line: Shape "sphere" "float radius" 500
+thisR.world(numel(thisR.world)+1) = {'Shape "sphere" "float radius" 5000'};
+
+outFile = thisR.get('outputfile');
+[outDir, fname, ext] = fileparts(outFile);
+thisR.set('outputFile',fullfile(outDir, [fname, '_instanceID', ext]));
+
+objID = thisR.get('objects');
 
 % Add this line: Shape "sphere" "float radius" 500 
 % So we do not label the world lighting, I think.
 thisR.world(numel(thisR.world)+1) = {'Shape "sphere" "float radius" 5000'};
 
-outputFile = thisR.get('outputfile');
-[dir, fname, ext] = fileparts(outputFile);
-thisR.set('outputFile',fullfile(dir, [fname, '_instanceID', ext]));
+%%  Create an instance for each of the objects
+for ii = 1:numel(objID)
+
+    % The last index is the node just prior to root
+    p2Root = thisR.get('asset',objID(ii),'pathtoroot');
+    
+    %{
+    parentId = objID(ii);
+
+    while parentId ~=1
+        currentId = parentId;
+        parentId = thisR.assets.getparent(currentId);
+    end
+    %}
+
+    thisNode = thisR.get('node',p2Root(end));
+    % thisNode = thisR.assets.Node{currentId}; % branch Id
+    thisNode.isObjectInstance = 1;
+
+    % for chessSet, we have to assign a unique name for each branch
+    % comment this line for simple scene
+    % thisNode.name = sprintf('%schess%03d%s',thisNode.name(1:7), ii, thisNode.name(8:end)); 
+    thisR.set('assets',p2Root(end), thisNode); 
+    thisR.assets.uniqueNames;
+
+    if isempty(thisNode.referenceObject)
+        thisR = piObjectInstanceCreate(thisR, thisNode.name,'position',[0 0 0],'rotation',piRotationMatrix());
+    end
+    
+end
+%%
+thisR.assets = thisR.assets.uniqueNames;
 
 piWrite(thisR);
 
-%% Use CPU for label generation, 
-% 
-% We will fix this and render along with radiance.  We is Zhenyi.
+%%  Get the object list from the new Geometry file
 
-% This is set up for Stanford.
-% For the moment it is hard-coded torender on the CPU on muxreconrt.
-%
-% It would probably be better to run locally and not to have to reset
-% the remote container.
-%
-% Also, can we just reset the running docker wrapper ?
-
-%{
-    % This worked for remote
-    dockerWrapper.reset;
-    x86Image = 'digitalprodev/pbrt-v4-cpu:latest';
-    thisD = dockerWrapper('gpuRendering', false, ...
-                          'remoteImage',x86Image);
-%}
-
-% thisD = dockerWrapper('gpuRendering', false);
-
-% This seems to work for local.  Not sure why we need the reset.
-dockerWrapper.reset;
-thisD = dockerWrapper('gpuRendering', false, ...
-    'localRender',true);
-
-% This is the scene or oi with the metadata attached.
-[isetStruct, result] = piRender(thisR,'our docker',thisD);
-
-% Why is this here?
-thisR.world = {'WorldBegin'};
-
-idmap = isetStruct.metadata.instanceID;
-% ieNewGraphWin; imagesc(idmap);
-
-%% Get object lists from the geometry file.
-
-%% Read the contents of the PBRT geometry file to find the Objects.
-
+% Read the text in the geometry file so we can find the object instances.
 outputFile = thisR.get('outputfile');
 fname = strrep(outputFile,'.pbrt','_geometry.pbrt');
 fileID = fopen(fname);
@@ -96,7 +119,13 @@ tmp = textscan(fileID,'%s','Delimiter','\n');
 txtLines = tmp{1};
 fclose(fileID);
 
-% Find all the lines that contain an ObjectInstance
-objectlist = txtLines(piContains(txtLines,'ObjectInstance'));
+% Find the lines
+objectlist = txtLines(piContains(txtLines, 'ObjectInstance'));
+
+%% Render on a CPU
+
+thisDocker = dockerWrapper('gpuRendering',false);
+[ieObject, result]   = piRender(thisR,'our docker',thisDocker);
+idmap      = ieObject.metadata;
 
 end
