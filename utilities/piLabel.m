@@ -31,12 +31,12 @@ function [idmap,objectlist,result] = piLabel(thisRIn)
 % It doesn't find the sphere.
 thisR = piRecipeDefault('scene name','SimpleScene');
 [idMap, oList, result] = piLabel(thisR);
-ieNewGraphWin; imagesc(idMap);
+ieNewGraphWin; imagesc(idMap); axis image
 %}
 %{
 thisR = piRecipeDefault('scene name','ChessSet');
 [idMap, oList, result] = piLabel(thisR);
-ieNewGraphWin; imagesc(idMap);
+ieNewGraphWin; imagesc(idMap); axis image
 %}
 %{
 % The legend method is not correct yet.
@@ -62,6 +62,7 @@ thisR.set('integrator','path');
 thisR.film.saveRadiance.value = false;
 
 % Add this line: Shape "sphere" "float radius" 500
+% So we do not label the world lighting, I think.
 thisR.world(numel(thisR.world)+1) = {'Shape "sphere" "float radius" 5000'};
 
 outFile = thisR.get('outputfile');
@@ -69,10 +70,6 @@ outFile = thisR.get('outputfile');
 thisR.set('outputFile',fullfile(outDir, [fname, '_instanceID', ext]));
 
 objID = thisR.get('objects');
-
-% Add this line: Shape "sphere" "float radius" 500 
-% So we do not label the world lighting, I think.
-thisR.world(numel(thisR.world)+1) = {'Shape "sphere" "float radius" 5000'};
 
 %%  Create an instance for each of the objects
 for ii = 1:numel(objID)
@@ -93,9 +90,6 @@ for ii = 1:numel(objID)
     % thisNode = thisR.assets.Node{currentId}; % branch Id
     thisNode.isObjectInstance = 1;
 
-    % for chessSet, we have to assign a unique name for each branch
-    % comment this line for simple scene
-    % thisNode.name = sprintf('%schess%03d%s',thisNode.name(1:7), ii, thisNode.name(8:end)); 
     thisR.set('assets',p2Root(end), thisNode); 
     thisR.assets.uniqueNames;
 

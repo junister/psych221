@@ -53,40 +53,29 @@ while i <= length(txt)
     % Return if we've reached the end of current attribute
 
     if strcmp(currentLine,'AttributeBegin')
-        % This is an Attribute inside an Attribute
-        % When we read the following text, it always returns a branch node
-        % and the object node.
+        % The usual format is that there is an AttBegin/AttEnd that
+        % begins with the transformation, and within there is an
+        % AttBegin/AttEnd that defines the shape.  We are at the one
+        % that defines the shape.
+        %
+        % At this point, the subnodes always returns some branch nodes
+        % and a leaf that could be either light or an object.  We
+        % assign names only if the node has a bad name, say '_B' or '_L'. 
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
 
-        % Since the subnodes include a branch node and an object node, we
-        % check the second node to see if it is an object node. We add
-        % the object (node) index to avoid naming ambiguity.
-        %
-        % Note this labelling is different from creating instances. For
-        % instances we change the node name extension from '_O' to '_I'.
-        % Here we descriminate each component of a group object with the
-        % object index. Add object index: index_objectname_O
-        %
-        % Warning:  We are not thinking about cases when there are more
-        % than 2 nodes in this logic. (BW).
-        if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
-            objectIndex = objectIndex+1;
-            thisNode = subnodes.Node{2};
-            thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
-            subnodes = subnodes.set(2, thisNode);
-
-            % Ask Zheng how we should do this correctly. (BW).
-            % This will fix the ChessSet problem.
-            %{
-              % Name the branch node like the object, but with a _B
-              oName = thisNode.name;
-              thisNode = subnodes.Node{1};
-              thisNode.name = strrep(oName,'_O','_B');
-              subnodes = subnodes.set(1,thisNode);
-            %}
-
-        elseif numel(subnodes.Node) > 2
-            % fprintf('More than 2 subnodes to label.  Line number %d\n',i);
+        % We check the last node to see if it is an object node.  
+        lastNode = subnodes.Node{end};
+        if isequal(lastNode.type,'object')
+            
+            baseName = lastNode.name(1:end-2);
+            for ii=(numel(subnodes.Node)-1):-1:1
+                thisNode = subnodes.Node{ii};
+                if isequal(thisNode.name,'_B')
+                    % An empty name.  So let's fix it.
+                    thisNode.name = sprintf('%s_B',baseName);
+                end
+                subnodes = subnodes.set(ii,thisNode);
+            end
         end
 
         subtrees = cat(1, subtrees, subnodes);
