@@ -95,7 +95,7 @@ if ~isempty(motion)
 end
 OBJsubtreeNew = tree();
 
-% for ii = 1:numel(OBJsubtree.Node)  
+% for ii = 1:numel(OBJsubtree.Node)
 %     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
 %             OBJsubtree.Node{1}.isObjectInstance==0
 %         continue;
@@ -118,39 +118,41 @@ OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
 
 %% Apply transformation to lights
 
-% The code breaks here with the Simple Scene case.
-extraNode = OBJsubtree_branch.extraNode;
+% Check wheather there are extra nodes attached.
+if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNode)
+    extraNode = OBJsubtree_branch.extraNode;
 
-extraNodeNew = extraNode;
-for nLightsNode = 1:numel(extraNode.Node)
-    thisLightNode = extraNode.Node{nLightsNode};
-    if strcmp(thisLightNode.type,'light')
-        if ~strcmp(thisLightNode.lght{1}.type,'area')
-            % only area light need to modify
-            continue;
+    extraNodeNew = extraNode;
+    for nLightsNode = 1:numel(extraNode.Node)
+        thisLightNode = extraNode.Node{nLightsNode};
+        if strcmp(thisLightNode.type,'light')
+            if ~strcmp(thisLightNode.lght{1}.type,'area')
+                % only area light need to modify
+                continue;
+            end
+            ParentId = extraNode.Parent(nLightsNode);
+            ParentNode = extraNode.Node{ParentId};
+            ParentNode.translation{end+1} = OBJsubtree_branch.translation{1};
+            ParentNode.transorder(end+1) = 'T';
+            ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
+            ParentNode.transorder(end+1) = 'R';
+            extraNodeNew = extraNodeNew.set(ParentId, ParentNode);
+        elseif isfield(thisLightNode,'referenceObject')
+            thisLightNode = rmfield(thisLightNode,'referenceObject');
+            extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
         end
-        ParentId = extraNode.Parent(nLightsNode);
-        ParentNode = extraNode.Node{ParentId};
-        ParentNode.translation{end+1} = OBJsubtree_branch.translation{1};
-        ParentNode.transorder(end+1) = 'T';
-        ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
-        ParentNode.transorder(end+1) = 'R';
-        extraNodeNew = extraNodeNew.set(ParentId, ParentNode);
-    elseif isfield(thisLightNode,'referenceObject')
-        thisLightNode = rmfield(thisLightNode,'referenceObject');
-        extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
     end
-end
 
-% graft lightsNode
-OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
+    % graft lightsNode
+    OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
+end
 % graft object tree to scene tree
 % thisR.assets = thisR.assets.graft(1, OBJsubtree);
 try
     id = thisR.get('node', 'root', 'id');
-%     rootSTID = thisR.assets.nnodes + 1;
+    %     rootSTID = thisR.assets.nnodes + 1;
     thisR.assets = thisR.assets.graft(id, OBJsubtreeNew);
-%     thisR.set('asset', 1, 'graft', OBJsubtreeNew);
+    %     thisR.set('asset', 1, 'graft', OBJsubtreeNew);
 catch
     disp('ERROR');
 end
