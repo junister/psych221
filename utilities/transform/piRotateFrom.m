@@ -17,11 +17,15 @@ function [pts, radius] = piRotateFrom(thisR,direction,varargin)
 %   show      - Plot the 3D graph showing the sampled 'from' points
 %   radius    - Circle radius of the sample points
 %   degrees   - Circle radius specified in degs of the 'from' and 'to' line
+%   method    - 'circle' or 'grid'.  Two ways to sample the plane.
 %
 % Output
 %   pts - Sample points in 3-space
 %
 % Description
+%   More words needed for sampling method, radius and degree parameters.  n
+%   samples is the number of samples on the circle or an n x n grid
+%   centered on the 'from'.
 %   
 % See also
 %  s_piRotate4AroundUp - might get deprecated, but for now a tutorial
@@ -33,6 +37,12 @@ thisR = piRecipeDefault('scene name','chessset');
 direction = thisR.get('fromto');
 n = 20;
 [pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
+%}
+%{
+thisR = piRecipeDefault('scene name','chessset');
+direction = thisR.get('fromto');
+n = 4;
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'method','grid','show',true);
 %}
 %{
 direction = thisR.get('up');
