@@ -17,6 +17,7 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 % Optional key/val
 %   position  - 1x3 position (World position)?
 %   rotation  - 3x4 rotation
+%   scale     - 1x3 scale
 %   motion    - motion struct which contains animated position and rotation
 %
 %   ** deprecated material  - material name for (object type) asset
@@ -35,8 +36,9 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 %% Read the parameters
 p = inputParser;
 p.addRequired('thisR', @(x)isequal(class(x),'recipe'));
-p.addParameter('position',[]);
-p.addParameter('rotation',[]);
+p.addParameter('position',[0, 0, 0]);
+p.addParameter('rotation',piRotationMatrix);
+p.addParameter('scale',[1,1,1]);
 p.addParameter('motion',[],@(x)isstruct);
 
 p.parse(thisR, varargin{:});
@@ -44,6 +46,7 @@ p.parse(thisR, varargin{:});
 thisR    = p.Results.thisR;
 position = p.Results.position;
 rotation = p.Results.rotation;
+scale    = p.Results.scale;
 motion   = p.Results.motion;
 
 %% Find the asset idx and properties
@@ -91,9 +94,13 @@ end
 if ~isempty(rotation)
     OBJsubtree_branch.rotation{1}    = rotation;
 end
+if ~isempty(scale)
+    OBJsubtree_branch.scale{1}    = scale;
+end
 if ~isempty(motion)
     OBJsubtree_branch.motion.translation = motion.translation;
     OBJsubtree_branch.motion.rotation = motion.rotation;
+    OBJsubtree_branch.motion.scale = motion.scale;
 end
 OBJsubtreeNew = tree();
 
@@ -138,6 +145,8 @@ if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNod
             ParentNode.transorder(end+1) = 'T';
             ParentNode.rotation{end+1} = OBJsubtree_branch.rotation{1};
             ParentNode.transorder(end+1) = 'R';
+            ParentNode.scale{end+1} = OBJsubtree_branch.scale{1};
+            ParentNode.transorder(end+1) = 'S';
             extraNodeNew = extraNodeNew.set(ParentId, ParentNode);
         elseif isfield(thisLightNode,'referenceObject')
             thisLightNode = rmfield(thisLightNode,'referenceObject');
