@@ -94,7 +94,7 @@ end
 %% Circle in the z=0 plane
 switch method
     case 'circle'
-        [x,y] = ieCirclePoints(2*pi/nSamples);
+        [x,y] = ieCirclePoints(2*pi/(nSamples-1));
         z = zeros(numel(x),1)';
         C = radius * [x(:),y(:),z(:)]';
     case 'grid'

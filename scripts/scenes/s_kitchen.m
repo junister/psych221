@@ -29,20 +29,15 @@ dRange = sceneGet(scene,'depth range');
 
 direction = thisR.get('fromto');
 direction = direction/norm(direction);
+nsamples = 5;
+frompts = piRotateFrom(thisR,direction,'nsamples',nsamples,'degrees',5,'method','circle');
 
-pts = piRotateFrom(thisR,direction,'nsamples',6,'radius',0.5);
-
-% We to move the 'to' into the middle of the depth range.
-% thisR.set('fromto distance',mean(dRange));
-to   = thisR.get('from') + direction*3;
-thisR.set('to',to);
-thisR.get('fromto distance')
-
-%% 
-for ii=1:size(pts,2)
-    thisR.set('from',pts(:,ii));
-    thisR.get('to')
-    piWRS(thisR);
+%% Do it.
+for ii=1:size(frompts,2)
+    fprintf('Point %d ... of %d\n',ii,size(frompts,2));
+    thisR.set('from',frompts(:,ii));
+    piWRS(thisR,'render flag','hdr');
+    fprintf('\n');
 end
 
 %%
