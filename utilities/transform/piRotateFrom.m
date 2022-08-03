@@ -1,4 +1,4 @@
-function pts = piRotateFrom(thisR,direction,varargin)
+function [pts, radius] = piRotateFrom(thisR,direction,varargin)
 % Return a set of points that sample around the from direction
 %
 % Brief
@@ -16,6 +16,7 @@ function pts = piRotateFrom(thisR,direction,varargin)
 %   n samples - Number of points around the circle
 %   show      - Plot the 3D graph showing the sampled 'from' points
 %   radius    - Circle radius of the sample points
+%   degrees   - Circle radius specified in degs of the 'from' and 'to' line
 %
 % Output
 %   pts - Sample points in 3-space
@@ -29,10 +30,9 @@ function pts = piRotateFrom(thisR,direction,varargin)
 % Examples:
 %{
 thisR = piRecipeDefault('scene name','chessset');
-
 direction = thisR.get('fromto');
 n = 20;
-pts = piRotateFrom(thisR, direction,'n samples',n, 'show',true);
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
 %}
 %{
 direction = thisR.get('up');
@@ -42,11 +42,16 @@ pts = piRotateFrom(thisR, direction,'n samples',n, 'show',true);
 %{
 direction = [0 0 1]
 n = 4;
-pts = piRotateFrom(thisR, direction,'n samples',n, 'radius',5,'show',true);
+pts = piRotateFrom(thisR, direction,'n samples',n, 'radius',1,'show',true);
 %}
 %{
-pts = piRotateFrom(thisR, direction,'n samples',n, 'radius',5);
-
+n = 5;
+direction = thisR.get('up');
+pts = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'method','grid','show',true);
+%}
+%{
+n = 10;
+pts = piRotateFrom(thisR, direction,'n samples',n);
 %}
 %% Parse parameters
 
@@ -56,20 +61,41 @@ p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
 p.addRequired('direction',@isvector);
 p.addParameter('nsamples',5,@isnumeric);
-p.addParameter('radius',1,@isnumeric);
+p.addParameter('radius',[],@isnumeric);      % derived from deg or spec'd
+p.addParameter('degrees',5,@isnumeric);      % 5 degree radius if a circ
 p.addParameter('show',false,@islogical);
+p.addParameter('method','circle',@(x)(ismember(x,{'circle','grid'})));
 
 p.parse(thisR,direction,varargin{:});
 nSamples = p.Results.nsamples;
 show     = p.Results.show;
 radius   = p.Results.radius;
+degrees  = p.Results.degrees;
+method   = p.Results.method;
+
+% The radius is part of the triangle tan(theta) = opposite/adjacent
+% We use it for a circle, or we use it as the sample distance between a
+% grid of nSample x nSample points
+if isempty(radius)
+    % The angle is tand(theta) = radius/(fromto distance);
+    radius = thisR.get('fromto distance')*tand(degrees);
+end
 
 %% Circle in the z=0 plane
-
-[x,y] = ieCirclePoints(2*pi/nSamples);
-
-z = zeros(numel(x),1)';
-C = radius * [x(:),y(:),z(:)]';
+switch method
+    case 'circle'
+        [x,y] = ieCirclePoints(2*pi/nSamples);
+        z = zeros(numel(x),1)';
+        C = radius * [x(:),y(:),z(:)]';
+    case 'grid'
+        % nSample^2 points, centered on lookat
+        [x,y] = meshgrid(1:nSamples,1:nSamples);
+        x = x - mean(x(:)); y = y - mean(y(:));
+        z = zeros(numel(x),1)';
+        C = radius*[x(:),y(:),z(:)]';        
+    otherwise
+        error('Unknown sampling method %s.',method);
+end
 
 %{
 ieNewGraphWin;
