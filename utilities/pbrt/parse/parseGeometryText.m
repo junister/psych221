@@ -39,7 +39,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 subtrees = {};
 
 i = 1;          
-objectIndex = 0;
+% objectIndex = 0;
 nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one object.
 while i <= length(txt)
 
@@ -77,14 +77,17 @@ while i <= length(txt)
         %}
         % I am not sure why subnodes must be two here.  Sometimes it
         % comes in as three elements.
-        if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
+        if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
             lastNode = subnodes.Node{end};
             if strcmp(lastNode.type,'object')
                 % We add the instance value here.  Need a better comment
                 % from Zhenyi or Zheng about this.
-                objectIndex = objectIndex+1;
-                lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
-                subnodes = subnodes.set(numel(subnodes),lastNode);
+                % Not sure what we were doing with objectInstance.  It
+                % might be important for the car scenes.
+                % objectIndex = objectIndex+1;
+                % lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
+                % lastNode.name = sprintf('%s', lastNode.name);
+                subnodes = subnodes.set(numel(subnodes.Node),lastNode);
 
                 % This is the base name, without the _O.
                 baseName = lastNode.name(1:end-2);
