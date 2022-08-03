@@ -38,7 +38,8 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % children = [];
 subtrees = {};
 
-i = 1;          objectIndex = 0;
+i = 1;          
+objectIndex = 0;
 nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one object.
 while i <= length(txt)
 
@@ -62,19 +63,43 @@ while i <= length(txt)
         % and a leaf that could be either light or an object.  We
         % assign names only if the node has a bad name, say '_B' or '_L'. 
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
+        
+        % We check the last node to see if it is an object node. If it
+        % is, we process the names.
+        %{
 
-        % We check the last node to see if it is an object node.  
-        lastNode = subnodes.Node{end};
-        if isequal(lastNode.type,'object')
-            
-            baseName = lastNode.name(1:end-2);
-            for ii=(numel(subnodes.Node)-1):-1:1
-                thisNode = subnodes.Node{ii};
-                if isequal(thisNode.name,'_B')
-                    % An empty name.  So let's fix it.
-                    thisNode.name = sprintf('%s_B',baseName);
+          if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
+            objectIndex = objectIndex+1;
+            thisNode = subnodes.Node{2};
+            thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
+            subnodes = subnodes.set(2, thisNode);
+
+        %}
+        % I am not sure why subnodes must be two here.  Sometimes it
+        % comes in as three elements.
+        if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
+            lastNode = subnodes.Node{end};
+            if strcmp(lastNode.type,'object')
+                % We add the instance value here.  Need a better comment
+                % from Zhenyi or Zheng about this.
+                objectIndex = objectIndex+1;
+                lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
+                subnodes = subnodes.set(numel(subnodes),lastNode);
+
+                % This is the base name, without the _O.
+                baseName = lastNode.name(1:end-2);
+
+                % Label the other subnodes with the same name but _B, if
+                % they are previously unlabeled.
+                for ii=(numel(subnodes.Node)-1):-1:1
+                    thisNode = subnodes.Node{ii};
+                    if isequal(thisNode.name,'_B')
+                        % An empty name.  So let's chanage it and put it
+                        % in place.
+                        thisNode.name = sprintf('%s_B',baseName);
+                        subnodes = subnodes.set(ii,thisNode);
+                    end
                 end
-                subnodes = subnodes.set(ii,thisNode);
             end
         end
 
