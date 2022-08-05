@@ -251,12 +251,12 @@ for ii = 1:numel(children)
             thisNode.size.h), '\n'));
 
         % If a motion exists in the current object, prepare to write it out by
-        % having an additional line below.
-
+        % having an additional line below.  For now, this is not
+        % functional.
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
-            thisR.hasActiveTransform = true;
+            % thisR.hasActiveTransform = true;
         end
 
         % Transformation section
@@ -469,8 +469,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             end
         else
             % If it does not have ply file, do this
-            % There is a shape slot we also open the
-            % geometry file.
+            % There is a shape slot we also open the geometry file.
             name = thisNode.name;
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
             fprintf(geometryFile,'%s',shapeText);
