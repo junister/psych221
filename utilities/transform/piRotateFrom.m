@@ -28,7 +28,6 @@ function [pts, radius] = piRotateFrom(thisR,direction,varargin)
 %   centered on the 'from'.
 %   
 % See also
-%  s_piRotate4AroundUp - might get deprecated, but for now a tutorial
 %
 
 % Examples:
