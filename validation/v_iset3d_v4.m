@@ -52,8 +52,15 @@ setpref('ISET3d', 'tvomniTime', toc(getpref('ISET3d', 'tvomniStart', 0)));
 %% Assets
 disp('t_assets')
 setpref('ISET3d', 'tvassetsStart', tic);
-t_assets;          % Get the zmap
-setpref('ISET3d', 'tvassetsTime', toc(getpref('ISET3d', 'tvassetsStart', 0)));
+try
+    t_assets;          % Get the zmap
+    setpref('ISET3d', 'tvassetsTime', toc(getpref('ISET3d', 'tvassetsStart', 0)));
+catch ME
+    warning('Macbeth failed.\n');
+    warning(ME.identifier,'%s',ME.message);
+    setpref('ISET3d', 'tvassetsTime', -1);
+end
+
 
 %% Demo working with materials
 disp('*** MATERIALS -- t_piIntro_material')

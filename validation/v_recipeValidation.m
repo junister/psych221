@@ -38,16 +38,16 @@ piWRS(thisR);
 thisR = piRecipeDefault('scene name','bunny');
 thisR.set('nbounces',5);
 thisR.set('skymap','room.exr');
-thisR.set('asset','001_Bunny_O','scale',3);
+thisR.set('asset','Bunny_O','scale',3);
 piMaterialsInsert(thisR,'names','glossy-red');
-thisR.set('asset','001_Bunny_O','material name','glossy-red');
+thisR.set('asset','Bunny_O','material name','glossy-red');
 piWRS(thisR);
 
 %%
 fname = fullfile(piRootPath,'data','scenes','teapot-set','TeaTime-converted.pbrt');
-exist(fname,'file')
-thisR = piRead(fname,'exporter','PARSE');
-piWRS(thisR);
-
+if isfile(fname)
+    thisR = piRead(fname,'exporter','PARSE');
+    piWRS(thisR);
+end
 %% END
 
