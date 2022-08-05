@@ -124,7 +124,8 @@ switch ieParamFormat(keyword)
 
         % ------------ GLASS
     case 'glasslist'
-        newMat = {'glass','red-glass','glass-bk7','glass-baf10','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
+        % red-glass doesn't work yet
+        newMat = {'glass','glass-bk7','glass-baf10','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
         return;
 
     case 'glass'
