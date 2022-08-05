@@ -7,7 +7,7 @@
 scene = ieGetObject('scene');
 
 %%
-E = sceneGet(scene,'energy');
+E    = sceneGet(scene,'energy');
 wave = sceneGet(scene,'wave');
 
 size(E)
@@ -28,10 +28,10 @@ end
 plotRadiance(wave,U(:,1:6));
 % cumsum(diag(S.^2))/sum(diag(S.^2))
 
-[coef, score, latent] = pca(Es);
+% [coef, score, latent] = pca(Es);
 
 % Radiance basis via pca
-plotRadiance(wave,score(:,1:6));
+% plotRadiance(wave,score(:,1:6));
 
 % L = sceneGet(scene,'illuminant energy');
 % ieNewGraphWin;
@@ -65,14 +65,14 @@ R = diag(1./L)*E;
 
 % The window is very bright and dominates ... but it isn't really a
 % reflectance.
-plotReflectance(wave,R(:,randi(5000,50)));
+% plotReflectance(wave,R(:,randi(5000,50)));
 
 %% Rapprox = R;
 
 % Our default 8 dimensional basis
 b1 = ieReadSpectra('reflectanceBasis.mat',wave);
 
-nDims = 6;
+nDims = 8;
 bsmall = b1(:,1:nDims);
 Rapprox = bsmall*(bsmall'* R);
 
