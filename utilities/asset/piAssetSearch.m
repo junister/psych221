@@ -1,4 +1,4 @@
-function val = piAssetSearch(thisR,varargin)
+function val = piAssetSearch(thisR,name,varargin)
 % A method to search through the assets, returning the indices
 %
 % Brief description
@@ -9,18 +9,16 @@ function val = piAssetSearch(thisR,varargin)
 %    val = piAssetSearch(thisR,varargin)
 %
 % Inputs
-%   thisR
+%  thisR - recipe
+%  name - string in the name, ignoring case
 %  
 % Optional key/val
-%  object
-%  branch
-%  light
-%  material
-%  position
-%  
+%  type          - 'object', 'light', 'instance' (default:  'object')
+%  material name - 'object' type with a particular material name
+%  match case    -  match case
 %
 % Output
-%   val - array of indices into the assets meeting the conditions
+%   val - numeric array of indices into the assets meeting the conditions
 %
 % Description
 %   We often want to find assets that meet a particular condition,

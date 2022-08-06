@@ -1,4 +1,13 @@
 function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+% Parse the text from a Geometry file, returning an asset subtree
+%
+% Synopsis
+%   [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+%
+% Brief:
+%   PBRT files include a great deal of geometry information about the
+%   assets.  We parse the text file here to build up the asset tree in the
+%   recipe.  We can do this for some, but not all, PBRT files.
 %
 % Inputs:
 %   thisR       - a scene recipe
@@ -11,43 +20,63 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %
 % Description:
 %
-%   The geometry text comes from C4D export. We parse the lines of text in
-%   'txt' cell array and recrursively create a tree structure of geometric objects.
+%   We parse the lines of text in 'txt' cell array and recrursively create
+%   a tree structure of geometric objects.  The naming logic has been a
+%   constant struggle, and I attempt to clarify here.
 %
-%   Logic explanation:
-%   parseGeometryText will recursively parse the geometry text line by
-%   line. If current text is:
+%   This parseGeometryText method works recursively, parsing the geometry
+%   text line by line. We do not have an overview of the whole situation at
+%   the beginning.  The limits how clever we can be. This might be our
+%   original sin.
+% 
+%   If the current text line is
+%
 %       a) 'AttributeBegin': this is the beginning of a section. We will
 %       keep looking for node/object/light information until we reach the
-%       'AttributeEnd'.
-%       b) Node/object/light information: this could contain rotation,
-%       position, scaling, shape, material properties, light spectrum
-%       information. Upon seeing the information, parameters will be
-%       created to store the value.
-%       c) 'AttributeEnd': this is the end of a section. Depending on
-%       parameters in this section, we will create different nodes and make
-%       them as trees. Noted the 'branch' node will have children for sure,
-%       so we assumed that before reaching the end of 'branch' seciton, we
-%       already have some children, so we need to attach them under the
-%       'branch'. 'Ojbect' and 'Light', on the other hand will have no child
-%       as they will be children leaves. So we simply create leave nodes
-%       for them and return.
+%       'AttributeEnd'.  Remember, though, this is recursive.  So we might
+%       have multiple Begin/End pairs within a Begin/End pair.  
+%
+%       b) Node/object/light information: The text within a Begin/End
+%       section may contain multiple types of information.  For example,
+%       about the object rotation, position, scaling, shape, material
+%       properties, light spectrum information. We do our best to parse
+%       this information, and then the parameters are stored in the
+%       appropriate location within the recipe. (When things go well).
+%
+%       c) 'AttributeEnd': We close up this node and add it to the tree. A
+%       branch' node will always have children.  'Object' and 'Light' notes
+%       are the leafs of the tree and have no children. Instance nodes are
+%       copies of Objects and thus also at the leaf.
 
 % res = [];
 % groupobjs = [];
 % children = [];
+
+% This routine processes the text and returns a cell array of trees that
+% will be part of the whole asset tree
 subtrees = {};
 
-i = 1;          
+% We sometimes have multiple objects inside one Begin/End group that have
+% the same name.  We add an index in this routine to distinguish them.  See
+% below.
 objectIndex = 0;
-nMaterial = 0;  
-nShape = 0; % Multiple material and shapes can be used for one object.
+
+% Multiple material and shapes can be used for one object.
+nMaterial   = 0;  
+nShape      = 0; 
+
+i = 1;          
 while i <= length(txt)
 
     currentLine = txt{i};
+
+    % Strip trailing spaces from the current line.  That has hurt us
+    % multiple times in the parsing.
     idx = find(currentLine ~=' ',1,'last');
     currentLine = currentLine(1:idx);
 
+    % ObjectInstances are treated specially.  I do not yet understand this
+    % (BW).
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
         InstanceName = erase(currentLine(16:end),'"');
     end
@@ -55,28 +84,23 @@ while i <= length(txt)
     % Return if we've reached the end of current attribute
 
     if strcmp(currentLine,'AttributeBegin')
-        % The usual format is that there is an AttBegin/AttEnd that
-        % begins with the transformation, and within there is an
-        % AttBegin/AttEnd that defines the shape.  We are at the one
-        % that defines the shape.
-        %
-        % At this point, the subnodes always returns some branch nodes
-        % and a leaf that could be either light or an object.  We
-        % assign names only if the node has a bad name, say '_B' or '_L'. 
+        % We reached a line with an AttributeBegin. So we start to process.
+        % There may be additional Begin/Ends on the next line. So, we
+        % dig our way down to the lowest level by recursively calling
         [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
         
-        % We check the last node to see if it is an object node. If it
-        % is, we process the names.
-        %{
-          if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
-            objectIndex = objectIndex+1;
-            thisNode = subnodes.Node{2};
-            thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
-            subnodes = subnodes.set(2, thisNode);
-        %}
-        % I am not sure why subnodes must be two here.  Sometimes it
-        % comes in as three elements.
+        % We processed the next line (through this same routine!) and it
+        % returned to us a section of a tree.  The 'subnodes'.  It also
+        % told us which line to start continuing our analysis from
+        % (retLine).
+        %
+        % We have a lot things to check, and that is what the long series
+        % of if/else choices accomplishes.  The logic of each of those
+        % choices is described through the if/else sequence.  This code
+        % remains a work in progress.
+        %
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
+            % The lost node is an object.  
             lastNode = subnodes.Node{end};
             if strcmp(lastNode.type,'object')
                 % In some cases (e.g., the Macbeth color checker)
