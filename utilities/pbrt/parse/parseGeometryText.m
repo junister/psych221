@@ -39,8 +39,9 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 subtrees = {};
 
 i = 1;          
-% objectIndex = 0;
-nMaterial = 0;  nShape = 0; % Multiple material and shapes can be used for one object.
+objectIndex = 0;
+nMaterial = 0;  
+nShape = 0; % Multiple material and shapes can be used for one object.
 while i <= length(txt)
 
     currentLine = txt{i};
@@ -67,26 +68,26 @@ while i <= length(txt)
         % We check the last node to see if it is an object node. If it
         % is, we process the names.
         %{
-
           if numel(subnodes.Node) == 2 && strcmp(subnodes.Node{2}.type, 'object')
             objectIndex = objectIndex+1;
             thisNode = subnodes.Node{2};
             thisNode.name = sprintf('%03d_%s',objectIndex, thisNode.name);
             subnodes = subnodes.set(2, thisNode);
-
         %}
         % I am not sure why subnodes must be two here.  Sometimes it
         % comes in as three elements.
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
             lastNode = subnodes.Node{end};
             if strcmp(lastNode.type,'object')
-                % We add the instance value here.  Need a better comment
-                % from Zhenyi or Zheng about this.
-                % Not sure what we were doing with objectInstance.  It
-                % might be important for the car scenes.
-                % objectIndex = objectIndex+1;
-                % lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
-                % lastNode.name = sprintf('%s', lastNode.name);
+                % In some cases (e.g., the Macbeth color checker)
+                % there is just one ObjectName in the comment, but
+                % there are multiple components to the object.  Say,
+                % the different patches.  We need to distinguish them.
+                % We use the objectIndex to distinguish the components
+                % in that case.  
+                %
+                objectIndex = objectIndex+1;
+                lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
                 subnodes = subnodes.set(numel(subnodes.Node),lastNode);
 
                 % This is the base name, without the _O.
@@ -124,7 +125,7 @@ while i <= length(txt)
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
         nMaterial = nMaterial+1;
-        mat{nMaterial} = piParseGeometryMaterial(currentLine);
+        mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW> 
 
     elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
 

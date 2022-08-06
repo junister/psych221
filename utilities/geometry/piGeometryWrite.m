@@ -159,10 +159,10 @@ for ii = 1:numel(children)
                 if nodeID ~=1, return; end
             end
         end
-        %         % Define object node
+
+        % Define object node
     elseif isequal(thisNode.type, 'object')
-        % Deal with this in recursiveWriteAttributes;
-        % I am not sure whether this will fail at some case.--Zhenyi
+        % Deal with object node properties in recursiveWriteAttributes;
         %{
                 while numel(thisNode.name) >= 8 &&...
                         isequal(thisNode.name(5:6), 'ID')
@@ -251,12 +251,12 @@ for ii = 1:numel(children)
             thisNode.size.h), '\n'));
 
         % If a motion exists in the current object, prepare to write it out by
-        % having an additional line below.
-
+        % having an additional line below.  For now, this is not
+        % functional.
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
-            thisR.hasActiveTransform = true;
+            % thisR.hasActiveTransform = true;
         end
 
         % Transformation section
@@ -276,8 +276,7 @@ for ii = 1:numel(children)
                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         end
 
-        % Write out motion
-        %
+        % Motion section
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform EndTime \n'));
@@ -314,24 +313,23 @@ for ii = 1:numel(children)
             end
         end
 
-        % There is an reference object and also it's an instance
+        % Reference object section (also if an instance (object copy))
         if ~isempty(referenceObjectExist) && isfield(thisNode,'referenceObject')
             fprintf(fid, strcat(spacing, indentSpacing, ...
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
 
-
-        recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, outFilePath,writeGeometryFlag);
+        recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, ...
+            outFilePath, writeGeometryFlag);
 
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 8 &&...
                 isequal(thisNode.name(5:6), 'ID')
+            
             % remove instance suffix
             endIndex = strfind(thisNode.name, '_I_');
-            if ~isempty(endIndex)
-                endIndex =endIndex-1;
-            else
-                endIndex = numel(thisNode.name);
+            if ~isempty(endIndex),    endIndex =endIndex-1;
+            else,                     endIndex = numel(thisNode.name);
             end
             thisNode.name = thisNode.name(8:endIndex);
         end
@@ -471,8 +469,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             end
         else
             % If it does not have ply file, do this
-            % There is a shape slot we also open the
-            % geometry file.
+            % There is a shape slot we also open the geometry file.
             name = thisNode.name;
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
             fprintf(geometryFile,'%s',shapeText);
