@@ -1,83 +1,116 @@
-function val = piAssetSearch(thisR,name,varargin)
+function val = piAssetSearch(thisR,srchtype,param,varargin)
 % A method to search through the assets, returning the indices
 %
 % Brief description
-%    Search the asset list and find those meeting a criterion
-%    specified in the varargin
+%  Search the asset list to find the node indices that meet a search
+%  criterion specified by the param
 %
 % Synopsis
-%    val = piAssetSearch(thisR,varargin)
+%    val = piAssetSearch(thisR,srchType,param)
 %
 % Inputs
-%  thisR - recipe
-%  name - string in the name, ignoring case
-%  
+%  thisR     - recipe
+%  srchType  - string that defines the search
+%      'object name', 'light name', 'material name'
+%  param     - value of the string
+%
 % Optional key/val
-%  type          - 'object', 'light', 'instance' (default:  'object')
-%  material name - 'object' type with a particular material name
-%  match case    -  match case
+%  'ignore case'  -  ignore case in the str (default: true)
 %
 % Output
-%   val - numeric array of indices into the assets meeting the conditions
+%   val - numeric array of node indices meeting the conditions
 %
 % Description
-%   We often want to find assets that meet a particular condition,
-%   such as assets that have a particular material, or whose positions
-%   are within a certain distance range.  We might then change the
-%   material, set the 'to' at one of these assets, and so forth.
+%   We often want to find assets that meet a particular condition, such as
+%   objects that have a string in their name, or use a specific material,
+%   or whose positions are within a certain distance range.  We might then
+%   change the material, set the camera to point at one of these assets,
+%   and so forth. 
 %
-%   This method searches through the assets finding the ones that meet
-%   a criterion specified by the varargin key/val pairs.
+%   This is a slow method that searches through the assets finding the ones
+%   that meet a criterion.  We have implemented these so far
+%
+%     object name -   Indices of objects whose name contains param
+%     material name - Indices of objects whose material name contains param
+%     light name - Indices of lights whose name contains param
 %
 % See also
 %   piAssetFind
 
 % Examples:
 %{
-thisR = piRecipeDefault('scene name','chess set');
-thisR.set('skymap','sky-room.exr');
-idx = piAssetSearch(thisR,'object',true);
+ thisR = piRecipeDefault('scene name','chess set');
+
+ idx = piAssetSearch(thisR,'object name','GroundMaterial');
+ thisR.get('asset',idx)
+%}
+%{
+ thisR = piRecipeDefault('scene name','chess set');
+ thisR.set('skymap','sky-room.exr');
+ idx = piAssetSearch(thisR,'light name','room')
+ idx = piAssetSearch(thisR,'object name','plane')
+ idx = piAssetSearch(thisR,'material name','Mrke_brikker_004')
+ for ii=1:numel(idx)
+   thisR.get('asset',idx(ii),'material name')
+ end
 %}
 
 %% Parse the search parameters
 
-varargin = ieParamFormat(varargin);
+srchtype = ieParamFormat(srchtype);
 
 p = inputParser;
 p.addRequired('thisR',@(x)(isa(x,'recipe')));
-p.addParameter('object',false,@islogical);
-p.addParameter('namecontains','',@ischar);
-p.addParameter('branch',false,@islogical);
-p.addParameter('material','',@ischar);
-p.addParameter('distancerange',[],@isvector);
+p.addRequired('srchtype',@ischar);
 
-p.parse(thisR,varargin{:});
+p.addParameter('ignorecase',true,@islogical);
 
-object   = p.Results.object;
-distance = p.Results.distancerange;
-branch   = p.Results.branch;
-material = p.Results.material;
-name     = p.Results.namecontains;
+p.parse(thisR,srchtype,varargin{:});
+
+ignoreCase = p.Results.ignorecase;
 
 %%  Start searching
 
 val = [];
 
-% These are the indices of nodes we will examine for other properties
-if object,         val = thisR.get('objects');
-elseif branch,     val = thisR.get('branches');
-elseif light,      val = thisR.get('lights');   % Not right yet.
-else,              val = 1:thisR.get('n nodes');
-end
-
-if ~isempty(name)
-    newval = [];
-    for ii=1:numel(val)
-        thisName = thisR.get('asset',val(ii),'name');
-        if piContains(thisName,name)
-            newval(end+1) = ii; %#ok<AGROW> 
+switch srchtype
+    case {'objectname'}
+        % Material name or distance or name contains str
+        oNames = thisR.get('object names');
+        for ii=1:numel(oNames)
+            if contains(oNames{ii},param,'IgnoreCase',ignoreCase)
+                % This should be the Node index
+                val(end+1) = str2double(oNames{ii}(1:4)); 
+            end
         end
-    end
+    case {'lightname'}
+        lNames = thisR.get('light','names id');
+        for ii=1:numel(lNames)
+            if contains(lNames{ii},param,'IgnoreCase',ignoreCase)
+                val(end+1) = str2double(lNames{ii}(1:4)); 
+            end
+        end
+    case {'materialname'}
+
+        % Find the full material name
+        mNames = thisR.get('material','names');
+        for ii=1:numel(mNames)
+            if contains(mNames{ii},param,'IgnoreCase',ignoreCase)
+                fullmaterialName = mNames{ii}; 
+                break
+            end
+        end
+
+        % Loop through the object indices to find the ones with the material
+        oID = thisR.get('objects');
+        for jj=1:numel(oID)
+            if contains(thisR.get('asset',oID(jj),'material name'),fullmaterialName)
+                val(end+1) = oID(jj); %#ok<*AGROW> 
+            end
+        end
+
+    otherwise
+        error('Unknown or NYI search type %s',srcType);
 end
     
 end

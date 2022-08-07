@@ -71,8 +71,8 @@ spdRef = piMaterialCreateSPD(wave, reflectance);
 thisR.set('material', redMatte, 'reflectance value', spdRef);
 
 %% Set the material
-assetName = 'Sphere_O';
-thisR.set('asset',assetName,'material name',redMatte.name);
+sphereID = piAssetSearch(thisR,'object name','Sphere');
+thisR.set('asset',sphereID,'material name',redMatte.name);
 
 % Show that we set it
 thisR.get('object material')
@@ -87,8 +87,7 @@ end
 %%  Now Put the sphere in an environment
 
 % Make the sphere a little smaller
-assetName = 'Sphere_O';
-thisR.set('asset',assetName,'scale',[0.5 0.5 0.5]);
+thisR.set('asset',sphereID,'scale',[0.5 0.5 0.5]);
 
 % Add an environmental light
 thisR.set('light', 'all', 'delete');
@@ -102,7 +101,7 @@ end
 %% Make the sphere glass
 
 piMaterialsInsert(thisR,'names',{'glass'});
-thisR.set('asset', assetName, 'material name', 'glass');
+thisR.set('asset', sphereID, 'material name', 'glass');
 thisR.get('object material')
 
 piWRS(thisR, 'name', 'Change sphere to glass');
@@ -110,7 +109,7 @@ piWRS(thisR, 'name', 'Change sphere to glass');
 %% Change the sphere to a mirror
 
 piMaterialsInsert(thisR,'names',{'mirror'});
-thisR.set('asset', assetName, 'material name', 'mirror');
+thisR.set('asset', sphereID, 'material name', 'mirror');
 thisR.get('object material')
 
 piWRS(thisR, 'name', 'Change glass to mirror');
