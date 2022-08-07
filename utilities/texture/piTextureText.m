@@ -118,8 +118,14 @@ for ii=1:numel(textureParams)
                     % Not in materials/textures, look elsewhere.
                     imgFile = which(thisVal);
                     if ~isempty(imgFile)
+                        % See if it is in a subdirectory of the material
+                        % directory or in the scenes directory.  Both are
+                        % OK.  If not, then warn the user where it was
+                        % found.
                         p = fileparts(imgFile);
-                        warning('Texture file found in %s.\n',p);
+                        if ~contains(p,piDirGet('material')) && ~contains(p,piDirGet('scenes'))
+                            warning('Texture file found in %s.\n',p);
+                        end
                     end
                 end
 
