@@ -2,9 +2,10 @@
 
 % Starting code from the MaterialInsert test:
 ieInit;
+bunnyAsset = '001_001_Bunny_O';
 thisR = piRecipeDefault('scene name','bunny');
 thisR.set('skymap','room.exr');
-thisR.set('asset','Bunny_O','scale',4);
+thisR.set('asset',bunnyAsset,'scale',4);
 thisR.set('nbounces',3);
 
 %%
@@ -16,10 +17,10 @@ for ii = 1:numel(allMaterials)
         % doesn't cause us to error out
         thisR = piRecipeDefault('scene name','bunny');
         thisR.set('skymap','room.exr');
-        thisR.set('asset','Bunny_O','scale',4);
+        thisR.set('asset',bunnyAsset,'scale',4);
         thisR.set('nbounces',3);
         piMaterialsInsert(thisR,'names',allMaterials{ii});
-        thisR.set('asset','Bunny_O','material name',allMaterials{ii});
+        thisR.set('asset',bunnyAsset,'material name',allMaterials{ii});
         piWRS(thisR);
         results = [results sprintf("Material: %s Succeeded\n",allMaterials{ii})];
     catch EX
