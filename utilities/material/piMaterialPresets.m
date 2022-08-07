@@ -287,7 +287,8 @@ switch ieParamFormat(keyword)
 
         % ---------  Marble
     case 'marblelist'
-        newMat = {'marble-beige','tiles-marble-sagegreen-brick'};
+        % This one often doesn't work: 'tiles-marble-sagegreen-brick' 
+        newMat = {'marble-beige'};
 
     case 'marble-beige'
         newMat.texture = piTextureCreate(materialName,...
