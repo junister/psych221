@@ -1281,6 +1281,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             names = thisR.assets.mapLgtFullName2Idx.keys;
             if isempty(names), disp('No lights.'); return;
             else
+                % We have some names.  Find the asset.
                 val = zeros(1,numel(names));
                 for ii=1:numel(names)
                     val(ii) = piAssetFind(thisR,'name',names{ii});

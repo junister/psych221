@@ -62,8 +62,8 @@ chartR.set('from',[0,0,0]);
 chartR.set('to',  [0,0,1]);
 chartR.set('up',  [0,1,0]);
 
-% Find the position of the surface
-surfaceName = '001_Cube_O';
+% Find the position of the Cube
+surfaceName = piAssetSearch(chartR,'object name','Cube');
 
 % We place the surface assuming the camera is at 0,0,0 and pointed in the
 % positive direction.  So we put the object 1 meter away from the camera.
@@ -85,21 +85,17 @@ wrotate = chartR.get('asset',surfaceName,'world rotation angle');
 id = chartR.get('asset',surfaceName,'path to root');
 fprintf('Geometry nodes:  %d\n',numel(id) - 1);
 
+% Delete all the branch nodes.  Nothing but root and the object.
 for ii=2:numel(id)
     chartR.set('asset',id(ii),'delete');
 end
 
-% Check again
-id = chartR.get('asset',surfaceName,'path to root');
-fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-
-if (numel(id)-1 == 0)
-    % disp('Adding a geometry and root node')
-    geometryNode = piAssetCreate('type','branch');
-    geometryNode.name = '001_Cube_B';
-    chartR.set('asset','root_B','add',geometryNode);
-    chartR.set('asset',surfaceName,'parent',geometryNode.name);
-end
+% Insert a controlled branch node.
+geometryNode = piAssetCreate('type','branch');
+geometryNode.name = '001_Cube_B';
+chartR.set('asset','root_B','add',geometryNode);
+surfaceName = piAssetSearch(chartR,'object name','Cube');
+chartR.set('asset',surfaceName,'parent',geometryNode.name);
 
 % Now set the parameters in the one geometry node.
 piAssetSet(chartR, geometryNode.name, 'translate',wpos);
@@ -182,7 +178,7 @@ chartR.set('asset',parent,'name',gName);
 
 %% Copy the texture file to the output dir
 
-textureFile = fullfile(piRootPath,'data','imageTextures',imgFile);
+textureFile = fullfile(piDirGet('texture'),imgFile);
 outputdir = chartR.get('output dir');
 if ~exist(textureFile,'file'), error('No texture file!'); end
 if ~exist(outputdir,'dir'), fprintf('Making output dir %s',outputdir); mkdir(outputdir); end

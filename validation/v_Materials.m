@@ -1,36 +1,48 @@
-% Need to add a validation script that runs through all materials!
+% A validation script that runs through the preset materials
+%
+% We change the material on the bunny set against a bright background.
+% This lets us judge transparency.
+%
+% See also
+%  
 
-% Starting code from the MaterialInsert test:
+%% Starting code from the MaterialInsert test:
 ieInit;
-bunnyAsset = '001_001_Bunny_O';
+
 thisR = piRecipeDefault('scene name','bunny');
+bunnyID = piAssetSearch(thisR,'object name','Bunny');
+
 thisR.set('skymap','room.exr');
-thisR.set('asset',bunnyAsset,'scale',4);
+thisR.set('asset',bunnyID,'scale',4);
 thisR.set('nbounces',3);
 
-%%
+%% 
 results = [];
 allMaterials = piMaterialPresets('list');
+
 for ii = 1:numel(allMaterials)
     try
         % we need to re-load so a broken material
         % doesn't cause us to error out
         thisR = piRecipeDefault('scene name','bunny');
         thisR.set('skymap','room.exr');
-        thisR.set('asset',bunnyAsset,'scale',4);
+        thisR.set('asset',bunnyID,'scale',4);
         thisR.set('nbounces',3);
         piMaterialsInsert(thisR,'names',allMaterials{ii});
-        thisR.set('asset',bunnyAsset,'material name',allMaterials{ii});
-        piWRS(thisR);
-        results = [results sprintf("Material: %s Succeeded\n",allMaterials{ii})];
+        thisR.set('asset',bunnyID,'material name',allMaterials{ii});
+        piWRS(thisR,'render flag','hdr');
+        results = cat(1,results,sprintf("Material: %s Succeeded\n",allMaterials{ii}));
     catch EX
-        results = [results sprintf("Material: %s FAILED: %s\n",allMaterials{ii},EX.message)];
+        results = cat(1,results, sprintf("Material: %s FAILED: %s\n",allMaterials{ii},EX.message));
     end
 end
 
 for ii = 1:numel(results)   
     fprintf(results{ii});
 end
+
+%% END
+
 %{ 
 results as of Aug 5, 2022:
 Material: diffuse-gray Succeeded
