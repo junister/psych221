@@ -99,22 +99,31 @@ while i <= length(txt)
         % choices is described through the if/else sequence.  This code
         % remains a work in progress.
         %
+        % For piLabel to work, we need to have this be >=2.
+        % But in that case, the labels can get pretty ugly, with recursive
+        % objectIndex values. It would be much better if the labels were
+        % based on the == 2 condition, not this >= 2 case.
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
-            % The lost node is an object.  
+            % The last node is an object.  When we only process for == 2,
+            % piLabel fails.
             lastNode = subnodes.Node{end};
             if strcmp(lastNode.type,'object')
-                % In some cases (e.g., the Macbeth color checker)
-                % there is just one ObjectName in the comment, but
-                % there are multiple components to the object.  Say,
-                % the different patches.  We need to distinguish them.
-                % We use the objectIndex to distinguish the components
-                % in that case.  
+                % Why do we add the objectIndex at all?
                 %
+                % In some cases (e.g., the Macbeth color checker) there is
+                % one ObjectName in the comment, but multiple components to
+                % the object (the patches). We need to distinguish the
+                % components. We use the objectIndex to distinguish them.                
+                %
+                % But when we allow processing when there are >2 nodes, we
+                % repeatedly add an objectIndex to the node name.  That's
+                % ugly, but runs.
                 objectIndex = objectIndex+1;
                 lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
                 subnodes = subnodes.set(numel(subnodes.Node),lastNode);
 
-                % This is the base name, without the _O.
+                % This is the base name, with the _O part removed.  It has
+                % the object index in it.
                 baseName = lastNode.name(1:end-2);
 
                 % Label the other subnodes with the same name but _B, if
@@ -137,10 +146,13 @@ while i <= length(txt)
     elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
 
+        % Name
         [name, sz] = piParseObjectName(currentLine);
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')
+        
+        % Translation
         [translation, rot, scale] = parseTransform(currentLine);
 
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
@@ -162,6 +174,7 @@ while i <= length(txt)
     elseif piContains(currentLine,'LightSource') ||...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
+        
         % Usually light source contains only one line. Exception is there
         % are rotations or scalings
         if ~exist('lght','var')
@@ -171,28 +184,31 @@ while i <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
-        % Not a comment.  Contains a shape.
+        
+        % Shape
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
 
     elseif strcmp(currentLine,'AttributeEnd')
-        % Assemble all the read attributes into either a group object, or a
-        % geometry object. Only group objects can have subnodes (not
-        % children). This can be confusing but is somewhat similar to
-        % previous representation.
+        % This is the end of this recursive step. 
+        % 
+        % At this point we know what kind of node we have, so we create a
+        % node of the right type.
+        %
+        % Another if/else sequence.
+        %
+        %   * See if some properties are defined.  Only then do we
+        %   process.  Otherwise we jump ahead and create a new branch node
+        %   * If there are properties, check various conditions to fill in
+        %   the node parameters
 
-        % More to explain this long if-elseif-else condition:
-        %   First check if this is a light/arealight node. If so, parse the
-        %   parameters.
-        %   If it is not a light node, then we consider if it is a node
-        %   node which records some common translation and rotation.
-        %   Else, it must be an object node which contains material info
-        %   and other things.
+        % If any of these variables were created, we have a known node.
+        if exist('areaLight','var') || exist('lght','var') ...
+                || exist('rot','var') || exist('translation','var') || ...
+                exist('shape','var') || ...
+                exist('mediumInterface','var') || exist('mat','var')
 
-        if exist('areaLight','var') || exist('lght','var') || exist('rot','var') || exist('translation','var') || ...
-                exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
-
-            % This is a 'light' node
+            % These variables mean it is a 'light' node
             if exist('areaLight','var') || exist('lght','var')
                 resLight = piAssetCreate('type', 'light');
                 if exist('lght','var')
@@ -216,9 +232,8 @@ while i <= length(txt)
                 % trees = subtrees;
 
 
-            % This is a branch or an object
-            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
-                % This path if it is an object
+            % If these variables are present, it is an object node
+            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')                
                 resObject = piAssetCreate('type', 'object');
                 if exist('name','var')
                     resObject.name = sprintf('%s_O', name);
@@ -228,7 +243,6 @@ while i <= length(txt)
                     % If we parse a valid name already, do this.
                     if ~isempty(name)
 
-                        % resObject.name = sprintf('%d_%d_%s',i, numel(subtrees)+1, name);
                         resObject.name = sprintf('%s_O', name);
 
                     % Otherwise we set the role of assigning object name in
@@ -273,18 +287,19 @@ while i <= length(txt)
                 end
 
                 subtrees = cat(1, subtrees, tree(resObject));
-                % trees = subtrees;
+
             end
 
             % This path if it is a 'branch' node
             resCurrent = piAssetCreate('type', 'branch');
+            
             % If present populate fields.
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
             
             if exist('InstanceName','var')
                 resCurrent.referenceObject = InstanceName;
-%               resCurrent.type = 'instance';
             end
+            
             if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
@@ -298,7 +313,8 @@ while i <= length(txt)
             end
 
         elseif exist('name','var')
-            % Create a branch, add it to the main tree.
+            % We got this far, and all we have is a name.
+            % So we create a branch, add it to the main tree.
             resCurrent = piAssetCreate('type', 'branch');
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
             trees = tree(resCurrent);
