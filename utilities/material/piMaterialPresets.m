@@ -2,8 +2,9 @@ function newMat = piMaterialPresets(keyword,materialName)
 % Create materials that are tuned for appearance (preset)
 %
 % Brief
-%   The material and related textures are returned in a struct. There
-%   are methods for listing all the available preset materials and
+%   The named material and related textures are returned in a struct. 
+% 
+%   There are methods for listing all the available preset materials and
 %   returning lists of different types.
 %
 % Syntax:
@@ -19,24 +20,38 @@ function newMat = piMaterialPresets(keyword,materialName)
 %    materialName - Name to assign to the material.
 %
 % Outputs:
-%    newMat      - Struct with material and texture slots
+%    newMat - Struct defining the material and texture
 %
 % Description
-%  Our knowledge for building specific types of materials is
-%  encapsulated in this function.  These materials are taken from
-%  examples in the PBRT code from other gruops.
+%  Our knowledge of specific materials is encapsulated in this function.
+%  These materials are taken from examples in the PBRT code from other
+%  groups.
 %
 %  To list all the available materials use
+%
 %     piMaterialPresets('list');
-%  To list one class do 
+%
+%   A cell array of all the preset materials is returned, and a printed,
+%   numbered list shows the materials in the returned cell array and their
+%   indices.
+%
+%  To list one class of materials call do 
+%
 %     piMaterialPresets('glass list') or 'wood list' or ...
-%  To preview the material appearance use
+%       {'diffuse list','glossy list','glass list','metal list','car
+%       list','marble list','testpatterns list','wood list'}; 
+%
+%  To preview the material appearance from one of the precomputed examples,
+%  use:
+%
 %     piMaterialPresets('preview','fabric-leather-var1.jpg');
-%  To see the list of available materials for preview use
+%
+%  To list the materials available for preview use
+%
 %     piMaterialPresets('preview')
 %
 % See also
-%   piMaterialsInsert
+%   piMaterialsInsert, v_Materials
 %
 
 %Examples:
@@ -92,13 +107,17 @@ switch ieParamFormat(keyword)
 
         % The user wants a list of all the materials.
     case {'list','listall','listmaterial','listmaterials'}
-        % do nothing
+        % Print out a list of the materials. Also, return a cell array of
+        % all the preset materials. The printed number is the index into
+        % that material in the returned cell array.
         types = {'diffuse list','glossy list','glass list','metal list','car list','marble list','testpatterns list','wood list'};
+        cnt =  0;
         for tt = 1:numel(types)
             newList = piMaterialPresets(types{tt});
             fprintf('\n--- Preset materials in %s ---\n',types{tt});
             for ii = 1:numel(newList)
-                fprintf('%d: %s \n',ii, newList{ii});
+                cnt = cnt + 1;
+                fprintf('%d: %s \n',cnt, newList{ii});
             end
 
             if tt == 1,  presetList = newList;
@@ -287,8 +306,8 @@ switch ieParamFormat(keyword)
 
         % ---------  Marble
     case 'marblelist'
-        % This one often doesn't work: 'tiles-marble-sagegreen-brick' 
-        newMat = {'marble-beige'};
+        % This one often doesn't work: 'marble-tiles-sagegreen-brick' 
+        newMat = {'marble-beige','marble-tiles-sagegreen-brick'};
 
     case 'marble-beige'
         newMat.texture = piTextureCreate(materialName,...
@@ -297,7 +316,7 @@ switch ieParamFormat(keyword)
             'filename', 'marbleBeige.exr');
         newMat.material = piMaterialCreate(materialName,'type','coateddiffuse','reflectance val',materialName);
     
-    case 'tiles-marble-sagegreen-brick'
+    case 'marble-tiles-sagegreen-brick'
         newMat = polligon_materialCreate(materialName,...
             'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coatedconductor');
 

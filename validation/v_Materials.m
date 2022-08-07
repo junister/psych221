@@ -16,7 +16,7 @@ thisR.set('skymap','room.exr');
 thisR.set('asset',bunnyID,'scale',4);
 thisR.set('nbounces',3);
 
-%% 
+%% Some debate about material 
 results = [];
 allMaterials = piMaterialPresets('list');
 
@@ -36,6 +36,8 @@ for ii = 1:numel(allMaterials)
         results = cat(1,results, sprintf("Material: %s FAILED: %s\n",allMaterials{ii},EX.message));
     end
 end
+
+%% Print out the results
 
 for ii = 1:numel(results)   
     fprintf(results{ii});
