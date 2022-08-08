@@ -54,7 +54,9 @@ motion   = p.Results.motion;
 
 % ZL only addressed the first entry of the cell.  So, this seems OK.
 if iscell(asset)
-    warning('Multiple assets returned. I think there should just be 1.');
+    if numel(asset) > 1
+        warning('Multiple assets returned. I think there should just be 1.');
+    end
     asset = asset{1}; 
 end
 
@@ -118,6 +120,9 @@ OBJsubtreeNew = tree();
 % %     end
 % OBJsubtreeNew = OBJsubtreeNew.set(1, thisNode);
 % end
+
+% There is now a problem in how we are setting the name of the reference
+% object.  See t_piSceneInstances (BW).
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
 OBJsubtree_branch.isObjectInstance = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);

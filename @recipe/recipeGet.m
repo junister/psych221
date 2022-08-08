@@ -1440,7 +1440,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                 case 'children'
                     % Get the children of a node
                     val = thisR.assets.getchildren(id);
-
+                case {'parent','parentid'}
+                    % There is asset parent id below, but I think this is
+                    % the right way to get it.
+                    val = thisR.assets.Parent(id);
                 case {'nodetoroot','pathtoroot'}
                     % thisR.get('asset',assetName,'node to root');
                     %
@@ -1540,6 +1543,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = thisR.assets.stripID;
     case {'nodeparentid','assetparentid'}
         % thisR.get('asset parent id',assetName or ID);
+        % Deprecated.
+        % Please use
+        %
+        %    thisR.get('asset',id,'parent')
         %
         % Returns the id of the parent node
         thisNode = varargin{1};
