@@ -6,9 +6,10 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 %
 % Brief description:
 %   If a complex object is used repeatedly in a scene, object instancing
-%   may be desirable; this lets the system store a single instance of the
-%   object in memory and just record multiple transformations to place it
-%   in the scene. It is essentially a lightweight method of copying.
+%   may be desirable; this method enables the system to store a single copy
+%   of the object mesh and define multiple copies (instances) that differ
+%   based on the transformations that place it in the scene. It is
+%   essentially a lightweight method of copying.
 %
 % Inputs:
 %   thisR     - scene recipe

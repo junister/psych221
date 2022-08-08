@@ -79,8 +79,20 @@ if ischar(mNames), mNames = {mNames}; end
 % Individually named materials
 if ~isempty(mNames{1})
     for ii=1:numel(mNames)
+        
         newMat = piMaterialPresets(mNames{ii},mNames{ii});
         thisR.set('material','add',newMat);
+
+        % Some materials are more complex and require a mixture of
+        % secondary materials.  These are returned in the mixMat slot.  We
+        % add each of those materials as well.  You only set the main
+        % material, but when it is set it uses the mixture materials as
+        % part of its definition.
+        if isfield(newMat,'mixMat')
+            for jj=1:numel(newMat.mixMat)
+                thisR.set('material','add',newMat.mixMat{jj});
+            end
+        end
     end
 end
 
