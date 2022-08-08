@@ -67,10 +67,6 @@ function newMat = piMaterialPresets(keyword,materialName)
   newMat.material.name
 %}
 %{
-  % Some materials are quite complex
-  newMat = piMaterialPresets('tiles-marble-sagegreen-brick','green-marble-tiles');
-%}
-%{
   % Not yet tested fully and does not work for all materials!
   piMaterialPresets('preview','fabric-leather-var1.jpg');
   piMaterialPresets('preview','rough-metal');
@@ -306,8 +302,7 @@ switch ieParamFormat(keyword)
 
         % ---------  Marble
     case 'marblelist'
-        % This one often doesn't work: 'marble-tiles-sagegreen-brick' 
-        newMat = {'marble-beige','marble-tiles-sagegreen-brick'};
+        newMat = {'marble-beige'};
 
     case 'marble-beige'
         newMat.texture = piTextureCreate(materialName,...
@@ -316,9 +311,11 @@ switch ieParamFormat(keyword)
             'filename', 'marbleBeige.exr');
         newMat.material = piMaterialCreate(materialName,'type','coateddiffuse','reflectance val',materialName);
     
-    case 'marble-tiles-sagegreen-brick'
-        newMat = polligon_materialCreate(materialName,...
-            'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coatedconductor');
+        % Stored, but too much hassle to make work with jpg instead of
+        % png and all the different components.
+        %     case 'marble-tiles-sagegreen-brick'
+        %         newMat = polligon_materialCreate(materialName,...
+        %             'TilesMarbleSageGreenBrickBondHoned001_COL_2K.png','coatedconductor');
 
         % ---------  Bricks
     case 'bricklist'
