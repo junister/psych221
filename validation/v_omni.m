@@ -1,32 +1,53 @@
-% Verify that omni camera is working
+%% Verify omni camera model in PBRT
+%
+% This is the most general camera model we have that also includes
+% microlens modeling at the ray level (not wave).
 %
 % D. Cardinal, Feb, 2022
 %
+% See also
+%   piIntro_lens
 
 %% Initialize
 
 ieInit;
-thisR = piRecipeDefault('scene name','cornell box');
+if ~piDockerExists, piDockerConfig; end
 
-%% Create a light
+%%  Scene and light
+thisR = piRecipeDefault('scene name','cornell box');
 lightName = 'from camera';
 ourLight = piLightCreate(lightName,...
                         'type','distant',...
                         'cameracoordinate', true);
 recipeSet(thisR,'lights', ourLight,'add');
 
-%% compare pinhole with omni default and omni lens
+%% No lens or omnni camera. Just a pinhole to render a scene radiance
+
+thisR.set('object distance',1);
 thisR.camera = piCameraCreate('pinhole'); 
 piWRS(thisR);
 
-%% Omni default
-thisR.camera = piCameraCreate('omni');
-recipeSet(thisR,'lights', ourLight,'add');
+%% Omni with a standard lens
+
+thisR.set('object distance',1);
+thisR.camera = piCameraCreate('omni','lens file','dgauss.22deg.12.5mm.json');
 piWRS(thisR);
 
-%% Omni with specified lens
-thisR.camera = piCameraCreate('omni', 'lensFile','dgauss.22deg.3.0mm.json');
-recipeSet(thisR,'lights', ourLight,'add');
+%% Omni with a fisheye lens
+
+% Here is a list of lenses in ISETCam
+lList = lensList;
+
+% Examples
+% ll = 8;   % dgauss.22deg.3.0mm.json
+% ll = 16;  % fisheye.87deg.12.5mm.json
+% ll = 19;  % fisheye.87deg.6.0mm.json
+
+ll = 18;    % fisheye.87deg.50.0mm.json
+
+% We move the camera back a bit to capture more of the scene
+thisR.set('object distance',3);
+thisR.camera = piCameraCreate('omni', 'lens file',lList(ll).name);
 piWRS(thisR);
 
 %% END
