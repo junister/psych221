@@ -264,7 +264,8 @@ switch ieParamFormat(sceneDir)
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
-        exporter = 'Copy';
+        % exporter = 'Copy';
+        exporter = 'PARSE';
     case {'landscape'}
         sceneDir = 'landscape';
         sceneFile = 'view-0.pbrt';
@@ -283,7 +284,8 @@ switch ieParamFormat(sceneDir)
         % Was sitting on my computer.
         sceneDir = 'bistro';
         sceneFile = 'bistro_cafe.pbrt';
-        exporter = 'Copy';        
+        % exporter = 'Copy'; 
+         exporter = 'PARSE'; 
     case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];

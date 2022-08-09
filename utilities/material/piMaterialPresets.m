@@ -2,8 +2,8 @@ function newMat = piMaterialPresets(keyword,materialName)
 % Create materials that are tuned for appearance (preset)
 %
 % Brief
-%   The named material and related textures are returned in a struct. 
-% 
+%   The named material and related textures are returned in a struct.
+%
 %   There are methods for listing all the available preset materials and
 %   returning lists of different types.
 %
@@ -35,11 +35,11 @@ function newMat = piMaterialPresets(keyword,materialName)
 %   numbered list shows the materials in the returned cell array and their
 %   indices.
 %
-%  To list one class of materials call do 
+%  To list one class of materials call do
 %
 %     piMaterialPresets('glass list') or 'wood list' or ...
 %       {'diffuse list','glossy list','glass list','metal list','car
-%       list','marble list','testpatterns list','wood list'}; 
+%       list','marble list','testpatterns list','wood list'};
 %
 %  To preview the material appearance from one of the precomputed examples,
 %  use:
@@ -70,6 +70,8 @@ function newMat = piMaterialPresets(keyword,materialName)
   % Not yet tested fully and does not work for all materials!
   piMaterialPresets('preview','fabric-leather-var1.jpg');
   piMaterialPresets('preview','rough-metal');
+  piMaterialPresets('asphalt-uniform','road-surface');
+  piMaterialPresets('asphalt-crack','road-surface');
   piMaterialPresets('preview','metal-Ag');  % Mirror
 %}
 %% Parameters
@@ -82,7 +84,7 @@ switch ieParamFormat(keyword)
     case 'preview'
         % The user wants to see a preview of a material.  Not all
         % materials have a preview.
-        
+
         materialPath = piDirGet('materials');
 
         % piMaterialPresets('preview','glass-F11');
@@ -120,7 +122,7 @@ switch ieParamFormat(keyword)
             else,        presetList = cellMerge(presetList,newList);
             end
         end
- 
+
         fprintf('\n');
         newMat = presetList;
 
@@ -204,7 +206,7 @@ switch ieParamFormat(keyword)
 
         % ----------- METALS
     case 'metallist'
-        newMat = {'mirror','metal-ag','chrome','rough-metal','metal-au','metal-cu','metal-cuzn','metal-mgo','metal-tio2'}; 
+        newMat = {'mirror','metal-ag','chrome','rough-metal','metal-au','metal-cu','metal-cuzn','metal-mgo','metal-tio2'};
 
     case {'metal-ag','mirror'}
         newMat.material = piMaterialCreate(materialName, ...
@@ -235,7 +237,7 @@ switch ieParamFormat(keyword)
             'type', 'conductor','eta','metal-Al-eta','k','metal-Al-k',...
             'uroughness',0.05,'vroughness',0.05);
 
-       % ----------------  Glossy materials
+        % ----------------  Glossy materials
     case 'glossylist'
         newMat = {'glossy-black','glossy-gray','glossy-red','glossy-white'};
 
@@ -243,11 +245,11 @@ switch ieParamFormat(keyword)
         newMat.material = piMaterialCreate(materialName, 'type', 'coateddiffuse');
         newMat.material = piMaterialSet(newMat.material,'reflectance',[0.02 0.02 0.02]);
         newMat.material = piMaterialSet(newMat.material,'roughness',0.0104);
-        
+
     case 'glossy-gray'
         newMat.material = piMaterialCreate(materialName, 'type', 'coateddiffuse');
         newMat.material = piMaterialSet(newMat.material,'reflectance',[0.2 0.2 0.2]);
-        
+
     case 'glossy-red'
         newMat.material = piMaterialCreate(materialName, 'type', 'coateddiffuse');
         newMat.material = piMaterialSet(newMat.material,'reflectance',[1 0.3 0.3]);
@@ -265,11 +267,22 @@ switch ieParamFormat(keyword)
 
         % -------- Car materials
     case 'carlist'
-        newMat = {'tire'};
+        newMat = {'tire','asphalt-uniform'};
     case 'tire'
         newMat.material = piMaterialCreate(materialName, ...
             'type', 'coateddiffuse','reflectance',[ 0.06394 0.06235 0.06235 ],'roughness',0.1);
-
+    case 'asphalt-uniform'
+        newMat.texture = piTextureCreate(materialName,...
+            'format', 'spectrum',...
+            'type', 'imagemap',...
+            'filename', 'asphalt-001.png');
+        newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
+    case 'asphalt-crack'
+        newMat.texture = piTextureCreate(materialName,...
+            'format', 'spectrum',...
+            'type', 'imagemap',...
+            'filename', 'asphalt-002.png');
+        newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
         % =============      Woods
         %{'wood-floor-merbau',wood-medium-knots','wood-light-large-grain','wood-mahogany'}
     case 'woodlist'
@@ -279,20 +292,20 @@ switch ieParamFormat(keyword)
         newMat = polligon_materialCreate(materialName,...
             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
 
-    case 'wood-medium-knots'        
+    case 'wood-medium-knots'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
             'filename', 'woodgrain001.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
     case 'wood-light-large-grain'        % Wood grain (light, large grain)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
             'filename', 'woodgrain002.exr');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
     case 'wood-mahogany'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
@@ -310,7 +323,7 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'marbleBeige.exr');
         newMat.material = piMaterialCreate(materialName,'type','coateddiffuse','reflectance val',materialName);
-    
+
         % Stored, but too much hassle to make work with jpg instead of
         % png and all the different components.
         %     case 'marble-tiles-sagegreen-brick'
@@ -328,14 +341,14 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'brickwall001.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
     case 'brickwall002'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
             'filename', 'brickwall002.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
     case 'brickwall003'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
@@ -368,7 +381,7 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'checkerboard.exr');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
         % Rings and Rays (Siemens star)
     case 'ringsrays'
         newMat.texture = piTextureCreate(materialName,...
@@ -376,7 +389,7 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'ringsrays.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        
+
         % Macbeth chart
     case 'macbethchart'
         newMat.texture = piTextureCreate(materialName,...
@@ -519,6 +532,5 @@ end
 newMat.material = material;
 
 end
-
 
 

@@ -12,127 +12,67 @@ if ~piDockerExists, piDockerConfig; end
 
 %%  Set up a scene
 sceneName = 'materialball'; 
-material_name = 'OuterBall'; 
 thisR = piRecipeDefault('scene name',sceneName);
-thisR.set('filmresolution',[1200,900]/3);
-thisR.set('pixelsamples',128);
 
-%% add a skymap
-
+% add a skymap
 fileName = 'room.exr';
 thisR.set('skymap',fileName);
 
+thisR.set('filmresolution',[1200,900]/3);
+thisR.set('pixelsamples',128);
+
 %% Add checkerboard texture to the InnerBall materials
-
-checkerboard = piTextureCreate('checkerboard_texture',...
-    'type', 'checkerboard',...
-    'uscale', 16,...
-    'vscale', 16,...
-    'tex1', [.01 .01 .01],...
-    'tex2', [.99 .99 .99]);
-thisR.set('texture','add',checkerboard);
-thisR.set('material','InnerBall','reflectance type','texture');
-thisR.set('material','InnerBall','reflectance val', checkerboard.name);
-
+piMaterialsInsert(thisR,'name','checkerboard');
+outerBallidx = piAssetSearch(thisR,'object name','OuterBall');
+thisR.set('asset',outerBallidx,'material name','checkerboard');
 piWRS(thisR,'gamma',0.85,'name','checker board');
+
+%% How do we set the texture properties of the material ....
+
+thisR.set('texture','checkerboard','vscale',16);
+thisR.set('texture','checkerboard','vscale',16);
+piWRS(thisR,'gamma',0.85,'name','checker board');
+
+%{
+% Should work because it does with piTextureCreate. But something not
+% clear in the set/get....
+thisR.set('texture','checkerboard','tex1', [.5 .01 .01]); 
+thisR.set('texture','checkerboard','tex2', [.01 .5 .01]);
+%}
+
+%%  Asphalt road material
+piMaterialsInsert(thisR,'name','asphalt-uniform');
+thisR.set('asset',outerBallidx,'material name','asphalt-uniform');
+piWRS(thisR,'gamma',0.85,'name','asphalt');
+
+%% Asphalt with a crack
+piMaterialsInsert(thisR,'name','asphalt-crack');
+thisR.set('asset',outerBallidx,'material name','asphalt-crack');
+piWRS(thisR,'gamma',0.85,'name','asphalt-crack');
+
+%%
+groundPlaneIdx = piAssetSearch(thisR,'material name','Ground');
+thisR.set('asset',groundPlaneIdx,'material name','asphalt-crack');
+piWRS(thisR,'gamma',0.85,'name','asphalt-crack');
 
 %% Show all the preset materials
 piMaterialPresets('list material');
 
 %%  Create a new material from the presents
 
-mat_type = 'metal-spotty-discoloration'; 
-new_material = piMaterialPresets(mat_type,material_name);
-
-% The returned new material is a struct that has a slot for material.
-% It may also have a slot for a texture.
-thisR.set('material','replace', material_name, new_material.material);
-
-if isfield(new_material, 'texture') && ~isempty(new_material.texture)
-    for ii = 1:numel(new_material.texture)
-        thisR.set('texture','add',new_material.texture{ii});
-    end
-end
-
-% Convert textures in a recipe to PNG format
-% We put this in piWrite.
-% thisR = piTextureFileFormat(thisR);
-
-piWRS(thisR,'gamma',0.85,'name',mat_type);
+piMaterialsInsert(thisR,'name','metal-spotty-discoloration');
+thisR.set('asset',outerBallidx,'material name','metal-spotty-discoloration');
+piWRS(thisR,'gamma',0.85,'name','spotty metal');
 
 %% Add a red glass material
 
-mat_type = 'red-glass';
-new_material = piMaterialPresets(mat_type,material_name);
+piMaterialsInsert(thisR,'name','red-glass');
+scene = piWRS(thisR,'gamma',0.85,'name','red-glass');
 
-%%  This chunk of code should become simpler
-%
-%   It might be something like piMaterialsInsert(thisR,new_material);
-%  
-if isfield(new_material, 'texture') && ~isempty(new_material.texture)
-    for ii = 1:numel(new_material.texture)
-        thisR.set('texture','add',new_material.texture{ii});
-    end
-end
+%% render leather material
 
-if isfield(new_material, 'mixMat') && ~isempty(new_material.mixMat)
-    for ii = 1:numel(new_material.mixMat)
-        thisR.set('material','add',new_material.mixMat{ii});
-    end
-end
+piMaterialsInsert(thisR,'name','fabric-leather-var2'); 
+thisR.set('asset',outerBallidx,'material name','fabric-leather-var2');
+piWRS(thisR,'gamma',0.85,'name','fabric-leather-var2');
 
-thisR.set('material','replace', material_name, new_material.material);
-
-%%
-scene = piWRS(thisR,'gamma',0.85,'name',mat_type);
-
-%{
-% Sometimes we write out the materials so people can see the expected
-% appearance.
- scene_rgb = sceneGet(scene,'rgb');
- outfileName = fullfile(piRootPath,'data/materials/previews',[mat_type,'.jpg']);
- imwrite(scene_rgb,outfileName);
-%}
-
-%% render cloth material
-
-sceneName = 'materialball_cloth';
-thisR = piRecipeDefault('scene name',sceneName);
-
-thisR.set('filmresolution',[1200,900]/1.5);
-thisR.set('pixelsamples',512);
-
-% add an environment map
-fileName = 'room.exr';
-thisR.set('skymap',fileName);
-
-%% Add checkerboard texture to inner ball
-checkerboard = piTextureCreate('checkerboard_texture',...
-    'type', 'checkerboard',...
-    'uscale', 16,...
-    'vscale', 16,...
-    'tex1', [.01 .01 .01],...
-    'tex2', [.99 .99 .99]);
-thisR.set('texture','add',checkerboard);
-thisR.set('material','InnerBall','reflectance type','texture');
-thisR.set('material','InnerBall','reflectance val', checkerboard.name);
-
-%%  Add a texture.
-mat_type = 'fabric-leather-var2'; 
-material_name = 'cloth'; 
-
-new_material = piMaterialPresets(mat_type,material_name);
-
-%%
-thisR.set('material','replace', material_name, new_material.material);
-if isfield(new_material, 'texture') && ~isempty(new_material.texture)
-    for ii = 1:numel(new_material.texture)
-        thisR.set('texture','add',new_material.texture{ii});
-    end
-end
-
-%%
-
-piWRS(thisR,'gamma',0.85,'name',mat_type);
-
-%%
+%% END

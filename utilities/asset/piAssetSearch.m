@@ -110,7 +110,7 @@ switch srchtype
         end
 
     otherwise
-        error('Unknown or NYI search type %s',srcType);
+        error('Unknown or NYI search type %s',srchType);
 end
     
 end

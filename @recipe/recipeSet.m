@@ -845,7 +845,7 @@ switch param
             end
         end
 
-        % At this point we have the material.
+        % At this point we have the texture.
         if numel(varargin{1}) == 1
             % A material struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
