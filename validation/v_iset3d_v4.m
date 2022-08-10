@@ -132,12 +132,12 @@ setpref('ISET3d', 'tvskymapTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
 % TEST Line used FOR DEBUGGING COLOR OUTPUT
 % setpref('ISET3d', 'tvskymapTime', -1);
 
-%% Textures
-% THIS DOES NOT WORK IN v4 yet
-%{
+%% Textures (re-inserted, Aug 10 2022)
 disp('*** TEXTURES -- t_piIntro_texture')
+setpref('ISET3d', 'tvtextureStart', tic);
 t_piIntro_texture;
-%}
+setpref('ISET3d', 'tvtextureTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
+
 %% Summary
 tTotal = toc(getpref('ISET3d','tStart'));
 afterTime = cputime;
@@ -156,6 +156,7 @@ vprintf('Light:      ', getpref('ISET3d','tvlightTime'));
 vprintf('Cam Pos.:   ', getpref('ISET3d','tvcampositionTime'));
 vprintf('Chess Set:  ', getpref('ISET3d','tvchessTime'));
 vprintf('Skymap:     ', getpref('ISET3d','tvskymapTime'));
+vprintf('Texture:    ', getpref('ISET3d','tvtextureTime'));
 vprintf('Recipes:    ', getpref('ISET3d','tvrecipeTime'));
 
 %% END
