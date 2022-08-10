@@ -36,7 +36,7 @@ classdef dockerWrapper < handle
     % commands.
     %
     % For the moment, we are storing these parameters within the key string
-    % 'docker', though we are discussing storing them within sthe string
+    % 'docker', though we are discussing storing them within the string
     % 'iset3d'.
     %
     % Default parameters can be retrieved from prefs using
@@ -80,8 +80,8 @@ classdef dockerWrapper < handle
     % defaults are used when creating a new dockerWrapper.
     %
     % * It is possible to create a dockerWrapper and then manually change
-    % the parameters.  We recently made the variables public, not
-    % private.
+    % the parameters.  We recently made the dockerWrapper variables
+    % public, not private.
     %
     % * To shut down stranded local containers, on the command line
     % run:

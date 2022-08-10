@@ -9,8 +9,11 @@
 % flat surface in the first few examples.  Then we assign the textures to
 % individual assets in the SimpleScene.
 %
+% An exploration of the other materials and textures we have defined
+% in piMaterialPresets is in v_material.m
+%
 % See also
-%  t_piIntro_light, tls_assets.mlx
+%  v_Materials, t_piIntro_light, tls_assets.mlx
 
 %% Init
 ieInit;
@@ -54,8 +57,10 @@ thisR.get('material print');
 % yourself.
 thisR = piMaterialsInsert(thisR,'names','checkerboard');
 
+cubeIDX = piAssetSearch(thisR,'object name','Cube');
+
 % Set the material to the object
-thisR.set('asset','001_Cube_O','material name','checkerboard');
+thisR.set('asset',cubeIDX,'material name','checkerboard');
 
 % Write and render the recipe with the new texture
 piWRS(thisR,'name','checks');
@@ -68,7 +73,7 @@ piWRS(thisR,'name','checks');
 
 % Set the material to the object
 thisR = piMaterialsInsert(thisR,'names','dots');
-thisR.set('asset','001_Cube_O','material name','dots');
+thisR.set('asset',cubeIDX,'material name','dots');
 
 thisR.get('texture','dots','uscale')
 
@@ -88,11 +93,8 @@ piWRS(thisR,'name','dots16');
 thisR = piRecipeDefault('scene name', 'SimpleScene');
 piMaterialsInsert(thisR,'groups','testpatterns');
 
-oNames = thisR.get('object names no id');
-idx = piContains(oNames,'Plane');
-thePlane = oNames(idx);
-
-thisR.set('asset',thePlane{1},'material name','dots');
+planeIDX = piAssetSearch(thisR,'object name','Plane');
+thisR.set('asset',planeIDX,'material name','dots');
 
 piWRS(thisR);
 
@@ -101,15 +103,14 @@ piWRS(thisR);
 % Pull in a couple of wood types
 piMaterialsInsert(thisR,'groups','wood');
 thisR.get('print materials');
-thisR.set('asset',thePlane{1},'material name','wood-medium-knots');
+thisR.set('asset',planeIDX,'material name','wood-medium-knots');
 
 piWRS(thisR);
 
 %% Let's change the texture of a the sphere to checkerboard
 
-idx = piContains(oNames,'Sphere');
-theSphere = oNames(idx);
-thisR.set('asset',theSphere{1},'material name','checkerboard');
+sphereIDX = piAssetSearch(thisR,'object name','Sphere');
+thisR.set('asset',sphereIDX,'material name','checkerboard');
 
 % We should figure out what all these parameters do
 %{
