@@ -1,4 +1,4 @@
-%% Explore light creation with new area light parameters
+ %% Explore light creation with new area light parameters
 %
 % The area lights were implemented by Zhenyi to help us accurately simulate
 % the headlights in night time driving scenes.
@@ -91,40 +91,37 @@ piWRS(thisR,'render flag','hdr');
 
 %% Change the SPD of the lights to halogen
 
+lList = {'LED_3845','LED_4613','halogen_2913','CFL_5780'};
+
 % Setting the name is enough.  At some point we read the light file
 % and write out the values in piWRS().
-thisR.set('light','Area_Yellow_L','spd','halogen_2913');
-thisR.set('light','Area_Red_L','spd','halogen_2913');
-thisR.set('light','Area_Green_L','spd','halogen_2913');
-thisR.set('light','Area_Blue_L','spd','halogen_2913');
+thisR.set('light','Area_Yellow_L','spd',lList{1});
+thisR.set('light','Area_Red_L','spd',lList{2});
+thisR.set('light','Area_Green_L','spd',lList{3});
+thisR.set('light','Area_Blue_L','spd',lList{4});
 
-piWRS(thisR,'render flag','hdr');
-
-%%  Now change it to LED
-
-thisR.set('light','Area_Yellow_L','spd','LED_3845');
 piWRS(thisR,'render flag','hdr');
 
 %%  Spectrum of an LED light that might be found in a car headlight
 
-%{
-% These appear about right to me (BW).
-%
-[ledSPD,wave] = ieReadSpectra('LED_3845');
-[ledSPD,wave] = ieReadSpectra('LED_4613');
-[ledSPD,wave] = ieReadSpectra('halogen_2913');
-[ledSPD,wave] = ieReadSpectra('CFL_5780');
+ieNewGraphWin; hold on;
+for ii=1:numel(lList)
+    [ledSPD,wave] = ieReadSpectra(lList{ii});
+    if ii==1, plotRadiance(wave,ledSPD);
+    else, hold on; plot(wave,ledSPD);
+    end
+end
 
-chromaticityPlot;
+for ii=1:numel(lList)
+    [ledSPD,wave] = ieReadSpectra(lList{ii});
+    XYZ = ieXYZFromEnergy(ledSPD',wave);
+    xy  = chromaticity(XYZ);
+    if ii == 1
+        chromaticityPlot; 
+        hold on; plot(xy(1),xy(2),'o');
+    else, hold on; plot(xy(1),xy(2),'o');
+    end
+end
 
-ieNewGraphWin; plotRadiance(wave,ledSPD)
-
-XYZ = ieXYZFromEnergy(ledSPD',wave);
-xy = chromaticity(XYZ);
-hold on; plot(xy(1),xy(2),'o');
-
-% It would be good to calculate the CCT
-%}
-
-%%
+%% END
 
