@@ -5,11 +5,11 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 %   [thisR, instanceBranchName]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
 % Brief description:
-%   If a complex object is used repeatedly in a scene, object instancing
-%   may be desirable; this method enables the system to store a single copy
-%   of the object mesh and define multiple copies (instances) that differ
-%   based on the transformations that place it in the scene. It is
-%   essentially a lightweight method of copying.
+%   If a complex object is used repeatedly in a scene, object
+%   instancing may be desirable.  Instancing enables the system to
+%   store a single copy of the object mesh and define multiple copies
+%   (instances) that differ based on the transformations that place it
+%   in the scene. Instancing is an efficient method of copying.
 %
 % Inputs:
 %   thisR     - scene recipe
@@ -27,6 +27,11 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 % Outputs:
 %   thisR     - scene recipe
 %   instanceBranchName
+%
+% Description
+%   In which we describe what happens in the piWrite method when we
+%   have objects and instances.  Maybe an example of ObjectBegin/End
+%   and ObjectInstanceBegin/End
 %
 % Zhenyi, 2021
 

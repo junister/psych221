@@ -25,10 +25,14 @@ scene = piWRS(thisR);
 oNames = thisR.get('object names');
 
 yellowID = piAssetSearch(thisR,'object name','figure_6m');
-yellowPos = thisR.get('asset',yelloID,'world position');
+yellowPos = thisR.get('asset',yellowID,'world position');
 
 parentID = thisR.get('asset',yellowID,'parent');
 
 thisR = piObjectInstanceCreate(thisR, parentID, 'position',yellowPos + [0.5 0.5 0.5]);
 
 thisR.show;
+
+s = piRender(thisR); sceneWindow(s);
+
+% [scene, result ] = piWRS(thisR);
