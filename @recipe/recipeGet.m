@@ -1127,8 +1127,11 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
-        % Objects
-    case {'objects'}
+
+        % Objects - this section should be converted to
+        % thisR.get('object',param)
+        % But for now, it is all 'objectparam'
+    case {'objects','object'}
         % Indices to the objects.
         val = [];
         if isempty(thisR.assets), return; end
@@ -1260,8 +1263,30 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
 
-        % Lights
+        % ---------  Lights
+    case {'lightsimplenames'}
+        % thisR.get('light simple names')
+        % Simple names of all the lights
+        lightIDX = thisR.get('lights');
+        val = cell(numel(lightIDX),1);
+        for ii=1:numel(lightIDX)
+            val{ii} = thisR.get('light',lightIDX(ii),'name simple');
+        end
+    case {'lightcoordinates','lightpositions'}
+        % thisR.get('light positions')
+        % Coordinates of all the lights that have positions
+        lightIDX = thisR.get('lights');
+        cnt = 0;
+        for ii=1:numel(lightIDX)
+            thisPos = thisR.get('light',lightIDX(ii),'world position');
+            if isnumeric(thisPos) && (sum(isinf(thisPos)) == 0)
+                cnt = cnt + 1;
+                val.positions(cnt,:) = thisPos; %#ok<AGROW> 
+                val.names{cnt} = thisR.get('light',lightIDX(ii),'name simple');
+            end
+        end
     case{'light', 'lights'}
+        % Many different light paramters
         % thisR.get('lights',varargin)
         % thisR.get('lights',name or id,property)
         % thisR.get('lights',idx,property)
@@ -1290,22 +1315,26 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
 
+        % Parameters from a single light
         switch ieParamFormat(varargin{1})
             case {'names','namesnoid'}
                 % thisR.get('lights','names')
+                % All the light names (full)
                 val = thisR.assets.mapLgtShortName2Idx.keys;
             case {'namesid','namesidx'}
                 % thisR.get('lights','names id');
+                % All the light names, without the ID
                 val = thisR.assets.mapLgtFullName2Idx.keys;
             otherwise
                 % If we are here, varargin{1} is a light name or id.
                 % There may be a varargin{2} for the light property to
                 % return
-                if isnumeric(varargin{1}) && ...
-                        varargin{1} <= thisR.get('nlights')
-                    lgtNames = thisR.assets.mapLgtShortName2Idx.keys;
-                    lgtIdx = varargin{1};
-                    thisLight = thisR.get('asset', lgtNames{lgtIdx});
+                if isnumeric(varargin{1})
+                    % An index
+                    % lgtNames = thisR.assets.mapLgtShortName2Idx.keys;
+                    % lgtIdx = varargin{1};
+                    thisLight = thisR.get('asset', varargin{1});
+                    assert(isequal(thisLight.type,'light'));
                     val = thisLight;
                 elseif isstruct(varargin{1})
                     % ZLY: I think it should not be here?
@@ -1314,7 +1343,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % material.  Maybe a test like "material.type ismember valid
                     % materials."
                     %
-                    % Added on July 29 2022.
+                    % Added on July 29 2022.  No warning issued by August
+                    % 11.
                     warning("We should not be in this code segment.");
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
@@ -1336,6 +1366,16 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % Return the light property in varargin{2}
                     thisLgtStruct = thisLight.lght{1};
                     switch ieParamFormat(varargin{2})
+                        case 'name'
+                            % This light's specific name
+                            val = thisLight.name;
+                        case 'namesimple'
+                            % Simplified version of this light's name
+                            % without ID  or _L and replacing
+                            % underscores with a dash.
+                            val = thisLight.name;
+                            tmp = strsplit(val,'_');
+                            val = join(tmp(2:(end-1)),'-');
                         case 'worldposition'
                             % thisR.get('light',idx,'world position')
                             if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
@@ -1359,8 +1399,6 @@ switch ieParamFormat(param)  % lower case, no spaces
                             val = thisR.get('asset', thisLight.name, 'rotation');
                         case {'worldrotationangle', 'worldorientation', 'worldrotation'}
                             val = thisR.get('asset', thisLight.name, 'world rotation angle');
-                        case 'name'
-                            val = thisLight.name;
                         case {'light', 'lght'}
                             val = thisLight.lght{1};
                         otherwise

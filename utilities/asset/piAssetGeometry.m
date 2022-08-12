@@ -62,11 +62,27 @@ p.addParameter('inplane','xz',@ischar);
 
 p.parse(thisR,varargin{:});
 
-%% Find the coordinates of the leafs of the tree (the objects)
+%% Find names and positions of objects and lights
 
-coords = thisR.get('object coordinates');   % World coordinates, meters of each object
-names  = thisR.get('object simple names');  % We might do a better job with this.
+objectcoords = thisR.get('object coordinates');   % World coordinates, meters of each object
+objectnames  = thisR.get('object simple names');  % We might do a better job with this.
 shapesize = thisR.get('object sizes');
+
+% We plot points for objects and lights differently
+nObjects = numel(objectnames);
+
+% World coordinates, meters of each light.  Also the simple names
+lightInfo = thisR.get('light positions');   
+
+if isfield(lightInfo,'names')
+    % If there are lights specified ...
+    names = cat(1,objectnames{:},lightInfo.names{:});
+    coords = cat(1,objectcoords,lightInfo.positions);
+else
+    names  = objectnames;
+    coords = objectcoords;
+end
+
 
 % These are the notes we attach to the objects.
 notes = cell(size(names));
@@ -78,7 +94,7 @@ lookat = thisR.get('lookat');
 % Equation of the line is start + t*direction
 % We draw the line from to for a lineLength
 % direction  = thisR.get('lookat direction'); % lookat.to - lookat.from;
-start = lookat.from;
+% start = lookat.from;
 % viewDirection  = lookat.from + direction;
 
 % Equation of the line is start + t*direction
@@ -111,7 +127,7 @@ if p.Results.name
     end
 end
 
-%% Add position
+%% Add positions of the objects and lights
 if p.Results.position
     for ii=1:numel(names)
         notes{ii} = sprintf('%s (%.1f %.1f %.1f)p ',notes{ii},coords(ii,1),coords(ii,2),coords(ii,3));
@@ -120,13 +136,13 @@ end
 
 %% Add size
 if p.Results.size
-    for ii=1:numel(names)
+    for ii=1:numel(objectnames)
         notes{ii} = sprintf('%s (%.1f %.1f %.1f)s ',notes{ii},shapesize(ii,1),shapesize(ii,2),shapesize(ii,3));
     end
 end
 
 % Start out with legend text size equal to the asset names
-legendtext = cell(numel(names,1));
+legendtext = cell(numel(objectnames,1));
 
 %% Open a figure to plot
 
@@ -138,20 +154,27 @@ sx = (max(coords(:,1)) - min(coords(:,1)))*0.04;
 sy = (max(coords(:,2)) - min(coords(:,2)))*0.04;
 sz = (max(coords(:,3)) - min(coords(:,3)))*0.04;
 
-% Plot the object coords
+% Plot the object and light coords
 for ii=1:numel(names)
-    plot3(coords(ii,1),coords(ii,2),coords(ii,3),'ko','MarkerSize',10,'MarkerFaceColor','k');
+    if ii <= nObjects
+        hold on;
+        plot3(coords(ii,1),coords(ii,2),coords(ii,3),'ko','MarkerSize',10,'MarkerFaceColor','k');
+    else
+        hold on;
+        plot3(coords(ii,1),coords(ii,2),coords(ii,3),'k*','MarkerSize',10,'MarkerFaceColor',[0.3 0.3 0.3]);
+    end
     text(coords(ii,1)+sx,coords(ii,2)+sy,coords(ii,3)+sz,notes{ii},'FontSize',14);
     legendtext{ii} = names{ii};
-    hold on;
 end
 
 %% The camera position (red) and where it is looking (green)
+hold on;
 plot3(lookat.from(1),lookat.from(2),lookat.from(3),'ro',...
     'Markersize',12,...
     'MarkerFaceColor','r');
 legendtext{end+1} = 'from';
 
+hold on;
 plot3(lookat.to(1),lookat.to(2),lookat.to(3),'go',...
     'Markersize',12,...
     'MarkerFaceColor','g');
@@ -174,8 +197,14 @@ plot3(upPoint(1) ,upPoint(2),upPoint(3),'bo',...
     'MarkerFaceColor','b');
 legendtext{end+1} = 'up';
 
+% Make the length of the from-up vector equal to the length of the
+% from-to vector
+d = thisR.get('fromto distance');
 start = lookat.from;
 stop  = upPoint;
+delta = stop - start;
+stop = start + (d/norm(delta))*delta;
+
 line([start(1),stop(1)],...
     [start(2), stop(2)],...
     [start(3), stop(3)],'Color','m',...
@@ -202,12 +231,10 @@ switch lower(p.Results.inplane)
         view(-180,0);
 end
 
+% Set the axis dimensions of the view box
 set(gca,'xlim',[boxMin(1) boxMax(1)], 'ylim',[boxMin(2) boxMax(2)], 'zlim',[boxMin(3) boxMax(3)]);
 
+% Add the legend
 legend(legendtext);
-
-% text(lookat.from(1)+sx,lookat.from(2)+sy,lookat.from(3),'from','Color','r');
-% text(lookat.to(1)+sx,lookat.to(2)+sy,lookat.to(3),'to','Color','g');
-% text(stop(1)+sx,stop(2)+sy,stop(3),'up','Color','b');
 
 end
