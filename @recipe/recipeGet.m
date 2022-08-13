@@ -1127,6 +1127,28 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
+    case {'branchnames'}
+        % Full names with id of every branch node
+        if isempty(thisR.assets), return; end
+        ids = thisR.get('branches');
+        names = thisR.assets.names;   % Names of everything.
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            val{ii} = names{ids(ii)};
+        end
+
+    case {'branchnamesnoid'}
+        % Name with id stripped of every branch node
+        if isempty(thisR.assets), return; end
+        ids = thisR.get('branches');
+        names = thisR.assets.names;   % Names of everything.
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            thisName = names{ids(ii)};
+            val{ii} = thisName(8:end);
+        end
 
         % Objects - this section should be converted to
         % thisR.get('object',param)

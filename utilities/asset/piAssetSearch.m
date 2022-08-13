@@ -74,7 +74,7 @@ ignoreCase = p.Results.ignorecase;
 val = [];
 
 switch srchtype
-    case {'objectname'}
+    case {'objectname','objectnames'}
         % Material name or distance or name contains str
         oNames = thisR.get('object names');
         for ii=1:numel(oNames)
@@ -83,14 +83,21 @@ switch srchtype
                 val(end+1) = str2double(oNames{ii}(1:4)); 
             end
         end
-    case {'lightname'}
+    case {'lightname','lightnames'}
         lNames = thisR.get('light','names id');
         for ii=1:numel(lNames)
             if contains(lNames{ii},param,'IgnoreCase',ignoreCase)
                 val(end+1) = str2double(lNames{ii}(1:4)); 
             end
         end
-    case {'materialname'}
+    case {'branchname','branchnames'}
+        bNames = thisR.get('branch names');
+        for ii=1:numel(bNames)
+            if contains(bNames{ii},param,'IgnoreCase',ignoreCase)
+                val(end+1) = str2double(bNames{ii}(1:4)); 
+            end
+        end
+    case {'materialname','materialnames'}
 
         % Find the full material name
         mNames = thisR.get('material','names');
