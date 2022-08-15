@@ -1387,7 +1387,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                     thisLgtStruct = thisLight.lght{1};
                     switch ieParamFormat(varargin{2})
                         case 'name'
-                            % This light's specific name
+                            % This light's specific name stored in the
+                            % asset, not the lght struct within the
+                            % asset.  They should be the same.
                             val = thisLight.name;
                         case 'namesimple'
                             % Simplified version of this light's name

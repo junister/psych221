@@ -8,6 +8,43 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Create a proper default for piLightCreate
+fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
+thisR    = piRead(fileName);
+
+thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
+thisR.set('asset','AreaLightRectangle.001_L','delete');
+thisR.set('asset','AreaLightRectangle.002_L','delete');
+thisR.set('asset','AreaLightRectangle.003_L','delete');
+
+thisR.show('objects');
+thisR.show('lights');
+piAssetGeometry(thisR);
+
+%%
+[~,result] = piWRS(thisR,'render flag','hdr');
+
+%% The 
+lNames = thisR.get('light', 'names no id');
+
+for oo=1:numel(lNames)
+    % Merge all the nodes.  The light is, for the moment, just below
+    % root
+    thisR.set('asset',lNames{oo},'merge branches');
+end
+
+% The positions should be unchanged.
+thisR.show('objects');
+thisR.show('lights');
+piAssetGeometry(thisR);
+
+%%
+[~,result] = piWRS(thisR,'render flag','hdr');
+
+%%
+thisR.show('lights');
+thisR.show;
+
 %% Load the Macbeth scene. 
 thisR =  piRecipeDefault('scene name','MacBethChecker');
 
@@ -174,6 +211,7 @@ for ii=1:numel(lList)
     else, hold on; plot(xy(1),xy(2),'o');
     end
 end
+%}
 
 %% END
 

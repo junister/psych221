@@ -1108,6 +1108,12 @@ switch param
             % property and then update the material in the list.
             thisLight = piLightSet(thisLight, param, val);
             thisR.set('asset', lghtName, 'lght', thisLight);
+            if isequal(param,'name')
+                % There are two places where light names are stored.
+                % We keep them the same, which is goofy.  But there is
+                % it is for now.  
+                thisR.set('asset',lghtName,'name',val);
+            end
         end
         
     case {'asset', 'assets','node','nodes'}
@@ -1253,30 +1259,37 @@ switch param
                 % style multiple branches.  In the newer format, we have an
                 % object and only one geometry branch above it.
                 %
+
+                % Find the world positions.  We will set the branch
+                % node of this object or light so these values.
                 wpos    = thisR.get('asset',assetName,'world position');
                 wscale  = thisR.get('asset',assetName,'world scale');
                 wrotate = thisR.get('asset',assetName,'world rotation angle');
-                
+
+                % Find the indices to root from this object or light.
                 id = thisR.get('asset',assetName,'path to root');
-                % fprintf('Geometry nodes:  %d\n',numel(id) - 1);
                 for ii=2:numel(id)
                     thisR.set('asset',id(ii),'delete');
                 end
+
+                % There should be only one id.
                 id = thisR.get('asset',assetName,'path to root');
-                % fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-                
                 if (numel(id)-1 == 0)
-                    % disp('Adding a geometry and root node')
+                    % Adding a geometry node above the object but
+                    % below the root node 
                     geometryNode = piAssetCreate('type','branch');
                     
-                    % Branch name is object name with _B replaced
+                    % Branch name is object or light name with _B replaced
+                    % This could be switch on asset type.
                     geometryNode.name = strrep(assetName,'_O','_B');
-                    
+                    geometryNode.name = strrep(assetName,'_L','_B');
+
                     % Branch is underneath root_B
                     thisR.set('asset','root_B','add',geometryNode);
                     thisR.set('asset',assetName,'parent',geometryNode.name);
                 end
                 
+                % Set the position and other parameters.
                 piAssetSet(thisR, geometryNode.name, 'translate',wpos);
                 piAssetSet(thisR, geometryNode.name, 'scale',wscale);
                 rotMatrix = [wrotate; fliplr(eye(3))];
