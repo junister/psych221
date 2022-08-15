@@ -27,6 +27,7 @@ piAssetGeometry(thisR);
 
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
 thisR.show('lights');
 
 %%
@@ -35,11 +36,9 @@ thisR.show('lights');
 %% The 
 lNames = thisR.get('light', 'names no id');
 
-for oo=1:numel(lNames)
-    % Merge all the nodes.  The light is, for the moment, just below
-    % root
-    thisR.set('asset',lNames{oo},'merge branches');
-end
+% Merge all the nodes.  The light is, for the moment, just below
+% root
+thisR.set('asset',lNames{1},'merge branches');
 
 % The positions should be unchanged.
 thisR.show('objects');

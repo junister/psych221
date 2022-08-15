@@ -1292,9 +1292,12 @@ switch param
                 % Set the position and other parameters.
                 piAssetSet(thisR, geometryNode.name, 'translate',wpos);
                 piAssetSet(thisR, geometryNode.name, 'scale',wscale);
-                rotMatrix = [wrotate; fliplr(eye(3))];
-                piAssetSet(thisR, geometryNode.name, 'rotation', rotMatrix);
                 
+                % rotMatrix = [wrotate; fliplr(eye(3))];
+                % piAssetSet(thisR, geometryNode.name, 'rotation', rotMatrix);
+
+                thisR.set('asset',geometryNode.name,'world rotation',wrotate);
+
             case {'chop', 'cut'}
                 id = thisR.get('asset', assetName, 'id');
                 thisR.assets = thisR.assets.chop(id);
