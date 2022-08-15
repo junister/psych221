@@ -39,7 +39,8 @@ thisR.get('light print');
 thisR.get('light', 'distant_light_L')
 
 % Or we can get the light from its index (number) in this list.
-thisR.get('light', 1)
+idx = piAssetSearch(thisR,'light name','distant_light');
+thisR.get('light', idx)
 
 %% Remove all the lights
 
