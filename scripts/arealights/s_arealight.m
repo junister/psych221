@@ -22,6 +22,14 @@ thisR.show('lights');
 piAssetGeometry(thisR);
 
 %%
+
+% [1m[31mError[0m: arealight_geometry.pbrt:73:8: Vertex indices "indices" must be provided with triangle mesh.
+
+wLight    = piLightCreate('white','type','area');
+thisR.set('light',wLight,'add');
+thisR.show('lights');
+
+%%
 [~,result] = piWRS(thisR,'render flag','hdr');
 
 %% The 

@@ -204,32 +204,46 @@ switch ieParamFormat(lght.type)
         %}
 
     case {'area', 'arealight'}
+        % These are the default parameters for an area light, that are
+        % based on the Blender export in arealight.pbrt.
+
+        lght.type = 'area';
+        lght.name = 'default-area';
+
         lght.twosided.type = 'bool';
         lght.twosided.value = [];
 
         lght.nsamples.type = 'integer';
         lght.nsamples.value = [];
 
-        lght.shape.type = 'shape';
-        lght.shape.value = [];
-
         lght.spread.type = 'float';
         lght.spread.value = [];
 
-        %{
-        % Potentially has rotation, transformation or concatransformation
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
+        lght.specscale.type = 'float';
+        lght.specscale.value = 100;
 
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
+        lght.spd.type = 'rgb';
+        lght.spd.value = [1 1 1];
 
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
+        % We need a piShapeCreate() method
+        rectShape = struct('meshshape','trianglemesh', ...
+        'filename','', ...
+        'integerindicies', [0 1 2 3 4 5], ...
+        'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
+        'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
+        'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
+        'height', '',...
+        'radius','',...
+        'zmin','',...
+        'zmax','',...
+        'p1','',...
+        'p2','',...
+        'phimax','',...
+        'alpha','');
+        lght.shape{1} = rectShape;
 
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
+        lght.spread.type = 'float';
+        lght.spread.value = 30;
 
         lght.ReverseOrientation.type = 'ReverseOrientation';
         lght.ReverseOrientation.value = false;
