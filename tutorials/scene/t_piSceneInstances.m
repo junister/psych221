@@ -19,42 +19,9 @@ if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name','simple scene');
 piObjectInstance(thisR);
-
 % thisR.show;
-%{
-%% We need to convert all of the objects to instances
-
-% These all have a mesh
-objID = thisR.get('objects');
-
-%  Create an instance for each of the objects
-for ii = 1:numel(objID)
-
-    % The last index is the node just prior to root
-    p2Root = thisR.get('asset',objID(ii),'pathtoroot');
-    
-    thisNode = thisR.get('node',p2Root(end));
-    thisNode.isObjectInstance = 1;
-
-    thisR.set('assets',p2Root(end), thisNode); 
-    thisR.assets.uniqueNames;
-
-    if isempty(thisNode.referenceObject)
-        thisR = piObjectInstanceCreate(thisR, thisNode.name,'position',[0 0 0],'rotation',piRotationMatrix());
-    end
-    
-end
-
-%%
-thisR.assets = thisR.assets.uniqueNames;
-%}
-
-%%
-piWRS(thisR,'render flag','hdr');
 
 %% Create a second instance if the yellow guy
-
-% oNames = thisR.get('object names');
 
 % Maybe this should be thisR.get('asset',idx,'top branch')
 yellowID = piAssetSearch(thisR,'object name','figure_6m');
@@ -84,3 +51,46 @@ end
 %%
 piWRS(thisR,'render flag','hdr');
 
+%% Try it with the Chess Set
+thisR = piRecipeDefault('scene name','Chess Set');
+piObjectInstance(thisR);
+piWRS(thisR,'render flag','hdr');
+
+%% Copy the pieces
+
+% To see the different pieces, try
+%   [idMap, oList] = piLabel(thisR);
+%   ieNewGraphWin; image(idMap);
+%
+% Click on the pieces to see the index
+% THen use oList(idx) to see the mesh name
+% 72 is the ruler.  The king is 7.  The queen is 141.
+
+pieceID = piAssetSearch(thisR,'object name','ChessSet_mesh_00007');
+p2Root = thisR.get('asset',pieceID,'pathtoroot');
+idx = p2Root(end);
+
+% This position is relative to the position of the original object
+% The Chess set dimensions are small.  
+steps = [-0.2 0.2]*1e-1;
+for ii=1:numel(steps)
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    % thisR.assets = thisR.assets.uniqueNames;
+end
+
+topID = piAssetSearch(thisR,'object name','ChessSet_mesh_00065');
+p2Root = thisR.get('asset',topID,'pathtoroot');
+idx = p2Root(end);
+
+% This position is relative to the position of the original object
+% The Chess set dimensions are small.  
+steps = [-0.2 0.2]*1e-1;
+for ii=1:numel(steps)
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    % thisR.assets = thisR.assets.uniqueNames;
+end
+
+piWRS(thisR,'render flag','hdr');
+
+
+%% END

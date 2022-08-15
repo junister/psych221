@@ -1,15 +1,14 @@
 function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, varargin)
-%% Create an object instance (copy)
+%% Create an object copy (instance)
 %
 % Synopsis:
 %   [thisR, instanceBranchName]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
 % Brief description:
-%   If a complex object is used repeatedly in a scene, object
-%   instancing may be desirable.  Instancing enables the system to
-%   store a single copy of the object mesh and define multiple copies
-%   (instances) that differ based on the transformations that place it
-%   in the scene. Instancing is an efficient method of copying.
+%   Instancing enables the system to store a single copy of the object mesh
+%   and define multiple copies (instances) that differ based on the
+%   transformations that place it in the scene. Instancing is an efficient
+%   method of copying.
 %
 % Inputs:
 %   thisR     - scene recipe
@@ -21,23 +20,23 @@ function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, 
 %   scale     - 1x3 scale
 %   motion    - motion struct which contains animated position and rotation
 %
-%   ** deprecated material  - material name for (object type) asset
-%   ** deprecated nodetype  - type of asset node
-%
 % Outputs:
 %   thisR     - scene recipe
 %   instanceBranchName
 %
 % Description
-%   In which we describe what happens in the piWrite method when we
-%   have objects and instances.  Maybe an example of ObjectBegin/End
-%   and ObjectInstanceBegin/End
+%   Instances can be used with scenes that have an 'assets' slot.  To use
+%   instances, we first prepare the recipe using piObjectInstance(). This
+%   creates an instance node for each of the objects. To make a copy of an
+%   object, use piObjectInstanceCreate.  
+% 
+%   The specific code is explained in the tutorial script
+%   t_piSceneInstances. 
 %
 % Zhenyi, 2021
-
-% TODO (BW):  Make work with other regular scenes.  It appears to work with
-% ISETAuto case, but there are problems with SimpleScene.  To fix with
-% Zhenyi or Zheng.
+%
+% See also
+%   piObjectInstance, t_piSceneInstances
 
 %% Read the parameters
 p = inputParser;
@@ -112,23 +111,6 @@ if ~isempty(motion)
 end
 OBJsubtreeNew = tree();
 
-% for ii = 1:numel(OBJsubtree.Node)
-%     if ~strcmp(OBJsubtree.Node{1}.type,'branch') || ...
-%             OBJsubtree.Node{1}.isObjectInstance==0
-%         continue;
-%     end
-
-% thisNode      = OBJsubtree.Node{1};
-% thisNode.name = strcat(OBJsubtree.Node{1}.name, InstanceSuffix);
-% %     if strcmp(OBJsubtree.Node{ii}.type,'object')
-% %         thisNode.type = 'instance';
-% %         thisNode.referenceObject = OBJsubtree.Node{ii}.name;
-% %     end
-% OBJsubtreeNew = OBJsubtreeNew.set(1, thisNode);
-% end
-
-% There is now a problem in how we are setting the name of the reference
-% object.  See t_piSceneInstances (BW).
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
 OBJsubtree_branch.isObjectInstance = 0;
 OBJsubtree_branch.name = strcat(OBJsubtree_branch.name, InstanceSuffix);
@@ -168,21 +150,21 @@ if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNod
     % graft lightsNode
     OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 end
+
 % graft object tree to scene tree
-% thisR.assets = thisR.assets.graft(1, OBJsubtree);
 try
     id = thisR.get('node', 'root', 'id');
-    %     rootSTID = thisR.assets.nnodes + 1;
     thisR.assets = thisR.assets.graft(id, OBJsubtreeNew);
-    %     thisR.set('asset', 1, 'graft', OBJsubtreeNew);
 catch
     disp('ERROR');
 end
 
+% Returned
 instanceBranchName = OBJsubtree_branch.name;
 
-% BW Added.  Not sure if the right thing to do here (Aug 14).
-% Works OK on the Simple Scene.  I should test with the car scene.
+% BW Added.  Worked for SimpleScene and the test nightdrive scene.
+% Eliminates the need to make the call after the return from this routine,
+% piObjectInstanceCreate
 thisR.assets = thisR.assets.uniqueNames;
 
 end
