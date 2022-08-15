@@ -18,21 +18,69 @@ if ~piDockerExists, piDockerConfig; end
 %% Render the basic scene
 
 thisR = piRecipeDefault('scene name','simple scene');
-scene = piWRS(thisR);
+piObjectInstance(thisR);
+
+% thisR.show;
+%{
+%% We need to convert all of the objects to instances
+
+% These all have a mesh
+objID = thisR.get('objects');
+
+%  Create an instance for each of the objects
+for ii = 1:numel(objID)
+
+    % The last index is the node just prior to root
+    p2Root = thisR.get('asset',objID(ii),'pathtoroot');
+    
+    thisNode = thisR.get('node',p2Root(end));
+    thisNode.isObjectInstance = 1;
+
+    thisR.set('assets',p2Root(end), thisNode); 
+    thisR.assets.uniqueNames;
+
+    if isempty(thisNode.referenceObject)
+        thisR = piObjectInstanceCreate(thisR, thisNode.name,'position',[0 0 0],'rotation',piRotationMatrix());
+    end
+    
+end
+
+%%
+thisR.assets = thisR.assets.uniqueNames;
+%}
+
+%%
+piWRS(thisR,'render flag','hdr');
 
 %% Create a second instance if the yellow guy
 
-oNames = thisR.get('object names');
+% oNames = thisR.get('object names');
 
+% Maybe this should be thisR.get('asset',idx,'top branch')
 yellowID = piAssetSearch(thisR,'object name','figure_6m');
-yellowPos = thisR.get('asset',yellowID,'world position');
+p2Root = thisR.get('asset',yellowID,'pathtoroot');
+idx = p2Root(end);
 
-parentID = thisR.get('asset',yellowID,'parent');
+% This position is relative to the position of the original object
+for ii=1:3
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0 0.0]);
+    % thisR.assets = thisR.assets.uniqueNames;
+end
 
-thisR = piObjectInstanceCreate(thisR, parentID, 'position',yellowPos + [0.5 0.5 0.5]);
+%% Blue man copies
 
-thisR.show;
+blueID = piAssetSearch(thisR,'object name','figure_3m');
+p2Root = thisR.get('asset',blueID,'pathtoroot');
+idx = p2Root(end);
 
-s = piRender(thisR); sceneWindow(s);
+% This position is relative to the position of the original object
+steps = [-0.3 0.3];
+for ii=1:numel(steps)
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    % thisR.assets = thisR.assets.uniqueNames;
+end
 
-% [scene, result ] = piWRS(thisR);
+% thisR.show;
+%%
+piWRS(thisR,'render flag','hdr');
+

@@ -1,6 +1,15 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
+% Description
+%    This is a warning.  piLightGet is not the same as other typical
+%    set/get functions.  It does not return the parameters, as say
+%    thisR.get('light',idx,param) would.  Rather it takes in the light
+%    struct and returns text that can be printed into the PBRT rendering
+%    file.  We should talk over the name of this function and we should see
+%    if we can have both of these functions. Maybe this function should be
+%    piLightGetText() to distinguish it from a conventional get? (BW)
+%
 % Synopsis
 %    [val, txt] = piLightGet(lght, param, varargin)
 %

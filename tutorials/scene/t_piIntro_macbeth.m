@@ -69,3 +69,5 @@ thisR.set('filmresolution', [640, 360]*2);
 % t_piIntro_macbeth_zmap for how to compute a zmap.
 thisR.set('render type', {'radiance', 'depth'});
 scene = piWRS(thisR);
+
+%% END

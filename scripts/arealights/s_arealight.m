@@ -1,42 +1,93 @@
- %% Explore light creation with new area light parameters
+%% Explore light creation with new area light parameters
 %
-% The area lights were implemented by Zhenyi to help us accurately simulate
-% the headlights in night time driving scenes.
-%
-% The definitions of the shape of the area light are in the
-% arealight_geometry.pbrt file.  Looking at the text there should give
-% us some ideas about how to create more area lights with different
-% properties.
-%
-% This script should explore setting the SPD of the lights and perhaps
-% making different shapes and intensities.
 %
 % See also
-%   ISETAuto 
+%   t_arealight.m, t_piIntro_l
 
 %%
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% 
+%% Load the Macbeth scene. 
+thisR =  piRecipeDefault('scene name','MacBethChecker');
+
+% This scene has no lights.  We will add
+thisR.get('print lights');
+
+% piLightCreate('list available types')
+
+%% Add a spot light
+
+lightName = 'new_spot_light_L';
+newLight = piLightCreate(lightName,...
+                        'type','spot',...
+                        'spd','equalEnergy',...
+                        'specscale', 1, ...
+                        'coneangle', 15,...
+                        'conedeltaangle', 10, ...
+                        'cameracoordinate', true);
+thisR.set('light', newLight, 'add');
+[~,result] = piWRS(thisR);
+
+%% Add an area light
+thisR =  piRecipeDefault('scene name','MacBethChecker');
+lName = 'light1';
+aLight = piLightCreate(lName,'type','area');
+thisR.set('light',aLight,'add');
+piWrite(thisR);
+
+[~,result] = piWRS(thisR);
+
+%%
+% When we position a light, it is treated as an asset.
+thisR.set('asset',lName,'world position',[3.4544           0     0.15036]);
+piAssetGeometry(thisR);
+
+[~,result] = piWRS(thisR);
+
+%{
+%% Let's make a recipe with just an area light
+
+% We can load this area light and position it in the scene different
+% ways.
+
+% We start with this full recipe of area lights
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
-thisR.get('print lights')
+
+idx1 = piAssetSearch(thisR,'branch name','AreaLightRectangle.001');
+idx2 = piAssetSearch(thisR,'branch name','AreaLightRectangle.002');
+idx3 = piAssetSearch(thisR,'branch name','AreaLightRectangle.003');
+idx = cat(2,idx1,idx2,idx3);
+idx = sort(idx,'descend');
+for ii=1:numel(idx),thisR.set('asset',idx(ii),'delete'); end
+
+idx1 = piAssetSearch(thisR,'light name','AreaLightRectangle.001');
+idx2 = piAssetSearch(thisR,'light name','AreaLightRectangle.002');
+idx3 = piAssetSearch(thisR,'light name','AreaLightRectangle.003');
+idx = cat(2,idx1,idx2,idx3);
+idx = sort(idx,'descend');
+for ii=1:numel(idx),thisR.set('asset',idx(ii),'delete'); end
+
+idx = 12:-1:7;
+for ii=1:numel(idx),thisR.set('asset',idx(ii),'delete'); end
+
+piWRS(thisR);
+
+
+thisR.set('asset','Plane_m_B','delete');
+thisR.set('asset','Plane_B','delete');
+
+thisR.set('node','Camera_B','delete');
+thisR.set('node',3,'delete');
+thisR.set('node',2,'delete');
+thisR.show;
 
 % The no number is the blue one
 % The 002 light is the green one.
 % The 001 is the red one
 % the 003 must be the yellow one.
 
-%% This sets the name of the light asset.  
-%
-% The name must always have a _L if it is a light. There is also a
-% name in the 'lght{1}' slot. That should probably be set to align
-% with this name.
-thisR.set('asset','AreaLightRectangle_L','name','Area_Blue_L');
-thisR.set('asset','AreaLightRectangle.001_L','name','Area_Red_L');
-thisR.set('asset','AreaLightRectangle.002_L','name','Area_Green_L');
-thisR.set('asset','AreaLightRectangle.003_L','name','Area_Yellow_L');
 thisR.show('lights');
 
 scene = piWRS(thisR,'render flag','hdr');

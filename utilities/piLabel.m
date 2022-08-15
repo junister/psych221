@@ -77,17 +77,7 @@ for ii = 1:numel(objID)
     % The last index is the node just prior to root
     p2Root = thisR.get('asset',objID(ii),'pathtoroot');
     
-    %{
-    parentId = objID(ii);
-
-    while parentId ~=1
-        currentId = parentId;
-        parentId = thisR.assets.getparent(currentId);
-    end
-    %}
-
     thisNode = thisR.get('node',p2Root(end));
-    % thisNode = thisR.assets.Node{currentId}; % branch Id
     thisNode.isObjectInstance = 1;
 
     thisR.set('assets',p2Root(end), thisNode); 

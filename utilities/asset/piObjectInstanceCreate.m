@@ -178,6 +178,11 @@ try
 catch
     disp('ERROR');
 end
+
 instanceBranchName = OBJsubtree_branch.name;
+
+% BW Added.  Not sure if the right thing to do here (Aug 14).
+% Works OK on the Simple Scene.  I should test with the car scene.
+thisR.assets = thisR.assets.uniqueNames;
 
 end

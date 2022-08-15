@@ -75,13 +75,21 @@ p.parse(lightName, varargin{:});
 lght.type = p.Results.type;
 lght.name = p.Results.lightName;
 
-% PBRT allows wavelength by wavelength adjustment - would enable that
+% PBRT allows wavelength by wavelength adjustment - we will enable that
 % someday.
 lght.specscale.type = 'float';
 lght.specscale.value = 1;
 
 lght.spd.type = 'rgb';
 lght.spd.value = [1 1 1];
+
+% I think we always want the name to end with _L.  So if it does not, we
+% append it
+if ~isequal(lght.name((end-1):end),'_L')
+    % warning('Appending _L to light name')
+    lght.name = [lght.name,'_L'];
+end
+
 switch ieParamFormat(lght.type)
     case 'distant'
         lght.cameracoordinate = true;
@@ -207,6 +215,7 @@ switch ieParamFormat(lght.type)
 
         lght.spread.type = 'float';
         lght.spread.value = [];
+
         %{
         % Potentially has rotation, transformation or concatransformation
         lght.rotation.type = 'rotation';
