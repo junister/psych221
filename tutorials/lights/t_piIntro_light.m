@@ -1,8 +1,10 @@
-%% Illustrate how to control properties of scene lights
+%% Illustrate the control of certain scene lights
 %
-%  The light structure has a large number of parameters that control its
-%  properties.  We will be controlling the properties with commands of sthis
-%  type:
+%  There are several types of lights that can be placed in a scene.
+%
+%  Each of the different type of lights has a number of parameters that
+%  control its properties.  We control the parameters with the recipe set
+%  command, such as
 %
 %    thisR.set('light ' .....)
 % 
@@ -10,11 +12,15 @@
 %
 %     * Spot lights (cone angle, cone delta angle, position)
 %     * SPD: RGB and Spectrum
-%     * Environment lights
+%     * Environment lights (skymap)
+%
+% There is another tutorial specifically designed for area lights
+%
+% The PBRT book definitions for lights are:
+%      https://www.pbrt.org/fileformat-v3.html#lights
 %
 % See also
-%   The PBRT book definitions for lights are:
-%      https://www.pbrt.org/fileformat-v3.html#lights
+%   t_arealight, s_arealight
 
 %% Initialize ISET and Docker and read a file
 
@@ -60,21 +66,19 @@ piLightCreate('list available types')
 
 % NOTE: 
 % Unlike most of ISET3d, you do not have the freedom to put spaces into the
-% key/val parameters for this function.  Thus, coneangle cannot be 'cone
+% key/val parameters for piLightCreate.  Thus, coneangle cannot be 'cone
 % angle'.
 %
 % Until the v4 textbook is published, only informal sources are available
 % for light parameters.
 % 
 % Many are the same as v3, documented here
-% https://www.pbrt.org/fileformat-v3.html#lights
+%   https://www.pbrt.org/fileformat-v3.html#lights
 %
 % But there are a lot of changes for v4. Here is a web resource we use:
-% https://github.com/shadeops/pbrt_v3-to-v4_migration
+%   https://github.com/shadeops/pbrt_v3-to-v4_migration
 %
 % We are also starting to add v4 information to the iset3D wiki:
-% https://github.com/ISET/iset3d/wiki
-% That will eventually show up in a wiki for iset3d-v4
 %
 lightName = 'new_spot_light_L';
 newLight = piLightCreate(lightName,...
@@ -188,7 +192,7 @@ thisR.get('lights print');
 
 piWRS(thisR,'name','Blue (distant)');
 
-%% Add an environment light
+%% Add an environment (skymap) light
 
 thisR.set('light', 'all', 'delete');
 

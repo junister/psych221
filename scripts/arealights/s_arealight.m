@@ -2,13 +2,52 @@
 %
 %
 % See also
-%   t_arealight.m
+%   t_arealight.m, t_piIntro_l
 
 %%
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Load the Macbeth scene. 
+thisR =  piRecipeDefault('scene name','MacBethChecker');
+
+% This scene has no lights.  We will add
+thisR.get('print lights');
+
+% piLightCreate('list available types')
+
+%% Add a spot light
+
+lightName = 'new_spot_light_L';
+newLight = piLightCreate(lightName,...
+                        'type','spot',...
+                        'spd','equalEnergy',...
+                        'specscale', 1, ...
+                        'coneangle', 15,...
+                        'conedeltaangle', 10, ...
+                        'cameracoordinate', true);
+thisR.set('light', newLight, 'add');
+[~,result] = piWRS(thisR);
+
+%% Add an area light
+thisR =  piRecipeDefault('scene name','MacBethChecker');
+lName = 'light1';
+aLight = piLightCreate(lName,'type','area');
+thisR.set('light',aLight,'add');
+piWrite(thisR);
+
+[~,result] = piWRS(thisR);
+
+%%
+% When we position a light, it is treated as an asset.
+thisR.set('asset',lName,'world position',[3.4544           0     0.15036]);
+piAssetGeometry(thisR);
+
+[~,result] = piWRS(thisR);
+
+%{
 %% Let's make a recipe with just an area light
+
 % We can load this area light and position it in the scene different
 % ways.
 

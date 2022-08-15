@@ -1,11 +1,25 @@
 function nLights = piLightPrint(thisR)
-% Print list of lights in the recipe
+% Print a table of lights in the recipe
 %
 % Synopsis
 %   nLights = piLightPrint(thisR)
 %
+% To get information about light names or their IDs use
+%
+%   thisR.get('lights')
+%   thisR.get('lights','names')
+%   thisR.get('lights','names id')
+%   thisR.get('light simple names')
+%   val = thisR.get('light positions')
+%
+% For a single light, use
+%
+%   thisR.get('light',id,'name')
+%   thisR.get('light',id,'name simple')
+%   
+
 % See also
-%   piMaterialPrint
+%
 
 nLights = thisR.get('n lights');
 
@@ -39,7 +53,7 @@ for ii =1:numel(lightNames)
         position(ii,:) = Inf;
     else
         % point, spot and area have a position
-        position(ii,:) = thisR.get('light',ii,'world position');
+        position(ii,:) = thisR.get('light',thisLight.name,'world position');
     end
 
     % not sure we even have mapnames anymore, but in case...
@@ -54,7 +68,7 @@ end
 
 for ii=1:numel(names), positionT{ii} = num2str(position(ii,:)); end
 
-T = table(categorical(names), categorical(types),positionT,spdT,'VariableNames',{'name','type','position','spd'}, 'RowNames',rows);
+T = table(categorical(names), categorical(types),positionT,spdT,'VariableNames',{'name','type','position','spd/rgb'}, 'RowNames',rows);
 
 disp(T);
 fprintf('-------------------------------\n');
