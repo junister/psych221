@@ -208,7 +208,6 @@ switch ieParamFormat(lght.type)
         % based on the Blender export in arealight.pbrt.
 
         lght.type = 'area';
-        lght.name = 'default-area';
 
         lght.twosided.type = 'bool';
         lght.twosided.value = [];

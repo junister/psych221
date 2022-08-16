@@ -72,16 +72,29 @@ thisR.set('light',wLight.name,'world rotation',[0 -10 0]);
 
 thisR =  piRecipeDefault('scene name','ChessSet');
 
-wLight    = piLightCreate('white','type','area');
+thisR.set('lights','all','delete');
+
+wLight    = piLightCreate('light1','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
 thisR.set('light',wLight.name,'translate',[1 2 0]);
-thisR.set('light',wLight.name,'spd',[255 128 128]);
-thisR.get('light',wLight.name,'world position')
+thisR.set('light',wLight.name,'spread',30);
+thisR.set('light',wLight.name,'spd',[32 32 255]);
+% thisR.get('light',wLight.name,'world position')
 
-thisR.show('lights');
+wLight    = piLightCreate('light2','type','area');
+lName = wLight.name;
+thisR.set('light',wLight,'add');
+thisR.set('light',lName,'world rotation',[-90 0 0]);
+thisR.set('light',lName,'translate',[-1 2 0]);
+thisR.set('light',lName,'spread',10);
+thisR.set('light',lName,'spd',[255 255 0]);
 
-[~,result] = piWRS(thisR,'render flag','rgb');
+% thisR.show('lights');
+
+[scene,result] = piWRS(thisR,'render flag','rgb');
+ieReplaceObject(piAIdenoise(scene));
+sceneWindow;
 
 %% Add a spot light
 thisR =  piRecipeDefault('scene name','ChessSet');
