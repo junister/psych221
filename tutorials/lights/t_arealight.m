@@ -33,10 +33,10 @@ thisR.get('print lights')
 % The name must always have a _L if it is a light. There is also a
 % name in the 'lght{1}' slot. That should probably be set to align
 % with this name.
-thisR.set('asset','AreaLightRectangle_L','name','Area_Blue_L');
-thisR.set('asset','AreaLightRectangle.001_L','name','Area_Red_L');
-thisR.set('asset','AreaLightRectangle.002_L','name','Area_Green_L');
-thisR.set('asset','AreaLightRectangle.003_L','name','Area_Yellow_L');
+thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
+thisR.set('light','AreaLightRectangle.001_L','name','Area_Red_L');
+thisR.set('light','AreaLightRectangle.002_L','name','Area_Green_L');
+thisR.set('light','AreaLightRectangle.003_L','name','Area_Yellow_L');
 thisR.show('lights');
 
 scene = piWRS(thisR,'render flag','hdr');
