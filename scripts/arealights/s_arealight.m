@@ -12,28 +12,21 @@ if ~piDockerExists, piDockerConfig; end
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
 
-thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
+% thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
+thisR.set('light','AreaLightRectangle_L','delete');
 thisR.set('asset','AreaLightRectangle.001_L','delete');
 thisR.set('asset','AreaLightRectangle.002_L','delete');
 thisR.set('asset','AreaLightRectangle.003_L','delete');
 
-thisR.show('objects');
-thisR.show('lights');
-piAssetGeometry(thisR);
-
-%%
-
-% [1m[31mError[0m: arealight_geometry.pbrt:73:8: Vertex indices "indices" must be provided with triangle mesh.
+%%  Put in a white light of our own.
 
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+
 thisR.show('lights');
 
-%%
-[~,result] = piWRS(thisR,'render flag','hdr');
-
-%% The 
+%% Simplify
 lNames = thisR.get('light', 'names no id');
 
 % Merge all the nodes.  The light is, for the moment, just below
@@ -55,8 +48,18 @@ thisR.show;
 %% Load the Macbeth scene. 
 thisR =  piRecipeDefault('scene name','MacBethChecker');
 
-% This scene has no lights.  We will add
-thisR.get('print lights');
+wLight    = piLightCreate('white','type','area');
+thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+thisR.set('light',wLight.name,'translate',[0 2 0]);
+
+thisR.show('lights');
+
+[~,result] = piWRS(thisR,'render flag','rgb');
+
+%%
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+[~,result] = piWRS(thisR,'render flag','rgb');
 
 % piLightCreate('list available types')
 
