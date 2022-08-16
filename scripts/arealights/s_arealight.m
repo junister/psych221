@@ -12,58 +12,40 @@ if ~piDockerExists, piDockerConfig; end
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
 
-% thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
 thisR.set('light','AreaLightRectangle_L','delete');
-thisR.set('asset','AreaLightRectangle.001_L','delete');
-thisR.set('asset','AreaLightRectangle.002_L','delete');
-thisR.set('asset','AreaLightRectangle.003_L','delete');
+thisR.set('light','AreaLightRectangle.001_L','delete');
+thisR.set('light','AreaLightRectangle.002_L','delete');
+thisR.set('light','AreaLightRectangle.003_L','delete');
+
+thisR.set('lights','all','delete');
 
 %%  Put in a white light of our own.
 
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
-thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
-
-thisR.show('lights');
-
-%% Simplify
-lNames = thisR.get('light', 'names no id');
-
-% Merge all the nodes.  The light is, for the moment, just below
-% root
-thisR.set('asset',lNames{1},'merge branches');
-
-% The positions should be unchanged.
-thisR.show('objects');
-thisR.show('lights');
-piAssetGeometry(thisR);
-
-%%
+thisR.set('asset',wLight.name,'world rotation',[-90 0 0]);
 [~,result] = piWRS(thisR,'render flag','hdr');
 
 %%
-thisR.show('lights');
-thisR.show;
+%{
+ thisR.show('lights');
+ thisR.show;
+ [c,b] = piAssetGeometry(thisR);
+%}
 
-%% Load the Macbeth scene. 
+%% Load the Macbeth scene. It has no default light.
+
 thisR =  piRecipeDefault('scene name','MacBethChecker');
 
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
-thisR.set('light',wLight.name,'translate',[1 2 0]);
-
-thisR.get('light',wLight.name,'world position')
-
-thisR.show('lights');
+thisR.set('light',wLight.name,'translate',[0 4 0]);
 
 [~,result] = piWRS(thisR,'render flag','rgb');
 
 %%
 thisR.set('light',wLight.name,'spread',15);
-
-thisR.get('light',wLight.name,'world rotation')
-thisR.set('light',wLight.name,'world rotation',[0 -10 0]);
 [~,result] = piWRS(thisR,'render flag','rgb');
 
 % piLightCreate('list available types')

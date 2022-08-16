@@ -1398,6 +1398,14 @@ switch ieParamFormat(param)  % lower case, no spaces
                             val = thisLight.name;
                             tmp = strsplit(val,'_');
                             val = join(tmp(2:(end-1)),'-');
+                        case {'pathtoroot'}
+                            % thisR.get('light',lightName,'path to root');
+                            %
+                            % Returns the sequence of ids from this
+                            % light node id to just below the root of
+                            % the tree. 
+                            id = piAssetSearch(thisR,'light name',thisLight.name);
+                            val = thisR.assets.nodetoroot(id);
                         case 'worldposition'
                             % thisR.get('light',idx,'world position')
                             if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate

@@ -1,5 +1,5 @@
 function thisR = piAssetDelete(thisR, assetInfo, varargin)
-% Delete a node of the asset tree
+% Delete a single node of the asset tree
 %
 % Synopsis:
 %   thisR = piAssetDelete(thisR, assetInfo)
@@ -10,6 +10,9 @@ function thisR = piAssetDelete(thisR, assetInfo, varargin)
 % Inputs:
 %   thisR     - recipe.
 %   assetInfo - asset node name or id.
+%
+% Optional key/val
+%   TODO:  Remove all the nodes in the tree below this node.
 %
 % Returns:
 %   thisR     - modified recipe.
@@ -47,8 +50,7 @@ if ~isempty(thisR.assets.get(assetInfo))
         parentID = thisR.assets.Parent(assetInfo);
         
         thisR.assets = thisR.assets.removenode(assetInfo);
-        % warning('Removing node might change remaining node ids.')
-        % [thisR.assets, ~] = thisR.assets.uniqueNames;
+        
         if isempty(thisR.assets.getchildren(parentID))
             assetInfo = parentID;
         else
