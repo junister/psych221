@@ -8,15 +8,96 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Create a proper default for piLightCreate
+fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
+thisR    = piRead(fileName);
+
+% thisR.set('light','AreaLightRectangle_L','name','Area_Blue_L');
+thisR.set('light','AreaLightRectangle_L','delete');
+thisR.set('asset','AreaLightRectangle.001_L','delete');
+thisR.set('asset','AreaLightRectangle.002_L','delete');
+thisR.set('asset','AreaLightRectangle.003_L','delete');
+
+%%  Put in a white light of our own.
+
+wLight    = piLightCreate('white','type','area');
+thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+
+thisR.show('lights');
+
+%% Simplify
+lNames = thisR.get('light', 'names no id');
+
+% Merge all the nodes.  The light is, for the moment, just below
+% root
+thisR.set('asset',lNames{1},'merge branches');
+
+% The positions should be unchanged.
+thisR.show('objects');
+thisR.show('lights');
+piAssetGeometry(thisR);
+
+%%
+[~,result] = piWRS(thisR,'render flag','hdr');
+
+%%
+thisR.show('lights');
+thisR.show;
+
 %% Load the Macbeth scene. 
 thisR =  piRecipeDefault('scene name','MacBethChecker');
 
-% This scene has no lights.  We will add
-thisR.get('print lights');
+wLight    = piLightCreate('white','type','area');
+thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+thisR.set('light',wLight.name,'translate',[1 2 0]);
+
+thisR.get('light',wLight.name,'world position')
+
+thisR.show('lights');
+
+[~,result] = piWRS(thisR,'render flag','rgb');
+
+%%
+thisR.set('light',wLight.name,'spread',15);
+
+thisR.get('light',wLight.name,'world rotation')
+thisR.set('light',wLight.name,'world rotation',[0 -10 0]);
+[~,result] = piWRS(thisR,'render flag','rgb');
 
 % piLightCreate('list available types')
 
+%% Add a top down area light
+
+thisR =  piRecipeDefault('scene name','ChessSet');
+
+thisR.set('lights','all','delete');
+
+wLight    = piLightCreate('light1','type','area');
+thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+thisR.set('light',wLight.name,'translate',[1 2 0]);
+thisR.set('light',wLight.name,'spread',30);
+thisR.set('light',wLight.name,'spd',[32 32 255]);
+% thisR.get('light',wLight.name,'world position')
+
+wLight    = piLightCreate('light2','type','area');
+lName = wLight.name;
+thisR.set('light',wLight,'add');
+thisR.set('light',lName,'world rotation',[-90 0 0]);
+thisR.set('light',lName,'translate',[-1 2 0]);
+thisR.set('light',lName,'spread',10);
+thisR.set('light',lName,'spd',[255 255 0]);
+
+% thisR.show('lights');
+
+[scene,result] = piWRS(thisR,'render flag','rgb');
+ieReplaceObject(piAIdenoise(scene));
+sceneWindow;
+
 %% Add a spot light
+thisR =  piRecipeDefault('scene name','ChessSet');
 
 lightName = 'new_spot_light_L';
 newLight = piLightCreate(lightName,...
@@ -174,6 +255,7 @@ for ii=1:numel(lList)
     else, hold on; plot(xy(1),xy(2),'o');
     end
 end
+%}
 
 %% END
 

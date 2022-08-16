@@ -110,7 +110,7 @@ if isfield(lght, pName)
     % Set the whole struct
     if isempty(pTypeVal)
         lght.(pName) = val;
-        return
+        return;
     end
 
     % Set parameter type

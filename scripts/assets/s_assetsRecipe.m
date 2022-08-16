@@ -60,10 +60,13 @@ geometryNode = piAssetCreate('type','branch');
 geometryNode.name = 'mergeNode_B';
 thisR.set('asset','root_B','add',geometryNode);
 
-% Merge the multiple branches above each object
-% Then attach each object to the merge node.
+% Merge the branches above the object. Then attach each object to the
+% merge node.
 for oo=1:numel(oNames)
     thisR.set('asset',oNames{oo},'merge branches');
+    % I do not think this line should be here.  This is managed inside
+    % of the merge branches set, above. (BW).  Even so, I left it for
+    % now.
     thisR.set('asset',strrep(oNames{oo},'_O','_B'),'parent',geometryNode.name);
 end
 
