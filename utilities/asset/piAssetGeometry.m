@@ -1,21 +1,23 @@
-function [coords,lookat,hdl] = piAssetGeometry(thisR,varargin)
+function [coords,boxRange,hdl] = piAssetGeometry(thisR,varargin)
 % Find and plot the object coords in the world
 %
 % Synopsis
-%  [coords,lookat,hdl] = piAssetGeometry(thisR,vararign)
+%  [coords,boxRange,hdl] = piAssetGeometry(thisR,vararign)
 %
 % Input
+%   thisR - Recipe
 %
 % Optional key/val
 %   size - Logical, add size to graph (default false)
 %   name - Logical, add name to graph (default true)
 %   position - World coordinates (default false)
 %   inplane  - Default view, either 'xz' or 'xy' plane
+%   show     - Show (or not) the image; used to just return coords and boxRange
 %
 % Outputs
 %    coords
-%    lookat
-%    hdl
+%    boxRange dim 1 min max; dim 2 min max; dim 3 min max;
+%    hdl - Figure handle
 %
 % To set the xz plane or xy plane views use
 %   xz plane view(0,0)
@@ -59,8 +61,11 @@ p.addParameter('size',false,@islogical);
 p.addParameter('name',true,@islogical);
 p.addParameter('position',false,@islogical);
 p.addParameter('inplane','xz',@ischar);
+p.addParameter('show',true,@islogical);
 
 p.parse(thisR,varargin{:});
+
+show = p.Results.show;
 
 %% Find names and positions of objects and lights
 
@@ -120,6 +125,11 @@ delta(delta==0) = 0.1;
 boxMax = boxMax + delta;
 boxMin = boxMin - delta;
 
+boxRange = [boxMin(1) boxMax(1); boxMin(2) boxMax(2); boxMin(3) boxMax(3)];
+
+% If we are not making the figure, we are done here.
+if ~show, return; end
+
 %% Include names
 if p.Results.name
     for ii=1:numel(names)
@@ -149,23 +159,25 @@ legendtext = cell(numel(objectnames,1));
 % We should have no plot switch
 hdl = ieNewGraphWin;
 
+
 % Shift is a few percent of the range.  This should become a parameter
 sx = (max(coords(:,1)) - min(coords(:,1)))*0.04;
 sy = (max(coords(:,2)) - min(coords(:,2)))*0.04;
 sz = (max(coords(:,3)) - min(coords(:,3)))*0.04;
 
-% Plot the object and light coords
-for ii=1:numel(names)
-    if ii <= nObjects
-        hold on;
-        plot3(coords(ii,1),coords(ii,2),coords(ii,3),'ko','MarkerSize',10,'MarkerFaceColor','k');
-    else
-        hold on;
-        plot3(coords(ii,1),coords(ii,2),coords(ii,3),'k*','MarkerSize',10,'MarkerFaceColor',[0.3 0.3 0.3]);
+if show
+    % Plot the object and light coords
+    for ii=1:numel(names)
+        if ii <= nObjects
+            hold on;
+            plot3(coords(ii,1),coords(ii,2),coords(ii,3),'ko','MarkerSize',10,'MarkerFaceColor','k');
+        else
+            hold on;
+            plot3(coords(ii,1),coords(ii,2),coords(ii,3),'k*','MarkerSize',10,'MarkerFaceColor',[0.3 0.3 0.3]);
+        end
+        text(coords(ii,1)+sx,coords(ii,2)+sy,coords(ii,3)+sz,notes{ii},'FontSize',14);
+        legendtext{ii} = names{ii};
     end
-    text(coords(ii,1)+sx,coords(ii,2)+sy,coords(ii,3)+sz,notes{ii},'FontSize',14);
-    legendtext{ii} = names{ii};
-end
 
 %% The camera position (red) and where it is looking (green)
 hold on;
@@ -232,7 +244,7 @@ switch lower(p.Results.inplane)
 end
 
 % Set the axis dimensions of the view box
-set(gca,'xlim',[boxMin(1) boxMax(1)], 'ylim',[boxMin(2) boxMax(2)], 'zlim',[boxMin(3) boxMax(3)]);
+set(gca,'xlim',boxRange(1,:), 'ylim',boxRange(2,:), 'zlim',boxRange(3,:));
 
 % Add the legend
 legend(legendtext);
