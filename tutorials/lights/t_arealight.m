@@ -12,7 +12,7 @@
 % making different shapes and intensities.
 %
 % See also
-%   ISETAuto 
+%   s_arealight
 
 %%
 ieInit;
