@@ -75,12 +75,14 @@ if ~obj.localRender
     % use -c for checksum if clocks & file times won't match
     % using -z for compression, but doesn't seem to make a difference?
     putData = tic;
+    speedup = ' --protocol=29  -e "ssh -x -T -o Compression=no"';
+    % -c arcfour might help if we have it on both sides
     if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation
         % (DJC)
-        putCommand = sprintf('%s -r -t %s %s',rSync, [nativeFolder,'/'], remoteScene);
+        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, [nativeFolder,'/'], remoteScene);
     else
-        putCommand = sprintf('%s -r -t %s %s',rSync, nativeFolder, remoteScene);
+        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, nativeFolder, remoteScene);
     end
 
     if verbose > 0
