@@ -51,14 +51,19 @@ thisR =  piRecipeDefault('scene name','MacBethChecker');
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
-thisR.set('light',wLight.name,'translate',[0 2 0]);
+thisR.set('light',wLight.name,'translate',[1 2 0]);
+
+thisR.get('light',wLight.name,'world position')
 
 thisR.show('lights');
 
 [~,result] = piWRS(thisR,'render flag','rgb');
 
 %%
-thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+thisR.set('light',wLight.name,'spread',15);
+
+thisR.get('light',wLight.name,'world rotation')
+thisR.set('light',wLight.name,'world rotation',[0 -10 0]);
 [~,result] = piWRS(thisR,'render flag','rgb');
 
 % piLightCreate('list available types')
