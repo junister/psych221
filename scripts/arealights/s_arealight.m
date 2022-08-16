@@ -68,7 +68,23 @@ thisR.set('light',wLight.name,'world rotation',[0 -10 0]);
 
 % piLightCreate('list available types')
 
+%% Add a top down area light
+
+thisR =  piRecipeDefault('scene name','ChessSet');
+
+wLight    = piLightCreate('white','type','area');
+thisR.set('light',wLight,'add');
+thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
+thisR.set('light',wLight.name,'translate',[1 2 0]);
+thisR.set('light',wLight.name,'spd',[255 128 128]);
+thisR.get('light',wLight.name,'world position')
+
+thisR.show('lights');
+
+[~,result] = piWRS(thisR,'render flag','rgb');
+
 %% Add a spot light
+thisR =  piRecipeDefault('scene name','ChessSet');
 
 lightName = 'new_spot_light_L';
 newLight = piLightCreate(lightName,...
