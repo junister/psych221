@@ -2,7 +2,7 @@ function [idmap,objectlist,result] = piLabel(thisRIn)
 % Generate a map that labels (pixel-wise) the scene objects
 %
 % Synopsis
-%    [objectslist,instanceIdMap,result] = roadgen.label;
+%    [instanceIdMap,objectList,result] = piLabel(thisR);
 %
 % Brief
 %   Render an image showing which object at each pixel (instanceId map).

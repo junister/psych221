@@ -13,10 +13,18 @@ function thisR = piRecipeDefault(varargin)
 %   N/A  - Default returns the MCC scene
 %
 % Optional key/val pairs
-%   scene name - Specify a PBRT scene name from the data/V4 directory.
-%      Examples: MacBethChecker (default), SimpleScene, slantedBar,
+%   scene name - Specify a PBRT scene name based on the directory.
+%      (e.g., MacBethChecker (default), SimpleScene, slantedBar,
 %          chessSet, teapot, numbers at depth. materialball,
-%          materialball_cloth 
+%          materialball_cloth)
+%   file  - The name of a file in the scene directory.  This is used
+%   because some PBRT have multiple files from different points of
+%   view.  We always have a default, but if you want one of the other
+%   ones, set this parameter
+%
+%     piRecipeDefault('scene name','landscape','file','view-1.pbrt')
+%     piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt')
+%
 % Outputs
 %   thisR - the ISET3d recipe with information from the PBRT scene file.
 %
@@ -76,10 +84,13 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addParameter('scenename','MacBethChecker',@ischar);
+p.addParameter('file','',@ischar);   
 p.addParameter('loadrecipe',true,@islogical);  % Load recipe if it exists
+
 p.parse(varargin{:});
 
 sceneDir   = p.Results.scenename;
+sceneFile  = p.Results.file;  % Should include the pbrt extension.
 loadrecipe = p.Results.loadrecipe;
 
 %%  To read the file,the upper/lower case must be right
@@ -116,7 +127,7 @@ switch ieParamFormat(sceneDir)
     case 'bmw-m6'
         sceneDir = 'bmw-m6';
         sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'Copy';
+        exporter = 'PARSE';
     case 'car'
         sceneDir = 'car';
         sceneFile = [sceneDir,'.pbrt'];
@@ -268,25 +279,20 @@ switch ieParamFormat(sceneDir)
         exporter = 'PARSE';
     case {'landscape'}
         sceneDir = 'landscape';
-        sceneFile = 'view-0.pbrt';
+        if isempty(sceneFile)
+            sceneFile = 'view-0.pbrt';
+        end
         exporter = 'Copy';
-    case {'bistro_vespa'}
+    case {'bistro'}
         % Just downloaded from cardinal
+        % Other options are
+        % bistro_boulangerie.pbrt and 'bistro_cafe.pbrt'
         sceneDir = 'bistro';
-        sceneFile = 'bistro_vespa.pbrt';
-        exporter = 'Copy';
-    case {'bistro_boulangerie'}
-        % Just downloaded from cardinal
-        sceneDir = 'bistro';
-        sceneFile = 'bistro_boulangerie.pbrt';
-        exporter = 'Copy';
-    case {'bistro','bistro_cafe'}
-        % Was sitting on my computer.
-        sceneDir = 'bistro';
-        sceneFile = 'bistro_cafe.pbrt';
-        % exporter = 'Copy'; 
-         exporter = 'PARSE'; 
-    case {'head'}
+        if isempty(sceneFile)
+            sceneFile = 'bistro_vespa.pbrt';
+        end
+        exporter = 'PARSE';
+   case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
         exporter = 'PARSE';   % Was Copy.  We updated head.pbrt for PARSE.
