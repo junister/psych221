@@ -1,5 +1,7 @@
 %% Render a the yeahright scene for calibration purposes
 %
+% DEPRECATED.  Not implemented for V4
+%
 %  Uses the integrator subtype 'path' with 3 bounces
 %  Generates a reflection scene
 %

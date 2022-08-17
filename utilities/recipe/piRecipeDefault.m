@@ -324,9 +324,10 @@ switch ieParamFormat(sceneDir)
         sceneFile = 'scene.pbrt';
         exporter = 'Copy';
     case 'sanmiguel'
-        warning('sanmiguel:  Not rendering correctly yet.')
         sceneDir = 'sanmiguel';
-        sceneFile = 'scene.pbrt';
+        if isempty(sceneFile)
+            sceneFile = 'scene.pbrt';
+        end
         exporter = 'Copy';
     case 'teapotfull'
         sceneDir = 'teapot-full';
