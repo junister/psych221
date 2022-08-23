@@ -78,8 +78,7 @@ scene = piWRS(thisR,'render flag','rgb');
 %}
 %% Samples the scene from a few new directions around the current from
 
-% thisR.set('fromto distance',mean(dRange));
-
+from = thisR.get('from'); to = thisR.get('to');
 direction = thisR.get('fromto');
 direction = direction/norm(direction);
 nsamples = 5;
@@ -108,7 +107,7 @@ thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 thisR.set('film diagonal',5);  %% 33 mm is small
 thisR.set('object distance',2);  % Move closer. The distance scaling is weird.
-[oi,results] = piWRS(thisR,'name','DG');
+[~,results] = piWRS(thisR,'name','DG');
 
 %% Fisheye
 
@@ -118,5 +117,5 @@ oi = piWRS(thisR,'name','fisheye');
 oi = piAIdenoise(oi);
 oiWindow(oi);
 
-%%
+%% END
 
