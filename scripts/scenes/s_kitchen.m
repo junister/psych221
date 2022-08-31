@@ -23,59 +23,6 @@ thisR.set('render type',{'radiance','depth'});
 scene = piWRS(thisR);
 dRange = sceneGet(scene,'depth range');
 
-%{
-piMaterialsInsert(thisR,'name','marble-beige');
-idx = piAssetSearch(thisR,'material name','Worktops');
-for ii=1:numel(idx)
- thisR.set('asset',idx(ii),'material name','marble-beige');
-end
-scene = piWRS(thisR);
-
-%}
-
-%{
-
-% Swapping out ALL the materials.  
-% Next, we should find the objects with just some
-% material.
-oNames = thisR.get('object names');
-
-%%
-piMaterialsInsert(thisR,'name','diffuse-white');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','diffuse-white');
-end
-scene = piWRS(thisR);
-
-%%
-piMaterialsInsert(thisR,'name','wood-light-large-grain');
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','wood-light-large-grain');
-end
-scene = piWRS(thisR);
-
-%%
-piMaterialsInsert(thisR,'name','glass-bk7');
-thisR.set('n bounces',10);
-
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','glass-bk7');
-end
-scene = piWRS(thisR,'render flag','rgb');
-
-%%
-piMaterialsInsert(thisR,'name','metal-ag');
-thisR.set('n bounces',5);
-
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','metal-ag');
-end
-scene = piWRS(thisR,'render flag','rgb');
-
-%}
 %% Samples the scene from a few new directions around the current from
 
 from = thisR.get('from'); to = thisR.get('to');
