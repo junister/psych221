@@ -1,8 +1,8 @@
-%% Explore light creation with new area light parameters
+%% Explore light creation with the area light parameters
 %
 %
 % See also
-%   t_arealight.m, t_piIntro_l
+%   t_arealight.m, t_piIntro_light
 
 %%
 ieInit;
@@ -25,13 +25,6 @@ wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('asset',wLight.name,'world rotation',[-90 0 0]);
 piWRS(thisR,'render flag','hdr');
-
-%%
-%{
- thisR.show('lights');
- thisR.show;
- [c,b] = piAssetGeometry(thisR);
-%}
 
 %% Load the Macbeth scene. It has no default light.
 
@@ -95,18 +88,15 @@ newLight = piLightCreate(lightName,...
                         'conedeltaangle', 10, ...
                         'cameracoordinate', true);
 thisR.set('light', newLight, 'add');
-piWRS(thisR);
-
-%% Additional Notes
 
 % When we position a light, it is treated as an asset.
 % Perhaps we should duplicate the world position and other sets in the
 % 'light' subcategory.  Or at least catch it in the 'light' case and
 % send it to the 'asset' case.  Something more thoughtful.
-thisR.set('asset',lName,'world position',[3.4544           0     0.15036]);
+thisR.set('asset',lightName,'world position',[3.4544  0  0.15036]);
 piAssetGeometry(thisR);
 
-[~,result] = piWRS(thisR);
+piWRS(thisR,'gamma',0.7);
 
 %% END
 
