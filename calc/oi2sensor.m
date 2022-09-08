@@ -10,6 +10,8 @@ function [outputFile] = oi2sensor(oiFiles, sensorFile)
 % test for oiFiles as some type of array here
 
 % These aren't actually optional yet:)
+ieInit;
+
 if isempty(oiFiles)
     oiFiles = 'sampleoi.mat';
 end
@@ -17,7 +19,7 @@ if isempty(sensorFile)
     sensorFile = 'ar0132atSensorRGB.mat';
 end
 
-load(oiFiles);
+load(oiFiles, 'oi');
 sensor = sensorFromFile(sensorFile);
 
 sensorImage = sensorCompute(sensor, oi);
