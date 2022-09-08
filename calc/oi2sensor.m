@@ -1,0 +1,20 @@
+function [outputFile] = oi2sensor(oiFiles, sensorFile)
+%OI2SENSOR Accept an OI and sensor and output the sensor image
+% D. Cardinal, B. Wandell, Zhenyi Liu, Stanford University, 2022
+
+%
+% oiFiles is (for now) the data file(s) for an Optical Image
+% sensorFile is (for now) the data file for the desired sensor
+%
+
+% test for oiFiles as some type of array here
+
+oi = oiFromFile(oiFiles,'RGB');
+sensor = sensorFromFile(sensorFile);
+
+sensorImage = sensorCompute(sensor, oi);
+
+sensorSaveImage(sensorImage,"sensorRGB",'rgb');
+
+end
+
