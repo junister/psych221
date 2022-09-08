@@ -111,7 +111,7 @@ if isfield(material,pName)
             elseif isequal(e, '.bsdf') % not sure whether other type of files are supported
                 material.(pName).type = 'string';
             elseif isequal(e, '.png')
-                if piContains(param,'reflectance')
+                if ~contains(param,'normalmap')
                     material.(pName).type = 'texture';
                 else
                     material.(pName).type = 'string';
