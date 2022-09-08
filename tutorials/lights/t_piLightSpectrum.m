@@ -70,7 +70,7 @@ spotLgt2 = piLightCreate('spot2_L',...
                         'cameracoordinate', true);
 thisR.set('lights',spotLgt2, 'add');
 
-position = thisR.get('lights','spot1_L','position');
+position = thisR.get('lights','spot1_L','world position');
 thisR.set('lights','spot1_L','from',position + [3 0 0]);
 thisR.set('lights','spot2_L','from',position - [3 0 0]);
 
@@ -82,8 +82,6 @@ piWRS(thisR,'name','Mixture (spot)');
 
 %% Adjust spread of the spots
 
-% Annoyingly, we can't use 'cone angle'
-% ZLY: I think it works now?
 thisR.set('lights','spot1','coneangle',5);
 thisR.set('lights','spot2','coneangle',5);
 piWRS(thisR,'name','Mixture narrow (spot)');

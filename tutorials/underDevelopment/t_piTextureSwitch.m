@@ -1,9 +1,6 @@
 % t_piTextureSwitch
 %
-% Should this be t_piTextureSwitch
-%
 % Change an object texture and render
-%
 %
 % See also
 %  
@@ -16,6 +13,7 @@ if ~piDockerExists, piDockerConfig; end
 thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
 
 thisR.get('texture print');
+
 %% Check and remove all lights
 thisR.set('light', 'delete', 'all');
 thisR.get('light')

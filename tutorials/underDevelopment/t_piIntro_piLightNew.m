@@ -1,5 +1,7 @@
 % t_piIntro_piLightNew
 %
+% ******* To Deprecate ********
+%
 % A demo to test the new way to manage lights in the scene.
 % The basic idea is we don't put any information in to recipe.world.
 % We manage the lights in recipe.lights. When writing the recipe using

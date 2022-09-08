@@ -2,7 +2,8 @@
 %
 % Brief description:
 %  This script renders the chess set scene to illustrate the lighting.  It
-%  does so by changing the materials of the chess set to white, diffuse.
+%  does so by changing the materials of the chess set to
+%  diffuse-white.
 % 
 %    * Initializes the recipe
 %    * Sets the film (sensor) resolution parameters
@@ -20,11 +21,10 @@
 
 %% Initialize ISET and Docker
 
-% Start up ISET and check that docker is configured 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Read the recipe
+%% Read the chess set recipe
 
 thisR = piRecipeDefault('scene name','chessset');
 
@@ -38,27 +38,34 @@ thisR.set('rays per pixel',256);
 thisR.set('n bounces',4); % Number of bounces traced for each ray
 
 thisR.set('render type',{'radiance','depth'});
+
 scene = piWRS(thisR,'render flag','hdr');
 
 %%  Edit the material list, adding White.
-oNames = thisR.get('object names');
+
 
 thisR.show('materials');
-nMaterials = thisR.get('n materials');
-matNames = thisR.get('material','names');
-thisR = piMaterialsInsert(thisR,'mtype','diffuse');
+thisR = piMaterialsInsert(thisR,'names','diffuse-white');
 
-%%
-% tmp = thisR.show('materials')
+%{
+% Useful.
+nMaterials = thisR.get('n materials');
+matNames   = thisR.get('material','names');
+%}
+
+%%  Replace the materials
+
+oNames = thisR.get('object names');
 for ii=1:numel(oNames)
     % The replace and other material commands need to be changed to match
     % the ordering in more modern methods
-    thisR.set('asset',oNames{ii},'material name','White');
+    thisR.set('asset',oNames{ii},'material name','diffuse-white');
 end
 
+% Confirm they materials have all been changed.
 thisR.show('objects');
-%%
 
+%% Render
 sceneW = piWRS(thisR,'render flag','hdr','name','reflectance');
 
 %% Divide the original photons by the diffuse white photons
@@ -68,11 +75,15 @@ photonsW = sceneGet(sceneW,'photons');   % White surfaces
 
 ref = photons ./ photonsW;               % Reflectance of original
 
-% Create the reflectance scene
+% Create the reflectance scene.
+% The specular component is not eliminated.
 sceneR = sceneSet(scene,'photons',ref);
 nWave  = sceneGet(sceneR,'n wave');
 sceneR = sceneSet(sceneR,'illuminant photons',ones(nWave,1));
+sceneR = sceneSet(sceneR,'name','Reflectance');
 sceneWindow(sceneR);
+
+%% END
 
 % We could try this with a point light next.
 %{

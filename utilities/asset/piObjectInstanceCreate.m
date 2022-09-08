@@ -57,6 +57,9 @@ motion   = p.Results.motion;
 %% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
 
+if isempty(asset)
+    warning('%s not found, failed to creat object instance for this asset.', assetname);
+end
 % ZL only addressed the first entry of the cell.  So, this seems OK.
 if iscell(asset)
     if numel(asset) > 1

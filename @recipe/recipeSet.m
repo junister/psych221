@@ -893,6 +893,11 @@ switch param
                         fprintf('Using skymap:  %s\n',[filename,ext]);
                         copyfile(skymapFileName,thisR.get('output dir'));
                         skymapFileName = [filename,ext];
+                    elseif exist(val, "file")
+                        [~, filename, ext] = fileparts(skymapFileName);
+                        fprintf('Using skymap:  %s\n',[filename,ext]);
+                        copyfile(val, thisR.get('output dir'));
+                        skymapFileName = [filename, ext];
                     else
                         warning("Unable to find skymap: %s\n", skymapFileName);
                         return % can't create the light

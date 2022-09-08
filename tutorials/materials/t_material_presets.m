@@ -1,10 +1,11 @@
 %% Illustrate use of material presents
 %
-% We have some materials with easy to understand names that we can use
-% to install in a scene.  This script illustrates how to find one of
-% them and insert it into a recipe.
+% We have some materials with easy to understand names that we can
+% insert in a scene.  This script illustrates how to find one of them,
+% insert it into a recipe, and assign it to an asset.
 %
-%
+%  See also
+%  t_material, t_piIntro_material
 
 %% 
 ieInit;

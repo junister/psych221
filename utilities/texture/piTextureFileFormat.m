@@ -71,14 +71,26 @@ for ii = 1:numel(textureList)
     end
     
     % convert RGB to alpha map
-    if contains(textureList{ii}.name,{'tex_','.alphamap.'}) && ...
-            exist(fullfile(inputDir, texSlotName),'file')
+    if contains(textureList{ii}.name,{'tex_'}) && ...
+            exist(fullfile(inputDir, texSlotName),'file') && ...
+            contains(textureList{ii}.name,{'.alphamap.'})
         
         outputPath = fullfile(inputDir, path, [name,'_alphamap.png']);
-        thisImg = imread(thisImgPath);
-        thisImg = thisImg(:,:,1);
-        thisImg(thisImg~=0)=255;
-        imwrite(thisImg,outputPath);
+        [img, ~, alphaImage] = imread(thisImgPath);
+
+        if size(img,3)~=1 && isempty(alphaImage) && ~isempty(find(img(:,:,1) ~= img(:,:,2), 1))
+            disp('No alpha texture map is available.');
+            return; 
+        end
+
+        % It's an alpha map, do nothing.
+        if size(img,3) ==1, continue;end
+
+        if ~isempty(alphaImage)
+            imwrite(alphaImage,outputPath);
+        else
+            imwrite(img(:,:,1),outputPath);
+        end
         if ispc
             textureList{ii}.filename.value = dockerWrapper.pathToLinux(fullfile(path, [name,'_alphamap.png']));
         else

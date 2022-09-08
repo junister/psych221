@@ -234,8 +234,7 @@ switch ieParamFormat(keyword)
             'type', 'conductor','eta','metal-TiO2-eta','k','metal-TiO2-k');
     case 'rough-metal'
         newMat.material = piMaterialCreate(materialName, ...
-            'type', 'conductor','eta','metal-Al-eta','k','metal-Al-k',...
-            'uroughness',0.05,'vroughness',0.05);
+            'type', 'conductor','eta','metal-Al-eta','k','metal-Al-k');
 
         % ----------------  Glossy materials
     case 'glossylist'
@@ -428,113 +427,6 @@ end
 
 end
 
-function newMat = polligon_materialCreate(materialName, material_ref, materialType)
-% We sometimes download textures from this web-site
-%
-% Polligon website: https://www.poliigon.com/textures/free
-%
-% When we do, they have a number of files that we assign to the
-% variables of the material in this function.
-%
-% material_ref is diffuse color texture in the folder which user
-% directly unzipped from the zip file downloaded from polligon website.
 
-%%
-texfile = which(material_ref);   % Texture file
-if isempty(texfile)
-    % We should probably go to ieWebGet() for the texture.  See
-    % example just below here.
-    error('File is not found! Make sure the file exists!');
-
-    % This is one I downloaded and we should figure out how to put
-    % these up on the web server and download.
-    %
-    %    case 'tiles-marble-sagegreen-brick'
-    %    newMat = polligon_materialCreate(materialName,...
-    %    'TilesMarbleSageGreenBrickBondHoned001_COL_2K.jpg','coateddiffuse');
-end
-
-[texdir] = fileparts(texfile);
-
-filelists = dir(texdir);
-
-tex_ref    = piTextureCreate([materialName,'_tex_ref'],...
-    'type','imagemap',...
-    'filename',material_ref);
-newMat.texture{1} = tex_ref;
-normal_texture = [];
-tex_displacement = [];
-tex_roughness = [];
-for ii = 1:numel(filelists)
-    if contains(filelists(ii).name, 'NRM')
-        normal_texture = filelists(ii).name;
-    end
-
-    if contains(filelists(ii).name, 'DISP16')
-        displacement_texture = filelists(ii).name;
-
-        tex_displacement = piTextureCreate([materialName,'_tex_displacement'],...
-            'type','imagemap',...
-            'format','float',...
-            'filename',displacement_texture);
-        newMat.texture{end+1} = tex_displacement;
-    end
-
-    if contains(filelists(ii).name, {'REFL','ROUGHNESS'})
-        roughness_texture = filelists(ii).name;
-
-        tex_roughness = piTextureCreate([materialName,'_tex_roughness'],...
-            'type','imagemap',...
-            'format','float',...
-            'filename',roughness_texture);
-        newMat.texture{end+1} = tex_roughness;
-    end
-end
-
-% Parameters based on the material type
-switch materialType
-    case 'coateddiffuse'
-        material = piMaterialCreate(materialName,...
-            'type','coateddiffuse',...
-            'reflectance',[materialName,'_tex_ref']);
-
-        if ~isempty(normal_texture)
-            material = piMaterialSet(material,'normalmap',normal_texture);
-            % material.normalmap.value = normal_texture;
-        end
-        if ~isempty(tex_roughness)
-            material = piMaterialSet(material,'roughness',[materialName,'_tex_roughness']);
-            % material.roughness.value = [materialName,'_tex_roughness'];
-        end
-        if ~isempty(tex_displacement)
-            material = piMaterialSet(material,'displacement',[materialName,'_tex_displacement']);
-            % material.displacement.value = [materialName,'_tex_displacement'];
-        end
-
-    case 'coatedconductor'
-        material = piMaterialCreate(materialName,...
-            'type','coatedconductor',...
-            'reflectance',[materialName,'_tex_ref'],...
-            'interfaceroughness',0.01);
-
-        if ~isempty(normal_texture')
-            material = piMaterialSet(material,'normalmap',normal_texture);
-            % material.normalmap.value = normal_texture;
-        end
-        if ~isempty(tex_roughness)
-            material = piMaterialSet(material,'conductorroughness',[materialName,'_tex_roughness']);
-            % material.conductorroughness.type  = 'texture';
-            % material.conductorroughness.value = [materialName,'_tex_roughness'];
-        end
-
-        if ~isempty(tex_displacement)
-            material = piMaterialSet(material,'displacement',[materialName,'_tex_displacement']);
-            % material.displacement.value = [materialName,'_tex_displacement'];
-        end
-end
-
-newMat.material = material;
-
-end
 
 

@@ -203,7 +203,8 @@ fclose(fileID);
 % texture maps and make sure the files are copied to 'local/'.
 if ~isempty(thisR.materials.list)
     % Make sure that the texture files are in PNG format
-    piTextureFileFormat(thisR);
+%     piTextureFileFormat(thisR); % We did this in piRead, no need to do
+%     this again
 
     % Write critical files.
     piWriteMaterials(thisR,overwritematerials);
@@ -562,7 +563,6 @@ for ofns = outerFields'
                         end
                     end
                 end
-
 
             elseif(strcmp(currType,'spectrum') && ~ischar(currValue))
                 % A spectrum of type [wave1 wave2 value1 value2]. TODO:

@@ -11,25 +11,26 @@ if isempty(texfile)
     end
 end
 
-[texdir,tex_name, ext] = fileparts(texfile);
+[texdir,~, ~] = fileparts(texfile);
 
 filelists = dir(texdir);
 
-[~, material_ref_fname,~] = fileparts(material_ref);
+[~, material_ref_fname, ext] = fileparts(material_ref);
 tex_ref    = piTextureCreate([materialName,'_tex_ref'],...
     'type','imagemap',...
-    'filename',material_ref_fname);
+    'filename',[material_ref_fname,ext]);
 newMat.texture{1} = tex_ref;
 normal_texture = [];
 tex_displacement = [];
 tex_roughness = [];
 for ii = 1:numel(filelists)
     if contains(filelists(ii).name, 'NRM')
-        normal_texture = filelists(ii).name;
+        normal_texture = TexFormat(filelists(ii).name);
     end
 
     if contains(filelists(ii).name, 'DISP16')
-        displacement_texture = filelists(ii).name;
+%         outputPath = TexFormat(filelists(ii).name);
+        displacement_texture = TexFormat(fullfile(filelists(ii).folder, filelists(ii).name));
 
         tex_displacement = piTextureCreate([materialName,'_tex_displacement'],...
             'type','imagemap',...
@@ -39,13 +40,13 @@ for ii = 1:numel(filelists)
     end
 
     if contains(filelists(ii).name, {'REFL','ROUGHNESS'})
-        roughness_texture = filelists(ii).name;
-        if contains(filelists(ii).name,'REFL')
-            ref = imread(filelists(ii).name);
+        roughness_texture = TexFormat(fullfile(filelists(ii).folder, filelists(ii).name));
+        if contains(roughness_texture,'REFL')
+            ref = rgb2gray(imread(filelists(ii).name));
             ref = double(ref)/255;
             roughness = 1-ref;
             roughness_texture = strrep(roughness_texture, 'REFL', 'ROUGHNESS');
-            imwrite((roughness/max2(roughness)), fullfile(filelists(ii).dir, roughness_texture));
+            imwrite((roughness/max2(roughness)), fullfile(filelists(ii).folder, roughness_texture));
         end
         tex_roughness = piTextureCreate([materialName,'_tex_roughness'],...
             'type','imagemap',...
@@ -90,4 +91,23 @@ end
 
 newMat.material = material;
 
+end
+
+function outputPath = TexFormat(thisImgPath)
+[path, fname, ext] = fileparts(thisImgPath);
+if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
+
+    outputPath = fullfile(path, [fname,'.png']);
+    if ~exist(outputPath,'file')
+        if isequal(ext,'.tga')
+            thisImg = tga_read_image(thisImgPath);
+        else
+            thisImg = imread(thisImgPath);
+        end
+        imwrite(thisImg,outputPath);
+    end
+    fprintf('Texture: %s is converted \n',fname);
+else
+    outputPath = thisImgPath;
+end
 end

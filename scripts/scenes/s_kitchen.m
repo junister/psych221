@@ -23,63 +23,9 @@ thisR.set('render type',{'radiance','depth'});
 scene = piWRS(thisR);
 dRange = sceneGet(scene,'depth range');
 
-%{
-piMaterialsInsert(thisR,'name','marble-beige');
-idx = piAssetSearch(thisR,'material name','Worktops');
-for ii=1:numel(idx)
- thisR.set('asset',idx(ii),'material name','marble-beige');
-end
-scene = piWRS(thisR);
-
-%}
-
-%{
-
-% Swapping out ALL the materials.  
-% Next, we should find the objects with just some
-% material.
-oNames = thisR.get('object names');
-
-%%
-piMaterialsInsert(thisR,'name','diffuse-white');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','diffuse-white');
-end
-scene = piWRS(thisR);
-
-%%
-piMaterialsInsert(thisR,'name','wood-light-large-grain');
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','wood-light-large-grain');
-end
-scene = piWRS(thisR);
-
-%%
-piMaterialsInsert(thisR,'name','glass-bk7');
-thisR.set('n bounces',10);
-
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','glass-bk7');
-end
-scene = piWRS(thisR,'render flag','rgb');
-
-%%
-piMaterialsInsert(thisR,'name','metal-ag');
-thisR.set('n bounces',5);
-
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-  thisR.set('asset',oName{ii},'material name','metal-ag');
-end
-scene = piWRS(thisR,'render flag','rgb');
-
-%}
 %% Samples the scene from a few new directions around the current from
 
-% thisR.set('fromto distance',mean(dRange));
-
+from = thisR.get('from'); to = thisR.get('to');
 direction = thisR.get('fromto');
 direction = direction/norm(direction);
 nsamples = 5;
@@ -106,17 +52,19 @@ piWRS(thisR);
 lensfile  = 'dgauss.22deg.3.0mm.json';    % 30 38 18 10
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
-thisR.set('film diagonal',5);  %% 33 mm is small
+thisR.set('film diagonal',5);    % 3 mm is small
 thisR.set('object distance',2);  % Move closer. The distance scaling is weird.
-[oi,results] = piWRS(thisR,'name','DG');
+[~,results] = piWRS(thisR,'name','DG');
 
 %% Fisheye
 
 lensfile = 'fisheye.87deg.3.0mm.json';
+thisR.set('film diagonal',7);  %% 3 mm is small
+
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 oi = piWRS(thisR,'name','fisheye');
 oi = piAIdenoise(oi);
 oiWindow(oi);
 
-%%
+%% END
 

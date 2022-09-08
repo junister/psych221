@@ -430,8 +430,10 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
     % end
 
     % Deal with possibility of a cell array for the shape
-    if ~iscell(thisNode.shape)
+    if ~iscell(thisNode.shape) 
         thisShape = thisNode.shape;
+    elseif iscell(thisNode.shape) && numel(thisNode.shape) 
+        thisShape = thisNode.shape{1};
     else
         thisShape = thisNode.shape{nMat};
     end
