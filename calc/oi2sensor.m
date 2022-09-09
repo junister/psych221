@@ -24,7 +24,11 @@ sensor = sensorFromFile(sensorFile);
 
 sensorImage = sensorCompute(sensor, oi);
 
-outputFile = sensorSaveImage(sensorImage,"sensorRGB.png",'rgb');
+ip = ipCreate();
+ipImage = ipCompute(ip, sensorImage);
+
+% ipWindow(ipImage);
+outputFile = ipSaveImage(ipImage, 'sensorRGB.png');
 
 end
 

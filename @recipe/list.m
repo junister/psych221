@@ -17,7 +17,7 @@ function [names,lst] = list(obj)
 % See also
 %   recipeSet, recipeGet
 
-sceneDir = fullfile(piGetPath('scenes');
+sceneDir = fullfile(piGetPath('scenes'));
 lst = dir(sceneDir);
 names = cell(numel(lst)-2,1);
 kk = 1;
