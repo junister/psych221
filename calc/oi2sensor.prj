@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="4222970141" file="B:\iset\iset3d-v4\oi2sensor.prj" location="B:\iset\iset3d-v4" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="3892395083" file="B:\iset\iset3d-v4\calc\oi2sensor.prj" location="B:\iset\iset3d-v4\calc" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\calc\calc\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>oi2sensor</param.appname>
     <param.icon />
     <param.icons />
@@ -9,7 +9,7 @@
     <param.company>Stanford University</param.company>
     <param.summary />
     <param.description />
-    <param.screenshot />
+    <param.screenshot>B:\iset\isetcam\data\images\rgb\BanteaySrei_01.jpg</param.screenshot>
     <param.guid />
     <param.installpath.string>\Stanford University\oi2sensor\</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
@@ -24,8 +24,8 @@
     <param.user.defined.mcr.options />
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
-    <param.web.mcr>true</param.web.mcr>
-    <param.package.mcr>false</param.package.mcr>
+    <param.web.mcr>false</param.web.mcr>
+    <param.package.mcr>true</param.package.mcr>
     <param.no.mcr>false</param.no.mcr>
     <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
     <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
@@ -47,7 +47,6 @@
       <param.icons />
       <param.summary />
       <param.description />
-      <param.screenshot />
       <param.guid />
       <param.installpath.string />
       <param.installpath.combo />
@@ -59,8 +58,6 @@
       <param.user.defined.mcr.options />
       <param.target.type />
       <param.support.packages />
-      <param.web.mcr />
-      <param.package.mcr />
       <param.no.mcr />
       <param.web.mcr.name />
       <param.package.mcr.name />
@@ -73,158 +70,161 @@
       <param.example />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}\calc\oi2sensor.m</file>
+      <file>${PROJECT_ROOT}\oi2sensor.m</file>
     </fileset.main>
     <fileset.resources />
-    <fileset.package />
+    <fileset.package>
+      <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
+      <file>${PROJECT_ROOT}\sampleoi.mat</file>
+    </fileset.package>
     <fileset.depfun>
-      <file>${PROJECT_ROOT}\@recipe\list.m</file>
-      <file>${PROJECT_ROOT}\@recipe\recipe.m</file>
-      <file>${PROJECT_ROOT}\@recipe\recipeGet.m</file>
-      <file>${PROJECT_ROOT}\@recipe\recipeSet.m</file>
-      <file>${PROJECT_ROOT}\@recipe\summarize.m</file>
-      <file>${PROJECT_ROOT}\@recipe\upload.m</file>
-      <file>${PROJECT_ROOT}\calc\ar0132atSensorRGB.mat</file>
-      <file>${PROJECT_ROOT}\calc\sampleoi.mat</file>
-      <file>${PROJECT_ROOT}\data\spds\namedSpectra.mat</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\config.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\dockerWrapper.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\exists.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\getParam.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\getPrefs.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\gpuStatus.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\init.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\localImage.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\render.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\runCommand.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\setParams.m</file>
-      <file>${PROJECT_ROOT}\docker\@dockerWrapper\setPrefs.m</file>
-      <file>${PROJECT_ROOT}\docker\piDockerConfig.m</file>
-      <file>${PROJECT_ROOT}\external\hex_and_rgb_v1\hex2rgb.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\all.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\and.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\any.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\breadthfirstiterator.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\chop.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\condense.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\conditioniterator.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\decondense.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\decorateplots.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\depth.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\depthfirstiterator.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\depthtree.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\eq.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\find.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\findpath.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\flatten.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\ge.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\graft.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\gt.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\isemptynode.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\issync.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\ldivide.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\le.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\lt.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\minus.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\ne.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\nodeorderiterator.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\not.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\oldTree.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\or.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\plot.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\plus.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\power.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\private\contentToString.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\private\permuteIfNeeded.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\rdivide.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\recursivecumfun.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\regexp.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\regexpi.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\regexprep.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\removenode.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strcmp.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strcmpi.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strfind.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strncmp.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strncmpi.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\strrep.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\subtree.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\times.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\tostring.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\tree.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\treefun.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\treefun2.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\uminus.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\uplus.m</file>
-      <file>${PROJECT_ROOT}\external\matlab-tree\@tree\xor.m</file>
-      <file>${PROJECT_ROOT}\piRootPath.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetAdd.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetCreate.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetDelete.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetFind.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetGet.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetInsert.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetMaterialPrint.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetMotionAdd.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetObject2Light.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetRotate.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetScale.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetSearch.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetSet.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetSetParent.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetTranslate.m</file>
-      <file>${PROJECT_ROOT}\utilities\asset\piAssetTreeLoad.m</file>
-      <file>${PROJECT_ROOT}\utilities\camera\piCameraCreate.m</file>
-      <file>${PROJECT_ROOT}\utilities\geometry\piGeometryWrite.m</file>
-      <file>${PROJECT_ROOT}\utilities\geometry\piRotationMatrix.m</file>
-      <file>${PROJECT_ROOT}\utilities\geometry\piShape2Text.m</file>
-      <file>${PROJECT_ROOT}\utilities\isetcam\piCamBio.m</file>
-      <file>${PROJECT_ROOT}\utilities\isetcam\piOICreate.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightCreate.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightGenerateTransformText.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightGet.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightISParamType.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightNameFormat.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightPrint.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightRotate.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightSet.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightTranslate.m</file>
-      <file>${PROJECT_ROOT}\utilities\light\piLightWrite.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialGet.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialISEEM.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMateriallib.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialPrint.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialSet.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialText.m</file>
-      <file>${PROJECT_ROOT}\utilities\material\piMaterialWrite.m</file>
-      <file>${PROJECT_ROOT}\utilities\pbrt\parse\piNum2String.m</file>
-      <file>${PROJECT_ROOT}\utilities\pbrt\pbrt-v4\piEXR2ISET.m</file>
-      <file>${PROJECT_ROOT}\utilities\pbrt\pbrt-v4\piEXR2Mat.m</file>
-      <file>${PROJECT_ROOT}\utilities\pbrt\pbrt-v4\piReadEXR.m</file>
-      <file>${PROJECT_ROOT}\utilities\piContains.m</file>
-      <file>${PROJECT_ROOT}\utilities\piDirGet.m</file>
-      <file>${PROJECT_ROOT}\utilities\piRender.m</file>
-      <file>${PROJECT_ROOT}\utilities\piWrite.m</file>
-      <file>${PROJECT_ROOT}\utilities\recipe\piRecipeCopy.m</file>
-      <file>${PROJECT_ROOT}\utilities\recipe\piRecipeFindOpticsParams.m</file>
-      <file>${PROJECT_ROOT}\utilities\scenes\piColorPick.m</file>
-      <file>${PROJECT_ROOT}\utilities\scenes\piSceneCreate.m</file>
-      <file>${PROJECT_ROOT}\utilities\scenes\piSceneDepth.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTextureFind.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTextureGet.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTexturePrint.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTextureSet.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTextureSetBasis.m</file>
-      <file>${PROJECT_ROOT}\utilities\texture\piTextureText.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piAssetRemoveLastTrans.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformAxis.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformCompose.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformDegs2RotM.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformRotation.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformRotationInAbsSpace.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformRotM2Degs.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformTranslation.m</file>
-      <file>${PROJECT_ROOT}\utilities\transform\piTransformWorld2Obj.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\list.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\recipe.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\recipeGet.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\recipeSet.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\summarize.m</file>
+      <file>B:\iset\iset3d-v4\@recipe\upload.m</file>
+      <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
+      <file>${PROJECT_ROOT}\sampleoi.mat</file>
+      <file>B:\iset\iset3d-v4\data\spds\namedSpectra.mat</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\config.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\dockerWrapper.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\exists.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\getParam.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\getPrefs.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\gpuStatus.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\init.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\localImage.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\render.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\runCommand.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\setParams.m</file>
+      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\setPrefs.m</file>
+      <file>B:\iset\iset3d-v4\docker\piDockerConfig.m</file>
+      <file>B:\iset\iset3d-v4\external\hex_and_rgb_v1\hex2rgb.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\all.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\and.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\any.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\breadthfirstiterator.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\chop.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\condense.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\conditioniterator.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\decondense.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\decorateplots.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depth.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depthfirstiterator.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depthtree.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\eq.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\find.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\findpath.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\flatten.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ge.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\graft.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\gt.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\isemptynode.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\issync.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ldivide.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\le.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\lt.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\minus.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ne.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\nodeorderiterator.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\not.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\oldTree.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\or.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\plot.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\plus.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\power.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\private\contentToString.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\private\permuteIfNeeded.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\rdivide.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\recursivecumfun.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexp.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexpi.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexprep.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\removenode.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strcmp.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strcmpi.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strfind.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strncmp.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strncmpi.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strrep.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\subtree.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\times.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\tostring.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\tree.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\treefun.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\treefun2.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\uminus.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\uplus.m</file>
+      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\xor.m</file>
+      <file>B:\iset\iset3d-v4\piRootPath.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetAdd.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetCreate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetDelete.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetFind.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetGet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetInsert.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetMaterialPrint.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetMotionAdd.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetObject2Light.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetRotate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetScale.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSearch.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSetParent.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetTranslate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\asset\piAssetTreeLoad.m</file>
+      <file>B:\iset\iset3d-v4\utilities\camera\piCameraCreate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\geometry\piGeometryWrite.m</file>
+      <file>B:\iset\iset3d-v4\utilities\geometry\piRotationMatrix.m</file>
+      <file>B:\iset\iset3d-v4\utilities\geometry\piShape2Text.m</file>
+      <file>B:\iset\iset3d-v4\utilities\isetcam\piCamBio.m</file>
+      <file>B:\iset\iset3d-v4\utilities\isetcam\piOICreate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightCreate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightGenerateTransformText.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightGet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightISParamType.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightNameFormat.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightPrint.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightRotate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightSet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightTranslate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\light\piLightWrite.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialGet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialISEEM.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMateriallib.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialPrint.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialSet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialText.m</file>
+      <file>B:\iset\iset3d-v4\utilities\material\piMaterialWrite.m</file>
+      <file>B:\iset\iset3d-v4\utilities\pbrt\parse\piNum2String.m</file>
+      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piEXR2ISET.m</file>
+      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piEXR2Mat.m</file>
+      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piReadEXR.m</file>
+      <file>B:\iset\iset3d-v4\utilities\piContains.m</file>
+      <file>B:\iset\iset3d-v4\utilities\piDirGet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\piRender.m</file>
+      <file>B:\iset\iset3d-v4\utilities\piWrite.m</file>
+      <file>B:\iset\iset3d-v4\utilities\recipe\piRecipeCopy.m</file>
+      <file>B:\iset\iset3d-v4\utilities\recipe\piRecipeFindOpticsParams.m</file>
+      <file>B:\iset\iset3d-v4\utilities\scenes\piColorPick.m</file>
+      <file>B:\iset\iset3d-v4\utilities\scenes\piSceneCreate.m</file>
+      <file>B:\iset\iset3d-v4\utilities\scenes\piSceneDepth.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTextureFind.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTextureGet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTexturePrint.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTextureSet.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTextureSetBasis.m</file>
+      <file>B:\iset\iset3d-v4\utilities\texture\piTextureText.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piAssetRemoveLastTrans.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformAxis.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformCompose.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformDegs2RotM.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotation.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotationInAbsSpace.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotM2Degs.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformTranslation.m</file>
+      <file>B:\iset\iset3d-v4\utilities\transform\piTransformWorld2Obj.m</file>
       <file>B:\iset\isetcam\camera\cameraColorAccuracy.m</file>
       <file>B:\iset\isetcam\camera\cameraCompute.m</file>
       <file>B:\iset\isetcam\camera\cameraCreate.m</file>
@@ -848,9 +848,9 @@
       <file>B:\iset\isetlens\utility\raysVisualize.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="splash.png" optional="false">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="readme.txt" optional="true">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="oi2sensor.exe" optional="false">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\oi2sensor.exe</file>
+      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="splash.png" optional="false">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="oi2sensor.exe" optional="false">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\oi2sensor.exe</file>
+      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="readme.txt" optional="true">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>
