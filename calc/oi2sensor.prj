@@ -81,7 +81,7 @@
     <fileset.package>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
       <file>${PROJECT_ROOT}\sampleoi.mat</file>
-      <file>B:\iset\iset3d-v4\data</file>
+      <file>B:\iset\isetcam\data</file>
     </fileset.package>
     <fileset.depfun>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
