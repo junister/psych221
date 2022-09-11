@@ -1,70 +1,73 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3892395083" file="B:\iset\iset3d-v4\calc\oi2sensor.prj" location="B:\iset\iset3d-v4\calc" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\calc\calc\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="287947999" file="B:\iset\iset3d-v4\calc\oi2sensor.prj" location="B:\iset\iset3d-v4\calc" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\calc\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>oi2sensor</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>0.001</param.version>
+    <param.version>0.006</param.version>
     <param.authnamewatermark>David Cardinal and Brian Wandell</param.authnamewatermark>
     <param.email>david.cardinal@stanford.edu</param.email>
     <param.company>Stanford University</param.company>
     <param.summary />
     <param.description />
-    <param.screenshot>B:\iset\isetcam\data\images\rgb\BanteaySrei_01.jpg</param.screenshot>
+    <param.screenshot />
     <param.guid />
     <param.installpath.string>\Stanford University\oi2sensor\</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
     <param.logo />
     <param.install.notes />
     <param.target.install.notes />
-    <param.intermediate>${PROJECT_ROOT}\calc\oi2sensor\for_testing</param.intermediate>
-    <param.files.only>${PROJECT_ROOT}\calc\oi2sensor\for_redistribution_files_only</param.files.only>
-    <param.output>${PROJECT_ROOT}\calc\oi2sensor\for_redistribution</param.output>
+    <param.intermediate>${PROJECT_ROOT}\oi2sensor\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\oi2sensor\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\oi2sensor\for_redistribution</param.output>
     <param.logdir>${PROJECT_ROOT}\oi2sensor</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
-    <param.web.mcr>false</param.web.mcr>
-    <param.package.mcr>true</param.package.mcr>
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
     <param.no.mcr>false</param.no.mcr>
     <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
     <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
     <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
-    <param.windows.command.prompt>true</param.windows.command.prompt>
-    <param.create.log>false</param.create.log>
-    <param.log.file />
+    <param.windows.command.prompt>false</param.windows.command.prompt>
+    <param.create.log>true</param.create.log>
+    <param.log.file>oi.log</param.log.file>
     <param.native.matlab>false</param.native.matlab>
     <param.checkbox>false</param.checkbox>
     <param.example />
     <param.help.text>Syntax 
 	 oi2sensor -? 
-	 oi2sensor oiFiles sensorFile 
+	 oi2sensor options 
  Input Arguments 
 	 -?  print help on how to use the application 
-	 oiFiles sensorFile  input arguments</param.help.text>
+	 options  input arguments</param.help.text>
     <unset>
       <param.icon />
       <param.icons />
       <param.summary />
       <param.description />
+      <param.screenshot />
       <param.guid />
       <param.installpath.string />
       <param.installpath.combo />
       <param.logo />
       <param.install.notes />
       <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
       <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
       <param.target.type />
       <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
       <param.no.mcr />
       <param.web.mcr.name />
       <param.package.mcr.name />
       <param.no.mcr.name />
-      <param.windows.command.prompt />
-      <param.create.log />
-      <param.log.file />
       <param.native.matlab />
       <param.checkbox />
       <param.example />
@@ -72,159 +75,15 @@
     <fileset.main>
       <file>${PROJECT_ROOT}\oi2sensor.m</file>
     </fileset.main>
-    <fileset.resources />
+    <fileset.resources>
+      <file>B:\iset\isetcam\data\human\luminosity.mat</file>
+    </fileset.resources>
     <fileset.package>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
       <file>${PROJECT_ROOT}\sampleoi.mat</file>
     </fileset.package>
     <fileset.depfun>
-      <file>B:\iset\iset3d-v4\@recipe\list.m</file>
-      <file>B:\iset\iset3d-v4\@recipe\recipe.m</file>
-      <file>B:\iset\iset3d-v4\@recipe\recipeGet.m</file>
-      <file>B:\iset\iset3d-v4\@recipe\recipeSet.m</file>
-      <file>B:\iset\iset3d-v4\@recipe\summarize.m</file>
-      <file>B:\iset\iset3d-v4\@recipe\upload.m</file>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
-      <file>${PROJECT_ROOT}\sampleoi.mat</file>
-      <file>B:\iset\iset3d-v4\data\spds\namedSpectra.mat</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\config.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\dockerWrapper.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\exists.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\getParam.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\getPrefs.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\gpuStatus.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\init.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\localImage.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\render.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\runCommand.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\setParams.m</file>
-      <file>B:\iset\iset3d-v4\docker\@dockerWrapper\setPrefs.m</file>
-      <file>B:\iset\iset3d-v4\docker\piDockerConfig.m</file>
-      <file>B:\iset\iset3d-v4\external\hex_and_rgb_v1\hex2rgb.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\all.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\and.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\any.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\breadthfirstiterator.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\chop.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\condense.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\conditioniterator.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\decondense.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\decorateplots.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depth.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depthfirstiterator.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\depthtree.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\eq.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\find.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\findpath.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\flatten.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ge.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\graft.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\gt.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\isemptynode.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\issync.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ldivide.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\le.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\lt.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\minus.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\ne.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\nodeorderiterator.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\not.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\oldTree.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\or.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\plot.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\plus.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\power.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\private\contentToString.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\private\permuteIfNeeded.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\rdivide.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\recursivecumfun.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexp.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexpi.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\regexprep.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\removenode.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strcmp.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strcmpi.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strfind.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strncmp.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strncmpi.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\strrep.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\subtree.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\times.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\tostring.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\tree.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\treefun.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\treefun2.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\uminus.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\uplus.m</file>
-      <file>B:\iset\iset3d-v4\external\matlab-tree\@tree\xor.m</file>
-      <file>B:\iset\iset3d-v4\piRootPath.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetAdd.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetCreate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetDelete.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetFind.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetGet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetInsert.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetMaterialPrint.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetMotionAdd.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetObject2Light.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetRotate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetScale.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSearch.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetSetParent.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetTranslate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\asset\piAssetTreeLoad.m</file>
-      <file>B:\iset\iset3d-v4\utilities\camera\piCameraCreate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\geometry\piGeometryWrite.m</file>
-      <file>B:\iset\iset3d-v4\utilities\geometry\piRotationMatrix.m</file>
-      <file>B:\iset\iset3d-v4\utilities\geometry\piShape2Text.m</file>
-      <file>B:\iset\iset3d-v4\utilities\isetcam\piCamBio.m</file>
-      <file>B:\iset\iset3d-v4\utilities\isetcam\piOICreate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightCreate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightGenerateTransformText.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightGet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightISParamType.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightNameFormat.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightPrint.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightRotate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightSet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightTranslate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\light\piLightWrite.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialGet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialISEEM.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMateriallib.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialPrint.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialSet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialText.m</file>
-      <file>B:\iset\iset3d-v4\utilities\material\piMaterialWrite.m</file>
-      <file>B:\iset\iset3d-v4\utilities\pbrt\parse\piNum2String.m</file>
-      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piEXR2ISET.m</file>
-      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piEXR2Mat.m</file>
-      <file>B:\iset\iset3d-v4\utilities\pbrt\pbrt-v4\piReadEXR.m</file>
-      <file>B:\iset\iset3d-v4\utilities\piContains.m</file>
-      <file>B:\iset\iset3d-v4\utilities\piDirGet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\piRender.m</file>
-      <file>B:\iset\iset3d-v4\utilities\piWrite.m</file>
-      <file>B:\iset\iset3d-v4\utilities\recipe\piRecipeCopy.m</file>
-      <file>B:\iset\iset3d-v4\utilities\recipe\piRecipeFindOpticsParams.m</file>
-      <file>B:\iset\iset3d-v4\utilities\scenes\piColorPick.m</file>
-      <file>B:\iset\iset3d-v4\utilities\scenes\piSceneCreate.m</file>
-      <file>B:\iset\iset3d-v4\utilities\scenes\piSceneDepth.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTextureFind.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTextureGet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTexturePrint.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTextureSet.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTextureSetBasis.m</file>
-      <file>B:\iset\iset3d-v4\utilities\texture\piTextureText.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piAssetRemoveLastTrans.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformAxis.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformCompose.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformDegs2RotM.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotation.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotationInAbsSpace.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformRotM2Degs.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformTranslation.m</file>
-      <file>B:\iset\iset3d-v4\utilities\transform\piTransformWorld2Obj.m</file>
       <file>B:\iset\isetcam\camera\cameraColorAccuracy.m</file>
       <file>B:\iset\isetcam\camera\cameraCompute.m</file>
       <file>B:\iset\isetcam\camera\cameraCreate.m</file>
@@ -351,7 +210,6 @@
       <file>B:\iset\isetcam\imgproc\ipMCCXYZ.m</file>
       <file>B:\iset\isetcam\imgproc\ipSaveImage.m</file>
       <file>B:\iset\isetcam\imgproc\ipSet.m</file>
-      <file>B:\iset\isetcam\imgproc\openexr\exrread.m</file>
       <file>B:\iset\isetcam\imgproc\vcimageClearData.m</file>
       <file>B:\iset\isetcam\imgproc\vcimageISOMTF.m</file>
       <file>B:\iset\isetcam\imgproc\vcimageSRGB.m</file>
@@ -613,7 +471,6 @@
       <file>B:\iset\isetcam\sensor\simulation\signalCurrent.m</file>
       <file>B:\iset\isetcam\sensor\simulation\SignalCurrentDensity.m</file>
       <file>B:\iset\isetcam\sensor\simulation\spatialIntegration.m</file>
-      <file>B:\iset\isetcam\utility\external\cpuinfo\cpuinfo.m</file>
       <file>B:\iset\isetcam\utility\external\freezeColors\freezeColors.m</file>
       <file>B:\iset\isetcam\utility\external\freezeColors\unfreezeColors.m</file>
       <file>B:\iset\isetcam\utility\external\hdr\build_pyramid.m</file>
@@ -635,9 +492,6 @@
       <file>B:\iset\isetcam\utility\external\hdr\recons_steerable_pyramid_full.m</file>
       <file>B:\iset\isetcam\utility\external\hdr\reconSFpyrLevs_o.m</file>
       <file>B:\iset\isetcam\utility\external\hdr\steerable_pyramid_full.m</file>
-      <file>B:\iset\isetcam\utility\external\JSONio\jsonread.m</file>
-      <file>B:\iset\isetcam\utility\external\JSONio\jsonread.mexw64</file>
-      <file>B:\iset\isetcam\utility\external\JSONio\jsonwrite.m</file>
       <file>B:\iset\isetcam\utility\external\max\max2.m</file>
       <file>B:\iset\isetcam\utility\external\zernike\zernfun.m</file>
       <file>B:\iset\isetcam\utility\file\ieImageType.m</file>
@@ -732,125 +586,15 @@
       <file>B:\iset\isetcam\utility\programming\vcReplaceObject.m</file>
       <file>B:\iset\isetcam\utility\programming\vcSetObjects.m</file>
       <file>B:\iset\isetcam\utility\programming\vcSetSelectedObject.m</file>
-      <file>B:\iset\isetcam\utility\rotationMatrix3d.m</file>
       <file>B:\iset\isetcam\utility\statistics\biNormal.m</file>
       <file>B:\iset\isetcam\utility\units\ieUnitScaleFactor.m</file>
       <file>B:\iset\isetcam\utility\units\sample2space.m</file>
       <file>B:\iset\isetcam\utility\units\unitFrequencyList.m</file>
-      <file>B:\iset\isetlens\@filmC\clear.m</file>
-      <file>B:\iset\isetlens\@filmC\draw.m</file>
-      <file>B:\iset\isetlens\@filmC\filmC.m</file>
-      <file>B:\iset\isetlens\@lensC\adjustSize.m</file>
-      <file>B:\iset\isetlens\@lensC\apertureGrid.m</file>
-      <file>B:\iset\isetlens\@lensC\apertureIndex.m</file>
-      <file>B:\iset\isetlens\@lensC\bbmComputeOptSyst.m</file>
-      <file>B:\iset\isetlens\@lensC\bbmCreate.m</file>
-      <file>B:\iset\isetlens\@lensC\bbmGetValue.m</file>
-      <file>B:\iset\isetlens\@lensC\bbmSetField.m</file>
-      <file>B:\iset\isetlens\@lensC\centersCompute.m</file>
-      <file>B:\iset\isetlens\@lensC\draw.m</file>
-      <file>B:\iset\isetlens\@lensC\elementsSet.m</file>
-      <file>B:\iset\isetlens\@lensC\fileRead.m</file>
-      <file>B:\iset\isetlens\@lensC\fileWrite.m</file>
-      <file>B:\iset\isetlens\@lensC\filmSizeFromFOV.m</file>
-      <file>B:\iset\isetlens\@lensC\findImagePoint.m</file>
-      <file>B:\iset\isetlens\@lensC\fovScale.m</file>
-      <file>B:\iset\isetlens\@lensC\fullGrid.m</file>
-      <file>B:\iset\isetlens\@lensC\get.m</file>
-      <file>B:\iset\isetlens\@lensC\lensC.m</file>
-      <file>B:\iset\isetlens\@lensC\list.m</file>
-      <file>B:\iset\isetlens\@lensC\offsetCompute.m</file>
-      <file>B:\iset\isetlens\@lensC\plot.m</file>
-      <file>B:\iset\isetlens\@lensC\rtHURB.m</file>
-      <file>B:\iset\isetlens\@lensC\rtIdealThroughLens.m</file>
-      <file>B:\iset\isetlens\@lensC\rtRealisticThroughLens.m</file>
-      <file>B:\iset\isetlens\@lensC\rtSourceToEntrance.m</file>
-      <file>B:\iset\isetlens\@lensC\rtThroughLens.m</file>
-      <file>B:\iset\isetlens\@lensC\rtThroughLens_output.m</file>
-      <file>B:\iset\isetlens\@lensC\scale.m</file>
-      <file>B:\iset\isetlens\@lensC\set.m</file>
-      <file>B:\iset\isetlens\@lensC\sortSurfaceOrder.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\autofocus.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\ComputeFFTpsf.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\computeRayDist.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\draw.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawComaRay.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawFFTpsf.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawMarginalRay.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawPoint.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawPrincipalRay.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\drawPupil.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\estimatePPSF.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\estimatePSF.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\oiCreate.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\PSFArray.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\psfCameraC.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\recordOnFilm.m</file>
-      <file>B:\iset\isetlens\@psfCameraC\traceToEntrance.m</file>
-      <file>B:\iset\isetlens\@rayC\addDistance.m</file>
-      <file>B:\iset\isetlens\@rayC\endPoint.m</file>
-      <file>B:\iset\isetlens\@rayC\expandWavelengths.m</file>
-      <file>B:\iset\isetlens\@rayC\LF.m</file>
-      <file>B:\iset\isetlens\@rayC\normalizeDir.m</file>
-      <file>B:\iset\isetlens\@rayC\plot.m</file>
-      <file>B:\iset\isetlens\@rayC\plotPhaseSpace.m</file>
-      <file>B:\iset\isetlens\@rayC\projectOnPlane.m</file>
-      <file>B:\iset\isetlens\@rayC\rayC.m</file>
-      <file>B:\iset\isetlens\@rayC\recordOnFilm.m</file>
-      <file>B:\iset\isetlens\@rayC\removeDead.m</file>
-      <file>B:\iset\isetlens\@rayC\sphereIntersect.m</file>
-      <file>B:\iset\isetlens\@rayC\wave2index.m</file>
-      <file>B:\iset\isetlens\@surfaceC\draw.m</file>
-      <file>B:\iset\isetlens\@surfaceC\sphereCenter.m</file>
-      <file>B:\iset\isetlens\@surfaceC\surfaceC.m</file>
-      <file>B:\iset\isetlens\ilensRootPath.m</file>
-      <file>B:\iset\isetlens\paraxial\checkNandWave.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxAddFilm2ImagSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxAddObject2ImagSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCheckSurfaceList.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputeOptSystMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputeOverallMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputePetzvalSum.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputePetzvalSum4SingleSurface.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputeSurfaceMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxComputeTranslationMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxConjImagingMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateFilm.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateImagSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateObject.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateOptSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateSubSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxCreateSurface.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxEffectiveNumericalAperture.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxFindMeridionalSpecialRays.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxFindN4SubSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxFindPupil4Object.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxFindPupils.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxFindWindow4Object.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxGet.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxGetImagSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxGetOptSyst.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxMatrix2CardinalPoints.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxMatrixRed2NotRed_red.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxObject2ImgSystTransferMatrix.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxSortSurfaceList.m</file>
-      <file>B:\iset\isetlens\paraxial\paraxThickLens.m</file>
-      <file>B:\iset\isetlens\utility\bbm\coordCart2Polar3D.m</file>
-      <file>B:\iset\isetlens\utility\bbm\coordPolar2Cart3D.m</file>
-      <file>B:\iset\isetlens\utility\bbm\paraxOpt2Imag.m</file>
-      <file>B:\iset\isetlens\utility\lens\lensFocus.m</file>
-      <file>B:\iset\isetlens\utility\lens\lensMatrix.m</file>
-      <file>B:\iset\isetlens\utility\normvec\normvec.m</file>
-      <file>B:\iset\isetlens\utility\normvec\vnorm\vnorm.m</file>
-      <file>B:\iset\isetlens\utility\pointVisualize.m</file>
-      <file>B:\iset\isetlens\utility\rayDirection.m</file>
-      <file>B:\iset\isetlens\utility\rayIntersection.m</file>
-      <file>B:\iset\isetlens\utility\raysVisualize.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="splash.png" optional="false">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="oi2sensor.exe" optional="false">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\oi2sensor.exe</file>
-      <file location="${PROJECT_ROOT}\calc\oi2sensor\for_testing" name="readme.txt" optional="true">B:\iset\iset3d-v4\calc\calc\oi2sensor\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\oi2sensor\for_testing" name="splash.png" optional="false">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\oi2sensor\for_testing" name="readme.txt" optional="true">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\oi2sensor\for_testing" name="oi2sensor.exe" optional="false">B:\iset\iset3d-v4\calc\oi2sensor\for_testing\oi2sensor.exe</file>
     </build-deliverables>
     <workflow />
     <matlab>

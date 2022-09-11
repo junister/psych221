@@ -127,7 +127,10 @@ if ~obj.localRender
         % sync data back -- renderings sub-folder
         % This assumes that all output is in that folder!
         getOutput = tic;
-        pullCommand = sprintf('%s -r %s %s',rSync, ...
+        % this speedup works for put, but so far not for pull
+        %speedup = ' --protocol=29  -e "ssh -x -T -o Compression=no"';
+        speedup = '';
+        pullCommand = sprintf('%s -r %s %s %s',rSync, speedup, ...
             [remoteScene 'renderings/'], dockerWrapper.pathToLinux(fullfile(nativeFolder, 'renderings')));
         if verbose > 0
             fprintf('Pull: %s ...\n', pullCommand);
