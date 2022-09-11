@@ -3,7 +3,7 @@
     <param.appname>oi2sensor</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>0.006</param.version>
+    <param.version>0.007</param.version>
     <param.authnamewatermark>David Cardinal and Brian Wandell</param.authnamewatermark>
     <param.email>david.cardinal@stanford.edu</param.email>
     <param.company>Stanford University</param.company>
@@ -81,6 +81,7 @@
     <fileset.package>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
       <file>${PROJECT_ROOT}\sampleoi.mat</file>
+      <file>B:\iset\iset3d-v4\data</file>
     </fileset.package>
     <fileset.depfun>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
