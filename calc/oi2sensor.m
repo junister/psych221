@@ -8,10 +8,7 @@ function [outputFile] = oi2sensor(options)
 % sensorFile is (for now) the data file for the desired sensor
 %
 
-% test for oiFiles as some type of array here
-
-% These aren't actually optional yet:)
-
+% Should test for oiFiles as some type of array here
 arguments
     options.oiFiles = 'sampleoi.mat';
     options.sensorFile = 'ar0132atSensorRGB.mat';
