@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="287947999" file="B:\iset\iset3d-v4\calc\oi2sensor.prj" location="B:\iset\iset3d-v4\calc" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\calc\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="948615099" file="B:\iset\iset3d-v4\calc\oi2sensor.prj" location="B:\iset\iset3d-v4\calc" name="oi2sensor" preferred-package-location="B:\iset\iset3d-v4\calc\oi2sensor\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>oi2sensor</param.appname>
     <param.icon />
     <param.icons />
@@ -76,12 +76,12 @@
       <file>${PROJECT_ROOT}\oi2sensor.m</file>
     </fileset.main>
     <fileset.resources>
+      <file>B:\iset\isetcam\data</file>
       <file>B:\iset\isetcam\data\human\luminosity.mat</file>
     </fileset.resources>
     <fileset.package>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
       <file>${PROJECT_ROOT}\sampleoi.mat</file>
-      <file>B:\iset\isetcam\data</file>
     </fileset.package>
     <fileset.depfun>
       <file>${PROJECT_ROOT}\ar0132atSensorRGB.mat</file>
