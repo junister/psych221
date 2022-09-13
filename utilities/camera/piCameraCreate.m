@@ -169,7 +169,9 @@ switch ieParamFormat(cameraType)
             error('Lens file %s not found',lensFile)
         else
             % camera.lensfile.value = [name, '.json'];
-            camera.lensfile.value = lensFile;
+%             camera.lensfile.value = lensFile;
+            % We always copy dependent lens file to output folder (Zhenyi)
+            camera.lensfile.value = fullfile('lens', [name, '.json']);
         end
 
         %         if isempty(which(lensFile))
