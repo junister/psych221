@@ -107,7 +107,7 @@ for ii = 1:numel(children)
         if isfield(thisNode,'isObjectInstance')
             if thisNode.isObjectInstance ==1
                 indentSpacing = "    ";
-                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(8:end-2));
+                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(10:end-2));
                 if ~isempty(thisNode.motion)
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'ActiveTransform StartTime \n'));
@@ -239,9 +239,9 @@ for ii = 1:numel(children)
     fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
     if isequal(thisNode.type, 'branch')
         % get the name after stripping ID for this Node
-        while numel(thisNode.name) >= 8 &&...
-                isequal(thisNode.name(5:6), 'ID')
-            thisNode.name = thisNode.name(8:end);
+        while numel(thisNode.name) >= 10 &&...
+                isequal(thisNode.name(7:8), 'ID')
+            thisNode.name = thisNode.name(10:end);
         end
         % Write the object's dimensions
         fprintf(fid, strcat(spacing, indentSpacing,...
@@ -323,15 +323,15 @@ for ii = 1:numel(children)
             outFilePath, writeGeometryFlag);
 
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
-        while numel(thisNode.name) >= 8 &&...
-                isequal(thisNode.name(5:6), 'ID')
+        while numel(thisNode.name) >= 10 &&...
+                isequal(thisNode.name(7:8), 'ID')
             
             % remove instance suffix
             endIndex = strfind(thisNode.name, '_I_');
             if ~isempty(endIndex),    endIndex =endIndex-1;
             else,                     endIndex = numel(thisNode.name);
             end
-            thisNode.name = thisNode.name(8:endIndex);
+            thisNode.name = thisNode.name(10:endIndex);
         end
 
         % if this is an arealight or object without a reference object

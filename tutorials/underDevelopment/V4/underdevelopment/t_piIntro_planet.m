@@ -88,7 +88,7 @@ for ii=1:numel(ids)
 end
 % Remove plane objects because they are lights now.
 for jj = 1:numel(namelist)
-    thisR.set('asset',namelist{jj}(8:end),'delete');
+    thisR.set('asset',namelist{jj}(10:end),'delete');
 end
 %% set material
 thisR.set('material','listva',      'reflectance value', [0.4 0.6 0.1]);

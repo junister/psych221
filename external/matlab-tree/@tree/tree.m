@@ -274,9 +274,9 @@ classdef tree
             elseif ischar(obj.Node{id})
                 newNames = obj.Node{id};
             end
-            while numel(newNames) >= 8 &&...
-                    isequal(newNames(5:6), 'ID')
-                newNames = newNames(8:end);
+            while numel(newNames) >= 10 &&...
+                    isequal(newNames(7:8), 'ID')
+                newNames = newNames(10:end);
             end
             
         end
@@ -374,16 +374,16 @@ classdef tree
             % If id is passed, we check if that node starts with XXXID.
             if isstruct(obj.Node{id})
                 % It is real node.
-                if isfield(obj.Node{id},'name') && numel(obj.Node{id}.name) >= 8 &&...
-                   isequal(obj.Node{id}.name(1:6), sprintf('%04dID', id))
+                if isfield(obj.Node{id},'name') && numel(obj.Node{id}.name) >= 10 &&...
+                   isequal(obj.Node{id}.name(1:10), sprintf('%06dID', id))
                     val = true;
                 else
                     val = false;
                 end
             else
                 % The root node is special.
-                if numel(obj.Node{id}) >= 8 && ...
-                   isequal(obj.Node{id}(1:6), sprintf('%04dID', id))
+                if numel(obj.Node{id}) >= 10 && ...
+                   isequal(obj.Node{id}(1:10), sprintf('%06dID', id))
                     val = true;
                 else
                     val = false;
@@ -414,8 +414,8 @@ classdef tree
                 % from all the nodes.
                 stripNames = obj.stripID;
                 names = cell(1, numel(stripNames));
-                if obj.nnodes > 9999
-                    warning('Number of nodes: %d exceeds 9999', obj.nnodes);
+                if obj.nnodes > 999999
+                    warning('Number of nodes: %d exceeds 999999', obj.nnodes);
                 end
                 
                 % Then we do the renaming.  We are considering if we need
@@ -423,10 +423,10 @@ classdef tree
                 % scenes.
                 for ii=1:obj.nnodes
                     if isstruct(obj.Node{ii})
-                        obj.Node{ii}.name = sprintf('%04dID_%s', ii, stripNames{ii});
+                        obj.Node{ii}.name = sprintf('%06dID_%s', ii, stripNames{ii});
                         names{ii} = obj.Node{ii}.name;
                     else
-                        obj.Node{ii} = sprintf('%04dID_%s', ii, stripNames{ii});
+                        obj.Node{ii} = sprintf('%06dID_%s', ii, stripNames{ii});
                         names{ii} = obj.Node{ii};
                     end
                     
@@ -443,10 +443,10 @@ classdef tree
             
             if ~obj.hasID(id)
                 if isstruct(obj.Node{id})
-                    obj.Node{id}.name = sprintf('%04dID_%s', id, obj.Node{id}.name);
+                    obj.Node{id}.name = sprintf('%06dID_%s', id, obj.Node{id}.name);
                     names = obj.Node{id}.name;
                 else
-                    obj.Node{id} = sprintf('%04dID_%s', id, obj.Node{id});
+                    obj.Node{id} = sprintf('%06dID_%s', id, obj.Node{id});
                     names = obj.Node{id};
                 end
             end

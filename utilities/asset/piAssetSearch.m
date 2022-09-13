@@ -80,21 +80,21 @@ switch srchtype
         for ii=1:numel(oNames)
             if contains(oNames{ii},param,'IgnoreCase',ignoreCase)
                 % This should be the Node index
-                val(end+1) = str2double(oNames{ii}(1:4)); 
+                val(end+1) = str2double(oNames{ii}(1:6)); 
             end
         end
     case {'lightname','lightnames'}
         lNames = thisR.get('light','names id');
         for ii=1:numel(lNames)
             if contains(lNames{ii},param,'IgnoreCase',ignoreCase)
-                val(end+1) = str2double(lNames{ii}(1:4)); 
+                val(end+1) = str2double(lNames{ii}(1:6)); 
             end
         end
     case {'branchname','branchnames'}
         bNames = thisR.get('branch names');
         for ii=1:numel(bNames)
             if contains(bNames{ii},param,'IgnoreCase',ignoreCase)
-                val(end+1) = str2double(bNames{ii}(1:4)); 
+                val(end+1) = str2double(bNames{ii}(1:6)); 
             end
         end
     case {'materialname','materialnames'}

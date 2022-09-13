@@ -1147,7 +1147,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii = 1:numel(ids)
             % Includes ids and everything
             thisName = names{ids(ii)};
-            val{ii} = thisName(8:end);
+            val{ii} = thisName(10:end);
         end
 
         % Objects - this section should be converted to
@@ -1218,7 +1218,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii = 1:numel(ids)
             % Includes ids and everything
             thisName = names{ids(ii)};
-            val{ii} = thisName(8:end);
+            val{ii} = thisName(10:end);
         end
 
     case 'objectsimplenames'
