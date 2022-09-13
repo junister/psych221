@@ -121,10 +121,17 @@ for ii = 1:length(recipelist)
             dstDir    = sceneR.get('output dir');
 
             % Copy the assets from source to destination
-            sourceAssets = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
-            if isfolder(sourceAssets) && ~isempty(dir(fullfile(sourceAssets,'*.pbrt')))
-                dstAssets = fullfile(dstDir,    'scene/PBRT/pbrt-geometry');
-                copyfile(sourceAssets, dstAssets);
+            sourceAssets_v1 = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
+            sourceAssets_v2 = fullfile(sourceDir, 'geometry');
+            if isfolder(sourceAssets_v1) && ~isempty(dir(fullfile(sourceAssets_v1,'*.pbrt')))
+                
+                dstAssets = fullfile(dstDir, 'scene/PBRT/pbrt-geometry');
+                copyfile(sourceAssets_v1, dstAssets);
+            elseif isfolder(sourceAssets_v2) && ...
+                    (~isempty(dir(fullfile(sourceAssets_v2,'*.pbrt'))) ||...
+                    ~isempty(dir(fullfile(sourceAssets_v2,'*.ply'))))
+                dstAssets = fullfile(dstDir, 'geometry');
+                copyfile(sourceAssets_v2, dstAssets);                
             else
                 if isfolder(sourceDir)
                     if ~isfolder(dstDir), mkdir(dstDir), end
@@ -163,6 +170,7 @@ for ii = 1:length(recipelist)
         else
             sceneR.textures = thisR.textures;
         end
+
         if copyTextureFlag
             % Copy texture files
             sourceDir = thisR.get('output dir');
@@ -172,7 +180,12 @@ for ii = 1:length(recipelist)
                 piCopyFolder(sourceTextures, dstDir);
             end
         end
+        
     end
+
 end
 
 end
+
+
+
