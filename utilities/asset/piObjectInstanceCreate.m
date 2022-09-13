@@ -168,6 +168,7 @@ instanceBranchName = OBJsubtree_branch.name;
 % BW Added.  Worked for SimpleScene and the test nightdrive scene.
 % Eliminates the need to make the call after the return from this routine,
 % piObjectInstanceCreate
-thisR.assets = thisR.assets.uniqueNames;
+% This call takes a quite a long time to run for driving scene.
+% thisR.assets = thisR.assets.uniqueNames;
 
 end
