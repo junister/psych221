@@ -56,7 +56,7 @@ classdef dockerWrapper < handle
     %
     %  remoteUser  -- username on remote machine if different from the
     %                   username on the local machine
-    %  remoteContext -- a docker context that defines the remote
+    %  renderContext -- a docker context that defines the remote
     %                   renderer; only set this if it is  different
     %                   from the default that is created for you
     %                   (unusual)
