@@ -46,9 +46,14 @@ end
 %% Omni camera (e.g. one with a lens)
 disp('v_omni')
 setpref('ISET3d', 'tvomniStart', tic);
-v_omni;          
-setpref('ISET3d', 'tvomniTime', toc(getpref('ISET3d', 'tvomniStart', 0)));
-
+try
+    v_omni;          
+    setpref('ISET3d', 'tvomniTime', toc(getpref('ISET3d', 'tvomniStart', 0)));
+catch ME
+    warning('Omni failed.\n');
+    warning(ME.identifier,'%s',ME.message);
+    setpref('ISET3d', 'tvomniTime', -1);
+end
 %% Assets
 disp('t_assets')
 setpref('ISET3d', 'tvassetsStart', tic);
@@ -83,9 +88,14 @@ end
 %% Our Intro Demo
 disp('*** INTRO -- t_piIntro')
 setpref('ISET3d', 'tvpbrtStart', tic);
-t_piIntro;
-setpref('ISET3d', 'tvpbrtTime', toc(getpref('ISET3d', 'tvpbrtStart', 0)));
-
+try
+    t_piIntro;
+    setpref('ISET3d', 'tvpbrtTime', toc(getpref('ISET3d', 'tvpbrtStart', 0)));
+catch ME
+    warning('piIntro failed');
+    warning(ME.identifier,'%s',ME.message);
+    setpref('ISET3d', 'tvpbrtTime', -1);
+end
 %%  Translate and Rotate the camera
 disp('*** CAMERA POSITION -- t_cameraPosition')
 setpref('ISET3d', 'tvcampositionStart', tic);

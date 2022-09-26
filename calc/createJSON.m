@@ -26,3 +26,10 @@ end
 %% NOTE: 
 % They can include complex numbers that are not directly
 % usable in JSON, so we need to encode or re-work somehow
+oiFiles = {'sampleoi.mat'};
+for ii = 1:numel(oiFiles)
+    load(oiFiles{ii}); % assume they are on our path
+    % change suffix to json
+    [~, fName, fSuffix] = fileparts(oiFiles{ii});
+    jsonwrite(fullfile(outputFolder,[fName '.json']), oi);
+end
