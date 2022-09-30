@@ -1,4 +1,4 @@
-function [thisR, instanceBranchName] = piObjectInstanceCreate(thisR, assetname, varargin)
+function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thisR, assetname, varargin)
 %% Create an object copy (instance)
 %
 % Synopsis:
@@ -44,7 +44,8 @@ p.addRequired('thisR', @(x)isequal(class(x),'recipe'));
 p.addParameter('position',[0, 0, 0]);
 p.addParameter('rotation',piRotationMatrix);
 p.addParameter('scale',[1,1,1]);
-p.addParameter('motion',[],@(x)isstruct);
+p.addParameter('motion',[], @(x)isstruct);
+p.addParameter('graftnow',1);
 
 p.parse(thisR, varargin{:});
 
@@ -53,11 +54,12 @@ position = p.Results.position;
 rotation = p.Results.rotation;
 scale    = p.Results.scale;
 motion   = p.Results.motion;
+graftNow = p.Results.graftnow;
 
 %% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
 
-if isempty(asset)
+if isempty(asset{1}) && numel(asset)==1
     warning('%s not found, failed to creat object instance for this asset.', assetname);
 end
 % ZL only addressed the first entry of the cell.  So, this seems OK.
@@ -107,11 +109,13 @@ end
 if ~isempty(scale)
     OBJsubtree_branch.scale{1}    = scale;
 end
+
 if ~isempty(motion)
     OBJsubtree_branch.motion.translation = motion.translation;
     OBJsubtree_branch.motion.rotation = motion.rotation;
     OBJsubtree_branch.motion.scale = motion.scale;
 end
+
 OBJsubtreeNew = tree();
 
 OBJsubtree_branch.referenceObject = OBJsubtree_branch.name(1:end-2); % remove '_B'
@@ -154,14 +158,15 @@ if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNod
     OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
 end
 
-% graft object tree to scene tree
-try
-    id = thisR.get('node', 'root', 'id');
-    thisR.assets = thisR.assets.graft(id, OBJsubtreeNew);
-catch
-    disp('ERROR');
+if graftNow
+    % graft object tree to scene tree
+    try
+        id = thisR.get('node', 'root', 'id');
+        thisR.assets = thisR.assets.append(id, OBJsubtreeNew);
+    catch
+        disp('ERROR: Failed to graft subtree to main tree');
+    end
 end
-
 % Returned
 instanceBranchName = OBJsubtree_branch.name;
 
