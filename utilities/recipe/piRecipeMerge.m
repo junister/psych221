@@ -36,11 +36,11 @@ p.addRequired('objectRs', @(x)isequal(class(x),'recipe') || iscell);
 
 % So far, we add materials, textures, and assets.  We have not yet
 % addressed lights.  The user can
-p.addParameter('material',true);
-p.addParameter('texture',true);
-p.addParameter('asset',true);
-p.addParameter('objectinstance',false); 
-p.addParameter('nodename','',@ischar);  % Name of the top node in the subtree
+p.addParameter('material', true);
+p.addParameter('texture', true);
+p.addParameter('asset', true);
+p.addParameter('objectinstance', false); 
+p.addParameter('nodename', '', @ischar);  % Name of the top node in the subtree
 p.addParameter('copyfiles', 1 , @islogical);
 
 p.parse(sceneR, objectRs, varargin{:});
@@ -173,11 +173,16 @@ for ii = 1:length(recipelist)
 
         if copyTextureFlag
             % Copy texture files
-            sourceDir = thisR.get('output dir');
+%             sourceDir = thisR.get('output dir');
+            sourceDir = thisR.get('input dir');
             dstDir    = sceneR.get('output dir');
             sourceTextures = fullfile(sourceDir, 'textures');
+            dstTextures    = fullfile(dstDir, 'textures');
             if exist(sourceTextures, 'dir')
-                piCopyFolder(sourceTextures, dstDir);
+%                 piCopyFolder(sourceTextures, dstDir);
+                  copyfile(sourceTextures, dstTextures);
+            else
+                disp('Should not go here.')
             end
         end
         
