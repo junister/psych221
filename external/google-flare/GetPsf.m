@@ -1,6 +1,6 @@
 %  // clang-format off
 function psf = GetPsf(aperture, phase, wavelengths)
-% GetPsf Computes the RGB response of an aperture under a point light source.
+% GetPsf Computes the wavelength response of an aperture under a point light source.
 %
 % psf = GetPsf(aperture, phase, wavelengths, spectral_response, crop)
 % Computes the point spread function (PSF) of the given aperture in response to
