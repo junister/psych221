@@ -25,6 +25,8 @@ textureList = values(thisR.textures.list);
 
 inputDir = thisR.get('input dir');
 
+% [~,sceneName] = fileparts(inputDir);
+
 for ii = 1:numel(textureList)
     
     if ~isfield(textureList{ii},'filename')
@@ -41,22 +43,23 @@ for ii = 1:numel(textureList)
 
     if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
         if exist(thisImgPath, 'file')
-            
-            outputPath = fullfile(inputDir, path, [name,'.png']);
+%             outputFile = fullfile(path,[sceneName,'_',name,'.png']);
+            outputFile = fullfile(path,[name,'.png']);
+            outputPath = fullfile(inputDir, outputFile);
             if ~exist(outputPath,'file')
                 if isequal(ext,'.tga')
                     thisImg = tga_read_image(thisImgPath);
                 else
                     thisImg = imread(thisImgPath);
                 end
-                imwrite(thisImg,outputPath);
+                imwrite(thisImg, outputPath);
             end
 
             % update texture slot
             if ispc
-                textureList{ii}.filename.value = dockerWrapper.pathToLinux(fullfile(path, [name,'.png']));
+                textureList{ii}.filename.value = dockerWrapper.pathToLinux(outputFile);
             else
-                textureList{ii}.filename.value = fullfile(path, [name,'.png']);
+                textureList{ii}.filename.value = outputFile;
             end
 
             thisR.textures.list(textureList{ii}.name) = textureList{ii};
@@ -74,8 +77,10 @@ for ii = 1:numel(textureList)
     if contains(textureList{ii}.name,{'tex_'}) && ...
             exist(fullfile(inputDir, texSlotName),'file') && ...
             contains(textureList{ii}.name,{'.alphamap.'})
-        
-        outputPath = fullfile(inputDir, path, [name,'_alphamap.png']);
+
+%         outputFile = fullfile(path,[sceneName,'_',name,'_alphamap.png']);
+        outputFile = fullfile(path,[name,'_alphamap.png']);
+        outputPath = fullfile(inputDir, outputFile);
         [img, ~, alphaImage] = imread(thisImgPath);
 
         if size(img,3)~=1 && isempty(alphaImage) && ~isempty(find(img(:,:,1) ~= img(:,:,2), 1))
@@ -92,9 +97,9 @@ for ii = 1:numel(textureList)
             imwrite(img(:,:,1),outputPath);
         end
         if ispc
-            textureList{ii}.filename.value = dockerWrapper.pathToLinux(fullfile(path, [name,'_alphamap.png']));
+            textureList{ii}.filename.value = dockerWrapper.pathToLinux(outputFile);
         else
-            textureList{ii}.filename.value = fullfile(path, [name,'_alphamap.png']);
+            textureList{ii}.filename.value = outputFile;
         end
         thisR.textures.list(textureList{ii}.name) = textureList{ii};
         
@@ -134,16 +139,18 @@ for ii = 1:numel(matKeys)
         
         thisImg = imread(thisImgPath);
 
-        outputPath = fullfile(inputDir, path, [name,'.png']);
+%         outputFile = fullfile(path,[sceneName,'_',name,'.png']);
+        outputFile = fullfile(path,[name,'.png']);
+        outputPath = fullfile(inputDir, outputFile);
         
         imwrite(thisImg,outputPath);
         % update texture slot
         % This is a problem if we are running on Windows and
         % rendering on Linux
         if ispc
-            thisMat.normalmap.value = dockerWrapper.pathToLinux(fullfile(path, [name,'.png']));
+            thisMat.normalmap.value = dockerWrapper.pathToLinux(outputFile);
         else
-            thisMat.normalmap.value = fullfile(path, [name,'.png']);
+            thisMat.normalmap.value = outputFile;
         end
         thisR.materials.list(matKeys{ii}) = thisMat;
         
