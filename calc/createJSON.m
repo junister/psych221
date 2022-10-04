@@ -49,14 +49,26 @@ for ii = 1:numel(oiFiles)
         load(sensorFiles{iii}); % assume they are on our path
         % change suffix to json
         [~, sName, fSuffix] = fileparts(sensorFiles{iii});
+
+        % Auto-Exposure breaks with oncoming headlights, etc.
+        eTime  = autoExposure(oi,sensor,.3,'mean');
+        sensor = sensorSet(sensor,'exp time',eTime);
+
         sensor = sensorCompute(sensor,oi);
         % append to our overall array
         imageArray = [imageArray sensor];
 
         % Here we save the preview images
         % Should cache the name with the metadata!
-        sensorJPEG = fullfile(outputFolder,'images',[fName '-' sName '.jpg']);
-        sensorSaveImage(sensor, sensorJPEG  ,'rgb');
+        ipJPEG = fullfile(outputFolder,'images',[fName '-' sName '.jpg']);
+        ip = ipCreate('ourIP',sensor);
+        ip = ipCompute(ip, sensor);
+
+        % save using default IP as preview
+        outputFile = ipSaveImage(ip, ipJPEG);
+        % we can save without an IP if we want
+        %sensorSaveImage(sensor, sensorJPEG  ,'rgb');
+
         % we'd better have metadata by now!
         sensor.metadata.jpegName = sensorJPEG;
         metadata = sensorSet(sensor,'volts',[]);
