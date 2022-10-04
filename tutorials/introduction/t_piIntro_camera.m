@@ -61,7 +61,7 @@ thisR.set('skymap','room.exr');
 thisR.set('light','room_L','specscale',0.03);
 
 thisR.show('objects');
-thisR.set('asset','001_glass_O','delete');
+%thisR.set('asset','001_glass_O','delete');
 % thisR.set('asset','001_mirror_O','delete');
 scene = piWRS(thisR);
 sceneWindow(scene);
