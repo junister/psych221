@@ -141,7 +141,14 @@ if isfield(lght, pName)
             elseif numel(val) == 1 && ~ischar(val)
                 % User sent in 1 value so this is blackbody temperature
                 lght.(pName).type = 'blackbody';            
-            elseif (numel(val) > 3 && mod(numel(val), 2) == 0) || ischar(val)
+            elseif numel(val) > 3 || ischar(val)
+                if ischar(val) % || mod(numel(val), 2) == 0
+                    % Do nothing
+                elseif val(1) - val(3) == val(3) - val(5)
+                    % Do nothing
+                else % It only contains the spd data but not wavelength
+                    error('No wavelength information, call piSPDCreate and send in return value instead');
+                end
                 % User sent in either
                 %  * a numerical vector of (wave, val, wave, val)
                 %  pairs or

@@ -42,11 +42,19 @@ for ii = 1:numel(filelists)
     if contains(filelists(ii).name, {'REFL','ROUGHNESS'})
         roughness_texture = TexFormat(fullfile(filelists(ii).folder, filelists(ii).name));
         if contains(roughness_texture,'REFL')
-            ref = rgb2gray(imread(filelists(ii).name));
+            % ZLY: Oct-2022: check the dimension of input file, if that's a
+            % monochrome image then don't do rgb2gray
+            cur_img = imread(filelists(ii).name);
+            if numel(size(cur_img)) == 3
+                ref = rgb2gray(cur_img);
+            else
+                ref = cur_img;
+            end
             ref = double(ref)/255;
             roughness = 1-ref;
             roughness_texture = strrep(roughness_texture, 'REFL', 'ROUGHNESS');
-            imwrite((roughness/max2(roughness)), fullfile(filelists(ii).folder, roughness_texture));
+            % imwrite((roughness/max2(roughness)), fullfile(filelists(ii).folder, roughness_texture));
+            imwrite((roughness/max2(roughness)), roughness_texture);
         end
         tex_roughness = piTextureCreate([materialName,'_tex_roughness'],...
             'type','imagemap',...

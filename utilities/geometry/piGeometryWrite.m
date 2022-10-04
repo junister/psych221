@@ -394,7 +394,12 @@ tMatrix = piTransformCompose(translation, rotation, scale);
 tMatrix = reshape(tMatrix,[1,16]);
 
 if arealight
-    transformType = 'Transform';
+    % ZLY Oct-2022: Somehow this is not correct for area light, double
+    % checking? If it is transform for area light, the syntax in the
+    % fprintf will be wrong. I think it also should be concattransform, but
+    % not 100% sure.
+    % transformType = 'Transform';
+    transformType = 'ConcatTransform';
 else
     transformType = 'ConcatTransform';
 end

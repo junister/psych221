@@ -28,9 +28,17 @@ if isinteger(num)
     string = int2str(num(:)');
 else
     % using %.5f is much slower than simply asking for precision
-    %formatSpec = '%.5f ';
-    formatSpec = 7; % 7 significant digits
-    string = num2str(num(:)', formatSpec);
+    % ZLY 2022: In some special cases, the shape value can be very small 
+    % (less than 0.01). If so, num2str with formatSpec = integer won't
+    % work. So for that special case, we keep the formatSpec = '%.5f' to
+    % keep the string from scientific notation.
+    if all(num(:) >= 1e-2)
+        formatSpec = 7; % 7 significant digits
+        string = num2str(num(:)', formatSpec);
+    else
+        formatSpec = '%.5f ';
+        string = num2str(num(:)', formatSpec);
+    end
 end
 
 % remove extra space from num2str function

@@ -1,8 +1,9 @@
-function vec = piMaterialCreateSPD(wave, spd, varargin)
-% Generate spectrum in PBRT version with wavelength and the spd.
-% We'll deprecate this function, call piSPDCreate instead.
+function vec = piSPDCreate(wave, spd, varargin)
+% Generate spectrum in PBRT version with wavelength and the spd
+%
+% 
 % Synopsis:
-%   vec = piMaterialCreateSPD(wave, spd, varargin)
+%   vec = piSPDCreate(wave, spd, varargin)
 %
 % Inputs:
 %   
@@ -11,12 +12,10 @@ function vec = piMaterialCreateSPD(wave, spd, varargin)
 %{
 wave = 400:10:700;
 spd = 300:10:600;
-vec = piMaterialCreateSPD(wave, spd);
+vec = piSPDCreate(wave, spd);
 %}
 
-vec = piSPDCreate(wave, spd);
 %% parse input
-%{
 p = inputParser;
 p.addRequired('wave', @isvector);
 p.addRequired('spd', @isvector);
@@ -33,5 +32,4 @@ else
     vec(1:2:end) = wave;
     vec(2:2:end) = spd;
 end
-%}
 end

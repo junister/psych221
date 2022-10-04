@@ -139,9 +139,10 @@ switch ieParamFormat(lght.type)
         lght.ctform.type = 'ctform';
         lght.ctform.value = [];
 
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
+        lght.scale.type = 'float';
+        lght.scale.value = [];
         %}
+        
     case 'point'
         % Initializes a light at the origin.
         % Point sources emit in all directions, and have no 'to'.
