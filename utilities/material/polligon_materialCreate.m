@@ -71,13 +71,18 @@ switch materialType
             'type','coateddiffuse',...
             'reflectance',[materialName,'_tex_ref']);
         if ~isempty(normal_texture')
-            material.normalmap.value = normal_texture;
+            material = piMaterialSet(material, 'normalmap', normal_texture);
+            % material.normalmap.value = normal_texture;
         end
         if ~isempty(tex_roughness)
-            material.roughness.value = [materialName,'_tex_roughness'];
+            material = piMaterialSet(material, 'roughness',...
+                [materialName,'_tex_roughness']);
+            % material.roughness.value = [materialName,'_tex_roughness'];
         end
         if ~isempty(tex_displacement)
-            material.displacement.value = [materialName,'_tex_displacement'];
+            material = piMaterialSet(material, 'displacement',...
+                            [materialName,'_tex_displacement']);
+            % material.displacement.value = [materialName,'_tex_displacement'];
         end
 
     case 'coatedconductor'
@@ -86,14 +91,19 @@ switch materialType
             'reflectance',[materialName,'_tex_ref'],...
             'interfaceroughness',0.01);
         if ~isempty(normal_texture')
-            material.normalmap.value = normal_texture;
+            material = piMaterialSet(material, 'normalmap', normal_texture);            
+            % material.normalmap.value = normal_texture;
         end
         if ~isempty(tex_roughness)
-            material.conductorroughness.type  = 'texture';
-            material.conductorroughness.value = [materialName,'_tex_roughness'];
+            material = piMaterialSet(material, 'conductorroughness',...
+                                [materialName,'_tex_roughness']);
+            % material.conductorroughness.type  = 'texture';
+            % material.conductorroughness.value = [materialName,'_tex_roughness'];
         end
         if ~isempty(tex_displacement)
-            material.displacement.value = [materialName,'_tex_displacement'];
+            material = piMaterialSet(material, 'displacement',...
+                [materialName,'_tex_displacement']);
+            % material.displacement.value = [materialName,'_tex_displacement'];
         end
 end
 

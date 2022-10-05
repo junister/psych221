@@ -813,8 +813,14 @@ switch param
             switch val
                 case {'add'}
                     % thisR.set('textures', 'add', texture struct);
-                    thisR.textures.list(newTexture.name) = varargin{1};
-                    thisR.textures.order{end + 1} = newTexture.name;
+                    if ~isKey(thisR.textures.list, newTexture.name)
+                        thisR.textures.list(newTexture.name) = varargin{1};
+                        thisR.textures.order{end + 1} = newTexture.name;
+                    else
+                        warning('%s tecture already exists, overriding',...
+                            newTexture.name);
+                        thisR.textures.list(newTexture.name) = varargin{1};
+                    end
                     return;
                 case {'delete', 'remove'}
                     % thisR.set('texture', 'delete', idxORname);
