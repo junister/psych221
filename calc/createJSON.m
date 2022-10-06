@@ -50,6 +50,11 @@ for ii = 1:numel(oiFiles)
         % change suffix to json
         [~, sName, fSuffix] = fileparts(sensorFiles{iii});
 
+        % At least for now, scale sensor
+        % to match the FOV
+        hFOV = oiGet(oi,'hfov');
+        sensor = sensorSetSizeToFOV(sensor,hFOV,oi);
+
         % Auto-Exposure breaks with oncoming headlights, etc.
         % NOTE: This is a patch, as it doesn't work for fog, for example.
         %       Need to decide best default for Exposure time calc
@@ -64,7 +69,11 @@ for ii = 1:numel(oiFiles)
         % We use the fullfile for local write
         % and just the filename for web use
         ipFileName = [fName '-' sName '.jpg'];
+        ipThumbnailName = [fName '-' sName '-thumbnail.jpg'];
+
         ipLocalJPEG = fullfile(outputFolder,'images',ipFileName);
+        ipLocalThumbnail = fullfile(outputFolder,'images',ipThumbnailName);
+
         ip = ipCreate('ourIP',sensor);
         ip = ipCompute(ip, sensor);
 
@@ -73,13 +82,19 @@ for ii = 1:numel(oiFiles)
         % we can save without an IP if we want
         %sensorSaveImage(sensor, sensorJPEG  ,'rgb');
 
+        % It's late & I'm lazy so generating a thumbnail
+        % by reading the jpeg back in, etc.
+        thumbnail = imread(ipLocalJPEG);
+        thumbnail = imresize(thumbnail, [128 128]);
+        imwrite(thumbnail, ipLocalThumbnail);
+
         % we'd better have metadata by now!
         sensor.metadata.jpegName = ipFileName;
+        sensor.metadata.thumbnailName = ipThumbnailName;
 
-        % Zero out Volts as a way to make the file smaller
-        % Perhaps only export metadata?
-        metadata = sensorSet(sensor,'volts',[]);
-        metadataArray = [metadataArray metadata];
+        % We ONLY write out the metadata in the main .json
+        % file to keep it of reasonable size
+        metadataArray = [metadataArray sensor.metadata];
         jsonwrite(fullfile(outputFolder,'images', [fName '-' sName '.json']), sensor);
 
     end
