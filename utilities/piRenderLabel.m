@@ -1,7 +1,8 @@
-function [objectslist,instanceIdMap] = piRenderLabel(thisR)
+function [objectslist,instanceIdMap, renderCMD,thisRecipe] = piRenderLabel(thisRecipe, renderLater)
 
 
-InstanceR = thisR.copy;
+InstanceR = piRecipeCopy(thisRecipe);
+
 outputDir = InstanceR.get('outputdir');
 [~,scenename] = fileparts(InstanceR.get('outputfile'));
 
@@ -19,7 +20,7 @@ nNodes = numel(InstanceR.assets.Node);
 NodeList = InstanceR.assets.Node;
 for nn = nNodes:-1:1
     thisNode =  NodeList{nn};
-    if contains(thisNode.name, {'headlight','headlamp','skymap'})
+    if contains(thisNode.name, {'light','lamp','sky'})
         InstanceR.assets = InstanceR.assets.chop(nn);
     end
 end
@@ -30,7 +31,8 @@ for mm = 1:numel(materialKeys)
     newMat = piMaterialCreate(materialKeys{mm}, ...
         'type', 'diffuse', ...
         'reflectance value',[1 1 1]);
-    InstanceR.set('material', 'replace', materialKeys{mm}, newMat);
+    InstanceR.materials.list(materialKeys{mm}) = newMat;
+%     InstanceR = InstanceR.set('material', 'replace', materialKeys{mm}, newMat);
 end
 
 spotWhite = piLightCreate('spotWhite',...
@@ -44,7 +46,7 @@ InstanceR.set('light', spotWhite, 'add');
 
 InstanceR.set('outputFile',fullfile(outputDir, [scenename, '_instanceID.pbrt']));
 
-piWrite(InstanceR, 'overwriteresources', false);
+piWrite(InstanceR);
 
 outputFile = InstanceR.get('outputfile');
 fname = strrep(outputFile,'.pbrt','_geometry.pbrt');
@@ -53,7 +55,13 @@ tmp = textscan(fileID,'%s','Delimiter','\n');
 txtLines = tmp{1};
 fclose(fileID);
 objectslist = txtLines(piContains(txtLines,'ObjectInstance'));
-
-instanceIdMap = piRenderZhenyi(InstanceR,'device','cpu');
+if exist('renderLater','var') && renderLater
+    instanceIdMap = [];
+    [~, ~, renderCMD] = piRenderZhenyi(InstanceR, ...
+        'device','cpu', ...
+        'renderLater',true);
+else
+    instanceIdMap = piRenderZhenyi(InstanceR,'device','cpu');
+end
 
 end
