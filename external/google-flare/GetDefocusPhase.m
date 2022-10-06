@@ -41,12 +41,13 @@ delta_sample_x = abs(sample_x(1)-sample_x(2));
 
 %% The mask is simply a centered unit disk.
 % Zernike polynomials below are only defined on the unit disk.
-% circular_mask = rr <= 1;
-% figure;imagesc(circular_mask);title('Test only');
-centerPoint = [n/2+1,n/2+1];
-pgon1 = nsidedpoly(numSidesAperture, 'Center', centerPoint, 'radius', floor(1/delta_sample_x));
-mask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), floor(n), floor(n));
-
+mask = rr <= 1;
+if numSidesAperture>1 && numSidesAperture<100
+    centerPoint = [n/2+1,n/2+1];
+    pgon1 = nsidedpoly(numSidesAperture, 'Center', centerPoint, 'radius', floor(1/delta_sample_x));
+    pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), floor(n), floor(n));
+    mask = mask*pgonmask;
+end
 %% Compute the Zernike polynomial of degree 2, order 0. 
 % Zernike polynomials form a complete, orthogonal basis over the unit disk. The 
 % "degree 2, order 0" component represents defocus, and is defined as (in 
