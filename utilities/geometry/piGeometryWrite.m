@@ -113,8 +113,7 @@ for ii = 1:numel(children)
                         'ActiveTransform StartTime \n'));
                 end
 
-                arealight = 0; % light can't be used as instance.
-                piGeometryTransformWrite(fid, thisNode, "", indentSpacing, 0);
+                piGeometryTransformWrite(fid, thisNode, "", indentSpacing);
 
                 % Write out motion
                 if ~isempty(thisNode.motion)
@@ -123,7 +122,7 @@ for ii = 1:numel(children)
                             'ActiveTransform EndTime \n'));
 
                         % First write out the same translation and rotation
-                        piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
+                        piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
 
                         if isfield(thisNode.motion, 'translation')
                             if isempty(thisNode.motion.translation(jj, :))
@@ -209,10 +208,6 @@ end
 % indent spacing
 indentSpacing = "    ";
 
-% indicate wheather the child node is an arealight, arealight use 'Transfom'
-% other objects use 'ConcatTransform', not sure why yet. --Zhenyi
-arealight = 0;
-
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
 
@@ -228,7 +223,6 @@ for ii = 1:numel(children)
         thisNodeChild = obj.get(thisNodeChildId);
         if strcmp(thisNodeChild.type, 'light') &&...
                 strcmp(thisNodeChild.lght{1}.type,'area')
-            arealight = 1; % this transform is for an arealight
         end
     end
     referenceObjectExist = [];
@@ -265,8 +259,7 @@ for ii = 1:numel(children)
             % the case below. Have no clue.
             % If this way, we would write the translation, rotation and
             % scale line by line based on the order of thisNode.transorder
-            piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
-            arealight = 0;
+            piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
         else
             thisNode.concattransform(13:15) = thisNode.translation(:);
             fprintf(fid, strcat(spacing, indentSpacing,...
@@ -284,7 +277,7 @@ for ii = 1:numel(children)
 
 
                 % First write out the same translation and rotation
-                piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight);
+                piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
 
                 if isfield(thisNode.motion, 'translation')
                     if isempty(thisNode.motion.translation(jj, :))
@@ -370,7 +363,7 @@ end
 end
 
 %% Geometry file writing helper
-function piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing, arealight)
+function piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing)
 % Zhenyi: export Transform matrix instead of translation/rotation/scale
 
 pointerT = 1; pointerR = 1; pointerS = 1;
@@ -393,16 +386,8 @@ end
 tMatrix = piTransformCompose(translation, rotation, scale);
 tMatrix = reshape(tMatrix,[1,16]);
 
-if arealight
-    % ZLY Oct-2022: Somehow this is not correct for area light, double
-    % checking? If it is transform for area light, the syntax in the
-    % fprintf will be wrong. I think it also should be concattransform, but
-    % not 100% sure.
-    % transformType = 'Transform';
-    transformType = 'ConcatTransform';
-else
-    transformType = 'ConcatTransform';
-end
+transformType = 'ConcatTransform';
+
 fprintf(fid, strcat(spacing, indentSpacing,...
     sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
     transformType, tMatrix(:)), '\n'));

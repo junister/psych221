@@ -130,7 +130,7 @@ OBJsubtreeNew = OBJsubtreeNew.set(1, OBJsubtree_branch);
 % Check wheather there are extra nodes attached.
 if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNode)
     extraNode = OBJsubtree_branch.extraNode;
-
+%{
     extraNodeNew = extraNode;
     for nLightsNode = 1:numel(extraNode.Node)
         thisLightNode = extraNode.Node{nLightsNode};
@@ -153,9 +153,9 @@ if isfield(OBJsubtree_branch,'extraNode') && ~isempty(OBJsubtree_branch.extraNod
             extraNodeNew = extraNodeNew.set(nLightsNode, thisLightNode);
         end
     end
-
+%}
     % graft lightsNode
-    OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNodeNew);
+    OBJsubtreeNew = OBJsubtreeNew.graft(1, extraNode);
 end
 
 if graftNow
