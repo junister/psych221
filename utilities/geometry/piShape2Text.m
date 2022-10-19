@@ -21,7 +21,7 @@ if isfield(shape, 'filename') && ~isempty(shape.filename)
     txt = strcat(txt, ' "string filename" ', ' "',shape.filename,'"');
 end
 if isfield(shape, 'integerindices') && ~isempty(shape.integerindices)
-    txt = strcat(txt, ' "integer indices"', [' [',piNum2String(shape.integerindices),']',]);
+    txt = strcat(txt, ' "integer indices"', [' [',num2str(shape.integerindices),']',]);
 end
 if isfield(shape, 'point3p') && ~isempty(shape.point3p)
     txt = strcat(txt, ' "point3 P"', [' [',piNum2String(shape.point3p),']',]);
