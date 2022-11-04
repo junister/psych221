@@ -772,11 +772,15 @@ classdef dockerWrapper < handle
                     % use.  We do this depending on the machine and the
                     % GPU.  A different image is needed for each, sigh.
                     %
+                    % BW:  Setting to
+                    % 'digitalprodev/pbrt-v4-gpu-ampere-mux:latest' to test
+                    % microlens code.  It was empty and defaulted to
+                    % 'shared' one below.
 
                     if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
                         switch thisD.whichGPU
                             case {0, -1}
-                                thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux-shared';
+                                thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                             case 1
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                             case 2

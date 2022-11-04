@@ -162,28 +162,20 @@ switch ieParamFormat(cameraType)
         % 
         % So, we test to see if lensFile is a full path. If it is, we
         % leave it alone.  We cannot test
-        if ~strncmp(lensFile,'/',1)
-            lensFile = fullfile(isetRootPath,'data','lens',lensFile);
-        end
         if ~isfile(lensFile)
             error('Lens file %s not found',lensFile)
+        elseif strncmp(lensFile,'/',1)
+            % Full path was specified.  Use it.
+            camera.lensfile.value = lensFile;
         else
-            % camera.lensfile.value = [name, '.json'];
-%             camera.lensfile.value = lensFile;
+            % Partial path ways specified.  So, use the filename and
+            % assume it is in the default location (isecam/data/lens).
             % We always copy dependent lens file to output folder (Zhenyi)
-            camera.lensfile.value = fullfile('lens', [name, '.json']);
+            camera.lensfile.value = fullfile(isetRootPath,'data','lens',[name, '.json']);
         end
 
-        %         if isempty(which(lensFile))
-        %             % The lensFile is not included in iset3d lens folder.
-        %             % So we copy the file into the lens folder.
-        %             copyfile(lensFile, fullfile(piRootPath,'data/lens'));
-        %             camera.lensfile.value = [name, '.json'];
-        %         else
-        %             % lensFile in matlab path
-        %             camera.lensfile.value = ;
-        %         end
-        
+        % Why are we setting these values here?  We should fix.
+        % TODO:  Change this.
         camera.aperturediameter.type = 'float';
         camera.aperturediameter.value = 5;    % mm
         camera.focusdistance.type = 'float';
