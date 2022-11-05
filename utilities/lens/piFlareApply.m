@@ -24,6 +24,13 @@ function [opticalImage, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %   aperture:  Scratched aperture
 %   psf_spectral -
 %
+% Description
+%   The paper "How to Train Neural Networks for Flare Removal" by Wu et al.
+%
+% See also
+%   
+
+% Examples:
 %{
 sceneSize = 512;
 scene = sceneCreate('point array',sceneSize, 512);
