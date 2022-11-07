@@ -6,8 +6,8 @@ function  setPrefs(varargin)
 %
 % Brief synopsis
 %  Interface to Matlab setpref(), getpref().  The Matlab prefs are
-%  persistent across Matlab sessions.  When these parameters are
-%  changed, dockerWrapper.reset() is called.
+%  persistent across Matlab sessions.  When these parameters are changed,
+%  dockerWrapper.reset() is called.
 %
 % Inputs
 %   N/A
@@ -39,8 +39,11 @@ function  setPrefs(varargin)
 % Return
 %   Changes the Matlab prefs
 %
+% Notes
+%   developed to replace dockerWrapper.setParams
+%
 % See also
-%   dockerWrapper.getPrefs;
+%   dockerWrapper.getPrefs;  
 
 p = inputParser;
 p.addParameter('verbosity','',@isnumeric);
@@ -62,28 +65,6 @@ p.addParameter('localImageTag','',@ischar);
 p.addParameter('localVolumePath','',@ischar);
 p.parse(varargin{:});
 
-% % The options slots 
-% arguments
-%     options.verbosity {mustBeNumeric} = [];
-%     options.whichGPU {mustBeNumeric} = [];
-%     options.gpuRendering = [];
-% 
-%     % Remote options
-%     % these relate to remote/server rendering
-%     % they overlap while we learn the best way to organize them
-%     options.remoteMachine = ''; % for syncing the data
-%     options.remoteUser = ''; % use for rsync & ssh/docker
-% 
-%     options.remoteImage = '';
-%     options.remoteImageTag = '';
-%     options.remoteRoot = ''; % we need to know where to map on the remote system
-% 
-%     % When we run on the user's computer
-%     options.localRoot = ''; % for the Windows/wsl case (sigh)
-%     options.localRender   = '';
-%     options.localImageTag = '';
-%     options.localVolumePath = '';
-% end
 
 % Interface
 if ~isempty(p.Results.verbosity)

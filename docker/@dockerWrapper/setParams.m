@@ -1,4 +1,5 @@
 function  setParams(options)
+% Deprecated.  Use dockerWrapper.setPrefs
 % Set the Matlab prefs (getpref('docker')) variables.
 %
 % Syntax

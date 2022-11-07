@@ -1,8 +1,6 @@
 classdef dockerWrapper < handle
     %DOCKERWRAPPER A class to manage ISET3d-v4 rendering
     %
-    % D.Cardinal -- Stanford University -- 2021-2022
-    %
     % This class manages how we run PBRT and other tools in Linux docker
     % containers in ISET3d (version 4). At present, we manage these cases:
     %
@@ -94,10 +92,18 @@ classdef dockerWrapper < handle
     % Those can be pruned by running the same command on the server.
     % (or wait for DJC to prune them on the server every few days:))
     %
+    % Useful docker tips
+    %    docker ps
+    %    docker images
+    %    docker -it exec <dockerID> bash 
+    %      (https://stackoverflow.com/questions/30172605/how-do-i-get-into-a-docker-containers-shell)
+    %
     % Examples:
     %
+    % D.Cardinal -- Stanford University -- 2021-2022
+    %
     % See also
-    %   
+    %   setpref/getpref
 
     properties (SetAccess = public)
 
