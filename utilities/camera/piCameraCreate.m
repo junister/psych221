@@ -160,11 +160,7 @@ switch ieParamFormat(cameraType)
         % case and now the microlens case.  In the microlens case, we
         % build the combined lens file in the output directory. (BW)
         % 
-        % So, we test to see if lensFile is a full path. If it is, we
-        % leave it alone.  We cannot test
-        if ~isfile(lensFile)
-            error('Lens file %s not found',lensFile)
-        elseif strncmp(lensFile,'/',1)
+        if isfile(lensFile)
             % Full path was specified.  Use it.
             camera.lensfile.value = lensFile;
         else
