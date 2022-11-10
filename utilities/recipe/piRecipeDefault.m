@@ -30,7 +30,7 @@ function thisR = piRecipeDefault(varargin)
 %
 %
 % See also
-%  @recipe, recipe.list
+%  ieWebGet, @recipe, recipe.list
 
 % Examples:
 %{
