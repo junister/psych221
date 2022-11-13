@@ -1,4 +1,4 @@
-%% Chromaticity example
+see%% Chromaticity example
 %
 % * We render a scene of a sphere that is illuminated by a point source.
 % We calculate an RGB image using a typical oi, sensor and ip routines.
