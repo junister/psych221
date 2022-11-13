@@ -88,12 +88,12 @@ try
     % test remote CPU rendering
     % currently we cache 1 GPU and 1 CPU container
     % Initializing a second one of either requires a reset
-    dockerWrapper.reset();
-
+    
     % NOTE: To render remotely, we may need to specify the .remoteImage
     %       since we don't know what CPU it is
     % Remote CPU for tagged case
 
+    dockerWrapper.reset();
     thisDWrapper = dockerWrapper;
     thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
     thisDWrapper.remoteImageTag = 'humanEye';
