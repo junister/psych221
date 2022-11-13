@@ -21,7 +21,8 @@ end
 
 %% Make an oi of the chess set scene using the LeGrand eye model
 
-thisSE = sceneEye('chess set scaled','human eye','arizona');
+% thisSE = sceneEye('chess set scaled','human eye','arizona');
+thisSE = sceneEye('chessset','human eye','arizona');
 
 thisSE.set('rays per pixel',128);  % Pretty quick, but not high quality
 
