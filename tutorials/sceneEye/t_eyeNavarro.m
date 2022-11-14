@@ -109,7 +109,8 @@ thisSE.set('spatial samples',256);
 % This takes longer than the pinhole rendering, so we do not bother with
 % the depth.
 thisDWrapper = dockerWrapper;
-thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
+% thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance', 'depth'});

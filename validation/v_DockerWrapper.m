@@ -63,7 +63,7 @@ end
 
 %% Local rendering CPU
 
-fprintf('*** Local CPU render, verbosity = 0 ... ***');
+fprintf('*** Local CPU render, verbosity = 0 ... ***\n');
 fprintf('-------------------------------------\n\n');
 
 try
@@ -82,6 +82,7 @@ catch
     result = -1;
 end
 
+%%
 fprintf('*** Remote rendering on CPU :humanEye test... ***\n');
 fprintf('-------------------------------------\n\n')
 try
