@@ -11,6 +11,14 @@ function result = v_DockerWrapper(options)
 %   remoteImage           digitalprodev/XXX
 %   renderContext         remote-mux
 %
+% Specific example for stanford wandell lab
+%
+%   remoteMachine     muxreconrt.stanford.edu
+%   remoteImage       'digitalprodev/pbrt-v4-gpu-ampere-mux:latest'
+%   renderContext     'remote-mux'
+%
+% See also
+%
 
 arguments
     options.length = 'short'; % how detailed a test to run
@@ -30,7 +38,7 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Default rendering
 
-fprintf('*** User defaults ... ****\n');
+fprintf('*** Testing user defaults ... ****\n');
 fprintf('-------------------------------------\n\n')
 
 try
@@ -45,7 +53,7 @@ catch
 end
 
 %% Default rendering, verbose
-fprintf('*** Rendering with verbosity = 2 ***\n');
+fprintf('*** Testing rendering with verbosity = 2 ***\n');
 fprintf('-------------------------------------\n\n')
 
 try
@@ -63,7 +71,7 @@ end
 
 %% Local rendering CPU
 
-fprintf('*** Local CPU render, verbosity = 0 ... ***\n');
+fprintf('*** Testing Local CPU render, verbosity = 0 ... ***\n');
 fprintf('-------------------------------------\n\n');
 
 try
@@ -89,7 +97,7 @@ try
     % test remote CPU rendering
     % currently we cache 1 GPU and 1 CPU container
     % Initializing a second one of either requires a reset
-    
+
     % NOTE: To render remotely, we may need to specify the .remoteImage
     %       since we don't know what CPU it is
     % Remote CPU for tagged case
@@ -144,6 +152,13 @@ if isequal(options.length, 'long')
         result = -1;
     end
 
+end
+
+%% Parting comment.
+if result < 0
+    disp('At least one test case failed.')
+else
+    disp('No failures reported.')
 end
 
 %% END

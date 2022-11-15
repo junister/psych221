@@ -4,20 +4,17 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 % Synopsis
 %   [ieObject, result, thisD] = piRender(thisR,varargin)
 %
-% Syntax:
-%  [oi or scene or metadata] = piRender(thisR,varargin)
-%
 % Input
-%  thisR - A recipe, whose outputFile specifies the file, OR a string that
-%          is a full path to a scene pbrt file.
+%  thisR - An ISET3d recipe
 %
 % OPTIONAL key/val pairs
 %
 %  rendertype - Any combination of these strings
 %        {'radiance', 'radiancebasis', 'depth', 'material', 'instance', 'illuminance'}
 %
-%  {oi or scene} params - You can choose parameters from sceneSet or oiSet
-%            to be applied to the rendered ieObject prior to return.
+%  {oi or scene} params - Parameters from sceneSet or oiSet that will
+%                         be applied to the rendered ieObject prior to
+%                         return. 
 %
 %  mean luminance -  If a scene, this mean luminance. If set to a negative
 %            value values returned by the renderer are used.
@@ -36,9 +33,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %  ourdocker  - Specify the docker wrapper to use.  Default is build
 %               from scratch with defaults in the Matlab getprefs('docker')
 %
-%  reflectancerender -  NYI
-%
-%  verbose    - Level of desired output:
+%  verbose    - How much to print to standard output:
 %               0 Silent
 %               1 Minimal
 %               2 Legacy -- for compatibility
@@ -46,31 +41,30 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %
 % wave      -   Adjust the wavelength sampling of the returned ieObject
 %
-% Returns
+% Output:
 %   ieObject - an ISET scene, oi, or a metadata image
-%   result   - PBRT output from the terminal. The result is very
-%              useful for debugging because it contains Warnings and Errors.
-%              The text also contains parameters about the
-%              optics, including the distance from the back of
-%              the lens to film and the in-focus distance given the 
-%              lens-film distance.
-%   thisD    - the dockerWrapper used for the rendering.
-%
+%   result   - PBRT terminal output. The result is very useful for
+%              debugging because it contains Warnings and Errors. The
+%              text also contains parameters about the optics,
+%              including the distance from the back of the lens to
+%              film and the in-focus distance given the lens-film distance.
+%   thisD    - the dockerWrapper used for the rendering.  Useful if
+%              you want to use it next as the ourdocker specification.
+%              
 % See also
 %   s_piReadRender*.m, piRenderResult, dockerWrapper
 
-% TODO: 
+% NOTE:  Eeek.  Is this true (BW?)
 %   The parameters are not yet all correctly handled, including
 % meanluminance and scalepupilarea.  These are important for ISETBio.
 %
 
 % Examples:
 %{
-  % Separately calculate the illuminant and the radiance-
-  % We are not sure this works or is right!
-  thisR = piRecipeDefault; 
+  % Calculate only the radiance.
+  thisR = piRecipeDefault('scene name','ChessSet');
   piWrite(thisR);
-  [scene, result]      = piRender(thisR,'render type','radiance');
+  [scene, result] = piRender(thisR,'render type','radiance');
   sceneWindow(scene);
 %}
 %{
@@ -91,10 +85,12 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %}
 %{
 % Render locally with your CPU machine
-  dockerWrapper.setPrefs('gpuRender',false); 
-  dockerWrapper.setPrefs('localRender',true);
   thisR = piRecipeDefault('scene name', 'ChessSet');
-  scene = piWRS(thisR);
+  thisDocker = dockerWrapper;
+  thisDocker.gpuRendering = false;
+  thisDocker.localRender = true; 
+  thisDocker = dockerWrapper('localRender',true,'gpuRendering', false,'verbosity',0);
+  scene = piWRS(thisR,'our docker',thisDocker);
 %}
 
 %%  Name of the pbrt scene file and whether we use a pinhole or lens model

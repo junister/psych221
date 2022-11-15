@@ -1,25 +1,32 @@
 function [status, result] = render(obj, renderCommand, outputFolder)
 % Render radiance and depth using the dockerWrapper method
 %
+% Synopsis
+%   [status, result] = render(obj, renderCommand, outputFolder)
+%
 % Inputs
 %  obj - a dockerWrapper
-%  renderCommand
-%  outputFolder
+%  renderCommand - the PBRT command for rendering
+%  outputFolder  - the output for the rendered data
 %
 % Outputs
-%  status
-%  result
+%  status - 0 means it worked well
+%  result - Stdout text returned here
+%
+% Notes:
+%   (Author?) Currently we have an issue where GPU rendering ignores
+%   objects that have ActiveTranforms. Maybe scan for those & set
+%   container back to CPU (perhaps ideally a beefy, remote, CPU).
 %
 % See also
-%  piRender
+%  piRender, sceneEye.render
 
-%%
+%% Build up the render command
+
+% How chatty to the stdout
 verbose = obj.verbosity; % 0, 1, 2
 
-% Let's simplify these lines
-% Currently we have an issue where GPU rendering ignores objects
-% that have ActiveTranforms. Maybe scan for those & set container back
-% to CPU (perhaps ideally a beefy, remote, CPU).
+% Determine the container
 if obj.gpuRendering
     useContainer = obj.getContainer('PBRT-GPU');
     renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');

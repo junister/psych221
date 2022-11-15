@@ -62,6 +62,7 @@ thisSE.set('fov',30);             % Degrees
 thisDWrapper = dockerWrapper;
 thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
 thisDWrapper.remoteImageTag = 'humanEye';
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance', 'depth'});
 scene = thisSE.render('docker wrapper',thisDWrapper);
