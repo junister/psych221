@@ -109,8 +109,12 @@ thisSE.set('spatial samples',256);
 
 %% This takes longer than the pinhole rendering, so we do not bother with
 % the depth.
+
+%% Eliminate the chromaticAberrationEnabled in piWrite for this case.
+%  We might need to specify the spectralpath method. for the path
+%  tracer.
+dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
-thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
