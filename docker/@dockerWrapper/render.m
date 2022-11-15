@@ -20,6 +20,8 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 %
 % See also
 %  piRender, sceneEye.render
+%
+% See debugging note at end.
 
 %% Build up the render command
 
@@ -109,25 +111,25 @@ if ~obj.localRender
 
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
-    containerRender = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
+    containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
         useContext, flags, useContainer, shortOut, renderCommand);
     if verbose > 0
-        fprintf('Command: %s\n', containerRender);
+        fprintf('Command: %s\n', containerCommand);
     end
 
     if verbose > 1
-        [status, result] = system(containerRender, '-echo');
+        [status, result] = system(containerCommand, '-echo');
         fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         fprintf('Returned parameter result is\n***\n%s', result);
     elseif verbose == 1
-        [status, result] = system(containerRender);
+        [status, result] = system(containerCommand);
         if status == 0
             fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         else
             fprintf("Error Rendering: %s", result);
         end
     else
-        [status, result] = system(containerRender);
+        [status, result] = system(containerCommand);
     end
     if status == 0 && ~isempty(obj.remoteMachine)
 
@@ -152,14 +154,22 @@ if ~obj.localRender
 else
     % Running locally.        
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerRender = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+    containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
     
     tic;
-    [status, result] = system(containerRender);
+    [status, result] = system(containerCommand);
     if verbose > 0
         fprintf('Rendered time %6.2f\n', toc)
     end
 end
+
+%% For debugging.  Will write a method to just return these before long (BW).
+
+fprintf('\n------------------\n');
+fprintf('Container command: %s\n',containerCommand);
+fprintf('PBRT command: %s\n',renderCommand);
+fprintf('\n------------------\n');
+
 
 end
 

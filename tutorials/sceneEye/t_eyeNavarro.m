@@ -60,10 +60,10 @@ thisSE.set('fov',30);             % Degrees
 % For now, this is the only docker wrapper that should work for the
 % human eye model.
 thisDWrapper = dockerWrapper;
-thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
+thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
+
 thisSE.recipe.set('render type', {'radiance', 'depth'});
 scene = thisSE.render('docker wrapper',thisDWrapper);
 
@@ -107,17 +107,18 @@ thisSE.set('rays per pixel',256);
 % Increase the spatial resolution by adding more spatial samples.
 thisSE.set('spatial samples',256);     
 
-% This takes longer than the pinhole rendering, so we do not bother with
+%% This takes longer than the pinhole rendering, so we do not bother with
 % the depth.
 thisDWrapper = dockerWrapper;
-% thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
+thisDWrapper.remoteImage = 'digitalprodev/pbrt-v4-cpu';
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance', 'depth'});
-oi = thisSE.render('docker wrapper',thisDWrapper);
+[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+result
 
-% Have a look.  Lots of things you can plot in this window.
+%% Have a look.  Lots of things you can plot in this window.
 oiWindow(oi);
 
 % Summarize

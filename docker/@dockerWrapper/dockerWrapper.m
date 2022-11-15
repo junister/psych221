@@ -371,12 +371,11 @@ classdef dockerWrapper < handle
         end
 
         function retVal = staticVar(action, varname, value)
-            % Actions are 'set' or anything else.  When using 'get' the
-            % value of one of the persistent variables is returned.
+            % Manages interactions with the persistent variables
             %
-            % These variables are 'set' by getRenderer, I think.  We
-            % should probably move that 'vistalab' repository and
-            % 'getRenderer' into dockerWrapper land (BW).
+            %    gpuContainer, cpuContainer and renderContext
+            %
+            % Actions are 'set' or 'get' (default).  
 
             persistent gpuContainer;
             persistent cpuContainer;
@@ -482,9 +481,9 @@ classdef dockerWrapper < handle
             % One tricky bit is that on Windows, the mount point is the
             % remote server path, but later we need to use the WSL path for rsync
             %
-            % hostLocalPath is the host fs for <iset3d-v4>/local
-            % containerLocalPath is the container path for <iset3d-v4>/local (normally
-            % under /iset)
+            % hostLocalPath is the host file system for
+            % <iset3d-v4>/local containerLocalPath is the container
+            % path for <iset3d-v4>/local (normally under /iset)
             %
             % BW:  Why do we change the variable name from
             % localVolumePath to hostLocalPath? Would it be OK to
