@@ -110,16 +110,16 @@ thisSE.set('spatial samples',256);
 %% This takes longer than the pinhole rendering, so we do not bother with
 % the depth.
 
-%% Eliminate the chromaticAberrationEnabled in piWrite for this case.
-%  We might need to specify the spectralpath method. for the path
-%  tracer.
 dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance', 'depth'});
-[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+piWrite(thisSE.recipe);
+% Eliminate the chromaticAberrationEnabled in piWrite for this case.
+[oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
+% [oi, result] = thisSE.render('docker wrapper',thisDWrapper);
 result
 
 %% Have a look.  Lots of things you can plot in this window.
