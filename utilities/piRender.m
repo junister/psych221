@@ -154,7 +154,8 @@ if isempty(renderType)
     end
 end
 
-if isequal(renderType{1},'all')
+if isequal(renderType{1},'all') || isequal(renderType{1},'both')
+    % 'both is legacy
     % 'all' is an alias for this.  Not sure we should do it this way.
     renderType = {'radiance','depth'};
 end

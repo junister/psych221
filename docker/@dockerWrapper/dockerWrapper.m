@@ -105,6 +105,25 @@ classdef dockerWrapper < handle
     % See also
     %   setpref/getpref
 
+    %% Notes
+    %{
+      Solution:  Local Docker desktop was not running on my mac
+      ------------------------------
+      Container command: docker --context default exec -it  pbrt-cpu-wandell12684 sh -c "cd /iset/iset3d-v4/local/ChessSet && pbrt --outfile renderings/ChessSet.exr ChessSet.pbrt"
+      PBRT command: pbrt --outfile renderings/ChessSet.exr ChessSet.pbrt
+
+      ------------------
+      Warning: Docker did not run correctly 
+      > In piRender (line 251)
+      In piWRS (line 106)
+      In v_DockerWrapper (line 83) 
+      Status:
+          1
+       Result:
+       Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+    %}
+
+    %% Methods
     properties (SetAccess = public)
 
         % by default we assume our container is built to run pbrt
@@ -120,61 +139,60 @@ classdef dockerWrapper < handle
         % This is the flag pbrt needs to specify it's output
         % Can be over-ridden if the command takes a different output flag
         outputFilePrefix = '--outfile';
-    end
 
-    properties (SetAccess = public)
+        % NOTE: Defaults set here are values we always want. Values the
+        % user might over-ride from their prefs, we declare the property
+        % here, and set the value using getpref in the Constructor.
 
-        % NOTE: Any property defaults set here should be ones we always
-        % want. For ones the user might over-ride, just declare the
-        % property here, and set the default value in the Constructor.
+        % Right now pbrt only supports Linux containers
+        containerType = 'linux'; % default, even on Windows
 
-        dockerCommand = 'docker run'; % sometimes we need a subsequent conversion command
+        % sometimes we need a subsequent conversion command.  What does
+        % that mean?
+        dockerCommand = 'docker run'; 
         dockerFlags = '';
 
         dockerContainerName = '';
         dockerContainerID = '';
 
-        % these are local things
+        % Better comment needed.
         % default image is cpu on x64 architecture
-        localImageName;
         dockerImageRender = '';        % set based on local machine
-        % Right now pbrt only supports Linux containers
-        containerType = 'linux'; % default, even on Windows
-
+        
         % The defaults for these are set in the constructor
         gpuRendering;
         whichGPU;
 
         % these relate to remote/server rendering
-        remoteMachine; % for syncing the data
-        remoteUser; % use for rsync & ssh/docker
-        remoteImage; % use to specify a GPU-specific image on server
+        remoteMachine;  % for syncing the data
+        remoteRoot;      % we need to know where to map on the remote system
+        remoteUser;     % use for rsync & ssh/docker
+        remoteImage;    % A GPU image on the remote server
+        remoteCPUImage; % A CPU image on the remote server
 
         % By default we assume that we want :latest, but :stable is
         % typically also an option incase something is broken
-        remoteImageTag;
-        remoteRoot; % we need to know where to map on the remote system
+        remoteImageTag;  % Seems to apply to both GPU and CPU?
 
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
         % gray, etc). Contexts are created via docker on the local system,
         % and if needed one is created by default
         renderContext;
-        defaultContext; % docker context used for everything else
-        localRoot     = ''; % dockerWrapper.defaultLocalRoot();
+        defaultContext;   % docker context used for everything else
+        localImageName;
+        localRoot  = '';  % dockerWrapper.defaultLocalRoot();
+        localRender;
+        localImageTag;    % Does this over-ride a tag that is already set?
+
+        localVolumePath  = '';
 
         workingDirectory = '';
-        localVolumePath  = '';
         targetVolumePath = '';
 
         relativeScenePath;
 
-        localRender;
-        localImageTag;
-
         verbosity;  % 0,1 or 2.  How much to print.  Might change
-
-        remoteCPUImage;
 
     end
 
@@ -300,24 +318,27 @@ classdef dockerWrapper < handle
 
 
     methods (Static=true)
-
-        % Matlab requires listing static functions that are defined in a
-        % separate file.  Here are the definitions.  (Static functions do
-        % not have an 'obj' argument.
+        %% Static functions
         %
-        % Methods in this file do not need to be here.
+        % Static functions do not have an 'obj' argument.
+        %
+        % Matlab requires listing all static functions in a separate file.
+        % The definitions must be here.
+        %
+        % Methods defined in this file, static or not, do not need to be
+        % listed here.
 
         setPrefs(varargin);
         getPrefs(varargin);
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
 
-        % Default servers
+        %% Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
         end
 
-        % This is used for wsl commands under Windows, which need
+        %% This is used for wsl commands under Windows, which need
         % to know where to find the drive root.
         function localRoot = defaultLocalRoot()
             if ispc
@@ -326,7 +347,8 @@ classdef dockerWrapper < handle
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
         end
-        % reset - Resets the running Docker containers
+        
+        %% reset - Resets the running Docker containers
         function reset()
             % Calls the method 'cleanup' and sets several parameters
             % to empty.  The cleanup is called if there is a static
@@ -350,7 +372,7 @@ classdef dockerWrapper < handle
             dockerWrapper.setContext('default'); % in case it has been set
         end
 
-        % cleanup
+        %% cleanup
         function cleanup(containerName)
             if ~isempty(dockerWrapper.staticVar('get','renderContext'))
                 contextFlag = sprintf(' --context %s ', dockerWrapper.staticVar('get','renderContext'));
@@ -370,6 +392,7 @@ classdef dockerWrapper < handle
             end
         end
 
+        %% Interact with persistent variables
         function retVal = staticVar(action, varname, value)
             % Manages interactions with the persistent variables
             %
@@ -399,6 +422,7 @@ classdef dockerWrapper < handle
             end
         end
 
+        %% Format path strings
         function output = pathToLinux(inputPath)
             % On Windows the Docker
             % paths are Linux-format, so the native fullfile and fileparts
@@ -421,7 +445,7 @@ classdef dockerWrapper < handle
 
         end
 
-        % For switching docker to other (typically remote) context
+        %% For switching docker to other (typically remote) context
         % and then back. Static as it is system-wide
         function newContext = setContext(useContext)
             % dummy return values otherwise we get output to console by
@@ -438,8 +462,9 @@ classdef dockerWrapper < handle
     end
 
     methods (Static = false)
-        % These functions are not static; they have an obj argument.
+        %% These have an obj argument and therefore they are not static.
 
+        %% Start PBRT
         function ourContainer = startPBRT(obj, processorType)
             % Start the docker container remotely
 
@@ -472,14 +497,16 @@ classdef dockerWrapper < handle
                 ourContainer = ['pbrt-cpu-' uName];
             end
 
-            % Because we are now running Docker as a background task,
-            % we need to be able to re-use it for all scenes
-            % so we need to volume map all of /local
+            % Because we are now running Docker as a background task, we
+            % need to be able to re-use it for all scenes so we need to
+            % volume map all of /local
             %
-            % if running Docker remotely then need to figure out correct path
+            % if running Docker remotely then need to figure out correct
+            % path
             %
             % One tricky bit is that on Windows, the mount point is the
-            % remote server path, but later we need to use the WSL path for rsync
+            % remote server path, but later we need to use the WSL path for
+            % rsync
             %
             % hostLocalPath is the host file system for
             % <iset3d-v4>/local containerLocalPath is the container
@@ -549,9 +576,10 @@ classdef dockerWrapper < handle
         end
 
 
+        %% The container name for different types of docker runs.  
         function containerName = getContainer(obj,containerType)
-            % Get the container name for different types of docker runs.  Either PBRT
-            % with a GPU or a CPU
+            
+            % Either PBRT with a GPU or a CPU
             switch containerType
                 case 'PBRT-GPU'
                     if isempty(obj.staticVar('get', 'PBRT-GPU', ''))
@@ -574,9 +602,11 @@ classdef dockerWrapper < handle
                     if strlength(result) == 0
                         % Couldn't find it.  So try starting it.
                         % This likely means it got killed, or the server
-                        % rebooted or similar
+                        % rebooted or similar.  So we start it.
                         obj.staticVar('set','PBRT-GPU', obj.startPBRT('GPU'));
                     end
+
+                    % At this point, we must have it.
                     containerName = obj.staticVar('get','PBRT-GPU', '');
 
                 case 'PBRT-CPU'
@@ -603,6 +633,7 @@ classdef dockerWrapper < handle
             end
         end
 
+        %% Get the name of the docker image.
         function useDockerImage = getPBRTImage(obj, processorType)
             % Returns the name of the docker image, both for the case of
             % local and remote execution.
@@ -693,7 +724,7 @@ classdef dockerWrapper < handle
         % implemented someplace, need to find the code!
         %end
 
-        % Inserted from getRenderer.  thisD is a dockerWrapper (obj)
+        %% Inserted from getRenderer.  thisD is a dockerWrapper (obj)
         function getRenderer(thisD)
             %GETRENDERER uses the 'docker' parameters to insert the
             %renderer
