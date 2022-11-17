@@ -87,8 +87,12 @@ thisSE.set('mmUnits', false);
 % bands for speed and to get a rought sense. You can use up to 31.  It is
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
+
+% {
+% Needs to work
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
+%}
 
 % Distance in meters to objects to govern accommodation.
 thisSE.set('to',toA); distA = thisSE.get('object distance');
