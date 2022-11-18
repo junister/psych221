@@ -11,3 +11,4 @@ data/V4/teapot-set/TeaTime-converted.pbrt
 calc/datafiles/oi_001.mat
 calc/datafiles/oi_002.mat
 calc/datafiles/oi_fog.mat
+*.wiki
