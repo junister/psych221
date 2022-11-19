@@ -64,7 +64,9 @@ thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 
-thisSE.recipe.set('render type', {'radiance', 'depth'});
+thisSE.recipe.set('render type', {'radiance'});
+
+%%
 scene = thisSE.render('docker wrapper',thisDWrapper);
 
 sceneWindow(scene);   
@@ -88,8 +90,9 @@ thisSE.set('mmUnits', false);
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
 
-% {
-% Needs to work
+%{
+% Needs to work with spectral path integrator.
+% Zhenyi will make that work in V4.
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 %}
@@ -111,20 +114,20 @@ thisSE.set('rays per pixel',256);
 % Increase the spatial resolution by adding more spatial samples.
 thisSE.set('spatial samples',256);     
 
-%% This takes longer than the pinhole rendering, so we do not bother with
-% the depth.
+%% This takes longer than the pinhole rendering
 
 dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance', 'depth'});
+thisSE.recipe.set('render type', {'radiance'});
+
 piWrite(thisSE.recipe);
-% Eliminate the chromaticAberrationEnabled in piWrite for this case.
 [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
+
+% Fix the flags, then maybe this will run.
 % [oi, result] = thisSE.render('docker wrapper',thisDWrapper);
-result
 
 %% Have a look.  Lots of things you can plot in this window.
 oiWindow(oi);

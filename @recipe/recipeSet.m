@@ -216,9 +216,21 @@ switch param
         thisR.lookAt.from = thisR.lookAt.from + objDirection*delta;
 
     case {'accommodation'}
-        % Special case where we allow setting accommodation or focal
-        % distance.  My optometrist friends insist.
-        thisR.set('focal distance',1/val);
+        % We allow specifying accommodation rather than focal distance.
+        % For typical lenses, accommodation is 1/focaldistance.
+        % 
+        % For the human eye models, we need to change the whole lens model
+        % using setNavarroAccommodation or setArizonaAccommodation. There
+        % is no way to adjust the LeGrand eye.
+        %        
+        subType = lower(thisR.camera.subtype);
+        switch subType
+            case {'humaneye','realisticeye'}
+                warning('Not setting accommodation yet.  Work in progress.')
+            otherwise
+                % Typically this is what is meant
+                thisR.set('focal distance',1/val);
+        end
 
     case {'focusdistance','focaldistance'}
         % lens.set('focus distance',m)
@@ -234,21 +246,40 @@ switch param
         % as this focus distance. That is because it is possible to
         % look at an object but have it not be the object that is in
         % focus.
-        %
-        % Depending on the camera type, the parameter name is either
+        
+        % Depending on the camera subtype, the parameter name is either
         % focusdistance or focaldistance. Historical annoyance in PBRT.
-        if isequal(thisR.camera.subtype,'pinhole')||...
-                isequal(thisR.camera.subtype,'perspective')
-            thisR.camera.focaldistance.value = val;
-            thisR.camera.focaldistance.type = 'float';
-            % pbrt v4 gets mad if we don't get rid of the field
-            if isfield(thisR.camera,'focusdistance')
-                thisR.camera = rmfield(thisR.camera,'focusdistance');
-            end
-        else
-            % When there is a lens.  Omni.  Realistic.
-            thisR.camera.focusdistance.value = val;
-            thisR.camera.focusdistance.type = 'float';
+
+        subType = lower(thisR.camera.subtype);
+        switch subType
+            case {'pinhole','perspective'}
+                thisR.camera.focaldistance.value = val;
+                thisR.camera.focaldistance.type = 'float';
+
+                % pbrt v4 does not allow this field
+                if isfield(thisR.camera,'focusdistance')
+                    thisR.camera = rmfield(thisR.camera,'focusdistance');
+                end
+            case {'humaneye','realisticeye'}
+                % For the human eye models, the lens accommodation is
+                % created by the initialization function 
+                % (e.g., [na,txt] = navarroLensCreate(accommodation)) or by
+                % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
+                % [az, columnDescription]  = arizonaLensCreate(1);
+                thisR.camera.retinalDistance.value = val;
+                thisR.camera.focaldistance.type = 'float';
+
+                % pbrt v4 does not allow this field
+                if isfield(thisR.camera,'focusdistance')
+                    thisR.camera = rmfield(thisR.camera,'focusdistance');
+                end
+
+            case {'omni','realistic'}
+                % When there is a lens.  Omni.  Realistic.
+                thisR.camera.focusdistance.value = val;
+                thisR.camera.focusdistance.type = 'float';
+            otherwise
+                warning('Unknown camera subtype %s', subType);
         end
 
         % Camera
@@ -496,37 +527,42 @@ switch param
         thisR.camera.diffractionEnabled.type = 'bool';
 
     case 'chromaticaberration'
-        % Enable chrommatic aberration, and potentially set the number
-        % of wavelength bands.  (Default is 8).
+        % There is no chromaticAberration flag in the recipe any more.
+        % This set adjust the integrator and the number of CA bands.
+        %
+        % If true, set the integrator to spectralpath and the number of
+        % bands to 8. 
+        % If an integer between 1 and 30, set the integrator
+        % to spectralpath and the number of bands to that integer. 
+        % If false, set the integrator to 'path' and the number of CA bands
+        % to 1.
+        %
+        % Examples:
         %   thisR.set('chromatic aberration',true);
         %   thisR.set('chromatic aberration',false);
         %   thisR.set('chromatic aberration',16);
-
-        % Enable or disable
-        thisR.camera.chromaticAberrationEnabled.type = 'bool';
 
         % User turned off chromatic abberations
         if isequal(val,false)
             % Use path, not spectralpath, integrator and set nunCABand to
             % 1.
-            thisR.camera.chromaticAberrationEnabled.value = false;
+            % thisR.camera.chromaticAberrationEnabled.value = false;
             thisR.set('integrator subtype','path');
             thisR.set('integrator num ca bands',1);
             return;
+        else
+            % User sent in true or an integer number of bands which implies
+            % true.
+
+            % This is the integrator that manages chromatic aberration.
+            thisR.set('integrator subtype','spectralpath');
+
+            % Set the number of bands.  These are divided evenly into bands
+            % between 400 and 700 nm. There are  31 wavelength samples, so
+            % we should not have more than 30 wavelength bands
+            if islogical(val), val = 8; end  % Default number of bands
+            thisR.set('integrator num cabands',val);            
         end
-
-        % User sent in true or an integer number of bands which implies
-        % true.
-        thisR.camera.chromaticAberrationEnabled.value = true;
-
-        % This is the integrator that manages chromatic aberration.
-        thisR.set('integrator subtype','spectralpath');
-
-        % Set the number of bands.  These are divided evenly into bands
-        % between 400 and 700 nm. There are  31 wavelength samples, so we
-        % should not have more than 30 wavelength bands
-        if islogical(val), val = 8;  end % Default number of bands
-        thisR.set('integrator num cabands',val);
 
     case {'integratorsubtype','integrator'}
         % thisR.set('integrator subtype',val)

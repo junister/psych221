@@ -520,12 +520,21 @@ switch ieParamFormat(param)  % lower case, no spaces
                 disp('Panorama rendering. No focal distance');
                 val = NaN;
             case 'lens'
-                % Focal distance given the object distance and the lens file
-                val      = thisR.camera.focusdistance.value; % Meters
 
-                % If isetlens is on the path, we convert the distance to
-                % the focal plane into millimeters and warn if there is no
-                % film distance that will bring the object into focus.
+                % Focal distance given the object distance and the lens
+                % file.  Some camera types uses focus and some use focal.
+                % Confusing and needs sorting (BW).
+                subType = lower(thisR.camera.subtype);
+                switch subType
+                    case {'humaneye','realisticeye'}
+                    val = thisR.camera.focusdistance.value; % Meters
+                    val = thisR.camera.focaldistance.value; % Meters
+                end
+
+                % If the isetlens repository is on the path, we convert the
+                % distance to the focal plane into millimeters and warn if
+                % there is no film distance that will bring the object into
+                % focus.
                 if exist('lensFocus','file')
                     % This will run if isetlens is on the path.  Then the
                     % function lensFocus will be on the path
@@ -545,8 +554,23 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
     case {'accommodation'}
+        % We allow specifying accommodation rather than focal distance.
+        % For typical lenses, accommodation is 1/focaldistance.
+        % 
+        % For the human eye models, accommodation is built into the model
+        % itself.  When we set the value, we use setNavarroAccommodation or
+        % setArizonaAccommodation. There is no way to adjust the LeGrand eye.
+        %        
+        subType = lower(thisR.camera.subtype);
+        switch subType
+            case {'humaneye','realisticeye'}
+                warning('No way to get accommodation yet.  Work in progress.');
+            otherwise
+                % Typically this is what is meant
+                val = 1 / thisR.get('focal distance','m');
+        end
+
         % thisR.get('accommodation');   % Diopters
-        val = 1 / thisR.get('focal distance','m');
 
     case 'film'
         % The whole film struct.
@@ -561,11 +585,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         % together.
         %
         % When there is a lens, PBRT sets the filmdistance so that an
-        % object at the focaldistance is in focus. This is a means of
-        % calculating roughly where that will be.  It requires having
-        % isetlens on the path, though.
+        % object at the focaldistance is in focus. This code calculates
+        % roughly where that will be.  It requires having isetlens on the
+        % path, though.
         %
-        % For the realisticEye, this is retina distance in mm.
+        % For humanEye or realisticEye, call retina distance in mm.
         %
         opticsType = thisR.get('optics type');
         switch opticsType

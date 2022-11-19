@@ -236,21 +236,23 @@ switch ieParamFormat(cameraType)
         camera.pupilDiameter.type   = 'float';
         camera.pupilDiameter.value  = 4;  % mm
 
+        % Not used in V4.  Like chromatic aberration.  Checking.
         % Default distance to the focal plane in object space.  This
         % differs from the 'object distance' which is the difference
         % between the 'from' and 'to' coordinates.
-        camera.focusdistance.value = 0.2;   % Meters.  Accommodation is 5 diopters
-        camera.focusdistance.type  = 'float';
+        % camera.focusdistance.value = 0.2;   % Meters.  Accommodation is 5 diopters
+        % camera.focusdistance.type  = 'float';
 
         % Default is units of meters.  If you have something in
         % millimeters, you should use this flag
         camera.mmUnits.value = 'false';
         camera.mmUnits.type  = 'bool';
 
+        % Not used in V4.
         % Status of the chromatic aberration during rendering.  This slows
         % the calculation, so we start with it off.
-        camera.chromaticAberrationEnabled.value = false;
-        camera.chromaticAberrationEnabled.type  = 'bool';
+        % camera.chromaticAberrationEnabled.value = false;
+        % camera.chromaticAberrationEnabled.type  = 'bool';
 
         % These are index of refraction files for the navarro model
         [~,n,~] = fileparts(lensFile);
