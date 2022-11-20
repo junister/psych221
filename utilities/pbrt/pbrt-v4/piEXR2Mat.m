@@ -19,6 +19,19 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 
 % tic
+try
+    % use matlab builtin method this way in case other user does not have 2022b.
+    if strcmpi(channelname,'radiance')
+        channelname = strings([1, 31]);
+        for ii = 1:31
+            channelname(ii) = sprintf('Radiance.C%02d',ii);
+        end
+    end
+    data = exrread(inputFile, Channels=channelname);
+    return;
+catch
+    % do nothing
+end
 
 %% Variables
 [indir, fname,~] = fileparts(inputFile);
