@@ -121,9 +121,7 @@ thisDWrapper = dockerWrapper;
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance'});
-
-thisSE.recipe.camera.subtype = 'humaneye';
+thisSE.recipe.set('render type', {'radiance','depth'});
 
 piWrite(thisSE.recipe);
 [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);

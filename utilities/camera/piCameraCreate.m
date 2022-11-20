@@ -212,7 +212,7 @@ switch ieParamFormat(cameraType)
             warning('human eye camera type is for use with ISETBio')
         end
         camera.type           = 'Camera';
-        camera.subtype        = 'humanEye';
+        camera.subtype        = 'humaneye';
         camera.lensfile.type  = 'string';
         camera.lensfile.value = lensFile;
 
