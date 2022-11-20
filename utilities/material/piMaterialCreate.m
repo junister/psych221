@@ -40,6 +40,7 @@ function material = piMaterialCreate(name, varargin)
 %   piMaterialRead.m, piMaterialGet
 %
 %   https://pbrt.org/users-guide-v4
+%   https://www.pbrt.org/fileformat-v4
 
 % Examples:
 %{
