@@ -106,13 +106,16 @@ thisSE.set('to',toB);
 % This is the distance we set our accommodation to that.
 % Try distC + 0.5  and then distA
 %
-thisSE.set('accommodation',1/(distC + 0.5));  
+thisSE.set('accommodation',1/(distA + 0.5));  
 
 % We reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',256);      
+thisSE.set('rays per pixel',512);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',256);     
+thisSE.set('spatial samples',512);     
+
+% Ray bounces
+thisSE.set('n bounces',3);
 
 %% This takes longer than the pinhole rendering
 
@@ -123,11 +126,13 @@ thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
 
-piWrite(thisSE.recipe);
-[oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
+% piWrite(thisSE.recipe);
+% [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
 
 % Fix the flags, then maybe this will run.
-% [oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+
+% thisSE.get('lens file')
 
 %% Have a look.  Lots of things you can plot in this window.
 oiWindow(oi);
