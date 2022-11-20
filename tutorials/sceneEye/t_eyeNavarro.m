@@ -123,6 +123,8 @@ thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance'});
 
+thisSE.recipe.camera.subtype = 'humaneye';
+
 piWrite(thisSE.recipe);
 [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
 

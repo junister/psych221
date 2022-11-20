@@ -270,8 +270,9 @@ switch lower(cameraType)
             ieObject = oiAdjustIlluminance(ieObject,meanIlluminance);
             ieObject.data.illuminance = oiCalculateIlluminance(ieObject);
         end
-    case {'realisticeye'}
-        % A human eye model, and the ieObject is an optical image (irradiance).
+    case {'humaneye'}
+        % A human eye model, and the ieObject is an optical image
+        % (irradiance). Used to be realisticEye
 
         focalLength = thisR.get('retina distance','m');
         pupilDiameter = thisR.get('pupil diameter','m');

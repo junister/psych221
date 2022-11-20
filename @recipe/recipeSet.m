@@ -35,7 +35,7 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %  % Camera
 %    'camera'     - Struct with camera information
 %    'camera subtype' - The valid camera subtypes are
-%                       {'pinhole','realistic','realisticEye','omni'}
+%                       {'pinhole','realistic','humaneye','omni'}
 %    'camera exposure'
 %    'camera body'      - Do not use
 %
@@ -65,7 +65,7 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %     'film distance'
 %     'spatial samples'
 %
-%   % RealisticEye (human optics)
+%   % humaneye (human optics)
 %     'retina distance' - mm
 %     'eye radius'      - mm
 %     'retina semdiam'  - mm
@@ -223,12 +223,27 @@ switch param
         % using setNavarroAccommodation or setArizonaAccommodation. There
         % is no way to adjust the LeGrand eye.
         %        
-        subType = lower(thisR.camera.subtype);
+        subType = thisR.get('camera subtype');
         switch subType
-            case {'humaneye','realisticeye'}
-                warning('Not setting accommodation yet.  Work in progress.')
+            case {'humaneye'}
+                % For the human eye models accommodation gets baked into
+                % the lens itself
+                lensName = thisR.get('lens basename');
+                lensDir = thisR.get('lens dir output');
+                switch lensName(1:5)
+                    case 'navar'
+                        setNavarroAccommodation(thisR,val,lensDir);
+                    case 'arizo'
+                        setArizonaAccommodation(thisR,val,lensDir);
+                    case 'legra'
+                        warning('The LeGrand eye does not allow accommodation adjustment.')
+                    otherwise
+                        error('Unknown human eye model %s',modelName);
+                end
             otherwise
-                % Typically this is what is meant
+                % For most lenses, accommodation means focal distance,
+                % which is managed by adjusting the distance from the lens
+                % to the film (sensor)
                 thisR.set('focal distance',1/val);
         end
 
@@ -250,9 +265,9 @@ switch param
         % Depending on the camera subtype, the parameter name is either
         % focusdistance or focaldistance. Historical annoyance in PBRT.
 
-        subType = lower(thisR.camera.subtype);
+        subType = thisR.get('camera.subtype');
         switch subType
-            case {'pinhole','perspective'}
+            case {'pinhole'}
                 thisR.camera.focaldistance.value = val;
                 thisR.camera.focaldistance.type = 'float';
 
@@ -260,7 +275,7 @@ switch param
                 if isfield(thisR.camera,'focusdistance')
                     thisR.camera = rmfield(thisR.camera,'focusdistance');
                 end
-            case {'humaneye','realisticeye'}
+            case {'humaneye'}
                 % For the human eye models, the lens accommodation is
                 % created by the initialization function 
                 % (e.g., [na,txt] = navarroLensCreate(accommodation)) or by
@@ -390,7 +405,7 @@ switch param
         % Lens related
     case 'lensfile'
         % lens.set('lens file',val)   (string)
-        % Typically a JSON file defining the camera.  But for realisticEye
+        % Typically a JSON file defining the camera.  But for humaneye
         % we are still using dat files (e.g., navarro.dat).
         if ~exist(val,'file')
             % Sometimes we set this without the file being copied yet.
@@ -433,11 +448,11 @@ switch param
     case {'ior1','ior2','ior3','ior4'}
         % thisR.set('ior1',fullfilename);
         %
-        % For the realisticEye Camera we store spd files that specify the
-        % indices of refraction. for each of the different human optics
+        % For the humaneye camera subtype, we store spd files that specify
+        % the indices of refraction. for each of the different human optics
         % components.
-        if ~isequal(thisR.get('camera subtype'),'realisticEye')
-            warning('No ior slot except for realisticEye camera subtype.');
+        if ~isequal(thisR.get('camera subtype'),'humaneye')
+            warning('No ior slot except for humaneye camera subtype.');
         else
             switch param(end)
                 case '1'
@@ -481,13 +496,13 @@ switch param
         % This sets a horizontal fov
         % We should check that this is a pinhole, I think
         % This is only used for pinholes, not realistic camera case.
-        if isequal(thisR.camera.subtype,'pinhole')||...
-                isequal(thisR.camera.subtype,'perspective')
+        subType = thisR.get('camera subtype');
+        if isequal(subType,'pinhole')
             if length(val)==1
                 thisR.camera.fov.value = val;
                 thisR.camera.fov.type = 'float';
             else
-                % camera types:  omni, realisticeye,
+                % camera types:  omni, humaneye, maybe others
 
                 % if two fov values are given [hor, ver], we should
                 % resize film acoordingly.  This is the current number
@@ -518,7 +533,7 @@ switch param
         % thisR.set('diffraction');
         %
         % Turn on diffraction rendering.  Works with realistic eye and
-        % omni.  Probably realisticEye, but we should ask TL.
+        % omni.  Probably humaneye, but we should ask TL.
         if val
             thisR.camera.diffractionEnabled.value = 'true';
         else

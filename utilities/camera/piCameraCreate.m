@@ -205,20 +205,20 @@ switch ieParamFormat(cameraType)
         % light field microlens method and is more modern.
         error('Use ''omni'' and add a microlens array');
     case {'humaneye'}
-        % Human eye model used with sceneEye calculations in ISETBio.
-        % The subtype 'realisticEye' is historical and sent to PBRT. It is
-        % intended to refer to the human eye model.
+        % Human eye model used with sceneEye calculations in ISETBio. The
+        % subtype 'realisticEye' is historical.  We still allow it for
+        % PBRT, though human eye is now preferred.
         if piCamBio
             warning('human eye camera type is for use with ISETBio')
         end
         camera.type           = 'Camera';
-        camera.subtype        = 'realisticEye';
+        camera.subtype        = 'humanEye';
         camera.lensfile.type  = 'string';
         camera.lensfile.value = lensFile;
 
         % This is the length of the chord that defines the field of view.
         % There is a PowerPoint in the wiki (iset3d) images that explains
-        % the parameters and the eye ball geometry.
+        % the parameters: EyeballGeometry.pptx.
 
         % The distance from the back of the lens to the retina is the
         % retinaDistance.
@@ -270,13 +270,15 @@ switch ieParamFormat(cameraType)
             camera.ior3.value = '';
             camera.ior4.value = '';
         end
+        % What happened to the LeGrand eye case?
+
         camera.ior1.type = 'spectrum';
         camera.ior2.type = 'spectrum';
         camera.ior4.type = 'spectrum';
         camera.ior3.type = 'spectrum';
 
     otherwise
-        error('Cannot recognize camera type, %s\n.', cameraType);
+        error('Unrecognized camera subtype, %s\n.', cameraType);
 end
 
 end

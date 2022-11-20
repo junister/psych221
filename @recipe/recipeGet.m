@@ -291,16 +291,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % This is always 'Camera'
         val = thisR.camera.type;
     case {'cameramodel','camerasubtype'}
-        % thisR.get('camera model')
-        % This is Camera model, stored in the subtype slot.
-        % It may be perspective, pinhole, realisticEye, omni, realistic,
+        % thisR.get('camera subtype') This is type of camera.  The type
+        % slot stores camera and the subtype stores the camera type. It may
+        % be perspective, pinhole, realisticEye, humaneye, omni, realistic,
         % environment.
-        if isfield(thisR.camera,'subtype')
-            val = thisR.camera.subtype;
+        if isfield(thisR.camera,'subtype'), val = lower(thisR.camera.subtype);
+        else, error('No camera subtype specified.')
         end
 
-        % Trying to change from perspective to pinhole (BW)
-        if isequal(val,'perspective'), val = 'pinhole'; end
+        % Enforcing perspective rather than pinhole and 
+        % humaneye rather than realisticeye
+        if isequal(val,'perspective'), val = 'pinhole';
+        elseif isequal(val,'realisticeye'), val = 'humaneye';
+        end
 
     case 'lookat'
         val = thisR.lookAt;
@@ -377,36 +380,37 @@ switch ieParamFormat(param)  % lower case, no spaces
     case 'opticstype'
         % val = thisR.get('optics type');
         %
-        % The returns are pinhole, lens, or environment
+        % This collapses the camera models, which tells us more, into lens
+        % and pinhole.  I have no idea what 'environment' is, but
+        % apparently that is something that can get returned here.
         %
         % perspective means pinhole.  I am trying to get rid of perspective
         % as a subtype (BW).
         %
-        % realisticEye is a lens type used for human eye models.  You must
-        % check the camera subtype to determine when lens model is omni or
-        % realisticEye
-        %
-        val = thisR.camera.subtype;
+        % See 'camera model' for more information about the subtypes of
+        % cameras. 
+        val = thisR.get('camera subtype');
 
-        % Translate
-        if     isequal(val,'perspective'), val = 'pinhole';
-        elseif isequal(val,'environment'), val = 'environment';
-        elseif ismember(val,{'realisticDiffraction','realisticEye','realistic','omni','raytransfer'})
+        % These get counted as 'lens' type optics.  pinhole and environment
+        % are the other options.
+        if ismember(val,{'realisticdiffraction','humaneye','realistic','omni','raytransfer'})
             val = 'lens';
         end
-    case 'realisticeyemodel'
-        % For the realisticEye we have several models.  Over time we will
-        % figure out how to identify them.  We might insert a slot in the
-        % recipe with the label when we create the model.
-        if isequal(thisR.get('camera subtype'),'realisticEye') && ...
-                contains(thisR.get('lensfile'),'navarro')
-            val = 'navarro';
-        elseif isequal(thisR.get('camera subtype'),'realisticEye')  && ...
-                contains(thisR.get('lensfile'),'legrand')
-            val = 'legrand';
-        elseif isequal(thisR.get('camera subtype'),'realisticEye')  && ...
-                contains(thisR.get('lensfile'),'arizona')
-            val = 'arizona';
+
+    case {'humaneyemodel','realisticeyemodel'}
+        % Which humanEye (realisticEye) model.  Over time we will figure
+        % out how to identify them in a better way. For example, we might
+        % insert a slot in the recipe with the label when we create the
+        % model.  For now, it is the lensfile name.
+        subType = thisR.get('camera subtype');
+        if isequal(subType,'humaneye')
+            if contains(thisR.get('lensfile'),'navarro')
+                val = 'navarro';
+            elseif contains(thisR.get('lensfile'),'legrand')
+                val = 'legrand';
+            elseif contains(thisR.get('lensfile'),'arizona')
+                val = 'arizona';
+            end
         else
             val = [];
         end
@@ -415,7 +419,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % The lens file should be in the isetcam/data/lens directory.
 
         % There are a few different camera types.  Not all have lens files.
-        subType = thisR.camera.subtype;
+        subType = thisR.get('camera subtype');
         switch(lower(subType))
             case 'pinhole'
                 val = 'pinhole';
@@ -423,7 +427,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             case 'perspective'
                 % There are no lenses for pinhole/perspective
                 val = 'pinhole (perspective)';
-            case 'realisticeye'
+            case 'humaneye'
                 % This will be navarro.dat or one of the other models,
                 % usually.
                 val = thisR.camera.lensfile.value;
@@ -470,14 +474,14 @@ switch ieParamFormat(param)  % lower case, no spaces
         % the realisticEye human models.
         val = piDirGet('lens');
     case 'lensdiroutput'
-        % Directory where we are stsoring the lens file for rendering
+        % Directory where we are stsring the lens file for rendering
         val = fullfile(thisR.get('outputdir'),'lens');
     case 'lensbasename'
         % Just the name, like fisheye
         val = thisR.get('lens file');
         [~,val,~] = fileparts(val);
     case 'lensfullbasename'
-        % the name plus the extension fisheye.dat
+        % the base name plus the extension fisheye.dat
         val = thisR.get('lens file');
         [~,val,ext] = fileparts(val);
         val = [val,ext];
@@ -487,6 +491,22 @@ switch ieParamFormat(param)  % lower case, no spaces
         outputDir = thisR.get('outputdir');
         lensfullbasename = thisR.get('lens full basename');
         val = fullfile(outputDir,'lens',lensfullbasename);
+    case 'lensaccommodation'
+        % The human eye models insert the accommodation in the name of the
+        % lens file We extract the numerical value of the accommodation
+        % here.  
+        % 
+        % We also extract it in recipeGet(thisR,'accommodation'),
+        % which calls this function for the human eye model cases, but not
+        % for other cases.  In those cases, the lens does not change
+        % (accommodate).  Rather the distance to the film sets the focal
+        % distance, and the inverse of this distance is called the
+        % accommodation of the lens (but it is not).
+        lensfullbasename = thisR.get('lens full basename');
+        tmp = split(lensfullbasename,'.');
+        lensfullbasename = tmp{1};
+        tmp = split(lensfullbasename,'_');
+        val = str2double(tmp{2}) + str2double(tmp{3})/100;
 
     case {'focusdistance','focaldistance'}
         % Distance in object space that is in focus on the film. If the
@@ -521,14 +541,16 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = NaN;
             case 'lens'
 
-                % Focal distance given the object distance and the lens
-                % file.  Some camera types uses focus and some use focal.
-                % Confusing and needs sorting (BW).
-                subType = lower(thisR.camera.subtype);
-                switch subType
-                    case {'humaneye','realisticeye'}
-                    val = thisR.camera.focusdistance.value; % Meters
-                    val = thisR.camera.focaldistance.value; % Meters
+                % Distance to the in-focus object. 
+                switch thisR.get('camera subtype')
+                    case {'humaneye'}
+                        % For the human eye, this is built into the
+                        % definition (accommodation) of the lens model
+                        val = 1/thisR.get('accommodation');                        
+                    otherwise
+                        % For other types of lenses this can be set, and
+                        % PBRT adjusts the film distance to achieve this.
+                        val = thisR.camera.focusdistance.value; % Meters
                 end
 
                 % If the isetlens repository is on the path, we convert the
@@ -536,8 +558,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % there is no film distance that will bring the object into
                 % focus.
                 if exist('lensFocus','file')
-                    % This will run if isetlens is on the path.  Then the
-                    % function lensFocus will be on the path
+                    % If isetlens is on the path, we run lensFocus to check
+                    % that the specified focus distance is a legitimate
+                    % value.
                     lensFile     = thisR.get('lens file');
                     filmdistance = lensFocus(lensFile,val*1e+3); %mm
                     if filmdistance < 0
@@ -561,10 +584,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % itself.  When we set the value, we use setNavarroAccommodation or
         % setArizonaAccommodation. There is no way to adjust the LeGrand eye.
         %        
-        subType = lower(thisR.camera.subtype);
-        switch subType
-            case {'humaneye','realisticeye'}
-                warning('No way to get accommodation yet.  Work in progress.');
+        switch thisR.get('camera subtype')
+            case {'humaneye'}
+                val = thisR.get('lens accommodation');
             otherwise
                 % Typically this is what is meant
                 val = 1 / thisR.get('focal distance','m');
@@ -613,7 +635,7 @@ switch ieParamFormat(param)  % lower case, no spaces
 
             case 'lens'
                 % We separate out the omni and human realisticEye models
-                if strcmp(thisR.get('camera subtype'),'realisticEye')
+                if strcmp(thisR.get('camera subtype'),'humaneye')
                     % For the human eye model we store the distance to the
                     % retina in millimeters.
                     warning('Returning retina distance in m')
@@ -650,12 +672,13 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
 
-        % realisticEye parameters
+        % humaneye (realisticEye) parameters
     case {'retinadistance'}
         % Default storage in mm.  Hence the scale factor on units
-        if isequal(thisR.camera.subtype,'realisticEye')
+        subType = thisR.get('camera subtype');
+        if isequal(subType,'humaneye')
             val = thisR.camera.retinaDistance.value;
-        else, error('%s only exists for realisticEye model',param);
+        else, error('%s only exists for humaneye or realisticeye model',param);
         end
 
         % Adjust spatial units per user's specification
@@ -669,10 +692,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         % Originally called retina radius, but it really is the
         % radius of the eye ball, not the retina.
-        if isequal(thisR.camera.subtype,'realisticEye')
+        subType = thisR.get('camera subtype');
+        if isequal(subType,'humaneye')
             val = thisR.camera.retinaRadius.value;
-        else, error('%s only exists for realisticEye model',param);
+        else, error('%s only exists for humaneye or realisticeye model',param);
         end
+        
         % Adjust spatial units per user's specification
         if isempty(varargin), return;
         else, val = (val*1e-3)*ieUnitScaleFactor(varargin{1});
@@ -681,7 +706,8 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'retinasemidiam'}
         % Curved retina parameter.
         % Default storage in mm.  Hence the scale factor on units
-        if isequal(thisR.camera.subtype,'realisticEye')
+        subType = thisR.get('camera subtype');
+        if isequal(subType,'humaneye')
             val = thisR.camera.retinaSemiDiam.value;
         else, error('%s only exists for realisticEye model',param);
         end
@@ -726,23 +752,23 @@ switch ieParamFormat(param)  % lower case, no spaces
 
     case {'ior1'}
         % Index of refraction 1
-        if isequal(thisR.camera.subtype,'realisticEye')
+        if isequal(thisR.get('camera subtype'),'humaneye')
             val = thisR.camera.ior1.value;
         else, error('%s only exists for realisticEye model',param);
         end
     case {'ior2'}
         % Index of refraction 1
-        if isequal(thisR.camera.subtype,'realisticEye')
+        if isequal(thisR.get('camera subtype'),'humaneye')
             val = thisR.camera.ior2.value;
         else, error('%s only exists for realisticEye model',param);
         end
     case {'ior3'}
-        if isequal(thisR.camera.subtype,'realisticEye')
+        if isequal(thisR.get('camera subtype'),'humaneye')
             val = thisR.camera.ior3.value;
         else, error('%s only exists for realisticEye model',param);
         end
     case {'ior4'}
-        if isequal(thisR.camera.subtype,'realisticEye')
+        if isequal(thisR.get('camera subtype'),'humaneye')
             val = thisR.camera.ior4.value;
         else, error('%s only exists for realisticEye model',param);
         end
@@ -788,7 +814,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % filmDistance = thisR.set('film distance');
                     val = atand(filmDiag/2/filmDistance);
                 end
-            case 'realisticeye'
+            case 'humaneye'
                 % thisR.get('fov') - realisticEye case
                 %
                 % The retinal geometry parameters are retinaDistance,
@@ -829,10 +855,10 @@ switch ieParamFormat(param)  % lower case, no spaces
 
     case 'pupildiameter'
         % Default units are millimeters
-        switch ieParamFormat(thisR.camera.subtype)
+        switch ieParamFormat(thisR.get('camera subtype'))
             case 'pinhole'
                 val = 0;
-            case 'realisticeye'
+            case 'humaneye'
                 val = thisR.camera.pupilDiameter.value;
             otherwise
                 disp('Need to figure out pupil diameter!!!')
