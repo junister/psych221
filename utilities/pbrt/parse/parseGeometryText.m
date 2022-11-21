@@ -163,7 +163,7 @@ while i <= length(txt)
         nMaterial = nMaterial+1;
         mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW> 
 
-    elseif piContains(currentLine,'Material') && ~strcmp(currentLine(1),'#')
+    elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
 
         mat = parseBlockMaterial(currentLine);
 
