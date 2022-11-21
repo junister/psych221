@@ -14,13 +14,13 @@ function data = piEXR2Mat(inputFile, channelname)
 % Output
 %   data - Matlab data.
 %
-% Zhenyi, 2021
+% Zhenyi,ß 2021
 % dockerWrapper Support, D. Cardinal, 2022
 %
 
 % tic
 try
-    % use matlab builtin method this way in case other user does not have 2022b.
+    % Use matlab builtin method if possible. 
     if strcmpi(channelname,'radiance')
         channelname = strings([1, 31]);
         for ii = 1:31

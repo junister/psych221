@@ -37,6 +37,9 @@ thisR.set('fov',45);
 thisR.set('nbounces',5);
 thisR.set('film render type',{'radiance','depth'});
 
+% Debugging
+% piWrite(thisR);
+% [scene, results] = piRender(thisR);
 % Render
 piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 
