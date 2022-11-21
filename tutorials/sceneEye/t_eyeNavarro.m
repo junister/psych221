@@ -112,10 +112,10 @@ thisSE.set('to',toB);
 thisSE.set('object distance',distC);  
 
 % We reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',256);      
+thisSE.set('rays per pixel',512);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',256);     
+thisSE.set('spatial samples',512);     
 
 % Ray bounces
 thisSE.set('n bounces',3);

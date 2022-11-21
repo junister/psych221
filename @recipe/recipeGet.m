@@ -492,29 +492,42 @@ switch ieParamFormat(param)  % lower case, no spaces
         lensfullbasename = thisR.get('lens full basename');
         val = fullfile(outputDir,'lens',lensfullbasename);
     case 'lensaccommodation'
-        % The human eye models insert the accommodation in the name of the
-        % lens file We extract the numerical value of the accommodation
-        % here.  
-        % 
-        % We also extract it in recipeGet(thisR,'accommodation'),
-        % which calls this function for the human eye model cases, but not
-        % for other cases.  In those cases, the lens does not change
-        % (accommodate).  Rather the distance to the film sets the focal
-        % distance, and the inverse of this distance is called the
-        % accommodation of the lens (but it is not).
-       
-        txtLines = piReadText(thisR.get('lensfile'));
-        % Find the text that has '(Diopters)' in it.  Normally this is
-        % line 10 in the lens file.
-        tmp = strfind(txtLines,'s)');
-        for ii=1:numel(tmp)
-            if ~isempty(tmp{ii})
-                thisLine = txtLines{ii};  % Should be line 10
-                % Find the string beyond Diopters and return it
-                val = str2double(thisLine((tmp{ii}+2):end)); % ,'%f')
-                return;
+        % Some eye models have an accommodation value for the
+        % lens/cornea.  The retina distance is held fixed, and
+        % accommodation is achieved by rebuilding the eye model.
+        %
+        % For typical lenses (not eye models) the accommodation refers
+        % to the 1/focal distance.  So people say that a simple lens
+        % is accommodated to a focal distance and its accommodation is
+        % the inverse of that distance.
+        %
+        % We used to insert the accommodation in the name of the lens
+        % file. Nov 2022 I took this approach (BW).
+
+        if isequal(thisR.get('camera subtype'),'humaneye')
+            % If it is a human eye model do this
+
+            % Read the lens file
+            txtLines = piReadText(thisR.get('lensfile'));
+
+            % Find the text that has '(Diopters)' in it.  Normally this is
+            % line 10 in the lens file.
+            tmp = strfind(txtLines,'s)');
+
+            for ii=1:numel(tmp)
+                if ~isempty(tmp{ii})
+                    thisLine = txtLines{ii};  % Should be line 10
+                    % Find the string beyond Diopters and return it
+                    val = str2double(thisLine((tmp{ii}+2):end)); % ,'%f')
+                    return;
+                end
             end
+        else
+            % For typical lenses people call the accommodation the
+            % inverse of the focal distance.
+            val = 1 / thisR.get('focal distance');
         end
+
 
     case {'focusdistance','focaldistance'}
         % Distance in object space that is in focus on the film. If the
