@@ -96,7 +96,7 @@ switch ieParamFormat(cameraType)
     otherwise
         lensDefault = '';
 end
-
+p.addParameter('eyemodel','navarro',@(x)ismember(x,{'navarro','arizona','legrand'}));
 p.addParameter('lensfile',lensDefault, @ischar);
 
 p.parse(cameraType,varargin{:});
@@ -104,7 +104,8 @@ p.parse(cameraType,varargin{:});
 % Use pinhole instead of perspective, for clarity.
 if isequal(cameraType,'perspective'), cameraType = 'pinhole'; end
 
-lensFile      = p.Results.lensfile;
+lensFile = p.Results.lensfile;
+eyeModel = p.Results.eyemodel;
 
 %% Initialize the default camera type
 switch ieParamFormat(cameraType)
@@ -186,7 +187,7 @@ switch ieParamFormat(cameraType)
         camera.filmdistance.type ='float';
         camera.filmdistance.value=0.002167;
         camera.lensfile.type  = 'string';
-        [~,name,e] = fileparts(lensFile);
+        [~,name,~] = fileparts(lensFile);
         % check if lensFile exist.  This may fail.  To check with RTF
         % calculations (BW, Augu 2 2022).
         if isempty(which(lensFile))
@@ -206,28 +207,51 @@ switch ieParamFormat(cameraType)
         error('Use ''omni'' and add a microlens array');
     case {'humaneye'}
         % Human eye model used with sceneEye calculations in ISETBio. The
-        % subtype 'realisticEye' is historical.  We still allow it for
-        % PBRT, though human eye is now preferred.
+        % subtype 'realisticEye' is historical.  We allow it for PBRT,
+        % though human eye is now preferred.
+        %
+        % piCameraCreate('humaneye',
+
         if piCamBio
             warning('human eye camera type is for use with ISETBio')
         end
         camera.type           = 'Camera';
         camera.subtype        = 'humaneye';
+        
+        % The lens file should be created by calling the appropriate lens
+        % model.  The default might be navarroLensCreate(0).
         camera.lensfile.type  = 'string';
-        camera.lensfile.value = lensFile;
+        switch eyeModel
+            case 'navarro'
+                camera.lensfile.value = lensFile;
+            case 'arizona'
+                camera.lensfile.value = lensFile;
+            case 'legrand'
+                camera.lensfile.value = lensFile;
+            otherwise
+                error('Unknown eye model %s\n',eyemodel);
+        end
 
-        % This is the length of the chord that defines the field of view.
+        
         % There is a PowerPoint in the wiki (iset3d) images that explains
         % the parameters: EyeballGeometry.pptx.
+        
+        % The retina distance and retina radius are the same for all the
+        % human eye models. The models differ in the parameters about the
+        % lens and cornea, which are written out in the lens file.
 
         % The distance from the back of the lens to the retina is the
         % retinaDistance.
         camera.retinaDistance.type = 'float';
         camera.retinaDistance.value = 16.32;
+
         % The radius of the whole eyeball is retinaRadius.
         camera.retinaRadius.type    = 'float';
         camera.retinaRadius.value   = 12;  %mm
 
+        % This the semi diameter and pupil diameter are changed, reasonably
+        % enough, to control the field of view and match the pupil.
+        %
         % The chord length used to define the effect 'width','height' and
         % field of view of the eyeball model.  See the PowerPoint (above).
         camera.retinaSemiDiam.type  = 'float';
@@ -248,34 +272,34 @@ switch ieParamFormat(cameraType)
         camera.mmUnits.value = 'false';
         camera.mmUnits.type  = 'bool';
 
-        % Not used in V4.
-        % Status of the chromatic aberration during rendering.  This slows
-        % the calculation, so we start with it off.
+        % Not used in V4.  The chromatic aberration must be handled
+        % through the spectralpath integrator, which is separate from the
+        % humaneye model.
         % camera.chromaticAberrationEnabled.value = false;
         % camera.chromaticAberrationEnabled.type  = 'bool';
 
         % These are index of refraction files for the navarro model
-        [~,n,~] = fileparts(lensFile);
-        if isequal(lower(n),'navarro') || ...
-                isequal(lower(n),'legrand')
-            camera.ior1.value = 'ior1.spd';
-            camera.ior2.value = 'ior2.spd';
-            camera.ior3.value = 'ior3.spd';
-            camera.ior4.value = 'ior4.spd';
-        else
-            % Arizona does not have any entries here.  How can that be?
-            % Asking TL.
-            camera.ior1.value = '';
-            camera.ior2.value = '';
-            camera.ior3.value = '';
-            camera.ior4.value = '';
-        end
-        % What happened to the LeGrand eye case?
-
         camera.ior1.type = 'spectrum';
         camera.ior2.type = 'spectrum';
         camera.ior4.type = 'spectrum';
         camera.ior3.type = 'spectrum';
+        switch eyeModel
+            case {'navarro','legrand'}
+                camera.ior1.value = 'ior1.spd';
+                camera.ior2.value = 'ior2.spd';
+                camera.ior3.value = 'ior3.spd';
+                camera.ior4.value = 'ior4.spd';
+            case 'arizona'
+                % Arizona does not have any entries here.  How can that be?
+                % Asking TL.  Maybe that model does not include chromatic
+                % abberration?
+                camera.ior1.value = '';
+                camera.ior2.value = '';
+                camera.ior3.value = '';
+                camera.ior4.value = '';
+            otherwise
+                error('Unknown eye model %s\n',eyeModel);
+        end
 
     otherwise
         error('Unrecognized camera subtype, %s\n.', cameraType);

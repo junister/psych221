@@ -103,16 +103,19 @@ thisSE.set('to',toB); distB = thisSE.get('object distance');
 thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
-% This is the distance we set our accommodation to that.
-% Try distC + 0.5  and then distA
+% This is the distance we set our accommodation to that. Try distC + 0.5
+% and then distA.  At a resolution of 512, I can see the difference.  I
+% don't really understand the units here, though.  (BW).
 %
-thisSE.set('accommodation',1/(distA + 0.5));  
+% thisSE.set('accommodation',1/(distC + 0.5));  
+
+thisSE.set('object distance',distC);  
 
 % We reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',512);      
+thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);     
+thisSE.set('spatial samples',256);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
@@ -126,10 +129,13 @@ thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
 
-% piWrite(thisSE.recipe);
-% [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
+%{
+% A lot of debugging to clean up iset3d-v4 this way.
+ piWrite(thisSE.recipe);
+ [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
+%}
 
-% Fix the flags, then maybe this will run.
+% Runs on the CPU on mux for humaneye case.
 [oi, result] = thisSE.render('docker wrapper',thisDWrapper);
 
 % thisSE.get('lens file')
@@ -139,5 +145,30 @@ oiWindow(oi);
 
 % Summarize
 thisSE.summary;
+
+%% Set accommodation to a different distance.
+%
+% The lens maker's equation has object distance (do), image distance (di)
+% and focal length (fl)
+% 
+%       1/do + 1/di = 1/fl
+%
+% So if focal length is 1/60 and 1/di is retinalDistance, we should be able
+% to calculate the distance to the infocus object as 
+% 
+%    1/fl - 1/retinalDistance
+%
+%
+
+
+thisSE.set('accommodation',1/(distC + 0.5));  
+
+% This changes the distance to the camera.
+% thisSE.set('object distance',distA);  
+
+[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+oiWindow(oi);
+thisSE.summary;
+
 
 %% END

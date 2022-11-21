@@ -634,11 +634,11 @@ switch ieParamFormat(param)  % lower case, no spaces
                 end
 
             case 'lens'
-                % We separate out the omni and human realisticEye models
+                % We separate out the omni and humaneye models
                 if strcmp(thisR.get('camera subtype'),'humaneye')
                     % For the human eye model we store the distance to the
-                    % retina in millimeters.
-                    warning('Returning retina distance in m')
+                    % retina in millimeters.  So we explicitly return it in
+                    % meters here.
                     val = thisR.get('retina distance','m');
                 else
                     % We calculate the focal length from the lens file
