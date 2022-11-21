@@ -136,7 +136,7 @@ thisSE.recipe.set('render type', {'radiance','depth'});
 %}
 
 % Runs on the CPU on mux for humaneye case.
-[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
+oi = thisSE.render('docker wrapper',thisDWrapper);
 
 % thisSE.get('lens file')
 

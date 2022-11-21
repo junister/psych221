@@ -502,11 +502,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % (accommodate).  Rather the distance to the film sets the focal
         % distance, and the inverse of this distance is called the
         % accommodation of the lens (but it is not).
-        lensfullbasename = thisR.get('lens full basename');
-        tmp = split(lensfullbasename,'.');
-        lensfullbasename = tmp{1};
-        tmp = split(lensfullbasename,'_');
-        val = str2double(tmp{2}) + str2double(tmp{3})/100;
+       
+        txtLines = piReadText(thisR.get('lensfile'));
+        % Find the text that has '(Diopters)' in it.  Normally this is
+        % line 10 in the lens file.
+        tmp = strfind(txtLines,'s)');
+        for ii=1:numel(tmp)
+            if ~isempty(tmp{ii})
+                thisLine = txtLines{ii};  % Should be line 10
+                % Find the string beyond Diopters and return it
+                val = str2double(thisLine((tmp{ii}+2):end)); % ,'%f')
+                return;
+            end
+        end
 
     case {'focusdistance','focaldistance'}
         % Distance in object space that is in focus on the film. If the

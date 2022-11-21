@@ -311,23 +311,8 @@ end
 end
 
 %% Helper functions
-
-%% Generic text reading, omitting comments and including comments
-function [txtLines, header] = piReadText(fname)
-% Open, read, close excluding comment lines
-fileID = fopen(fname);
-% tmp = textscan(fileID,'%s','Delimiter','\n','CommentStyle',{'#'});
-tmp = textscan(fileID,'%s','Delimiter','\n');
-
-txtLines = tmp{1};
-fclose(fileID);
-
-% Include comments so we can read only the first line, really
-fileID = fopen(fname);
-tmp = textscan(fileID,'%s','Delimiter','\n');
-header = tmp{1};
-fclose(fileID);
-end
+% Moved piReadText to utilities/file.  Will probably move piRead
+% there, too.
 
 %% Find the text in WorldBegin/End section
 function [options, world] = piReadWorldText(thisR,txtLines)
