@@ -19,18 +19,30 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 
 % tic
-try
-    % Use matlab builtin method if possible.
+if ~isMATLABReleaseOlderThan('R2022b')
+    % Use Matlab builtin exrread from the image toolbox 
+
+    % Matlab included exrread() in 2022b.  We included exread() in
+    % ISETCam (imgproc/openexr) for earlier releases. This code forces
+    % a call to the Matlab toolbox version.  It eliminates the openexr
+    % version from the user's path (if it is still there).
+    tmp = which('exrread','-all');
+    if numel(tmp) > 1
+        lst = ~contains(tmp,'toolbox/images/iptformats');
+        rmpath(fileparts(tmp{lst}));        
+    end
+
     if strcmpi(channelname,'radiance')
         channels = strings([1, 31]);
         for ii = 1:31
             channels(ii) = sprintf('Radiance.C%02d',ii);
         end
     end
+
     data = exrread(inputFile, Channels=channels);
     return;
 
-catch
+else
 
     % Use the docker image to perform the EXR read.
     [indir, fname,~] = fileparts(inputFile);
