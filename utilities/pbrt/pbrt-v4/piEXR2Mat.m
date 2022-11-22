@@ -37,6 +37,8 @@ if ~isMATLABReleaseOlderThan('R2022b')
         for ii = 1:31
             channels(ii) = sprintf('Radiance.C%02d',ii);
         end
+    else
+        channels = channelname;
     end
 
     data = exrread(inputFile, Channels=channels);
