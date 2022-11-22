@@ -41,6 +41,8 @@ toC = [ 0.1458     0.0100     1.6667];
 % infinite depth of field (no focal distance).
 thisSE = sceneEye('letters at depth');
 
+thisSE.set('render type',{'radiance','depth'});
+
 % Position the eye off to the side so we can see the 3D easily
 from = [0.25,0.3,-0.2];
 thisSE.set('from',from);
@@ -111,11 +113,11 @@ thisSE.set('to',toB);
 
 thisSE.set('object distance',distC);  
 
-% We reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',512);      
+% We can reduce the rendering noise by using more rays. This takes a while.
+thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);     
+thisSE.set('spatial samples',256);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
@@ -148,7 +150,7 @@ thisSE.summary;
 
 %% Set accommodation to a different distance.
 
-thisSE.set('accommodation',1/(distC + 0.5));  
+thisSE.set('accommodation',1/distC);  
 
 % This changes the distance to the camera.
 % thisSE.set('object distance',distA);  
