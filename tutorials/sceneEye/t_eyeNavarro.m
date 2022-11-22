@@ -147,19 +147,6 @@ oiWindow(oi);
 thisSE.summary;
 
 %% Set accommodation to a different distance.
-%
-% The lens maker's equation has object distance (do), image distance (di)
-% and focal length (fl)
-% 
-%       1/do + 1/di = 1/fl
-%
-% So if focal length is 1/60 and 1/di is retinalDistance, we should be able
-% to calculate the distance to the infocus object as 
-% 
-%    1/fl - 1/retinalDistance
-%
-%
-
 
 thisSE.set('accommodation',1/(distC + 0.5));  
 
