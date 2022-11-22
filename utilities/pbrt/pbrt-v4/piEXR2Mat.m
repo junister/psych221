@@ -28,7 +28,7 @@ if ~isMATLABReleaseOlderThan('R2022b')
     % version from the user's path (if it is still there).
     tmp = which('exrread','-all');
     if numel(tmp) > 1
-        lst = ~contains(tmp,'toolbox/images/iptformats');
+        lst = ~contains(tmp,fullfile('toolbox',filesep,'images',filesep,'iptformats'));
         rmpath(fileparts(tmp{lst}));        
     end
 
