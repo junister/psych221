@@ -608,6 +608,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         switch thisR.get('camera subtype')
             case {'humaneye'}
                 val = thisR.get('lens accommodation');
+            case 'pinhole'
+                warning('Pinhole has infinite depth of field, no focal distance.');
+                val = Inf;
+                return;
             otherwise
                 % Typically this is what is meant
                 val = 1 / thisR.get('focal distance','m');
