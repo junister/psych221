@@ -27,9 +27,23 @@ toC = [ 0.1458     0.0100     1.6667];
 
 % This is rendered using a pinhole so the rendering is fast.  It has
 % infinite depth of field (no focal distance).
-thisSE = sceneEye('letters at depth','eye model','arizona');
+% thisSE = sceneEye('letters at depth','eye model','arizona');
+thisSE = sceneEye('slantedEdge','eye model','arizona');
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
+thisSE.set('light',thisLight, 'add');
+thisR = thisSE.get('recipe');
 
-thisSE.set('render type',{'radiance','depth'});
+% {
+scene = piRecipeDefault('scene name','slanted edge');
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
+scene.set('light',thisLight, 'add');
+scene.set('to',[0 0 0]);
+piAssetGeometry(scene);
+
+%}
+% thisR.set('light',thisLight.name,'specscale',0.5);
+% thisR.set('light',thisLight.name,'spd',[0.5 0.4 0.2]);
+% thisSE.set('render type',{'radiance','depth'});
 
 % Position the eye off to the side so we can see the 3D easily
 from = [0.25,0.3,-0.2];

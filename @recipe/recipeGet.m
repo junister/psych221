@@ -1401,7 +1401,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             names = thisR.assets.mapLgtFullName2Idx.keys;
             if isempty(names), disp('No lights.'); return;
             else
-                % We have some names.  Find the asset.
+                % We have some names.  Find the numerical value of the asset.
                 val = zeros(1,numel(names));
                 for ii=1:numel(names)
                     val(ii) = piAssetFind(thisR,'name',names{ii});
@@ -1410,7 +1410,8 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
 
-        % Parameters from a single light
+        % Parameters from a single light.  varargin{1} may be an index
+        % to the light asset.
         switch ieParamFormat(varargin{1})
             case {'names','namesnoid'}
                 % thisR.get('lights','names')
