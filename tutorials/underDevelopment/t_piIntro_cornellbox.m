@@ -14,14 +14,6 @@ thisR = piRecipeDefault('scene name',sceneName);
 thisR.set('rays per pixel',128);
 thisR.set('nbounces',5);
 
-%%
-piWrite(thisR); scene = piRender(thisR,'render type','radiance');
-sceneWindow(scene);
-
-%% Summarize the recipe
-
-thisR.summarize;
-
 %% Add an area light at predefined region
 
 % Should we delete all the lights and start clean?
@@ -30,26 +22,9 @@ piLightDelete(thisR,'all');
 
 distantLight = piLightCreate('distantLight', ...
     'type','spot',...
-    'cone angle',18,...
     'cameracoordinate', true);
-thisR.set('light','add',distantLight);
+thisR.set('light',distantLight,'add');
 
-% thisR = piLightAdd(thisR, 'type', 'spot', ...
-%     'cameracoordinate', true, ...
-%     'cone angle',18);
-
-%{
-% This does not work yet.  We will improve the code get these area lights
-% with different shapes going. 
-thisR = piLightAdd(thisR, 'type', 'area', ...
-    'name','Area light 1',...
-    'shape','sphere', ...
-    'radius',0.2,...
-    'lightspectrum', 'Tungsten');
-%}
-%{
- thisR = piLightDelete(thisR,1);
-%}
 %%  Rendering parameters
 
 
@@ -69,12 +44,7 @@ thisR.integrator.subtype ='directlighting';
 
 %% Write and render
 
-piWrite(thisR);
-
-scene = piRender(thisR, 'rendertype', 'radiance');
-
-scene = sceneSet(scene,'mean luminance',100);
-sceneWindow(scene);
+piWRS(thisR);
 
 %% Add another point light
 
