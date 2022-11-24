@@ -27,23 +27,7 @@ toC = [ 0.1458     0.0100     1.6667];
 
 % This is rendered using a pinhole so the rendering is fast.  It has
 % infinite depth of field (no focal distance).
-% thisSE = sceneEye('letters at depth','eye model','arizona');
-thisSE = sceneEye('slantedEdge','eye model','arizona');
-thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
-thisSE.set('light',thisLight, 'add');
-thisR = thisSE.get('recipe');
-
-% {
-scene = piRecipeDefault('scene name','slanted edge');
-thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
-scene.set('light',thisLight, 'add');
-scene.set('to',[0 0 0]);
-piAssetGeometry(scene);
-
-%}
-% thisR.set('light',thisLight.name,'specscale',0.5);
-% thisR.set('light',thisLight.name,'spd',[0.5 0.4 0.2]);
-% thisSE.set('render type',{'radiance','depth'});
+thisSE = sceneEye('letters at depth','eye model','arizona');
 
 % Position the eye off to the side so we can see the 3D easily
 from = [0.25,0.3,-0.2];
@@ -122,7 +106,7 @@ thisSE.set('spatial samples',256);
 % Ray bounces
 thisSE.set('n bounces',3);
 
-%% This takes longer than the pinhole rendering
+%% Have a at the letters. Lots of things you can plot in this window.
 
 dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
@@ -131,36 +115,27 @@ thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
 
-%{
-% A lot of debugging to clean up iset3d-v4 this way.
- piWrite(thisSE.recipe);
- [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
-%}
-
 % Runs on the CPU on mux for humaneye case.
 oi = thisSE.render('docker wrapper',thisDWrapper);
 
-% thisSE.get('lens file')
-
-%% Have a look.  Lots of things you can plot in this window.
 oiWindow(oi);
 
 % Summarize
 thisSE.summary;
 
-
-
 %% Make an oi of the chess set scene using the LeGrand eye model
 
 % thisSE = sceneEye('chess set scaled','human eye','arizona');
-thisSE = sceneEye('chessset','human eye','arizona');
+thisSE = sceneEye('chessset','eye model','arizona');
 
-thisSE.set('rays per pixel',128);  % Pretty quick, but not high quality
+thisSE.set('rays per pixel',256);  % Pretty quick, but not high quality
 
-oi = thisSE.render('render type','radiance');  % Render and show
+thisSE.set('render type',{'radiance','depth'});
+
+oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
 
 oi = oiSet(oi,'name','Arizona');
-
+oi = piAIdenoise(oi);
 oiWindow(oi);
 
 %% Have a look with the slanted bar scene
@@ -168,21 +143,38 @@ oiWindow(oi);
 % Commented out because it takes a while to run.  But in a way, seeing the
 % chromatic aberration is the point.  So, I put it in here.  The slanted
 % bar is at the focal distance.
+thisSE = sceneEye('slantedEdge','eye model','arizona');
+thisSE.set('to',[0 0 0]);
 
-%{
-thisSE = sceneEye('slanted bar','human eye','arizona');
-
-thisSE.set('rays per pixel',256);  % Pretty quick, but not high quality
-thisSE.set('chromatic aberration',8);
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
+thisSE.set('light',thisLight, 'add');
+thisSE.set('light',thisLight.name,'specscale',0.5);
+thisSE.set('light',thisLight.name,'spd',[0.5 0.4 0.2]);
 thisSE.set('fov',2);
 
-oi = thisSE.render('render type','radiance');  % Render and show
+% Debug something about reading the light.
+% piAssetGeometry(thisSE.recipe);
+
+thisSE.set('render type',{'radiance','depth'});
+thisSE.set('rays per pixel',64);  % Pretty quick, but not high quality
+
+thisSE.set('use pinhole',true);
+scene = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+sceneWindow(scene);
+
+%%
+% CA not working in V4 yet.
+% thisSE.set('chromatic aberration',8);
+
+thisSE.set('use pinhole',false);
+thisSE.set('object distance',20);
+oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
 
 oi = oiSet(oi,'name','SB Arizona');
+oi = piAIdenoise(oi);
 oiWindow(oi);
 
 thisSE.summary;
-%}
 
 %% END
 

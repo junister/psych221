@@ -1384,7 +1384,6 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
     case{'light', 'lights'}
         % Many different light paramters
-        % thisR.get('lights',varargin)
         % thisR.get('lights',name or id,property)
         % thisR.get('lights',idx,property)
         % thisR.get('light',idx,'shape')
