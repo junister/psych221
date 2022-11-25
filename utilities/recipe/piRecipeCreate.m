@@ -41,7 +41,12 @@ function thisR = piRecipeCreate(rName,varargin)
  thisR = piRecipeCreate('Simple scene');
  piWRS(thisR);
 %}
-%%
+%{
+ thisR = piRecipeCreate('arealight');
+ piWRS(thisR);
+%}
+
+%% Input parsing
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
@@ -122,7 +127,8 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name','CornellBoxReference');
     case 'simplescene'
         thisR = piRecipeDefault('scene name',rName);
-
+    case 'arealight'
+        thisR = piRecipeDefault('scene name',rName);
     otherwise
         error('Unknown recipe name %s\n',rName);
 end

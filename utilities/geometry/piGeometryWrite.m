@@ -49,7 +49,8 @@ fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
 % Open the file and write out the assets
 fid_obj = fopen(fname_obj,'w');
-fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',datetime("now"));
+% fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
+fprintf(fid_obj,'# Exported by piGeometryWrite %s \n  \n',string(datetime));
 
 % Traverse the asset tree beginning at the root
 rootID = 1;

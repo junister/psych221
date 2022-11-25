@@ -374,6 +374,12 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'stepfunction';
         sceneFile = [sceneDir, '.pbrt'];
         exporter = 'Copy';
+
+    case 'arealight'
+        sceneDir = 'arealight';
+        sceneFile = [sceneDir, '.pbrt'];
+        exporter = 'PARSE';
+        
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
 end
