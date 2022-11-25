@@ -22,7 +22,10 @@ function  piGeometryWrite(thisR,varargin)
 % See also
 %   piGeometryRead
 %
-%%
+
+%% Main logic is in this routine.
+%  The routine relies on multiple helpers, below.
+
 p = inputParser;
 
 % Not needed now.
@@ -46,7 +49,7 @@ fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
 % Open the file and write out the assets
 fid_obj = fopen(fname_obj,'w');
-fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
+fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',datetime("now"));
 
 % Traverse the asset tree beginning at the root
 rootID = 1;
@@ -66,13 +69,14 @@ else
         fprintf(fid_obj, thisR.world{ii});
     end
 end
-fclose(fid_obj);
 
-% Not sure we want this most of the time, can un-comment as needed
-%fprintf('%s is written out \n', fname_obj);
+fclose(fid_obj);
 
 end
 
+%% ---------  Geometry file writing helpers
+
+%% Recursively write nodes
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
@@ -102,8 +106,13 @@ for ii = 1:numel(children)
 
     % If a branch, put id in the nodeList
     if isequal(thisNode.type, 'branch')
-        % do not write object instance repeatedly
+        
+        % It would be much better to pre-allocate if possible.  For speed
+        % with scenes and many assets. Ask Zhenyi Liu how he wants to
+        % handle this (BW)
         nodeList = [nodeList children(ii)];
+
+        % do not write object instance repeatedly
         if isfield(thisNode,'isObjectInstance')
             if thisNode.isObjectInstance ==1
                 indentSpacing = "    ";
@@ -189,6 +198,8 @@ for ii = 1:numel(nodeList)
 end
 
 end
+
+%% Recursive write for attributes?
 
 function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag)
 % Write attribute sections. The logic is:
@@ -362,7 +373,8 @@ end
 
 end
 
-%% Geometry file writing helper
+
+%% Geometry transforms
 function piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing)
 % Zhenyi: export Transform matrix instead of translation/rotation/scale
 
@@ -394,7 +406,7 @@ fprintf(fid, strcat(spacing, indentSpacing,...
 
 end
 
-
+%% Write out an object?  Needs comments
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
 
 if ~isempty(thisNode.mediumInterface)

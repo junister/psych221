@@ -28,26 +28,14 @@ function workingDir = piWrite(thisR,varargin)
 %
 % Return
 %    workingDir - path to the output directory mounted by the Docker
-%                 container.  This is not necessary, however, because we
-%                 can find it from thisR.get('output dir')
+%                 container.  This return is not necessary, however,
+%                 because it is in the recipe as: thisR.get('output dir')
 %
 % TL Scien Stanford 2017
 % JNM -- Add Windows support 01/25/2019
 %
 % See also
 %   piRead, piRender
-
-% Deprecated key/val
-%   Deprecated overwrite pbrtfile  - If scene PBRT file exists,    overwrite (default true)
-%   Deprecated overwrite resources - If the resources files exist, overwrite (default true)
-%   Deprecated overwrite lensfile  - Logical. Default true
-%   Deprecated overwrite materials - Logical. Default true
-%   Deprecated overwrite geometry  - Logical. Default true
-%   Deprecated overwrite json      - Logical. Default true
-%   Deprecated lightsFlag
-%
-%   Deprecated thistrafficflow
-%
 
 % Examples:
 %{
@@ -76,10 +64,6 @@ piWrite(thisR);
 oi = piRender(thisR,'render type','radiance');
 oiWindow(oi);
 %}
-%{
-piWrite(thisR,'overwrite resources',false,'overwrite pbrt file',true);
-piWrite(thisR);
-%}
 
 %% Parse inputs
 varargin = ieParamFormat(varargin);
@@ -90,52 +74,17 @@ p = inputParser;
 % varargin = ieParamFormat(varargin);
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-
-%{
-% Copy over the whole directory
-p.addParameter('overwriteresources', true,@islogical);
-
-% Overwrite the specific scene file
-p.addParameter('overwritepbrtfile',true,@islogical);
-
-% Force overwrite of the lens file
-p.addParameter('overwritelensfile',true,@islogical);
-
-% Overwrite materials.pbrt
-p.addParameter('overwritematerials',true,@islogical);
-
-% Overwrite geometry.pbrt
-p.addParameter('overwritegeometry',true,@islogical);
-%}
-
-% Create a new materials.pbrt
-% p.addParameter('creatematerials',false,@islogical);
-
-% % control lighting in geomtery.pbrt
-% p.addParameter('lightsflag',false,@islogical);
-%
-% % Read trafficflow variable
-% p.addParameter('thistrafficflow',[]);
-
 p.addParameter('verbose', 0, @isnumeric);
-
 p.parse(thisR,varargin{:});
 
-% We need to get rid of these variables down below.  Until that time,
-% ...
+% We need to get rid of these variables down below.  Historically, these
+% were parameters. Until we get rid of these in the subroutines, we leave
+% them here. 
 overwriteresources  = true;
 overwritepbrtfile   = true;
 overwritelensfile   = true;
 overwritematerials  = true;
 overwritegeometry   = true;
-
-%{
-overwriteresources  = p.Results.overwriteresources;
-overwritepbrtfile   = p.Results.overwritepbrtfile;
-overwritelensfile   = p.Results.overwritelensfile;
-overwritematerials  = p.Results.overwritematerials;
-overwritegeometry   = p.Results.overwritegeometry;
-%}
 
 % creatematerials     = p.Results.creatematerials;
 verbosity           = p.Results.verbose;
@@ -170,7 +119,6 @@ if isequal(thisR.get('optics type'),'lens')
 
     if ~isempty(thisR.get('lensfile'))
         piWriteLens(thisR,overwritelensfile);
-
     end
 end
 
@@ -210,17 +158,16 @@ if ~isempty(thisR.materials.list)
     piWriteMaterials(thisR,overwritematerials);
 end
 
-%% Overwrite geometry.pbrt
+%% Write the scene_geometry.pbrt
 if ~isequal(exporter,'Copy')
     piWriteGeometry(thisR,overwritegeometry);
 end
 
 end   % End of piWrite
 
-%% Helper functions
+%% ---------  Helper functions
 
 %% Copy the input resources to the output directory
-
 function piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
 % Copy files from the input to output dir
 %
@@ -270,8 +217,7 @@ if overwriteresources && ~isempty(inputDir)
     end
 end
 
-%% Potentially overwrite the scene PBRT file
-
+% Potentially overwrite the scene PBRT file
 outFile = thisR.get('output file');
 
 % Check if the outFile exists. If it does, decide what to do.
@@ -293,7 +239,6 @@ end
 
 function piWriteHeader(thisR,fileID)
 % Write the header
-%
 
 fprintf(fileID,'# PBRT file created with piWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
 fprintf(fileID,'# PBRT version = %i \n',thisR.version);
@@ -598,7 +543,8 @@ end
 
 end
 
-%%
+%% Include Lines inserted in the scene file
+
 function piIncludeLines(thisR,fileID)
 % Insert the 'Include scene_materials.pbrt' and similarly for geometry and
 % lights into the main scene file
@@ -608,8 +554,8 @@ function piIncludeLines(thisR,fileID)
 %
 
 basename = thisR.get('output basename');
-%% Find the World lines with _geometry, _materials, _lights
 
+% Find the World lines with _geometry, _materials, _lights
 % We are being aggressive about the Include files.  We want to name them
 % ourselves.  First we see whether we have Includes for these at all
 lineMaterials = find(contains(thisR.world, {'_materials.pbrt'}));
@@ -636,8 +582,6 @@ if isequal(thisR.exporter, 'Copy')
     return;
 end
 
-
-
 % If we have  geometry Include, we overwrite it with the name we want.
 if ~isempty(lineGeometry)
     thisR.world{lineGeometry} = sprintf('Include "%s_geometry.pbrt"\n', basename);
@@ -655,9 +599,8 @@ if ~isempty(lineLights)
     thisR.world(lineLights) = sprintf('Include "%s_lights.pbrt"\n', basename);
 end
 
-%% Write out the World information.
-
-
+% Write out the World information.
+%
 % Insert the Include lines as the last three before WorldEnd.
 % Also, as of December 2021, placed the 'Scale' line in here.
 % Maybe we should not have an overall Scale in the recipe, however.
@@ -676,11 +619,11 @@ for ii = 1:length(thisR.world)
         % Start with the Scale value from the recipe.  This scales the whole scene,
         % but it might be a bad idea because it does not preserve the geometric
         % relationships between the objects.  They all get bigger.
-%         theScale = thisR.get('scale');
-%         if(~isempty(theScale))
-%             fprintf(fileID,'Scale %0.2f %0.2f %0.2f \n', [theScale(1) theScale(2) theScale(3)]);
-%             fprintf(fileID,'\n');
-%         end
+        %         theScale = thisR.get('scale');
+        %         if(~isempty(theScale))
+        %             fprintf(fileID,'Scale %0.2f %0.2f %0.2f \n', [theScale(1) theScale(2) theScale(3)]);
+        %             fprintf(fileID,'\n');
+        %         end
     end
 
     if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials)
@@ -718,7 +661,8 @@ end
 
 end
 
-%%
+%% Write the scene_geometry file
+
 function piWriteGeometry(thisR,overwritegeometry)
 % Write the geometry file into the output dir
 %

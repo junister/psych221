@@ -72,8 +72,16 @@ p.KeepUnmatched = true;
 p.parse(lightName, varargin{:});
 
 %% Construct light struct
+
+% Some of the fields are present in all the lights
 lght.type = p.Results.type;
+
 lght.name = p.Results.lightName;
+% We want the name to end with _L.  So if it does not, we append the _L
+if ~isequal(lght.name((end-1):end),'_L')
+    % warning('Appending _L to light name')
+    lght.name = [lght.name,'_L'];
+end
 
 % PBRT allows wavelength by wavelength adjustment - we will enable that
 % someday.
@@ -83,13 +91,7 @@ lght.specscale.value = 1;
 lght.spd.type = 'rgb';
 lght.spd.value = [1 1 1];
 
-% I think we always want the name to end with _L.  So if it does not, we
-% append it
-if ~isequal(lght.name((end-1):end),'_L')
-    % warning('Appending _L to light name')
-    lght.name = [lght.name,'_L'];
-end
-
+% Each light type has a different set of parameters.
 switch ieParamFormat(lght.type)
     case 'distant'
         lght.cameracoordinate = true;
