@@ -5,8 +5,7 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   sceneR = piRecipeMerge(sceneR, objects, varargin)
 %
 % Brief description:
-%   Merges objects information (material, texture, assets) from two recipes
-%   into one.
+%   Merges two recipes (material, texture, assets) into one.
 %
 % Inputs:
 %   sceneR    - scene recipe
@@ -25,7 +24,7 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   sceneR   - scene recipe with added objects
 %
 % See also
-%
+%   piAssetLoad, piAssetList
 
 %% Parse input
 varargin = ieParamFormat(varargin);

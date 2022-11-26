@@ -1,5 +1,6 @@
 % s_MCCCBAssetCreate;
 %
+% Description
 %   Generate and save Macbeth Color Checker for Cornell Box project. This
 %   is a more extensive asset than the macbeth asset created by
 %   piChartCreate and used in s_assetsRecipe. This one includes the
@@ -8,7 +9,8 @@
 % Zheng Lyu
 %
 % See also
-%
+%   piChartCreate, s_assetsRecipe
+
 
 %% Init
 

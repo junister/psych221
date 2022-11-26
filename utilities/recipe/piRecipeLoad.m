@@ -1,18 +1,21 @@
 function thisR = piRecipeLoad(fname)
-% Load a scene recipe that has been saved in ISET3d directory
+% Load a scene recipe that has been saved in ISET3d data/scene directory
 %
 % Synopsis
 %    thisR = piRecipeLoad(fname);
 %
 % Inputs
-%    fname - mat-file that contains 'thisR', this stored recipe
+%    fname - mat-file that contains 'thisR', the stored recipe
 %
 % Outputs
 %    thisR - the recipe, adjusted to run properly in the user's local
 %    environment.
 %
+% Description
+%  
+%
 % See also
-%   piAssetLoad
+%   piRecipeMerge, piAssetLoad
 %
 
 %% Read the recipe file, which should be a mat-file

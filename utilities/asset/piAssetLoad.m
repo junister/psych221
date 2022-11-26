@@ -14,18 +14,17 @@ function asset = piAssetLoad(fname)
 %   asset.mergeNode - Node in the asset tree to be used for merging
 %
 % Description
-%   We store certain simple asset recipes as mat-files for easy loading and
-%   insertion into scenes.  The assets are created in the script
-%   s_assetsCreate
-%
-%   The piRecipeMerge function works to combine
-%   these with general scenes.
-%
-%   The asset recipes are stored along with the critical node used for
-%   merging. The mat-file slot for the input is just the name of the
+%   We store certain assets as mat-files that contain a recipe.  These
+%   recipes be loaded (piAssetLoad) and then merged into any other
+%   scene recipe. 
+% 
+%   The assets are created and stored in the script s_assetsCreate. The
+%   piRecipeMerge function combines the asset into the scene. The asset
+%   recipe is stored along with the name of the critical node used for
+%   merging. 
 %
 % See also
-%   s_assetsCreate, piRootPath/data/assets
+%   piRecipeMerge, piDirGet('assets'), piRootPath/data/assets
 %
 
 %%

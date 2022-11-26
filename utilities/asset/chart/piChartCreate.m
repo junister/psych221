@@ -1,8 +1,12 @@
 function [chartR, gName, oName]  = piChartCreate(chartName)
-% Create a small calibration chart to insert in a scene
+% Create a small calibration chart to insert in another scene
 %
 % Synopsis
 %  [chartR, sName] = piChartCreate(chartName)
+%
+% Describe
+%   Used by s_assetsRecipe to create a recipe we later merge with other
+%   recipes.
 %
 % Input
 %   chartName - 'EIA','rings rays','slanted bar','grid lines',
@@ -14,6 +18,7 @@ function [chartR, gName, oName]  = piChartCreate(chartName)
 %   oName   - Object node name
 %
 % See also
+%  s_assetsRecipe, piRecipeMerge
 
 % Examples:
 %{

@@ -1,5 +1,9 @@
-%% Write out the letters as loadable assets
+%% Write out the letters in lattersAtDepth as loadable assets
 %
+%
+%
+% See also
+%   s_assetsRecipe, v_Assets, piAssetLoad, piRecipeMerge
 
 %% This is where we will save them
 assetDir = fullfile(piRootPath,'data','assets');

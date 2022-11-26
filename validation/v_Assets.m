@@ -3,19 +3,20 @@
 % Validate merging assets into recipes
 %
 % This checks that we can merge the pre-computed assets into a simple
-% scene, in this case the Corneel Box
+% scene, in this case the Cornell Box
 %
 % DJC and others
 %
+% See also
+%   piAssetLoad, piRecipeMerge, piDirGet
 
 %% Initialize ISETCam and ISET3d-V4
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Render the base Cornell box scene
+%% Render each asset using the Cornell box scene as the base scene
 %  
-% The first time, it may take 30 sec to fire up the Docker image
-%
+
 parentRecipe = piRecipeDefault('scene name','cornell_box');
 lightName = 'from camera';
 ourLight = piLightCreate(lightName,...
@@ -24,9 +25,9 @@ ourLight = piLightCreate(lightName,...
 recipeSet(parentRecipe,'lights', ourLight,'add');
 piWRS(parentRecipe);
 
-%%  A list of the pre-computed assets
-assetFiles = dir([fullfile(piDirGet('assets'),filesep(),'*.mat']);
-report = '';
+%% The pre-computed assets
+
+assetFiles = dir([fullfile(piDirGet('assets'),filesep(),'*.mat')]);
 fprintf('Found %d assets\n',numel(assetFiles));
 
 %% Loop over each asset
@@ -49,6 +50,10 @@ Asset: ringsrays.mat Succeeded.
 Asset: slantedbar.mat Succeeded.
 Asset: sphere.mat Succeeded.
 %}
+
+% Return a report
+report = '';
+
 for ii = 1:numel(assetFiles)
 
     % I think we need to reload to avoid issues
@@ -71,7 +76,7 @@ for ii = 1:numel(assetFiles)
         sz = ourAsset.thisR.get('asset',thisName{1},'size');
         ourAsset.thisR.set('asset',thisName{1},'scale',[0.1 0.1 0.1] ./ sz);
         
-        % Merge it with the CB
+        % Merge it with the Cornell Box
         combinedR = piRecipeMerge(parentRecipe, ourAsset.thisR, 'node name',ourAsset.mergeNode);
         % piAssetGeometry(combinedR);
         

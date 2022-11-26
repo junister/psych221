@@ -18,15 +18,11 @@ thisR.set('film diagonal',5)
 piWrite(thisR);
 thisDocker = 'vistalab/pbrt-v3-spectral:raytransfer';
 
-[oi, result] = piRender(thisR, 'dockerimagename',...
-            thisDocker);
-
-        oiWindow(oi)
+[oi, result] = piRender(thisR, 'dockerimagename',thisDocker);
+oiWindow(oi)
 
 
 %% Make the chart, simple scene, and merge
-
-
 
 thisR = piRecipeDefault('scene name','simple scene');
 thisR.set('assets','Camera_B','delete');

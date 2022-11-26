@@ -268,7 +268,7 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
 
-        % Benedikt scenes in V4
+        % ************* Start Benedikt V4
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
@@ -285,9 +285,9 @@ switch ieParamFormat(sceneDir)
         end
         exporter = 'Copy';
     case {'bistro'}
-        % Just downloaded from cardinal
-        % Other options are
-        % bistro_boulangerie.pbrt and 'bistro_cafe.pbrt'
+        % Downloaded from the computer, cardinal, put in data/scenes/web
+        % Other versions of this scene are
+        %    bistro_boulangerie.pbrt and 'bistro_cafe.pbrt'
         sceneDir = 'bistro';
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
@@ -296,9 +296,26 @@ switch ieParamFormat(sceneDir)
    case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
-        exporter = 'PARSE';   % Was Copy.  We updated head.pbrt for PARSE.
-         % End Benedikt V4
+        exporter = 'PARSE'; 
+         % ************* End Benedikt V4
          
+    case {'blenderscene'}
+        sceneDir = 'BlenderScene';
+        sceneFile = [sceneDir,'.pbrt'];
+        exporter = 'Blender';   % Blender
+    case {'testplane'}
+        sceneDir = 'testplane';
+        sceneFile = [sceneDir, '.fbx'];
+        exporter = 'Copy';
+    case {'stepfunction'}
+        sceneDir = 'stepfunction';
+        sceneFile = [sceneDir, '.pbrt'];
+        exporter = 'Copy';
+    case 'arealight'
+        sceneDir = 'arealight';
+        sceneFile = [sceneDir, '.pbrt'];
+        exporter = 'PARSE';
+
         % Maybe deprecated V3?
     case 'classroom'
         sceneDir = 'classroom';
@@ -362,23 +379,7 @@ switch ieParamFormat(sceneDir)
         
         % End V3 to deprecate or update
 
-    case {'blenderscene'}
-        sceneDir = 'BlenderScene';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'Blender';   % Blender
-    case {'testplane'}
-        sceneDir = 'testplane';
-        sceneFile = [sceneDir, '.fbx'];
-        exporter = 'Copy';
-    case {'stepfunction'}
-        sceneDir = 'stepfunction';
-        sceneFile = [sceneDir, '.pbrt'];
-        exporter = 'Copy';
 
-    case 'arealight'
-        sceneDir = 'arealight';
-        sceneFile = [sceneDir, '.pbrt'];
-        exporter = 'PARSE';
         
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);

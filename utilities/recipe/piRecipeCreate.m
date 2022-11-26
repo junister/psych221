@@ -42,7 +42,7 @@ function thisR = piRecipeCreate(rName,varargin)
  piWRS(thisR);
 %}
 %{
- thisR = piRecipeCreate('arealight');
+ thisR = piRecipeCreate('teapot set');
  piWRS(thisR);
 %}
 
@@ -57,7 +57,7 @@ p.parse(rName,varargin{:});
 %{
   rList = thisR.list;
    1 {'ChessSet'               } - OK
-    {'CornellBoxReference'    } - Seems black on ISETBio.  Maybe HDR?
+    {'CornellBoxReference'    } - Requires HDR because light is bright
     {'MacBethChecker'         } - Needs a light
     {'SimpleScene'            } - Renders
    5 {'arealight'             } - Broken
@@ -75,7 +75,7 @@ p.parse(rName,varargin{:});
     {'sphere'                 } - Needs a light
     {'stepfunction'           } - OK
     {'teapot'                 } - Many problems
-    20 {'teapot-set'             } - Bad file name
+    20 {'teapotset'             } - Bad file name
     {'testplane'              } - Bad FBX
 
 thisR = piRecipeDefault('scene name',rList{4});
@@ -92,12 +92,12 @@ switch ieParamFormat(rName)
         % Add an equal energy distant light for uniform lighting
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
-        newDistant = piLightCreate('new distant',...
+        lgt = piLightCreate('new distant',...
             'type', 'distant',...
             'specscale float', spectrumScale,...
             'spd spectrum', lightSpectrum,...
             'cameracoordinate', true);
-        thisR.set('light', newDistant, 'add');
+        thisR.set('light', lgt, 'add');
         
         thisR.set('integrator subtype','path');
         thisR.set('rays per pixel', 16);
@@ -125,9 +125,115 @@ switch ieParamFormat(rName)
         thisR.set('film resolution',filmRes);
     case 'cornellboxreference'
         thisR = piRecipeDefault('scene name','CornellBoxReference');
+        warning('Requires HDR because light source is bright.')
     case 'simplescene'
         thisR = piRecipeDefault('scene name',rName);
     case 'arealight'
+        thisR = piRecipeDefault('scene name',rName);
+    case 'bunny'
+        thisR = piRecipeDefault('scene name',rName);
+        bIDX = piAssetSearch(thisR,'object name','bunny');
+        bPos = thisR.get('asset',bIDX,'world position');
+        thisR.set('to',bPos);
+        thisR.set('object distance',0.5);
+
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+        warning('Single, isolated bunny.  Might use piAssetInsert')
+    case 'car'
+        % The materials do not look right.  Rendering needs help.
+        thisR = piRecipeDefault('scene name',rName);
+        thisR.set('object distance',6);
+        thisR.set('to',[-1 1.2 -5.6]);
+        
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+        warning('Car scene needs work.')
+    case 'checkerboard'
+        thisR = piRecipeDefault('scene name',rName);
+    case 'coordinate'
+        thisR = piRecipeDefault('scene name',rName);
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+        idx = piAssetSearch(thisR,'object name','origin');
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+        warning('Not visible in HDR mode.')
+    case 'flatsurface'
+        thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'object name','Cube');
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+    case 'flatsurfacewhitetexture'
+        thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'object name','Cube');
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+        thisR.set('lights','all','delete');
+
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+        idx = piAssetSearch(thisR,'object name','Cube');
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+        warning('No obvious texture.  Use checkerboard.')
+
+    case 'lettersatdepth'
+        thisR = piRecipeDefault('scene name',rName);
+    case 'materialball'
+        thisR = piRecipeDefault('scene name',rName);
+    case 'materialball_cloth'
+        thisR = piRecipeDefault('scene name',rName);
+    case {'slantededge','slantedbar'}
+        rName = 'slantededge';
+        thisR = piRecipeDefault('scene name',rName);
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+
+        idx = piAssetSearch(thisR,'object name','Plane');
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+    case 'sphere'
+        thisR = piRecipeDefault('scene name',rName);
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisR.set('light', lgt, 'add');
+    case 'stepfunction'
+        thisR = piRecipeDefault('scene name',rName);
+        warning('No assets.  Maybe use slanted edge.')
+    case 'teapotset'
+        thisR = piRecipeDefault('scene name',rName);
+    case 'testplane'
         thisR = piRecipeDefault('scene name',rName);
     otherwise
         error('Unknown recipe name %s\n',rName);
