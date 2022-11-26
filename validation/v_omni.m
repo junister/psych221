@@ -35,8 +35,8 @@ piWRS(thisR);
 
 %% Omni with a fisheye lens
 
-% Here is a list of lenses in ISETCam
-lList = lensList;
+% Create a list of lens files in ISETCam data/lens
+lList = lensList('quiet',true);
 
 % Examples
 % ll = 8;   % dgauss.22deg.3.0mm.json
@@ -45,8 +45,8 @@ lList = lensList;
 
 ll = 18;    % fisheye.87deg.50.0mm.json
 
-% We move the camera back a bit to capture more of the scene
-thisR.set('object distance',3);
+% Move the camera back a bit to capture more of the scene
+thisR.set('object distance',4);
 thisR.camera = piCameraCreate('omni', 'lens file',lList(ll).name);
 piWRS(thisR);
 
