@@ -109,11 +109,34 @@ rgb = cell(4,1);
 for ii=1:4
     vcSetSelectedObject('scene',ii);
     scene = ieGetObject('scene');
+    scene = piAIdenoise(scene);
     rgb{ii} = sceneGet(scene,'rgb');
 end
 
 ieNewGraphWin;
 montage(rgb);
+
+%% Plot the spectra
+
+wave = 400:2:700;
+tungsten = ieReadSpectra('Tungsten',wave);
+cfl = ieReadSpectra('CFL_5780',wave);
+d75 = ieReadSpectra('D75',wave);
+tungsten = ieScale(tungsten,1);
+cfl = ieScale(cfl,1);
+d75 = ieScale(d75,1);
+
+ieNewGraphWin; 
+p = plot(wave,tungsten,'r-',wave,cfl,'k-',wave,d75,'b-');
+for ii=1:3
+    p(ii).LineWidth = 2;
+end
+grid on;
+xlabel('Wavelength (nm)')
+ylabel('Relative radiance');
+
+
+
 
 %%  Edit the material list, adding White.
 
