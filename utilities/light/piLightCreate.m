@@ -9,11 +9,13 @@ function lght = piLightCreate(lightName, varargin)
 %
 % Optional key/val pairs
 %   type   - light type. Default is point light.  The light specific
-%    properties depend on the light type. To see the light types use
+%    properties depend on the light type. 
+% 
+%  To see the light types use
 %
 %      lightTypes = piLightCreate('list available types');
 %
-%    Properties for each light type can be found
+%  To see the settable properties for each light type use
 %
 %        piLightProperties(lightTypes{3})
 %
@@ -43,7 +45,7 @@ function lght = piLightCreate(lightName, varargin)
 
 % Examples
 %{
-  piLightCreate('list available types')
+  lightTypes =piLightCreate('list available types');
 %}
 %{
  lgt = piLightCreate('point light 1')
@@ -58,6 +60,11 @@ validLights = {'distant','goniometric','infinite','point','area','projection','s
 
 if isequal(ieParamFormat(lightName),'listavailabletypes')
     lght = validLights;
+    fprintf('\n\nValid light types\n-------------\n')
+    for ii=1:numel(lght)
+        fprintf('  %s\n',lght{ii});
+    end
+    fprintf('-------------\n')
     return;
 end
 
@@ -88,6 +95,12 @@ if ~isequal(lght.name((end-1):end),'_L')
     % warning('Appending _L to light name')
     lght.name = [lght.name,'_L'];
 end
+
+% All lights have these slots
+%   name
+%   type
+%   specscale
+%   spd
 
 % PBRT allows wavelength by wavelength adjustment - we will enable that
 % someday.
@@ -124,6 +137,10 @@ switch ieParamFormat(lght.type)
         %}
 
     case 'goniometric'
+        %%  We a file name for goniometric light.
+
+        % We should find a valid file and make it the default here.  And
+        % document the file requirements.
         lght.mapname.type = 'string';
         lght.mapname.value = '';
 

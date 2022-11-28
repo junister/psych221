@@ -1,8 +1,8 @@
-function properties = piLightProperties(lightType)
-%  Show the list of properties for a given light type
+function properties = piLightProperties(lightType,varargin)
+%  Prints a list of properties for a given light type
 %
 % Synopsis
-%    properties = piLightProperties(lightType);
+%    properties = piLightProperties(lightType,varargin);
 %
 % Input
 %
@@ -10,7 +10,7 @@ function properties = piLightProperties(lightType)
 %     types.
 %
 % Optional key/val
-%    N/A
+%    quiet - Just return the properties, no print out.  Default false.
 %
 % Return
 %    properties - cell array of light properties
@@ -20,14 +20,37 @@ function properties = piLightProperties(lightType)
 
 % Examples:
 %{
-   piLightProperties('spot')
+   piLightProperties('spot');
 %}
 %{
-   piLightProperties('goniometric')
+   properties = piLightProperties('goniometric');
+%}
+%{
+   properties = piLightProperties('point','quiet',true);
 %}
 
-%
+%% Parse
+
+varargin = ieParamFormat(varargin);
+
+p = inputParser;
+p.addRequired('lightType',@ischar);
+p.addParameter('quiet',false,@islogical);
+
+p.parse(lightType,varargin{:});
+
+%% Create a light of that type
 thisLight = piLightCreate('ignoreMe','type',lightType);
+
+% Here are its field names, which we return
 properties = fieldnames(thisLight);
+
+if ~p.Results.quiet
+    fprintf('\n\nLight type:  %s\n----------\n',lightType);
+    for ii=1:numel(properties)
+        fprintf('  %s\n',properties{ii});
+    end
+    fprintf('----------\n');
+end
 
 end

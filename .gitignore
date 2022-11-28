@@ -12,3 +12,6 @@ calc/datafiles/oi_001.mat
 calc/datafiles/oi_002.mat
 calc/datafiles/oi_fog.mat
 *.wiki
+data/.DS_Store
+.DS_Store
+.DS_Store

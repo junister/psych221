@@ -42,7 +42,7 @@ function thisR = piRecipeCreate(rName,varargin)
  piWRS(thisR);
 %}
 %{
- thisR = piRecipeCreate('teapot set');
+ thisR = piRecipeCreate('chess set');
  piWRS(thisR);
 %}
 
@@ -104,6 +104,12 @@ switch ieParamFormat(rName)
         thisR.set('fov', 30);
         thisR.set('filmresolution', [640, 360]);
         thisR.set('render type', {'radiance', 'depth'});
+
+    case 'chessset'
+        thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'light name','_L');
+        thisR.set('asset',idx,'name','mainLight_L');
+        thisR.set('render type',{'radiance','depth'});
 
     case 'cornell_box'
         thisR = piRecipeDefault('scene name',rName);

@@ -9,9 +9,9 @@ function lght = piLightSet(lght, param, val, varargin)
 %   param:    The parameter to set
 %   val:      The new value
 %
-%
-% The list of settable light parameters is determined by the light
-% parameters in PBRT. That is defined on this web-page
+% Describe
+%  The list of settable light parameters is determined by the light
+%  parameters in PBRT. That is defined on this web-page
 %
 %      https://www.pbrt.org/fileformat-v3.html#lights
 %
@@ -44,12 +44,20 @@ function lght = piLightSet(lght, param, val, varargin)
 %  'camera coordinate' - true or false. automatically place the light
 %                            at the camera location.
 %
+%  To see the light types use
+%
+%      lightTypes = piLightCreate('list available types');
+%
+%  To see the settable properties for each light type use
+%
+%        piLightProperties(lightTypes{3})
+%
 % ieExamplesPrint('piLightSet');
 %
 % Zheng,BW, SCIEN, 2020 - 2021
 %
 % See also
-%   piLightCreate, piLightGet
+%   piLightCreate, piLightProperties, piLightGet
 %
 
 % Examples:

@@ -26,7 +26,8 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Read the chess set recipe
 
-thisR = piRecipeDefault('scene name','chessset');
+thisR = piRecipeCreate('chess set');
+thisR.set('render type',{'radiance','depth'});
 
 %% Set the render quality
 
@@ -37,12 +38,86 @@ thisR.set('film resolution',[256 256]);
 thisR.set('rays per pixel',256);
 thisR.set('n bounces',4); % Number of bounces traced for each ray
 
-thisR.set('render type',{'radiance','depth'});
+thisR.set('skymap','sky-blue-sun.exr');
 
-scene = piWRS(thisR,'render flag','hdr');
+piWRS(thisR);
+
+%% Render with just ambient and then three different point sources
+
+% CFL_2471
+% CFL_5780
+% D50, D65, D75
+% halogen_2913
+% LED_4613
+% Tungsten
+
+thisR.set('light', 'all', 'delete');
+whitePoint = piLightCreate('mainLight_L',...
+    'type', 'point', ...
+    'spd spectrum', 'Tungsten',...
+    'specscale float', 1,...
+    'cameracoordinate', true);
+thisR.set('light',whitePoint,'add');
+thisR.set('skymap','sky-blue-sun.exr');
+piWRS(thisR);
+
+%%
+
+thisR.set('light', 'all', 'delete');
+whitePoint = piLightCreate('mainLight_L',...
+    'type', 'point', ...
+    'spd spectrum', 'CFL_5780',...
+    'specscale float', 1,...
+    'cameracoordinate', true);
+thisR.set('light',whitePoint,'add');
+thisR.set('skymap','sky-blue-sun.exr');
+piWRS(thisR);
+
+%%
+thisR.set('light', 'all', 'delete');
+whitePoint = piLightCreate('mainLight_L',...
+    'type', 'point', ...
+    'spd spectrum', 'D75',...
+    'specscale float', 1,...
+    'cameracoordinate', true);
+thisR.set('light',whitePoint,'add');
+thisR.set('skymap','sky-blue-sun.exr');
+piWRS(thisR);
+
+%%
+thisR.show('lights');
+l = thisR.get('light','mainLight');
+l.lght{1}.spd
+%{
+% The light is an asset with a special slot .lght
+% The slot is a cell array (not sure why).
+% You can set the entries of struct lght{1}
+%
+thisR.set('light','mainLight','specscale',5);
+thisR.set('light','mainLight','spd',[.3 .5 1]);
+thisR.set('skymap','room.exr');
+%}
+
+%%  The scene does not have the true illuminant spectrum
+%
+% We should find a way to update it into the ISET scene from the recipe.
+%
+% piWRS(thisR);
+
+%%
+rgb = cell(4,1);
+for ii=1:4
+    vcSetSelectedObject('scene',ii);
+    scene = ieGetObject('scene');
+    rgb{ii} = sceneGet(scene,'rgb');
+end
+
+ieNewGraphWin;
+montage(rgb);
 
 %%  Edit the material list, adding White.
 
+thisR.set('skymap','sky-blue-sun.exr');
 
 thisR.show('materials');
 thisR = piMaterialsInsert(thisR,'names','diffuse-white');

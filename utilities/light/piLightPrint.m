@@ -56,8 +56,8 @@ for ii =1:numel(lightNames)
         position(ii,:) = thisR.get('light',thisLight.name,'world position');
     end
 
-    % not sure we even have mapnames anymore, but in case...
-    if ~isfield(thisLight,'mapname') || isempty(thisLight.mapname)
+    % We have mapnames in some cases (e.g., default chess set light)
+    if ~isfield(thisLight,'mapname') || isempty(thisLight.mapname.value)
         spdT{ii} = num2str(thisLight.spd.value);
     else
         spdT{ii} = thisLight.mapname.value;
