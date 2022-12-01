@@ -44,9 +44,14 @@ iLensName = 'dgauss.22deg.3.0mm.json';
 uLensHeight = 0.0028;        % 2.8 um - each covers two pixels
 
 % The spec is for x and y cimensions (not row and column)
-nMicrolens = [64 64]*2;     % Did a lot of work at 40,40 * 8
+% When this gets very big, the lenses may overlap one another and
+% block some light?
+nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 %}
 
+% We need to redo this piece of code, replacing it with
+% piMicrolensWrite
+%
 % [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensHeight,nMicrolens);
 %
 combinedLensFile = 'dgauss.22deg.3.0mm+microlens.json';
