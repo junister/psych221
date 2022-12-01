@@ -265,7 +265,7 @@ switch param
         % Depending on the camera subtype, the parameter name is either
         % focusdistance or focaldistance. Historical annoyance in PBRT.
 
-        subType = thisR.get('camera.subtype');
+        subType = thisR.get('camera subtype');
         switch subType
             case {'pinhole'}
                 thisR.camera.focaldistance.value = val;
