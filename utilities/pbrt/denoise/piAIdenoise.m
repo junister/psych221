@@ -97,8 +97,8 @@ end
 %     writePFM(normalmap, normal_pth);
 % end
 
-outputTmp = fullfile(piRootPath,'local','tmp_input.pfm');
-DNImg_pth = fullfile(piRootPath,'local','tmp_dn.pfm');
+outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
+DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.pfm',randi(1000),randi(1000)));
 newPhotons = zeros(rows, cols, chs);
 
 
