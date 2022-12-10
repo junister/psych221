@@ -1,10 +1,19 @@
-% Demonstrate rendering a string from our Character assets
+function charactersRender(aRecipe, aString, options)
+% Render a string from our Character assets
 
 % D. Cardinal, Stanford University, December, 2022
 % for ISET3d, ISETauto, and ISETonline
 
-% should be incorporated into a function
+arguments
+    aRecipe = '';
+    aString = '';
 
+    % ASPIRATIONAL / TBD
+    options.fontSize = 12;
+    options.fontColor = 'white';
+    options.material = 'coateddiffuse';
+    
+end
 % For now we can use a background scene
 % When we make this a function we'll have to sort out defaults
 thisR = piRecipeDefault; % MCC
