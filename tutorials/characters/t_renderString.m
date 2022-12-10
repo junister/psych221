@@ -18,16 +18,17 @@ recipeSet(thisR,'lights', ourLight,'add');
 
 % Note -- Uppercase requires special handling since those
 %         recipes need a different name to avoid case collision
-ourString = 'cat';
+ourString = 'c';
 letterSpacing = .4;
 
 % add letters
 for ii = 1:numel(ourString)
     ourLetter = ourString(ii);
     ourLetterAsset = piAssetLoad([ourLetter '-pbrt.mat']);
+    % We have an issue with merge nodes not working correctly!
     piRecipeMerge(thisR, ourLetterAsset.thisR);
     spaceLetter = ii * letterSpacing;
-    scaleLetter = 2; % TBD
+    scaleLetter = 1; % TBD
     thisR.set('asset',['001_001_' ourLetter '_O'],'scale', ...
         [scaleLetter scaleLetter scaleLetter]);
     
