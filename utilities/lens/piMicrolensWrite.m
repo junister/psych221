@@ -1,5 +1,7 @@
 function fname = piMicrolensWrite(fname,cLens)
 % Write out a JSON file with a combined microlens and main lens
+% Probably not needed.  Just use jsonwrite
+%
 %
 % Synopsis
 %   fname = piMicrolensWrite(fname,cLens)

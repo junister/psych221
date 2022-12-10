@@ -41,7 +41,7 @@ uLensName = 'microlens.json';
 iLensName = 'dgauss.22deg.3.0mm.json';
 % iLensName = 'dgauss.22deg.50.0mm.json';
 
-uLensHeight = 0.0028;        % 2.8 um - each covers two pixels
+uLensDiameter = 0.0028;        % 2.8 um - each covers two pixels
 
 % The spec is for x and y cimensions (not row and column)
 % When this gets very big, the lenses may overlap one another and
@@ -49,13 +49,22 @@ uLensHeight = 0.0028;        % 2.8 um - each covers two pixels
 nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 %}
 
+%%
 % We need to redo this piece of code, replacing it with
-% piMicrolensWrite
+% piMicrolensInsert
 %
-% [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensHeight,nMicrolens);
+% [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensDiameter,nMicrolens);
+% foo = jsonread(combinedLensFile);
 %
-combinedLensFile = 'dgauss.22deg.3.0mm+microlens.json';
 % {
+[combinedLensFile,uLens,iLens] = piMicrolensInsert(uLensName,iLensName, ...
+    'microlens diameter',uLensDiameter, ...
+    'n microlens',nMicrolens);
+
+% bar = jsonread(combinedLensFile);
+%}
+
+%{
 cLens = jsonread(combinedLensFile);
 % The offset is with respect to the microlens position assuming they
 % were all placed in a regular rectangular grid on the film.
@@ -102,7 +111,7 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',32);
 
-thisR.get('depth range') % This calls the docker container to get the depth
+% thisR.get('depth range') % This calls the docker container to get the depth
 
 thisR.set('render type',{'radiance','depth'});
 

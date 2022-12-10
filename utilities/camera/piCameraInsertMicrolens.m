@@ -1,5 +1,5 @@
 function [combinedLens, cmd]  = piCameraInsertMicrolens(microLens,imagingLens,varargin)
-% Combine a microlens with an imaging lens into a lens file
+% Deprecate:  Combine a microlens with an imaging lens into a lens file
 %
 % Syntax
 %   combinedLens  = piCameraInsertMicrolens(microLens,imagingLens,varargin)
@@ -60,7 +60,7 @@ function [combinedLens, cmd]  = piCameraInsertMicrolens(microLens,imagingLens,va
 %    --filmtomicrolens <n>  Distance (mm) from film to back of microlens. Default: 0.0 
 %
 % See also
-%
+%   piMicrolensInsert, piMicrolensWrite are replacements
 
 % Examples:
 %{
