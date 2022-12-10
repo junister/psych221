@@ -1,12 +1,13 @@
-% Demonstrate rendering our Character assets
+% Demonstrate rendering a string from our Character assets
 
 % D. Cardinal, Stanford University, December, 2022
 % for ISET3d, ISETauto, and ISETonline
 
-%%  Characters and a light
+% should be incorporated into a function
 
-% start with a simple 1 in the middle
-thisR = piRead('1-pbrt.pbrt');
+% For now we can use a background scene
+% When we make this a function we'll have to sort out defaults
+thisR = piRead('');
 
 % characters don't have a light
 lightName = 'from camera';

@@ -1,8 +1,10 @@
 %% Proto script for turning pbrt characters into
 %  assets that we can merge
 
-    recipeDir = piDirGet('character-recipes');
-    charAssetDir = piDirGet('character-assets');
+%  D.Cardinal, Stanford University, December, 2022
+
+recipeDir = piDirGet('character-recipes');
+charAssetDir = piDirGet('character-assets');
 
 for ii = 0:9 %number assets
     characterRecipe = [num2str(ii) '-pbrt.pbrt'];
@@ -52,35 +54,5 @@ end
         %thisR.get('asset','001_C_O','material')
         %thisR.set('material','White','reflectance',[.5 .5 .5]);
         piWRS(thisR);
-%}
-
-
-% TEST CASE BORROWED FROM LETTER SCRIPT:
-%% Merge a letter into the Chess set
-
-%{
-% This is an example to test that it worked.
-
-chessR = piRecipeDefault('scene name','chess set');
-%chessR = piMaterialsInsert(chessR);
-piMaterialsInsert(chessR,'groups','all'); 
-chessR.get('print materials');
-% Lysse_brikker is light pieces
-% Mrke brikker must be dark pieces
-% piAssetGeometry(chessR);
-
-theLetter = piAssetLoad(which('1-pbrt.mat'));
-
-piRecipeMerge(chessR,theLetter.thisR,'node name',theLetter.mergeNode);
-chessR.show('objects');
-
-to = chessR.get('to');
-chessR.set('asset', '001_001_1_O', 'world position', [0 0 1]);
-%chessR.set('asset','001_001_1_O','world position',to + [0 0.1 -0.65]);
-chessR.set('asset','001_001_1_O','scale',[.3 .3 .3]);
-%chessR.set('asset','001_001_1_O','rotate',[-90 45 0]);
-chessR.set('asset','001_001_1_O','material name','brickwall001');
-piWRS(chessR,'render type','radiance');
-
 %}
 
