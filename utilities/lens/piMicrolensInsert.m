@@ -1,77 +1,47 @@
 function [combinedLensName, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
-% Combine a microlens with an imaging lens into a lens file
+% Combine a microlens with an imaging lens into a PBRT lens file (json)
 %
 % Syntax
 %   [combinedLensName, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
 %
 % Brief description:
-%   Create a json file that combines the imaging and microlens array.
-%   Used for PBRT omni camera rendering.
+%   Create a JSON file that combines the imaging and microlens array
+%   information. The file will be used by PBRT for the omni camera
+%   rendering, which handles microlenses.
 %   
 % Inputs:
-%   uLens - Microlens file name or a lensC of the lens
-%   iLens - Imaging lens file name or a lensC of the lens
+%   microLens   - Microlens file name or a lensC of the lens
+%   imagingLens - Imaging lens file name or a lensC of the lens
 %
 % Optional key/value pairs
 %   output name   - File name of the output combined lens
-%   uLensHeight   - Shouldn't this be part of the microlens file?
 %   nMicrolens    - 2-vector for row/col?
-%
-% Default parameters - not always useful.  Should create a routine to
-% generate default parameters
-%   n microlens        - x,y number (col, row)
-%   microlens diameter - microns?
-%   filmwidth   -   4 microns for each of the 3 superpixels behind the
-%                   microlens; 84 superpixels, 84 * 12 (um) ~ 1 mm
-%   filmheight  -  
-%   filmtomicrolens - Only works for 0.
+%   filmsize      - 2-vector for width/height (x,y) in mm
 %
 % Output
 %   combinedLens - Full path to the output file
-%   cmd  - Full docker command that was built
+%   uLens  - Microlens (lensC)
+%   iLens -  Imaging lens (lensC)
 %
 % See also
-%   piMicrolensWrite
+%   piMicrolensWrite, lens2pbrt (internal)
 
+% Examples:
 %{
-%convert options:
-%    --inputscale <n>    Input units per mm (which are used in the output). Default: 1.0
-%    --implicitdefaults  Omit fields from the json file if they match the defaults.
-%
-% insertmicrolens options:
-%    --xdim <n>             How many microlenses span the X direction.
-%        Default - tile the film based on uLens height and film width
-%    --ydim <n>             How many microlenses span the Y direction.
-%        Default - tile the film based on uLens height and film height
-%
-%    --filmwidth <n>        Width of target film  (mm). Default: 20.0
-%    --filmheight <n>       Height of target film (mm). Default: 20.0
-%    --filmtolens <n>       Distance (mm) from film to back of main lens system . Default: 50.0
-%    --filmtomicrolens <n>  Distance (mm) from film to back of microlens. Default: 0.0 and only
-%
-%}
-
-
-%{
- chdir(fullfile(piRootPath,'local','microlens'));
- microLens   = lensC('filename','microlens.json');
- imagingLens = lensC('filename','dgauss.22deg.3.0mm.json');
- combinedLens = piMicrolensInsert(microLens,imagingLens,'film to microlens',0);
-
+ chdir(fullfile(piRootPath,'local'));
+ microLens   = lensC('file name','microlens.json');
+ imagingLens = lensC('file name','dgauss.22deg.3.0mm.json');
+ combinedLens = piMicrolensInsert(microLens.get('full filename'),imagingLens.get('full filename'));
  thisLens = jsonread(combinedLens);
-%}
-%{
-
 %}
 
 %% Programming TODO
 %
-%   The filmheight and filmwidth seem to have an error when less than 1.
-%   Checking with Mike Mara.
+% To set the distance between the microlens and the film, you can adjust a
+% parameter in the OMNI camera.  The command is (ask Thomas)
 %
+%   thisR.set(....)
 %
-% To set the distance between the microlens and the film, you must adjust a
-% parameter in the OMNI camera.  Talk to TL about that!
 
 %% Parse inputs
 
@@ -84,136 +54,123 @@ vFile = @(x)(isa(x,'lensC') || (ischar(x) && exist(x,'file')));
 p.addRequired('imagingLens',vFile);
 p.addRequired('microLens',vFile);
 
-p.addParameter('microlensdiameter',0.028,@isscalar);   % Default is 2.8 microns
+% Optional
 p.addParameter('outputname','',@ischar);
-p.addParameter('nmicrolens',[],@isvector);    % x,y (col, row)
-
-p.addParameter('xdim',[],@isscalar);
-p.addParameter('ydim',[],@isscalar);
-p.addParameter('filmheight',1,@isscalar);
-p.addParameter('filmwidth',1,@isscalar);
-p.addParameter('filmtomicrolens',0,@isscalar);   % Only works for 0 at this time.
+p.addParameter('nmicrolens',[],@isvector);   % x,y (col, row)
+p.addParameter('filmsize',[],@isscalar);     % x,y (width, height) mm
+p.addParameter('quiet',false,@islogical);    % Suppress print out
 
 p.parse(imagingLens,microLens,varargin{:});
 
 nMicrolens = p.Results.nmicrolens;
+filmSize  = p.Results.filmsize;
 
-% If a lensC was input, the lensC might have been modified from the
-% original fullFileName. So we write out a local copy of the json file.
+%%  Create the iLens and mLens (lensC) objects
+
+% If a lensC was input, the  data in the lensC might have been modified
+% from its original state. So we write out a copy of the JSON file in the
+% current working directory and use this copy as input for the PBRT
+% rendering. 
 if isa(imagingLens,'lensC')
-    thisName = [imagingLens.name,'.json']; 
-    imagingLens.fileWrite(thisName);
-    imagingLens = fullfile(pwd,thisName);
+    thisName = [imagingLens.get('name'),'.json'];
+    imagingLensName = imagingLens.fileWrite(thisName);
+else
+    imagingLensName = imagingLens;
 end
+iLens = lensC('file name',imagingLensName);
 
 if isa(microLens,'lensC')
-    mlObj = microLens;
-    thisName = [microLens.name,'.json'];
-    microLens.fileWrite(thisName);
-    microLens = fullfile(pwd,thisName);
+    thisName = [microLens.get('name'),'.json'];
+    microLensName = microLens.fileWrite(thisName);     
+else
+    microLensName = microLens;
 end
+uLens = lensC('file name',microLensName);
 
+% Create the file name for the combined file.
 if isempty(p.Results.outputname)
-    [~,imagingName,~]   = fileparts(imagingLens);
-    [~,microLensName,e] = fileparts(microLens); 
-    combinedLensName = fullfile(pwd,sprintf('%s+%s',imagingName,[microLensName,e]));
+    [~,imagingLensName,~] = fileparts(imagingLensName);
+    [~,microLensName,e]   = fileparts(microLensName); 
+    combinedLensName = fullfile(pwd,sprintf('%s+%s',imagingLensName,[microLensName,e]));
 else
     combinedLensName = p.Results.outputname;
 end
 
 %% Set up dimension and film parameters
 
-filmheight = ceil(p.Results.filmheight);
-filmwidth  = ceil(p.Results.filmwidth);
+% We use the microlens diameter for various calculations below.
+ulensDiameter = uLens.get('lens diameter','mm');
 
-% If the user did not specify  xdim and ydim, set up the number of
-% microlenses so that the film is tiled based on the lens height.
-if isempty(nMicrolens)
-    xdim =  floor((filmheight/mlObj.get('lens height')));
-    ydim =  floor((filmwidth/mlObj.get('lens height')));
-else
-    xdim = nMicrolens(1); ydim = nMicrolens(2);
+if isempty(filmSize) && isempty(nMicrolens)
+    warning('No film size or nMicrolens.  Using 1.1 x 1.1 mm film size');
+    filmSize = [1.1 1.1];
+    % We know the film size, so calculate the nMicrolens
+    nMicrolens(1) = floor(filmSize(1)/ulensDiameter);
+    nMicrolens(2) = floor(filmSize(2)/ulensDiameter);
+elseif isempty(nMicrolens)
+    % We know the film size, so calculate the nMicrolens.  Must be an
+    % integer.
+    nMicrolens(1) = floor(filmSize(1)/ulensDiameter);
+    nMicrolens(2) = floor(filmSize(2)/ulensDiameter);
+elseif isempty(filmSize)
+    % We know nMicrolens, so calculate filmSize.  
+    filmSize(1) = nMicrolens(1)*ulensDiameter;  % mm
+    filmSize(2) = nMicrolens(2)*ulensDiameter;
 end
 
 %% Print out parameter summary
-fprintf('\n------\nMicrolens insertion summary\n');
-fprintf('Microlens dimensions %d %d \n',xdim,ydim);
-fprintf('Film height and width %0.2f %0.2f mm\n',filmheight,filmwidth);
-fprintf('------\n');
-
-%% Remember where you started 
-% 
-% % Basic docker command
-% if ispc
-%     dockerCommand   = 'docker run -i --rm';
-% else
-%     dockerCommand   = 'docker run -ti --rm';
-% end
-% 
-% % Where you want the output file
-% % dockerCommand = sprintf('%s --workdir="%s"', dockerCommand, pathToLinux(outputFolder));
-% dockerCommand = sprintf('%s --volume="%s":"%s"', dockerCommand, outputFolder, pathToLinux(outputFolder));
-% 
-% % What you want to run
-% dockerImageName = dockerWrapper.localImage;
+if ~p.Results.quiet
+    fprintf('\n------\nMicrolens insertion summary\n');
+    fprintf('Microlens array (x,y) %d, %d\n',nMicrolens(1),nMicrolens(2));
+    fprintf('Film width and height %0.2f, %0.2f mm\n',filmSize(1),filmSize(2));
+    fprintf('------\n');
+end
 
 %% Copy the imaging and microlens to the output folder
 
-outputFolder  = pwd;
-
-iLensFullPath = which(imagingLens);
-[~,n,e] = fileparts(iLensFullPath);
-iLensCopy = fullfile(outputFolder,[n e]);
-if ~exist(iLensCopy,'file')
-    copyfile(iLensFullPath,iLensCopy)
-else
-    disp('Imaging lens copy exists.  Not over-writing');
-end
-
-mLensFullPath = which(microLens);
-[~,n,e] = fileparts(mLensFullPath);
-mLensCopy = fullfile(outputFolder,[n e]);
-if ~exist(mLensCopy,'file')
-    copyfile(mLensFullPath,mLensCopy)
-else
-    disp('Microlens copy exists.  Not over-writing');
-end
+% outputFolder  = pwd;
+% 
+% % Overwrite even if the file is already in the output/lens directory.
+% [~,n,e] = fileparts(iLensFullPath);
+% iLensCopy = fullfile(outputFolder,[n e]);
+% copyfile(iLensFullPath,iLensCopy,'f');
+% 
+% mLensFullPath = which(microLens);
+% [~,n,e] = fileparts(mLensFullPath);
+% mLensCopy = fullfile(outputFolder,[n e]);
+% copyfile(mLensFullPath,mLensCopy,'f');
 
 
-%% Set up the lens tool command to run
+%% Create the struct and JSON file for PBRT from the lens information
 
-% Replace this call.
-% [combinedLens, cmd] = piDockerLenstool('insertmicrolens', ...
-%     'xdim', xdim, 'ydim', ydim, ...
-%     'filmheight', filmheight, 'filmwidth', filmwidth, ...
-%     'imaginglens', imagingLens, 'microLens', microLens, ...
-%     'filmtomicrolens',filmtomicrolens,...
-%     'combinedlens', combinedLens, 'outputfolder', outputFolder);
-
-iLens = lensC('file name',imagingLens);
 combinedLens.description = iLens.description;
 combinedLens.microlens = [];
 combinedLens.name = [imagingLens,' + ',microLens];
 combinedLens.surfaces = lens2pbrt(iLens);
 combinedLens.type = iLens.type;
 
-uLens = lensC('file name',microLens);
-combinedLens.microlens.dimensions = [xdim,ydim]';
-combinedLens.microlens.offsets = zeros(xdim*ydim,2);
-combinedLens.microlens.surfaces = lens2pbrt(uLens);
+combinedLens.microlens.dimensions = nMicrolens(:);
+combinedLens.microlens.offsets    = zeros(prod(nMicrolens),2);
+combinedLens.microlens.surfaces   = lens2pbrt(uLens);
 
 jsonwrite(combinedLensName,combinedLens);
 
 end
 
+
+%% lens2pbrt 
+
 function surfaces = lens2pbrt(uLens)
-% Take a lensC and returns it as an array of structs needed to write
-% into the PBRT file for rendering.
+% Convert a lensC into the structs needed to write the PBRT lens file
+%
+% surfaces is an array of structs that will be written to the lens json
+% file.
 
 if ~numel(unique(uLens.surfaceArray(1).n)) == 1
-    warning('Index of refraction is not constant.')
+    warning('Index of refraction is not constant.  Fix this code to work with a spectral IOR!!!')
 end
 
+% For each surface in the surface array
 surfaceArray = uLens.surfaceArray;
 for ii=1:numel(surfaceArray)
     thisSurf = surfaceArray(ii);

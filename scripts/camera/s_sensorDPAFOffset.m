@@ -36,68 +36,30 @@ thisR = piRecipeDefault('scene name','chessSet');
 
 %% Set up the combined imaging and microlens array
 
-% {
-uLensName = 'microlens.json';
-iLensName = 'dgauss.22deg.3.0mm.json';
-% iLensName = 'dgauss.22deg.50.0mm.json';
-
-uLensDiameter = 0.0028;        % 2.8 um - each covers two pixels
-
-% The spec is for x and y cimensions (not row and column)
-% When this gets very big, the lenses may overlap one another and
-% block some light?
+uLensName = fullfile(piDirGet('lens'),'microlens.json');
+iLensName = fullfile(piDirGet('lens'),'dgauss.22deg.3.0mm.json');
 nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
-%}
 
-%%
-% We need to redo this piece of code, replacing it with
-% piMicrolensInsert
-%
-% [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensDiameter,nMicrolens);
-% foo = jsonread(combinedLensFile);
-%
-% {
+%% Create the combined lens file and camera
+
 [combinedLensFile,uLens,iLens] = piMicrolensInsert(uLensName,iLensName, ...
-    'microlens diameter',uLensDiameter, ...
     'n microlens',nMicrolens);
-
 % bar = jsonread(combinedLensFile);
-%}
 
-%{
-cLens = jsonread(combinedLensFile);
-% The offset is with respect to the microlens position assuming they
-% were all placed in a regular rectangular grid on the film.
-cLens.microlens.offsets(:,:) = 0.7e-6;   % Unit is meters for this test.
-jsonwrite('test.json',cLens);
-combinedLensFile = fullfile(pwd,'test.json');
-%}
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
 %% Set up the film parameters
-%
+
 % We want the OI to be calculated at 4 positions behind each microlens.
 % There will be two positions for each of the pixels.  The pair of up/down
 % positions will be summed by the sensor into a single pixel response.  The
 % pair of left/right positions will be the two pixels behind the microlens.
-%
 
 pixelsPerMicrolens = 2;
-
 pixelSize  = uLens.get('lens height')/pixelsPerMicrolens;   % mm
 filmwidth  = nMicrolens(2)*uLens.get('diameter','mm');       % mm
 filmheight = nMicrolens(1)*uLens.get('diameter','mm');       % mm
 filmresolution = [filmheight, filmwidth]/pixelSize;
-
-%{
-dRange = thisR.get('depth range');
-
-thisR.set('focus distance',dRange(2));
-%}
-
-%{
-thisR.set('focus distance',0.6);
-%}
 
 % This is the size of the film/sensor in millimeters
 thisR.set('film diagonal',sqrt(filmwidth^2 + filmheight^2));
@@ -111,14 +73,9 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',32);
 
-% thisR.get('depth range') % This calls the docker container to get the depth
-
 thisR.set('render type',{'radiance','depth'});
 
-% piWRS(thisR);
-
 %% Make a dual pixel sensor that has rectangular pixels
-%
 
 % Turn this into a function like sensorCreate('dual pixel');
 
@@ -192,8 +149,6 @@ sensorWindow(sensorBoth);
 ipBoth = ipCreate;
 ipBoth = ipCompute(ipBoth,sensorBoth);
 ipWindow(ipBoth);
-
-
 
 %%
 ip = ipCreate;
