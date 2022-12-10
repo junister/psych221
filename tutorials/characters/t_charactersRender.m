@@ -3,11 +3,9 @@
 % D. Cardinal, Stanford University, December, 2022
 % for ISET3d, ISETauto, and ISETonline
 
-% should be incorporated into a function
-
-% For now we can use a background scene
-% When we make this a function we'll have to sort out defaults
+% Ue a background scene
 thisR = piRecipeDefault; % MCC
+thisR.set('object distance', 2);
 
 % characters (and default recipe) don't have a light
 lightName = 'from camera';
