@@ -22,16 +22,27 @@ arguments
 
 end
 
+%-----------------------------------------------------------------
+% NOTE: We don't handle strings with duplicate characters yet
+%       We need to create Instances for subsequent ones, I think!
+%-----------------------------------------------------------------
+
 % Set output recipe to our initial input
 outputR = aRecipe;
 
-% Note TBD -- Uppercase requires special handling since those
-%         recipes need a different name to avoid case collision
 
 % add letters
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
-    ourLetterAsset = piAssetLoad([ourLetter '-pbrt.mat']);
+
+    % check for Upper Case letter (assets need a different name to avoid
+    % case collision)
+    if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
+        ourAssetName = [ourLetter '-pbrt-UC.mat'];
+    else
+        ourAssetName = [ourLetter '-pbrt.mat'];
+    end
+    ourLetterAsset = piAssetLoad(ourAssetName);
 
     ourLetterAsset.thisR.set('object distance', options.distance);
     

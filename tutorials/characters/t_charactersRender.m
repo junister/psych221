@@ -18,6 +18,9 @@ recipeSet(thisR,'lights', ourLight,'add');
 % try to do that for us?
 piMaterialsInsert(thisR,'name','brickwall001');
 
+%% Limitations:
+% If we have a duplicate letter, not handled yet
+% Upper case also doesn't work as piRead changes the node to lower case
 ourString = 'cat';
 
 thisR = charactersRender(thisR, ourString, 'material_name','brickwall001', ...

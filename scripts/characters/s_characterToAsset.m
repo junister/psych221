@@ -26,9 +26,16 @@ Alphabet_LC = lower(Alphabet_UC);
 
 allLetters = [Alphabet_LC Alphabet_UC];
 
+% Code currently assumes OS can tell UC from LC
+% Otherwise instead of relying on Matlab path to get pbrt
+% files, we'd need to provide a specific path
 for ii = 1:numel(allLetters)
     characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
     thisR = piRead(characterRecipe);
+
+    % piRead changes asset names to lower case
+    % This means things break when we merge UC letters into recipes
+    
     n = thisR.get('asset names');
 
     % Save in assets/characters instead...
