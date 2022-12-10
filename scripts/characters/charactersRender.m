@@ -29,6 +29,7 @@ end
 
 % Set output recipe to our initial input
 outputR = aRecipe;
+piMaterialsInsert(outputR,'groups',{'diffuse'});
 
 
 % add letters
@@ -57,7 +58,7 @@ for ii = 1:numel(aString)
         [options.scaleLetter options.scaleLetter options.scaleLetter]);
 
     % space the letters
-    spaceLetter = ii * options.letterSpacing;
+    spaceLetter = (ii-1) * options.letterSpacing;
     outputR.set('asset', letterNode,'translate', ...
         [spaceLetter 0 0]);
     

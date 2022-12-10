@@ -16,15 +16,19 @@ recipeSet(thisR,'lights', ourLight,'add');
 
 % do we need to insert the material or can charactersRender
 % try to do that for us?
-piMaterialsInsert(thisR,'name','brickwall001');
+piMaterialsInsert(thisR,'names',{'brickwall001'});
+
+% mcc already has these
+% piMaterialsInsert(thisR,'names',{'diffuse-red'});
 
 %% Limitations:
 % If we have a duplicate letter, not handled yet
 % Upper case also doesn't work as piRead changes the node to lower case
-ourString = 'cat';
+ourString = '3';
 
-thisR = charactersRender(thisR, ourString, 'material_name','brickwall001', ...
-    'distance', .5);
+%  'material_name','brickwall001',
+thisR = charactersRender(thisR, ourString, ...
+    'distance', 15, 'material_name','diffuse-red', scaleLetter=3);
 
 %% No lens or omnni camera. Just a pinhole to render a scene radiance
 
