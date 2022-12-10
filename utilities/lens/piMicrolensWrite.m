@@ -6,7 +6,7 @@ function fname = piMicrolensWrite(fname,cLens)
 %
 % Inputs
 %   fname - file name of the output json file
-%   cLens - Matlab struct in a compatible JSON format 
+%   cLens - Matlab struct of the combined lenses (compatible with JSON output)
 %
 % Optional key/val
 %   N/A
@@ -15,8 +15,8 @@ function fname = piMicrolensWrite(fname,cLens)
 %   fname - full path to the output file name
 %
 % Description
-%   This is designed to replace the old lenstool code in the PBRT
-%   docker container. The format of the JSON file is this:
+%   This is designed to replace the lenstool code in the PBRT docker
+%   container. The format of the JSON file is this:
 %
 % cLens = jsonread('dgauss.22deg.3.0mm+microlens.json');
 % cLens = 
@@ -48,8 +48,10 @@ function fname = piMicrolensWrite(fname,cLens)
 %       offsets: [262144×2 double]
 %      surfaces: [3×1 struct]
 %
+% Where do we store the distance from the sensor?
+%
 % See also
-%   piCameraInsertMicrolens, lensCombine
+%   piMicrolensInsert, [Deprecated: piCameraInsertMicrolens, lensCombine]
 
 
 if exist(fname,'file')

@@ -20,8 +20,12 @@ function [output,cmd] = piDockerLenstool(command,varargin)
 %     --filmwidth <n>        Width of target film in mm. Default: 20.0
 %     --filmheight <n>       Height of target film in mm. Default: 20.0
 %     --filmtolens <n>       Distance from film to back of main lens system (in mm). Default: 50.0
-% 
-% Uses the Docker Container to execuate
+%     --filmtomicrolens      Distance from microlens to film (mm?)
+%
+% Uses the Docker Container to execute
+%
+% Hopefully the distance from film to the imaging lens can be
+% adjusted elsewhere, say by thisR.set() ...?
 %
 % TBD
 %
@@ -30,7 +34,7 @@ function [output,cmd] = piDockerLenstool(command,varargin)
 
 %% Parse
 
-command = ieParamFormat(command);
+command  = ieParamFormat(command);
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
@@ -42,7 +46,8 @@ p.addParameter('xdim',16, @isnumeric);
 p.addParameter('ydim',16, @isnumeric);
 p.addParameter('filmwidth',20.0, @isnumeric);
 p.addParameter('filmheight',20.0, @isnumeric);
-p.addParameter('filmtolens', 50.0, @isnumeric);
+p.addParameter('filmtolens', 50.0, @isnumeric);    % mm, I think.
+p.addParameter('filmtomicrolens', 0, @isnumeric);  % Not sure of units.  Everything else is mm.
 p.addParameter('microlens','', @ischar);
 p.addParameter('imaginglens','', @ischar);
 p.addParameter('combinedlens','', @ischar);
@@ -68,9 +73,11 @@ switch command
             runDocker, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
             p.Results.outputfolder, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
             dockerImage);
-        partialcmd = sprintf('%s --xdim %d --ydim %d --filmheight %d --filmwidth %d --filmtolens %d ', ...
+
+        % Edited to add filmtomicrolens 12/9/22 (BW)
+        partialcmd = sprintf('%s --xdim %d --ydim %d --filmheight %d --filmwidth %d --filmtolens %d --filmtomicrolens %d', ...
             basecmd, p.Results.xdim, p.Results.ydim, ...
-            p.Results.filmheight, p.Results.filmwidth, p.Results.filmtolens);
+            p.Results.filmheight, p.Results.filmwidth, p.Results.filmtolens,p.Results.filmtomicrolens);
         cmd = sprintf('%s %s %s %s ',...
             partialcmd, dockerWrapper.pathToLinux(p.Results.imaginglens), ...
             dockerWrapper.pathToLinux(p.Results.microlens), ...
@@ -78,16 +85,16 @@ switch command
     case 'convert'
         error('Convert not implemented.');
         % only an initial stab!
-        basecmd = sprintf('%s  --workdir=%s --volume="%s":"%s" %s lenstool convert ', ...
-            runDocker, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
-            p.Results.outputfolder, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
-            dockerImage);
-        partialcmd = sprintf('%s --inputscale %d --implicitdefaults %s ', ...
-            basecmd, p.Results.inputscale, p.Results.implicitdefaults);
-        cmd = sprintf('%s %s %s %s ',...
-            partialcmd, dockerWrapper.pathToLinux(p.Results.imaginglens), ...
-            dockerWrapper.pathToLinux(p.Results.microlens), ...
-            dockerWrapper.pathToLinux(p.Results.combinedlens));
+        %         basecmd = sprintf('%s  --workdir=%s --volume="%s":"%s" %s lenstool convert ', ...
+        %             runDocker, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
+        %             p.Results.outputfolder, dockerWrapper.pathToLinux(p.Results.outputfolder), ...
+        %             dockerImage);
+        %         partialcmd = sprintf('%s --inputscale %d --implicitdefaults %s ', ...
+        %             basecmd, p.Results.inputscale, p.Results.implicitdefaults);
+        %         cmd = sprintf('%s %s %s %s ',...
+        %             partialcmd, dockerWrapper.pathToLinux(p.Results.imaginglens), ...
+        %             dockerWrapper.pathToLinux(p.Results.microlens), ...
+        %             dockerWrapper.pathToLinux(p.Results.combinedlens));
         
     case 'help'
         if isempty(p.Results.helpparameter)

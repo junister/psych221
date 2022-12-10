@@ -104,6 +104,8 @@ thisR.set('rays per pixel',32);
 
 thisR.get('depth range') % This calls the docker container to get the depth
 
+thisR.set('render type',{'radiance','depth'});
+
 % piWRS(thisR);
 
 %% Make a dual pixel sensor that has rectangular pixels
@@ -126,13 +128,12 @@ sensor = sensorSet(sensor,'pattern',[2 2 1 1; 3 3 2 2]);
 
 %% Render
 
-thisR.set('render type',{'radiance','depth'});
 oi = piWRS(thisR);
 
-%
-%piWrite(thisR);
-%[oi, result] = piRender(thisR,'render type','radiance');
-%oiWindow(oi);
+%{
+rgb = oiGet(oi,'rgb');
+imtool(rgb);
+%}
 
 %% Compute the sensor data
 
