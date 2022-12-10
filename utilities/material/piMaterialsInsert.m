@@ -116,13 +116,14 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','mirror'})
-            mirrors = piMaterialPresets('mirror list');
-            for mm = 1:numel(mirrors)
-                newMat = piMaterialPresets(mirrors{mm},mirrors{mm});
-                thisR.set('material', 'add', newMat);
-            end
-        end
+        % There is no type 'mirror list' any more
+        % if ismember(mType{ii},{'all','mirror'})
+        %    mirrors = piMaterialPresets('mirror list');
+        %    for mm = 1:numel(mirrors)
+        %        newMat = piMaterialPresets(mirrors{mm},mirrors{mm});
+        %        thisR.set('material', 'add', newMat);
+        %    end
+        %end
 
         if ismember(mType{ii},{'all','diffuse'})
             diffuse = piMaterialPresets('diffuse list'); 
@@ -135,7 +136,7 @@ if ~isempty(mType{1})
         if ismember(mType{ii},{'all','glossy'})
             glossy = piMaterialPresets('glossy list');
             for gl = 1:numel(glossy)
-                newMat = piMaterialPresets(diffuse{gl},diffuse{gl});
+                newMat = piMaterialPresets(glossy{gl},glossy{gl});
                 thisR.set('material', 'add', newMat);
             end
         end

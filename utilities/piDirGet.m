@@ -8,7 +8,7 @@ function resourceDir = piDirGet(resourceType)
 %   resourceType - One of
 %     {'data','assets', 'lights', 'imageTextures', 
 %     'lens', 'scenes','local',
-%     'server local'}
+%     'server local', 'character-assets', 'character-recipes'}
 %
 % Output
 %   resourceDir
@@ -33,7 +33,8 @@ function resourceDir = piDirGet(resourceType)
 % Planning on deprecating imageTextures.
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
-    'scenes','scene','local','server local'};
+    'scenes','scene','local','server local', 'character-assets', ...
+    'character-recipes'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -72,6 +73,12 @@ switch (resourceType)
         resourceDir = fullfile(ourData,'scenes');
     case 'local'
         resourceDir = fullfile(ourRoot,'local');
+    case 'character-assets'
+        % put characters in a sub-folder of assets for now
+        resourceDir = fullfile(piDirGet('assets'),'characters');
+    case 'character-recipes'
+        % put characters in a sub-folder of assets for now
+        resourceDir = fullfile(ourData,'characters');
     case 'server local'
         % should really be someplace else!
         resourceDir = '/iset/iset3d-v4/local'; % default

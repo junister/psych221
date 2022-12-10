@@ -141,15 +141,16 @@ switch ieParamFormat(keyword)
 
         % ------------ GLASS
     case 'glasslist'
-        % red-glass doesn't work yet
-        newMat = {'glass','red-glass','glass-bk7','glass-baf10','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
+        % 'red-glass' doesn't work yet
+        newMat = {'glass','glass-bk7','glass-baf10','glass-fk51a','glass-lasf9','glass-f5','glass-f10','glass-f11'}';
         return;
 
     case 'glass'
         newMat.material = piMaterialCreate(materialName,'type',...
             'dielectric','roughness',0);
 
-    case 'red-glass'
+    case 'red-glass-broken' % mixed materials don't currently seem to work
+
         % Not sure about what to do with mixed materials.  Must ask
         % Zhenyi.
         newMat_glass = piMaterialCreate([materialName, '_mix_glass'], ...

@@ -33,6 +33,8 @@ if ~exist('fname','var') || isempty(fname)
 end
 
 %% We need a mat-file, preferably from the data/assets directory
+% Note: We are adding a large supply of characters, so we might
+%       extend this to include data/assets/characters
 
 % Check the extension
 [p,n,e] = fileparts(fname);
@@ -42,8 +44,8 @@ fname = fullfile(p,[n,e]);
 % If the user did not specify a path, look in the data/assets directory
 if isempty(p)
     % See if it exists in the data/assets directory.
-    if exist(fullfile(piRootPath,'data','assets',[n e]),'file')
-        fname = fullfile(piRootPath,'data','assets',[n e]);
+    if exist(fullfile(piDirGet('assets'),[n e]),'file')
+        fname = fullfile(piDirGet('assets'),[n e]);
     else
         % See if you can find it anywhere
         if isempty(which(fname)), error('Could not find %s\n',fname); 
@@ -62,7 +64,7 @@ asset = load(fname);
 % system is loading it. So we need to adjust the location of the input to
 % match this user.
 
-% Find the name of the directory containing the file in the file.
+% Find the name of the directory containing the original pbrt file in the file.
 [thePath,n,e] = fileparts(asset.thisR.get('input file'));
 
 % Cross-platform issue: 
@@ -74,10 +76,18 @@ end
 theDir = temp{end};
 
 % This is the path for the current user.
-inFile = fullfile(piRootPath,'data','scenes',theDir,[n,e]);
+% Hmm. This seems pretty limiting ...
+inFile = fullfile(piDirGet('scenes'),theDir,[n,e]);
 
-% Make sure it exists
-if ~isfile(inFile), error('Cannot find the PBRT input file %s\n',thisR.inputFile); end
+% Make sure it exists or try characters
+% PS I still don't really understand all this re-mapping
+%    and wish we could just get rid of it somehow
+if ~isfile(inFile)
+    inFile = fullfile(piDirGet('character-recipes'),theDir,[n,e]);
+    if ~isfile(inFile)
+        error('Cannot find the PBRT input file %s\n',thisR.inputFile); 
+    end
+end
 
 % Set it
 asset.thisR.set('input file',inFile);
