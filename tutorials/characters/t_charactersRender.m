@@ -21,14 +21,14 @@ thisR.set('object distance', 2);
 %% Limitations:
 % If we have a duplicate letter, not handled yet
 % Upper case also doesn't work as piRead changes the node to lower case
-ourString = '3';
+ourString = '312';
 
 %  'material_name','brickwall001',
 thisR = charactersRender(thisR, ourString, ...
     'distance', 15, 'material_name','diffuse-red', scaleLetter=1);
 
-idx = piAssetSearch(thisR,'object name','3_O');
-thisR.set('asset',idx,'world position',[0 0 -1]);
+%idx = piAssetSearch(thisR,'object name','3_O');
+%thisR.set('asset',idx,'world position',[0 0 -1]);
 
 %% No lens or omnni camera. Just a pinhole to render a scene radiance
 

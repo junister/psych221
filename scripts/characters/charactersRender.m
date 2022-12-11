@@ -57,6 +57,8 @@ for ii = 1:numel(aString)
     outputR.set('asset', letterNode, 'scale', ...
         [options.scaleLetter options.scaleLetter options.scaleLetter]);
 
+    outputR.set('asset',letterNode, 'rotate', [-90 00 0]);
+
     % space the letters
     spaceLetter = (ii-1) * options.letterSpacing;
     outputR.set('asset', letterNode,'translate', ...
