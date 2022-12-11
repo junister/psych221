@@ -72,9 +72,9 @@ for ii = 1:numel(assetFiles)
         ourAsset  = piAssetLoad(assetName);
         
         % Scale its size to be good for the Cornell Box
-        thisName = ourAsset.thisR.get('object names no id');
-        sz = ourAsset.thisR.get('asset',thisName{1},'size');
-        ourAsset.thisR.set('asset',thisName{1},'scale',[0.1 0.1 0.1] ./ sz);
+        thisID = ourAsset.thisR.get('objects');   % Object id
+        sz = ourAsset.thisR.get('asset',thisID(1),'size');
+        ourAsset.thisR.set('asset',thisID(1),'scale',[0.1 0.1 0.1] ./ sz);
         
         % Merge it with the Cornell Box
         combinedR = piRecipeMerge(parentRecipe, ourAsset.thisR, 'node name',ourAsset.mergeNode);

@@ -75,8 +75,10 @@ asset = load(fname);
 inFile = asset.thisR.get('input file');
 switch assetType
     case 'scene'
-        % We may need to do more here.  Check the bunny.
-        asset.thisR.set('inputfile',fullfile(piDirGet('scenes'),inFile));
+        % We may need to do more here.  This only works if the directory
+        % name and scene file name are the same. Check the bunny. 
+        [~,n,e] = fileparts(inFile);
+        asset.thisR.set('inputfile',fullfile(piDirGet('scenes'),n,[n,e]));
     case 'character'
         [~,n,~] = fileparts(inFile);
         asset.thisR.set('inputfile',fullfile(piDirGet('character-recipes'),n,inFile));
