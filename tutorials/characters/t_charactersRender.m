@@ -21,9 +21,11 @@ thisR.set('object distance', 2);
 %% Limitations:
 % If we have a duplicate letter, not handled yet
 % Upper case also doesn't work as piRead changes the node to lower case
-ourString = '312';
+ourString = 'CAT';
 
 %  'material_name','brickwall001',
+% Okay, we sometimes get an asset with "C" and sometimes with "c"
+% I guess we need to fix the UC / LC issue!
 thisR = charactersRender(thisR, ourString, ...
     'distance', 15, 'material_name','diffuse-red', scaleLetter=1);
 
