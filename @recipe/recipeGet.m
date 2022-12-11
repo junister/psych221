@@ -1281,8 +1281,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
     case {'objectnamesnoid'}
         % Names of the objects with the ID stripped.
-        % I don't think we are doing this properly.  We need a routine to
-        % break an asset name into
+        % Edited by BW Dec 10, 2022.  It used to strip the first 10
+        % characters.  Now it splits at ID_ and returns the part after
+        % that.
+        %
+        % We should build a routine that does more, like this one:
         %
         %    [id, instance, objectname] = assetNameParse(name)
         %
@@ -1293,7 +1296,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii = 1:numel(ids)
             % Includes ids and everything
             thisName = names{ids(ii)};
-            val{ii} = thisName(10:end);
+            tmp = split(thisName,'ID_');
+            val{ii} = tmp{end};
         end
 
     case 'objectsimplenames'
