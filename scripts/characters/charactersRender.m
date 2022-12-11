@@ -43,7 +43,7 @@ for ii = 1:numel(aString)
     else
         ourAssetName = [ourLetter '-pbrt.mat'];
     end
-    ourLetterAsset = piAssetLoad(ourAssetName);
+    ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character');
 
     ourLetterAsset.thisR.set('object distance', options.distance);
     

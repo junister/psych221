@@ -1,14 +1,34 @@
-%% Proto script for turning pbrt characters into
-%  assets that we can merge
-
+%% Turning pbrt characters into assets 
+%  We merge these characters into scenes as labels, using
+%
+% piRecipeMerge
+%
 %  D.Cardinal, Stanford University, December, 2022
+%
+% See also
+%
 
+%% Set up the directories
+
+% The input directory with the pbrt files
 recipeDir = piDirGet('character-recipes');
+
+% The output directory where we write the mat-files
 charAssetDir = piDirGet('character-assets');
 
-for ii = 0:9 %number assets
+%% number assets
+for ii = 0:9 
     characterRecipe = [num2str(ii) '-pbrt.pbrt'];
     thisR = piRead(characterRecipe);
+
+    % We do not want the input file to have the user's full path.  So we
+    % reduce it to just the name of the pbrt file.
+    thisR.set('inputfile',characterRecipe);
+
+    % Assets do not get rendered directly.  They get merged into another
+    % scene which has its own output. So they do not need an output file or
+    % directory.
+    thisR.set('outputfile','');   
     n = thisR.get('asset names');
 
     % Save in assets/characters instead...
@@ -20,7 +40,7 @@ for ii = 0:9 %number assets
     save(oFile,'mergeNode','-append');
 end
 
-% Generate letters
+%% Generate letters
 Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 Alphabet_LC = lower(Alphabet_UC);
 
@@ -32,6 +52,15 @@ allLetters = [Alphabet_LC Alphabet_UC];
 for ii = 1:numel(allLetters)
     characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
     thisR = piRead(characterRecipe);
+
+    % We do not want the input file to have the user's full path.  So we
+    % reduce it to just the name of the pbrt file.
+    thisR.set('inputfile',characterRecipe);
+
+    % Assets do not get rendered directly.  They get merged into another
+    % scene which has its own output. So they do not need an output file or
+    % directory.
+    thisR.set('outputfile','');
 
     % piRead changes asset names to lower case
     % This means things break when we merge UC letters into recipes
