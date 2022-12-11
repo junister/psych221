@@ -270,3 +270,10 @@ thisR.get('light', skyMap.name, 'world orientation')
 piWRS(thisR, 'name','No rotation skymap');
 %}
 %% END
+
+
+thisR.camera = piCameraCreate('omni','lensFile','dgauss.22deg.12.5mm.json');
+thisR.set('film resolution',[1024 1024]);
+piWRS(thisR);
+
+
