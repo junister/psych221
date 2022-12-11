@@ -36,10 +36,7 @@ piMaterialsInsert(outputR,'groups',{'diffuse'});
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
 
-    % check for Upper Case letter (assets need a different name to avoid
-    % case collision)
-    % EXCEPT the actual mat file has the same name for both UC & LC
-    %  Even though the folders have different names!
+    % REQUIRES CASE SENSITIVE FILE SYSTEM
     if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
         ourAssetName = [ourLetter '-pbrt-UC.mat'];
     else
