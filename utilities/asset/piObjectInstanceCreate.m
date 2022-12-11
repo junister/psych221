@@ -10,6 +10,11 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   transformations that place it in the scene. Instancing is an efficient
 %   method of copying.
 %
+%   After running this function, upon return you should assign unique names
+%   to all of the assets again.
+%
+%        thisR.assets = thisR.assets.uniquename;
+%
 % Inputs:
 %   thisR     - scene recipe
 %   assetName - The objecct we want to copy

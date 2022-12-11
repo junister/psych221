@@ -31,7 +31,6 @@ idx = p2Root(end);
 % This position is relative to the position of the original object
 for ii=1:3
     thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 %% Blue man copies
@@ -44,7 +43,6 @@ idx = p2Root(end);
 steps = [-0.3 0.3];
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 % thisR.show;
@@ -75,7 +73,6 @@ idx = p2Root(end);
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 topID = piAssetSearch(thisR,'object name','ChessSet_mesh_00065');
@@ -87,7 +84,6 @@ idx = p2Root(end);
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 piWRS(thisR,'render flag','hdr');
