@@ -20,6 +20,7 @@
 % offset properties to trace into the imaging lens and then to the
 % scene.
 %
+% REQUIRES ISETLens on your path.
 %
 % See also
 %  s_sensorDPAF (ISETCam)
@@ -42,8 +43,15 @@ nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 
 %% Create the combined lens file and camera
 
-[combinedLensFile,uLens,iLens] = piMicrolensInsert(uLensName,iLensName, ...
-    'n microlens',nMicrolens);
+% Read the microlens and scale it to a diameter of 2.8 microns.
+uLensDiameter = 2.8;    % Microns
+uLens = lensC('file name',uLensName);
+d = uLens.get('lens diameter','microns');
+uLens.scale(uLensDiameter/d);
+fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'));
+
+iLens = lensC('file name',iLensName);
+combinedLensFile = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
 % bar = jsonread(combinedLensFile);
 
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);

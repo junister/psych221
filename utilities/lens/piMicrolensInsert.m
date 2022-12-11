@@ -72,7 +72,7 @@ filmSize  = p.Results.filmsize;
 % current working directory and use this copy as input for the PBRT
 % rendering. 
 if isa(imagingLens,'lensC')
-    thisName = [imagingLens.get('name'),'.json'];
+    thisName = fullfile(pwd,[imagingLens.get('name'),'.json']);
     imagingLensName = imagingLens.fileWrite(thisName);
 else
     imagingLensName = imagingLens;
@@ -80,7 +80,7 @@ end
 iLens = lensC('file name',imagingLensName);
 
 if isa(microLens,'lensC')
-    thisName = [microLens.get('name'),'.json'];
+    thisName = fullfile(pwd,[microLens.get('name'),'.json']);
     microLensName = microLens.fileWrite(thisName);     
 else
     microLensName = microLens;
@@ -126,26 +126,11 @@ if ~p.Results.quiet
     fprintf('------\n');
 end
 
-%% Copy the imaging and microlens to the output folder
-
-% outputFolder  = pwd;
-% 
-% % Overwrite even if the file is already in the output/lens directory.
-% [~,n,e] = fileparts(iLensFullPath);
-% iLensCopy = fullfile(outputFolder,[n e]);
-% copyfile(iLensFullPath,iLensCopy,'f');
-% 
-% mLensFullPath = which(microLens);
-% [~,n,e] = fileparts(mLensFullPath);
-% mLensCopy = fullfile(outputFolder,[n e]);
-% copyfile(mLensFullPath,mLensCopy,'f');
-
-
 %% Create the struct and JSON file for PBRT from the lens information
 
 combinedLens.description = iLens.description;
 combinedLens.microlens = [];
-combinedLens.name = [imagingLens,' + ',microLens];
+combinedLens.name = [imagingLensName,' + ',microLensName];
 combinedLens.surfaces = lens2pbrt(iLens);
 combinedLens.type = iLens.type;
 
