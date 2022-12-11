@@ -7,27 +7,26 @@
 
 % Use a background scene
 thisR = piRecipeCreate('macbeth checker');
-piWRS(thisR);
+%piWRS(thisR);
 
 thisR.set('object distance', 2);
 
 % do we need to insert the material or can charactersRender
 % try to do that for us?
-% piMaterialsInsert(thisR,'names',{'brickwall001'});
+piMaterialsInsert(thisR,'names',{'brickwall001'});
 
 % mcc already has these
 % piMaterialsInsert(thisR,'names',{'diffuse-red'});
 
 %% Limitations:
-% If we have a duplicate letter, not handled yet
-% Upper case also doesn't work as piRead changes the node to lower case
-ourString = 'CAT';
+% Assumes case-sensitive file system for character folders!!
+% As we have assets of "a" and "A", for example
+ourString = 'catalog';
 
 %  'material_name','brickwall001',
-% Okay, we sometimes get an asset with "C" and sometimes with "c"
-% I guess we need to fix the UC / LC issue!
+%  'material_name','diffuse-red'
 thisR = charactersRender(thisR, ourString, ...
-    'distance', 15, 'material_name','diffuse-red', scaleLetter=1);
+    'distance', 15, 'material_name','brickwall001', scaleLetter=.5);
 
 %idx = piAssetSearch(thisR,'object name','3_O');
 %thisR.set('asset',idx,'world position',[0 0 -1]);
