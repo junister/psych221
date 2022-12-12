@@ -89,7 +89,6 @@ end
 
 %{
 % This is an example to test that it worked.
-
 chessR = piRecipeDefault('scene name','chess set');
 chessR = piMaterialsInsert(chessR);
 
@@ -105,7 +104,6 @@ chessR.show('objects');
 to = chessR.get('to');
 idx = piAssetSearch(chessR,'object name','letterA');
 chessR.set('asset',idx,'world position',to + [0 0.1 0]);
-chessR.set('asset',idx,'material name','glass');
 piWRS(chessR,'render type','radiance');
 
 %}
