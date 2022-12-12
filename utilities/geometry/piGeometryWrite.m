@@ -342,6 +342,9 @@ for ii = 1:numel(children)
         % if this is an arealight or object without a reference object
         if writeGeometryFlag || isempty(referenceObjectExist)
             [rootPath,~] = fileparts(outFilePath);
+            % We have a cross-platform problem here?
+            [p,n,e ] = fileparts(thisNode.shape{1}.filename);
+            thisNode.shape{1}.filename = fullfile(p, [n e]);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
             fprintf(fid,'\n');
         else

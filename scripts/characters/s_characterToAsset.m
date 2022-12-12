@@ -41,7 +41,9 @@ for ii = 0:9
 end
 
 %% Generate letters
-Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+% Latter letters are broken
+Alphabet_UC = 'ABCDEFG';
+%Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 Alphabet_LC = lower(Alphabet_UC);
 
 allLetters = [Alphabet_LC Alphabet_UC];
@@ -50,7 +52,16 @@ allLetters = [Alphabet_LC Alphabet_UC];
 % Otherwise instead of relying on Matlab path to get pbrt
 % files, we'd need to provide a specific path
 for ii = 1:numel(allLetters)
-    characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
+    disp(ii);
+    if isequal(upper(allLetters(ii)),allLetters(ii))
+        characterRecipe = [lower(allLetters(ii)) '_uc-pbrt.pbrt'];
+    else
+        characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
+    end
+
+    if ~exist(characterRecipe,'file')
+        warning("Help! %s\n", characterRecipe)
+    end
     thisR = piRead(characterRecipe);
 
     % We do not want the input file to have the user's full path.  So we
@@ -70,7 +81,7 @@ for ii = 1:numel(allLetters)
     % Save in assets/characters instead...
     saveFileStub = erase(characterRecipe,'.pbrt');
     if isequal(upper(allLetters(ii)),allLetters(ii))
-        saveFile = [saveFileStub '-UC.mat'];
+        saveFile = [saveFileStub '.mat'];
     else
         saveFile = [saveFileStub '.mat'];
     end

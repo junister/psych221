@@ -38,16 +38,17 @@ for ii = 1:numel(aString)
 
     % REQUIRES CASE SENSITIVE FILE SYSTEM
     if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
-        ourAssetName = [ourLetter '-pbrt-UC.mat'];
+        ourAssetName = [lower(ourLetter) '_uc-pbrt.mat'];
+        ourAsset = [lower(ourLetter) '_uc'];
     else
         ourAssetName = [ourLetter '-pbrt.mat'];
+        ourAsset = ourLetter;
     end
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character');
 
     ourLetterAsset.thisR.set('object distance', options.distance);
     
-    letterNode = ['001_001_' ourLetter '_O'];
-    % We have an issue with merge nodes not working correctly!
+    letterNode = ['001_001_' ourAsset '_O'];
 
     piRecipeMerge(outputR, ourLetterAsset.thisR);
 
