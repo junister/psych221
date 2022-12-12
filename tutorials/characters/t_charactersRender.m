@@ -21,7 +21,7 @@ piMaterialsInsert(thisR,'names',{'brickwall001'});
 %% Limitations:
 % Assumes case-sensitive file system for character folders!!
 % As we have assets of "a" and "A", for example
-ourString = 'BeF';
+ourString = 'BaF';
 
 %  'material_name','brickwall001',
 %  'material_name','diffuse-red'
