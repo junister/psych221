@@ -31,25 +31,6 @@ assetFiles = dir([fullfile(piDirGet('assets'),filesep(),'*.mat')]);
 fprintf('Found %d assets\n',numel(assetFiles));
 
 %% Loop over each asset
-%{
-Asset Validation Results: 
-Asset: EIA.mat Succeeded.
-Asset: bunny.mat Succeeded.
-Asset: coordinate.mat Succeeded.
-Asset: face.mat Succeeded.
-Asset: glasses.mat failed % Zheng special case.
-Asset: gridlines.mat Succeeded.
-Asset: letterA.mat Succeeded.
-Asset: letterB.mat Succeeded.
-Asset: letterC.mat Succeeded.
-Asset: macbeth.mat Succeeded.
-Asset: mccCB.mat failed   % Zheng special case.
-Asset: plane.mat failed   % Not sure what this is yet.
-Asset: pointarray512.mat Succeeded.
-Asset: ringsrays.mat Succeeded.
-Asset: slantedbar.mat Succeeded.
-Asset: sphere.mat Succeeded.
-%}
 
 % Return a report
 report = '';
