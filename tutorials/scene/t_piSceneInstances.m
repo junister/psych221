@@ -45,8 +45,10 @@ for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
 end
 
-% thisR.show;
-%%
+%% The necessity of unique names has to do with speed and ISETAuto
+
+% See comments at the end of piObjectInstanceCreate
+thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
 
 %% Try it with the Chess Set
@@ -61,7 +63,7 @@ piWRS(thisR,'render flag','hdr');
 %   ieNewGraphWin; image(idMap);
 %
 % Click on the pieces to see the index
-% THen use oList(idx) to see the mesh name
+% Then use oList(idx) to see the mesh name
 % 72 is the ruler.  The king is 7.  The queen is 141.
 
 pieceID = piAssetSearch(thisR,'object name','ChessSet_mesh_00007');
@@ -86,6 +88,9 @@ for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
 end
 
+%% The necessity of unique names has to do with speed and ISETAuto
+
+thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
 
 

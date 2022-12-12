@@ -178,8 +178,8 @@ for ii = 1:length(recipelist)
             sourceTextures = fullfile(sourceDir, 'textures');
             dstTextures    = fullfile(dstDir, 'textures');
             if exist(sourceTextures, 'dir')
-                % piCopyFolder(sourceTextures, dstDir);
-                copyfile(sourceTextures, dstTextures);
+                piCopyFolder(sourceTextures, dstDir);
+                %copyfile(sourceTextures, dstTextures);
             else
                 sprintf('No textures for this source (%s).\n',sourceDir)
             end

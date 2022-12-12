@@ -80,8 +80,9 @@ switch assetType
         [~,n,e] = fileparts(inFile);
         asset.thisR.set('inputfile',fullfile(piDirGet('scenes'),n,[n,e]));
     case 'character'
-        [~,n,~] = fileparts(inFile);
-        asset.thisR.set('inputfile',fullfile(piDirGet('character-recipes'),n,inFile));
+        [~,n, e] = fileparts(inFile);
+        % assume folder name is the same as pbrt file prefix
+        asset.thisR.set('inputfile',fullfile(piDirGet('character-recipes'),n,[n e]));
 end
 
 % Find the name of the directory containing the original recipe input file
