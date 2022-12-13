@@ -3,10 +3,13 @@
 % D. Cardinal, Stanford University, December, 2022
 % VAGUE OUTLINE ONLY SO FAR
 
+% clear the decks
+ieInit;
+
 %%  Characters and a light
 
 % start with a simple 1 in the middle
-thisR = piRead('e-pbrt.pbrt');
+thisR = piRead('1-pbrt.pbrt');
 
 % characters don't have a light
 lightName = 'from camera';
@@ -20,7 +23,7 @@ piMaterialsInsert(thisR,'name','brickwall001');
 topRowHeight = 1;
 letterSpacing = .9;
 scaleFactor = .7; % need to figure this out for real
-rowHeight = 1; % guess
+rowHeight = 2; % guess
 
 % Generate letters
 chartRows = {'E', 'FAB', 'CDGH'};
@@ -34,12 +37,16 @@ for ii = 1:numel(chartRows)
     ourRow = chartRows{ii};
 
     for jj = 1:numel(chartRows{ii})
+        % Need to handle upper case!
         ourLetterAsset = piAssetLoad([chartRows{ii}(jj) '-pbrt.mat'],...
         'assettype','character');
         piRecipeMerge(thisR, ourLetterAsset.thisR);
     
-        spaceLetter = (ii - ceil(numel(eyeChartSample)/2)) * letterSpacing;
-        %thisR.set('asset',['001_001_' ourLetter '_O'],'translate', [spaceLetter 0 0]);
+        spaceLetter = (jj - ceil(numel(chartRows{ii}/2))) * letterSpacing;
+        % Need to decide on the object node name to merge
+        % Right now we mess up Ucase, so using LCase
+        thisR.set('asset',['001_001_' lower(chartRows{ii}(jj)) '_O'], ...
+            'translate', [spaceLetter letterVertical letterVertical]);
     end
 end
 
