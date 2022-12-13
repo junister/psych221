@@ -11,7 +11,7 @@ arguments
     % Optional parameters
     options.letterSpacing = .4;
     options.scaleLetter = 1; % TBD
-    options.material_name = 'coateddiffuse';
+    options.material_name = '';
     options.distance = 5; % in meters
     
     % ASPIRATIONAL / TBD
@@ -52,12 +52,15 @@ for ii = 1:numel(aString)
 
     piRecipeMerge(outputR, ourLetterAsset.thisR);
 
-    outputR.set('asset',letterNode, 'material name', options.material_name);
+    if ~isempty(options.material_name)  
+        outputR.set('asset',letterNode, 'material name', options.material_name);
+    end
 
     outputR.set('asset', letterNode, 'scale', ...
         [options.scaleLetter options.scaleLetter options.scaleLetter]);
 
-    outputR.set('asset',letterNode, 'rotate', [-90 00 0]);
+    % maybe we don't always want this?
+    %outputR.set('asset',letterNode, 'rotate', [-90 00 0]);
 
     % space the letters
     spaceLetter = (ii-1) * options.letterSpacing;
