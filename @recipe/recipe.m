@@ -119,7 +119,7 @@ classdef recipe < matlab.mixin.Copyable
                     if isempty(obj.assets), disp('No assets in this recipe');
                     else, obj.assets.show;
                     end
-                case 'nodenames'
+                case {'assetnames','nodenames','objectnames'}
                     % List all the nodes, not just the objects
                     names = obj.get('asset names')';
                     rows = cell(numel(names),1);

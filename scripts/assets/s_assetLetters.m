@@ -1,12 +1,17 @@
-%% Write out the letters in lattersAtDepth as loadable assets
+%% Write out the letters in lettersAtDepth as loadable assets
 %
+%   thisAsset = piAssetLoad('latterA.mat');
 %
+% There are also letters from Krithin stored in the characters directory,
+% made using Blender.  
+%
+% Talk to Dave Cardinal and Krithin about those assets, and see ...
 %
 % See also
 %   s_assetsRecipe, v_Assets, piAssetLoad, piRecipeMerge
 
 %% This is where we will save them
-assetDir = fullfile(piRootPath,'data','assets');
+assetDir = piDirGet('assets');
 
 %% Pull out each of the letters separately and position them.
 
@@ -16,41 +21,48 @@ for ii=1:numel(letters)
     
     sceneName = 'letters at depth';
     thisR = piRecipeDefault('scene name', sceneName);
-    % thisR.show;
+    % thisR.show('objects');
     
-    for ii=7:-1:2
-        thisR.set('asset',ii,'delete');
+    % Eliminate everything example A,B,C    
+    objects = {'Ground','Wall'};
+    for jj=1:numel(objects)
+        idx = piAssetSearch(thisR,'object name',objects{jj});
+        thisR.set('asset',idx,'delete');
     end
-    % thisR.show;
-    
+    thisR.set('lights','all','delete');
     thisR.set('asset','Camera_B','delete');
-    % thisR.show;
+    % thisR.show('objects');
+
+    idxA = piAssetSearch(thisR,'object name','A');
+    idxB = piAssetSearch(thisR,'object name','B');
+    idxC = piAssetSearch(thisR,'object name','C');
+
     if letter == 'A'
-        thisR.set('asset', '001_A_O', 'world position', [0 0 1]);
-    else
-        thisR.set('asset','001_A_O','delete');
+        thisR.set('asset', idxA, 'world position', [0 0 1]);
+        thisR.set('asset',idxA,'name','letterA');
+        thisR.set('asset',max(idxB,idxC),'delete');
+        thisR.set('asset',min(idxB,idxC),'delete');
     end
-    % thisR.show;
+    % thisR.show('objects');
     
     if letter == 'B'
-        thisR.set('asset', '001_B_O', 'world position', [0 0 1]);
-    else
-        thisR.set('asset','001_B_O','delete');
+        thisR.set('asset', idxB, 'world position', [0 0 1]);
+        thisR.set('asset',idxB,'name','letterB');
+        thisR.set('asset',max(idxA,idxC),'delete');
+        thisR.set('asset',min(idxA,idxC),'delete'); 
     end
-    % thisR.show;
+    % thisR.show('objects');
     
     if letter == 'C'
-        thisR.set('asset', '001_C_O', 'world position', [0 0 1]);
-    else
-        thisR.set('asset','001_C_O','delete');
+        thisR.set('asset', idxC, 'world position', [0 0 1]);
+        thisR.set('asset',idxC,'name','letterC');
+        thisR.set('asset',max(idxB,idxC),'delete');
+        thisR.set('asset',min(idxB,idxC),'delete');
     end
-    
-    % thisR.show;
+    % thisR.show('objects');
     
     thisR.set('from',[0 0 0]);
     thisR.set('to',[0 0 1]);
-    
-    % thisR.show();
     
     %{
      % I checked the letters this way
@@ -59,7 +71,8 @@ for ii=1:numel(letters)
         thisR.set('light',l,'add');
         piAssetGeometry(thisR);
         thisR.show('objects')
-        thisR.get('asset','001_C_O','material')
+        idx = piAssetSearch(thisR,'object name','A');
+        thisR.get('asset',idx,'material name')
         thisR.set('material','White','reflectance',[.5 .5 .5]);
         piWRS(thisR);
     %}
@@ -76,7 +89,6 @@ end
 
 %{
 % This is an example to test that it worked.
-
 chessR = piRecipeDefault('scene name','chess set');
 chessR = piMaterialsInsert(chessR);
 
@@ -84,14 +96,14 @@ chessR = piMaterialsInsert(chessR);
 % Mrke brikker must be dark pieces
 % piAssetGeometry(chessR);
 
-theLetter = piAssetLoad('letterA');
+theLetter = piAssetLoad('letterA.mat');
 
 piRecipeMerge(chessR,theLetter.thisR,'node name',theLetter.mergeNode);
 chessR.show('objects');
 
 to = chessR.get('to');
-chessR.set('asset','001_A_O','world position',to + [0 0.1 0]);
-chessR.set('asset','001_A_O','material name','glass');
+idx = piAssetSearch(chessR,'object name','letterA');
+chessR.set('asset',idx,'world position',to + [0 0.1 0]);
 piWRS(chessR,'render type','radiance');
 
 %}
