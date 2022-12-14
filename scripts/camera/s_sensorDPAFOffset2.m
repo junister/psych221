@@ -49,8 +49,9 @@ fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'))
 
 iLens = lensC('file name',iLensName);
 
-nMicrolens = [64 64];   % Determines film size.
-[combinedLensFile, filmSize] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
+nMicrolens = [64 64]*4;   % Determines film size.
+[combinedLensFile, filmSize] = piMicrolensInsert(uLens,iLens,...
+    'n microlens',nMicrolens, 'offset method','default');
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
 %% Set up the film parameters
@@ -84,8 +85,8 @@ thisR.set('microlens sensor offset',5e-6);   % Specify in meters
 
 %% Render
 
-thisSize = thisR.get('film size')
-thisR.set('film size',[thisSize(1),thisSize(2)/10]);
+% thisSize = thisR.get('film size')
+% thisR.set('film size',[thisSize(1),thisSize(2)/10]);
 
 oi = piWRS(thisR);
 
@@ -96,7 +97,7 @@ imtool(rgb);
 
 %% Make a dual pixel sensor that has rectangular pixels
 
-sensor = sensorCreate('dual pixel',[], oi, uLens);
+sensor = sensorCreate('dual pixel',[], oi, nMicrolens);
 
 %% Compute the sensor data
 

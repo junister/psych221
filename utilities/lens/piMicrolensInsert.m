@@ -17,6 +17,11 @@ function [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensIn
 %   output name   - File name of the output combined lens
 %   nMicrolens    - 2-vector for row/col?
 %   filmsize      - 2-vector for width/height (x,y) in mm
+%   offsets       - The offsets for each microlens, with respect to
+%                   its own pixel.  Size is [prod(nMicrolens),2]
+%                   (Default is all zeros)
+%   offsetmethod  - Call this method to compute the offsets (default
+%                   is do nothing, use what is sent in)
 %
 % Output
 %   combinedLens - Full path to the output file
@@ -62,10 +67,14 @@ p.addParameter('nmicrolens',[],@isvector);   % x,y (col, row)
 p.addParameter('filmsize',[],@isscalar);     % x,y (width, height) mm
 p.addParameter('quiet',false,@islogical);    % Suppress print out
 
+vMethods = {'default','linear'};
+p.addParameter('offsetmethod','default',@(x)(ismember(x,vMethods)));
+
 p.parse(imagingLens,microLens,varargin{:});
 
 nMicrolens = p.Results.nmicrolens;
 filmSize  = p.Results.filmsize;
+offsetMethod = p.Results.offsetmethod;
 
 %%  Create the iLens and mLens (lensC) objects
 
@@ -101,24 +110,63 @@ end
 %% Set up dimension and film parameters
 
 % We use the microlens diameter for various calculations below.
-ulensDiameter = uLens.get('lens diameter','mm');
+ulensDiameterMM = uLens.get('lens diameter','mm');
 
 if isempty(filmSize) && isempty(nMicrolens)
     warning('No film size or nMicrolens.  Using 1.1 x 1.1 mm film size');
     filmSize = [1.1 1.1];
     % We know the film size, so calculate the nMicrolens
-    nMicrolens(1) = floor(filmSize(1)/ulensDiameter);
-    nMicrolens(2) = floor(filmSize(2)/ulensDiameter);
+    nMicrolens(1) = floor(filmSize(1)/ulensDiameterMM);
+    nMicrolens(2) = floor(filmSize(2)/ulensDiameterMM);
 elseif isempty(nMicrolens)
     % We know the film size, so calculate the nMicrolens.  Must be an
     % integer.
-    nMicrolens(1) = floor(filmSize(1)/ulensDiameter);
-    nMicrolens(2) = floor(filmSize(2)/ulensDiameter);
+    nMicrolens(1) = floor(filmSize(1)/ulensDiameterMM);
+    nMicrolens(2) = floor(filmSize(2)/ulensDiameterMM);
 elseif isempty(filmSize)
     % We know nMicrolens, so calculate filmSize.  
-    filmSize(1) = nMicrolens(1)*ulensDiameter;  % mm
-    filmSize(2) = nMicrolens(2)*ulensDiameter;
+    filmSize(1) = nMicrolens(1)*ulensDiameterMM;  % mm
+    filmSize(2) = nMicrolens(2)*ulensDiameterMM;
 end
+
+%% Build the offsets
+
+% Default offsets is all zeroes
+switch offsetMethod
+    case 'default'
+        offsets = zeros(prod(nMicrolens),2);
+    case 'linear'
+        % Scale the microlens positions by field height.  They move
+        % towards to center.  At the farthest corner they are moved by
+        % one half the microlens diameter.
+        
+        ulensDiameterM = ulensDiameterMM*1e-3;
+        % Find the X,Y positions of each microlens.  We use units of
+        % meters here, converting from mm.
+        xPos = (1:nMicrolens(1))*ulensDiameterM; xPos = xPos - mean(xPos);
+        yPos = (1:nMicrolens(2))*ulensDiameterM; yPos = yPos - mean(yPos);
+        [X,Y] = meshgrid(xPos,yPos);
+
+        % Scale offsets so that the maximum allowed offset occurs
+        % for the microlens furthest from the center
+        maxOffset = ulensDiameterM/2; % Default maximum offset 
+        dist = sqrt(X.^2 + Y.^2);
+        offset_dist = maxOffset * (dist ./ max(dist(:)));
+        offset_dir = 1./dist(:).*[X(:) Y(:)];
+        %Xo = sign(X).*offsets(:,1); Yo = sign(Y).*offsets(:,2);
+
+        % We move the microlenses towards the center, which is why the
+        % -1 is there.
+        offsets = -1*offset_dir.*offset_dist(:);        
+        %{
+        ieNewGraphWin; plot(X(:) + offsets(:,1),Y(:)+offsets(:,2),'.')
+        hold on; plot(X(:),Y(:),'b.')
+        %}
+
+    otherwise
+        error('Unknown offset method %s\n',offsetMethod);
+end
+
 
 %% Print out parameter summary
 if ~p.Results.quiet
@@ -137,7 +185,7 @@ combinedLens.surfaces = lens2pbrt(iLens);
 combinedLens.type = iLens.type;
 
 combinedLens.microlens.dimensions = nMicrolens(:);
-combinedLens.microlens.offsets    = zeros(prod(nMicrolens),2);
+combinedLens.microlens.offsets    = offsets;
 combinedLens.microlens.surfaces   = lens2pbrt(uLens);
 
 jsonwrite(combinedLensName,combinedLens);
