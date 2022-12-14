@@ -1,8 +1,8 @@
-function [combinedLensName, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
+function [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
 % Combine a microlens with an imaging lens into a PBRT lens file (json)
 %
 % Syntax
-%   [combinedLensName, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
+%   [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
 %
 % Brief description:
 %   Create a JSON file that combines the imaging and microlens array
@@ -20,8 +20,10 @@ function [combinedLensName, uLens, iLens]  = piMicrolensInsert(microLens,imaging
 %
 % Output
 %   combinedLens - Full path to the output file
-%   uLens  - Microlens (lensC)
-%   iLens -  Imaging lens (lensC)
+%   filmSize   - We might have only sent in nMicrolens, this is the filmSize
+%   nMicrolens - We might have only sent in filmSize, this is the nMicrolens
+%   uLens  - If we only sent in the name, this is the Microlens (lensC)
+%   iLens -  If we only sent in the name, this is the Imaging lens (lensC)
 %
 % See also
 %   piMicrolensWrite, lens2pbrt (internal)

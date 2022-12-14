@@ -33,18 +33,15 @@ if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeDefault('scene name','chessSet');
 
-% piWRS(thisR);
-
 %% Set up the combined imaging and microlens array
 
 uLensName = fullfile(piDirGet('lens'),'microlens.json');
 iLensName = fullfile(piDirGet('lens'),'dgauss.22deg.3.0mm.json');
-nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 
 %% Create the combined lens file and camera
 
-% Read the microlens and scale its diameter
-uLensDiameter = 2.8;     % Microns
+% Read the microlens and scale it to a diameter of 2.8 microns.
+uLensDiameter = 2.8;    % Microns
 uLens = lensC('file name',uLensName);
 d = uLens.get('lens diameter','microns');
 uLens.scale(uLensDiameter/d);
@@ -52,9 +49,8 @@ fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'))
 
 iLens = lensC('file name',iLensName);
 
+nMicrolens = [64 64];   % Determines film size.
 [combinedLensFile, filmSize] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
-thisR.set('film size',filmSize);
-
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
 %% Set up the film parameters
@@ -80,37 +76,29 @@ thisR.set('film resolution',filmresolution);
 thisR.set('aperture diameter',10);
 
 % Adjust for quality
-thisR.set('rays per pixel',32);
+thisR.set('rays per pixel',256);
 
 thisR.set('render type',{'radiance','depth'});
 
+thisR.set('microlens sensor offset',5e-6);   % Specify in meters
+
 %% Render
+
+thisSize = thisR.get('film size')
+thisR.set('film size',[thisSize(1),thisSize(2)/10]);
 
 oi = piWRS(thisR);
 
 %{
-rgb = oiGet(oi,'rgb'); imtool(rgb);
+rgb = oiGet(oi,'rgb');
+imtool(rgb);
 %}
 
 %% Make a dual pixel sensor that has rectangular pixels
 
-sensor = sensorCreate('dual pixel',[], oi, nMicrolens);
-%{
-% This is about what the create does.
-%
-sensor = sensorCreate;
-sz = sensorGet(sensor,'pixel size');
+sensor = sensorCreate('dual pixel',[], oi, uLens);
 
-% We make the height
-sensor = sensorSet(sensor,'pixel width',sz(2)/2);
-
-% Add more columns
-rowcol = sensorGet(sensor,'size');
-sensor = sensorSet(sensor,'size',[rowcol(1)*2, rowcol(2)*4]);
-
-% Set the CFA pattern accounting for the dual pixel architecture
-sensor = sensorSet(sensor,'pattern',[2 2 1 1; 3 3 2 2]);
-%}
+%% Compute the sensor data
 
 % Notice that we get the spatial structure of the image right, even though
 % the pixels are rectangular.
