@@ -44,7 +44,9 @@ nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 %% Create the combined lens file and camera
 
 % Read the microlens and scale its diameter
-uLensDiameter = 2.8;     % Microns
+uLensDiameter = 2.8;        % Microns
+uLensDiameterM = 2.8*1e-6;  % Microns
+
 uLens = lensC('file name',uLensName);
 d = uLens.get('lens diameter','microns');
 uLens.scale(uLensDiameter/d);
@@ -52,8 +54,15 @@ fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'))
 
 iLens = lensC('file name',iLensName);
 
-[combinedLensFile, filmSize] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
-thisR.set('film size',filmSize);
+% Zero offset of the microlens by default.
+[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
+
+% Linearly scaled offset of the microlens array
+%
+% [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens,...
+%     'offset method','linear','max offset',uLensDiameterM/4);
+
+thisR.set('film size',info.filmSize);
 
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 

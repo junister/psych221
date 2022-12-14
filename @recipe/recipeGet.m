@@ -931,6 +931,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % How many film pixels behind each microlens/pinhole
         val(2) = thisR.camera.subpixels_w;
         val(1) = thisR.camera.subpixels_h;
+    case 'microlenssensoroffset'
+        % thisR.get('microlens sensor offset',val) 
+        %
+        % Distance between microlens and sensor. Default units
+        % meters
+        %
+        if isfield(thisR.camera,'microlenssensoroffset')
+            val = thisR.camera.microlenssensoroffset.value;        
+        end
+        if isempty(varargin), return;
+        else
+            val = val*ieUnitScaleFactor(varargin{1});
+        end
 
         % Film (because of PBRT.  ISETCam it would be sensor).
     case {'spatialsamples','filmresolution','spatialresolution'}

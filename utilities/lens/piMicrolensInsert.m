@@ -1,8 +1,8 @@
-function [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
+function [combinedLensName, info]  = piMicrolensInsert(microLens,imagingLens,varargin)
 % Combine a microlens with an imaging lens into a PBRT lens file (json)
 %
 % Syntax
-%   [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensInsert(microLens,imagingLens,varargin)
+%   [combinedLensName, info]  = piMicrolensInsert(microLens,imagingLens,varargin)
 %
 % Brief description:
 %   Create a JSON file that combines the imaging and microlens array
@@ -15,20 +15,24 @@ function [combinedLensName, filmSize, nMicrolens, uLens, iLens]  = piMicrolensIn
 %
 % Optional key/value pairs
 %   output name   - File name of the output combined lens
-%   nMicrolens    - 2-vector for row/col?
-%   filmsize      - 2-vector for width/height (x,y) in mm
-%   offsets       - The offsets for each microlens, with respect to
-%                   its own pixel.  Size is [prod(nMicrolens),2]
-%                   (Default is all zeros)
-%   offsetmethod  - Call this method to compute the offsets (default
-%                   is do nothing, use what is sent in)
+%   nMicrolens    - 2-vector for row/col, if not sent in the default
+%                   is the number of microlenses needed to cover the
+%                   film, spaced by 1 uLens diameter
+%   filmsize      - 2-vector for width/height (x,y) in mm.  If not
+%                   sent in the default is make the size match
+%                   nMicrolens, spaced by 1 uLens diameter.
+%   offsets       - Create a microlens offset for each pixel (meters).
+%                   Size is [prod(nMicrolens),2] (Default is all zeros)
+%   offsetmethod  - Name a method to compute the offsets ('default'
+%                   is use what is sent in.  'linear' creates an array.)
+%   maxoffset     - Set the maximum microlens offset for the 'linear'
+%                   method.
 %
 % Output
-%   combinedLens - Full path to the output file
-%   filmSize   - We might have only sent in nMicrolens, this is the filmSize
-%   nMicrolens - We might have only sent in filmSize, this is the nMicrolens
-%   uLens  - If we only sent in the name, this is the Microlens (lensC)
-%   iLens -  If we only sent in the name, this is the Imaging lens (lensC)
+%   combinedLensName - Full path to the output file
+%   info - Struct with information about the combined lens file.
+%          Parameters include the struct saved in the JSON file
+%          (combinedLens) and the filmSize, uLens and iLens.
 %
 % See also
 %   piMicrolensWrite, lens2pbrt (internal)
@@ -62,19 +66,25 @@ p.addRequired('imagingLens',vFile);
 p.addRequired('microLens',vFile);
 
 % Optional
-p.addParameter('outputname','',@ischar);
-p.addParameter('nmicrolens',[],@isvector);   % x,y (col, row)
+p.addParameter('outputname','',@ischar);     % JSON file name
+p.addParameter('nmicrolens',[],@isvector);   % number of x,y (col, row)
 p.addParameter('filmsize',[],@isscalar);     % x,y (width, height) mm
 p.addParameter('quiet',false,@islogical);    % Suppress print out
+
+% For the linear method, the default max offset is one half of the
+% microlens diameter.  But you can set the value (in mm) through the
+% maxoffset parameter.
+p.addParameter('maxoffset',[],@isscalar);    % x,y (width, height) mm
 
 vMethods = {'default','linear'};
 p.addParameter('offsetmethod','default',@(x)(ismember(x,vMethods)));
 
 p.parse(imagingLens,microLens,varargin{:});
 
-nMicrolens = p.Results.nmicrolens;
-filmSize  = p.Results.filmsize;
+nMicrolens   = p.Results.nmicrolens;
+filmSize     = p.Results.filmsize;
 offsetMethod = p.Results.offsetmethod;
+maxOffset    = p.Results.maxoffset;
 
 %%  Create the iLens and mLens (lensC) objects
 
@@ -148,16 +158,21 @@ switch offsetMethod
         [X,Y] = meshgrid(xPos,yPos);
 
         % Scale offsets so that the maximum allowed offset occurs
-        % for the microlens furthest from the center
-        maxOffset = ulensDiameterM/2; % Default maximum offset 
+        % for the microlens furthest from the center (meters)
+        if isempty(maxOffset)
+            maxOffset = ulensDiameterM/2; % Default maximum offset
+        else
+            maxOffset = p.Results.maxoffset;
+        end
+
         dist = sqrt(X.^2 + Y.^2);
         offset_dist = maxOffset * (dist ./ max(dist(:)));
         offset_dir = 1./dist(:).*[X(:) Y(:)];
-        %Xo = sign(X).*offsets(:,1); Yo = sign(Y).*offsets(:,2);
 
-        % We move the microlenses towards the center, which is why the
-        % -1 is there.
+        % The microlenses are displaced towards the center, so we must
+        % multiply the direction by -1.
         offsets = -1*offset_dir.*offset_dist(:);        
+        
         %{
         ieNewGraphWin; plot(X(:) + offsets(:,1),Y(:)+offsets(:,2),'.')
         hold on; plot(X(:),Y(:),'b.')
@@ -190,6 +205,13 @@ combinedLens.microlens.surfaces   = lens2pbrt(uLens);
 
 jsonwrite(combinedLensName,combinedLens);
 
+% Offsets (info.microlens.offset) and nMicrolenses
+% (info.microlens.dimension) are inthe combinedLens struct 
+info.combinedLens = combinedLens;
+info.filmSize = filmSize;
+info.uLens = uLens;
+info.iLens = iLens;
+info.microlensfilmoffset = thisR.get('microlens sensor offset','m')
 end
 
 

@@ -31,7 +31,8 @@ if ~piDockerExists, piDockerConfig; end
 
 %%  Get the chess set scene
 
-thisR = piRecipeDefault('scene name','chessSet');
+% thisR = piRecipeDefault('scene name','chessSet');
+thisR = piRecipeCreate('flatSurface');
 
 %% Set up the combined imaging and microlens array
 
@@ -41,18 +42,17 @@ iLensName = fullfile(piDirGet('lens'),'dgauss.22deg.3.0mm.json');
 %% Create the combined lens file and camera
 
 % Read the microlens and scale it to a diameter of 2.8 microns.
-uLensDiameter = 2.8;    % Microns
+uLensDiameterUM = 2.8;    % Microns
+uLensDiameterM = uLensDiameterUM*1e-6;
 uLens = lensC('file name',uLensName);
 d = uLens.get('lens diameter','microns');
-uLens.scale(uLensDiameter/d);
+uLens.scale(uLensDiameterUM/d);
 fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'));
 
 iLens = lensC('file name',iLensName);
 
-nMicrolens = [64 64]*4;   % Determines film size.
-[combinedLensFile, filmSize] = piMicrolensInsert(uLens,iLens,...
-    'n microlens',nMicrolens, 'offset method','default');
-thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
+% Determines film size.  Samples will be 2x because of subpixels
+nMicrolens = [1024 16];
 
 %% Set up the film parameters
 
@@ -79,16 +79,28 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',256);
 
-thisR.set('render type',{'radiance','depth'});
+thisR.set('render type',{'radiance'});
 
-thisR.set('microlens sensor offset',5e-6);   % Specify in meters
 
-%% Render
+%%
 
-% thisSize = thisR.get('film size')
-% thisR.set('film size',[thisSize(1),thisSize(2)/10]);
+mlensOffset = 5e-6;  % Meters
+maxOffset = 0;       % Meters
+
+thisR.set('microlens sensor offset',mlensOffset);   % Specify in meters
+[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,...
+    'n microlens',nMicrolens, 'offset method','default', ...
+    'max offset',maxOffset);
+
+thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
 oi = piWRS(thisR);
+
+uData = oiPlot(oi,'illuminance hline',[1 16]);
+ieNewGraphWin;
+plot(uData.pos(1:2:end),uData.data(1:2:end),'ro');
+hold on;
+plot(uData.pos(2:2:end),uData.data(2:2:end),'bo');
 
 %{
 rgb = oiGet(oi,'rgb');

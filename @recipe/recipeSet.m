@@ -658,9 +658,10 @@ switch param
         thisR.camera.num_pinholes_w.value = val(2);
         thisR.camera.num_pinholes_w.type = 'float';
     case 'microlenssensoroffset'
-        % thisR.set('microlens sensor offset',val) - Default units
-        % meters
+        % thisR.set('microlens sensor offset',val) - Units meters.
         %
+        % Printed out in 'camera' subfield of PBRT file for use by
+        % omni camera.         
         thisR.camera.microlenssensoroffset.type = 'float';
         thisR.camera.microlenssensoroffset.value = val;
     case 'nsubpixels'
