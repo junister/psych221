@@ -52,8 +52,10 @@ fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'))
 iLens = lensC('file name',iLensName);
 
 % Determines film size.  Samples will be 2x because of subpixels
-nMicrolens = [1024 16];
+% We think this (x,y)
+nMicrolens = [16 1];
 
+% nMicrolens = [64 64];
 %% Set up the film parameters
 
 % We want the OI to be calculated at 4 positions behind each microlens.
@@ -85,23 +87,34 @@ thisR.set('render type',{'radiance'});
 %%
 
 mlensOffset = 5e-6;  % Meters
-maxOffset = 0;       % Meters
+maxOffset = uLensDiameterM/2;       % Meters
 
 thisR.set('microlens sensor offset',mlensOffset);   % Specify in meters
 [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,...
-    'n microlens',nMicrolens, 'offset method','default', ...
+    'n microlens',nMicrolens, 'offset method','linear', ...
     'max offset',maxOffset);
 
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
 oi = piWRS(thisR);
 
-uData = oiPlot(oi,'illuminance hline',[1 16]);
-ieNewGraphWin;
-plot(uData.pos(1:2:end),uData.data(1:2:end),'ro');
-hold on;
-plot(uData.pos(2:2:end),uData.data(2:2:end),'bo');
+[uData, hdl] = oiPlot(oi,'illuminance hline',[1 16]);
+delete(hdl);
 
+ieNewGraphWin;
+plot(uData.pos(1:2:end),uData.data(1:2:end),'bo');
+hold on;
+plot(uData.pos(2:2:end),uData.data(2:2:end),'ro');
+legend({'left','right'});
+grid on
+
+%{
+ieNewGraphWin; 
+plot(info.X(:) + info.combinedLens.microlens.offsets(:,1),info.Y(:)+ info.combinedLens.microlens.offsets(:,2),'.')
+hold on; plot(info.X(:),info.Y(:),'b.')
+legend({'microlens','pixel'});
+
+%}
 %{
 rgb = oiGet(oi,'rgb');
 imtool(rgb);

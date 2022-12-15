@@ -81,7 +81,7 @@ p.addParameter('offsetmethod','default',@(x)(ismember(x,vMethods)));
 
 p.parse(imagingLens,microLens,varargin{:});
 
-nMicrolens   = p.Results.nmicrolens;
+nMicrolens   = p.Results.nmicrolens;  % (x,y)
 filmSize     = p.Results.filmsize;
 offsetMethod = p.Results.offsetmethod;
 maxOffset    = p.Results.maxoffset;
@@ -153,8 +153,8 @@ switch offsetMethod
         ulensDiameterM = ulensDiameterMM*1e-3;
         % Find the X,Y positions of each microlens.  We use units of
         % meters here, converting from mm.
-        xPos = (1:nMicrolens(1))*ulensDiameterM; xPos = xPos - mean(xPos);
-        yPos = (1:nMicrolens(2))*ulensDiameterM; yPos = yPos - mean(yPos);
+        xPos = (1:nMicrolens(2))*ulensDiameterM; xPos = xPos - mean(xPos);
+        yPos = (1:nMicrolens(1))*ulensDiameterM; yPos = yPos - mean(yPos);
         [X,Y] = meshgrid(xPos,yPos);
 
         % Scale offsets so that the maximum allowed offset occurs
@@ -211,7 +211,12 @@ info.combinedLens = combinedLens;
 info.filmSize = filmSize;
 info.uLens = uLens;
 info.iLens = iLens;
-info.microlensfilmoffset = thisR.get('microlens sensor offset','m')
+if exist('X','var')
+    info.X = X;
+    info.Y = Y;
+end
+
+
 end
 
 

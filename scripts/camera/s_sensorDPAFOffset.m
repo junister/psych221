@@ -89,17 +89,21 @@ thisR.set('film resolution',filmresolution);
 thisR.set('aperture diameter',10);
 
 % Adjust for quality
-thisR.set('rays per pixel',32);
+thisR.set('rays per pixel',256);
 
 thisR.set('render type',{'radiance','depth'});
 
 %% Render
+
+thisR.set('microlens sensor offset',5e-6);
 
 oi = piWRS(thisR);
 
 %{
 rgb = oiGet(oi,'rgb'); imtool(rgb);
 %}
+
+thisR.get('microlens sensor offset','um')
 
 %% Make a dual pixel sensor that has rectangular pixels
 
