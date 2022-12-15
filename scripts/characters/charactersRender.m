@@ -10,13 +10,13 @@ arguments
 
     % Optional parameters
     options.letterSpacing = .4;
-    options.scaleLetter = 1; % TBD
+    options.scaleLetter = 4; % TBD
     options.material_name = '';
-    options.distance = 5; % in meters
+    options.distance = 6; % default in meters
     
     % ASPIRATIONAL / TBD
     options.fontSize = 12;
-    options.fontColor = 'white';
+    options.fontColor = 'black';
     options.direction = 'horizontal_lr';
     options.billboard = false; % whether to have a background box
 
