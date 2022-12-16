@@ -10,10 +10,10 @@ arguments
 
     % Optional parameters
     options.letterSpacing = .4;
-    options.scaleLetter = 4; % TBD
-    options.material_name = '';
-    options.distance = 6; % default in meters
-    
+    options.letterScale = 1; % TBD
+    options.letterMaterial = '';
+    options.letterPosition = [0 0 0];    
+
     % ASPIRATIONAL / TBD
     options.fontSize = 12;
     options.fontColor = 'black';
@@ -31,12 +31,11 @@ end
 outputR = aRecipe;
 piMaterialsInsert(outputR,'groups',{'diffuse'});
 
-
 % add letters
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
 
-    % REQUIRES CASE SENSITIVE FILE SYSTEM
+    % Addresses non-case-sensitive file sensitive
     if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
         ourAssetName = [lower(ourLetter) '_uc-pbrt.mat'];
         ourAsset = [lower(ourLetter) '_uc'];
@@ -44,28 +43,29 @@ for ii = 1:numel(aString)
         ourAssetName = [ourLetter '-pbrt.mat'];
         ourAsset = ourLetter;
     end
-    ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character');
 
-    ourLetterAsset.thisR.set('object distance', options.distance);
+    ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 
+    letterRecipe = ourLetterAsset.thisR;
+    letterObject = piAssetSearch(letterRecipe,'object name',[ourAsset '_O']);
     
-    letterNode = ['001_001_' ourAsset '_O'];
+    % location, scale, and material elements
+    letterRecipe.set('asset',letterObject,'material name',options.letterMaterial);
+    letterRecipe.set('asset', letterObject, ...
+        'translate', options.letterPosition);
 
-    piRecipeMerge(outputR, ourLetterAsset.thisR);
+    % TBD space subsequent letters
+    %spaceLetter = (ii-1) * options.letterSpacing;
+    %outputR.set('asset', letterNode,'translate', ...
+    %    [spaceLetter 0 0]);
 
-    if ~isempty(options.material_name)  
-        outputR.set('asset',letterNode, 'material name', options.material_name);
-    end
-
-    outputR.set('asset', letterNode, 'scale', ...
-        [options.scaleLetter options.scaleLetter options.scaleLetter]);
+    letterRecipe.set('asset',letterObject, ...
+        'scale', options.letterScale);
 
     % maybe we don't always want this?
-    %outputR.set('asset',letterNode, 'rotate', [-90 00 0]);
+    % need to make sure we know
+    letterRecipe.set('asset',letterObject, 'rotate', [-90 00 0]);
 
-    % space the letters
-    spaceLetter = (ii-1) * options.letterSpacing;
-    outputR.set('asset', letterNode,'translate', ...
-        [spaceLetter 0 0]);
+    piRecipeMerge(outputR, ourLetterAsset.thisR);
     
 end
 
