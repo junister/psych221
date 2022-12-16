@@ -1585,6 +1585,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         replace = true;
                     end
+                    % This seems wrong. Second param is an ID, 3rd should
+                    % be replace. 
                     [~, val] = val.stripID([],replace);
 
                 case 'children'
@@ -1690,7 +1692,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % What about objectnames and assetnames should be the same
         % thing.  But somehow nodenames and assetnames became the
         % same.
-        val = thisR.assets.stripID;
+        val = thisR.assets.stripID([],'');
     case {'nodeparentid','assetparentid'}
         % thisR.get('asset parent id',assetName or ID);
         % Deprecated.

@@ -239,12 +239,12 @@ classdef tree
             % then all the nodes.
             
             % Replace the names in this tree.
-            if ~exist('replace','var'), replace = false; end
-            if ~exist('id','var') || isempty(id)
+            if isempty(replace), replace = false; end
+            if isempty(id)
                 % All of the nodes
                 newNames = cell(1, obj.nnodes);
                 for ii=1:obj.nnodes
-                    newNames{ii} = obj.stripID(ii);
+                    newNames{ii} = obj.stripID(ii, '');
                 end
                 
                 % We have the new names and user said replace them all
@@ -412,7 +412,7 @@ classdef tree
             if ~exist('id','var') || isempty(id)
                 % Some nodes may already have an ID.  So we strip the ID
                 % from all the nodes.
-                stripNames = obj.stripID;
+                stripNames = obj.stripID([],'');
                 names = cell(1, numel(stripNames));
                 if obj.nnodes > 999999
                     warning('Number of nodes: %d exceeds 999999', obj.nnodes);

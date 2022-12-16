@@ -5,6 +5,7 @@
 
 % clear the decks
 ieInit;
+if ~piDockerExists, piDockerConfig; end
 
 %%  Characters and a light
 
@@ -27,7 +28,7 @@ topRowHeight = 1.2; % varies with the scene we use
 
 % effective distance for each row
 % need to magnify by a ratio
-% 60 = 200/20, etc.
+% 60 = 200/20, etc. 6 is 20/20 (currently Row 5)
 rowDistances = {60, 42, 24, 12, 6, 3};
 
 % Eye Chart Letters
@@ -39,8 +40,12 @@ rowLetters = {'E', 'FAB', 'CDG', 'abcde', 'fghijk', 'lmnopq'};
 thisR = piRecipeCreate('MacBethChecker');
 
 % fix defaults with our values
-thisR.set('rays per pixel', 64);
-thisR.set('filmresolution', [1280, 720]);
+thisR.set('rays per pixel', 128);
+% resolution notes:
+% Meta says 8K needed for readable 20/20
+% Current consumer displays are mostly 1440 or 2k
+% High-end might be 4K (these are all per eye)
+thisR.set('filmresolution', [1920*2, 1080*2]);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);

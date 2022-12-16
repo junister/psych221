@@ -166,6 +166,9 @@ instanceBranchName = OBJsubtree_branch.name;
 % Eliminates the need to make the call after the return from this routine,
 % piObjectInstanceCreate
 % This call takes a quite a long time to run for driving scene.
-% thisR.assets = thisR.assets.uniqueNames;
+
+% I fixed some lazy coding in the tree and this runs a lot faster
+% Hopefully that means we can leave it in place
+thisR.assets = thisR.assets.uniqueNames;
 
 end
