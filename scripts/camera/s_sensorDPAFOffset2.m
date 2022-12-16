@@ -31,8 +31,8 @@ if ~piDockerExists, piDockerConfig; end
 
 %%  Get the chess set scene
 
-% thisR = piRecipeDefault('scene name','chessSet');
-thisR = piRecipeCreate('flatSurface');
+thisR = piRecipeDefault('scene name','chessSet');
+%thisR = piRecipeCreate('flatSurface');
 
 %% Set up the combined imaging and microlens array
 
@@ -53,9 +53,13 @@ iLens = lensC('file name',iLensName);
 
 % Determines film size.  Samples will be 2x because of subpixels
 % We think this (x,y)
-nMicrolens = [16 1];
+% nMicrolens = [384 1];
 
-% nMicrolens = [64 64];
+% For this lens, a 1/5 of the microlens is OK for 256.
+% So at 512, 2/5 of the microlens is the max, and so forth.
+% nMicrolens = [256 256];  % Chess set.
+nMicrolens = [512 512];  % Chess set.
+
 %% Set up the film parameters
 
 % We want the OI to be calculated at 4 positions behind each microlens.
@@ -79,26 +83,42 @@ thisR.set('film resolution',filmresolution);
 thisR.set('aperture diameter',10);
 
 % Adjust for quality
-thisR.set('rays per pixel',256);
+thisR.set('rays per pixel',512);
 
 thisR.set('render type',{'radiance'});
 
+%% Experiments with the mlZ and mlXY
 
-%%
+% For some offset, we match the chief ray angle as we extend out. When
+% nMicrolens is 2.8 um, this imaging lens, and we have 256
+% microlenses, the shift is 1/5th of the diameter of the microlens.
+% We found this by experimenting.  We should find a systematic way to
+% estimate.
+% maxMLXY = uLensDiameterM * ((nMicrolens(1)/256)/5);       % Meters
+maxMLXY = 0;
 
-mlensOffset = 5e-6;  % Meters
-maxOffset = uLensDiameterM/2;       % Meters
-
-thisR.set('microlens sensor offset',mlensOffset);   % Specify in meters
 [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,...
     'n microlens',nMicrolens, 'offset method','linear', ...
-    'max offset',maxOffset);
-
+    'max offset',maxMLXY);
+%{
+  offsets = info.combinedLens.microlens.offsets;
+  X = info.X; Y = info.Y;
+  ieNewGraphWin; plot(X(:) + offsets(:,1),Y(:)+offsets(:,2),'.')
+        hold on; plot(X(:),Y(:),'b.')
+plot(X(:),X(:))
+%}
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
-oi = piWRS(thisR);
+% This has to be set after we create the lens file.  Unfortunate.
+mlZ = 7e-6;  % Meters
+thisR.set('microlens sensor offset',mlZ);   % Specify in meters
+thisR.get('microlens sensor offset')
 
-[uData, hdl] = oiPlot(oi,'illuminance hline',[1 16]);
+oi = piWRS(thisR);
+sz = oiGet(oi,'size');   % Size is row,col - 
+
+% oiPlot specifies x,y 
+[uData, hdl] = oiPlot(oi,'illuminance hline',[1 round(sz(1)/2)]);
 delete(hdl);
 
 ieNewGraphWin;
@@ -107,19 +127,13 @@ hold on;
 plot(uData.pos(2:2:end),uData.data(2:2:end),'ro');
 legend({'left','right'});
 grid on
+set(gca,'ylim',[0 350]);
+title(sprintf('m2sensor %0.2f maxOffset %0.2f (um)',thisR.get('microlens sensor offset','um'),maxMLXY*1e6));
 
-%{
-ieNewGraphWin; 
-plot(info.X(:) + info.combinedLens.microlens.offsets(:,1),info.Y(:)+ info.combinedLens.microlens.offsets(:,2),'.')
-hold on; plot(info.X(:),info.Y(:),'b.')
-legend({'microlens','pixel'});
-
-%}
 %{
 rgb = oiGet(oi,'rgb');
 imtool(rgb);
 %}
-
 %% Make a dual pixel sensor that has rectangular pixels
 
 sensor = sensorCreate('dual pixel',[], oi, nMicrolens);

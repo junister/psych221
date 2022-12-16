@@ -147,14 +147,14 @@ switch offsetMethod
         offsets = zeros(prod(nMicrolens),2);
     case 'linear'
         % Scale the microlens positions by field height.  They move
-        % towards to center.  At the farthest corner they are moved by
-        % one half the microlens diameter.
+        % progressively towards the center.  At the farthest corner
+        % they are moved by one half the microlens diameter.
         
         ulensDiameterM = ulensDiameterMM*1e-3;
         % Find the X,Y positions of each microlens.  We use units of
         % meters here, converting from mm.
-        xPos = (1:nMicrolens(2))*ulensDiameterM; xPos = xPos - mean(xPos);
-        yPos = (1:nMicrolens(1))*ulensDiameterM; yPos = yPos - mean(yPos);
+        xPos = (1:nMicrolens(1))*ulensDiameterM; xPos = xPos - mean(xPos);
+        yPos = (1:nMicrolens(2))*ulensDiameterM; yPos = yPos - mean(yPos);
         [X,Y] = meshgrid(xPos,yPos);
 
         % Scale offsets so that the maximum allowed offset occurs
@@ -171,7 +171,7 @@ switch offsetMethod
 
         % The microlenses are displaced towards the center, so we must
         % multiply the direction by -1.
-        offsets = -1*offset_dir.*offset_dist(:);        
+        offsets = -1*flip(offset_dir,2).*offset_dist(:);        
         
         %{
         ieNewGraphWin; plot(X(:) + offsets(:,1),Y(:)+offsets(:,2),'.')
