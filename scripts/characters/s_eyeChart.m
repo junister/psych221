@@ -110,7 +110,9 @@ thisR.camera = piCameraCreate('pinhole');
 % can only set once we have a pinhole camera
 thisR = thisR.set('fov',28);
 
-% Eventually want to move to human eye optics for PBRT
+% For human eye optics with ISETbio we can use something like
+% oi = oiCreate('wvf human'); % then oiCompute
+% Is there anything we can do at the PBRT stage?
 %thisR.camera = piCameraCreate('human eye'); 
 %piAssetGeometry(thisR);
 piWRS(thisR);
