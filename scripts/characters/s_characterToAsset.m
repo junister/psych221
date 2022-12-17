@@ -41,9 +41,8 @@ for ii = 0:9
 end
 
 %% Generate letters
-% Latter letters are broken
-Alphabet_UC = 'ABCDEFG';
-%Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+% H is broken
+Alphabet_UC = 'ABCDEFGIJKLMNOPQRSTUVWXYZ';
 Alphabet_LC = lower(Alphabet_UC);
 
 allLetters = [Alphabet_LC Alphabet_UC];
@@ -80,11 +79,15 @@ for ii = 1:numel(allLetters)
 
     % Save in assets/characters instead...
     saveFileStub = erase(characterRecipe,'.pbrt');
+    saveFile = [saveFileStub '.mat'];
+    %{
+    % not sure why we needed this?
     if isequal(upper(allLetters(ii)),allLetters(ii))
         saveFile = [saveFileStub '.mat'];
     else
         saveFile = [saveFileStub '.mat'];
     end
+    %}
     oFile = thisR.save(fullfile(charAssetDir,saveFile));
 
     letter = allLetters(ii); % hard-code for testing

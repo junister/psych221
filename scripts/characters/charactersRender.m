@@ -29,7 +29,7 @@ end
 
 % Set output recipe to our initial input
 outputR = aRecipe;
-piMaterialsInsert(outputR,'groups',{'diffuse'});
+%piMaterialsInsert(outputR,'groups',{'diffuse'});
 
 % add letters
 for ii = 1:numel(aString)

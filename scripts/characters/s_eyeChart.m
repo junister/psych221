@@ -32,20 +32,23 @@ topRowHeight = 1.2; % varies with the scene we use
 rowDistances = {60, 42, 24, 12, 6, 3};
 
 % Eye Chart Letters
+% Typical Snellen Letters
+% ...
+
 % NOTE: CURRENTLY CAN'T RE-USE LETTERS
-% AND CAN ONLY USE UPPERCASE THROUGH G
-rowLetters = {'E', 'FAB', 'CDG', 'abcde', 'fghijk', 'lmnopq'};
+% I failing so move it up for debugging
+rowLetters = {'E', 'TUV', 'CDGOP', 'RZMNQSWX', 'ABFJKLY'};
 
 % start with a simple background
 thisR = piRecipeCreate('MacBethChecker');
 
 % fix defaults with our values
-thisR.set('rays per pixel', 128);
+thisR.set('rays per pixel', 64);
 % resolution notes:
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
 % High-end might be 4K (these are all per eye)
-thisR.set('filmresolution', [1920*2, 1080*2]);
+thisR.set('filmresolution', [3840, 2160]);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
