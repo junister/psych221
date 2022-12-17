@@ -31,6 +31,9 @@ end
 outputR = aRecipe;
 %piMaterialsInsert(outputR,'groups',{'diffuse'});
 
+% test
+gotZero = false;
+
 % add letters
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
@@ -40,8 +43,20 @@ for ii = 1:numel(aString)
         ourAssetName = [lower(ourLetter) '_uc-pbrt.mat'];
         ourAsset = [lower(ourLetter) '_uc'];
     else
-        ourAssetName = [ourLetter '-pbrt.mat'];
-        ourAsset = ourLetter;
+        % TEST TO SEE IF WE CAN DUPLICATE ASSETS
+        if isequal(ourLetter,'0')
+            if gotZero == false
+                gotZero = true;
+                ourAssetName = [ourLetter '-pbrt.mat'];
+                ourAsset = ourLetter;
+            else
+                ourAssetName = '0-pbrt-1.mat';
+                ourAsset = ourLetter;
+            end
+        else
+                ourAssetName = [ourLetter '-pbrt.mat'];
+                ourAsset = ourLetter;
+        end
     end
 
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 

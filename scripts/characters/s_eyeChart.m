@@ -36,19 +36,20 @@ rowDistances = {60, 42, 24, 12, 6, 3};
 % ...
 
 % NOTE: CURRENTLY CAN'T RE-USE LETTERS
-% I failing so move it up for debugging
+% Can test multi-letters by using '00'
+%rowLetters = {'00', 'E', 'TUV', 'CDGOP', 'RZMNQSWX', 'ABFJKLY'};
 rowLetters = {'E', 'TUV', 'CDGOP', 'RZMNQSWX', 'ABFJKLY'};
 
 % start with a simple background
 thisR = piRecipeCreate('MacBethChecker');
 
 % fix defaults with our values
-thisR.set('rays per pixel', 64);
+thisR.set('rays per pixel', 32);
 % resolution notes:
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
 % High-end might be 4K (these are all per eye)
-thisR.set('filmresolution', [3840, 2160]);
+thisR.set('filmresolution', [1280, 720]);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -62,13 +63,6 @@ for ii = 1:numel(checkerAssets)
     piAssetTranslate(thisR, checkerAssets(ii), ...
         [0 0 chartPlacement + 2]);
 end
-
-%{
-% this is now done by RecipeCreate when we use that instead of Load
-lightName = 'from camera';
-ourLight = piLightCreate(lightName,'type','distant','cameracoordinate', true);
-recipeSet(thisR,'lights', ourLight,'add');
-%}
 
 % Get materials we might need
 % white on black for now, need to swap
@@ -87,7 +81,7 @@ for ii = 1:numel(rowLetters)
 
     for jj = 1:numel(rowLetters{ii})
        
-        spaceLetter = (jj - ceil(numel(rowLetters{ii}/2))) * letterSpacing;
+        spaceLetter = (jj - ceil(numel(rowLetters{ii})/2)) * letterSpacing;
 
         % Assume y is vertical and z is depth (not always true)
         letterPosition = [spaceLetter letterVertical chartPlacement];
@@ -104,7 +98,7 @@ end
 %% No lens or omnni camera. Just a pinhole to render a scene radiance
 
 
-thisR.camera = piCameraCreate('pinhole');
+%thisR.camera = piCameraCreate('pinhole');
 
 % want a narrow FOV for the distance we're using
 % can only set once we have a pinhole camera
@@ -112,7 +106,12 @@ thisR = thisR.set('fov',28);
 
 % For human eye optics with ISETbio we can use something like
 % oi = oiCreate('wvf human'); % then oiCompute
+
 % Is there anything we can do at the PBRT stage?
+% Right now our current build of pbrt doesn't seem to work with human eye
 %thisR.camera = piCameraCreate('human eye'); 
-%piAssetGeometry(thisR);
+
+% Use a pinhole for now
+thisR.camera = piCameraCreate('pinhole');
+
 piWRS(thisR);
