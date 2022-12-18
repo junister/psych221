@@ -12,7 +12,7 @@ if ~piDockerExists, piDockerConfig; end
 % Eye Chart Parameters
 % If we want to 0-base we need to align elements
 sceneFrom = -1; % arbitrary based on background 
-sceneTo = 8;
+sceneTo = 30;
 
 chartDistance = 6; % 6 meters from camera or about 20 feet
 chartPlacement = sceneFrom + chartDistance;
@@ -46,6 +46,12 @@ rowLetters = {'E', 'FP', 'TOZ', 'LpeD', '0qCfd',};
 %thisR = piRecipeCreate('MacBethChecker');
 thisR = piRecipeCreate('flatsurface');
 thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
+
+ourBackground = piAssetSearch(thisR,'object name','Cube');
+thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
+
+% Set our chart up on a skymap
+thisR.set('skymap', 'noon_009.exr');
 
 % fix defaults with our values
 thisR.set('rays per pixel', 32);
