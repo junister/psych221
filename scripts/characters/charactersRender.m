@@ -12,7 +12,8 @@ arguments
     options.letterSpacing = .4;
     options.letterScale = 1; % TBD
     options.letterMaterial = '';
-    options.letterPosition = [0 0 0];    
+    options.letterPosition = [0 0 0];
+    options.letterRotation = [0 0 0];
 
     % ASPIRATIONAL / TBD
     options.fontSize = 12;
@@ -72,6 +73,8 @@ for ii = 1:numel(aString)
     end
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'translate', options.letterPosition);
+    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
+        'rotate', options.letterRotation);
 
     % TBD space subsequent letters
     %spaceLetter = (ii-1) * options.letterSpacing;

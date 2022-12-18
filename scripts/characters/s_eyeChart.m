@@ -23,8 +23,8 @@ chartPlacement = sceneFrom + chartDistance;
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
 % at 20 feet that is 8.73mm character height.
 baseLetterSize = .00873; % 8.73mm @ 6 meters, "20/20" vision
-rowHeight = 10 * baseLetterSize; % arbitrary
-letterSpacing = 6 * baseLetterSize; % arbitrary
+rowHeight = 12 * baseLetterSize; % arbitrary
+letterSpacing = 8 * baseLetterSize; % arbitrary
 
 topRowHeight = 1.2; % top of chart -- varies with the scene we use
 
@@ -54,8 +54,10 @@ thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 %ourBackground = piAssetSearch(thisR,'object name','Cube');
 %thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
 
-% Set our chart up on a skymap
-thisR.set('skymap', 'office_map.exr', 'rotation val', [-90 -90 0]);
+% Set our chart up on a medical offic skymap and rotate letters to back wall
+% This takes time to render, so also can use any other skymap
+thisR.set('skymap', 'office_map.exr', 'rotation val', [-90.1 90.4 0]);
+letterRotation = [0 0 0]; % try to match the wall
 
 % fix defaults with our values
 thisR.set('rays per pixel', 64);
@@ -78,12 +80,7 @@ for ii = 1:numel(checkerAssets)
         [0 0 chartPlacement + 2]);
 end
 
-% Get materials we might need
-% white on black for now, need to swap
-%mattewhite = piMaterialCreate('matteWhite', 'type', 'coateddiffuse');
-%thisR = thisR.set('material', 'add', mattewhite);
-%letterMaterial = 'mattewhite'; % substitute for black
-letterMaterial = 'glossy-black'; % substitute for black
+letterMaterial = 'glossy-black'; 
 
 % add letters by row
 for ii = 1:numel(rowLetters)
@@ -106,6 +103,7 @@ for ii = 1:numel(rowLetters)
             'letterScale', [letterScale letterScale letterScale], ...
             'letterSpacing', [letterSpacing letterVertical chartDistance], ...
             'letterMaterial', letterMaterial,...
+            'letterRotation', letterRotation, ...
             'letterPosition', letterPosition);
     end
 end
