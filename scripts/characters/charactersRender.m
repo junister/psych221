@@ -5,8 +5,8 @@ function outputR = charactersRender(aRecipe, aString, options)
 % for ISET3d, ISETauto, and ISETonline
 
 arguments
-    aRecipe;
-    aString;
+    aRecipe; % recipe where we'll add the characters
+    aString; % one or more characters to add to the recipe
 
     % Optional parameters
     options.letterSpacing = .4;
@@ -31,14 +31,15 @@ end
 outputR = aRecipe;
 %piMaterialsInsert(outputR,'groups',{'diffuse'});
 
-% test
+% Allows for testing duplicate characters by using '00' as the string
 gotZero = false;
 
-% add letters
+%% add letters
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
 
-    % Addresses non-case-sensitive file sensitive
+    % Addresses non-case-sensitive file systems
+    % by using _uc to denote Uppercase letter assets
     if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
         ourAssetName = [lower(ourLetter) '_uc-pbrt.mat'];
         ourAsset = [lower(ourLetter) '_uc'];
@@ -54,18 +55,22 @@ for ii = 1:numel(aString)
                 ourAsset = ourLetter;
             end
         else
-                ourAssetName = [ourLetter '-pbrt.mat'];
-                ourAsset = ourLetter;
+            % This is the normal case
+            ourAssetName = [ourLetter '-pbrt.mat'];
+            ourAsset = ourLetter;
         end
     end
 
+    %% Load our letter asset
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 
-    letterRecipe = ourLetterAsset.thisR;
-    letterObject = piAssetSearch(letterRecipe,'object name',[ourAsset '_O']);
+    
+    letterObject = piAssetSearch(ourLetterAsset.thisR,'object name',[ourAsset '_O']);
     
     % location, scale, and material elements
-    letterRecipe.set('asset',letterObject,'material name',options.letterMaterial);
-    letterRecipe.set('asset', letterObject, ...
+    if ~isempty(options.letterMaterial)
+        ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset',letterObject,'material name',options.letterMaterial);
+    end
+    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'translate', options.letterPosition);
 
     % TBD space subsequent letters
@@ -73,14 +78,14 @@ for ii = 1:numel(aString)
     %outputR.set('asset', letterNode,'translate', ...
     %    [spaceLetter 0 0]);
 
-    letterRecipe.set('asset',letterObject, ...
+    ourLetterAsset.thisR.set('asset',letterObject, ...
         'scale', options.letterScale);
 
     % maybe we don't always want this?
     % need to make sure we know
-    letterRecipe.set('asset',letterObject, 'rotate', [-90 00 0]);
+    ourLetterAsset.thisR.set('asset',letterObject, 'rotate', [-90 00 0]);
 
-    piRecipeMerge(outputR, ourLetterAsset.thisR);
+    outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
     
 end
 

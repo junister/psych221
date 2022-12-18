@@ -18,8 +18,7 @@ chartDistance = 6; % 6 meters from camera or about 20 feet
 chartPlacement = sceneFrom + chartDistance;
 
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
-% PS I never noticed that when getting an eye exam. Look next time!
-% at 20 feet that is 8.73mm per character.
+% at 20 feet that is 8.73mm character height.
 baseLetterSize = .00873; % 8.73mm @ 6 meters, "20/20" vision
 rowHeight = 10 * baseLetterSize;
 letterSpacing = 6 * baseLetterSize;
@@ -32,16 +31,21 @@ topRowHeight = 1.2; % varies with the scene we use
 rowDistances = {60, 42, 24, 12, 6, 3};
 
 % Eye Chart Letters
-% Typical Snellen Letters
-% ...
+% Vocabulary of Snellen Letters
+% C, D, E, F, L, O, P, T, and Z
+% One typical chart arrangement
+% 'E', 'F P', 'T O Z', 'L P E D', "P E C F D', 'E D F C Z P', ...
+% 'F E L O Z P D', 'D E F P O T E C'
 
 % NOTE: CURRENTLY CAN'T RE-USE LETTERS
 % Can test multi-letters by using '00'
 %rowLetters = {'00', 'E', 'TUV', 'CDGOP', 'RZMNQSWX', 'ABFJKLY'};
-rowLetters = {'E', 'TUV', 'CDGOP', 'RZMNQSWX', 'ABFJKLY'};
+rowLetters = {'E', 'FP', 'TOZ', 'LpeD', '0qCfd',};
 
-% start with a simple background
-thisR = piRecipeCreate('MacBethChecker');
+%% Create our scene starting with a simple background
+%thisR = piRecipeCreate('MacBethChecker');
+thisR = piRecipeCreate('flatsurface');
+thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 
 % fix defaults with our values
 thisR.set('rays per pixel', 32);
@@ -66,9 +70,10 @@ end
 
 % Get materials we might need
 % white on black for now, need to swap
-mattewhite = piMaterialCreate('matteWhite', 'type', 'coateddiffuse');
-thisR = thisR.set('material', 'add', mattewhite);
-letterMaterial = 'mattewhite'; % substitute for black
+%mattewhite = piMaterialCreate('matteWhite', 'type', 'coateddiffuse');
+%thisR = thisR.set('material', 'add', mattewhite);
+%letterMaterial = 'mattewhite'; % substitute for black
+letterMaterial = 'glossy-black'; % substitute for black
 
 % add letters by row
 for ii = 1:numel(rowLetters)
