@@ -337,6 +337,10 @@ classdef dockerWrapper < handle
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
         end
+        % WSL sometimes has DNS issues, so we can also use the IP
+        function useServer = vistalabDefaultServerIP()
+            useServer =  '171.64.204.112';
+        end
 
         %% This is used for wsl commands under Windows, which need
         % to know where to find the drive root.
@@ -813,7 +817,8 @@ classdef dockerWrapper < handle
                     % microlens code.  It was empty and defaulted to
                     % 'shared' one below.
 
-                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
+                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer) || ...
+                        isequal(thisD.remoteMachine, thisD.vistalabDefaultServerIP)
                         switch thisD.whichGPU
                             case {0, -1}
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
