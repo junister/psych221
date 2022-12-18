@@ -3,6 +3,9 @@
 % D. Cardinal, Stanford University, December, 2022
 % Don't have all letters yet, so content isn't accurate
 
+% TBD Proper scaling based on display so that we get a better
+%     idea of actual viewability we are previewing it
+
 % clear the decks
 ieInit;
 if ~piDockerExists, piDockerConfig; end
@@ -20,10 +23,10 @@ chartPlacement = sceneFrom + chartDistance;
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
 % at 20 feet that is 8.73mm character height.
 baseLetterSize = .00873; % 8.73mm @ 6 meters, "20/20" vision
-rowHeight = 10 * baseLetterSize;
-letterSpacing = 6 * baseLetterSize;
+rowHeight = 10 * baseLetterSize; % arbitrary
+letterSpacing = 6 * baseLetterSize; % arbitrary
 
-topRowHeight = 1.2; % varies with the scene we use
+topRowHeight = 1.2; % top of chart -- varies with the scene we use
 
 % effective distance for each row
 % need to magnify by a ratio
@@ -47,19 +50,20 @@ rowLetters = {'E', 'FP', 'TOZ', 'LpeD', '0qCfd',};
 thisR = piRecipeCreate('flatsurface');
 thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 
-ourBackground = piAssetSearch(thisR,'object name','Cube');
-thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
+% This doesn't do what I was hoping
+%ourBackground = piAssetSearch(thisR,'object name','Cube');
+%thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
 
 % Set our chart up on a skymap
-thisR.set('skymap', 'noon_009.exr');
+thisR.set('skymap', 'office_map.exr', 'rotation val', [-90 -90 0]);
 
 % fix defaults with our values
-thisR.set('rays per pixel', 32);
+thisR.set('rays per pixel', 64);
 % resolution notes:
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
 % High-end might be 4K (these are all per eye)
-thisR.set('filmresolution', [1280, 720]);
+thisR.set('filmresolution', [1920, 1080]);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -108,13 +112,6 @@ end
 
 %% No lens or omnni camera. Just a pinhole to render a scene radiance
 
-
-%thisR.camera = piCameraCreate('pinhole');
-
-% want a narrow FOV for the distance we're using
-% can only set once we have a pinhole camera
-thisR = thisR.set('fov',28);
-
 % For human eye optics with ISETbio we can use something like
 % oi = oiCreate('wvf human'); % then oiCompute
 
@@ -124,5 +121,12 @@ thisR = thisR.set('fov',28);
 
 % Use a pinhole for now
 thisR.camera = piCameraCreate('pinhole');
+
+% Big "E" (200/20) is .0873 meters square
+% That should be 50 arc-minutes at 20 feet
+% Envelope Calc: Resolution/Degrees = pixels/degree
+% Need to sort out FOV for previewing through HMD
+% can only set once we have a pinhole camera
+thisR = thisR.set('fov',60); % high-end HMDs can be 120-160
 
 piWRS(thisR);
