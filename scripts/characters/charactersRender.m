@@ -10,10 +10,10 @@ arguments
 
     % Optional parameters
     options.letterSpacing = .4;
-    options.letterScale = 1; % TBD
     options.letterMaterial = '';
     options.letterPosition = [0 0 0];
     options.letterRotation = [0 0 0];
+    options.letterSize = [];
 
     % ASPIRATIONAL / TBD
     options.fontSize = 12;
@@ -34,6 +34,10 @@ outputR = aRecipe;
 
 % Allows for testing duplicate characters by using '00' as the string
 gotZero = false;
+
+% Our Blender-rendered Characters [width height depth] 
+% Per Matlab these are [l w h]
+characterAssetSize = [.88 .25 1.23];
 
 %% add letters
 for ii = 1:numel(aString)
@@ -71,8 +75,8 @@ for ii = 1:numel(aString)
     if ~isempty(options.letterMaterial)
         ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset',letterObject,'material name',options.letterMaterial);
     end
-    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
-        'translate', options.letterPosition);
+
+
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'rotate', options.letterRotation);
 
@@ -81,8 +85,16 @@ for ii = 1:numel(aString)
     %outputR.set('asset', letterNode,'translate', ...
     %    [spaceLetter 0 0]);
 
-    ourLetterAsset.thisR.set('asset',letterObject, ...
-        'scale', options.letterScale);
+    % We want to scale by our characterSize compared with the desired size
+    if ~isempty(options.letterSize)
+        letterScale = options.letterSize ./ characterAssetSize;
+        ourLetterAsset.thisR.set('asset',letterObject, ...
+            'scale', letterScale);
+    end
+
+    % translate goes after scale or scale will reduce translation
+    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
+        'translate', options.letterPosition);
 
     % maybe we don't always want this?
     % need to make sure we know

@@ -3,14 +3,11 @@
 % D. Cardinal, Stanford University, December, 2022
 % Don't have all letters yet, so content isn't accurate
 
-% TBD Proper scaling based on display so that we get a better
-%     idea of actual viewability we are previewing it
-
 %% clear the decks
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%%  Characters and a light
+%%  Basic Scene and Chart Parameters
 
 % Eye Chart Parameters
 % If we want to 0-base we need to align elements
@@ -20,12 +17,14 @@ sceneTo = 30;
 chartDistance = 6; % 6 meters from camera or about 20 feet
 chartPlacement = sceneFrom + chartDistance;
 
+
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
 % at 20 feet that is 8.73mm character height.
-baseLetterSize = .00873; % 8.73mm @ 6 meters, "20/20" vision
-rowHeight = 20 * baseLetterSize; % arbitrary
-letterSpacing = 20 * baseLetterSize; % arbitrary
+baseLetterSize = [.00873 .001 .00873]; % 8.73mm @ 6 meters, "20/20" vision
 
+% Height & Spacing don't affect 'score', just letter placement
+rowHeight = 20 * baseLetterSize(1); % arbitrary
+letterSpacing = 20 * baseLetterSize(1); % arbitrary
 topRowHeight = 1.2; % top of chart -- varies with the scene we use
 
 % effective distance for each row
@@ -76,28 +75,18 @@ thisR = recipeSet(thisR, 'up', [0 1 0]);
 thisR = recipeSet(thisR, 'from', [0 0 sceneFrom]);
 thisR = recipeSet(thisR, 'to', [0 0 sceneTo]);
 
-% checker is at 0 depth here, so we want to move it behind the eye chart
-% which will be at from + 6. So we try to move it to from + 8
-checkerAssets = piAssetSearch(thisR, 'object name', 'colorChecker_O');
-for ii = 1:numel(checkerAssets)
-    piAssetTranslate(thisR, checkerAssets(ii), ...
-        [0 0 chartPlacement + 2]);
-end
-
+% color our letters -- matte black might be better if we have one?
 letterMaterial = 'glossy-black'; 
 
 % add letters by row
 for ii = 1:numel(rowLetters)
     
     % Handle placement and scale for each row
-    letterScale = (rowDistances{ii}/chartDistance) * baseLetterSize;
+    % Size is multiple of 20/20 based on row's visual equivalent
+    letterSize = (rowDistances{ii}/chartDistance) * baseLetterSize;
     letterVertical = topRowHeight - (ii-1) * rowHeight;
 
     ourRow = rowLetters{ii};
-
-    % Testing.  Hack. BW.
-    % Scene resolves without this, but cone mosaic is mostly noise
-    letterScale = 3 * letterScale;
 
     for jj = 1:numel(rowLetters{ii})
        
@@ -108,7 +97,7 @@ for ii = 1:numel(rowLetters)
 
         % Need to decide on the object node name to merge
         thisR = charactersRender(thisR, rowLetters{ii}(jj), ...
-            'letterScale', [letterScale letterScale letterScale], ...
+            'letterSize', letterSize, ...
             'letterSpacing', [letterSpacing letterVertical chartDistance], ...
             'letterMaterial', letterMaterial,...
             'letterRotation', letterRotation, ...
