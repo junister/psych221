@@ -158,11 +158,12 @@ else
     HMDResolutions = {[2000 500], [4000 1000], [8000 2000]};
     for ii=1:numel(HMDResolutions)
         % scale for portion of FOV we are rendering
+        thisName = sprintf('HMD: %d',HMDResolutions{ii}(1));
         thisR.set('filmresolution', HMDResolutions{ii} * useFOV/HMDFOV);
-        scene = piWRS(thisR);
+        scene = piWRS(thisR,'name',thisName);
 
         oi = oiCompute(oi, scene);
-        cMosaic.name = sprintf('HMD: %s',HMDResolutions{ii}(1));
+        cMosaic.name = thisName;
         cMosaic.compute(oi);
         cMosaic.computeCurrent;
 
