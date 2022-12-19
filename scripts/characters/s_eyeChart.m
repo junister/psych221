@@ -23,8 +23,8 @@ chartPlacement = sceneFrom + chartDistance;
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
 % at 20 feet that is 8.73mm character height.
 baseLetterSize = .00873; % 8.73mm @ 6 meters, "20/20" vision
-rowHeight = 12 * baseLetterSize; % arbitrary
-letterSpacing = 8 * baseLetterSize; % arbitrary
+rowHeight = 20 * baseLetterSize; % arbitrary
+letterSpacing = 20 * baseLetterSize; % arbitrary
 
 topRowHeight = 1.2; % top of chart -- varies with the scene we use
 
@@ -67,9 +67,9 @@ thisR.set('rays per pixel', 128);
 % High-end might be 4K (these are all per eye)
 % But they also cover 120-160 degrees, so at 30 degrees
 % We only need 1/4 of that, for example
-useFOV = 30;
+useFOV = 10;
 % 1080p @ 30 degrees should be similar to 8K HMD
-thisR.set('filmresolution', [1920, 1080]);
+thisR.set('filmresolution', [8000 2000]*useFOV/120);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -96,7 +96,8 @@ for ii = 1:numel(rowLetters)
     ourRow = rowLetters{ii};
 
     % Testing.  Hack. BW.
-    letterScale = 5*letterScale;
+    % Scene resolves without this, but cone mosaic is mostly noise
+    letterScale = 3 * letterScale;
 
     for jj = 1:numel(rowLetters{ii})
        
@@ -157,15 +158,15 @@ else
     % Create the coneMosaic object
     cMosaic = coneMosaic;
 
-    % Set size to show about half the scene. Speeds things up.
-    cMosaic.setSizeToFOV(0.1 * sceneGet(scene, 'fov'));
+    % Set size to show part of the scene. Speeds things up.
+    cMosaic.setSizeToFOV(0.2 * sceneGet(scene, 'fov'));
     cMosaic.emGenSequence(50);
     oi = oiCreate;
 
     % Experiment with different "display" resolutions
     % Probably need to be wider for typical fov
     HMDFOV = 120; % Full FOV
-    HMDResolutions = {[1920 720], [3840 1440], [7680 2880]};
+    HMDResolutions = {[2000 500], [4000 1000], [8000 2000]};
     for ii=1:numel(HMDResolutions)
         % scale for portion of FOV we are rendering
         thisR.set('filmresolution', HMDResolutions{ii} * useFOV/HMDFOV);
