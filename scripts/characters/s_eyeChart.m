@@ -1,12 +1,12 @@
 % Create a virtual eye chart (modified Snellen for now)
-
+%
 % D. Cardinal, Stanford University, December, 2022
 % Don't have all letters yet, so content isn't accurate
 
 % TBD Proper scaling based on display so that we get a better
 %     idea of actual viewability we are previewing it
 
-% clear the decks
+%% clear the decks
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -65,7 +65,7 @@ thisR.set('rays per pixel', 64);
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
 % High-end might be 4K (these are all per eye)
-thisR.set('filmresolution', [1920, 1080]);
+thisR.set('filmresolution', [1920, 1080]/2);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -90,6 +90,9 @@ for ii = 1:numel(rowLetters)
     letterVertical = topRowHeight - (ii-1) * rowHeight;
 
     ourRow = rowLetters{ii};
+
+    % Testing.  Hack. BW.
+    letterScale = 5*letterScale;
 
     for jj = 1:numel(rowLetters{ii})
        
@@ -125,6 +128,29 @@ thisR.camera = piCameraCreate('pinhole');
 % Envelope Calc: Resolution/Degrees = pixels/degree
 % Need to sort out FOV for previewing through HMD
 % can only set once we have a pinhole camera
-thisR = thisR.set('fov',60); % high-end HMDs can be 120-160
 
-piWRS(thisR);
+% high-end HMDs can be 120-160 (DJC) 
+
+% Yes, but we can't simulate such large mosaics. So let's keep the
+% test samples smaller.  Also, for adquate cone sampling resolution at
+% 60 deg the film samples will be very large.
+% Amazingly, we do not have a 'name' field
+%    thisR.set('name','EyeChart-docOffice');
+% Fix this BW!
+
+thisR = thisR.set('fov',30);
+idx = piAssetSearch(thisR,'object name','e_uc');
+pos = thisR.get('asset',idx,'world position');
+
+thisR.set('to',pos - 0.3*thisR.get('up'));   % Look a bit below the Upper Case E
+thisR.set('object distance',15);
+scene = piWRS(thisR,'name','EyeChart-docOffice');
+
+%% Rectangular cone mosaic to allow for the eye position anywhere
+
+% Create the coneMosaic object
+cMosaic = coneMosaic;
+
+% Set size to show about half the scene. Speeds things up.
+cMosaic.setSizeToFOV(0.1 * sceneGet(s, 'fov'));
+
