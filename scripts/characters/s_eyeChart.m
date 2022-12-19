@@ -146,10 +146,14 @@ thisR.set('object distance',15);
 scene = piWRS(thisR,'name','EyeChart-docOffice');
 
 %% Rectangular cone mosaic to allow for the eye position anywhere
+%  Needs ISETBio
+if piCamBio
+    warning('Cone Mosaic requires ISETBio');
+else
+    % Create the coneMosaic object
+    cMosaic = coneMosaic;
 
-% Create the coneMosaic object
-cMosaic = coneMosaic;
-
-% Set size to show about half the scene. Speeds things up.
-cMosaic.setSizeToFOV(0.1 * sceneGet(s, 'fov'));
+    % Set size to show about half the scene. Speeds things up.
+    cMosaic.setSizeToFOV(0.1 * sceneGet(scene, 'fov'));
+end
 
