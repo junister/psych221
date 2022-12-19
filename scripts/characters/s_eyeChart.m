@@ -12,7 +12,7 @@ if ~piDockerExists, piDockerConfig; end
 % Eye Chart Parameters
 % If we want to 0-base we need to align elements
 sceneFrom = -1; % arbitrary based on background 
-sceneTo = 30;
+sceneTo = 20;
 
 chartDistance = 6; % 6 meters from camera or about 20 feet
 chartPlacement = sceneFrom + chartDistance;
@@ -25,7 +25,7 @@ baseLetterSize = [.00873 .001 .00873]; % 8.73mm @ 6 meters, "20/20" vision
 % Height & Spacing don't affect 'score', just letter placement
 rowHeight = 20 * baseLetterSize(1); % arbitrary
 letterSpacing = 20 * baseLetterSize(1); % arbitrary
-topRowHeight = 1.2; % top of chart -- varies with the scene we use
+topRowHeight = .95; % top of chart -- varies with the scene we use
 
 % effective distance for each row
 % need to magnify by a ratio
@@ -136,7 +136,7 @@ idx = piAssetSearch(thisR,'object name','e_uc');
 pos = thisR.get('asset',idx,'world position');
 
 thisR.set('to',pos - 0.1*thisR.get('up'));   % Look a bit below the Upper Case E
-thisR.set('object distance',15);
+
 scene = piWRS(thisR,'name','EyeChart-docOffice');
 
 %% Rectangular cone mosaic to allow for the eye position anywhere

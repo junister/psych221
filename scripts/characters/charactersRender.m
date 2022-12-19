@@ -76,7 +76,6 @@ for ii = 1:numel(aString)
         ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset',letterObject,'material name',options.letterMaterial);
     end
 
-
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'rotate', options.letterRotation);
 
@@ -92,13 +91,15 @@ for ii = 1:numel(aString)
             'scale', letterScale);
     end
 
+    % maybe we don't always want this?
+    % need to make sure we know
+    ourLetterAsset.thisR.set('asset',letterObject, 'rotate', [-90 00 0]);
+    
     % translate goes after scale or scale will reduce translation
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'translate', options.letterPosition);
 
-    % maybe we don't always want this?
-    % need to make sure we know
-    ourLetterAsset.thisR.set('asset',letterObject, 'rotate', [-90 00 0]);
+
 
     outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
     
