@@ -60,12 +60,16 @@ thisR.set('skymap', 'office_map.exr', 'rotation val', [-90.1 90.4 0]);
 letterRotation = [0 0 0]; % try to match the wall
 
 % fix defaults with our values
-thisR.set('rays per pixel', 64);
+thisR.set('rays per pixel', 128);
 % resolution notes:
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
 % High-end might be 4K (these are all per eye)
-thisR.set('filmresolution', [1920, 1080]/2);
+% But they also cover 120-160 degrees, so at 30 degrees
+% We only need 1/4 of that, for example
+useFOV = 30;
+% 1080p @ 30 degrees should be similar to 8K HMD
+thisR.set('filmresolution', [1920, 1080]);
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -134,10 +138,10 @@ thisR.camera = piCameraCreate('pinhole');
 % Yes, but we can't simulate such large mosaics. So let's keep the
 % test samples smaller.  Also, for adquate cone sampling resolution at
 % 60 deg the film samples will be very large.
-
+thisR.set('fov', useFOV);
 thisR.set('name','EyeChart-docOffice');
 
-thisR = thisR.set('fov',30);
+
 idx = piAssetSearch(thisR,'object name','e_uc');
 pos = thisR.get('asset',idx,'world position');
 
@@ -157,12 +161,23 @@ else
     cMosaic.setSizeToFOV(0.1 * sceneGet(scene, 'fov'));
     cMosaic.emGenSequence(50);
     oi = oiCreate;
-    oi = oiCompute(oi, scene);
 
-    cMosaic.compute(oi);
-    cMosaic.computeCurrent;
+    % Experiment with different "display" resolutions
+    % Probably need to be wider for typical fov
+    HMDFOV = 120; % Full FOV
+    HMDResolutions = {[1920 720], [3840 1440], [7680 2880]};
+    for ii=1:numel(HMDResolutions)
+        % scale for portion of FOV we are rendering
+        thisR.set('filmresolution', HMDResolutions{ii} * useFOV/HMDFOV);
+        scene = piWRS(thisR);
 
-    cMosaic.window;
+        oi = oiCompute(oi, scene);
+        cMosaic.name = sprintf('HMD: %s',HMDResolutions{ii}(1));
+        cMosaic.compute(oi);
+        cMosaic.computeCurrent;
 
+        cMosaic.window;
+    
+    end
 end
 
