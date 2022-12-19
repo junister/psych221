@@ -54,7 +54,7 @@ thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 %ourBackground = piAssetSearch(thisR,'object name','Cube');
 %thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
 
-% Set our chart up on a medical offic skymap and rotate letters to back wall
+% Set our chart up on a medical office skymap and rotate letters to back wall
 % This takes time to render, so also can use any other skymap
 thisR.set('skymap', 'office_map.exr', 'rotation val', [-90.1 90.4 0]);
 letterRotation = [0 0 0]; % try to match the wall
@@ -134,9 +134,8 @@ thisR.camera = piCameraCreate('pinhole');
 % Yes, but we can't simulate such large mosaics. So let's keep the
 % test samples smaller.  Also, for adquate cone sampling resolution at
 % 60 deg the film samples will be very large.
-% Amazingly, we do not have a 'name' field
-%    thisR.set('name','EyeChart-docOffice');
-% Fix this BW!
+
+thisR.set('name','EyeChart-docOffice');
 
 thisR = thisR.set('fov',30);
 idx = piAssetSearch(thisR,'object name','e_uc');

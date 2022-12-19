@@ -14,6 +14,9 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 % Parameter list (in progress, many more to be added)
 %
+%   Metadata:
+%    'name'
+%
 %   Data management
 %    'input file'
 %    'output file
@@ -154,6 +157,10 @@ param = ieParamFormat(p.Results.param);
 
 switch param
 
+    % Object metadata
+    case {'name'}
+        thisR.name = val;
+        
     % Rendering and Docker related
     case {'outputfile'}
         % thisR.set('outputfile',fullfilepath);

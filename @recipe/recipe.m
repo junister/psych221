@@ -15,6 +15,8 @@ classdef recipe < matlab.mixin.Copyable
     properties (GetAccess=public, SetAccess=public)
         % Can be set by user
         %
+        name = 'recipe';
+        
         % These are all structs that contain the parameters necessary
         % for piWrite to convert the structs to text output in the
         % scene.pbrt file.
