@@ -141,7 +141,7 @@ thisR = thisR.set('fov',30);
 idx = piAssetSearch(thisR,'object name','e_uc');
 pos = thisR.get('asset',idx,'world position');
 
-thisR.set('to',pos - 0.3*thisR.get('up'));   % Look a bit below the Upper Case E
+thisR.set('to',pos - 0.1*thisR.get('up'));   % Look a bit below the Upper Case E
 thisR.set('object distance',15);
 scene = piWRS(thisR,'name','EyeChart-docOffice');
 
@@ -155,5 +155,14 @@ else
 
     % Set size to show about half the scene. Speeds things up.
     cMosaic.setSizeToFOV(0.1 * sceneGet(scene, 'fov'));
+    cMosaic.emGenSequence(50);
+    oi = oiCreate;
+    oi = oiCompute(oi, scene);
+
+    cMosaic.compute(oi);
+    cMosaic.computeCurrent;
+
+    cMosaic.window;
+
 end
 
