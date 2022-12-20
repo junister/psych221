@@ -100,7 +100,9 @@ for ii = 1:numel(aString)
         'translate', options.letterPosition);
 
 
-
+    % THINGS BREAK HERE. We have a 6m distance to the character asset
+    % in its recipe, but the recipe we are merging with has from closer to
+    % 0, so we get a much shorter distance.
     outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
     
 end

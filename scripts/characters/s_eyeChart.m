@@ -11,11 +11,12 @@ if ~piDockerExists, piDockerConfig; end
 
 % Eye Chart Parameters
 % If we want to 0-base we need to align elements
-sceneFrom = -1; % arbitrary based on background 
-sceneTo = 20;
+sceneFrom = [0 0 -1]; % arbitrary based on background 
+sceneTo = [0 0 20];
+objectDistance = 21; % I don't really understand if this is just to - from
 
 chartDistance = 6; % 6 meters from camera or about 20 feet
-chartPlacement = sceneFrom + chartDistance;
+chartPlacement = sceneFrom + [0 0 chartDistance];
 
 
 % 20/20 is 5 arc-minutes per character, 1 arc-minute per feature
@@ -73,9 +74,10 @@ thisR.set('filmresolution', [8000 2000] .* [useFOV/120 useFOV/30]);
 thisR.set('name','EyeChart-docOffice');
 
 % Set our visual "box"
-thisR = recipeSet(thisR, 'up', [0 1 0]);
-thisR = recipeSet(thisR, 'from', [0 0 sceneFrom]);
-thisR = recipeSet(thisR, 'to', [0 0 sceneTo]);
+thisR = recipeSet(thisR, 'from', sceneFrom);
+thisR = recipeSet(thisR, 'to', sceneTo);
+thisR = recipeSet(thisR, 'up', [0 20 0]);
+thisR = recipeSet(thisR, 'objectDistance', objectDistance);
 
 % color our letters -- matte black might be better if we have one?
 letterMaterial = 'glossy-black'; 
@@ -85,7 +87,7 @@ for ii = 1:numel(rowLetters)
     
     % Handle placement and scale for each row
     % Size is multiple of 20/20 based on row's visual equivalent
-    letterSize = (rowDistances{ii}/chartDistance) * baseLetterSize;
+    letterSize = (rowDistances{ii} * baseLetterSize) / chartDistance ;
     letterVertical = topRowHeight - (ii-1) * rowHeight;
 
     ourRow = rowLetters{ii};
@@ -95,7 +97,7 @@ for ii = 1:numel(rowLetters)
         spaceLetter = (jj - ceil(numel(rowLetters{ii})/2)) * letterSpacing;
 
         % Assume y is vertical and z is depth (not always true)
-        letterPosition = [spaceLetter letterVertical chartPlacement];
+        letterPosition = [spaceLetter letterVertical 0] + chartPlacement;
 
         % Need to decide on the object node name to merge
         thisR = charactersRender(thisR, rowLetters{ii}(jj), ...
