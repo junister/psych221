@@ -1,7 +1,9 @@
 % Create a virtual eye chart (modified Snellen for now)
 %
 % D. Cardinal, Stanford University, December, 2022
-% Don't have all letters yet, so content isn't accurate
+%
+% See also
+%   t_eyeArizona
 
 %% clear the decks
 ieInit;
@@ -61,6 +63,7 @@ letterRotation = [0 0 0]; % try to match the wall
 
 % fix defaults with our values
 thisR.set('rays per pixel', 128);
+
 % resolution notes:
 % Meta says 8K needed for readable 20/20
 % Current consumer displays are mostly 1440 or 2k
@@ -130,10 +133,11 @@ pos = thisR.get('asset',idx,'world position');
 
 thisR.set('to',pos - 0.05*thisR.get('up'));   % Look a bit below the Upper Case E
 scene = piWRS(thisR,'name','EyeChart-docOffice');
+
 %% Rectangular cone mosaic to allow for the eye position anywhere
+
 %  Needs ISETBio
 if piCamBio
-
     warning('Cone Mosaic requires ISETBio');
 else
 
@@ -142,7 +146,7 @@ else
         
         tic
         % Possible mod for faster parpool startup
-        parpool('Threads');
+        parpool('Threads', 4);
         toc
     end
    
@@ -153,7 +157,7 @@ else
     % Set size to show part of the scene. Speeds things up.
     cMosaic.setSizeToFOV(0.4 * sceneGet(scene, 'fov'));
     cMosaic.emGenSequence(50);
-    oi = oiCreate;
+    oi = oiCreate('wvf human');
 
     % Experiment with different "display" resolutions
     HMDFOV = 120; % Full FOV

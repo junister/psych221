@@ -34,7 +34,7 @@ function resourceDir = piDirGet(resourceType)
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
     'scenes','scene','local','server local', 'character-assets', ...
-    'character-recipes'};
+    'character-recipes','skymaps'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -71,6 +71,8 @@ switch (resourceType)
         resourceDir = fullfile(isetRootPath,'data','lens');
     case {'scenes','scene'}
         resourceDir = fullfile(ourData,'scenes');
+    case {'skymaps'}
+        resourceDir = fullfile(ourData,'skymaps');
     case 'local'
         resourceDir = fullfile(ourRoot,'local');
     case 'character-assets'
