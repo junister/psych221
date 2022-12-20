@@ -135,11 +135,14 @@ if piCamBio
     warning('Cone Mosaic requires ISETBio');
 else
 
-    tic
-    % Possible mod for faster parpool startup
-    parpool('Threads', 12);
-    toc
-
+    poolobj = gcp('nocreate');
+    if isempty(poolobj)
+        
+        tic
+        % Possible mod for faster parpool startup
+        parpool('Threads', 12);
+        toc
+    end
    
     % Create the coneMosaic object
     tic
