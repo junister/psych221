@@ -140,7 +140,7 @@ else
         
         tic
         % Possible mod for faster parpool startup
-        parpool('Threads', 12);
+        parpool('Threads');
         toc
     end
    
