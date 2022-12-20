@@ -134,9 +134,17 @@ if piCamBio
 
     warning('Cone Mosaic requires ISETBio');
 else
-    % Create the coneMosaic object
-    cMosaic = coneMosaic;
 
+    tic
+    % Possible mod for faster parpool startup
+    parpool('Threads', 12);
+    toc
+
+   
+    % Create the coneMosaic object
+    tic
+    cMosaic = coneMosaic;
+    toc
     % Set size to show part of the scene. Speeds things up.
     cMosaic.setSizeToFOV(0.4 * sceneGet(scene, 'fov'));
     cMosaic.emGenSequence(50);
