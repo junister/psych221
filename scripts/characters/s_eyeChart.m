@@ -126,27 +126,26 @@ thisR.set('fov', useFOV);
 idx = piAssetSearch(thisR,'object name','e_uc');
 pos = thisR.get('asset',idx,'world position');
 
-thisR.set('to',pos - 0.1*thisR.get('up'));   % Look a bit below the Upper Case E
-
+thisR.set('to',pos - 0.05*thisR.get('up'));   % Look a bit below the Upper Case E
 scene = piWRS(thisR,'name','EyeChart-docOffice');
-
 %% Rectangular cone mosaic to allow for the eye position anywhere
 %  Needs ISETBio
 if piCamBio
+
     warning('Cone Mosaic requires ISETBio');
 else
     % Create the coneMosaic object
     cMosaic = coneMosaic;
 
     % Set size to show part of the scene. Speeds things up.
-    cMosaic.setSizeToFOV(0.2 * sceneGet(scene, 'fov'));
+    cMosaic.setSizeToFOV(0.4 * sceneGet(scene, 'fov'));
     cMosaic.emGenSequence(50);
     oi = oiCreate;
 
     % Experiment with different "display" resolutions
-    % Probably need to be wider for typical fov
     HMDFOV = 120; % Full FOV
-    HMDResolutions = {[2000 500], [4000 1000], [8000 2000]};
+    % Should be 4:1 aspect ratio, but we want a square patch
+    HMDResolutions = {[2000 2000], [4000 4000], [8000 8000]};
     for ii=1:numel(HMDResolutions)
         % scale for portion of FOV we are rendering
         thisName = sprintf('HMD: %d',HMDResolutions{ii}(1));
