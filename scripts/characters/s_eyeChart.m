@@ -23,8 +23,8 @@ chartPlacement = sceneFrom + chartDistance;
 baseLetterSize = [.00873 .001 .00873]; % 8.73mm @ 6 meters, "20/20" vision
 
 % Height & Spacing don't affect 'score', just letter placement
-rowHeight = 20 * baseLetterSize(1); % arbitrary
-letterSpacing = 20 * baseLetterSize(1); % arbitrary
+rowHeight = 10 * baseLetterSize(1); % arbitrary
+letterSpacing = 15 * baseLetterSize(1); % arbitrary
 topRowHeight = .95; % top of chart -- varies with the scene we use
 
 % effective distance for each row
@@ -45,13 +45,13 @@ rowDistances = {60, 42, 24, 12, 6, 3};
 rowLetters = {'E', 'FP', 'TOZ', 'LpeD', '0qCfd',};
 
 %% Create our scene starting with a simple background
-%thisR = piRecipeCreate('MacBethChecker');
 thisR = piRecipeCreate('flatsurface');
-thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 
-% This doesn't do what I was hoping
-%ourBackground = piAssetSearch(thisR,'object name','Cube');
-%thisR = thisR.set('asset',ourBackground, 'material name', 'mattewhite');
+% Hide the cube
+%idxCube =  piAssetSearch(thisR, 'object name', 'Cube');
+%piAssetDelete(thisR,idxCube);
+
+thisR = piMaterialsInsert(thisR,'names',{'glossy-black'});
 
 % Set our chart up on a medical office skymap and rotate letters to back wall
 % This takes time to render, so also can use any other skymap
@@ -68,7 +68,9 @@ thisR.set('rays per pixel', 128);
 % We only need 1/4 of that, for example
 useFOV = 10;
 % 1080p @ 30 degrees should be similar to 8K HMD
-thisR.set('filmresolution', [8000 2000]*useFOV/120);
+% Tweak aspect ratio so we get a usable resolution
+thisR.set('filmresolution', [8000 2000] .* [useFOV/120 useFOV/30]);
+thisR.set('name','EyeChart-docOffice');
 
 % Set our visual "box"
 thisR = recipeSet(thisR, 'up', [0 1 0]);
@@ -117,21 +119,10 @@ end
 % Use a pinhole for now
 thisR.camera = piCameraCreate('pinhole');
 
-% Big "E" (200/20) is .0873 meters square
-% That should be 50 arc-minutes at 20 feet
-% Envelope Calc: Resolution/Degrees = pixels/degree
-% Need to sort out FOV for previewing through HMD
-% can only set once we have a pinhole camera
-
-% high-end HMDs can be 120-160 (DJC) 
-
-% Yes, but we can't simulate such large mosaics. So let's keep the
-% test samples smaller.  Also, for adquate cone sampling resolution at
-% 60 deg the film samples will be very large.
+% Can't set FOV until we have a pinhole camera!
 thisR.set('fov', useFOV);
-thisR.set('name','EyeChart-docOffice');
 
-
+% Find the bottom of the E to orient ourselves
 idx = piAssetSearch(thisR,'object name','e_uc');
 pos = thisR.get('asset',idx,'world position');
 
