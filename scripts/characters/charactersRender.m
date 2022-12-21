@@ -90,6 +90,10 @@ gotZero = false;
 % Per Matlab these are [l w h]
 characterAssetSize = [.88 .25 1.23];
 
+if size(options.letterPosition,1) == 1
+    letterPosition = repmat(options.letterPosition,5,1);
+end
+
 %% add letters
 for ii = 1:numel(aString)
     ourLetter = aString(ii);
@@ -154,7 +158,7 @@ for ii = 1:numel(aString)
     
     % translate goes after scale or scale will reduce translation
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
-        'translate', options.letterPosition(ii,:));
+        'translate', letterPosition(ii,:));
 
 
     % THINGS BREAK HERE. We have a 6m distance to the character asset
