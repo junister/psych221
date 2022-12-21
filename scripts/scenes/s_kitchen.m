@@ -21,7 +21,8 @@ thisR.set('render type',{'radiance','depth'});
 %% This renders the scene
 
 scene = piWRS(thisR);
-dRange = sceneGet(scene,'depth range');
+
+% dRange = sceneGet(scene,'depth range');
 
 %% Samples the scene from a few new directions around the current from
 
