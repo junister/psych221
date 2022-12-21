@@ -109,7 +109,17 @@ end
 
 % This seems like a big fix, but latter code assumes
 % that inputFile is a full path!
-thisR.inputFile = which(infile);
+if exist(infile,'file')
+    if isempty(which(infile))
+        % It is already a full path
+        thisR.inputFile = infile;
+    else
+        % It exists and this should make it a full path.
+        thisR.inputFile = which(infile);
+    end
+else
+    error('Can not find %s\n',infile);
+end
 
 % Copy?  Or some other method?
 exporter = p.Results.exporter;
@@ -520,7 +530,7 @@ if isequal(blockName,'Integrator') && isempty(s)
     s.subtype = 'path';
     s.maxdepth.type = 'integer';
     s.maxdepth.value= 5;
-    fprintf('Setting integrator to "path" with 5 bounces.')
+    fprintf('Setting integrator to "path" with 5 bounces.\n')
 end
 
 end

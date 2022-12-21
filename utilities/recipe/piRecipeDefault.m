@@ -272,12 +272,12 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'PARSE';  % Working towards PARSE
+        exporter = 'PARSE';  % Mostly OK.  Not sure all OK.
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
-        % exporter = 'Copy';
-        exporter = 'PARSE';
+        exporter = 'Copy';
+        % exporter = 'PARSE';  % Does not work yet.
     case {'landscape'}
         sceneDir = 'landscape';
         if isempty(sceneFile)
