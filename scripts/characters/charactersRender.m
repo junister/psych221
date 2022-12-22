@@ -96,6 +96,7 @@ end
 
 %% add letters
 for ii = 1:numel(aString)
+    fprintf('Rendering Character(s): %s\n', aString);
     ourLetter = aString(ii);
 
     % Addresses non-case-sensitive file systems
