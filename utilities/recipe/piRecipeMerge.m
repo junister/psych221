@@ -176,12 +176,12 @@ for ii = 1:length(recipelist)
             sourceDir = thisR.get('input dir');
             dstDir    = sceneR.get('output dir');
             sourceTextures = fullfile(sourceDir, 'textures');
-            dstTextures    = fullfile(dstDir, 'textures');
+            % dstTextures    = fullfile(dstDir, 'textures');
             if exist(sourceTextures, 'dir')
                 piCopyFolder(sourceTextures, dstDir);
-                %copyfile(sourceTextures, dstTextures);
+                % copyfile(sourceTextures, dstTextures);
             else
-                sprintf('No textures for this source (%s).\n',sourceDir)
+                % sprintf('No textures for (%s).\n',sourceDir)
             end
         end
         
