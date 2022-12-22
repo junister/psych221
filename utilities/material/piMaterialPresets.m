@@ -126,6 +126,15 @@ switch ieParamFormat(keyword)
         fprintf('\n');
         newMat = presetList;
 
+        % Now show it in a dialog box that can stay up in a screen window
+        % mats = piMaterialPresets('list');
+        h = helpdlg(presetList);
+
+        % I can change the font size, but the window clips the text.  So we
+        % would need to change the window size, too.  Maybe another time.
+        str = findall(h,'Type','Text');
+        str.FontSize = 10;
+
         % ------------ DIFFUSE
     case 'diffuselist'
         newMat = {'diffuse-gray','diffuse-red','diffuse-white'};

@@ -1239,6 +1239,7 @@ switch param
                 piAssetSet(thisR, assetName, 'motion', []);
             case {'delete', 'remove'}
                 % thisR.set('asset',assetName,'delete');
+                % Do we need an 'all' option?
                 piAssetDelete(thisR, assetName);
             case {'insert'}
                 % thisR.set('asset',assetName,'insert');

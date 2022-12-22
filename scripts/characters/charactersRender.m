@@ -36,7 +36,8 @@ function outputR = charactersRender(aRecipe, aString, options)
  delta = [0.15 0 0];
  for ii=1:numel('Lorem'), pos(ii,:) = to + ii*delta; end
  pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
- thisR = charactersRender(thisR, 'Lorem','letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],'letterPosition',pos,'letterMaterial','wood-light-large-grain');
+ thisR = charactersRender(thisR, 'Lorem','letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
+   'letterPosition',pos,'letterMaterial','wood-light-large-grain');
  thisR.set('skymap','sky-sunlight.exr');
  thisR.set('nbounces',4);
  piWRS(thisR);
@@ -44,11 +45,15 @@ function outputR = charactersRender(aRecipe, aString, options)
 %{
  thisR = piRecipeCreate('Cornell_Box');
  thisR.set('film resolution',[384 256]*2);
- to = thisR.get('to') - [0.35 -0.1 -0.8];
- delta = [0.14 0 0];
- for ii=1:numel('Ipsum'), pos(ii,:) = to + ii*delta; end
- pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
- thisR = charactersRender(thisR, 'Lorem','letterSize',[0.10,0.1,0.15],'letterRotation',[0,15,15],'letterPosition',pos,'letterMaterial','checkerboard');
+ to = thisR.get('to') - [0.32 -0.1 -0.8];
+ delta = [0.09 0 0];
+ str = 'marble';
+ idx = piAssetSearch(thisR,'object name','003_cornell_box');
+ piMaterialsInsert(thisR,'name','wood-light-large-grain');
+ thisR.set('asset',idx,'material name','wood-light-large-grain');
+ for ii=1:numel(str), pos(ii,:) = to + ii*delta; end
+ thisR = charactersRender(thisR, str,'letterSize',[0.1,0.03,0.1]*0.7,...
+    'letterRotation',[0,0,-10],'letterPosition',pos,'letterMaterial','marble-beige');
  thisR.set('skymap','sky-sunlight.exr');
  thisR.set('nbounces',4);
  piWRS(thisR);
@@ -90,8 +95,11 @@ gotZero = false;
 % Per Matlab these are [l w h]
 characterAssetSize = [.88 .25 1.23];
 
+% Always make the number of positions equal to the number of letters.
 if size(options.letterPosition,1) == 1
     letterPosition = repmat(options.letterPosition,5,1);
+else
+    letterPosition = options.letterPosition;
 end
 
 %% add letters
@@ -159,7 +167,7 @@ for ii = 1:numel(aString)
     
     % translate goes after scale or scale will reduce translation
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
-        'translate', options.letterPosition(ii,:));
+        'translate', letterPosition(ii,:));
 
 
     % THINGS BREAK HERE. We have a 6m distance to the character asset
