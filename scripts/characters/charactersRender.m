@@ -1,4 +1,4 @@
-function outputR = charactersRender(aRecipe, aString, options)
+function [outputR, letterNames] = charactersRender(aRecipe, aString, options)
 % Add a string of character assets to a recipe
 %
 % Synopsis
@@ -102,6 +102,8 @@ else
     letterPosition = options.letterPosition;
 end
 
+letterNames = [];
+
 %% add letters
 for ii = 1:numel(aString)
     fprintf('Rendering Character(s): %s\n', aString);
@@ -129,6 +131,8 @@ for ii = 1:numel(aString)
             ourAsset = ourLetter;
         end
     end
+    % return object names to caller
+    letterNames = [letterNames ourAsset];
 
     %% Load letter assets
 
