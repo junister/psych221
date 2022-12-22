@@ -43,6 +43,38 @@ end
 thisR.set('name','Sample Character Backgrounds');
 thisR.set('skymap','sky-sunlight.exr');
 thisR.set('nbounces',4);
+
+%% Try Humaneye
+humanEye = false;
+if humanEye
+        % create a modern human eye ready scene
+        % we want to use our modified scene, but maybe
+        % we need to load the scene here & then modify?
+        %thisSE = sceneEye(thisR);
+        thisSE = sceneEye('MacBethChecker');
+
+         spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('new distant',...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum,...
+            'cameracoordinate', true);
+        thisSE.recipe.set('light', lgt, 'add');
+
+        
+        % humaneye is part of the latest CPU docker images
+        % but is not currently supported on the GPU
+        thisDWrapper = dockerWrapper;
+        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+        thisDWrapper.gpuRendering = 0;
+
+        %%  Render
+        oi = thisSE.render('docker wrapper',thisDWrapper);
+        oiWindow(oi);
+
+end
+%% END TRY
 piWRS(thisR);
 
 %add materials from our library
@@ -52,7 +84,7 @@ addMaterials(thisR)
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
 piWRS(varyLettersR);
 
-% Vary patch materials
+% Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
 piWRS(varyPatchR);
 
