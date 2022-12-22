@@ -63,7 +63,7 @@ function newMat = piMaterialPresets(keyword,materialName)
   newMat = piMaterialPresets('glass','glass-demo');
 %}
 %{
-  newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
+  newMat = piMaterialPresets('wood-medium-knots','woodfloor');
   newMat.material.name
 %}
 %{
@@ -283,14 +283,15 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'asphalt-002.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        % =============      Woods
-        %{'wood-floor-merbau',wood-medium-knots','wood-light-large-grain','wood-mahogany'}
-    case 'woodlist'
-        newMat = {'wood-floor-merbau','wood-medium-knots','wood-light-large-grain','wood-mahogany'};
 
-    case 'wood-floor-merbau'
-        newMat = polligon_materialCreate(materialName,...
-            'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
+        % --------       Woods
+        %{wood-medium-knots','wood-light-large-grain','wood-mahogany'}
+    case 'woodlist'
+        newMat = {'wood-medium-knots','wood-light-large-grain','wood-mahogany'};
+
+        %     case 'wood-floor-merbau'
+        %         newMat = polligon_materialCreate(materialName,...
+        %             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
 
     case 'wood-medium-knots'
         newMat.texture = piTextureCreate(materialName,...
