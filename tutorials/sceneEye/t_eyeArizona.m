@@ -45,11 +45,10 @@ thisSE.set('fov',30);             % Degrees
 
 % Render the scene
 
-% For now, this is the only docker wrapper that should work for the
-% human eye model.
+% humaneye is part of the latest CPU docker images
+% but is not currently supported on the GPU
 thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
 thisDWrapper.gpuRendering = 0;
 
 thisSE.recipe.set('render type', {'radiance','depth'});
@@ -57,6 +56,7 @@ thisSE.recipe.set('render type', {'radiance','depth'});
 %%  Render
 
 scene = thisSE.render('docker wrapper',thisDWrapper);
+
 
 sceneWindow(scene);   
 
@@ -110,8 +110,7 @@ thisSE.set('n bounces',3);
 
 dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
 
