@@ -194,8 +194,11 @@ if ispc  % Windows
     while true
         thisline = fgets(pFile);
         if ~ischar(thisline); break; end  %end of file
-        if contains(thisline, "C:\") || contains(thisline, "B:\")
+        % pc definitely needs some path massaging. Not sure about Mac/Linux
+        if ispc && (contains(thisline, "C:\") || contains(thisline, "B:\"))
             thisline = strrep(thisline, piRootPath, '');
+            % in some cases local has a trailing slash
+            thisline = strrep(thisline, ['\local\' currName '\'], '');
             thisline = strrep(thisline, '\local', '');
             thisline = strrep(thisline, '\', '/');
         end
