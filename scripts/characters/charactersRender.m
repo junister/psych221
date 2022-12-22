@@ -158,7 +158,7 @@ for ii = 1:numel(aString)
     
     % translate goes after scale or scale will reduce translation
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
-        'translate', letterPosition(ii,:));
+        'translate', options.letterPosition(ii,:));
 
 
     % THINGS BREAK HERE. We have a 6m distance to the character asset
