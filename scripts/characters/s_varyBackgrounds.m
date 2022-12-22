@@ -12,8 +12,25 @@ Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
 chartRows = 4;
 chartCols = 6;
 
-% Use the patches of the MCC as placeholders
-thisR = piRecipeCreate('macbeth checker');
+humanEye = true;
+%% We can process through the humaneye camera
+% Otherwise we use a pinhole camera
+if humanEye == false
+    % Use the patches of the MCC as placeholders
+    thisR = piRecipeCreate('macbeth checker');
+else
+    % Use Humaneye
+    % create a modern human eye ready scene
+    thisSE = sceneEye('MacBethChecker');
+    thisSE.recipe = addLight(thisSE.recipe);
+
+    % humaneye is part of the latest CPU docker images
+    % but is not currently supported on the GPU
+    thisDWrapper = createHumanEyeDocker();
+
+    % set our recipe
+    thisR = thisSE.recipe;
+end
 
 % Put our characters in front, starting at the top left
 to = thisR.get('to') - [0.5 -0.28 -0.8];
@@ -44,49 +61,35 @@ thisR.set('name','Sample Character Backgrounds');
 thisR.set('skymap','sky-sunlight.exr');
 thisR.set('nbounces',4);
 
-%% Try Humaneye
-humanEye = false;
 if humanEye
-        % create a modern human eye ready scene
-        % we want to use our modified scene, but maybe
-        % we need to load the scene here & then modify?
-        %thisSE = sceneEye(thisR);
-        thisSE = sceneEye('MacBethChecker');
+    %%  Render
+    oi = thisSE.render('docker wrapper',thisDWrapper);
+    oiWindow(oi);
 
-         spectrumScale = 1;
-        lightSpectrum = 'equalEnergy';
-        lgt = piLightCreate('new distant',...
-            'type', 'distant',...
-            'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
-        thisSE.recipe.set('light', lgt, 'add');
-
-        
-        % humaneye is part of the latest CPU docker images
-        % but is not currently supported on the GPU
-        thisDWrapper = dockerWrapper;
-        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-        thisDWrapper.gpuRendering = 0;
-
-        %%  Render
-        oi = thisSE.render('docker wrapper',thisDWrapper);
-        oiWindow(oi);
-
+else
+    piWRS(thisR);
 end
-%% END TRY
-piWRS(thisR);
 
 %add materials from our library
 addMaterials(thisR)
 
 % Now vary the materials that compose the letters
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
-piWRS(varyLettersR);
+if humanEye
+    oi = thisSE.render('docker wrapper',thisDWrapper);
+    oiWindow(oi);
+else
+    piWRS(varyLettersR);
+end
 
 % Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
-piWRS(varyPatchR);
+if humanEye
+    oi = thisSE.render('docker wrapper',thisDWrapper);
+    oiWindow(oi);
+else
+    piWRS(varyPatchR);
+end
 
 
 
@@ -142,4 +145,23 @@ for iii = 1:numel(allMaterials)
         warning('Material: %s insert failed. \n',allMaterials{ii});
     end
 end
+end
+
+function thisR = addLight(thisR)
+    spectrumScale = 1;
+    lightSpectrum = 'equalEnergy';
+    lgt = piLightCreate('new distant',...
+        'type', 'distant',...
+        'specscale float', spectrumScale,...
+        'spd spectrum', lightSpectrum,...
+        'cameracoordinate', true);
+    thisR.set('light', lgt, 'add');
+
+end
+
+function thisDWrapper = createHumanEyeDocker()
+    thisDWrapper = dockerWrapper;
+    thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+    thisDWrapper.gpuRendering = 0;
+
 end
