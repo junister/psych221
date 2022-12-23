@@ -104,8 +104,8 @@ function val = recipeGet(thisR, param, varargin)
 %      'film x resolution'  - Number of x dimension samples
 %      'film y resolution'  - Number of y-dimension samples
 %      'sample spacing'     - Spacing between row and col samples
-%      'film diagonal'      - Size in mm
-%
+%      'film diagonal'      - Diagonal size in mm
+%      'film size'          - (width, height) in mm
 %
 %      % Special retinal properties for human eye models
 %      'retina distance'
@@ -931,6 +931,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % How many film pixels behind each microlens/pinhole
         val(2) = thisR.camera.subpixels_w;
         val(1) = thisR.camera.subpixels_h;
+    case 'microlenssensoroffset'
+        % thisR.get('microlens sensor offset',val) 
+        %
+        % Distance between microlens and sensor. Default units
+        % meters
+        %
+        if isfield(thisR.camera,'microlenssensoroffset')
+            val = thisR.camera.microlenssensoroffset.value;        
+        end
+        if isempty(varargin), return;
+        else
+            val = val*ieUnitScaleFactor(varargin{1});
+        end
 
         % Film (because of PBRT.  ISETCam it would be sensor).
     case {'spatialsamples','filmresolution','spatialresolution'}
@@ -960,7 +973,16 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Distance in meters between the row and col samples
 
         % This formula assumes film diagonal pixels
-        val =thisR.get('filmdiagonal')/norm(thisR.get('spatial samples'));
+        val = thisR.get('filmdiagonal')/norm(thisR.get('spatial samples'));
+        
+        %{
+        % We want more of these. The problem is many of the
+        if isempty(varargin), return;
+        else
+           val = val*1e-3;  % Convert to meters from mm
+           val = val*ieUnitScaleFactor(varargin{1});
+        end
+        %}
 
     case 'filmxresolution'
         % An integer specifying number of samples
@@ -972,11 +994,15 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'filmwidth'}
         % x-dimension, columns
         ss   = thisR.get('spatial samples'); % Number of samples
-        val = ss(1)*thisR.get('sample spacing');
+        val = ss(1)*thisR.get('sample spacing','mm');
     case {'filmheight'}
         % y-dimension, rows
         ss   = thisR.get('spatial samples'); % Number of samples
-        val = ss(2)*thisR.get('sample spacing');
+        val = ss(2)*thisR.get('sample spacing','mm');
+    case 'filmsize'
+        val(1) = thisR.get('film width');
+        val(2) = thisR.get('film height');
+
     case 'aperturediameter'
         % Needs to be checked.  Default units are meters or millimeters?
         if isfield(thisR.camera, 'aperturediameter') ||...

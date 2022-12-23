@@ -32,39 +32,33 @@ if ~piDockerExists, piDockerConfig; end
 %%  Get the chess set scene
 
 thisR = piRecipeDefault('scene name','chessSet');
-
-% piWRS(thisR);
+%thisR = piRecipeCreate('flatSurface');
 
 %% Set up the combined imaging and microlens array
 
 uLensName = fullfile(piDirGet('lens'),'microlens.json');
 iLensName = fullfile(piDirGet('lens'),'dgauss.22deg.3.0mm.json');
-nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 
 %% Create the combined lens file and camera
 
-% Read the microlens and scale its diameter
-uLensDiameter = 2.8;        % Microns
-uLensDiameterM = 2.8*1e-6;  % Microns
-
+% Read the microlens and scale it to a diameter of 2.8 microns.
+uLensDiameterUM = 2.8;    % Microns
+uLensDiameterM = uLensDiameterUM*1e-6;
 uLens = lensC('file name',uLensName);
 d = uLens.get('lens diameter','microns');
-uLens.scale(uLensDiameter/d);
+uLens.scale(uLensDiameterUM/d);
 fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'));
 
 iLens = lensC('file name',iLensName);
 
-% Zero offset of the microlens by default.
-[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
+% Determines film size.  Samples will be 2x because of subpixels
+% We think this (x,y)
+% nMicrolens = [384 1];
 
-% Linearly scaled offset of the microlens array
-%
-% [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens,...
-%     'offset method','linear','max offset',uLensDiameterM/4);
-
-thisR.set('film size',info.filmSize);
-
-thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
+% For this lens, a 1/5 of the microlens is OK for 256.
+% So at 512, 2/5 of the microlens is the max, and so forth.
+% nMicrolens = [256 256];  % Chess set.
+nMicrolens = [512 512];  % Chess set.
 
 %% Set up the film parameters
 
@@ -89,41 +83,62 @@ thisR.set('film resolution',filmresolution);
 thisR.set('aperture diameter',10);
 
 % Adjust for quality
-thisR.set('rays per pixel',256);
+thisR.set('rays per pixel',512);
 
-thisR.set('render type',{'radiance','depth'});
+thisR.set('render type',{'radiance'});
 
-%% Render
+%% Experiments with the mlZ and mlXY
 
-thisR.set('microlens sensor offset',5e-6);
+% For some offset, we match the chief ray angle as we extend out. When
+% nMicrolens is 2.8 um, this imaging lens, and we have 256
+% microlenses, the shift is 1/5th of the diameter of the microlens.
+% We found this by experimenting.  We should find a systematic way to
+% estimate.
+% maxMLXY = uLensDiameterM * ((nMicrolens(1)/256)/5);       % Meters
+maxMLXY = 0;
+
+[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,...
+    'n microlens',nMicrolens, 'offset method','linear', ...
+    'max offset',maxMLXY);
+%{
+  offsets = info.combinedLens.microlens.offsets;
+  X = info.X; Y = info.Y;
+  ieNewGraphWin; plot(X(:) + offsets(:,1),Y(:)+offsets(:,2),'.')
+        hold on; plot(X(:),Y(:),'b.')
+plot(X(:),X(:))
+%}
+thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
+
+% This has to be set after we create the lens file.  Unfortunate.
+mlZ = 7e-6;  % Meters
+thisR.set('microlens sensor offset',mlZ);   % Specify in meters
+thisR.get('microlens sensor offset')
 
 oi = piWRS(thisR);
+sz = oiGet(oi,'size');   % Size is row,col - 
+
+% oiPlot specifies x,y 
+[uData, hdl] = oiPlot(oi,'illuminance hline',[1 round(sz(1)/2)]);
+delete(hdl);
+
+ieNewGraphWin;
+plot(uData.pos(1:2:end),uData.data(1:2:end),'bo');
+hold on;
+plot(uData.pos(2:2:end),uData.data(2:2:end),'ro');
+legend({'left','right'});
+grid on
+set(gca,'ylim',[0 350]);
+title(sprintf('m2sensor %0.2f maxOffset %0.2f (um)',thisR.get('microlens sensor offset','um'),maxMLXY*1e6));
 
 %{
-rgb = oiGet(oi,'rgb'); imtool(rgb);
+rgb = oiGet(oi,'rgb');
+imtool(rgb);
 %}
-
-thisR.get('microlens sensor offset','um')
-
 %% Make a dual pixel sensor that has rectangular pixels
 
 sensor = sensorCreate('dual pixel',[], oi, nMicrolens);
-%{
-% This is about what the create does.
-%
-sensor = sensorCreate;
-sz = sensorGet(sensor,'pixel size');
 
-% We make the height
-sensor = sensorSet(sensor,'pixel width',sz(2)/2);
-
-% Add more columns
-rowcol = sensorGet(sensor,'size');
-sensor = sensorSet(sensor,'size',[rowcol(1)*2, rowcol(2)*4]);
-
-% Set the CFA pattern accounting for the dual pixel architecture
-sensor = sensorSet(sensor,'pattern',[2 2 1 1; 3 3 2 2]);
-%}
+%% Compute the sensor data
 
 % Notice that we get the spatial structure of the image right, even though
 % the pixels are rectangular.

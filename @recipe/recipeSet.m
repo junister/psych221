@@ -52,7 +52,8 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %                        from the pinhole
 %    'n microlens'     - Number of microlenses in front of the sensor
 %    'n subpixels'     - Number of pixels behind each microlens
-%    'light field film resolution' - ????
+%    'microlens sensor offset' - Distance in mm between the microlens
+%                                and film (sensor).  NYI in PBRT.
 %
 %   % Lens
 %     'lens file'    - JSON file for omni.  Older models (realistic) use dat-file
@@ -62,6 +63,7 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %     'fov'
 %     'diffraction'
 %     'chromatic aberration'
+%     TODO:  Microlens information should be stored in some way.
 %
 %   % Film
 %     'film diagonal'
@@ -662,14 +664,13 @@ switch param
         thisR.camera.num_pinholes_h.type = 'float';
         thisR.camera.num_pinholes_w.value = val(2);
         thisR.camera.num_pinholes_w.type = 'float';
-    case 'lightfieldfilmresolution'
-        % This is printed out in the pbrt scene file
-        % It should only be a get, not a set.
-        %{
-        nMicrolens = thisR.get('n microlens');
-        nSubpixels = thisR.get('n subpixels');
-        thisR.set('film resolution', nMicrolens .* nSubpixels);
-        %}
+    case 'microlenssensoroffset'
+        % thisR.set('microlens sensor offset',val) - Units meters.
+        %
+        % Printed out in 'camera' subfield of PBRT file for use by
+        % omni camera.         
+        thisR.camera.microlenssensoroffset.type = 'float';
+        thisR.camera.microlenssensoroffset.value = val;
     case 'nsubpixels'
         % How many pixels behind each microlens/pinhole
         % The type is not included because this is not passed to pbrt.  It
@@ -681,9 +682,23 @@ switch param
         % Film parameters
     case 'filmdiagonal'
         % thisR.set('film diagonal',val)
-        % Default units are millimeters, Sigh.
+        % Default units are millimeters.
         thisR.film.diagonal.type = 'float';
         thisR.film.diagonal.value = val;
+    case 'filmsize'
+        % thisR.set('film size',[width,height] in mm);
+        %
+        % The person wants to specify width,height but the code is
+        % with respect to the diagonal. So we compute the relevant
+        % parameters here, maintaining the sample spacing.
+        spacing = thisR.get('sample spacing','mm');
+
+        filmdiagonal = sqrt(val(1).^2 + val(2).^2);  % New diagonal
+        thisR.set('film diagonal',filmdiagonal);
+
+        nRowCol = round([val(1),val(2)]/spacing);
+        thisR.set('film resolution',nRowCol);        
+
     case {'filmdistance'}
         % Set in meters. Sigh again.
         thisR.camera.filmdistance.type = 'float';
