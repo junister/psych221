@@ -1,5 +1,5 @@
 function [combinedLens, cmd]  = piCameraInsertMicrolens(microLens,imagingLens,varargin)
-% Combine a microlens with an imaging lens into a lens file
+% Deprecate:  Combine a microlens with an imaging lens into a lens file
 %
 % Syntax
 %   combinedLens  = piCameraInsertMicrolens(microLens,imagingLens,varargin)
@@ -60,7 +60,7 @@ function [combinedLens, cmd]  = piCameraInsertMicrolens(microLens,imagingLens,va
 %    --filmtomicrolens <n>  Distance (mm) from film to back of microlens. Default: 0.0 
 %
 % See also
-%
+%   piMicrolensInsert, piMicrolensWrite are replacements
 
 % Examples:
 %{
@@ -102,7 +102,7 @@ p.addParameter('xdim',[],@isscalar);
 p.addParameter('ydim',[],@isscalar);
 p.addParameter('filmheight',1,@isscalar);
 p.addParameter('filmwidth',1,@isscalar);
-p.addParameter('microlenstofilm',[],@isscalar);
+p.addParameter('filmtomicrolens',0,@isscalar);
 
 p.parse(imagingLens,microLens,varargin{:});
 
@@ -140,16 +140,16 @@ ydim = p.Results.ydim;
 if isempty(xdim), xdim =  floor((filmheight/mlObj.get('lens height'))); end
 if isempty(ydim), ydim =  floor((filmwidth/mlObj.get('lens height'))); end
 
-microlenstofilm = p.Results.microlenstofilm;
-if isempty(microlenstofilm)
-    microlenstofilm = lensFocus(microLens,1e6);
+filmtomicrolens = p.Results.filmtomicrolens;
+if isempty(filmtomicrolens)
+    filmtomicrolens = lensFocus(microLens,1e6);
 end
 
 %% Print out parameter summary
 fprintf('\n------\nMicrolens insertion summary\n');
 fprintf('Microlens dimensions %d %d \n',xdim,ydim);
-fprintf('Microlens to film distance %f\n',microlenstofilm);
-fprintf('Film height and width %f %f\n',filmheight,filmwidth);
+fprintf('Microlens to film distance %0.2f\n',filmtomicrolens);
+fprintf('Film height and width %f %0.2f\n',filmheight,filmwidth);
 fprintf('------\n');
 
 %% Remember where you started 
@@ -192,9 +192,11 @@ end
 %% Set up the lens tool command to run
 
 % Need to add the other parameters
-[combinedLens, cmd] = piDockerLenstool('insertmicrolens', 'xdim', xdim, 'ydim', ydim, ...
+[combinedLens, cmd] = piDockerLenstool('insertmicrolens', ...
+    'xdim', xdim, 'ydim', ydim, ...
     'filmheight', filmheight, 'filmwidth', filmwidth, ...
     'imaginglens', imagingLens, 'microLens', microLens, ...
+    'filmtomicrolens', filmtomicrolens, ...
     'combinedlens', combinedLens, 'outputfolder', outputFolder);
 
 

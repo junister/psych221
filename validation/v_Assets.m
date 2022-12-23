@@ -31,25 +31,6 @@ assetFiles = dir([fullfile(piDirGet('assets'),filesep(),'*.mat')]);
 fprintf('Found %d assets\n',numel(assetFiles));
 
 %% Loop over each asset
-%{
-Asset Validation Results: 
-Asset: EIA.mat Succeeded.
-Asset: bunny.mat Succeeded.
-Asset: coordinate.mat Succeeded.
-Asset: face.mat Succeeded.
-Asset: glasses.mat failed % Zheng special case.
-Asset: gridlines.mat Succeeded.
-Asset: letterA.mat Succeeded.
-Asset: letterB.mat Succeeded.
-Asset: letterC.mat Succeeded.
-Asset: macbeth.mat Succeeded.
-Asset: mccCB.mat failed   % Zheng special case.
-Asset: plane.mat failed   % Not sure what this is yet.
-Asset: pointarray512.mat Succeeded.
-Asset: ringsrays.mat Succeeded.
-Asset: slantedbar.mat Succeeded.
-Asset: sphere.mat Succeeded.
-%}
 
 % Return a report
 report = '';
@@ -72,9 +53,9 @@ for ii = 1:numel(assetFiles)
         ourAsset  = piAssetLoad(assetName);
         
         % Scale its size to be good for the Cornell Box
-        thisName = ourAsset.thisR.get('object names no id');
-        sz = ourAsset.thisR.get('asset',thisName{1},'size');
-        ourAsset.thisR.set('asset',thisName{1},'scale',[0.1 0.1 0.1] ./ sz);
+        thisID = ourAsset.thisR.get('objects');   % Object id
+        sz = ourAsset.thisR.get('asset',thisID(1),'size');
+        ourAsset.thisR.set('asset',thisID(1),'scale',[0.1 0.1 0.1] ./ sz);
         
         % Merge it with the Cornell Box
         combinedR = piRecipeMerge(parentRecipe, ourAsset.thisR, 'node name',ourAsset.mergeNode);

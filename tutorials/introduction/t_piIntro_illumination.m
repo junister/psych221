@@ -110,11 +110,56 @@ for ii=1:4
     vcSetSelectedObject('scene',ii);
     scene = ieGetObject('scene');
     scene = piAIdenoise(scene);
-    rgb{ii} = sceneGet(scene,'rgb');
+    rgb{ii} = sceneGet(scene,'srgb');
 end
 
 ieNewGraphWin;
 montage(rgb);
+
+%% Look for the linear transform between RGB values
+
+comp = [2,3];
+vcSetSelectedObject('scene',comp(1));     
+scene = ieGetObject('scene');
+scene = piAIdenoise(scene);
+srgb1 = sceneGet(scene,'srgb');
+lrgb1 = srgb2lrgb(srgb1);
+
+vcSetSelectedObject('scene',comp(2));     
+scene = ieGetObject('scene');
+scene = piAIdenoise(scene);
+srgb2 = sceneGet(scene,'srgb');
+lrgb2 = srgb2lrgb(srgb2);
+
+xw1 = RGB2XWFormat(lrgb1);
+xw2 = RGB2XWFormat(lrgb2);
+
+% M = pinv(xw1)*xw2;  xw2 = xw1*M;
+M = xw1\xw2;  
+
+pred2 = xw1*M;
+
+%% How well did we do with the prediction?
+
+ieNewGraphWin([],'wide');
+subplot(1,2,1)
+plot(xw2(1:10:end),xw1(1:10:end),'.');
+identityLine;
+xlabel('lRGB2'); ylabel('lRGB1'); grid on;
+
+subplot(1,2,2)
+plot(xw2(1:10:end),pred2(1:10:end),'.');
+identityLine;
+xlabel('lRGB2'); ylabel('lRGB1'); grid on;
+
+%%
+ieNewGraphWin;
+rgbPred2 = XW2RGBFormat(pred2,size(srgb2,1),size(srgb2,2));
+rgbPred2 = ieClip(rgbPred2,0,1);
+srgbPred2 = lrgb2srgb(rgbPred2);
+
+montage({srgb1,srgb2,srgbPred2},'Size',[1 3]);
+
 
 %% Plot the spectra
 
@@ -135,8 +180,9 @@ grid on;
 xlabel('Wavelength (nm)')
 ylabel('Relative radiance');
 
+%% END
 
-
+%{
 
 %%  Edit the material list, adding White.
 
@@ -180,7 +226,7 @@ nWave  = sceneGet(sceneR,'n wave');
 sceneR = sceneSet(sceneR,'illuminant photons',ones(nWave,1));
 sceneR = sceneSet(sceneR,'name','Reflectance');
 sceneWindow(sceneR);
-
+%}
 %% END
 
 % We could try this with a point light next.
@@ -224,3 +270,10 @@ thisR.get('light', skyMap.name, 'world orientation')
 piWRS(thisR, 'name','No rotation skymap');
 %}
 %% END
+
+
+thisR.camera = piCameraCreate('omni','lensFile','dgauss.22deg.12.5mm.json');
+thisR.set('film resolution',[1024 1024]);
+piWRS(thisR);
+
+

@@ -449,7 +449,10 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         if ~isempty(thisShape.filename)
             % If the shape has ply info, do this
             % Convert shape struct to text
-            [~, ~, e] = fileparts(thisShape.filename);
+            [p, n, e] = fileparts(thisShape.filename);
+
+            % For Windows we need to "fix" the path
+            % thisShape.filename = fullfile(p, [n e]);
             if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
                 if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
                     error('%s not exist',thisShape.filename);

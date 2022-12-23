@@ -10,6 +10,11 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   transformations that place it in the scene. Instancing is an efficient
 %   method of copying.
 %
+%   After running this function, upon return you should assign unique names
+%   to all of the assets again.
+%
+%        thisR.assets = thisR.assets.uniquename;
+%
 % Inputs:
 %   thisR     - scene recipe
 %   assetName - The objecct we want to copy
@@ -59,9 +64,10 @@ graftNow = p.Results.graftnow;
 %% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
 
-if isempty(asset{1}) && numel(asset)==1
-    warning('%s not found, failed to creat object instance for this asset.', assetname);
-end
+% if isempty(asset{1}) && numel(asset)==1
+%     warning('%s not found, failed to creat object instance for this asset.', assetname);
+% end
+
 % ZL only addressed the first entry of the cell.  So, this seems OK.
 if iscell(asset)
     if numel(asset) > 1

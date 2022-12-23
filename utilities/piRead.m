@@ -107,7 +107,9 @@ else
     infile = fname;
 end
 
-thisR.inputFile = infile;
+% This seems like a big fix, but latter code assumes
+% that inputFile is a full path!
+thisR.inputFile = which(infile);
 
 % Copy?  Or some other method?
 exporter = p.Results.exporter;

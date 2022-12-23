@@ -31,7 +31,6 @@ idx = p2Root(end);
 % This position is relative to the position of the original object
 for ii=1:3
     thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 %% Blue man copies
@@ -44,11 +43,12 @@ idx = p2Root(end);
 steps = [-0.3 0.3];
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
-% thisR.show;
-%%
+%% The necessity of unique names has to do with speed and ISETAuto
+
+% See comments at the end of piObjectInstanceCreate
+thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
 
 %% Try it with the Chess Set
@@ -63,7 +63,7 @@ piWRS(thisR,'render flag','hdr');
 %   ieNewGraphWin; image(idMap);
 %
 % Click on the pieces to see the index
-% THen use oList(idx) to see the mesh name
+% Then use oList(idx) to see the mesh name
 % 72 is the ruler.  The king is 7.  The queen is 141.
 
 pieceID = piAssetSearch(thisR,'object name','ChessSet_mesh_00007');
@@ -75,7 +75,6 @@ idx = p2Root(end);
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
 topID = piAssetSearch(thisR,'object name','ChessSet_mesh_00065');
@@ -87,9 +86,11 @@ idx = p2Root(end);
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
-    % thisR.assets = thisR.assets.uniqueNames;
 end
 
+%% The necessity of unique names has to do with speed and ISETAuto
+
+thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
 
 

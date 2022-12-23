@@ -289,6 +289,8 @@ else
 
     if ~exist(outputLensFile,'file')
         copyfile(inputLensFile,outputLensFile);
+    elseif isequal(inputLensFile,outputLensFile)
+        warning('input and output lens files are the same (%s).',inputLensFile);        
     elseif overwritelensfile
         % It must exist.  So if we are supposed overwrite
         delete(outputLensFile);
