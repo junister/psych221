@@ -180,10 +180,21 @@ function oi = eyeRender(thisSE, options)
     oi = thisSE.render('docker wrapper',options.dockerWrapper);
     oiWindow(oi);
 
-    cmosaic = coneMosaic;   % Create cone mosaic.  Many parameters can be set.
-    cmosaic.compute(oi);    % Compute the absorptions from the optical image, oi
-    cmosaic.computeCurrent; % Compute the photocurrent using the attached outerSegment model
+    % Mod for faster parpool startup
+    poolobj = gcp('nocreate');
+    if isempty(poolobj)
+        parpool('Threads', 4);
+    end
 
-    cmosaic.window;   % An interactive window to view the mosaic, absorptions and current
-    %cmosaic.plot(...);   % Plotting methods
+    cMosaic = coneMosaic;   % Create cone mosaic.  Many parameters can be set.
+
+    % Mosaics are expensive so make a smaller one
+    cMosaic.setSizeToFOV(0.2 * oiGet(oi, 'fov'));
+    cMosaic.emGenSequence(50);
+    
+    cMosaic.compute(oi);    % Compute the absorptions from the optical image, oi
+    cMosaic.computeCurrent; % Compute the photocurrent using the attached outerSegment model
+
+    cMosaic.window;   % An interactive window to view the mosaic, absorptions and current
+    %cMosaic.plot(...);   % Plotting methods
 end
