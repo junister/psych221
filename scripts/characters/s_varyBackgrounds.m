@@ -1,4 +1,4 @@
-% Experiment with different backgrounds for characters
+% Experiment with different materials and backgrounds for characters
 %
 % D. Cardinal Stanford University, 2022
 %
@@ -23,7 +23,6 @@ else
     % create a modern human eye ready scene
     thisSE = sceneEye('MacBethChecker');
     thisSE.recipe = addLight(thisSE.recipe);
-
     % humaneye is part of the latest CPU docker images
     % but is not currently supported on the GPU
     thisDWrapper = createHumanEyeDocker();
@@ -34,10 +33,10 @@ end
 
 % Set quality parameters
 % High-res
-thisR.set('film resolution', [2048 2048]);
+%thisR.set('film resolution', [2048 2048]);
 thisR.set('rays per pixel',1024);
 % Normal-res
-thisR.set('film resolution', [512 512]);
+%thisR.set('film resolution', [512 512]);
 thisR.set('rays per pixel',128);
 
 % Put our characters in front, starting at the top left
@@ -71,7 +70,7 @@ thisR.set('nbounces',4);
 
 if humanEye
     %%  Render
-    oiVanilla = eyeRender(thisSE);
+    oiVanilla = eyeRender(thisSE, 'dockerWrapper', thisDWrapper);
 else
     piWRS(thisR);
 end
@@ -82,7 +81,7 @@ addMaterials(thisR)
 % Now vary the materials that compose the letters
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
 if humanEye
-    oiVaryLetters = eyeRender(thisSE);
+    oiVaryLetters = eyeRender(thisSE, 'dockerWrapper', thisDWrapper);
 else
     piWRS(varyLettersR);
 end
@@ -90,7 +89,7 @@ end
 % Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
 if humanEye
-    oiVaryBackgrounds = eyeRender(thisSE);
+    oiVaryBackgrounds = eyeRender(thisSE, 'dockerWrapper',thisDWrapper);
 else
     piWRS(varyPatchR);
 end
@@ -171,8 +170,14 @@ function thisDWrapper = createHumanEyeDocker()
 end
 
 % group humanEye related processing into a function
-function oi = eyeRender(thisSE)
-    oi = thisSE.render('docker wrapper',thisDWrapper);
+function oi = eyeRender(thisSE, options)
+
+    arguments
+        thisSE;
+        options.dockerWrapper = [];
+    end
+
+    oi = thisSE.render('docker wrapper',options.dockerWrapper);
     oiWindow(oi);
 
     cmosaic = coneMosaic;   % Create cone mosaic.  Many parameters can be set.
