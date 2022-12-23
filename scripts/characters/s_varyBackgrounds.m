@@ -32,6 +32,14 @@ else
     thisR = thisSE.recipe;
 end
 
+% Set quality parameters
+% High-res
+thisR.set('film resolution', [2048 2048]);
+thisR.set('rays per pixel',1024);
+% Normal-res
+thisR.set('film resolution', [512 512]);
+thisR.set('rays per pixel',128);
+
 % Put our characters in front, starting at the top left
 to = thisR.get('to') - [0.5 -0.28 -0.8];
 
@@ -63,9 +71,7 @@ thisR.set('nbounces',4);
 
 if humanEye
     %%  Render
-    oi = thisSE.render('docker wrapper',thisDWrapper);
-    oiWindow(oi);
-
+    oiVanilla = eyeRender(thisSE);
 else
     piWRS(thisR);
 end
@@ -76,8 +82,7 @@ addMaterials(thisR)
 % Now vary the materials that compose the letters
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
 if humanEye
-    oi = thisSE.render('docker wrapper',thisDWrapper);
-    oiWindow(oi);
+    oiVaryLetters = eyeRender(thisSE);
 else
     piWRS(varyLettersR);
 end
@@ -85,8 +90,7 @@ end
 % Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
 if humanEye
-    oi = thisSE.render('docker wrapper',thisDWrapper);
-    oiWindow(oi);
+    oiVaryBackgrounds = eyeRender(thisSE);
 else
     piWRS(varyPatchR);
 end
@@ -164,4 +168,17 @@ function thisDWrapper = createHumanEyeDocker()
     thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
     thisDWrapper.gpuRendering = 0;
 
+end
+
+% group humanEye related processing into a function
+function oi = eyeRender(thisSE)
+    oi = thisSE.render('docker wrapper',thisDWrapper);
+    oiWindow(oi);
+
+    cmosaic = coneMosaic;   % Create cone mosaic.  Many parameters can be set.
+    cmosaic.compute(oi);    % Compute the absorptions from the optical image, oi
+    cmosaic.computeCurrent; % Compute the photocurrent using the attached outerSegment model
+
+    cmosaic.window;   % An interactive window to view the mosaic, absorptions and current
+    %cmosaic.plot(...);   % Plotting methods
 end
