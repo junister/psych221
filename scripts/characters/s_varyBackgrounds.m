@@ -12,7 +12,8 @@ Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
 chartRows = 4;
 chartCols = 6;
 
-humanEye = false;
+humanEye = ~piCamBio(); % if using ISETBio, then use human eye
+
 %% We can process through the humaneye camera
 % Otherwise we use a pinhole camera
 if humanEye == false
