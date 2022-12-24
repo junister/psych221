@@ -12,12 +12,16 @@ Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
 chartRows = 4;
 chartCols = 6;
 
-humanEye = true;
+humanEye = false;
 %% We can process through the humaneye camera
 % Otherwise we use a pinhole camera
 if humanEye == false
     % Use the patches of the MCC as placeholders
-    thisR = piRecipeCreate('macbeth checker');
+    thisR = piRecipeDefault('scene name','MacBethChecker');
+    thisR = addLight(thisR);
+    % nice aspect ratio & fov for the chart
+    thisR.set('fov', 30);
+    thisR.set('filmresolution', [640, 360]);
 else
     % Use Humaneye
     % create a modern human eye ready scene
@@ -38,6 +42,10 @@ thisR.set('rays per pixel',1024);
 % Normal-res
 %thisR.set('film resolution', [512 512]);
 thisR.set('rays per pixel',128);
+
+thisR.set('name','Sample Character Backgrounds');
+thisR.set('skymap','sky-sunlight.exr');
+thisR.set('nbounces',4);
 
 % Put our characters in front, starting at the top left
 to = thisR.get('to') - [0.5 -0.28 -0.8];
@@ -64,9 +72,9 @@ for ii = 1:chartRows
     end
 end
 
-thisR.set('name','Sample Character Backgrounds');
-thisR.set('skymap','sky-sunlight.exr');
-thisR.set('nbounces',4);
+%% For debugging try to back way off and get a view
+%recipeSet(thisR,'from', [-5 5 -15]);
+%recipeSet(thisR,'to', [0 0 8]);
 
 if humanEye
     %%  Render
@@ -95,7 +103,8 @@ else
 end
 
 
-
+%% Start Support Functions here...
+%
 function thisR = doMaterials(thisR, options)
 
 arguments
@@ -153,11 +162,11 @@ end
 function thisR = addLight(thisR)
     spectrumScale = 1;
     lightSpectrum = 'equalEnergy';
-    lgt = piLightCreate('new distant',...
+    lgt = piLightCreate('scene light',...
         'type', 'distant',...
         'specscale float', spectrumScale,...
         'spd spectrum', lightSpectrum,...
-        'cameracoordinate', true);
+        'from', [0 0 0],  'to', [0 0 20]);
     thisR.set('light', lgt, 'add');
 
 end
