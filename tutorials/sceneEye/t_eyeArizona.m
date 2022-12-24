@@ -57,7 +57,6 @@ thisSE.recipe.set('render type', {'radiance','depth'});
 
 scene = thisSE.render('docker wrapper',thisDWrapper);
 
-
 sceneWindow(scene);   
 
 thisSE.summary;

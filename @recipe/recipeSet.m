@@ -703,6 +703,18 @@ switch param
         % Set in meters. Sigh again.
         thisR.camera.filmdistance.type = 'float';
         thisR.camera.filmdistance.value = val;
+    case {'filmshapefile'}
+        % thisR.set('film shape file') = JSONFile;        
+        %
+        % Used for making arbitrary film shapes, as in the examples in
+        % the ISETBio directory retinaShape.
+        %
+        % We considered naming this filmshape.  To do that requires
+        % recompiling PBRT to look for 'filmshape' and rebuilding the
+        % Docker containers (TG/BW)
+        thisR.camera.lookuptable.type = 'string';
+        thisR.camera.lookuptable.value  = val;
+
     case {'spatialsamples','filmresolution','spatialresolution'}
         % thisR.set('spatial samples',256);
         %
