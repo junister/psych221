@@ -59,12 +59,21 @@ thisSE.set('fov',30);             % Degrees
 
 % Render the scene
 
+%{
 % For now, this is the only docker wrapper that should work for the
 % human eye model.
 thisDWrapper = dockerWrapper;
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
+%}
+
+dockerWrapper.reset();
+thisDWrapper = dockerWrapper;
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+thisDWrapper.remoteImageTag = 'latest';
+thisDWrapper.gpuRendering = 0;
+thisSE.recipe.set('render type', {'radiance','depth'});
 
 thisSE.recipe.set('render type', {'radiance'});
 
@@ -124,18 +133,22 @@ thisSE.set('n bounces',3);
 
 %% This takes longer than the pinhole rendering
 
+%{
 dockerWrapper.reset();
 thisDWrapper = dockerWrapper;
 thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
 thisDWrapper.remoteImageTag = 'humanEye';
 thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
-
-%{
-% A lot of debugging to clean up iset3d-v4 this way.
- piWrite(thisSE.recipe);
- [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
 %}
+
+% Seems to run.
+dockerWrapper.reset();
+thisDWrapper = dockerWrapper;
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+thisDWrapper.remoteImageTag = 'latest';
+thisDWrapper.gpuRendering = 0;
+thisSE.recipe.set('render type', {'radiance','depth'});
 
 % Runs on the CPU on mux for humaneye case.
 oi = thisSE.render('docker wrapper',thisDWrapper);

@@ -696,6 +696,31 @@ switch ieParamFormat(param)  % lower case, no spaces
         else, val = val*ieUnitScaleFactor(varargin{1});
         end
 
+    case {'filmshapefile'}
+        % JSONFileName = thisR.get('film shape file');
+        %
+        % Should be the full path to the file specifying the film
+        % shape, as in the examples in the ISETBio directory
+        % retinaShape.
+        %
+        % The JSON file that represents the XYZ values of the film
+        % shape (units are meters) 
+        %
+        % We considered naming this filmshape.  To do that requires
+        % recompiling PBRT to look for 'filmshape' and rebuilding the
+        % Docker containers (TG/BW).
+        if isfield(thisR.camera,'lookuptable')
+            val = thisR.camera.lookuptable.value;
+        end
+    case {'filmshapeoutput'}
+        % The full path to the file after it is copied to the output
+        % area where the film shape lookup table is stored.
+        outputDir = thisR.get('outputdir');
+        filmshapebasename = thisR.get('film shape basename');
+        val = fullfile(outputDir,'filmshape',filmshapebasename);
+    case {'filmshapebasename'}
+        val = thisR.get('filmshape file');
+        [~,val,~] = fileparts(val);
 
         % humaneye (realisticEye) parameters
     case {'retinadistance'}
@@ -947,7 +972,7 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         % Film (because of PBRT.  ISETCam it would be sensor).
     case {'spatialsamples','filmresolution','spatialresolution'}
-        % thisR.get('spatial samples');
+        % thisR.get('film resolution');
         %
         % When using ISETBio, we usually call it spatial samples or spatial
         % resolution.  For ISET3d, it is usually film resolution because of
