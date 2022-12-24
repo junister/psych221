@@ -328,6 +328,7 @@ classdef dockerWrapper < handle
         % Methods defined in this file, static or not, do not need to be
         % listed here.
 
+        thisDWrapper = humanEyeDocker();
         setPrefs(varargin);
         getPrefs(varargin);
         dockerImage = localImage();

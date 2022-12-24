@@ -30,7 +30,7 @@ else
     thisSE.recipe = addLight(thisSE.recipe);
     % humaneye is part of the latest CPU docker images
     % but is not currently supported on the GPU
-    thisDWrapper = createHumanEyeDocker();
+    thisDWrapper = dockerWrapper.humanEyeDocker();
 
     % set our recipe
     thisR = thisSE.recipe;
@@ -77,20 +77,31 @@ end
 %recipeSet(thisR,'from', [-5 5 -15]);
 %recipeSet(thisR,'to', [0 0 8]);
 
+% See if making a copy of the recipe avoids any artifacts
+if humanEye
+    varyLettersSE = thisSE.copy();
+    varyPatchSE = thisSE.copy();
+else
+    varyLettersR = thisR.copy();
+    varyPatchR = thiSR.copy();
+end
+
 if humanEye
     %%  Render
-    oiVanilla = eyeRender(thisSE, 'dockerWrapper', thisDWrapper);
+    oiVanilla = eyeRender(thisSE, 'dockerWrapper', thisDWrapper, ...
+        'fovScale', .5);
 else
     piWRS(thisR);
 end
 
 %add materials from our library
-addMaterials(thisR)
+addMaterials(thisR);
 
 % Now vary the materials that compose the letters
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
 if humanEye
-    oiVaryLetters = eyeRender(thisSE, 'dockerWrapper', thisDWrapper);
+    oiVaryLetters = eyeRender(varyLettersSE, 'show', true, ...
+        'dockerWrapper', thisDWrapper);
 else
     piWRS(varyLettersR);
 end
@@ -98,7 +109,8 @@ end
 % Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
 if humanEye
-    oiVaryBackgrounds = eyeRender(thisSE, 'dockerWrapper',thisDWrapper);
+    oiVaryBackgrounds = eyeRender(varyPatchSE, 'show', true,...
+        'dockerWrapper',thisDWrapper);
 else
     piWRS(varyPatchR);
 end
@@ -172,39 +184,4 @@ function thisR = addLight(thisR)
 
 end
 
-function thisDWrapper = createHumanEyeDocker()
-    thisDWrapper = dockerWrapper;
-    thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-    thisDWrapper.gpuRendering = 0;
 
-end
-
-% group humanEye related processing into a function
-function oi = eyeRender(thisSE, options)
-
-    arguments
-        thisSE;
-        options.dockerWrapper = [];
-    end
-
-    oi = thisSE.render('docker wrapper',options.dockerWrapper);
-    oiWindow(oi);
-
-    % Mod for faster parpool startup
-    poolobj = gcp('nocreate');
-    if isempty(poolobj)
-        parpool('Threads', 4);
-    end
-
-    cMosaic = coneMosaic;   % Create cone mosaic.  Many parameters can be set.
-
-    % Mosaics are expensive so make a smaller one
-    cMosaic.setSizeToFOV(0.2 * oiGet(oi, 'fov'));
-    cMosaic.emGenSequence(50);
-    
-    cMosaic.compute(oi);    % Compute the absorptions from the optical image, oi
-    cMosaic.computeCurrent; % Compute the photocurrent using the attached outerSegment model
-
-    cMosaic.window;   % An interactive window to view the mosaic, absorptions and current
-    %cMosaic.plot(...);   % Plotting methods
-end
