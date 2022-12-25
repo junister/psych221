@@ -44,21 +44,15 @@ thisSE.set('use pinhole',true);
 thisSE.set('fov',30);             % Degrees
 
 % Render the scene
-
-% humaneye is part of the latest CPU docker images
-% but is not currently supported on the GPU
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.gpuRendering = 0;
-
 thisSE.recipe.set('render type', {'radiance','depth'});
 
 %%  Render
 
-scene = thisSE.render('docker wrapper',thisDWrapper);
+% Default, which renders remotely with the GPU
+thisDocker = dockerWrapper;
+scene = thisSE.render('docker wrapper',thisDocker);
 
 sceneWindow(scene);   
-
 thisSE.summary;
 
 %% Now use the optics model with chromatic aberration
@@ -107,14 +101,11 @@ thisSE.set('n bounces',3);
 
 %% Have a at the letters. Lots of things you can plot in this window.
 
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
+thisDocker = dockerWrapper.humanEyeDocker;
+
 
 % Runs on the CPU on mux for humaneye case.
-oi = thisSE.render('docker wrapper',thisDWrapper);
+oi = thisSE.render('docker wrapper',thisDocker);
 
 oiWindow(oi);
 
@@ -130,7 +121,7 @@ thisSE.set('rays per pixel',256);  % Pretty quick, but not high quality
 
 thisSE.set('render type',{'radiance','depth'});
 
-oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+oi = thisSE.render('docker wrapper',thisDocker);  % Render and show
 
 oi = oiSet(oi,'name','Arizona');
 oi = piAIdenoise(oi);
@@ -157,7 +148,7 @@ thisSE.set('render type',{'radiance','depth'});
 thisSE.set('rays per pixel',64);  % Pretty quick, but not high quality
 
 thisSE.set('use pinhole',true);
-scene = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+scene = thisSE.render('docker wrapper',thisDocker);  % Render and show
 sceneWindow(scene);
 
 %%
@@ -166,7 +157,7 @@ sceneWindow(scene);
 
 thisSE.set('use pinhole',false);
 thisSE.set('object distance',20);
-oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+oi = thisSE.render('docker wrapper',thisDocker);  % Render and show
 
 oi = oiSet(oi,'name','SB Arizona');
 oi = piAIdenoise(oi);
