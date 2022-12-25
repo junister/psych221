@@ -4,10 +4,12 @@ function thisR = piRecipeCreate(rName,varargin)
 % Synopsis
 %   thisR = piRecipeCreate(rName,varargin)
 %
-% Briewf
+% Brief
 %   Many of the piRecipeDefault cases still need a light or to position the
 %   camera to be rendered.  This routine adjusts the recipe so that it can
 %   be rendered with piWRS immediately.
+%  
+%   Use piRecipeCreate('list') to see the valid recipes
 %
 % Input
 %   rName - Recipe name from the piRecipeDefaults list
@@ -15,7 +17,7 @@ function thisR = piRecipeCreate(rName,varargin)
 % Key/Val pairs
 %
 % Return
-%   thisR - the recipe
+%   thisR - the recipe, or if help/list the validRecipes as a cell array
 %
 % See also
 %   piRecipeDefault, thisR.list
@@ -47,10 +49,27 @@ function thisR = piRecipeCreate(rName,varargin)
 %}
 
 %% Input parsing
-varargin = ieParamFormat(varargin);
 
+validRecipes = {'macbethchecker','chessset',...
+    'cornell_box','cornellboxreference',...
+    'simplescene','arealight','bunny','car','checkerboard', ...
+    'lettersatdepth','materialball','materialball_cloth',...
+    'sphere','slantededge','stepfunction','testplane','teapotset'};
+
+rName    = ieParamFormat(rName);
+if isequal(rName,'help') || isequal(rName,'list')
+    fprintf('\n-------Known recipes-----\n\n')
+    for ii=1:numel(validRecipes)
+            fprintf('%02d - %s\n',ii,validRecipes{ii});
+    end
+    thisR = validRecipes;
+    return;
+end
+
+varargin = ieParamFormat(varargin);
 p = inputParser;
-p.addRequired('rName',@ischar);
+
+p.addRequired('rName',@(x)(ismember(x,validRecipes)));
 p.parse(rName,varargin{:});
 
 %% 
@@ -83,8 +102,10 @@ piWRS(thisR);
 
 %}
 
-%%
-switch ieParamFormat(rName)
+
+%% Each case
+
+switch rName
     case 'macbethchecker'
         thisR = piRecipeDefault('scene name',rName);
         thisR = piLightDelete(thisR, 'all');

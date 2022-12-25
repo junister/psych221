@@ -31,7 +31,6 @@ piWRS(thisR);
 thisR.birdsEye();
 
 
-
 function addMaterials(thisR)
 % should inherit from parent
 
