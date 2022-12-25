@@ -16,6 +16,7 @@ humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 
 % Start with a "generic" recipe
 thisR = piRecipeCreate('lettersatdepth');
+thisR = addLight(thisR);
 
 backWall = piAssetSearch(thisR,'object name','Wall');
 recipeSet(thisR, 'up', [0 1 0]);
@@ -26,15 +27,12 @@ addMaterials(thisR)
 wallMaterial = 'wood-light-large-grain';
 piAssetSet(thisR, backWall, 'material name', wallMaterial);
 
+charactersRender(thisR,'ABC');
 % I think at this point Wall is at z=2 and a,b,c are between camera & wall
 piWRS(thisR);
-thisR.birdsEye();
-
-
+%thisR.birdsEye();
 
 function addMaterials(thisR)
-% should inherit from parent
-
 
 % See list of materials, if we want to select some
 allMaterials = piMaterialPresets('list');
@@ -49,3 +47,14 @@ for iii = 1:numel(allMaterials)
 end
 end
 
+function thisR = addLight(thisR)
+    spectrumScale = 1;
+    lightSpectrum = 'equalEnergy';
+    lgt = piLightCreate('scene light',...
+        'type', 'distant',...
+        'specscale float', spectrumScale,...
+        'spd spectrum', lightSpectrum,...
+        'from', [0 0 0],  'to', [0 0 20]);
+    thisR.set('light', lgt, 'add');
+
+end
