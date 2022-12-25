@@ -1,6 +1,6 @@
 function [oi, cMosaic] = eyeRender(thisSE, options)
 %EYERENDER Wrapper for commonly called human eye model rendering functions
-%  Group humanEye related processing into a function
+%  Group a few common humanEye related processing steps into a function
 %
 % Examples:
 %
@@ -12,6 +12,7 @@ function [oi, cMosaic] = eyeRender(thisSE, options)
         options.fovScale = .1; % how much to reduce the FOV
         options.show = false; %display output in windows
         options.numThreads = 0; % use the default unless the user sets a value
+        options.emGenSequence = 50; 
     end
 
     if piCamBio
@@ -35,7 +36,7 @@ function [oi, cMosaic] = eyeRender(thisSE, options)
 
         % Mosaics are expensive so make a smaller one
         cMosaic.setSizeToFOV(options.fovScale * oiGet(oi, 'fov'));
-        cMosaic.emGenSequence(50);
+        cMosaic.emGenSequence(options.emGenSequence);
     
         cMosaic.compute(oi);    % Compute the absorptions from the optical image, oi
         cMosaic.computeCurrent; % Compute the photocurrent using the attached outerSegment model

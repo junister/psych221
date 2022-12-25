@@ -3,9 +3,9 @@
 %   thisAsset = piAssetLoad('latterA.mat');
 %
 % There are also letters from Krithin stored in the characters directory,
-% made using Blender.  
-%
-% Talk to Dave Cardinal and Krithin about those assets, and see ...
+% made using Blender. They are now usable via the characters scripts
+% and tutorials, such as s_eyeChart, charactersRender, and
+% s_varyBackgrounds
 %
 % See also
 %   s_assetsRecipe, v_Assets, piAssetLoad, piRecipeMerge
