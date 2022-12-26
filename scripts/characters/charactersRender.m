@@ -99,7 +99,7 @@ characterAssetSize = [.88 .25 1.23];
 % If the user specifies a position for each, use it
 % Otherwise use letterspacing
 if size(options.letterPosition,1) == 1
-    letterPosition = repmat(options.letterPosition,numel(aString),1);
+    letterPosition = repmat(options.letterPosition,strlength(aString),1);
 else
     letterPosition = options.letterPosition;
     options.letterSpacing = 0; % user has specified positions
@@ -108,8 +108,8 @@ end
 letterNames = [];
 
 %% add letters
-for ii = 1:numel(aString)
-    fprintf('Rendering Character(s): %s\n', aString);
+for ii = 1:strlength(aString)
+    fprintf('Rendering Character(s): %s\n', aString(ii));
     ourLetter = aString(ii);
 
     % Addresses non-case-sensitive file systems
@@ -141,40 +141,39 @@ for ii = 1:numel(aString)
 
     % This should only happen once -- Once per character
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 
-    
-    letterObject = piAssetSearch(ourLetterAsset.thisR,'object name',[ourAsset '_O']);
+
+    % Try merging before we do anything else
+    outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
+
+    % The letter we need to place
+    letterObject = piAssetSearch(outputR,'object name',[ourAsset '_O']);
     
     % location, scale, and material elements
     if ~isempty(options.letterMaterial)
-        piMaterialsInsert(ourLetterAsset.thisR,'names',{options.letterMaterial});
-        ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset',letterObject,'material name',options.letterMaterial);
+        piMaterialsInsert(outputR,'names',{options.letterMaterial});
+        ourLetterAsset.thisR = outputR.set('asset',letterObject,'material name',options.letterMaterial);
     end
 
-    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
+    ourLetterAsset.thisR = outputR.set('asset', letterObject, ...
         'rotate', options.letterRotation);
 
     % We want to scale by our characterSize compared with the desired size
     if ~isempty(options.letterSize)
         letterScale = options.letterSize ./ characterAssetSize;
-        ourLetterAsset.thisR.set('asset',letterObject, ...
+        outputR.set('asset',letterObject, ...
             'scale', letterScale);
     end
 
     % maybe we don't always want this?
     % need to make sure we know
-    ourLetterAsset.thisR.set('asset',letterObject, 'rotate', [-90 00 0]);
+    outputR.set('asset',letterObject, 'rotate', [-90 00 0]);
     
     % translate goes after scale or scale will reduce translation
     % if user has given us positions for each letter, use them
     % otherwise use start position + spacing
-    ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
+    outputR = outputR.set('asset', letterObject, ...
         'translate', letterPosition(ii,:) + options.letterSpacing * (ii-1));
 
-
-    % THINGS BREAK HERE. We have a 6m distance to the character asset
-    % in its recipe, but the recipe we are merging with has from closer to
-    % 0, so we get a much shorter distance.
-    outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
     
 end
 
