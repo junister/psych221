@@ -43,22 +43,13 @@ thisSE.set('use pinhole',true);
 % Given the distance from the scene, this FOV captures everything we want
 thisSE.set('fov',30);             % Degrees
 
-% Render the scene
-
-% humaneye is part of the latest CPU docker images
-% but is not currently supported on the GPU
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.gpuRendering = 0;
-
 thisSE.recipe.set('render type', {'radiance','depth'});
 
 %%  Render
 
-scene = thisSE.render('docker wrapper',thisDWrapper);
-
-sceneWindow(scene);   
-
+% Render the scene with the GPU
+thisDockerGPU = dockerWrapper;
+thisSE.piWRS('docker wrapper',thisDockerGPU);
 thisSE.summary;
 
 %% Now use the optics model with chromatic aberration
@@ -107,16 +98,18 @@ thisSE.set('n bounces',3);
 
 %% Have a at the letters. Lots of things you can plot in this window.
 
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
+% dockerWrapper.reset();
+% thisDocker = dockerWrapper;
+% thisDocker.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+% thisDocker.gpuRendering = 0;
+% thisSE.recipe.set('render type', {'radiance','depth'});
+
+thisSE.piWRS;
 
 % Runs on the CPU on mux for humaneye case.
-oi = thisSE.render('docker wrapper',thisDWrapper);
+% oi = thisSE.render('docker wrapper',thisDocker);
 
-oiWindow(oi);
+% oiWindow(oi);
 
 % Summarize
 thisSE.summary;
@@ -130,9 +123,11 @@ thisSE.set('rays per pixel',256);  % Pretty quick, but not high quality
 
 thisSE.set('render type',{'radiance','depth'});
 
-oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+oi = thisSE.piWRS('show',false,'name','Arizona');
 
-oi = oiSet(oi,'name','Arizona');
+% oi = thisSE.render('docker wrapper',thisDocker);  % Render and show
+% oi = oiSet(oi,'name','Arizona');
+
 oi = piAIdenoise(oi);
 oiWindow(oi);
 
@@ -157,8 +152,9 @@ thisSE.set('render type',{'radiance','depth'});
 thisSE.set('rays per pixel',64);  % Pretty quick, but not high quality
 
 thisSE.set('use pinhole',true);
-scene = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
-sceneWindow(scene);
+thisSE.piWRS('docker wrapper',thisDockerGPU);  % Render and show
+% scene = thisSE.render('docker wrapper',thisDockerGPU);  % Render and show
+% sceneWindow(scene);
 
 %%
 % CA not working in V4 yet.
@@ -166,11 +162,13 @@ sceneWindow(scene);
 
 thisSE.set('use pinhole',false);
 thisSE.set('object distance',20);
-oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
 
-oi = oiSet(oi,'name','SB Arizona');
-oi = piAIdenoise(oi);
+oi = thisSE.piWRS('name','SB Arizona','show',false);
+oi = piAIdenoise(oi); 
 oiWindow(oi);
+
+% oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
+% oi = oiSet(oi,'name','SB Arizona','show',false);
 
 thisSE.summary;
 

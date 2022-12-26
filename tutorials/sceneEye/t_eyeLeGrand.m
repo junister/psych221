@@ -39,7 +39,7 @@ toC = [ 0.1458     0.0100     1.6667];
 
 % This is rendered using a pinhole so the rendering is fast.  It has
 % infinite depth of field (no focal distance).
-thisSE = sceneEye('letters at depth','human eye','legrand');
+thisSE = sceneEye('letters at depth','eye model','legrand');
 % thisSE.summary;
 
 % Position the eye off to the side so we can see the 3D easily
@@ -54,7 +54,7 @@ thisSE.set('to',toB);
 thisSE.set('rays per pixel',32);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);  
+thisSE.set('film resolution',384);  
 
 % Have a quick check with the pinhole
 thisSE.set('use pinhole',true);
@@ -67,10 +67,9 @@ thisSE.set('use pinhole',true);
 % Given the distance from the scene, this FOV captures everything we want
 thisSE.set('fov',15);             % Degrees
 
-% Render the scene
-scene = thisSE.render('render type','radiance');
+thisSE.set('render type',{'radiance','depth'});
 
-sceneWindow(scene);
+thisSE.piWRS;
 
 thisSE.summary;
 
@@ -87,27 +86,16 @@ thisSE.set('use pinhole',false);
 % bands for speed and to get a rought sense. You can use up to 31.  It is
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
-nSpectralBands = 8;
-thisSE.set('chromatic aberration',nSpectralBands);
-
-% Find the distance to the object
-oDist = thisSE.get('object distance');
-
-% This is the distance to the B and we set our accommodation to that.
-thisSE.set('focal distance',oDist);  
+% nSpectralBands = 8;
+% thisSE.set('chromatic aberration',nSpectralBands);
 
 % Reduce the rendering noise by using more rays. 
-thisSE.set('rays per pixel',768);      
+thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);     
+thisSE.set('film resolution',384);     
 
-% This takes longer than the pinhole rendering, so we do not bother with
-% the depth.
-oi = thisSE.render('render type','radiance');
-
-% Have a look.  Lots of things you can plot in this window.
-oiWindow(oi);
+thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker);
 
 % Summarize
 thisSE.summary;

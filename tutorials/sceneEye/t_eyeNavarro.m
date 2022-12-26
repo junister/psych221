@@ -55,32 +55,18 @@ thisSE.set('to',toB);
 thisSE.set('use pinhole',true);
 
 % Given the distance from the scene, this FOV captures everything we want
-thisSE.set('fov',30);             % Degrees
+thisSE.set('fov',25);             % Degrees
 
 % Render the scene
-
-%{
-% For now, this is the only docker wrapper that should work for the
-% human eye model.
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
-%}
-
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.remoteImageTag = 'latest';
-thisDWrapper.gpuRendering = 0;
 thisSE.recipe.set('render type', {'radiance','depth'});
 
-thisSE.recipe.set('render type', {'radiance'});
+%% Render as a scene with the GPU docker wrapper
 
-%%
-scene = thisSE.render('docker wrapper',thisDWrapper);
+thisDocker = dockerWrapper;
+scene = thisSE.piWRS('docker wrapper',thisDocker);
 
-sceneWindow(scene);   
+% scene = thisSE.render('docker wrapper',thisDWrapper);
+% sceneWindow(scene);   
 
 thisSE.summary;
 
@@ -123,40 +109,19 @@ thisSE.set('to',toB);
 thisSE.set('object distance',distC);  
 
 % We can reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',256);      
+thisSE.set('rays per pixel',512);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',256);     
+thisSE.set('spatial samples',512);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
 
 %% This takes longer than the pinhole rendering
 
-%{
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
-%}
-
-% Seems to run.
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.remoteImageTag = 'latest';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
-
-% Runs on the CPU on mux for humaneye case.
-oi = thisSE.render('docker wrapper',thisDWrapper);
-
-% thisSE.get('lens file')
-
-%% Have a look.  Lots of things you can plot in this window.
-oiWindow(oi);
+% Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker);
 
 % Summarize
 thisSE.summary;
@@ -165,12 +130,9 @@ thisSE.summary;
 
 thisSE.set('accommodation',1/distC);  
 
-% This changes the distance to the camera.
-% thisSE.set('object distance',distA);  
+% Default is humanEyeDocker, so try just the default.  Should also work.
+thisSE.piWRS;
 
-[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
-oiWindow(oi);
 thisSE.summary;
-
 
 %% END
