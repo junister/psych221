@@ -65,9 +65,9 @@ arguments
     aString; % one or more characters to add to the recipe
 
     % Optional parameters
-    options.letterSpacing = .4;
+    options.letterSpacing = [.4 0 0]; % right shift if positions not specified
     options.letterMaterial = '';
-    options.letterPosition = [0 0 0];  % Meters
+    options.letterPosition = [0 0 1];  % Meters, default 'just ahead'
     options.letterRotation = [0 0 0];  % Degrees
     options.letterSize = [];
 
@@ -96,10 +96,13 @@ gotZero = false;
 characterAssetSize = [.88 .25 1.23];
 
 % Always make the number of positions equal to the number of letters.
+% If the user specifies a position for each, use it
+% Otherwise use letterspacing
 if size(options.letterPosition,1) == 1
-    letterPosition = repmat(options.letterPosition,5,1);
+    letterPosition = repmat(options.letterPosition,numel(aString),1);
 else
     letterPosition = options.letterPosition;
+    options.letterSpacing = 0; % user has specified positions
 end
 
 letterNames = [];
@@ -136,7 +139,7 @@ for ii = 1:numel(aString)
 
     %% Load letter assets
 
-    % This should only happen once, right?
+    % This should only happen once -- Once per character
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 
     
     letterObject = piAssetSearch(ourLetterAsset.thisR,'object name',[ourAsset '_O']);
@@ -150,14 +153,6 @@ for ii = 1:numel(aString)
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
         'rotate', options.letterRotation);
 
-    % Is it set the position?  Or is it set the spacing?
-    %{
-    % Space after each letter subsequent letters
-    if ii > 1
-        % Starting with the 2nd letter, translate it
-        outputR.set('asset', letterNode,'translate',[options.letterSpacing(ii-1,:)]);
-    end
-    %}
     % We want to scale by our characterSize compared with the desired size
     if ~isempty(options.letterSize)
         letterScale = options.letterSize ./ characterAssetSize;
@@ -170,8 +165,10 @@ for ii = 1:numel(aString)
     ourLetterAsset.thisR.set('asset',letterObject, 'rotate', [-90 00 0]);
     
     % translate goes after scale or scale will reduce translation
+    % if user has given us positions for each letter, use them
+    % otherwise use start position + spacing
     ourLetterAsset.thisR = ourLetterAsset.thisR.set('asset', letterObject, ...
-        'translate', letterPosition(ii,:));
+        'translate', letterPosition(ii,:) + options.letterSpacing * (ii-1));
 
 
     % THINGS BREAK HERE. We have a 6m distance to the character asset

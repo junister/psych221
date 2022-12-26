@@ -23,11 +23,13 @@ recipeSet(thisR, 'up', [0 1 0]);
 recipeSet(thisR, 'from', [0 0 0]);
 recipeSet(thisR, 'to', [0 0 5]);
 
-addMaterials(thisR)
+addMaterials(thisR);
 wallMaterial = 'wood-light-large-grain';
 piAssetSet(thisR, backWall, 'material name', wallMaterial);
+addLight(thisR);
 
-charactersRender(thisR,'ABC');
+charactersRender(thisR,'DEF','letterSize',[.1 .1 .1], letterSpacing=[.1 0 0], ...
+    letterPosition=[-.3 .3 1]);
 % I think at this point Wall is at z=2 and a,b,c are between camera & wall
 piWRS(thisR);
 %thisR.birdsEye();
@@ -35,7 +37,7 @@ piWRS(thisR);
 function addMaterials(thisR)
 
 % See list of materials, if we want to select some
-allMaterials = piMaterialPresets('list');
+allMaterials = piMaterialPresets('list', [],'show',false);
 
 % Loop through our material list, adding whichever ones work
 for iii = 1:numel(allMaterials)

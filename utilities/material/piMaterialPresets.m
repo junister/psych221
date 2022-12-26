@@ -1,4 +1,4 @@
-function newMat = piMaterialPresets(keyword,materialName)
+function newMat = piMaterialPresets(keyword,materialName, options)
 % Create materials that are tuned for appearance (preset)
 %
 % Brief
@@ -76,8 +76,11 @@ function newMat = piMaterialPresets(keyword,materialName)
 %}
 %% Parameters
 
-if ~exist('keyword','var'), error('keyword is required.'); end
-if ~exist('materialName','var'), materialName = keyword; end
+arguments
+    keyword;
+    materialName = keyword;
+    options.show = true; % whether to show the help dialog
+end
 
 %% Depending on the key word, go for it.
 switch ieParamFormat(keyword)
@@ -126,14 +129,16 @@ switch ieParamFormat(keyword)
         fprintf('\n');
         newMat = presetList;
 
-        % Now show it in a dialog box that can stay up in a screen window
-        % mats = piMaterialPresets('list');
-        h = helpdlg(presetList);
+        if options.show
+            % Now show it in a dialog box that can stay up in a screen window
+            % mats = piMaterialPresets('list');
+            h = helpdlg(presetList);
 
-        % I can change the font size, but the window clips the text.  So we
-        % would need to change the window size, too.  Maybe another time.
-        str = findall(h,'Type','Text');
-        str.FontSize = 10;
+            % I can change the font size, but the window clips the text.  So we
+            % would need to change the window size, too.  Maybe another time.
+            str = findall(h,'Type','Text');
+            str.FontSize = 10;
+        end
 
         % ------------ DIFFUSE
     case 'diffuselist'
