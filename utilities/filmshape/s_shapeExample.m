@@ -76,7 +76,9 @@ for r=1:rowcols(1)
         filmRes.y = rowcols(2);
         point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
 
-        % PBRT expects meters for lookuptable not milimeters
+        % PBRT expects meters for lookuptable not milimeters.
+        % The retina is typically around -16.2 mm from the lens, which is
+        % at 0 mm.  A bump towards the lens will be, say, -15.5 mm 
         mm2meter = 1e-3;
         pointPlusBump_meter(index,:) = [point.x point.y point.z + bump(point.x,point.y)]*mm2meter;
 
