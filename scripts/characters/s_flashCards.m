@@ -31,8 +31,12 @@ thisR.recipeSet('fov', 1); % 1
 % EXCEPT our Assets include blank backgrounds (Sigh)
 % Note that letter size is per our Blender assets which are l w h, 
 % NOT x, y, z
-charactersRender(thisR,testChars,'letterSize',[.08 .02 .08], ...
-    letterPosition=[0 .0 0]); % 6 Meters out
+charMultiple = 10; % how many times the 20/20 version
+charBaseline = .0873;
+charSize = charMultiple * charBaseline;
+
+charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
+    letterPosition=[0 charSize/10 0]); % 6 Meters out
 
 piWRS(thisR);
 %thisR.birdsEye();
@@ -61,12 +65,16 @@ function [thisR, ourMaterials, ourBackground] = prepRecipe(thisR)
 
 for ii = 24:-1:1 % number of patches -- backwards as they re-number
     try
+        ourAsset = 0; % reset
         if ii < 9
             ourAsset = piAssetSearch(thisR,'object name',['00' num2str(ii+1) '_colorChecker_O']);
         else
             ourAsset = piAssetSearch(thisR,'object name',['0' num2str(ii+1) '_colorChecker_O']);
         end
-        piAssetDelete(thisR, ourAsset);
+        % don't delete blank asset by default
+        % And deleteing a bunch of assets confuses the tree,
+        % so maybe just teleport them to Mars?
+        if ourAsset > 0, piAssetTranslate(thisR, ourAsset, [100 100 100]); end
     catch EX
         warning('Failed to delete asset %s. \n',ii, EX.message);
     end
