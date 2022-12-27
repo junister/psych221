@@ -13,6 +13,10 @@
 % See also
 %
 
+%%
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
 %% Define Bump (gaussian
 center=[0 0];sigma=0.9;
 height = 400*1e-3; % 0.4 mm
@@ -53,31 +57,29 @@ col_physicalwidth= pixelsize*colresolution;
 %% Sample positions for the lookup table
 
 index = 1;
+Zref_mm  = zeros(rowcols);
+Zbump_mm = zeros(rowcols);
+pointPlusBump_meter = zeros(prod(rowcols),3);
+
 for r=1:rowcols(1)
     for c=1:rowcols(2)
 
-
         % Define the film index (r,c) in the 2d lookuptable
         pFilm = struct;
-        pFilm.x=r;
-        pFilm.y=c;
-
+        pFilm.x = r;
+        pFilm.y = c;
 
         % Map Point to sphere using the legacy realisticEye code
         filmRes= struct;        filmRes.x=rowcols(1);        filmRes.y=rowcols(2);
         point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
 
-
-
         % PBRT expects meters for lookuptable not milimeters
-        mm2meter=1e-3;
+        mm2meter = 1e-3;
         pointPlusBump_meter(index,:) = [point.x point.y point.z+bump(point.x,point.y)]*mm2meter;
 
-
         % Keep data for plotting the surface later
-        Zref_mm(r,c)=point.z;
-        Zbump_mm(r,c)=pointPlusBump_meter(index,3)/mm2meter;
-
+        Zref_mm(r,c)  = point.z;
+        Zbump_mm(r,c) = pointPlusBump_meter(index,3)/mm2meter;
 
         index=index+1;
     end
@@ -85,11 +87,12 @@ end
 
 
 %% Plot surface
-Zref_mm(Zref_mm>0)=nan;
-Zbump_mm(Zbump_mm>-13)=nan;
-fig=figure(5);clf
+Zref_mm(Zref_mm>0)     = nan;
+Zbump_mm(Zbump_mm>-13) = nan;
+
+fig = figure(5);clf
 fig.Position = [700 487 560 145];
-fig.Position=[700 487 560 145];
+fig.Position = [700 487 560 145];
 subplot(121)
 s=surf(Zbump_mm);
 
@@ -100,28 +103,36 @@ imagesc(Zbump_mm,[-retinaDistance -15]);
 
 %% From utilities/filmshape
 
-% thisR = piRecipeDefault('scene name','lettersAtDepth');
-
 thisSE = sceneEye('letters at depth','eye model','arizona');
 
-fname = fullfile(pwd,'deleteMe.json');
+fname = fullfile(piRootPath,'local','deleteMe.json');
 piShapeWrite(fname, pointPlusBump_meter);
 
 thisSE.set('film shape file',fname);
-thisSE.get('film shape file')
+% thisSE.get('film shape file')
 
+% Read the film shape.  The film shape (fs) has a slot for a table.  The
+% table has a set of indices and corresponding points.  The points are 3D
+% values for a film position.  The indices start at 0 and are used by PBRT
+% code to index the positions.
 fs = jsonread(fname);
-% (x,y)
+
+% We render with one long list of positions.  We set the film resolution to
+% have one point for each resolution.
+% Resolution is (x,y), not row, col
 thisSE.set('film resolution',[fs.numberofpoints 1]);
 
-%
-thisD = dockerWrapper;
-thisD.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisD.gpuRendering = 0;
-
+% The samplers have some issues with TG's code, and sobol seems the least
+% problematic.
 thisSE.set('sampler subtype','sobol');
 thisSE.set('rays per pixel',64);
-[oi,result] = thisSE.render('docker wrapper',thisD);
+
+% Render with the humanEye camera model.
+thisD = dockerWrapper.humanEyeDocker;
+% oi = thisSE.render('docker wrapper',thisD);
+
+% We cannot view yet, because the data are in the format of a long line.
+oi = thisSE.piWRS('docker wrapper',thisD,'show',false);
 
 %%
 % If a general case, we have (x,y,z) in the JSON file and
@@ -154,6 +165,15 @@ xlim([-5 5]*mm2meter);
 ylim([-5 5]*mm2meter);
 colormap gray
 view(-162,86)
+
+%% Rendering on a 3D mesh
+checks = imread('hatsC.jpg');
+checks = imresize(checks,size(X));
+
+ieNewGraphWin;
+s = mesh(X,Y,Z,checks); hold on;
+s.FaceColor = 'flat';
+hold on; plot3(X(:),Y(:),Z(:),'k.'); set(gca,'zlim',[-20 bumpSize]); 
 
 %%
 % If a grid, this would work

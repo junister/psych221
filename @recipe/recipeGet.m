@@ -319,7 +319,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Vector that starts at 'to' pointing towards 'from'  
         val = thisR.lookAt.from - thisR.lookAt.to;
     case 'fromto'
-        % Vector that starts at 'from' pointing towards 'to'
+        % Differences between the 'from' and 'to'.  Points towards 'to'
         val = thisR.lookAt.to - thisR.lookAt.from;
     case {'scale'}
         % Change the size (scale) of something.  Almost always 1 1 1
@@ -1371,14 +1371,16 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
     case {'objectcoords','objectcoordinates'}
-        % Returns the coordinates of the objects (leafs of the asset tree)
-        % Units should be meters
         % coords = thisR.get('object coordinates');
         %
+        % Returns the world position of the objects (leafs of the asset
+        % tree). Units should be in meters.
+
         Objects  = thisR.get('objects');
         nObjects = numel(Objects);
 
-        % Get their world positions
+        % Get the world positions.  I don't know which element of the shape
+        % mesh this applies to.
         val = zeros(nObjects,3);
         for ii=1:nObjects
             thisNode = thisR.get('assets',Objects(ii));
@@ -1397,8 +1399,8 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisScale = thisR.get('assets',Objects(ii),'world scale');
 
             % All the object points
-            if isfield(thisNode.shape,'point3p')
-                pts = thisNode.shape.point3p;
+            if isfield(thisNode.shape{1},'point3p')
+                pts = thisNode.shape{1}.point3p;
                 if ~isempty(pts)
                     % Range of points times any scale factors on the path
                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
