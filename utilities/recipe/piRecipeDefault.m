@@ -116,7 +116,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'mccCB';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-
+    case {'flashcards'}
+        sceneDir = 'flashCards';
+        sceneFile = [sceneDir,'.pbrt'];
+        exporter = 'PARSE';
     case 'whiteboard'
         sceneDir = 'WhiteBoard';
         sceneFile = [sceneDir,'.pbrt'];
@@ -378,8 +381,6 @@ switch ieParamFormat(sceneDir)
         exporter = 'Copy';
         
         % End V3 to deprecate or update
-
-
         
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);

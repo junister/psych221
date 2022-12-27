@@ -17,13 +17,16 @@ testChars = 'D'; % just a few for debugging
 humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 
 % Start with a "generic" recipe
-thisR = piRecipeCreate('MacBethChecker');
-[thisR, ourMaterials, ourBackground] = prepRecipe(thisR); % add light, move stuff around, etc.
+[thisR, ourMaterials, ourBackground] = prepRecipe('flashCards');
 
 % now we want to make the scene FOV 1 degree
 % I think we need a camera first
 thisR.camera = piCameraCreate('pinhole');
-thisR.recipeSet('fov', 1); % 1
+thisR.recipeSet('fov', 50/60); % 50 arc-minutes is enough for 200/20 
+
+% set our film to a square
+filmSideLength = 240;
+recipeSet(thisR, 'film resolution', [filmSideLength filmSideLength]);
 
 % We've set our scene to be 1 degree (60 arc-minutes) @ 6 meters
 % For 20/20 vision characters should be .00873 meters high (5 arc-minutes)
@@ -32,11 +35,12 @@ thisR.recipeSet('fov', 1); % 1
 % Note that letter size is per our Blender assets which are l w h, 
 % NOT x, y, z
 charMultiple = 10; % how many times the 20/20 version
-charBaseline = .0873;
+charBaseline = .00873;
 charSize = charMultiple * charBaseline;
 
+% and drop the character by half its size
 charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
-    letterPosition=[0 charSize/10 0]); % 6 Meters out
+    letterPosition=[0 -1*(charSize/2) 6]); % 6 Meters out
 
 piWRS(thisR);
 %thisR.birdsEye();
@@ -58,27 +62,11 @@ for iii = 1:numel(allMaterials)
 end
 end
 
-function [thisR, ourMaterials, ourBackground] = prepRecipe(thisR)
+function [thisR, ourMaterials, ourBackground] = prepRecipe(sceneName)
 
-% The long way around to getting a simple background
-% Someday I'll learn how to do it right -djc
+thisR = piRecipeDefault('scene name',sceneName);
+thisR = addLight(thisR);
 
-for ii = 24:-1:1 % number of patches -- backwards as they re-number
-    try
-        ourAsset = 0; % reset
-        if ii < 9
-            ourAsset = piAssetSearch(thisR,'object name',['00' num2str(ii+1) '_colorChecker_O']);
-        else
-            ourAsset = piAssetSearch(thisR,'object name',['0' num2str(ii+1) '_colorChecker_O']);
-        end
-        % don't delete blank asset by default
-        % And deleteing a bunch of assets confuses the tree,
-        % so maybe just teleport them to Mars?
-        if ourAsset > 0, piAssetTranslate(thisR, ourAsset, [100 100 100]); end
-    catch EX
-        warning('Failed to delete asset %s. \n',ii, EX.message);
-    end
-end
 
 addMaterials(thisR);
 ourMaterialsMap = thisR.get('materials');
@@ -89,13 +77,14 @@ recipeSet(thisR,'to',[0 .01 10]);
 % set vertical to 0. -6 gives us 6m or 20 feet
 recipeSet(thisR,'from',[0 .01 -6]);
 
-% Now set the color of the background
-ourBackground = piAssetSearch(thisR,'object name', '001_colorChecker_O');
+% Now set the place/color of the background
+ourBackground = piAssetSearch(thisR,'object name', 'flashCard_O');
 % background is at 0 0 0 by default
-%piAssetTranslate(thisR,ourBackground,[0 0 1]); % just behind center
+piAssetTranslate(thisR,ourBackground,[0 .01 10]); % just behind center
+
 end
 
-% Not needed for MCC
+
 function thisR = addLight(thisR)
 spectrumScale = 1;
 lightSpectrum = 'equalEnergy';
