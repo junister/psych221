@@ -61,6 +61,7 @@ Zref_mm  = zeros(rowcols);
 Zbump_mm = zeros(rowcols);
 pointPlusBump_meter = zeros(prod(rowcols),3);
 
+% We need a better way to sample so we can render the OI later.
 for r=1:rowcols(1)
     for c=1:rowcols(2)
 
@@ -70,12 +71,14 @@ for r=1:rowcols(1)
         pFilm.y = c;
 
         % Map Point to sphere using the legacy realisticEye code
-        filmRes= struct;        filmRes.x=rowcols(1);        filmRes.y=rowcols(2);
+        filmRes   = struct;        
+        filmRes.x = rowcols(1);        
+        filmRes.y = rowcols(2);
         point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
 
         % PBRT expects meters for lookuptable not milimeters
         mm2meter = 1e-3;
-        pointPlusBump_meter(index,:) = [point.x point.y point.z+bump(point.x,point.y)]*mm2meter;
+        pointPlusBump_meter(index,:) = [point.x point.y point.z + bump(point.x,point.y)]*mm2meter;
 
         % Keep data for plotting the surface later
         Zref_mm(r,c)  = point.z;
@@ -87,19 +90,19 @@ end
 
 
 %% Plot surface
-Zref_mm(Zref_mm>0)     = nan;
-Zbump_mm(Zbump_mm>-13) = nan;
 
-fig = figure(5);clf
-fig.Position = [700 487 560 145];
-fig.Position = [700 487 560 145];
-subplot(121)
+Zref_mm(Zref_mm>0)     = NaN;
+Zbump_mm(Zbump_mm>-13) = NaN;
+
+fig = ieNewGraphWin; 
+subplot(121); 
 s=surf(Zbump_mm);
 
 s.EdgeColor = 'none';
 zlim([-retinaDistance -15])
-subplot(122)
+subplot(122);
 imagesc(Zbump_mm,[-retinaDistance -15]);
+axis image; colorbar;
 
 %% From utilities/filmshape
 
@@ -153,8 +156,41 @@ for t=1:fs.numberofpoints
     pixelvalue(t) = illuminance(fs.table(t).index+1); 
     
     % Record position
-    position(t,1:3)=fs.table(t).point;
+    position(t,1:3) = fs.table(t).point;
 end
+
+% Vector length of each row
+distances = vecnorm(position,2,2);
+ieNewGraphWin; histogram(distances,50);
+
+% We are picking Xq/Yq values that are out of the measurement range.  We
+% need to select the original points c
+mnmx(1,:) = min(position);
+mnmx(2,:) = max(position);
+
+xq = linspace(mnmx(1,1),mnmx(2,1),256);
+yq = linspace(mnmx(1,2),mnmx(2,2),256);
+[Xq,Yq] = meshgrid(xq,yq);
+pQ = [Xq(:),Yq(:)];
+
+distancesQ = vecnorm([Xq(:),Yq(:)],2,2);
+histogram(distancesQ,50);
+ieNewGraphWin; histogram(distancesQ,50);
+
+Vq = griddata(position(:,1),position(:,2),pixelvalue(:),fliplr(Xq),Yq);
+Zq = griddata(position(:,1),position(:,2),position(:,3),fliplr(Xq),Yq);
+
+size(Vq)
+ieNewGraphWin; imagesc(Vq);
+
+%%
+mesh(Xq,Yq,Zq);
+
+%% griddatan version
+
+VVq = griddatan(position,pixelvalue(:),Xq,Yq,Zq);
+
+%%
 
 ieNewGraphWin;
 scatter3(position(:,1),position(:,2),position(:,3), 40, pixelvalue(:), 'filled')
