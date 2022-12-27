@@ -9,9 +9,12 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 % Something still isn't quite right about the H and I assets
+% Small d also appears broken
 Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
-Alphabet_LC = 'abcdefghijklmnopqrstuvwxyz';
+Alphabet_LC = 'abcefghijklmnopqrstuvwxyz';
 Digits = '0123456789';
+allCharacters = [Alphabet_LC Alphabet_UC Digits];
+
 testChars = 'D'; % just a few for debugging
 
 humanEye = ~piCamBio(); % if using ISETBio, then use human eye
@@ -23,6 +26,15 @@ humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 % I think we need a camera first
 thisR.camera = piCameraCreate('pinhole');
 thisR.recipeSet('fov', 50/60); % 50 arc-minutes is enough for 200/20 
+
+% NOTE: We may not allow for any "padding" that is in the character
+%       assets, around the edges of the actual character.
+
+% Set quality parameters
+% High-fidelity
+thisR.set('rays per pixel',1024);
+% Normal-fidelity
+thisR.set('rays per pixel',128);
 
 % set our film to a square
 filmSideLength = 240;
@@ -38,14 +50,33 @@ charMultiple = 10; % how many times the 20/20 version
 charBaseline = .00873;
 charSize = charMultiple * charBaseline;
 
-% and drop the character by half its size
+% and lower the character position by half its size
+%{
+% for testing
 charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
     letterPosition=[0 -1*(charSize/2) 6]); % 6 Meters out
+%}
+% Now generate a full set of flash cards with black
+numMat = 0;
+
+% Can run one of the three, but maybe not all at once?
+%useCharset = Digits; % Works
+%useCharset = Alphabet_UC; % Works
+useCharset = Alphabet_LC; % Works
+for ii = 1:numel(useCharset)
+
+    % also need to set material for letter
+    numMat = numMat+ 1;
+    useMat = mod(numMat, numel(ourMaterials));
+    charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
+        letterPosition=[0 -1*(charSize/2), 6]);    
+end
 
 piWRS(thisR);
 %thisR.birdsEye();
 
 %% ------------- Support Functions Start Here
+%%
 
 function addMaterials(thisR)
 
@@ -67,6 +98,8 @@ function [thisR, ourMaterials, ourBackground] = prepRecipe(sceneName)
 thisR = piRecipeDefault('scene name',sceneName);
 thisR = addLight(thisR);
 
+% Give it a skylight (assumes we want one)
+thisR.set('skymap','sky-sunlight.exr');
 
 addMaterials(thisR);
 ourMaterialsMap = thisR.get('materials');

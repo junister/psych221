@@ -151,27 +151,27 @@ for ii = 1:strlength(aString)
     % location, scale, and material elements
     if ~isempty(options.letterMaterial)
         piMaterialsInsert(outputR,'names',{options.letterMaterial});
-        ourLetterAsset.thisR = outputR.set('asset',letterObject,'material name',options.letterMaterial);
+        ourLetterAsset.thisR = outputR.set('asset',letterObject(1),'material name',options.letterMaterial);
     end
 
-    ourLetterAsset.thisR = outputR.set('asset', letterObject, ...
+    ourLetterAsset.thisR = outputR.set('asset', letterObject(1), ...
         'rotate', options.letterRotation);
 
     % We want to scale by our characterSize compared with the desired size
     if ~isempty(options.letterSize)
         letterScale = options.letterSize ./ characterAssetSize;
-        outputR.set('asset',letterObject, ...
+        outputR.set('asset',letterObject(1), ...
             'scale', letterScale);
     end
 
     % maybe we don't always want this?
     % need to make sure we know
-    outputR.set('asset',letterObject, 'rotate', [-90 00 0]);
+    outputR.set('asset',letterObject(1), 'rotate', [-90 00 0]);
     
     % translate goes after scale or scale will reduce translation
     % if user has given us positions for each letter, use them
     % otherwise use start position + spacing
-    outputR = outputR.set('asset', letterObject, ...
+    outputR = outputR.set('asset', letterObject(1), ...
         'translate', letterPosition(ii,:) + options.letterSpacing * (ii-1));
 
     
