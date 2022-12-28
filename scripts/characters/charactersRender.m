@@ -150,7 +150,8 @@ for ii = 1:strlength(aString)
     
     % location, scale, and material elements
     if ~isempty(options.letterMaterial)
-        piMaterialsInsert(outputR,'names',{options.letterMaterial});
+        % we can assume our caller has already loaded the material?
+        % outputR = piMaterialsInsert(outputR,'names',{options.letterMaterial});
         ourLetterAsset.thisR = outputR.set('asset',letterObject(1),'material name',options.letterMaterial);
     end
 

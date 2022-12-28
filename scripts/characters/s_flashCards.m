@@ -67,9 +67,11 @@ for ii = 1:numel(useCharset)
 
     % also need to set material for letter
     numMat = numMat+ 1;
-    useMat = mod(numMat, numel(ourMaterials));
+    useMat = ourMaterials(mod(numMat, numel(ourMaterials)));
+
     charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
-        letterPosition=[0 -1*(charSize/2), 6]);    
+        'letterPosition',[0 -1*(charSize/2), 6], ...
+        'letterMaterial', useMat{1}.name);    
 end
 
 piWRS(thisR);
