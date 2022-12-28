@@ -46,7 +46,7 @@ recipeSet(thisR, 'film resolution', [filmSideLength filmSideLength]);
 % EXCEPT our Assets include blank backgrounds (Sigh)
 % Note that letter size is per our Blender assets which are l w h,
 % NOT x, y, z
-charMultiple = 5; % 10; % how many times the 20/20 version
+charMultiple = 10; % 10; % how many times the 20/20 version
 charBaseline = .00873;
 charSize = charMultiple * charBaseline;
 
@@ -69,8 +69,10 @@ for ii = 1:numel(useCharset)
     numMat = numMat+ 1;
     useMat = ourMaterials(mod(numMat, numel(ourMaterials)));
 
+    % from winds up at -6, so we need to offset
+    wereAt = recipeGet(thisR,'from');
     charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
-        'letterPosition',[0 -1*(charSize/2), 6], ...
+        'letterPosition',[0 -1*(charSize/2), 6] + wereAt, ...
         'letterMaterial', useMat{1}.name);
 end
 
@@ -137,25 +139,26 @@ end
 %% Eye/Cone code grafted from s_eyeChart
 %% Need to simplify & customize
 
-function DoEyeStuff(obj, options) 
+function DoEyeStuff(obj, options)
 
 arguments
     obj;
     options.thisName = 'letter';
 end
 
-% not sure if we can compare class or not
-if isequal(class(obj),'oi')
-    error("Don't know how to handle oi");
-else
-    scene = obj;
-end
-
-%  Needs ISETBio -- set thread pool for performance
+%  Needs ISETBio -- and set parallel to thread pool for performance
 if piCamBio
     warning('Cone Mosaic requires ISETBio');
     return
 else
+    % Create an oi if we aren't passed one
+    if isequal(class(obj),'oi')
+        oi=obj;
+    else
+        scene = obj;
+        oi = oiCreate('wvf human');
+
+    end
 
     poolobj = gcp('nocreate');
     if isempty(poolobj)
@@ -168,7 +171,6 @@ else
     cMosaic = coneMosaic;
     cMosaic.fov = [1 1]; % 1 degree in each dimension
     cMosaic.emGenSequence(50);
-    oi = oiCreate('wvf human');
 
     oi = oiCompute(oi, scene);
     cMosaic.name = options.thisName;
