@@ -25,7 +25,7 @@ humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 % now we want to make the scene FOV 1 degree
 % I think we need a camera first
 thisR.camera = piCameraCreate('pinhole');
-thisR.recipeSet('fov', 50/60); % 50 arc-minutes is enough for 200/20 
+thisR.recipeSet('fov', 50/60); % 50 arc-minutes is enough for 200/20
 
 % NOTE: We may not allow for any "padding" that is in the character
 %       assets, around the edges of the actual character.
@@ -44,7 +44,7 @@ recipeSet(thisR, 'film resolution', [filmSideLength filmSideLength]);
 % For 20/20 vision characters should be .00873 meters high (5 arc-minutes)
 % For 200/20 they are 50 arc-minutes (or .0873 meters high)
 % EXCEPT our Assets include blank backgrounds (Sigh)
-% Note that letter size is per our Blender assets which are l w h, 
+% Note that letter size is per our Blender assets which are l w h,
 % NOT x, y, z
 charMultiple = 10; % how many times the 20/20 version
 charBaseline = .00873;
@@ -71,11 +71,13 @@ for ii = 1:numel(useCharset)
 
     charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
         'letterPosition',[0 -1*(charSize/2), 6], ...
-        'letterMaterial', useMat{1}.name);    
+        'letterMaterial', useMat{1}.name);
 end
 
-piWRS(thisR);
-%thisR.birdsEye();
+% obj is either a scene, or an oi if we use optics
+[obj] = piWRS(thisR);
+
+DoEyeStuff(obj); % figure out what we want here
 
 %% ------------- Support Functions Start Here
 %%
@@ -130,4 +132,127 @@ lgt = piLightCreate('scene light',...
     'from', [0 0 0],  'to', [0 0 20]);
 thisR.set('light', lgt, 'add');
 
+end
+
+%% Eye/Cone code grafted from s_eyeChart
+%% Need to simplify & customize
+
+function DoEyeStuff(obj, options) % TBD
+
+arguments
+    obj;
+    options.thisName = 'letter';
+end
+
+% not sure if we can compare class or not
+if isequal(class(obj),'oi')
+    error("Don't know how to handle oi");
+else
+    scene = obj;
+end
+
+%  Needs ISETBio -- set thread pool for performance
+if piCamBio
+    warning('Cone Mosaic requires ISETBio');
+    return
+else
+
+    poolobj = gcp('nocreate');
+    if isempty(poolobj)
+        parpool('Threads');
+    end
+
+    % we can render the cone mosaics, but another option is an eye model
+    useConeMosaic = true;
+
+    if useConeMosaic
+        % Create the coneMosaic object
+        % We want this to be about .35mm in diameter
+        % or 1 degree FOV
+        cMosaic = coneMosaic;
+        cMosaic.fov = [1 1]; % 1 degree in each dimension
+        cMosaic.emGenSequence(50);
+        oi = oiCreate('wvf human');
+
+        oi = oiCompute(oi, scene);
+        cMosaic.name = options.thisName;
+        cMosaic.compute(oi);
+        cMosaic.computeCurrent;
+
+        cMosaic.window;
+
+    else % Try Arizona eye model
+
+        thisSE = thisR;
+
+        % humaneye is part of the latest CPU docker images
+        % but is not currently supported on the GPU
+        thisDWrapper = dockerWrapper;
+        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+        thisDWrapper.gpuRendering = 0;
+
+        thisSE.recipe.set('render type', {'radiance','depth'});
+
+        %%  Render
+
+        scene = thisSE.render('docker wrapper',thisDWrapper);
+
+        sceneWindow(scene);
+
+        thisSE.summary;
+
+        %% Now use the optics model with chromatic aberration
+
+        % Turn off the pinhole.  The model eye (by default) is the Navarro model.
+        thisSE.set('use optics',true);
+
+        % True by default anyway
+        thisSE.set('mmUnits', false);
+
+        % We turn on chromatic aberration.  That slows down the calculation, but
+        % makes it more accurate and interesting.  We often use only 8 spectral
+        % bands for speed and to get a rought sense. You can use up to 31.  It is
+        % slow, but that's what we do here because we are only rendering once. When
+        % the GPU work is completed, this will be fast!
+
+        % Distance in meters to objects to govern accommodation.
+        %thisSE.set('to',toA); distA = thisSE.get('object distance');
+        %thisSE.set('to',toB); distB = thisSE.get('object distance');
+        %thisSE.set('to',toC); distC = thisSE.get('object distance');
+        %thisSE.set('to',toB);
+
+        % This is the distance we set our accommodation to that. Try distC + 0.5
+        % and then distA.  At a resolution of 512, I can see the difference.  I
+        % don't really understand the units here, though.  (BW).
+        %
+        % thisSE.set('accommodation',1/(distC + 0.5));
+
+        %thisSE.set('object distance',distC);
+
+        % We can reduce the rendering noise by using more rays. This takes a while.
+        thisSE.set('rays per pixel',256);
+
+        % Increase the spatial resolution by adding more spatial samples.
+        thisSE.set('spatial samples',256);
+
+        % Ray bounces
+        thisSE.set('n bounces',3);
+
+        %% Have a at the letters. Lots of things you can plot in this window.
+
+        dockerWrapper.reset();
+        thisDWrapper = dockerWrapper;
+        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+        thisDWrapper.gpuRendering = 0;
+        thisSE.recipe.set('render type', {'radiance','depth'});
+
+        % Runs on the CPU on mux for humaneye case.
+        oi = thisSE.render('docker wrapper',thisDWrapper);
+
+        oiWindow(oi);
+
+        % Summarize
+        thisSE.summary;
+    end
+end
 end
