@@ -15,8 +15,6 @@ Alphabet_LC = 'abcefghijklmnopqrstuvwxyz';
 Digits = '0123456789';
 allCharacters = [Alphabet_LC Alphabet_UC Digits];
 
-testChars = 'D'; % just a few for debugging
-
 % not always true. Sometimes we want film for the scene
 %humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 
@@ -25,7 +23,8 @@ testChars = 'D'; % just a few for debugging
 charMultiple = 10; % 10; % how many times the 20/20 version
 
 charBaseline = .00873; % 20/20 @ 6 meters
-charSize = charMultiple * charBaseline;
+charMultiples = [10 5 1]; % using multiple sizes in a single recipe still fails
+charSizes = charMultiples * charBaseline;
 
 % and lower the character position by half its size
 %{
@@ -45,29 +44,33 @@ useCharset = 'Aa'; % for testing
 numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
 
-    % right now we create a new recipe for every flashcard
-    % but can experiment with trying to remove & replace
-    % letters & background (has been confusing so far)
-    [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256);
-    
     % also need to set material for letter
     % for just  black don't incrment
     numMat = 1; % numMat+ 1;
     useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
-    % from winds up at -6, so we need to offset
-    wereAt = recipeGet(thisR,'from');
-
     % copying the recipe doesn't work right, unfortunately!
     %finalRecipe = thisR.copy(); % don't pollute the original
-    charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
-        'letterPosition',[0 -1*(charSize/2), 6] + wereAt, ...
-        'letterMaterial', useMat);
-    % obj is either a scene, or an oi if we use optics
-    [obj] = piWRS(thisR);
+    for jj = 1:numel(charSizes)
 
-    % Needs more params:)
-    %charSampleCreate(obj, thisR); % figure out what we want here
+        % right now we create a new recipe for every flashcard
+        % but can experiment with trying to remove & replace
+        % letters & background (has been confusing so far)
+        [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256);
+
+        % from winds up at -6, so we need to offset
+        wereAt = recipeGet(thisR,'from');
+
+        charactersRender(thisR,useCharset(ii), 'letterSize',[charSizes(jj) .02 charSizes(jj)], ...
+            'letterPosition',[0 -1*(charSizes(jj)/2), 6] + wereAt, ...
+            'letterMaterial', useMat);
+        % obj is either a scene, or an oi if we use optics
+        [obj] = piWRS(thisR);
+
+        % Needs more params:)
+        %charSampleCreate(obj, thisR); % figure out what we want here
+    end
+
 
 end
 
