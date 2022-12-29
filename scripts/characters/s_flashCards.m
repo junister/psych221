@@ -68,9 +68,11 @@ for ii = 1:numel(useCharset)
         [obj] = piWRS(thisR);
 
         % Needs more params:)
-        %charSampleCreate(obj, thisR); % figure out what we want here
+        cSample = characterSample('recipe', thisR); 
+        % set any additional needed parameters
+        % call methods to write it out
+        
     end
-
 
 end
 

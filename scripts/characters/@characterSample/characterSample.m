@@ -18,7 +18,7 @@ classdef characterSample < handle
         % separately to make it easier to do db searches, and in case
         % we have large recipes that won't fit in the database
         type = 'character';
-        recipe = thisR; % includes mapping to uc_
+        recipe; % includes mapping to uc_
         character = ''; % the character being rendered
         fov = 1; % Default
         resolution = [240 240]; % film resolution
@@ -48,40 +48,13 @@ classdef characterSample < handle
             %% Create a usable sample image and mosaic for
             arguments 
                 options.Recipe;
-
             end
+            recipe = options.Recipe;
+        end
 
-            %  Needs ISETBio -- and set parallel to thread pool for performance
-            if piCamBio
-                warning('Cone Mosaic requires ISETBio');
-                return
-            end
-            % Create an oi if we aren't passed one
-            if isequal(class(obj),'oi')
-                oi=obj;
-            else
-                scene = obj;
-                oi = oiCreate('wvf human');
+        function saveCharacterSample(obj)
 
-            end
-
-            poolobj = gcp('nocreate');
-            if isempty(poolobj)
-                parpool('Threads');
-            end
-
-            % Create the coneMosaic object
-            % We want this to be about .35mm in diameter
-            % or 1 degree FOV
-            cMosaic = coneMosaic;
-            cMosaic.fov = [1 1]; % 1 degree in each dimension
-            cMosaic.emGenSequence(50);
-
-            oi = oiCompute(oi, scene);
-            cMosaic.name = options.thisName;
-            cMosaic.compute(oi);
-            cMosaic.computeCurrent;
-
+            cMosaic = computeConeMosaic(obj);
             % We now have a recipe, an oi and/or scene, and a cone mosaic with absorbtions
             % We get both a scene and an oi if the scene has been rendered with pinhole
             % The next step is to save it for analysis
@@ -107,10 +80,15 @@ classdef characterSample < handle
             % Check Results == before saving metadata into DB
             % We switch based on which one in the save routine, so maybe we
             % can simplify to save all three?
-            result = saveSampleDataFiles('oi',oi, 'scene', scene, 'cMosaic', cMosaic);
+            result = saveDataFiles(obj, 'oi',oi, 'scene', scene, 'cMosaic', cMosaic);
+            if result == 0
+                % Save Metadata
+                % ...
+                % save recipe
+            else
+                warning("unable to save data files");
+            end
 
-            % Save Metadata
-            % ...
         end
 
 
