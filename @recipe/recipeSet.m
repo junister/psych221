@@ -291,7 +291,7 @@ switch param
                 % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
                 % [az, columnDescription]  = arizonaLensCreate(1);
                 thisR.camera.retinalDistance.value = val;
-                thisR.camera.focaldistance.type = 'float';
+                thisR.camera.retinalDistance.type = 'float';
 
                 % pbrt v4 does not allow this field
                 if isfield(thisR.camera,'focusdistance')

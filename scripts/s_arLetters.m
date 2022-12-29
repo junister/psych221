@@ -122,7 +122,7 @@ piMaterialsInsert(thisSE.recipe,'groups',{'glass','diffuse','wood','brick'});
 % For glass and metal, multiple bounces is needed.
 thisSE.set('nbounces',5);
 
-thisSE.get('print materials')
+thisSE.get('print materials');
 
 %%
 thisSE.set('asset', letterA, 'material name', 'White');
@@ -145,17 +145,16 @@ thisSE.recipe.show('objects');
 % 
 % Add those in to make some point about stereo.
 from = thisSE.get('from');
-thisSE.recipe.set('render type',{'radiance'}); 
+thisSE.set('render type',{'radiance'}); 
 
 %%
 thisSE.set('from',from - [0.06 0.0 0]);
-scene = thisSE.render; 
-sceneWindow(scene);
+thisSE.piWRS; 
+
 
 %%
 thisSE.set('from',from + [0.06 0.0 0]);
-scene = thisSE.render; 
-sceneWindow(scene);
+thisSE.piWRS; 
 
 %% Use the eye model.  Requires CPU, however.
 
@@ -167,8 +166,8 @@ thisSE.set('use pinhole',false);
 % bands for speed and to get a rought sense. You can use up to 31.  It is
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
-nSpectralBands = 8;
-thisSE.set('chromatic aberration',nSpectralBands);
+% nSpectralBands = 8;
+% thisSE.set('chromatic aberration',nSpectralBands);
 
 % Find the distance to the object
 oDist = thisSE.get('object distance');
@@ -183,11 +182,9 @@ thisSE.set('rays per pixel',256);
 thisSE.set('spatial samples',512);     
 
 thisSE.set('from',from);
-oi = thisSE.render('render type','radiance');
-oiWindow(oi);
+thisSE.piWRS;
 
-% This takes longer than the pinhole rendering, so we do not bother with
-% the depth.
+%% This takes longer than the pinhole rendering, 
 thisSE.set('from',from - [0.06,0,0]);
 oi = thisSE.render('render type','radiance');
 oiWindow(oi);
