@@ -66,29 +66,25 @@ dataSample.illumination = ''; NEED TO SET, COULD BE COMPLEX
 dataSample.mosaicMetaData = ''; NEED TO SET
 
 
-%% Get ID & save Metadata
-
-docSample.ID = getDataSampleID(); % pass some params
+%% Get ID
+dataSample.ID = getDataSampleID(); % pass some params
 
 %% Save oi/scene/mosaic
+% The hope is that they can be saved in directories with those names
+% but file names that are "ID.mat" (unless JSON is needed/practical).
+
+% Check Results == before saving metadata into DB
+% We switch based on which one in the save routine, so maybe we
+% can simplify to save all three? 
+result = saveSampleDataFiles('oi',oi, 'scene', scene, 'cMosaic', cMosaic);
+
+% Save Metadata
+% ...
 
 % =======================================================================
 %% START SUPPORT FUNCTIONS HERE
 %%
-    function ID =  getDataSampleID(prefix)
 
-        timeStampSeparator = '__'; % keep timestamp accessible
-
-        % figure out a uniqueID that would be helpful
-        % Time should be GMT (I think) although mostly it needs to help
-        % with local values. I guess we could store timezone.
-        % NOTE: They want us to use datetime, but I can't find an easy way
-        % to get it to use milliseconds. Example code in the doc doesn't
-        % work.
-        timeStamp = datestr(now,'yyyy_mm_dd_HH_MM_SS_FFF'); %#ok<TNOW1,DATST> 
-        ID = [prefix timeStampSeparator timeStamp];
-
-    end
 
 end
 
