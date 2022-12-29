@@ -29,15 +29,19 @@ SE.set('retina semidiam',3.942150,'mm');
 %% Define Bump (gaussian)
 
 % These will be superimposed on the default shape.
-center = [0 0];
-sigma  = 0.9;
+
+% Bump height and width?
 height = 400*1e-3; % 0.4 mm
-width  = 400*1e-3; % 0.4 mm
+% width  = 400*1e-3; % 0.4 mm
 
 maxnorm=@(x)x;
+
+center = [0 0]; sigma  = 0.9;
 bump1=@(x,y) 2*height*maxnorm(exp(- ((x-center(1))^2+(y-center(2))^2)/(2*sigma^2)));
+
 center=[2 0];sigma=0.9;
 bump2=@(x,y) 2*height*maxnorm(exp(- ((x-center(1))^2+(y-center(2))^2)/(2*sigma^2)));
+
 center=[-1.9 -2];sigma=0.9;
 bump3=@(x,y) 2*height*maxnorm(exp(- ((x-center(1))^2+(y-center(2))^2)/(2*sigma^2)));
 
@@ -70,80 +74,40 @@ filmWidth  = SE.get('film width','m');
 %% Sample positions for the lookup table
 
 index = 1;
-Zref_mm  = zeros(rowcols);
-Zbump_mm = zeros(rowcols);
+% Zref_mm  = zeros(rowcols);
+% Zbump_mm = zeros(rowcols);
 filmXYZ_m = zeros(prod(rowcols),3);
 
 x = linspace(-filmWidth/2,filmWidth/2,rowcols(2));
 y = linspace(-filmHeight/2,filmHeight/2,rowcols(1));
 
-sigma = 0.01;  % Millimeters
-
-% We need a better way to sample so we can render the OI later.
-for r=1:rowcols(1)
-    for c=1:rowcols(2)
-
-        % A flat surface
-        point.x = x(c); 
-        point.y = y(r);
-
-        % This is the key place to put in a z-dimension.
-        point.z = (-16.32 + randn(1,1)*sigma)*1e-3;
-
-        filmXYZ_m(index,:) = [point.x point.y point.z];
-        index=index+1;
-
-        %{
-        % Define the film index (r,c) in the 2d lookuptable
-        pFilm = struct;
-        pFilm.x = r;
-        pFilm.y = c;
-
-        % Map Point to sphere using the legacy realisticEye code
-        filmRes   = struct;        
-        filmRes.x = rowcols(1);        
-        filmRes.y = rowcols(2);
-
-        % This is the original retinal sphere shape method
-        point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
-
-
-        % PBRT expects meters for lookuptable not milimeters.
-        % The retina is typically around -16.2 mm from the lens, which is
-        % at 0 mm.  A bump towards the lens will be, say, -15.5 mm 
-        mm2meter = 1e-3;
-        pointPlusBump_meter(index,:) = [point.x point.y point.z + bump(point.x,point.y)]*mm2meter;
-
-        % Keep data for plotting the surface later.  This is the sphere
-        Zref_mm(r,c)  = point.z;
-
-        % This is the sphere with the added bump
-        Zbump_mm(r,c) = pointPlusBump_meter(index,3)/mm2meter;
-
-        index=index+1;
-        %}
-
-    end
+% shapeType = 'flatnoisy';
+shapeType = 'gaussian bump';
+switch ieParamFormat(shapeType)
+    case 'flatnoisy'
+        % We need a better way to sample so we can render the OI later.
+        sigma = 0.01;  % SD of retinal flatness in Millimeters
+        for r=1:rowcols(1)
+            for c=1:rowcols(2)
+                z = (-16.32 + randn(1,1)*sigma)*1e-3;
+                filmXYZ_m(index,:) = [x(c) y(r) z];
+                index=index+1;
+            end
+        end
+    case 'gaussianbump'
+        height_mm = 0.3;
+        bump = fspecial('gaussian',rowcols,10);
+        bump = ieScale(bump,0,height_mm);
+        for r=1:rowcols(1)
+            for c=1:rowcols(2)
+                z = (-16.32 + bump(r,c))*1e-3;
+                filmXYZ_m(index,:) = [x(c) y(r) z];
+                index=index+1;
+            end
+        end
+    otherwise
 end
 
-
-%% Plot surface
-%{
-Zref_mm(Zref_mm>0)     = NaN;
-Zbump_mm(Zbump_mm>-13) = NaN;
-
-ieNewGraphWin; 
-
-subplot(121); 
-s=surf(Zbump_mm);
-
-s.EdgeColor = 'none';
-zlim([-retinaDistance -15])
-subplot(122);
-imagesc(Zbump_mm,[-retinaDistance -15]);
-axis image; colorbar;
-
-%}
 
 %% Show the film surface graph
 
@@ -156,10 +120,14 @@ surf(filmSurface(:,:,3));
 mesh(filmSurface(:,:,3));
 set(gca,'zlim',[-16.5 -16]*1e-3)
 %}
+%%
 
 %% From utilities/filmshape
 
 thisSE = sceneEye('letters at depth','eye model','arizona');
+% thisSE = sceneEye('slanted edge','eye model','arizona');
+
+thisSE.set('retina semidiam',SE.get('retina semidiam'));
 
 fname = fullfile(piRootPath,'local','deleteMe.json');
 piShapeWrite(fname, filmXYZ_m);
@@ -208,7 +176,17 @@ oiWindow(oi);
 % corresponding radiance and illuminance ... 
 illuminance = oiGet(oi,'illuminance');
 
-% Try to find the mesh method in t_retinalShapes
+X = filmSurface(:,:,1);
+Y = filmSurface(:,:,2);
+Z = filmSurface(:,:,3);
+
+ieNewGraphWin;
+s = mesh(X,Y,Z,illuminance);
+hold on;
+s.FaceLighting = 'gouraud';
+colormap(gray);
+
+% Try to find the mesh method in s_retinalShapes
 %
 
 % Each point in the rendered oi corresponds to a position specified by
@@ -249,7 +227,7 @@ Zq = griddata(position(:,1),position(:,2),position(:,3),fliplr(Xq),Yq);
 size(Vq)
 ieNewGraphWin; imagesc(Vq);
 
-s%%
+%%
 mesh(Xq,Yq,Zq);
 
 %% griddatan version
@@ -289,7 +267,50 @@ oiWindow(oi);
 
 %% END
 
-%% END
+%{
+        % Define the film index (r,c) in the 2d lookuptable
+        pFilm = struct;
+        pFilm.x = r;
+        pFilm.y = c;
+
+        % Map Point to sphere using the legacy realisticEye code
+        filmRes   = struct;        
+        filmRes.x = rowcols(1);        
+        filmRes.y = rowcols(2);
+
+        % This is the original retinal sphere shape method
+        point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
 
 
+        % PBRT expects meters for lookuptable not milimeters.
+        % The retina is typically around -16.2 mm from the lens, which is
+        % at 0 mm.  A bump towards the lens will be, say, -15.5 mm 
+        mm2meter = 1e-3;
+        pointPlusBump_meter(index,:) = [point.x point.y point.z + bump(point.x,point.y)]*mm2meter;
+
+        % Keep data for plotting the surface later.  This is the sphere
+        Zref_mm(r,c)  = point.z;
+
+        % This is the sphere with the added bump
+        Zbump_mm(r,c) = pointPlusBump_meter(index,3)/mm2meter;
+
+        index=index+1;
+        %}
+%% Plot surface
+%{
+Zref_mm(Zref_mm>0)     = NaN;
+Zbump_mm(Zbump_mm>-13) = NaN;
+
+ieNewGraphWin; 
+
+subplot(121); 
+s=surf(Zbump_mm);
+
+s.EdgeColor = 'none';
+zlim([-retinaDistance -15])
+subplot(122);
+imagesc(Zbump_mm,[-retinaDistance -15]);
+axis image; colorbar;
+
+%}
 
