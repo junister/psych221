@@ -17,9 +17,11 @@ allCharacters = [Alphabet_LC Alphabet_UC Digits];
 
 testChars = 'D'; % just a few for debugging
 
-humanEye = ~piCamBio(); % if using ISETBio, then use human eye
+% not always true. Sometimes we want film for the scene
+%humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 
-% Start with a "generic" recipe
+% Start with a "generic" recipe that has a light
+% and whatever materials we can load
 [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards');
 
 % now we want to make the scene FOV 1 degree
@@ -36,18 +38,22 @@ thisR.set('rays per pixel',1024);
 % Normal-fidelity
 thisR.set('rays per pixel',256);
 
-% set our film to a square
+% set our film to a square, like the characters on an eye chart
+% and to mimic the fovea area later on
 filmSideLength = 240;
 recipeSet(thisR, 'film resolution', [filmSideLength filmSideLength]);
 
 % We've set our scene to be 1 degree (60 arc-minutes) @ 6 meters
 % For 20/20 vision characters should be .00873 meters high (5 arc-minutes)
 % For 200/20 they are 50 arc-minutes (or .0873 meters high)
-% EXCEPT our Assets include blank backgrounds (Sigh)
 % Note that letter size is per our Blender assets which are l w h,
 % NOT x, y, z
+
+% We will want to iterate over the charMultiple
+% once we get this working for one multiple
 charMultiple = 10; % 10; % how many times the 20/20 version
-charBaseline = .00873;
+
+charBaseline = .00873; % 20/20 @ 6 meters
 charSize = charMultiple * charBaseline;
 
 % and lower the character position by half its size
@@ -56,31 +62,33 @@ charSize = charMultiple * charBaseline;
 charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
     letterPosition=[0 -1*(charSize/2) 6]); % 6 Meters out
 %}
-% Now generate a full set of flash cards with black
-numMat = 0;
+% Now generate a full set of flash cards with black background
 
 % Can run one of the three, but maybe not all at once?
+% Eventually we will concatenate or iterate through them
 useCharset = Digits; % Works
 %useCharset = Alphabet_UC; % Works
 %useCharset = Alphabet_LC; % Works
+
+numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
 
     % also need to set material for letter
     numMat = numMat+ 1;
-    useMat = ourMaterials(mod(numMat, numel(ourMaterials)));
+    useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
     % from winds up at -6, so we need to offset
     wereAt = recipeGet(thisR,'from');
     charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
         'letterPosition',[0 -1*(charSize/2), 6] + wereAt, ...
-        'letterMaterial', useMat{1}.name);
+        'letterMaterial', useMat);
 end
 
 % obj is either a scene, or an oi if we use optics
 [obj] = piWRS(thisR);
 
 % Needs more params:)
-charSampleCreate(obj, thisR); % figure out what we want here
+%charSampleCreate(obj, thisR); % figure out what we want here
 
 %% ------------- Support Functions Start Here
 %%
@@ -110,7 +118,7 @@ thisR.set('skymap','sky-sunlight.exr');
 
 addMaterials(thisR);
 ourMaterialsMap = thisR.get('materials');
-ourMaterials = values(ourMaterialsMap);
+ourMaterials = keys(ourMaterialsMap);
 
 recipeSet(thisR,'to',[0 .01 10]);
 

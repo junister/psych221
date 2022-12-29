@@ -760,7 +760,8 @@ classdef dockerWrapper < handle
             % Current GPU Options at vistalab:
             %
             %   muxreconrt:
-            %     GPU 0: Nvidia 3070 -- -ampere -- (Broken)
+            %     GPU 0: Nvidia 3070 -- -ampere --
+            %     dockerWrapper.setPref('whichGPU',0);
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
             %     GPU 2: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 2);
             %

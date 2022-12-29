@@ -1,4 +1,4 @@
-function result = saveSampleDataFiles(options)
+function result = saveDataFiles(options)
         % find base storage folder, can leverage off prepData for DB
         % version
         arguments
