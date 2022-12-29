@@ -26,7 +26,8 @@ function result = saveSampleDataFiles(options)
 
         % make sure we get what we want for 'object' 
         % Kind of yucky
-        % !! We might actually need to save all three (DOH!)
+        % Need to decide whether to call for all 3 in one function
+        % or have 3 functions that each call for separate ones
         switch class(object)
             case 'oi'
                 saveObject = 'oi';
