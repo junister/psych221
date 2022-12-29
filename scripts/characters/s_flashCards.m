@@ -79,7 +79,8 @@ end
 % obj is either a scene, or an oi if we use optics
 [obj] = piWRS(thisR);
 
-DoEyeStuff(obj); % figure out what we want here
+% Needs more params:)
+charSampleCreate(obj, thisR); % figure out what we want here
 
 %% ------------- Support Functions Start Here
 %%
@@ -136,50 +137,5 @@ thisR.set('light', lgt, 'add');
 
 end
 
-%% Eye/Cone code grafted from s_eyeChart
-%% Need to simplify & customize
-
-function DoEyeStuff(obj, options)
-
-arguments
-    obj;
-    options.thisName = 'letter';
-end
-
-%  Needs ISETBio -- and set parallel to thread pool for performance
-if piCamBio
-    warning('Cone Mosaic requires ISETBio');
-    return
-else
-    % Create an oi if we aren't passed one
-    if isequal(class(obj),'oi')
-        oi=obj;
-    else
-        scene = obj;
-        oi = oiCreate('wvf human');
-
-    end
-
-    poolobj = gcp('nocreate');
-    if isempty(poolobj)
-        parpool('Threads');
-    end
-
-    % Create the coneMosaic object
-    % We want this to be about .35mm in diameter
-    % or 1 degree FOV
-    cMosaic = coneMosaic;
-    cMosaic.fov = [1 1]; % 1 degree in each dimension
-    cMosaic.emGenSequence(50);
-
-    oi = oiCompute(oi, scene);
-    cMosaic.name = options.thisName;
-    cMosaic.compute(oi);
-    cMosaic.computeCurrent;
-
-    cMosaic.window;
 
 
-
-end
-end
