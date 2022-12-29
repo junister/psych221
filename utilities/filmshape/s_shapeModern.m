@@ -1,4 +1,4 @@
-% s_shapeExample
+% s_shapeModern
 %
 % In the newest version  of Human Eye in PBRT v4 (TG), we have the
 % ability to give PBRT an arbitrary lookuptable to represent positions
@@ -11,7 +11,7 @@
 % to do, but it ran through the first visualization.
 %
 % See also
-%
+%  s_shapeExample
 
 %%
 ieInit;
@@ -85,7 +85,9 @@ for r=1:rowcols(1)
 
         % A flat surface
         point.x = x(c); 
-        point.y = y(r); 
+        point.y = y(r);
+
+        % This is the key place to put in a z-dimension.
         point.z = (-16.32 + randn(1,1)*sigma)*1e-3;
 
         filmXYZ_m(index,:) = [point.x point.y point.z];
