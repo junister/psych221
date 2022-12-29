@@ -474,8 +474,19 @@ switch ieParamFormat(param)  % lower case, no spaces
         % the realisticEye human models.
         val = piDirGet('lens');
     case 'lensdiroutput'
-        % Directory where we are stsring the lens file for rendering
-        val = fullfile(thisR.get('outputdir'),'lens');
+        % thisR.get('lens dir output')
+        % Directory where we plan to store the lens file for rendering
+        %
+        % The directory depends on the scene - outputdir/lens. If
+        % no scene is defined the output dir is empty and we use
+        % iset3d/local/lens.
+        outdir = thisR.get('output dir');
+        if isempty(outdir)
+            val = fullfile(piRootPath,'local','lens');
+            if ~exist(val,'dir'), mkdir(val); end
+        else
+            val = fullfile(thisR.get('outputdir'),'lens');
+        end
     case 'lensbasename'
         % Just the name, like fisheye
         val = thisR.get('lens file');
@@ -995,19 +1006,18 @@ switch ieParamFormat(param)  % lower case, no spaces
         %}
 
     case {'samplespacing'}
-        % Distance in meters between the row and col samples
+        % thisR.get('sample spacing',unit)
+        %
+        % Distance between the row and col samples.  Default is 'mm'
 
         % This formula assumes film diagonal pixels
-        val = thisR.get('filmdiagonal')/norm(thisR.get('spatial samples'));
+        val = thisR.get('filmdiagonal','mm')/norm(thisR.get('spatial samples'));
         
-        %{
-        % We want more of these. The problem is many of the
         if isempty(varargin), return;
         else
            val = val*1e-3;  % Convert to meters from mm
            val = val*ieUnitScaleFactor(varargin{1});
         end
-        %}
 
     case 'filmxresolution'
         % An integer specifying number of samples
@@ -1017,19 +1027,36 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = [thisR.film.yresolution.value];
 
     case {'filmwidth'}
+        % thisR.get('film width',unit);
         % x-dimension, columns
+        unit = 'mm';
+        if numel(varargin) == 1
+            unit = varargin{1};
+        end
         ss   = thisR.get('spatial samples'); % Number of samples
-        val = ss(1)*thisR.get('sample spacing','mm');
+        val = ss(1)*thisR.get('sample spacing',unit);
     case {'filmheight'}
+        % thisR.get('film height',unit);
         % y-dimension, rows
+        % Default 'mm'
+        unit = 'mm';
+        if numel(varargin) == 1
+            unit = varargin{1};
+        end
         ss   = thisR.get('spatial samples'); % Number of samples
-        val = ss(2)*thisR.get('sample spacing','mm');
+        val = ss(2)*thisR.get('sample spacing',unit);
     case 'filmsize'
-        val(1) = thisR.get('film width');
-        val(2) = thisR.get('film height');
+        unit = 'mm';
+        if numel(varargin) == 1
+            unit = varargin{1};
+        end
+        val(1) = thisR.get('film width',unit);
+        val(2) = thisR.get('film height',unit);
 
     case 'aperturediameter'
-        % Needs to be checked.  Default units are meters or millimeters?
+        % thisR.get('aperture diameter',units);
+        %
+        % Default units are millimeters
         if isfield(thisR.camera, 'aperturediameter') ||...
                 isfield(thisR.camera, 'aperture_diameter')
             val = thisR.camera.aperturediameter.value;
@@ -1037,9 +1064,9 @@ switch ieParamFormat(param)  % lower case, no spaces
             val = NaN;
         end
 
-        % Need to check on the units!
+        % Starts in mm.  Convert to meters and then apply scale factor.
         if isempty(varargin), return;
-        else, val = val*ieUnitScaleFactor(varargin{1});
+        else, val = val*1e-3*ieUnitScaleFactor(varargin{1});
         end
 
     case {'filmdiagonal','filmdiag'}

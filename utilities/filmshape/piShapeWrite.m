@@ -1,55 +1,36 @@
-function piShapeWrite(fname,pointCloud,varargin)
-% Write out the JSON file for specifying the film shape
+function fullPathfname = piShapeWrite(fname,pointsXYZ_meters,varargin)
+% Write out a JSON file for specifying the film shape
 %
 % Synopsis
+%   fullPathfname = piShapeWrite(fname,pointsXYZ_meters,varargin)
+%
+% Description
+%  The film shape is described as a collection of XYZ sample points. This
+%  function converts the points into the relatively arcane lookup format
+%  needed by PBRT.  Its main purpose is to hide the complexity from the
+%  user. 
 %
 % Inputs
 %  fname - File name (JSON file)
 %  pointCloud - Film surface locations (Nx3) specified in meters
 %  
 % Key/val
-%
+%   N/A
 %
 % Outputs
+%   fullPathfname - Full path to the file written out.
 %
 % See also
-%
+%   piShapeLookuptable
 
-%% Generate Loouptable JSON 
+%% Generate Lookup table JSON 
 
-lookuptable = pointsToLookuptable(pointCloud);
+lookuptable = piShapeLookuptable(pointsXYZ_meters);
+
 jsonwrite(fname,lookuptable);
 
-% jsonwrite(['lookuptable-bump-vectorized-' num2str(rowresolution) 'x' num2str(colresolution) '.json'],lookuptable);
+fullPathfname = which(fname);
 
 end
 
-% Helper function
-function lookuptable = pointsToLookuptable(pointsXYZ_meters)
-% Take A set of XYZ points and generate a lookuptable struct that maps
-% index to position. Use jsonwrite(lookuptable) to generate the appropriate
-% json file
-%
-% INPUTS
-%  pointsXYZ - Nx3 -matrix with N the number of points in meters
-%
-% OUTPUTS
-%   lookuptable - A struct that can be written out to a json file to be
-%   read by PBRT as a lookuptable (e.g. for human eye)
-%
-% Thomas Goossens 2022
 
-lookuptable = struct;
-lookuptable.numberofpoints= size(pointsXYZ_meters,1);
-
-% Construct map
-for index = 1:size(pointsXYZ_meters,1)
-    map = struct;
-    map.index= index-1; % Array index (start counting at zero)
-    map.point =  pointsXYZ_meters(index,:);  % Target point in mters
-
-     % Add map to lookup table
-    lookuptable.table(index) =map; 
-end
-
-end

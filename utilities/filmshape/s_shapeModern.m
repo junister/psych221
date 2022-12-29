@@ -17,8 +17,18 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Read the default retinal parameters from this SE (sceneEye)
+%
+% The code from TG doesn't work well for all semi diameters.  Not sure why,
+% but when it is 6 mm rather than 4 mm the shape looks odd.
+
+SE = sceneEye;
+SE.set('film resolution',[256 256]);
+SE.set('retina semidiam',3.942150,'mm');  
+
 %% Define Bump (gaussian)
 
+% These will be superimposed on the default shape.
 center = [0 0];
 sigma  = 0.9;
 height = 400*1e-3; % 0.4 mm
@@ -36,38 +46,52 @@ bump=@(x,y) (bump1(x,y) + bump2(x,y)+ bump3(x,y));
 
 %% Define Retina
 
-retinaDistance =16.320000;  %mm  (This will be the lowest Z value of the surface)
-retinaRadius   = 12.000000; %mm
-retinaSemiDiam = 3.942150;  %mm
+% This will be the lowest Z value of the retina.  It is negative.
+retinaDistance = SE.get('retina distance','mm');  
+retinaRadius   = SE.get('retina radius','mm');   
+retinaSemiDiam = SE.get('retina semidiam','mm');
 
 retinaDiag = retinaSemiDiam*1.4142*2; % sqrt(2)*2
 
+%% Define film properties using sceneEye methods
 
-%% Define film
-filmDiagonal  = 10; % mm
-rowresolution = 256; % number of pixels
-colresolution = 256; % number of pixels
-rowcols = [rowresolution colresolution];
+filmDiagonal  = SE.get('film diagonal','mm'); % mm
+rowcols       = SE.get('film resolution');
+rowresolution = rowcols(1); % number of pixels
+colresolution = rowcols(2); % number of pixels
 
 % Pixels are square by construction
-pixelsize = filmDiagonal/sqrt(rowresolution^2+colresolution^2);
+% pixelsize = filmDiagonal/sqrt(rowresolution^2 + colresolution^2);
 
 % Total size of the film in mm
-row_physicalwidth= pixelsize*rowresolution;
-col_physicalwidth= pixelsize*colresolution;
-
+filmHeight = SE.get('film height','m');
+filmWidth  = SE.get('film width','m');
 
 %% Sample positions for the lookup table
 
 index = 1;
 Zref_mm  = zeros(rowcols);
 Zbump_mm = zeros(rowcols);
-pointPlusBump_meter = zeros(prod(rowcols),3);
+filmXYZ_m = zeros(prod(rowcols),3);
+
+x = linspace(-filmWidth/2,filmWidth/2,rowcols(2));
+y = linspace(-filmHeight/2,filmHeight/2,rowcols(1));
+
+sigma = 0.01;  % Millimeters
 
 % We need a better way to sample so we can render the OI later.
 for r=1:rowcols(1)
     for c=1:rowcols(2)
 
+        % A flat surface
+        point.x = x(c); 
+        point.y = y(r); 
+        point.z = (-16.32 + randn(1,1)*sigma)*1e-3;
+
+        filmXYZ_m(index,:) = [point.x point.y point.z];
+        index=index+1;
+
+        %{
         % Define the film index (r,c) in the 2d lookuptable
         pFilm = struct;
         pFilm.x = r;
@@ -77,7 +101,10 @@ for r=1:rowcols(1)
         filmRes   = struct;        
         filmRes.x = rowcols(1);        
         filmRes.y = rowcols(2);
+
+        % This is the original retinal sphere shape method
         point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
+
 
         % PBRT expects meters for lookuptable not milimeters.
         % The retina is typically around -16.2 mm from the lens, which is
@@ -85,21 +112,26 @@ for r=1:rowcols(1)
         mm2meter = 1e-3;
         pointPlusBump_meter(index,:) = [point.x point.y point.z + bump(point.x,point.y)]*mm2meter;
 
-        % Keep data for plotting the surface later
+        % Keep data for plotting the surface later.  This is the sphere
         Zref_mm(r,c)  = point.z;
+
+        % This is the sphere with the added bump
         Zbump_mm(r,c) = pointPlusBump_meter(index,3)/mm2meter;
 
         index=index+1;
+        %}
+
     end
 end
 
 
 %% Plot surface
-
+%{
 Zref_mm(Zref_mm>0)     = NaN;
 Zbump_mm(Zbump_mm>-13) = NaN;
 
-fig = ieNewGraphWin; 
+ieNewGraphWin; 
+
 subplot(121); 
 s=surf(Zbump_mm);
 
@@ -109,12 +141,26 @@ subplot(122);
 imagesc(Zbump_mm,[-retinaDistance -15]);
 axis image; colorbar;
 
+%}
+
+%% Show the film surface graph
+
+ieNewGraphWin;
+filmSurface = XW2RGBFormat(filmXYZ_m,rowcols(1),rowcols(2));
+surf(filmSurface(:,:,3));
+% set(gca,'zlim',[-16.5 -16]*1e-3)
+
+%{
+mesh(filmSurface(:,:,3));
+set(gca,'zlim',[-16.5 -16]*1e-3)
+%}
+
 %% From utilities/filmshape
 
 thisSE = sceneEye('letters at depth','eye model','arizona');
 
 fname = fullfile(piRootPath,'local','deleteMe.json');
-piShapeWrite(fname, pointPlusBump_meter);
+piShapeWrite(fname, filmXYZ_m);
 
 thisSE.set('film shape file',fname);
 % thisSE.get('film shape file')
@@ -141,6 +187,19 @@ thisD = dockerWrapper.humanEyeDocker;
 
 % We cannot view yet, because the data are in the format of a long line.
 oi = thisSE.piWRS('docker wrapper',thisD,'show',false);
+
+%%  Show the oi
+
+p = XW2RGBFormat(squeeze(oi.data.photons),rowcols(1),rowcols(2));
+p = imageRotate(p,'cw');
+
+% tmp = sum(p,3);
+% ieNewGraphWin;
+% imagesc(tmp); axis image; colormap(gray);
+oi = oiSet(oi,'photons',p);
+oiWindow(oi);
+
+% p = reshape(oi.data.photons,256,256,31);
 
 %%
 % If a general case, we have (x,y,z) in the JSON file and
@@ -188,7 +247,7 @@ Zq = griddata(position(:,1),position(:,2),position(:,3),fliplr(Xq),Yq);
 size(Vq)
 ieNewGraphWin; imagesc(Vq);
 
-%%
+s%%
 mesh(Xq,Yq,Zq);
 
 %% griddatan version
