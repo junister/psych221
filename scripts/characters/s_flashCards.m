@@ -20,35 +20,6 @@ testChars = 'D'; % just a few for debugging
 % not always true. Sometimes we want film for the scene
 %humanEye = ~piCamBio(); % if using ISETBio, then use human eye
 
-% Start with a "generic" recipe that has a light
-% and whatever materials we can load
-[thisR, ourMaterials, ourBackground] = prepRecipe('flashCards');
-
-% now we want to make the scene FOV 1 degree
-% I think we need a camera first
-thisR.camera = piCameraCreate('pinhole');
-thisR.recipeSet('fov', 1); % 50 arc-minutes is enough for 200/20
-
-% NOTE: We may not allow for any "padding" that is in the character
-%       assets, around the edges of the actual character.
-
-% Set quality parameters
-% High-fidelity
-thisR.set('rays per pixel',1024);
-% Normal-fidelity
-thisR.set('rays per pixel',256);
-
-% set our film to a square, like the characters on an eye chart
-% and to mimic the fovea area later on
-filmSideLength = 240;
-recipeSet(thisR, 'film resolution', [filmSideLength filmSideLength]);
-
-% We've set our scene to be 1 degree (60 arc-minutes) @ 6 meters
-% For 20/20 vision characters should be .00873 meters high (5 arc-minutes)
-% For 200/20 they are 50 arc-minutes (or .0873 meters high)
-% Note that letter size is per our Blender assets which are l w h,
-% NOT x, y, z
-
 % We will want to iterate over the charMultiple
 % once we get this working for one multiple
 charMultiple = 10; % 10; % how many times the 20/20 version
@@ -66,29 +37,40 @@ charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
 
 % Can run one of the three, but maybe not all at once?
 % Eventually we will concatenate or iterate through them
-useCharset = Digits; % Works
+%useCharset = Digits; % Works
 %useCharset = Alphabet_UC; % Works
 %useCharset = Alphabet_LC; % Works
+useCharset = 'Aa'; % for testing
 
 numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
 
+    % right now we create a new recipe for every flashcard
+    % but can experiment with trying to remove & replace
+    % letters & background (has been confusing so far)
+    [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256);
+    
     % also need to set material for letter
-    numMat = numMat+ 1;
+    % for just  black don't incrment
+    numMat = 1; % numMat+ 1;
     useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
     % from winds up at -6, so we need to offset
     wereAt = recipeGet(thisR,'from');
+
+    % copying the recipe doesn't work right, unfortunately!
+    %finalRecipe = thisR.copy(); % don't pollute the original
     charactersRender(thisR,useCharset(ii), 'letterSize',[charSize .02 charSize], ...
         'letterPosition',[0 -1*(charSize/2), 6] + wereAt, ...
         'letterMaterial', useMat);
+    % obj is either a scene, or an oi if we use optics
+    [obj] = piWRS(thisR);
+
+    % Needs more params:)
+    %charSampleCreate(obj, thisR); % figure out what we want here
+
 end
 
-% obj is either a scene, or an oi if we use optics
-[obj] = piWRS(thisR);
-
-% Needs more params:)
-%charSampleCreate(obj, thisR); % figure out what we want here
 
 %% ------------- Support Functions Start Here
 %%
@@ -108,13 +90,38 @@ for iii = 1:numel(allMaterials)
 end
 end
 
-function [thisR, ourMaterials, ourBackground] = prepRecipe(sceneName)
+function [thisR, ourMaterials, ourBackground] = prepRecipe(sceneName, options)
+
+arguments
+    sceneName = '';
+    options.raysPerPixel = 256; % "Normal" fidelity
+    options.filmSideLength = 240;
+end
 
 thisR = piRecipeDefault('scene name',sceneName);
-thisR = addLight(thisR);
 
 % Give it a skylight (assumes we want one)
 thisR.set('skymap','sky-sunlight.exr');
+
+% now we want to make the scene FOV 1 degree
+% I think we need a camera first
+thisR.camera = piCameraCreate('pinhole');
+thisR.recipeSet('fov', 1); % 50 arc-minutes is enough for 200/20
+
+% Set quality parameters
+% High-fidelity
+%thisR.set('rays per pixel',1024);
+thisR.set('rays per pixel',options.raysPerPixel);
+
+% set our film to a square, like the characters on an eye chart
+% and to mimic the fovea area later on
+recipeSet(thisR, 'film resolution', [options.filmSideLength options.filmSideLength]);
+
+% We've set our scene to be 1 degree (60 arc-minutes) @ 6 meters
+% For 20/20 vision characters should be .00873 meters high (5 arc-minutes)
+% For 200/20 they are 50 arc-minutes (or .0873 meters high)
+% Note that letter size is per our Blender assets which are l w h,
+% NOT x, y, z
 
 addMaterials(thisR);
 ourMaterialsMap = thisR.get('materials');
@@ -127,8 +134,17 @@ recipeSet(thisR,'from',[0 .01 -6]);
 
 % Now set the place/color of the background
 ourBackground = piAssetSearch(thisR,'object name', 'flashCard_O');
+% Default background color is mat
+recipeSet(thisR,'asset', ourBackground, 'size',[10 10 1]);
+
+recipeSet(thisR,'asset',ourBackground, 'material name','asphalt-uniform');
+
 % background is at 0 0 0 by default
-piAssetTranslate(thisR,ourBackground,[0 .01 10]); % just behind center
+% Okay, I can't really figure out how to put something someplace:)
+% worldposition doesn't always seem to work
+piAssetTranslate(thisR,ourBackground,[0 .0 5]); % just behind center
+
+thisR = addLight(thisR);
 
 end
 
