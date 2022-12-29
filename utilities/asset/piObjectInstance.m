@@ -1,12 +1,12 @@
 function piObjectInstance(thisR)
-% Create instances for each of the objects in a recipe 
-%
-% Description
-%   This function prepares a recipe with assets so that its objects can be
-%   copied by creating an instance
+% Prepare a recipe by creating instances for each of its objects 
 %
 % Synopsis
-%    piObjectInstance(thisR);
+%   piObjectInstance(thisR)
+%
+% Brief
+%   This function prepares a recipe with assets so that its objects can be
+%   copied by creating an instance
 %
 % Inputs
 %   thisR - A recipe

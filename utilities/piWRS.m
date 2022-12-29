@@ -113,13 +113,21 @@ switch obj.type
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
         if show, sceneWindow(obj);
             if ~isempty(g), sceneSet(obj,'gamma',g); end
-            if ~isempty(renderFlag), sceneSet(obj,'render flag',renderFlag); end
+            if ~isempty(renderFlag) 
+                if piCamBio, oiSet(obj,'render flag',renderFlag); 
+                else,  warning('No hdr setting for ISETBio windows.');
+                end
+            end
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show, oiWindow(obj); 
             if ~isempty(g), oiSet(obj,'gamma',g); end
-            if ~isempty(renderFlag), oiSet(obj,'render flag',renderFlag); end
+            if ~isempty(renderFlag) 
+                if piCamBio, oiSet(obj,'render flag',renderFlag); 
+                else, warning('No hdr setting for ISETBio windows.');
+                end
+            end
         end
         % Store the recipe camera on the oi.  Not sure why, but it
         % seems like a good idea.  I considered the film, too, but

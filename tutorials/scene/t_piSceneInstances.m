@@ -1,15 +1,14 @@
 %% t_piSceneInstances
 %
-% Show how to add additional instances of an asset to a scene. 
-%
-%  piObjectInstanceCreate
-%
-% Also illustrate
-%
-%  piObjectInstanceRemove
-%
+% Show how to add multiple instances of an asset to a scene.  Instances are
+% a way to store the mesh data of an object once, but to reuse the mesh
+% and render it with different transforms for position, size, and rotation.
+% 
+% We 
+%  
 % See also
-%
+%  piObjectInstanceCreate, piObjectInstanceRemove
+
  
 %%
 ieInit;
@@ -18,10 +17,13 @@ if ~piDockerExists, piDockerConfig; end
 %% Render the basic scene
 
 thisR = piRecipeDefault('scene name','simple scene');
-piObjectInstance(thisR);
-% thisR.show;
+piWRS(thisR);
+
 
 %% Create a second instance if the yellow guy
+
+piObjectInstance(thisR);
+% thisR.show;
 
 % Maybe this should be thisR.get('asset',idx,'top branch')
 yellowID = piAssetSearch(thisR,'object name','figure_6m');
