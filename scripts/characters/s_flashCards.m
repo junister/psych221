@@ -33,7 +33,8 @@ characterDistance = 6; % default for 20 foot eye chart
 charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
     letterPosition=[0 -1*(charSize/2) 6]); % 6 Meters out
 %}
-% Now generate a full set of flash cards with black background
+% Now generate a full set of flash cards with fixed background
+% for now. Can add background rotation later.
 
 % Can run one of the three, but maybe not all at once?
 % Eventually we will concatenate or iterate through them
@@ -173,7 +174,8 @@ recipeSet(thisR,'from',[0 .01 -1 * options.characterDistance]);
 % Now set the place/color of the background
 ourBackground = piAssetSearch(thisR,'object name', 'flashCard_O');
 % Default background color is mat
-recipeSet(thisR,'asset', ourBackground, 'size',[10 10 1]);
+% This resize doesn't work
+%recipeSet(thisR,'asset', ourBackground, 'size',[10 10 1]);
 
 recipeSet(thisR,'asset',ourBackground, 'material name',options.backgroundMaterial);
 
