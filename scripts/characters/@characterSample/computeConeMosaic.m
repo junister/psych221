@@ -23,13 +23,12 @@ if piCamBio
     return
 end
 % Create an oi if we aren't passed one
-if isequal(class(obj),'oi')
-    oi=obj;
+if ~isempty(obj.oi)
+    oi=obj.oi;
     scene = []; % Probably needs to be set to the default if we have one
 else
-    scene = obj;
+    scene = obj.scene;
     oi = oiCreate('wvf human');
-
 end
 
 poolobj = gcp('nocreate');
@@ -44,7 +43,10 @@ cMosaic = coneMosaic;
 cMosaic.fov = options.fov; 
 cMosaic.emGenSequence(50);
 
-oi = oiCompute(oi, scene);
+% I think we only need to do oiCompute if we don't have an OI?
+if ~isempty(scene)
+    oi = oiCompute(scene, oi);
+end
 cMosaic.name = options.name;
 cMosaic.compute(oi);
 cMosaic.computeCurrent;

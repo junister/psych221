@@ -65,11 +65,20 @@ for ii = 1:numel(useCharset)
             'letterPosition',[0 -1*(charSizes(jj)/2), 6] + wereAt, ...
             'letterMaterial', useMat);
         % obj is either a scene, or an oi if we use optics
-        [obj] = piWRS(thisR);
+        [renderedObject] = piWRS(thisR);
 
-        % Needs more params:)
+        % Initialize our data sample
         cSample = characterSample('Recipe', thisR); 
         cSample.init; % for some reason we have a hard time setting an object specific ID in the constructors
+
+        if isequal(renderedObject.type, 'scene')
+            cSample.scene = renderedObject;
+        elseif isequal(renderedObject.type, 'oi')
+            cSample.oi = renderedObject;
+        else 
+            error("Rendering didn't work");
+        end    
+
         % set any additional needed parameters
         % call methods to write it out
         % I think we can probably do without the params?

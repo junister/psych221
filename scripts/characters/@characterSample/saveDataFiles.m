@@ -8,6 +8,11 @@ arguments
     options.cMosaic = obj.cMosaic;
 end
 
+oi = options.oi;
+scene = options.scene;
+cMosaic = options.cMosaic;
+
+
 % Where do we want our root folder?
 % right now seedling someplace
 % IRL we'll put them on acorn or a public version of seedline
@@ -24,15 +29,18 @@ try
     % can probably group these:)
     if ~isempty(options.oi)
         saveDataFileDir = fullfile(sampleDataRoot, 'oi');
-        save(fullfile(saveDataFileDir,['oi_' obj.ID suffix], 'oi'));
+        if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
+        save(fullfile(saveDataFileDir,['oi_' obj.ID suffix]), 'oi');
     end
     if ~isempty(options.scene)
         saveDataFileDir = fullfile(sampleDataRoot, 'scene');
-        save(fullfile(saveDataFileDir,['scene_' obj.ID suffix], 'scene'));
+        if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
+        save(fullfile(saveDataFileDir,['scene_' obj.ID suffix]), 'scene');
     end
     if ~isempty(options.cMosaic)
         saveDataFileDir = fullfile(sampleDataRoot, 'mosaic');
-        save(fullfile(saveDataFileDir,['mosaic_' obj.ID suffix], 'cMosaic'));
+        if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
+        save(fullfile(saveDataFileDir,['mosaic_' obj.ID suffix]), 'cMosaic');
     end
 catch
     result = -1; % something failed

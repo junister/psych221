@@ -92,7 +92,7 @@ classdef characterSample < handle
         function saveCharacterSample(obj)
 
             [obj.scene, obj.oi, obj.cMosaic] = computeConeMosaic(obj);
-            obj.mosaicMetaData = cMosaic.metadata;
+            %obj.mosaicMetaData = obj.cMosaic.metadata;
 
             % We now have a recipe, an oi and/or scene, and a cone mosaic with absorbtions
             % We get both a scene and an oi if the scene has been rendered with pinhole
@@ -122,7 +122,7 @@ classdef characterSample < handle
 
             % NEED TO ADD SAVING PREVIEWS!
 
-            result = saveDataFiles(obj, 'oi',oi, 'scene', scene, 'cMosaic', cMosaic);
+            result = saveDataFiles(obj, 'oi',obj.oi, 'scene', obj.scene, 'cMosaic', obj.cMosaic);
             if result == 0
                 % Save Metadata
                 % ...
