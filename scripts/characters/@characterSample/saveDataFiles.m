@@ -1,16 +1,17 @@
-function result = saveDataFiles(obj, options)
+function result = saveDataFiles(obj)
 % find base storage folder, can leverage off prepData for DB
 % version
 arguments
     obj;
-    options.oi = obj.oi;
-    options.scene = obj.scene;
-    options.cMosaic = obj.cMosaic;
 end
 
-oi = options.oi;
-scene = options.scene;
-cMosaic = options.cMosaic;
+% Save as file system files
+oi = obj.oi;
+scene = obj.scene;
+cMosaic = obj.cMosaic;
+
+% Save as JSON for the database & in the file system
+metadata = obj.metadata;
 
 
 % Where do we want our root folder?
@@ -18,8 +19,8 @@ cMosaic = options.cMosaic;
 % IRL we'll put them on acorn or a public version of seedline
 % or a more powerful server if needed
 sampleDataRoot = 'v:\characters';
-sampleDataType = 'MATLAB'; % could be JSON
-switch sampleDataType
+sampleDataFileType = 'MATLAB'; % could be JSON
+switch sampleDataFileType
     case 'MATLAB'
         suffix = '.mat';
     case 'JSON'
@@ -27,20 +28,26 @@ switch sampleDataType
 end
 try
     % can probably group these:)
-    if ~isempty(options.oi)
+    if ~isempty(oi)
         saveDataFileDir = fullfile(sampleDataRoot, 'oi');
         if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
         save(fullfile(saveDataFileDir,['oi_' obj.ID suffix]), 'oi');
     end
-    if ~isempty(options.scene)
+    if ~isempty(scene)
         saveDataFileDir = fullfile(sampleDataRoot, 'scene');
         if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
         save(fullfile(saveDataFileDir,['scene_' obj.ID suffix]), 'scene');
     end
-    if ~isempty(options.cMosaic)
+    if ~isempty(cMosaic)
         saveDataFileDir = fullfile(sampleDataRoot, 'mosaic');
         if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
         save(fullfile(saveDataFileDir,['mosaic_' obj.ID suffix]), 'cMosaic');
+    end
+    if ~isempty(metadata)
+        % Do we need to store filenames here, or can we compute?
+        saveDataFileDir = fullfile(sampleDataRoot, 'metadata');
+        if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
+        jsonwrite(fullfile(saveDataFileDir,['csample_' obj.ID '.json']), metadata);
     end
 catch
     result = -1; % something failed

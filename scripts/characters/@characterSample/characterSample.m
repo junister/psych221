@@ -18,19 +18,22 @@ classdef characterSample < handle
         % separately to make it easier to do db searches, and in case
         % we have large recipes that won't fit in the database
         type = 'character';
-        recipe; % includes mapping to uc_
+        ourRecipe; % includes mapping to uc_
         character = ''; % the character being rendered
-        fov; % gotten from recipe
-        filmResolution = []; % gotten from recipe
-        raysPerPixel = []; % passed in or from recipe
         characterMaterial = ''; % passed in or from recipe
         backgroundMaterial = ''; %passed in or from recipe
         illumination = ''; % short-hand for what's in recipe?
-        mosaicMetaData = ''; % TBD info about mosaic
-        recipeMetaData = '';
         oi = [];
         scene = [];
         cMosaic = [];
+
+        %To be filled with data we want saved as JSON
+        metadata = [];
+        % Gets filled in with at least these entries:
+        % fov; % gotten from recipe
+        % filmResolution = []; % gotten from recipe
+        % raysPerPixel = []; % passed in or from recipe
+        % recipeMetaData, mosaicMetaData, oiMetaData;
 
         %% Get ID
         ID = 0; % Needs to be set in constructor
@@ -48,29 +51,28 @@ classdef characterSample < handle
     end
 
     methods
-        function cSample = characterSample(options)
+        function cSample = characterSample()
             %% Create a usable sample image and mosaic for
-            arguments
-                options.Recipe;
-            end
-            ourRecipe = options.Recipe;
-            recipeMetaData = ourRecipe.metadata;
-
-            % some of these probably duplicate recipe.metadata
-            % might not be needed unless we want them at top level
-
-            character = ''; % Need to figure out how to find
-            filmResolution = [ourRecipe.film.xresolution.value, ...
-                ourRecipe.film.xresolution.value];
-            fov = ourRecipe.camera.fov;
-            raysPerPixel = ourRecipe.sampler.pixelsamples.value;
 
 
         end
 
         % can't call object specific functions in creation code
-        function init(obj)
+        function init(obj, recipe)
+            obj.ourRecipe = recipe;
             obj.ID = getDataSampleID(obj, ''); % figure out a prefix
+            obj.metadata.ID = obj.ID;
+            obj.metadata.recipeMetaData = obj.ourRecipe.metadata;
+
+            % some of these probably duplicate recipe.metadata
+            % might not be needed unless we want them at top level
+
+            obj.metadata.character = ''; % Need to figure out how to find
+            obj.metadata.filmResolution = [obj.ourRecipe.film.xresolution.value, ...
+                obj.ourRecipe.film.xresolution.value];
+            obj.metadata.fov = obj.ourRecipe.camera.fov;
+            obj.metadata.raysPerPixel = obj.ourRecipe.sampler.pixelsamples.value;
+
         end
 
         function  ID =  getDataSampleID(obj, prefix)
@@ -117,11 +119,9 @@ classdef characterSample < handle
 
             % NEED TO ADD SAVING PREVIEWS and METADATA!
 
-            result = saveDataFiles(obj, 'oi',obj.oi, 'scene', obj.scene, 'cMosaic', obj.cMosaic);
+            result = saveDataFiles(obj);
             if result == 0
-                % Save Metadata
-                % ...
-                % save recipe
+                % Can save in DB if desired
             else
                 warning("unable to save data files");
             end

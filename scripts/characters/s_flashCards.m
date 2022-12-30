@@ -25,6 +25,7 @@ charMultiple = 10; % 10; % how many times the 20/20 version
 charBaseline = .00873; % 20/20 @ 6 meters
 charMultiples = [10 5 1]; % using multiple sizes in a single recipe still fails
 charSizes = charMultiples * charBaseline;
+characterDistance = 6; % default for 20 foot eye chart
 
 % and lower the character position by half its size
 %{
@@ -39,7 +40,7 @@ charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
 %useCharset = Digits; % Works
 %useCharset = Alphabet_UC; % Works
 %useCharset = Alphabet_LC; % Works
-useCharset = 'Aa'; % for testing
+useCharset = 'Lorem'; % for testing
 
 numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
@@ -55,21 +56,35 @@ for ii = 1:numel(useCharset)
         % right now we create a new recipe for every flashcard
         % but can experiment with trying to remove & replace
         % letters & background (has been confusing so far)
-        [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256);
+        
+        % fixed background for now
+        backgroundMaterial = 'asphalt-uniform';
+        [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256, ...
+            'backgroundMaterial', backgroundMaterial, ...
+            'characterDistance', characterDistance);
         useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
         % from winds up at -6, so we need to offset
         wereAt = recipeGet(thisR,'from');
-
-        charactersRender(thisR,useCharset(ii), 'letterSize',[charSizes(jj) .02 charSizes(jj)], ...
+        letterSize = [charSizes(jj) .02 charSizes(jj)];
+        charactersRender(thisR,useCharset(ii), 'letterSize',letterSize, ...
             'letterPosition',[0 -1*(charSizes(jj)/2), 6] + wereAt, ...
             'letterMaterial', useMat);
         % obj is either a scene, or an oi if we use optics
         [renderedObject] = piWRS(thisR);
 
         % Initialize our data sample
-        cSample = characterSample('Recipe', thisR); 
-        cSample.init; % for some reason we have a hard time setting an object specific ID in the constructors
+        cSample = characterSample();
+        cSample.init(thisR); % for some reason we have a hard time setting an object specific ID in the constructors
+        
+        % now set some other metadata. Once we do this for real
+        % add some methods that do this more elegantly
+        cSample.metadata.characterName = useCharset(ii);
+        cSample.metadata.characterSize = letterSize;
+        cSample.metadata.characterMaterial = useMat;
+        cSample.metadata.characterBackground = backgroundMaterial;
+        cSample.metadata.characterDistance = characterDistance;
+        cSample.metadata.characterFont = 'plain';
 
         if isequal(renderedObject.type, 'scene')
             cSample.scene = renderedObject;
@@ -114,9 +129,12 @@ arguments
     sceneName = '';
     options.raysPerPixel = 256; % "Normal" fidelity
     options.filmSideLength = 240;
+    options.backgroundMaterial = 'asphalt-uniform';
+    options.characterDistance = 6; % meters default
 end
 
 thisR = piRecipeDefault('scene name',sceneName);
+thisR.set('render type', {'radiance', 'depth'});
 
 % Give it a skylight (assumes we want one)
 thisR.set('skymap','sky-sunlight.exr');
@@ -148,14 +166,14 @@ ourMaterials = keys(ourMaterialsMap);
 recipeSet(thisR,'to',[0 .01 10]);
 
 % set vertical to 0. -6 gives us 6m or 20 feet
-recipeSet(thisR,'from',[0 .01 -6]);
+recipeSet(thisR,'from',[0 .01 -1 * options.characterDistance]);
 
 % Now set the place/color of the background
 ourBackground = piAssetSearch(thisR,'object name', 'flashCard_O');
 % Default background color is mat
 recipeSet(thisR,'asset', ourBackground, 'size',[10 10 1]);
 
-recipeSet(thisR,'asset',ourBackground, 'material name','asphalt-uniform');
+recipeSet(thisR,'asset',ourBackground, 'material name',options.backgroundMaterial);
 
 % background is at 0 0 0 by default
 % Okay, I can't really figure out how to put something someplace:)
