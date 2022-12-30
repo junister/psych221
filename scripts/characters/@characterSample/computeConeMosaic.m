@@ -31,10 +31,8 @@ else
     oi = oiCreate('wvf human');
 end
 
-poolobj = gcp('nocreate');
-if isempty(poolobj)
-    parpool('Threads');
-end
+%for faster pool init
+piUseThreadPool();
 
 % Create the coneMosaic object
 % We want this to be about .35mm in diameter
