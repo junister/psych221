@@ -1,4 +1,4 @@
-function [scene, oi, cMosaic] = computeConeMosaic(obj, options)
+function [scene, oi, cMosaic, previews] = computeConeMosaic(obj, options)
 %COMPUTECONEMOSAIC Compute the foveal response to a character sample
 %   Used in creating data samples for reading recognition
 % Returns both the computed cone mosaic and the oi used to generate it
@@ -49,4 +49,10 @@ cMosaic.name = options.name;
 cMosaic.compute(oi);
 cMosaic.computeCurrent;
 
+%% Generate previews
+% First Frame mean absorptions is a start
+% Figure out how to show these? Record as jpeg in db or separate?
+previews.oi = oiGet(oi,'rgb image');
+previews.scene = sceneGet(scene,'rgb image');
+previews.mosaic = cMosaic.absorptions(:,:,1);
 

@@ -12,6 +12,7 @@ cMosaic = obj.cMosaic;
 
 % Save as JSON for the database & in the file system
 metadata = obj.metadata;
+previews = obj.previews;
 
 
 % Where do we want our root folder?
@@ -48,6 +49,21 @@ try
         saveDataFileDir = fullfile(sampleDataRoot, 'metadata');
         if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
         jsonwrite(fullfile(saveDataFileDir,['csample_' obj.ID '.json']), metadata);
+    end
+    % save preview jpegs, need to conver RGB 0-1 to sRGB
+    if ~isempty(previews)
+        saveDataFileDir = fullfile(sampleDataRoot, 'previews');
+        if ~isfolder(saveDataFileDir), mkdir(saveDataFileDir); end
+        try
+        imwrite(previews.scene, ...
+            fullfile(saveDataFileDir,['scenePreview_' obj.ID '.jpg']));
+        imwrite(previews.oi, ...
+            fullfile(saveDataFileDir,['oiPreview_' obj.ID '.jpg']));
+        imwrite(previews.mosaic,...
+            fullfile(saveDataFileDir,['mosaicPreview_' obj.ID '.jpg']));
+        catch
+            warning("Unable to save previews");
+        end
     end
 catch
     result = -1; % something failed

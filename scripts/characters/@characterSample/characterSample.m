@@ -23,9 +23,12 @@ classdef characterSample < handle
         characterMaterial = ''; % passed in or from recipe
         backgroundMaterial = ''; %passed in or from recipe
         illumination = ''; % short-hand for what's in recipe?
+
+        % Currently these get filled in by mosaic rendering
         oi = [];
         scene = [];
         cMosaic = [];
+        previews = []; 
 
         %To be filled with data we want saved as JSON
         metadata = [];
@@ -93,7 +96,7 @@ classdef characterSample < handle
         end
         function saveCharacterSample(obj)
 
-            [obj.scene, obj.oi, obj.cMosaic] = computeConeMosaic(obj);
+            [obj.scene, obj.oi, obj.cMosaic, obj.previews] = computeConeMosaic(obj);
             %obj.mosaicMetaData = obj.cMosaic.metadata;
 
             % We now have a recipe, an oi and/or scene, and a cone mosaic with absorbtions

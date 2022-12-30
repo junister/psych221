@@ -86,6 +86,8 @@ for ii = 1:numel(useCharset)
         cSample.metadata.characterDistance = characterDistance;
         cSample.metadata.characterFont = 'plain';
 
+        % do we want to generate previews here or in cSample
+        % currently we need to do the cone mosaic one there in any case
         if isequal(renderedObject.type, 'scene')
             cSample.scene = renderedObject;
         elseif isequal(renderedObject.type, 'oi')
