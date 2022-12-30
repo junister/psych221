@@ -146,7 +146,7 @@ for ii = 1:strlength(aString)
     outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
 
     % The letter we need to place
-    letterObject = piAssetSearch(outputR,'object name',[ourAsset '_O']);
+    letterObject = piAssetSearch(outputR,'object name',['_' ourAsset '_O']);
     
     % location, scale, and material elements
     if ~isempty(options.letterMaterial)

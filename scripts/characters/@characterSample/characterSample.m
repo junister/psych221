@@ -20,16 +20,20 @@ classdef characterSample < handle
         type = 'character';
         recipe; % includes mapping to uc_
         character = ''; % the character being rendered
-        fov = 1; % Default
-        resolution = [240 240]; % film resolution
+        fov; % gotten from recipe
+        filmResolution = []; % gotten from recipe
         raysPerPixel = []; % passed in or from recipe
         characterMaterial = ''; % passed in or from recipe
         backgroundMaterial = ''; %passed in or from recipe
         illumination = ''; % short-hand for what's in recipe?
         mosaicMetaData = ''; % TBD info about mosaic
+        recipeMetaData = '';
+        oi = [];
+        scene = [];
+        cMosaic = [];
 
         %% Get ID
-        ID = getDataSampleID(); % pass some params
+        ID = 0; % Needs to be set in constructor
 
         % Preview Images that are small enough to fit in DB
         sceneJPEG = [];
@@ -46,15 +50,50 @@ classdef characterSample < handle
     methods
         function cSample = characterSample(options)
             %% Create a usable sample image and mosaic for
-            arguments 
+            arguments
                 options.Recipe;
             end
-            recipe = options.Recipe;
+            ourRecipe = options.Recipe;
+            recipeMetaData = ourRecipe.metadata;
+
+            % some of these probably duplicate recipe.metadata
+            % might not be needed unless we want them at top level
+
+            character = ''; % Need to figure out how to find
+            filmResolution = [ourRecipe.film.xresolution.value, ...
+                ourRecipe.film.xresolution.value];
+            fov = ourRecipe.camera.fov;
+            raysPerPixel = ourRecipe.sampler.pixelsamples.value;
+
+
         end
 
+        % can't call object specific functions in creation code
+        function init(obj)
+            obj.ID = getDataSampleID(obj, ''); % figure out a prefix
+        end
+
+        function  ID =  getDataSampleID(obj, prefix)
+
+            timeStampSeparator = '__'; % keep timestamp accessible
+            %prefix = ''; % this is confusing, as we have prefix for each sub-object
+            % that work with their files, but do we need one for the db?
+
+            % figure out a uniqueID that would be helpful
+            % Time should be GMT (I think) although mostly it needs to help
+            % with local values. I guess we could store timezone.
+            % NOTE: They want us to use datetime, but I can't find an easy way
+            % to get it to use milliseconds. Example code in the doc doesn't
+            % work.
+            timeStamp = datestr(now,'yyyy_mm_dd_HH_MM_SS_FFF'); %#ok<TNOW1,DATST>
+            ID = [prefix timeStampSeparator timeStamp];
+
+        end
         function saveCharacterSample(obj)
 
-            cMosaic = computeConeMosaic(obj);
+            [obj.scene, obj.oi, obj.cMosaic] = computeConeMosaic(obj);
+            obj.mosaicMetaData = cMosaic.metadata;
+
             % We now have a recipe, an oi and/or scene, and a cone mosaic with absorbtions
             % We get both a scene and an oi if the scene has been rendered with pinhole
             % The next step is to save it for analysis
@@ -80,6 +119,9 @@ classdef characterSample < handle
             % Check Results == before saving metadata into DB
             % We switch based on which one in the save routine, so maybe we
             % can simplify to save all three?
+
+            % NEED TO ADD SAVING PREVIEWS!
+
             result = saveDataFiles(obj, 'oi',oi, 'scene', scene, 'cMosaic', cMosaic);
             if result == 0
                 % Save Metadata

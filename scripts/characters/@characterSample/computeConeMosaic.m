@@ -1,4 +1,4 @@
-function [cMosaic, oi] = computeConeMosaic(obj, options)
+function [scene, oi, cMosaic] = computeConeMosaic(obj, options)
 %COMPUTECONEMOSAIC Compute the foveal response to a character sample
 %   Used in creating data samples for reading recognition
 % Returns both the computed cone mosaic and the oi used to generate it
@@ -13,7 +13,7 @@ function [cMosaic, oi] = computeConeMosaic(obj, options)
 
 arguments
     obj;
-    options.name = obj.name; % assuming the object has a name
+    options.name = 'character sample' % obj.name; % assuming the object has a name
     options.fov = [1 1]; % default of 1 degree
 end
 
@@ -25,6 +25,7 @@ end
 % Create an oi if we aren't passed one
 if isequal(class(obj),'oi')
     oi=obj;
+    scene = []; % Probably needs to be set to the default if we have one
 else
     scene = obj;
     oi = oiCreate('wvf human');

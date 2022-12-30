@@ -47,7 +47,6 @@ for ii = 1:numel(useCharset)
     % also need to set material for letter
     % for just  black don't incrment
     numMat = 1; % numMat+ 1;
-    useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
     % copying the recipe doesn't work right, unfortunately!
     %finalRecipe = thisR.copy(); % don't pollute the original
@@ -57,6 +56,7 @@ for ii = 1:numel(useCharset)
         % but can experiment with trying to remove & replace
         % letters & background (has been confusing so far)
         [thisR, ourMaterials, ourBackground] = prepRecipe('flashCards','raysPerPixel',256);
+        useMat = ourMaterials{mod(numMat, numel(ourMaterials))};
 
         % from winds up at -6, so we need to offset
         wereAt = recipeGet(thisR,'from');
@@ -68,10 +68,14 @@ for ii = 1:numel(useCharset)
         [obj] = piWRS(thisR);
 
         % Needs more params:)
-        cSample = characterSample('recipe', thisR); 
+        cSample = characterSample('Recipe', thisR); 
+        cSample.init; % for some reason we have a hard time setting an object specific ID in the constructors
         % set any additional needed parameters
         % call methods to write it out
-        
+        % I think we can probably do without the params?
+        % and some of these come from the cSample!
+        cSample.saveCharacterSample;
+
     end
 
 end
