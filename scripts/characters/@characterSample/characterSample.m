@@ -112,15 +112,10 @@ classdef characterSample < handle
             % want to write out all the files and then bulk import them into a db.
 
 
-            %% Save oi/scene/mosaic
-            % The hope is that they can be saved in directories with those names
-            % but file names that are "ID.mat" (unless JSON is needed/practical).
+            %% Save oi/scene/mosaic each in their own folders
+            % but file names that are "<type>___ID.mat" (unless JSON is needed/practical).
 
-            % Check Results == before saving metadata into DB
-            % We switch based on which one in the save routine, so maybe we
-            % can simplify to save all three?
-
-            % NEED TO ADD SAVING PREVIEWS!
+            % NEED TO ADD SAVING PREVIEWS and METADATA!
 
             result = saveDataFiles(obj, 'oi',obj.oi, 'scene', obj.scene, 'cMosaic', obj.cMosaic);
             if result == 0
