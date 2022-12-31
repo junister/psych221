@@ -8,10 +8,9 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-% Something still isn't quite right about the H and I assets
-% Small d also appears broken
-Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
-Alphabet_LC = 'abcefghijklmnopqrstuvwxyz';
+% Entire alphabet seems to be working
+Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+Alphabet_LC = 'abcdefghijklmnopqrstuvwxyz';
 Digits = '0123456789';
 allCharacters = [Alphabet_LC Alphabet_UC Digits];
 
@@ -41,7 +40,7 @@ charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
 %useCharset = Digits; % Works
 %useCharset = Alphabet_UC; % Works
 %useCharset = Alphabet_LC; % Works
-useCharset = 'H'; % for testing
+useCharset = 'd'; % for testing
 
 numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
