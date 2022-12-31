@@ -79,7 +79,7 @@ for ii = 1:strlength(aString)
     % eliminate it here.
     idx = piAssetSearch(theAsset.thisR,'branch name','SceneCollection');
     theAsset.thisR.set('asset',idx,'subtree delete');
-    theAsset.thisR.show;
+    % theAsset.thisR.show;
 
     % Try merging before we do anything else
     aRecipe = piRecipeMerge(aRecipe, theAsset.thisR, 'node name', theAsset.mergeNode);

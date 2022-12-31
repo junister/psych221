@@ -1414,34 +1414,49 @@ switch ieParamFormat(param)  % lower case, no spaces
             if iscell(thisNode), thisNode = thisNode{1}; end
             val(ii,:) = thisR.get('assets',thisNode.name,'world position');
         end
-    case {'objectsizes'}
-        % All the objects
-        % thisR.get('object sizes')
-        Objects  = thisR.get('objects');
-        nObjects = numel(Objects);
+    
+    case 'objectsizes'
+        % thisR.get('object sizes');
+        %
+        % Sizes for all of the objects.  These cannot be determined in all
+        % cases - the ply files need to be present in the output directory.
+        idx  = thisR.get('objects');
+        nObjects = numel(idx);
         val = zeros(nObjects,3);
         for ii=1:nObjects
-            thisNode = thisR.get('assets',Objects(ii));
-            if iscell(thisNode), thisNode = thisNode{1}; end
-            thisScale = thisR.get('assets',Objects(ii),'world scale');
-
-            % All the object points
-            if isfield(thisNode.shape{1},'point3p')
-                pts = thisNode.shape{1}.point3p;
-                if ~isempty(pts)
-                    % Range of points times any scale factors on the path
-                    val(ii,1) = range(pts(1:3:end))*thisScale(1);
-                    val(ii,2) = range(pts(2:3:end))*thisScale(2);
-                    val(ii,3) = range(pts(3:3:end))*thisScale(3);
-                else
-                    val(ii,:) = NaN;
-                end
-            else
-                % There is no shape point information.  So we return NaNs.
-                val(ii,:) = NaN;
-            end
-
+            val(ii,:) = thisR.get('asset',idx(ii),'size');
         end
+
+        % Old code for 'size' - Updated in various ways by BW Dec 31 2022.
+        %
+        % case 'size'
+        %         % All the objects
+        %         % thisR.get('object sizes')
+        %         Objects  = thisR.get('objects');
+        %         nObjects = numel(Objects);
+        %         val = zeros(nObjects,3);
+        %         for ii=1:nObjects
+        %             thisNode = thisR.get('assets',Objects(ii));
+        %             if iscell(thisNode), thisNode = thisNode{1}; end
+        %             thisScale = thisR.get('assets',Objects(ii),'world scale');
+        %
+        %             % All the object points
+        %             if isfield(thisNode.shape{1},'point3p')
+        %                 pts = thisNode.shape{1}.point3p;
+        %                 if ~isempty(pts)
+        %                     % Range of points times any scale factors on the path
+        %                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
+        %                     val(ii,2) = range(pts(2:3:end))*thisScale(2);
+        %                     val(ii,3) = range(pts(3:3:end))*thisScale(3);
+        %                 else
+        %                     val(ii,:) = NaN;
+        %                 end
+        %             else
+        %                 % There is no shape point information.  So we return NaNs.
+        %                 val(ii,:) = NaN;
+        %             end
+        %
+        %         end
 
 
         % ---------  Lights
@@ -1733,23 +1748,52 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         val = piAssetGet(thisAsset, 'rotation');
                     end
-
-                case 'size'
-                    % thisR.get('asset',objectName,'size');
-                    % Size of one object in meters
+                case {'size','objectsize'}
+                    % thisR.get('asset',objectID,'size');
+                    %
+                    % Only objects have a size.  No branches.
+                    %
+                    % We store the shape of the objects either as point3p
+                    % in the shape field or as a filename that points to a
+                    % ply file with the mesh points.
+                    
                     if thisR.assets.isleaf(id)
                         % Only objects
                         thisScale = thisR.get('assets',id,'world scale');
-                        % We are not sure why this is sometimes a
-                        % cell and sometimes not
+
+                        % Not sure why this is sometimes a cell and
+                        % sometimes not
                         if iscell(thisAsset.shape)
-                            pts = thisAsset.shape{1}.point3p;
+                            theShape = thisAsset.shape{1};
                         else
-                            pts = thisAsset.shape.point3p;
+                            theShape = thisAsset.shape;
                         end
-                        val(1) = range(pts(1:3:end))*thisScale(1);
-                        val(2) = range(pts(2:3:end))*thisScale(2);
-                        val(3) = range(pts(3:3:end))*thisScale(3);
+
+                        % Sometimes we have the points and sometimes only a
+                        % pointer to a PLY file.
+                        if ~isempty(theShape.point3p)
+                            pts = theShape.point3p;
+                            val(1) = range(pts(1:3:end))*thisScale(1);
+                            val(2) = range(pts(2:3:end))*thisScale(2);
+                            val(3) = range(pts(3:3:end))*thisScale(3);
+                        elseif ~isempty(theShape.filename)
+                            % Read a ply file.  The problem is the ply file
+                            % needs to be in the output directory.  This is
+                            % a limitation.  For example, if we have a
+                            % character, the file might be in the asset
+                            % directory and not yet copied to the output
+                            % directory. (BW).
+                            plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
+                            if exist(plyFile,'file')
+                                tmp = pcread(plyFile);
+                                val(1) = tmp.XLimits(2) - tmp.XLimits(1);
+                                val(2) = tmp.YLimits(2) - tmp.YLimits(1);
+                                val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
+                            else
+                                warning('ply file not yet in output dir.')
+                                val = zeros(1,3);
+                            end
+                        end
                     else
                         warning('Only objects have a size');
                         val = [];
