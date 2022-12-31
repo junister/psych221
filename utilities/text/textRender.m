@@ -6,7 +6,7 @@ function [outputR, letterNames] = textRender(aRecipe, aString, options)
 %
 % Brief
 %   Loads the characters saved in the ISET3d assets file for characters,
-%   and merges them into the input recipe.  Requires ISET3d and ISETCam.
+%   and merges them into the input recipe.  Requires ISET3d and ISETCam (or ISETBio).
 %   Used by ISETauto, and ISETonline
 %
 % Input

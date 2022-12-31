@@ -2,6 +2,9 @@ classdef characterSample < handle
     % Class to handle creation, storage, and retrieval of character data
     % samples used for the analysis of readability in 3D, VR, AR, and MR
     %
+    % Currently requires ISETbio, but could easily just save ISETCam
+    % objects if that's desirable
+    %
     % Parameters (properties):
     %
     % Methods:
