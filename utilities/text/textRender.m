@@ -1,8 +1,8 @@
-function [outputR, letterNames] = charactersRender(aRecipe, aString, options)
+function [outputR, letterNames] = textRender(aRecipe, aString, options)
 % Add a string of characters to a recipe
 %
 % Synopsis
-%   outputR = charactersRender(aRecipe, aString, options)
+%   outputR = textRender(aRecipe, aString, options)
 %
 % Brief
 %   Loads the characters saved in the ISET3d assets file for characters,
