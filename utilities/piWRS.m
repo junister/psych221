@@ -111,17 +111,19 @@ if isempty(obj),  error('Render failed.'); end
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
-        if show, sceneWindow(obj);
+        if show
+            sceneWindow(obj);
             if ~isempty(g), sceneSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
-                if piCamBio, oiSet(obj,'render flag',renderFlag); 
+                if piCamBio, sceneSet(obj,'render flag',renderFlag); 
                 else,  warning('No hdr setting for ISETBio windows.');
                 end
             end
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
-        if show, oiWindow(obj); 
+        if show
+            oiWindow(obj); 
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
                 if piCamBio, oiSet(obj,'render flag',renderFlag); 
