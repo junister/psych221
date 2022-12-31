@@ -41,7 +41,7 @@ charactersRender(thisR,testChars,'letterSize',[charSize .02 charSize], ...
 %useCharset = Digits; % Works
 %useCharset = Alphabet_UC; % Works
 %useCharset = Alphabet_LC; % Works
-useCharset = 'Lorem'; % for testing
+useCharset = 'H'; % for testing
 
 numMat = 0; % keep track of iterating through our materials
 for ii = 1:numel(useCharset)
