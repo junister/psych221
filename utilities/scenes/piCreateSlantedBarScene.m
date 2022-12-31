@@ -1,20 +1,31 @@
 function thisR = piCreateSlantedBarScene(varargin)
-%CREATESIMPLEPOINT 
-% Create a recipe for a slanted bar scene. 
-
+% DEPRECATED - Create a recipe for a slanted bar scene. 
+%
+% This seemed to rely on V3.  Use the V4 
+%
+%    thisR = piRecipeCreate('slanted edge'); 
+%    scene = piWRS(thisR);
+%
+% Inputs
+%   N/A
+%
 % OPTIONAL input parameter/val
-%   blackDepth - distance from the camera to the black side of the slanted
-%                bar (in meters)
-%   whiteDepth - distance from the camera to the white side of the slanted
-%                bar (in meters)
 %   illumination - illumination of the scene (infinite light) as as SPD
 %                filename.
 %   planeDepth - distance from camera to both black and white sides. If
 %                set, this will override the blackDepth/whiteDepth
 %                parameters. (in meters)
-
+%  NYI -
+%   blackDepth - distance from the camera to the black side of the slanted
+%                bar (in meters)
+%   whiteDepth - distance from the camera to the white side of the slanted
+%                bar (in meters)
+%
 % RETURN
 %   recipe - recipe for this created scene
+%
+% See also
+%
 
 % Examples:
 %{
@@ -22,16 +33,17 @@ function thisR = piCreateSlantedBarScene(varargin)
 %}
 
 %% Parse inputs
+varargin = ieParamFormat(varargin);
 parser = inputParser();
-parser.addParameter('planeDepth',1, @isnumeric);
+parser.addParameter('planedepth',1, @isnumeric);
 parser.addParameter('eccentricity',0, @isnumeric);
 parser.addParameter('illumination', 'EqualEnergy.spd', @ischar);
-parser.addParameter('whiteDepth',0, @isnumeric);
-parser.addParameter('blackDepth',0, @isnumeric);
+parser.addParameter('whitedepth',0, @isnumeric);
+parser.addParameter('blackdepth',0, @isnumeric);
 
 parser.parse(varargin{:});
 
-planeDepth   = parser.Results.planeDepth;
+planeDepth   = parser.Results.planedepth;
 eccentricity = parser.Results.eccentricity;
 illumination = parser.Results.illumination;
 
