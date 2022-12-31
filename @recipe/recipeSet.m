@@ -174,7 +174,7 @@ switch param
         % thisR.set('input file',filename);
         % This file should typically exist.  There are cases, however,
         % where we may set it before the file exists.  I think.
-        if ~isfile(val), warning('Specified input file not found.'); end
+        %if ~isfile(val), warning('Specified input file not found.'); end
         thisR.inputFile = val;
     case {'verbose'}
         thisR.verbose = val;
