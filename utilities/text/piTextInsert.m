@@ -77,8 +77,13 @@ for ii = 1:strlength(aString)
     % BW:  We should clean up the mat-files.  They have this extra cruft in
     % them.  I do it here now, but we should do it in the files and
     % eliminate it here.
-    idx = piAssetSearch(theAsset.thisR,'branch name','SceneCollection');
-    theAsset.thisR.set('asset',idx,'subtree delete');
+    %
+    % But testing shows that eliminating these branches breaks things.  Not
+    % sure why.  As we figure out how to do instances, maybe this will
+    % clarify.  The text does get stored with a 'referenceObject' slot.
+    %
+    % idx = piAssetSearch(theAsset.thisR,'branch name','SceneCollection');
+    % theAsset.thisR.set('asset',idx,'subtree delete');
     % theAsset.thisR.show;
 
     % Try merging before we do anything else

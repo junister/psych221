@@ -20,18 +20,20 @@ thisR.set('skymap','sky-sunlight.exr');
 thisR.set('nbounces',4);
 piWRS(thisR);
 
-%%
+%% This now renders the same way as above
+
 thisR = piRecipeCreate('macbeth checker');
-% thisR = piRecipeCreate('simple scene');
+thisR.set('skymap','sky-sunlight.exr');
+thisR.set('nbounces',4);
 
 piMaterialsInsert(thisR,'name','wood-light-large-grain');
 
+% str = 'Lorem';
 str = 'Lorem';
 piTextInsert(thisR,str);
 % thisR.show;
 
-% Letter positions
-%{
+% Letter positions as above
 to = thisR.get('to') - [0.5 0 -0.8];
 delta = [0.15 0 0];
 pos = zeros(numel(str),3);
@@ -39,29 +41,30 @@ for ii=1:numel(str), pos(ii,:) = to + ii*delta; end
 pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
 %}
 
-% {
-pos = [ 0.04 -0.89 0.01;
-0.06 -0.87 0.00;
-0.09 -0.86 -0.00;
-0.11 -0.84 -0.01;
-0.15 -0.82 -0.02];
-%}
-% Letter sizes
+% Letter sizes as in textRender
 characterAssetSize = [.88 .25 1.23];
 letterScale = [0.15,0.1,0.15] ./ characterAssetSize;
 
+% Matching the rotate/translate/scale operations with textRender
 for ii=1:numel(str)
     idx = piAssetSearch(thisR,'object name',['_',str(ii),'_']);
-    thisR.set('asset',idx,'world position',pos(ii,:));
+    thisR.set('asset',idx, 'material name','wood-light-large-grain');
+
+    % This seems to match textRender
+    thisR.set('asset',idx, 'rotate', [0,15,15]);
+    thisR.set('asset',idx, 'rotate', [-90 00 0]);
+    thisR.set('asset',idx, 'translate',pos(ii,:));
     thisR.set('asset',idx, 'scale', letterScale);
-    thisR.set('asset',idx,'material name','wood-light-large-grain');
 end
 % thisR.show('objects');
 
+% Need to understand this.  It renders with this, but I do not yet
+% understand what all the different branch and instances are doing and how
+% they know about one another.
+%
+% piObjectInstance(thisR);
+
 piWRS(thisR);
-
-piAssetGeometry(thisR);
-
 
 %% Deal with instances
 piObjectInstance(thisR);
