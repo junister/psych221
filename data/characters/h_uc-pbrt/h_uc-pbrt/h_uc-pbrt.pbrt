@@ -18,6 +18,6 @@ Camera "perspective"
 "float fov" [22.895194130645738]
 WorldBegin
 
-Include "_uc-pbrt_materials.pbrt"
-Include "_uc-pbrt_texture.pbrt"
-Include "_uc-pbrt_geometry.pbrt"
+Include "h_uc-pbrt_materials.pbrt"
+Include "h_uc-pbrt_texture.pbrt"
+Include "h_uc-pbrt_geometry.pbrt"
