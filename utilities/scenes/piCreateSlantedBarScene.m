@@ -1,7 +1,7 @@
 function thisR = piCreateSlantedBarScene(varargin)
 % DEPRECATED - Create a recipe for a slanted bar scene. 
 %
-% This seemed to rely on V3.  Use the V4 
+% This seemed to rely on V3.  Use the V4 instead
 %
 %    thisR = piRecipeCreate('slanted edge'); 
 %    scene = piWRS(thisR);
@@ -33,6 +33,8 @@ function thisR = piCreateSlantedBarScene(varargin)
 %}
 
 %% Parse inputs
+error('Deprecated.  Use thisR = piRecipeCreate(''slanted edge'')');
+
 varargin = ieParamFormat(varargin);
 parser = inputParser();
 parser.addParameter('planedepth',1, @isnumeric);

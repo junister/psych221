@@ -1,13 +1,13 @@
 function [outputR, letterNames] = charactersRender(aRecipe, aString, options)
-% Add a string of character assets to a recipe
+% Add a string of characters to a recipe
 %
 % Synopsis
 %   outputR = charactersRender(aRecipe, aString, options)
 %
-% Description
-%   Loads the characters saved in the ISET3d assets file for
-%   characters, and merges them into the input recipe.  Requires
-%   ISET3d and ISETCam.  Used by ISETauto, and ISETonline
+% Brief
+%   Loads the characters saved in the ISET3d assets file for characters,
+%   and merges them into the input recipe.  Requires ISET3d and ISETCam.
+%   Used by ISETauto, and ISETonline
 %
 % Input
 %  aRecipe
@@ -31,29 +31,34 @@ function [outputR, letterNames] = charactersRender(aRecipe, aString, options)
 
 % Example:
 %{
- thisR = piRecipeCreate('macbeth checker');
- to = thisR.get('to') - [0.5 0 -0.8];
- delta = [0.15 0 0];
- for ii=1:numel('Lorem'), pos(ii,:) = to + ii*delta; end
- pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
- thisR = charactersRender(thisR, 'Lorem','letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
-   'letterPosition',pos,'letterMaterial','wood-light-large-grain');
- thisR.set('skymap','sky-sunlight.exr');
- thisR.set('nbounces',4);
- piWRS(thisR);
+thisR = piRecipeCreate('macbeth checker');
+piMaterialsInsert(thisR,'name','wood-light-large-grain');
+to = thisR.get('to') - [0.5 0 -0.8];
+delta = [0.15 0 0];
+str = 'Lorem';
+pos = zeros(numel(str),3);
+for ii=1:numel(str), pos(ii,:) = to + ii*delta; end
+pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
+thisR = charactersRender(thisR, str,'letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
+    'letterPosition',pos,'letterMaterial','wood-light-large-grain');
+thisR.set('skymap','sky-sunlight.exr');
+thisR.set('nbounces',4);
+piWRS(thisR);
 %}
 %{
  thisR = piRecipeCreate('Cornell_Box');
+ piMaterialsInsert(thisR,'name','marble-beige');
+ piMaterialsInsert(thisR,'name','wood-light-large-grain');
+
  thisR.set('film resolution',[384 256]*2);
  to = thisR.get('to') - [0.32 -0.1 -0.8];
  delta = [0.09 0 0];
  str = 'marble';
  idx = piAssetSearch(thisR,'object name','003_cornell_box');
- piMaterialsInsert(thisR,'name','wood-light-large-grain');
- thisR.set('asset',idx,'material name','wood-light-large-grain');
+ thisR.set('asset',idx,'material name','marble-beige');
  for ii=1:numel(str), pos(ii,:) = to + ii*delta; end
  thisR = charactersRender(thisR, str,'letterSize',[0.1,0.03,0.1]*0.7,...
-    'letterRotation',[0,0,-10],'letterPosition',pos,'letterMaterial','marble-beige');
+    'letterRotation',[0,0,-10],'letterPosition',pos,'letterMaterial','wood-light-large-grain');
  thisR.set('skymap','sky-sunlight.exr');
  thisR.set('nbounces',4);
  piWRS(thisR);
@@ -82,6 +87,15 @@ end
 %-----------------------------------------------------------------
 % NOTE: We don't handle strings with duplicate characters yet
 %       We need to create Instances for subsequent ones, I think!
+% 
+% BW: Conceptually, we run unique on the input letters and add each as an
+% asset once. Then we use piObjectInstance(thisR) to create instances on
+% the whole recipe.  (I don't know if we can just make instances for only
+% the letters, but maybe. If not, we might modify piObjectInstance to
+% specify.  Or maybe it is not important.).
+%   Finally, each time we insert a character we add it as an instance using
+% piObjectInstanceCreate().
+%   Use t_piSceneInstances as a model.
 %-----------------------------------------------------------------
 
 % Set output recipe to our initial input
