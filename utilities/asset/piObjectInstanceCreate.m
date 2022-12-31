@@ -17,7 +17,8 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %
 % Inputs:
 %   thisR     - scene recipe
-%   assetName - The objecct we want to copy
+%   assetName - Identifier of the object we want to copy.  Either an index
+%               or a name
 %
 % Optional key/val
 %   position  - 1x3 position (World position)?
@@ -64,14 +65,10 @@ graftNow = p.Results.graftnow;
 %% Find the asset idx and properties
 [idx,asset] = piAssetFind(thisR, 'name', assetname);
 
-% if isempty(asset{1}) && numel(asset)==1
-%     warning('%s not found, failed to creat object instance for this asset.', assetname);
-% end
-
 % ZL only addressed the first entry of the cell.  So, this seems OK.
 if iscell(asset)
     if numel(asset) > 1
-        warning('Multiple assets returned. I think there should just be 1.');
+        warning('Multiple assets returned. There should just be 1.');
     end
     asset = asset{1}; 
 end
@@ -81,7 +78,9 @@ if ~strcmp(asset.type, 'branch')
     return;
 end
 
-%% We seem to have a good index.
+%% We seem to have a valid index.
+
+%
 OBJsubtree = thisR.get('asset', idx, 'subtree','false');
 
 OBJsubtree_branch = OBJsubtree.get(1);

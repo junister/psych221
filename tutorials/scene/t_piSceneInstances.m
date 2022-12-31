@@ -1,14 +1,16 @@
 %% t_piSceneInstances
 %
 % Show how to add multiple instances of an asset to a scene.  Instances are
-% a way to store the mesh data of an object once, but to reuse the mesh
-% and render it with different transforms for position, size, and rotation.
+% a way to store the mesh data of an object once, but to reuse the mesh as
+% we render the asset with different transforms for position, size, and
+% rotation.
 % 
-% We 
+% This is used heavily in the ISETAuto work and also for text rendering
+% (e.g., piTextInsert).
 %  
 % See also
 %  piObjectInstanceCreate, piObjectInstanceRemove
-
+%
  
 %%
 ieInit;
@@ -19,9 +21,9 @@ if ~piDockerExists, piDockerConfig; end
 thisR = piRecipeDefault('scene name','simple scene');
 piWRS(thisR);
 
+%% Create a second instance of the yellow guy
 
-%% Create a second instance if the yellow guy
-
+% Converts the whole recipe.  Is this necessary or 
 piObjectInstance(thisR);
 % thisR.show;
 
@@ -93,6 +95,8 @@ end
 %% The necessity of unique names has to do with speed and ISETAuto
 
 thisR.assets = thisR.assets.uniqueNames;
+
+%%
 piWRS(thisR,'render flag','hdr');
 
 

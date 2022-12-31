@@ -1661,12 +1661,16 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % tree.  So we strip them and replace the names in the
                     % current structure.
                     if numel(varargin) >= 4
+                        warning('subtree call has 4th varargin.  Surprised I am.')
                         replace = varargin{4};
                     else
                         replace = true;
                     end
-                    % This seems wrong. Second param is an ID, 3rd should
-                    % be replace. 
+
+                    % This step strips removes the ID from the Node names
+                    % in val. These IDs only make sense in the context of
+                    % the original tree.  New IDs will need to be recreated
+                    % by the calling function.
                     [~, val] = val.stripID([],replace);
 
                 case 'children'
