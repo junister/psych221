@@ -11,7 +11,7 @@ function val = piAssetSearch(thisR,srchtype,param,varargin)
 % Inputs
 %  thisR     - recipe
 %  srchType  - string that defines the search
-%      'object name', 'light name', 'material name'
+%              'object name', 'light name', 'material name', 'branch name'
 %  param     - value of the string
 %
 % Optional key/val

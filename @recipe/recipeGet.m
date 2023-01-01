@@ -129,16 +129,33 @@ function val = recipeGet(thisR, param, varargin)
 %      'integrator subtype'
 %      'nwavebands'
 %
-%    % Asset information
-%       'assets'      - This struct includes the objects and their
+%    % Node information 
+%        The code uses asset and node interchangeably.  We should have used
+%        object and asset interchangeably, node for everything, and
+%        branch for nodes that are not leaves.  Trying to do better over
+%        time. 
+%
+%       'nodes'      - This struct includes the objects and their
 %                       properties in the World
-%       'asset names'
-%       'asset id'
-%       'asset root'
-%       'asset names'
-%       'asset parent id'
-%       'asset parent'
-%       'asset list'  - a list of branches.
+%       'node names'
+%       'node id'
+%       'node root'
+%       'node parent id'
+%       'node parent'
+%       'nodes list'  - a list of nodes (branches).
+%
+%    % Object information
+%        Objects have an _O at the end and are the leaves of the asset
+%        tree.  Other nodes have a branch (_B) or Instance (_I) or light
+%        (_L) indicator.  (We consider lights to be assets/objects.
+%     'object ids'        - Indices of the objects
+%     'object names'           - Full names 
+%     'object name material'   - Two cell arrays names and materials
+%     'object materials'       - Just the materials
+%     'object names noid'
+%     'object simple names'  
+%     'object coords','object coordinates'    
+%     'object sizes'
 %
 %    % Material information
 %      'materials'
@@ -1305,8 +1322,9 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         % Objects - this section should be converted to
         % thisR.get('object',param)
+        % thisR.get('object',id,param)
         % But for now, it is all 'objectparam'
-    case {'objects','object'}
+    case {'objectids','objects','object'}
         % Indices to the objects.
         val = [];
         if isempty(thisR.assets), return; end
@@ -1317,17 +1335,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
-    case {'objectmaterial','materialobject'}
-        % val = thisR.get('object material');
+    case {'objectnamematerial'}
+        % val = thisR.get('object name material');
         %
-        % Cell arrays of object names and corresponding material
-        % names.
+        % Two cell arrays - object names and its material names.
+        % See also thisR.show('object');
         %
-        % We do not use findleaves because sometimes tree class
-        % thinks what we call is a branch is a leaf because,
-        % well, we don't put an object below a branch node.  We
-        % should trim the tree of useless branches (any branch
-        % that has no object beneath it). Maybe.  (BW).
         ids = thisR.get('objects');
         leafMaterial = cell(1,numel(ids));
         leafNames = cell(1,numel(ids));
@@ -1335,16 +1348,15 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii=ids
             thisAsset = thisR.get('asset',ii);
             if iscell(thisAsset), thisAsset = thisAsset{1}; end
-            leafNames{cnt} = thisAsset.name;
+            leafNames{cnt}    = thisAsset.name;
             leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
             cnt = cnt + 1;
         end
         val.leafNames = leafNames;
         val.leafMaterial = leafMaterial;
     case {'objectmaterials'}
-        % A list of materials for each of the objects
-        % This and the one above should be merged.
-        tmp = thisR.get('object material');
+        % A list of materials in the recipe
+        tmp = thisR.get('object name material');
         val = (tmp.leafMaterial)';
     case {'objectnames'}
         % Full names of the objects, including ID and instance.
@@ -1383,7 +1395,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % We think there is ID_Instance_ObjectName_O.
         % So we try to delete the first two and the O atthe end.
         % If there are fewer parts, we delete less.
-        ids = thisR.get('objects');
+        ids = thisR.get('object ids');
         names = thisR.assets.names;
         val = cell(1,numel(ids));
         for ii = 1:numel(ids)
@@ -1414,35 +1426,109 @@ switch ieParamFormat(param)  % lower case, no spaces
             if iscell(thisNode), thisNode = thisNode{1}; end
             val(ii,:) = thisR.get('assets',thisNode.name,'world position');
         end
-    case {'objectsizes'}
-        % All the objects
-        % thisR.get('object sizes')
-        Objects  = thisR.get('objects');
-        nObjects = numel(Objects);
+    
+    case 'objectsizes'
+        % thisR.get('object sizes');
+        %
+        % Sizes for all of the objects.  These cannot be determined in all
+        % cases - the ply files need to be present in the output directory.
+        idx  = thisR.get('objects');
+        nObjects = numel(idx);
         val = zeros(nObjects,3);
         for ii=1:nObjects
-            thisNode = thisR.get('assets',Objects(ii));
-            if iscell(thisNode), thisNode = thisNode{1}; end
-            thisScale = thisR.get('assets',Objects(ii),'world scale');
-
-            % All the object points
-            if isfield(thisNode.shape{1},'point3p')
-                pts = thisNode.shape{1}.point3p;
-                if ~isempty(pts)
-                    % Range of points times any scale factors on the path
-                    val(ii,1) = range(pts(1:3:end))*thisScale(1);
-                    val(ii,2) = range(pts(2:3:end))*thisScale(2);
-                    val(ii,3) = range(pts(3:3:end))*thisScale(3);
-                else
-                    val(ii,:) = NaN;
-                end
-            else
-                % There is no shape point information.  So we return NaNs.
-                val(ii,:) = NaN;
-            end
-
+            val(ii,:) = thisR.get('asset',idx(ii),'size');
         end
 
+        % Old code for 'size' - Updated in various ways by BW Dec 31 2022.
+        %
+        % case 'size'
+        %         % All the objects
+        %         % thisR.get('object sizes')
+        %         Objects  = thisR.get('objects');
+        %         nObjects = numel(Objects);
+        %         val = zeros(nObjects,3);
+        %         for ii=1:nObjects
+        %             thisNode = thisR.get('assets',Objects(ii));
+        %             if iscell(thisNode), thisNode = thisNode{1}; end
+        %             thisScale = thisR.get('assets',Objects(ii),'world scale');
+        %
+        %             % All the object points
+        %             if isfield(thisNode.shape{1},'point3p')
+        %                 pts = thisNode.shape{1}.point3p;
+        %                 if ~isempty(pts)
+        %                     % Range of points times any scale factors on the path
+        %                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
+        %                     val(ii,2) = range(pts(2:3:end))*thisScale(2);
+        %                     val(ii,3) = range(pts(3:3:end))*thisScale(3);
+        %                 else
+        %                     val(ii,:) = NaN;
+        %                 end
+        %             else
+        %                 % There is no shape point information.  So we return NaNs.
+        %                 val(ii,:) = NaN;
+        %             end
+        %
+        %         end
+
+        % -------Instances
+    case {'instance'}
+        % thisR.get('instance',id,'param')
+        if ischar(varargin{1})
+            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+            % If only one asset matches, turn it from cell to struct.
+        else
+            % Not sure when we send in varargin as an array.  Example?
+            % (BW)
+            if numel(varargin{1}) > 1,  id = varargin{1}(1);
+            else,                       id = varargin{1};
+            end
+            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
+        end
+        if isempty(id)
+            error('Could not find asset %s\n',varargin{1});
+        end
+        if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        assert(contains(thisAsset.name,'_I_'));
+
+        % Enable various parameters - todo!!!!
+        switch ieParamFormat(varargin{2})
+            case 'name'
+                val = thisAsset.name;
+            otherwise
+                error('Unknown instance property.')
+        end
+        
+        % These are the other form, without a parameter
+    case {'instanceid','instanceids'}
+        % We have a problem identifying instances.  They should be of
+        % 'type' instance.  But now, they are of type branch and have an
+        % _I_ in them.  The _I_ is largely OK but we sometimes have the
+        % capital letter _I_ represented.  That has an 'uc' so I tried to
+        % avoid the error.  
+        val = [];
+        if isempty(thisR.assets), return; end
+        nnodes = thisR.assets.nnodes;
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'branch')
+                if contains(thisNode.name,'_I_') && ~contains(thisNode.name,'uc')
+                    val = [val,ii]; %#ok<AGROW>
+                end
+            end
+        end
+    case {'instancenames'}
+        % thisR.get('instance names')
+        %
+        % Full names with id of every branch node
+        if isempty(thisR.assets), return; end
+        ids = thisR.get('instance ids');
+        names = thisR.assets.names;   % Names of everything.
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            val{ii} = names{ids(ii)};
+        end
+        
 
         % ---------  Lights
     case {'lightsimplenames'}
@@ -1654,19 +1740,28 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = id;
                 case 'subtree'
                     % thisR.get('asset', assetName, 'subtree', ['replace', false]);
-                    % The id is retrieved above.
+                    % The node id is retrieved above.
+                    %
+                    % The extra varargin which allows the user to specify
+                    % the 'replace' value as true or false.  By default,
+                    % replace seems to be true.
+                    %
                     val = thisR.assets.subtree(id);
 
                     % The current IDs only make sense as part of the whole
                     % tree.  So we strip them and replace the names in the
                     % current structure.
                     if numel(varargin) >= 4
+                        warning('subtree call has 4th varargin.  Surprised I am.')
                         replace = varargin{4};
                     else
                         replace = true;
                     end
-                    % This seems wrong. Second param is an ID, 3rd should
-                    % be replace. 
+
+                    % This step strips removes the ID from the Node names
+                    % in val. These IDs only make sense in the context of
+                    % the original tree.  New IDs will need to be recreated
+                    % by the calling function.
                     [~, val] = val.stripID([],replace);
 
                 case 'children'
@@ -1729,26 +1824,58 @@ switch ieParamFormat(param)  % lower case, no spaces
                     else
                         val = piAssetGet(thisAsset, 'rotation');
                     end
-
-                case 'size'
-                    % thisR.get('asset',objectName,'size');
-                    % Size of one object in meters
+                case {'size','objectsize'}
+                    % thisR.get('asset',objectID,'size');
+                    %
+                    % Only objects have a size.  No branches.
+                    %
+                    % We store the shape of the objects either as point3p
+                    % in the shape field or as a filename that points to a
+                    % ply file with the mesh points.
+                    
                     if thisR.assets.isleaf(id)
                         % Only objects
                         thisScale = thisR.get('assets',id,'world scale');
-                        % We are not sure why this is sometimes a
-                        % cell and sometimes not
+
+                        % Not sure why this is sometimes a cell and
+                        % sometimes not
                         if iscell(thisAsset.shape)
-                            pts = thisAsset.shape{1}.point3p;
+                            theShape = thisAsset.shape{1};
                         else
-                            pts = thisAsset.shape.point3p;
+                            theShape = thisAsset.shape;
                         end
-                        val(1) = range(pts(1:3:end))*thisScale(1);
-                        val(2) = range(pts(2:3:end))*thisScale(2);
-                        val(3) = range(pts(3:3:end))*thisScale(3);
+
+                        % Not sure how an object has no shape, but I have
+                        % seen it in bathroom-contemporary. Sometimes we
+                        % have the points and sometimes only a pointer to a
+                        % PLY file.
+                        val = zeros(1,3);
+                        if isempty(theShape)
+                            warning('Object %d has no shape.',id);
+                        elseif ~isempty(theShape.point3p)
+                            pts = theShape.point3p;
+                            val(1) = range(pts(1:3:end))*thisScale(1);
+                            val(2) = range(pts(2:3:end))*thisScale(2);
+                            val(3) = range(pts(3:3:end))*thisScale(3);
+                        elseif ~isempty(theShape.filename)
+                            % Read a ply file.  The problem is the ply file
+                            % needs to be in the output directory.  This is
+                            % a limitation.  For example, if we have a
+                            % character, the file might be in the asset
+                            % directory and not yet copied to the output
+                            % directory. (BW).
+                            plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
+                            if exist(plyFile,'file')
+                                tmp = pcread(plyFile);
+                                val(1) = tmp.XLimits(2) - tmp.XLimits(1);
+                                val(2) = tmp.YLimits(2) - tmp.YLimits(1);
+                                val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
+                            else
+                                warning('ply file not yet in output dir.')
+                            end
+                        end
                     else
                         warning('Only objects have a size');
-                        val = [];
                     end
                 otherwise
                     % Give it a try.

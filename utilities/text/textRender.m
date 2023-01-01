@@ -39,7 +39,7 @@ str = 'Lorem';
 pos = zeros(numel(str),3);
 for ii=1:numel(str), pos(ii,:) = to + ii*delta; end
 pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
-thisR = charactersRender(thisR, str,'letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
+thisR = textRender(thisR, str,'letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
     'letterPosition',pos,'letterMaterial','wood-light-large-grain');
 thisR.set('skymap','sky-sunlight.exr');
 thisR.set('nbounces',4);
@@ -166,7 +166,8 @@ for ii = 1:strlength(aString)
     if ~isempty(options.letterMaterial)
         % we can assume our caller has already loaded the material?
         % outputR = piMaterialsInsert(outputR,'names',{options.letterMaterial});
-        ourLetterAsset.thisR = outputR.set('asset',letterObject(1),'material name',options.letterMaterial);
+        ourLetterAsset.thisR = outputR.set('asset',letterObject(1),...
+            'material name',options.letterMaterial);
     end
 
     ourLetterAsset.thisR = outputR.set('asset', letterObject(1), ...
@@ -178,6 +179,12 @@ for ii = 1:strlength(aString)
         outputR.set('asset',letterObject(1), ...
             'scale', letterScale);
     end
+
+    % The order of the transformations matters.  In general, I think we
+    % want 'scale' to be last not first, because the scale is applied to
+    % the translate.  This works for our current demos, so I am not
+    % changing.  But this issue - of ordering the transformations - will
+    % come up a lot as we work through things. BW.
 
     % maybe we don't always want this?
     % need to make sure we know

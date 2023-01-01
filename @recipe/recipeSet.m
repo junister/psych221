@@ -1395,9 +1395,13 @@ switch param
 
                 thisR.set('asset',geometryNode.name,'world rotation',wrotate);
 
-            case {'chop', 'cut'}
+            case {'subtreedelete','chop', 'cut'}
+                % thisR.set('asset',id,'subtree delete');
+                %
+                % Delete all the node and its subtree
                 id = thisR.get('asset', assetName, 'id');
                 thisR.assets = thisR.assets.chop(id);
+                thisR.assets = thisR.assets.uniqueNames;
             otherwise
                 % Set a parameter of an asset to val
                 % rotation is a parameter, but it is stopped above via the
