@@ -99,7 +99,7 @@ classdef recipe < matlab.mixin.Copyable
             %              too)
             %
             % Optional
-            %   assets (or nodes)
+            %   window - Shows the whole node tree
             %   node names
             %   object materials
             %   object positions
@@ -107,7 +107,7 @@ classdef recipe < matlab.mixin.Copyable
             %   materials
             %   lights
 
-            if isempty(varargin), showType = 'assets';
+            if isempty(varargin), showType = 'window';
             else,                 showType = varargin{1};
             end
 
@@ -115,9 +115,15 @@ classdef recipe < matlab.mixin.Copyable
 
             % We should probably use nodes and objects/assets distinctly
             switch ieParamFormat(showType)
-                case {'objectnames','assetnames','nodenames'}
+                case {'window'}
+                    % Brings up the window that you can click through
+                    % showing all the nodes.
+                    if isempty(obj.assets), disp('No assets in this recipe');
+                    else, obj.assets.show;
+                    end
+                case {'nodenames'}
                     % List all the nodes, not just the objects
-                    names = obj.get('asset names')';
+                    names = obj.get('node names')';
                     rows = cell(numel(names),1);
                     for ii=1:numel(names), rows{ii} = sprintf('%d',ii); end
                     T = table(categorical(names),'VariableNames',{'assetName'}, 'RowNames',rows);

@@ -67,15 +67,14 @@ end
 piWRS(thisR);
 
 %% Deal with instances
+
+% Adding the instances alone changes nothing.
 piObjectInstance(thisR);
 thisR.show;
+piWRS(thisR);
 
+%%
 
-thisR = textRender(thisR, str,'letterSize',[0.15,0.1,0.15],'letterRotation',[0,15,15],...
-    'letterPosition',pos,'letterMaterial','wood-light-large-grain');
-
-thisR.set('skymap','sky-sunlight.exr');
-thisR.set('nbounces',4);
 piWRS(thisR);
 
 %% END

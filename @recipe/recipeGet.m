@@ -148,10 +148,10 @@ function val = recipeGet(thisR, param, varargin)
 %        Objects have an _O at the end and are the leaves of the asset
 %        tree.  Other nodes have a branch (_B) or Instance (_I) or light
 %        (_L) indicator.  (We consider lights to be assets/objects.
-%     'objects'        - Indices of the objects
-%     'object names'
-%     'object material'
-%     'object materials'
+%     'object ids'        - Indices of the objects
+%     'object names'           - Full names 
+%     'object name material'   - Two cell arrays names and materials
+%     'object materials'       - Just the materials
 %     'object names noid'
 %     'object simple names'  
 %     'object coords','object coordinates'    
@@ -1322,8 +1322,9 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         % Objects - this section should be converted to
         % thisR.get('object',param)
+        % thisR.get('object',id,param)
         % But for now, it is all 'objectparam'
-    case {'objects','object'}
+    case {'objectids','objects','object'}
         % Indices to the objects.
         val = [];
         if isempty(thisR.assets), return; end
@@ -1334,17 +1335,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
-    case {'objectmaterial','materialobject'}
-        % val = thisR.get('object material');
+    case {'objectnamematerial'}
+        % val = thisR.get('object name material');
         %
-        % Cell arrays of object names and corresponding material
-        % names.
+        % Two cell arrays - object names and its material names.
+        % See also thisR.show('object');
         %
-        % We do not use findleaves because sometimes tree class
-        % thinks what we call is a branch is a leaf because,
-        % well, we don't put an object below a branch node.  We
-        % should trim the tree of useless branches (any branch
-        % that has no object beneath it). Maybe.  (BW).
         ids = thisR.get('objects');
         leafMaterial = cell(1,numel(ids));
         leafNames = cell(1,numel(ids));
@@ -1352,16 +1348,15 @@ switch ieParamFormat(param)  % lower case, no spaces
         for ii=ids
             thisAsset = thisR.get('asset',ii);
             if iscell(thisAsset), thisAsset = thisAsset{1}; end
-            leafNames{cnt} = thisAsset.name;
+            leafNames{cnt}    = thisAsset.name;
             leafMaterial{cnt} = piAssetGet(thisAsset,'material name');
             cnt = cnt + 1;
         end
         val.leafNames = leafNames;
         val.leafMaterial = leafMaterial;
     case {'objectmaterials'}
-        % A list of materials for each of the objects
-        % This and the one above should be merged.
-        tmp = thisR.get('object material');
+        % A list of materials in the recipe
+        tmp = thisR.get('object name material');
         val = (tmp.leafMaterial)';
     case {'objectnames'}
         % Full names of the objects, including ID and instance.
@@ -1400,7 +1395,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % We think there is ID_Instance_ObjectName_O.
         % So we try to delete the first two and the O atthe end.
         % If there are fewer parts, we delete less.
-        ids = thisR.get('objects');
+        ids = thisR.get('object ids');
         names = thisR.assets.names;
         val = cell(1,numel(ids));
         for ii = 1:numel(ids)
@@ -1475,6 +1470,65 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         %         end
 
+        % -------Instances
+    case {'instance'}
+        % thisR.get('instance',id,'param')
+        if ischar(varargin{1})
+            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+            % If only one asset matches, turn it from cell to struct.
+        else
+            % Not sure when we send in varargin as an array.  Example?
+            % (BW)
+            if numel(varargin{1}) > 1,  id = varargin{1}(1);
+            else,                       id = varargin{1};
+            end
+            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
+        end
+        if isempty(id)
+            error('Could not find asset %s\n',varargin{1});
+        end
+        if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        assert(contains(thisAsset.name,'_I_'));
+
+        % Enable various parameters - todo!!!!
+        switch ieParamFormat(varargin{2})
+            case 'name'
+                val = thisAsset.name;
+            otherwise
+                error('Unknown instance property.')
+        end
+        
+        % These are the other form, without a parameter
+    case {'instanceid','instanceids'}
+        % We have a problem identifying instances.  They should be of
+        % 'type' instance.  But now, they are of type branch and have an
+        % _I_ in them.  The _I_ is largely OK but we sometimes have the
+        % capital letter _I_ represented.  That has an 'uc' so I tried to
+        % avoid the error.  
+        val = [];
+        if isempty(thisR.assets), return; end
+        nnodes = thisR.assets.nnodes;
+        for ii=1:nnodes
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode,'type') && isequal(thisNode.type,'branch')
+                if contains(thisNode.name,'_I_') && ~contains(thisNode.name,'uc')
+                    val = [val,ii]; %#ok<AGROW>
+                end
+            end
+        end
+    case {'instancenames'}
+        % thisR.get('instance names')
+        %
+        % Full names with id of every branch node
+        if isempty(thisR.assets), return; end
+        ids = thisR.get('instance ids');
+        names = thisR.assets.names;   % Names of everything.
+        val = cell(1,numel(ids));
+        for ii = 1:numel(ids)
+            % Includes ids and everything
+            val{ii} = names{ids(ii)};
+        end
+        
 
         % ---------  Lights
     case {'lightsimplenames'}
