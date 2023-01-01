@@ -129,16 +129,33 @@ function val = recipeGet(thisR, param, varargin)
 %      'integrator subtype'
 %      'nwavebands'
 %
-%    % Asset information
-%       'assets'      - This struct includes the objects and their
+%    % Node information 
+%        The code uses asset and node interchangeably.  We should have used
+%        object and asset interchangeably, node for everything, and
+%        branch for nodes that are not leaves.  Trying to do better over
+%        time. 
+%
+%       'nodes'      - This struct includes the objects and their
 %                       properties in the World
-%       'asset names'
-%       'asset id'
-%       'asset root'
-%       'asset names'
-%       'asset parent id'
-%       'asset parent'
-%       'asset list'  - a list of branches.
+%       'node names'
+%       'node id'
+%       'node root'
+%       'node parent id'
+%       'node parent'
+%       'nodes list'  - a list of nodes (branches).
+%
+%    % Object information
+%        Objects have an _O at the end and are the leaves of the asset
+%        tree.  Other nodes have a branch (_B) or Instance (_I) or light
+%        (_L) indicator.  (We consider lights to be assets/objects.
+%     'objects'        - Indices of the objects
+%     'object names'
+%     'object material'
+%     'object materials'
+%     'object names noid'
+%     'object simple names'  
+%     'object coords','object coordinates'    
+%     'object sizes'
 %
 %    % Material information
 %      'materials'
@@ -1669,7 +1686,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                     val = id;
                 case 'subtree'
                     % thisR.get('asset', assetName, 'subtree', ['replace', false]);
-                    % The id is retrieved above.
+                    % The node id is retrieved above.
+                    %
+                    % The extra varargin which allows the user to specify
+                    % the 'replace' value as true or false.  By default,
+                    % replace seems to be true.
+                    %
                     val = thisR.assets.subtree(id);
 
                     % The current IDs only make sense as part of the whole
@@ -1769,9 +1791,14 @@ switch ieParamFormat(param)  % lower case, no spaces
                             theShape = thisAsset.shape;
                         end
 
-                        % Sometimes we have the points and sometimes only a
-                        % pointer to a PLY file.
-                        if ~isempty(theShape.point3p)
+                        % Not sure how an object has no shape, but I have
+                        % seen it in bathroom-contemporary. Sometimes we
+                        % have the points and sometimes only a pointer to a
+                        % PLY file.
+                        val = zeros(1,3);
+                        if isempty(theShape)
+                            warning('Object %d has no shape.',id);
+                        elseif ~isempty(theShape.point3p)
                             pts = theShape.point3p;
                             val(1) = range(pts(1:3:end))*thisScale(1);
                             val(2) = range(pts(2:3:end))*thisScale(2);
@@ -1791,12 +1818,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                                 val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
                             else
                                 warning('ply file not yet in output dir.')
-                                val = zeros(1,3);
                             end
                         end
                     else
                         warning('Only objects have a size');
-                        val = [];
                     end
                 otherwise
                     % Give it a try.

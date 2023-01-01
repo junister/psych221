@@ -2,23 +2,20 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %% Create an object copy (instance)
 %
 % Synopsis:
-%   [thisR, instanceBranchName]  = piObjectInstanceCreate(thisR, assetname, varargin)
+%   [thisR, instanceBranchName, OBJsubtreeNew]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
-% Brief description:
+% Brief
 %   Instancing enables the system to store a single copy of the object mesh
 %   and define multiple copies (instances) that differ based on the
 %   transformations that place it in the scene. Instancing is an efficient
 %   method of copying.
 %
-%   After running this function, upon return you should assign unique names
-%   to all of the assets again.
-%
-%        thisR.assets = thisR.assets.uniquename;
+%   Running this function can change all of the node indices.
 %
 % Inputs:
 %   thisR     - scene recipe
-%   assetName - Identifier of the object we want to copy.  Either an index
-%               or a name
+%   assetName - Identifier of the object we want to copy.  Either an
+%               integer index or an asset (object) name
 %
 % Optional key/val
 %   position  - 1x3 position (World position)?
@@ -28,16 +25,18 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %
 % Outputs:
 %   thisR     - scene recipe
-%   instanceBranchName
+%   instanceBranchName - The new instance is in a new branch
+%   OBJsubtreeNew - this is the subtree of the instance
 %
 % Description
 %   Instances can be used with scenes that have an 'assets' slot.  To use
-%   instances, we first prepare the recipe using piObjectInstance(). This
-%   creates an instance node for each of the objects. To make a copy of an
-%   object, use piObjectInstanceCreate.  
+%   instances, we first prepare the recipe using the function
+%   (piObjectInstance). This code makes an instance (light weight copy) of
+%   a particular asset. 
 % 
-%   The specific code is explained in the tutorial script
-%   t_piSceneInstances. 
+%   The code is explained in the tutorial script
+%
+%       t_piSceneInstances. 
 %
 % Zhenyi, 2021
 %
@@ -45,15 +44,17 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   piObjectInstance, t_piSceneInstances
 
 %% Read the parameters
+
 p = inputParser;
 p.addRequired('thisR', @(x)isequal(class(x),'recipe'));
+p.addRequired('assetname',@(x)(ischar(x) || isnumeric(x)));
 p.addParameter('position',[0, 0, 0]);
 p.addParameter('rotation',piRotationMatrix);
 p.addParameter('scale',[1,1,1]);
 p.addParameter('motion',[], @(x)isstruct);
 p.addParameter('graftnow',1);
 
-p.parse(thisR, varargin{:});
+p.parse(thisR, assetname, varargin{:});
 
 thisR    = p.Results.thisR;
 position = p.Results.position;
@@ -78,9 +79,9 @@ if ~strcmp(asset.type, 'branch')
     return;
 end
 
-%% We seem to have a valid index.
+%% We have a valid index.  Start the operations.
 
-%
+% Get the subtree but do not replace the
 OBJsubtree = thisR.get('asset', idx, 'subtree','false');
 
 OBJsubtree_branch = OBJsubtree.get(1);
