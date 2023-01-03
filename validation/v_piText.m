@@ -68,12 +68,24 @@ piWRS(thisR);
 
 %% Deal with instances
 
-% Adding the instances alone changes nothing.
+% Adding the instances alone changes nothing.  That's probably good.
 piObjectInstance(thisR);
+
+%%
 thisR.show;
 piWRS(thisR);
 
-%%
+%%  
+
+% Maybe this should be thisR.get('asset',idx,'top branch')
+thisLetter = piAssetSearch(thisR,'object name','_L_uc');
+p2Root = thisR.get('asset',thisLetter,'pathtoroot');
+idx = p2Root(end);
+
+% The 'position' seems to be a translation
+pos = thisR.get('asset',idx,'world position');
+thisR = piObjectInstanceCreate(thisR, idx, 'position',[-0.1 0 0.0]);
+thisR = piObjectInstanceCreate(thisR, idx, 'position',[0 0.1 0.0]);
 
 piWRS(thisR);
 
