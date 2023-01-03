@@ -83,8 +83,7 @@ p2Root = thisR.get('asset',thisLetter,'pathtoroot');
 idx = p2Root(end);
 
 % The 'position' seems to be a translation
-pos = thisR.get('asset',idx,'world position');
-thisR = piObjectInstanceCreate(thisR, idx, 'position',[-0.1 0 0.0]);
+[thisR, foo] = piObjectInstanceCreate(thisR, idx, 'position',[-0.1 0 0.0]);
 thisR = piObjectInstanceCreate(thisR, idx, 'position',[0 0.1 0.0]);
 
 piWRS(thisR);
