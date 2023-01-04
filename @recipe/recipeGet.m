@@ -210,6 +210,10 @@ val = [];
 
 switch ieParamFormat(param)  % lower case, no spaces
 
+    % Metadata
+    case {'name'}
+       val = thisR.name;
+        
     % File management
     case 'inputfile'
         % The place where the PBRT scene files start before being modified
