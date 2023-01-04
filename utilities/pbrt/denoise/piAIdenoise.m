@@ -126,7 +126,7 @@ for ii = 1:chs
         cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
     else
         % Write it out into a temporary file
-        % For the Intel Denoiser, we currently duplicate the channels
+        % For the Intel Denoiser,need to duplicate the channels
         img_sp(:,:,2) = img_sp(:,:,1);
         img_sp(:,:,3) = img_sp(:,:,1);
         writePFM(img_sp, outputTmp);
