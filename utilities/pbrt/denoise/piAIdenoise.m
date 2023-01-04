@@ -120,14 +120,15 @@ for ii = 1:chs
     % For every channel, get the photon data, normalize it, and
     % denoise it
     img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,2) = img_sp(:,:,1);
-    img_sp(:,:,3) = img_sp(:,:,1);
 
     if p.Results.useNvidia
         exrwrite(img_sp, outputTmp);
         cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
     else
         % Write it out into a temporary file
+        % For the Intel Denoiser, we currently duplicate the channels
+        img_sp(:,:,2) = img_sp(:,:,1);
+        img_sp(:,:,3) = img_sp(:,:,1);
         writePFM(img_sp, outputTmp);
         cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
     end
