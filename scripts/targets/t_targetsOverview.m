@@ -13,7 +13,7 @@
 % The standard material is a struct with multiple slots.
 %
 % To learn about how to use the standard PBRT textures, see the examples in
-% t_piIntro_material and t_mat
+% t_piIntro_material and t_materials
 
 %%
 ieInit;
