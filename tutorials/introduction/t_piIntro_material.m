@@ -46,7 +46,7 @@ piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 %% The material library
 
 % Print out the named materials in this scene.
-thisR.get('materials print');
+thisR.show('materials');
 
 % We have additional materials in a piMaterialPresets.
 piMaterialPresets('list');
