@@ -872,9 +872,13 @@ switch param
         thisR.materials.outputfile = val;
 
     case {'textures', 'texture'}
-        % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
-
+        % thisR.set('texture',textureName,parameter,value);
+        % thisR.set('texture',textures
         if isempty(varargin)
+            % At this point thisR.textures has a slot for list
+            % (contains.Map) and a slot for order, a cell array of texture
+            % names.  The code here is not the right way to adjust
+            % thisR.textures.
             if iscell(val)
                 thisR.textures.list = val;
             else
@@ -936,15 +940,16 @@ switch param
             end
         end
 
-        % At this point we have the texture.
+        % At this point we have the texture.  This code has not been used a
+        % lot and needs checking.  Maybe with Zheng's help. (BW).
         if numel(varargin{1}) == 1
-            % A material struct was sent in as the only argument.  We
+            % A texture struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
             % it.
             thisTexture = varargin{1};
             thisR.textures.list(thisTexture.name) = varargin{1};
         else
-            % A material name and property was sent in.  We set the
+            % A texture name and property was sent in.  We set the
             % property and then update the material in the list.
             thisTexture = piTextureSet(thisTexture, varargin{1}, varargin{2});
             thisR.set('textures', textureName, thisTexture);

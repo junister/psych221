@@ -4,16 +4,19 @@
 % create materials with pre-assigned textures, and some of the parameters
 % of these textures can be modified. 
 % 
-% This script illustrates how we use piMaterialsInsert to include materials
-% with pre-assigned textures into a recipe. We render the materials on a
-% flat surface in the first few examples.  Then we assign the textures to
-% individual assets in the SimpleScene.
+% See the tutorial t_material* for examples of inserting materials that
+% have been predefined.  That tutorial uses piMaterialsInsert, which
+% depends on piMaterialPresets, to insert materials with pre-assigned
+% textures into a recipe.
+% 
+% This recipe expands on how to create a material using an image as a
+% texture, and then to control the properties of the texture.
 %
 % An exploration of the other materials and textures we have defined
 % in piMaterialPresets is in v_material.m
 %
 % See also
-%  v_Materials, t_piIntro_light, tls_assets.mlx
+%  v_Materials, t_materials, t_materials*
 
 %% Init
 ieInit;

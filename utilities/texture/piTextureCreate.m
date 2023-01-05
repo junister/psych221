@@ -10,6 +10,7 @@ function texture = piTextureCreate(name, varargin)
 % Optional key/val pairs
 %
 %   The key/val options depend on the type of texture.  Use
+%   piTextureCreate('help') to see the valid texture types.
 %
 %       piTextureProperties(textureType)
 %
@@ -18,14 +19,20 @@ function texture = piTextureCreate(name, varargin)
 % Outputs:
 %   texture - new texture with parameters
 %
-% ZLY, 2021
-%
 % See also
+%   piMaterialPresets, t_piIntro_texture,t_targetsOverview
 %
 
 % Examples
 %{
-  piTextureCreate('list available types')
+  tTypes = piTextureCreate('help');
+  for ii=1:numel(tTypes)
+     params = piTextureProperties(tTypes{ii});
+     fprintf('\n\n***  %s\n',tTypes{ii});
+     for jj=1:numel(params)
+      fprintf('\t%s \n',params{jj});
+     end
+  end
 %}
 %{
   texture = piTextureCreate('checkerboard_texture',...
@@ -36,12 +43,13 @@ function texture = piTextureCreate(name, varargin)
         'tex2', [.99 .99 .99]);
 %}
 
-%% List availble type
+%% List available texture types
 
 validTextures = {'constant','scale','mix','bilerp','imagemap',...
     'checkerboard','dots','fbm','wrinkled','marble','windy'};
 
-if isequal(ieParamFormat(name),'listavailabletypes')
+if isequal(ieParamFormat(name),'listavailabletypes') || ...
+    isequal(ieParamFormat(name),'help')
     texture = validTextures;
     return;
 end

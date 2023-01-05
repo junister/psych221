@@ -30,7 +30,6 @@ function resourceDir = piDirGet(resourceType)
 %}
 
 %% Parse
-% Planning on deprecating imageTextures.
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
     'scenes','scene','local','server local', 'character-assets', ...
@@ -63,7 +62,7 @@ switch (resourceType)
     case {'materials','material'}
         resourceDir = fullfile(ourData,'materials');
     case {'imageTextures','textures','texture'}
-        % imageTextures is legacy and should be deprecated
+        % imageTextures is legacy and will be deprecated
         % Moved textures inside of materials Aug 1, 2022. (BW).
         resourceDir = fullfile(ourData,'materials','textures');
     case {'lens', 'lenses'}
