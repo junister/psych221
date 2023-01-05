@@ -14,6 +14,9 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 % Parameter list (in progress, many more to be added)
 %
+%   Metadata:
+%    'name'
+%
 %   Data management
 %    'input file'
 %    'output file
@@ -156,6 +159,10 @@ param = ieParamFormat(p.Results.param);
 
 switch param
 
+    % Object metadata
+    case {'name'}
+        thisR.name = val;
+        
     % Rendering and Docker related
     case {'outputfile'}
         % thisR.set('outputfile',fullfilepath);
@@ -167,7 +174,7 @@ switch param
         % thisR.set('input file',filename);
         % This file should typically exist.  There are cases, however,
         % where we may set it before the file exists.  I think.
-        if ~isfile(val), warning('Specified input file not found.'); end
+        %if ~isfile(val), warning('Specified input file not found.'); end
         thisR.inputFile = val;
     case {'verbose'}
         thisR.verbose = val;
@@ -284,7 +291,7 @@ switch param
                 % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
                 % [az, columnDescription]  = arizonaLensCreate(1);
                 thisR.camera.retinalDistance.value = val;
-                thisR.camera.focaldistance.type = 'float';
+                thisR.camera.retinalDistance.type = 'float';
 
                 % pbrt v4 does not allow this field
                 if isfield(thisR.camera,'focusdistance')
@@ -696,6 +703,18 @@ switch param
         % Set in meters. Sigh again.
         thisR.camera.filmdistance.type = 'float';
         thisR.camera.filmdistance.value = val;
+    case {'filmshapefile'}
+        % thisR.set('film shape file') = JSONFile;        
+        %
+        % Used for making arbitrary film shapes, as in the examples in
+        % the ISETBio directory retinaShape.
+        %
+        % We considered naming this filmshape.  To do that requires
+        % recompiling PBRT to look for 'filmshape' and rebuilding the
+        % Docker containers (TG/BW)
+        thisR.camera.lookuptable.type = 'string';
+        thisR.camera.lookuptable.value  = val;
+
     case {'spatialsamples','filmresolution','spatialresolution'}
         % thisR.set('spatial samples',256);
         %
@@ -853,9 +872,13 @@ switch param
         thisR.materials.outputfile = val;
 
     case {'textures', 'texture'}
-        % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
-
+        % thisR.set('texture',textureName,parameter,value);
+        % thisR.set('texture',textures
         if isempty(varargin)
+            % At this point thisR.textures has a slot for list
+            % (contains.Map) and a slot for order, a cell array of texture
+            % names.  The code here is not the right way to adjust
+            % thisR.textures.
             if iscell(val)
                 thisR.textures.list = val;
             else
@@ -917,15 +940,16 @@ switch param
             end
         end
 
-        % At this point we have the texture.
+        % At this point we have the texture.  This code has not been used a
+        % lot and needs checking.  Maybe with Zheng's help. (BW).
         if numel(varargin{1}) == 1
-            % A material struct was sent in as the only argument.  We
+            % A texture struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
             % it.
             thisTexture = varargin{1};
             thisR.textures.list(thisTexture.name) = varargin{1};
         else
-            % A material name and property was sent in.  We set the
+            % A texture name and property was sent in.  We set the
             % property and then update the material in the list.
             thisTexture = piTextureSet(thisTexture, varargin{1}, varargin{2});
             thisR.set('textures', textureName, thisTexture);
@@ -1247,6 +1271,7 @@ switch param
                 piAssetSet(thisR, assetName, 'motion', []);
             case {'delete', 'remove'}
                 % thisR.set('asset',assetName,'delete');
+                % Do we need an 'all' option?
                 piAssetDelete(thisR, assetName);
             case {'insert'}
                 % thisR.set('asset',assetName,'insert');
@@ -1279,16 +1304,29 @@ switch param
                 else
                     error('val must be 4x4 matrix');
                 end
+            case {'size'}
+                % thisR.set('asset',assetID-Name,'size',[x y z meters]);
+                % Change the size of the asset (x,y,z) in meters
 
-                %thisR.assets.Node{id}.rotation = val;
+                % Get the current size, and then use scale to make a new
+                % size.
+                curSize = thisR.get('asset',assetName,'size');
+                thisR.set('asset',assetName,'scale',val./curSize);
+
             case {'worldrotate', 'worldrotation'}
-                % It adds rotation in the world space
+                % thisR.set('asset','assetID,'world rotate',vecDeg)
+                %
+                % Change the rotation in the world space
+                
                 % Get current rotation matrix
-                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
+                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); 
+                
+                % Compute new axis rotation (orientation)
                 [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
                 
-                % BW: Removed many comments Feb 19 2022
+                % Set the rotation parameter PBRT will use
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
+
             case {'worldorientation'}
                 % curRot = thisR.get('asset', assetName, 'worldrotationangle');
                 curM = thisR.get('asset', assetName, 'worldrotationmatrix');
@@ -1375,9 +1413,13 @@ switch param
 
                 thisR.set('asset',geometryNode.name,'world rotation',wrotate);
 
-            case {'chop', 'cut'}
+            case {'subtreedelete','chop', 'cut'}
+                % thisR.set('asset',id,'subtree delete');
+                %
+                % Delete all the node and its subtree
                 id = thisR.get('asset', assetName, 'id');
                 thisR.assets = thisR.assets.chop(id);
+                thisR.assets = thisR.assets.uniqueNames;
             otherwise
                 % Set a parameter of an asset to val
                 % rotation is a parameter, but it is stopped above via the

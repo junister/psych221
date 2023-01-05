@@ -36,7 +36,7 @@ fileName = 'room.exr';
 % thisR.set('lights',skyMap.name,'rotate',[0 0 5]); % {[0 0 5 0], [135 1 0 0]});
 thisR.set('lights',skyMap.name,'rotate',[-90 0 0]);
 % Insert the materials
-thisR = piMaterialsInsert(thisR,'mtype',{'all'});
+thisR = piMaterialsInsert(thisR,'groups',{'all'});
 
 objNames = thisR.get('object names');
 matNames = thisR.get('material', 'names');

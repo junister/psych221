@@ -5,7 +5,8 @@ function asset = piAssetLoad(fname,varargin)
 %   asset = piAssetLoad(fname,varargin)
 %
 % Input
-%   fname - filename of the asset mat-file
+%   fname - filename of the asset mat-file, or 'help' or 'list' to see the
+%           assets in piDirGet('assets') (but not character-assets).
 %
 % Output
 %  asset - a struct containing the recipe and the mergeNode
@@ -24,15 +25,29 @@ function asset = piAssetLoad(fname,varargin)
 %   merging. 
 %
 % See also
-%   piRecipeMerge, piDirGet('assets'), piRootPath/data/assets
+%   piRecipeMerge, piDirGet('assets'), dir(piDirGet('assets'))
 %
 
 % Examples:
 %{
- piAssetLoad('
+ thisR = piRecipeCreate('flat surface');
+ piMaterialsInsert(thisR,'groups','test patterns');
+ idx = piAssetSearch(thisR,'object name','Cube');
+ thisR.set('asset',idx,'Material name','macbethchart');
+ thisR.set('asset',idx,'scale',[.3 0.2 .2]*0.9);
+ piWRS(thisR);
 %}
 
 %% Parse 
+
+if ismember(ieParamFormat(fname),{'list','help'})
+    tmp = dir(fullfile(piDirGet('assets'),'*.mat'));
+    fprintf('\n\nAsset files (not character-assets)\n----------\n\n');
+    for ii=1:numel(tmp)
+        fprintf('%03d\t%s\n',ii,tmp(ii).name');
+    end
+    return;
+end
 
 varargin = ieParamFormat(varargin);
 p = inputParser;

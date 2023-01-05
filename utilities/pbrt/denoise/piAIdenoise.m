@@ -9,6 +9,7 @@ function [object, results] = piAIdenoise(object,varargin)
 %
 % Optional key/value
 %   quiet - Do not show the waitbar
+%   useNvidia - try to use GPU denoiser if available
 %
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons
@@ -53,12 +54,16 @@ p = inputParser;
 p.addRequired('object',@(x)(isequal(x.type,'scene') || isequal(x.type,'opticalimage') ));
 p.addParameter('quiet',false,@islogical);
 
+% Try using Nvidia GPU de-noiser
+p.addParameter('useNvidia',false,@islogical);
+
 p.parse(object,varargin{:});
 
 quiet = p.Results.quiet;
 
 %% Set up the denoiser path information and check
 
+if ~p.Results.useNvidia
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 elseif isunix
@@ -67,6 +72,13 @@ elseif ispc
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
 else
     warning("No denoise binary found.\n")
+end
+else
+    if ispc
+        oidn_pth = fullfile(piRootPath, 'external', 'nvidia_denoiser.windows');
+    else
+        warning("Don't know if we have a binary yet\n");
+    end
 end
 
 if ~isfolder(oidn_pth)
@@ -89,16 +101,14 @@ switch object.type
         error('Should never get here.  %s\n',object.type);
 end
 
-% Old code, no longer used. get normal
-% if isfield(object.data,'normalMap') && ~isempty(object.data.normalMap)
-%     normalFlag = 1;
-%     normalmap = object.data.normalMap;
-%     normal_pth = fullfile(piRootPath,'local','tmp_input_normal.pfm');
-%     writePFM(normalmap, normal_pth);
-% end
+if p.Results.useNvidia
+    outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.exr',randi(1000),randi(1000)));
+    DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.exr',randi(1000),randi(1000)));
+else
+    outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
+    DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.pfm',randi(1000),randi(1000)));
+end
 
-outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
-DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.pfm',randi(1000),randi(1000)));
 newPhotons = zeros(rows, cols, chs);
 
 
@@ -110,19 +120,30 @@ for ii = 1:chs
     % For every channel, get the photon data, normalize it, and
     % denoise it
     img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,2) = img_sp(:,:,1);
-    img_sp(:,:,3) = img_sp(:,:,1);
 
-    % Write it out into a temporary file
-    writePFM(img_sp, outputTmp);
-    cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
-    
+    if p.Results.useNvidia
+        exrwrite(img_sp, outputTmp);
+        cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
+    else
+        % Write it out into a temporary file
+        % For the Intel Denoiser,need to duplicate the channels
+        img_sp(:,:,2) = img_sp(:,:,1);
+        img_sp(:,:,3) = img_sp(:,:,1);
+        writePFM(img_sp, outputTmp);
+        cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
+    end
+
     % Run the executable.
     [status, results] = system(cmd);
     if status, error(results); end
 
     % Read the denoised data and scale it back up
-    DNImg = readPFM(DNImg_pth);
+    if p.Results.useNvidia
+        DNImg = exrread(DNImg_pth);
+    else
+        DNImg = readPFM(DNImg_pth);
+    end
+
     newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
 
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end

@@ -21,7 +21,7 @@ function gnames = piAssetList(thisR,varargin)
 % ieExamplesPrint('piAssetList');
 %
 % See also
-%  piAssetNames
+%  
 
 
 %% Examples:

@@ -59,19 +59,7 @@ validmaterials = ...
     {'diffuse','coateddiffuse','coatedconductor','conductor',...
     'diffusetransmission','dielectric','thindielectric','hair', ...
     'measured','subsurface','mix'};
-%{
-% need to check type, not name...
-if isequal(ieParamFormat(type),'listavailabletypes')
-    material = validmaterials;
-        %{
-        % V3 materials.  Now deprecated, sigh.
-        {'matte','uber','plastic','metal','mirror','glass', ...
-       'translucent','hair','kdsubsurface','disney','fourier', ...
-       'mix','substrate','subsurface'};
-        %}
-    return;
-end
-%}
+
 %% Replace the space in parameters.
 
 % For example, 'rgb kd' won't pass parse with the space, but we need the

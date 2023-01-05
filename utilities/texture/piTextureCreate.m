@@ -10,22 +10,24 @@ function texture = piTextureCreate(name, varargin)
 % Optional key/val pairs
 %
 %   The key/val options depend on the type of texture.  Use
+%   piTextureCreate('help') to see the valid texture types.  Once you have
+%   a texture type, you can use this method to see its PBRT parameters.
 %
 %       piTextureProperties(textureType)
 %
-%   to see the properties that you can set for each texture type.
+%   These are the PBRT properties that you can set for that textureType.
 %
 % Outputs:
 %   texture - new texture with parameters
 %
-% ZLY, 2021
-%
 % See also
+%   piTextureProperties, piMaterialPresets, t_piIntro_texture,
+%      t_targetsOverview 
 %
 
 % Examples
 %{
-  piTextureCreate('list available types')
+  tTypes = piTextureCreate('help');
 %}
 %{
   texture = piTextureCreate('checkerboard_texture',...
@@ -36,13 +38,30 @@ function texture = piTextureCreate(name, varargin)
         'tex2', [.99 .99 .99]);
 %}
 
-%% List availble type
+%% List available texture types
+
+varargin = ieParamFormat(varargin);
+
+p = inputParser;
+p.KeepUnmatched = true;
+p.addRequired('name',@ischar);
+p.addParameter('quiet',false,@islogical);
+p.parse(name,varargin{:});
 
 validTextures = {'constant','scale','mix','bilerp','imagemap',...
     'checkerboard','dots','fbm','wrinkled','marble','windy'};
 
-if isequal(ieParamFormat(name),'listavailabletypes')
+if isequal(ieParamFormat(name),'listavailabletypes') || ...
+        isequal(ieParamFormat(name),'help')
+
     texture = validTextures;
+    if p.Results.quiet, return; end
+
+    fprintf('\n\n***  Valid textures ***\n\n');
+    for jj=1:numel(texture)
+        fprintf('\t%s \n',texture{jj});
+    end
+
     return;
 end
 
