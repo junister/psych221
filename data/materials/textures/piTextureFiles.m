@@ -34,3 +34,22 @@ rgb = sceneGet(scene,'rgb');
 textureFile = fullfile(piRootPath,'data','imageTextures','pointArray_1024_64.png');
 imwrite(rgb,textureFile);
 %}
+
+%{
+scene = sceneCreate('point array',1024,64);
+rgb = sceneGet(scene,'rgb');
+textureFile = fullfile(piRootPath,'data','imageTextures','pointArray_1024_64.png');
+imwrite(rgb,textureFile);
+%}
+
+%{
+f = 1;
+x = linspace(0,f*(2*pi),1024);
+rgb(:,:,1) = repmat(square(x),1024,1);
+rgb(:,:,2) = rgb(:,:,1); rgb(:,:,3) = rgb(:,:,1);
+textureFile = fullfile(piDirGet('textures'),sprintf('squarewave_v_%02d.png',f));
+imwrite(rgb,textureFile);
+rgb = imageTranspose(rgb);
+textureFile = fullfile(piDirGet('textures'),sprintf('squarewave_h_%02d.png',f));
+imwrite(rgb,textureFile);
+%}
