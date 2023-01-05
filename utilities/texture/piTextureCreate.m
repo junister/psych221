@@ -10,29 +10,24 @@ function texture = piTextureCreate(name, varargin)
 % Optional key/val pairs
 %
 %   The key/val options depend on the type of texture.  Use
-%   piTextureCreate('help') to see the valid texture types.
+%   piTextureCreate('help') to see the valid texture types.  Once you have
+%   a texture type, you can use this method to see its PBRT parameters.
 %
 %       piTextureProperties(textureType)
 %
-%   to see the properties that you can set for each texture type.
+%   These are the PBRT properties that you can set for that textureType.
 %
 % Outputs:
 %   texture - new texture with parameters
 %
 % See also
-%   piMaterialPresets, t_piIntro_texture,t_targetsOverview
+%   piTextureProperties, piMaterialPresets, t_piIntro_texture,
+%      t_targetsOverview 
 %
 
 % Examples
 %{
   tTypes = piTextureCreate('help');
-  for ii=1:numel(tTypes)
-     params = piTextureProperties(tTypes{ii});
-     fprintf('\n\n***  %s\n',tTypes{ii});
-     for jj=1:numel(params)
-      fprintf('\t%s \n',params{jj});
-     end
-  end
 %}
 %{
   texture = piTextureCreate('checkerboard_texture',...
@@ -45,12 +40,28 @@ function texture = piTextureCreate(name, varargin)
 
 %% List available texture types
 
+varargin = ieParamFormat(varargin);
+
+p = inputParser;
+p.KeepUnmatched = true;
+p.addRequired('name',@ischar);
+p.addParameter('quiet',false,@islogical);
+p.parse(name,varargin{:});
+
 validTextures = {'constant','scale','mix','bilerp','imagemap',...
     'checkerboard','dots','fbm','wrinkled','marble','windy'};
 
 if isequal(ieParamFormat(name),'listavailabletypes') || ...
-    isequal(ieParamFormat(name),'help')
+        isequal(ieParamFormat(name),'help')
+
     texture = validTextures;
+    if p.Results.quiet, return; end
+
+    fprintf('\n\n***  Valid textures ***\n\n');
+    for jj=1:numel(texture)
+        fprintf('\t%s \n',texture{jj});
+    end
+
     return;
 end
 

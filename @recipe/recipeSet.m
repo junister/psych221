@@ -1304,16 +1304,29 @@ switch param
                 else
                     error('val must be 4x4 matrix');
                 end
+            case {'size'}
+                % thisR.set('asset',assetID-Name,'size',[x y z meters]);
+                % Change the size of the asset (x,y,z) in meters
 
-                %thisR.assets.Node{id}.rotation = val;
+                % Get the current size, and then use scale to make a new
+                % size.
+                curSize = thisR.get('asset',assetName,'size');
+                thisR.set('asset',assetName,'scale',val./curSize);
+
             case {'worldrotate', 'worldrotation'}
-                % It adds rotation in the world space
+                % thisR.set('asset','assetID,'world rotate',vecDeg)
+                %
+                % Change the rotation in the world space
+                
                 % Get current rotation matrix
-                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
+                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); 
+                
+                % Compute new axis rotation (orientation)
                 [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
                 
-                % BW: Removed many comments Feb 19 2022
+                % Set the rotation parameter PBRT will use
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
+
             case {'worldorientation'}
                 % curRot = thisR.get('asset', assetName, 'worldrotationangle');
                 curM = thisR.get('asset', assetName, 'worldrotationmatrix');

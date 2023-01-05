@@ -44,7 +44,7 @@ imwrite(rgb,textureFile);
 
 %{
 f = 1;
-x = linspace(0,f*(2*pi),1024);
+x = linspace(0,f*(2*pi) - 1/1024,1024);
 rgb(:,:,1) = repmat(square(x),1024,1);
 rgb(:,:,2) = rgb(:,:,1); rgb(:,:,3) = rgb(:,:,1);
 textureFile = fullfile(piDirGet('textures'),sprintf('squarewave_v_%02d.png',f));
