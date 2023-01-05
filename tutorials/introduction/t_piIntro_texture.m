@@ -4,21 +4,25 @@
 % create materials with pre-assigned textures, and some of the parameters
 % of these textures can be modified. 
 % 
-% This script illustrates how we use piMaterialsInsert to include materials
-% with pre-assigned textures into a recipe. We render the materials on a
-% flat surface in the first few examples.  Then we assign the textures to
-% individual assets in the SimpleScene.
+% See the tutorial t_material* for examples of inserting materials that
+% have been predefined.  That tutorial uses piMaterialsInsert, which
+% depends on piMaterialPresets, to insert materials with pre-assigned
+% textures into a recipe.
+% 
+% This recipe expands on how to create a material using an image as a
+% texture, and then to control the properties of the texture.
 %
 % An exploration of the other materials and textures we have defined
 % in piMaterialPresets is in v_material.m
 %
 % See also
-%  v_Materials, t_piIntro_light, tls_assets.mlx
+%  v_Materials, t_materials, t_materials*
 
 %% Init
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%%
 thisR = piRecipeDefault('scene name', 'flatSurfaceWhiteTexture');
 
 %% Add a light and render
@@ -29,17 +33,16 @@ newDistLight = piLightCreate('Distant 1',...
     'cameracoordinate', true,...
     'spd', 'equalEnergy');
 thisR.set('light',  newDistLight, 'add');
-thisR.get('light print');
 
-%%
+% This is a description of the scene properties
+thisR.show('objects');
+
+% To see the individual types, you can also call this
+thisR.show('lights');
+thisR.show('materials');
+thisR.show('textures');
+
 piWRS(thisR,'name','random color');
-
-%% This is description of the scene
-
-% We list the textures, lights and materials.
-thisR.get('texture print');
-thisR.get('lights print');
-thisR.get('material print');
 
 %% Change the texture of the checkerboard.
 
@@ -62,12 +65,13 @@ cubeIDX = piAssetSearch(thisR,'object name','Cube');
 % Set the material to the object
 thisR.set('asset',cubeIDX,'material name','checkerboard');
 
+thisR.show('materials');
+thisR.show('objects');
+thisR.get('asset',cubeIDX,'material name')
+
 % Write and render the recipe with the new texture
 piWRS(thisR,'name','checks');
 
-% There are many properties of the checks you can change
-%{
-%}
 
 %%  That felt good.  Let's make colored dots.
 

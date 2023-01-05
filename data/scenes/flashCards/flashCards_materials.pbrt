@@ -1,0 +1,3 @@
+MakeNamedMaterial "Mat"
+    "string type" [ "diffuse" ]
+    "rgb reflectance" [ 0.00489631 0.00489631 0.00489631 ]

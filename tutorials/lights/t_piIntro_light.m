@@ -197,7 +197,7 @@ piWRS(thisR,'name','Blue (distant)');
 
 thisR.set('light', 'all', 'delete');
 
-fileName = 'room.exr';
+fileName = fullfile(piDirGet('skymaps'),'room.exr');
 thisR.set('skymap',fileName);
 tmp = thisR.get('lights','names');
 skyName = tmp{1};

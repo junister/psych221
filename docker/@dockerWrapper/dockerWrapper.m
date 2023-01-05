@@ -328,6 +328,7 @@ classdef dockerWrapper < handle
         % Methods defined in this file, static or not, do not need to be
         % listed here.
 
+        thisDWrapper = humanEyeDocker();
         setPrefs(varargin);
         getPrefs(varargin);
         dockerImage = localImage();
@@ -336,6 +337,10 @@ classdef dockerWrapper < handle
         %% Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
+        end
+        % WSL sometimes has DNS issues, so we can also use the IP
+        function useServer = vistalabDefaultServerIP()
+            useServer =  '171.64.204.112';
         end
 
         %% This is used for wsl commands under Windows, which need
@@ -755,7 +760,8 @@ classdef dockerWrapper < handle
             % Current GPU Options at vistalab:
             %
             %   muxreconrt:
-            %     GPU 0: Nvidia 3070 -- -ampere -- (Broken)
+            %     GPU 0: Nvidia 3070 -- -ampere --
+            %     dockerWrapper.setPref('whichGPU',0);
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
             %     GPU 2: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 2);
             %
@@ -813,7 +819,8 @@ classdef dockerWrapper < handle
                     % microlens code.  It was empty and defaulted to
                     % 'shared' one below.
 
-                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
+                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer) || ...
+                        isequal(thisD.remoteMachine, thisD.vistalabDefaultServerIP)
                         switch thisD.whichGPU
                             case {0, -1}
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';

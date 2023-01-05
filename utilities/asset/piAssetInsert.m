@@ -5,8 +5,8 @@ function id = piAssetInsert(thisR, assetInfo, newNode, varargin)
 %   id = piAssetInsert(thisR, assetInfo, node)
 %
 % Brief description:
-%   The assetInfo defines the node.  The newNode will be inserted between
-%   the node and its parent.
+%   The assetInfo defines an existing node.  The newNode is inserted
+%   between the existing node and its parent.
 %
 %   There are cases when we want the insertion between a node and all of
 %   its children.  See piRecipeRectify for that method.  Add it here some
@@ -14,12 +14,14 @@ function id = piAssetInsert(thisR, assetInfo, newNode, varargin)
 %
 % Inputs:
 %   thisR      - recipe.
-%   assetInfo  - asset node name or id.
-%   node       - the node to insert.
+%   assetInfo  - an existing asset node name or id.
+%   newNode    - the node to insert.
 %
 % Returns:
 %   id         - id of the newly inserted node.
 %
+% See also
+%   Only appears to be called in recipeSet.  Maybe not necessary any more?
 
 % Examples:
 %{

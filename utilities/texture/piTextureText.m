@@ -140,8 +140,10 @@ for ii=1:numel(textureParams)
                         imgFile = dockerWrapper.pathToLinux(imgFile);
                     end
 
-                    if isempty(texturePath)
-                        thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
+                    if isempty(texturePath) || isequal('/',texturePath(1))
+                        % Replaced this text Jan 4 2023 (BW)
+                        % thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
+                        thisText = strrep(thisText, imgFile, ['textures/',thisVal]);
                     end
 
                     texturesDir = [thisR.get('output dir'),'/textures'];
