@@ -425,6 +425,7 @@ thisR.set('exporter',exporter);
 [~,n,e] = fileparts(fname);
 outFile = fullfile(piRootPath,'local',sceneDir,[n,e]);
 thisR.set('outputfile',outFile);
+thisR.set('name',sceneDir);
 
 % Set defaults for very low resolution (for testing)
 thisR.integrator.subtype = 'path';

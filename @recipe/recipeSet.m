@@ -872,9 +872,13 @@ switch param
         thisR.materials.outputfile = val;
 
     case {'textures', 'texture'}
-        % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
-
+        % thisR.set('texture',textureName,parameter,value);
+        % thisR.set('texture',textures
         if isempty(varargin)
+            % At this point thisR.textures has a slot for list
+            % (contains.Map) and a slot for order, a cell array of texture
+            % names.  The code here is not the right way to adjust
+            % thisR.textures.
             if iscell(val)
                 thisR.textures.list = val;
             else
@@ -936,15 +940,16 @@ switch param
             end
         end
 
-        % At this point we have the texture.
+        % At this point we have the texture.  This code has not been used a
+        % lot and needs checking.  Maybe with Zheng's help. (BW).
         if numel(varargin{1}) == 1
-            % A material struct was sent in as the only argument.  We
+            % A texture struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
             % it.
             thisTexture = varargin{1};
             thisR.textures.list(thisTexture.name) = varargin{1};
         else
-            % A material name and property was sent in.  We set the
+            % A texture name and property was sent in.  We set the
             % property and then update the material in the list.
             thisTexture = piTextureSet(thisTexture, varargin{1}, varargin{2});
             thisR.set('textures', textureName, thisTexture);
@@ -1299,16 +1304,29 @@ switch param
                 else
                     error('val must be 4x4 matrix');
                 end
+            case {'size'}
+                % thisR.set('asset',assetID-Name,'size',[x y z meters]);
+                % Change the size of the asset (x,y,z) in meters
 
-                %thisR.assets.Node{id}.rotation = val;
+                % Get the current size, and then use scale to make a new
+                % size.
+                curSize = thisR.get('asset',assetName,'size');
+                thisR.set('asset',assetName,'scale',val./curSize);
+
             case {'worldrotate', 'worldrotation'}
-                % It adds rotation in the world space
+                % thisR.set('asset','assetID,'world rotate',vecDeg)
+                %
+                % Change the rotation in the world space
+                
                 % Get current rotation matrix
-                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
+                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); 
+                
+                % Compute new axis rotation (orientation)
                 [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
                 
-                % BW: Removed many comments Feb 19 2022
+                % Set the rotation parameter PBRT will use
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
+
             case {'worldorientation'}
                 % curRot = thisR.get('asset', assetName, 'worldrotationangle');
                 curM = thisR.get('asset', assetName, 'worldrotationmatrix');

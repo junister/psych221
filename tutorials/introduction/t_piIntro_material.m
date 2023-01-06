@@ -46,7 +46,7 @@ piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 %% The material library
 
 % Print out the named materials in this scene.
-thisR.get('materials print');
+thisR.show('materials');
 
 % We have additional materials in a piMaterialPresets.
 piMaterialPresets('list');
@@ -78,7 +78,7 @@ sphereID = piAssetSearch(thisR,'object name','Sphere');
 thisR.set('asset',sphereID,'material name',redMatte.name);
 
 % Show that we set it
-thisR.get('object material')
+thisR.show('materials');
 
 % Let's have a look
 
@@ -105,7 +105,7 @@ end
 
 piMaterialsInsert(thisR,'names',{'glass'});
 thisR.set('asset', sphereID, 'material name', 'glass');
-thisR.get('object material')
+thisR.show('materials')
 
 piWRS(thisR, 'name', 'Change sphere to glass');
 
@@ -113,7 +113,7 @@ piWRS(thisR, 'name', 'Change sphere to glass');
 
 piMaterialsInsert(thisR,'names',{'mirror'});
 thisR.set('asset', sphereID, 'material name', 'mirror');
-thisR.get('object material')
+thisR.show('materials');
 
 piWRS(thisR, 'name', 'Change glass to mirror');
 
