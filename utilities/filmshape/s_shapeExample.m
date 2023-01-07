@@ -1,5 +1,6 @@
 % s_shapeExample
 %
+<<<<<<< Updated upstream
 % TO BE DEPRECATED USING s_shapeModern examples.
 %
 % In the newest version  of Human Eye in PBRT v4 (TG), we have the
@@ -7,19 +8,26 @@
 % on the surface. This is supposed to reproduce the results from the
 % legacy code that maps a position on the film to a position on a
 % spherical surface.
+=======
+% In the newest version  of Human Eye in PBRT v4 (TG), we can give
+% PBRT a lookuptable to represent 3D positions on the film points. 
+% 
+% This new approach extends the code from Mike Mara and Trisha that
+% maps a position on the film to a position on a spherical surface.
+>>>>>>> Stashed changes
 %
-% This script illustrates how we made a bumpy retina and rendered
-% using the sceneEye with that.  Various quality of life things left
-% to do, but it ran through the first visualization.
+% This script illustrates how we made a bumpy retina and then rendered
+% a scene using sceneEye.  Various quality of life things left to do,
+% but it ran through the first visualization.
 %
 % See also
 %  s_shapeModern
 
-%%
+%% Initialize
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Define Bump (gaussian)
+%% Define the Bump method (gaussian)
 
 center = [0 0];
 sigma  = 0.9;
@@ -36,16 +44,16 @@ bump3=@(x,y) 2*height*maxnorm(exp(- ((x-center(1))^2+(y-center(2))^2)/(2*sigma^2
 bump=@(x,y) (bump1(x,y) + bump2(x,y)+ bump3(x,y));
 
 
-%% Define Retina
+%% Define the basic retinal surface
 
-retinaDistance =16.320000;  %mm  (This will be the lowest Z value of the surface)
+retinaDistance = 16.320000; %mm  (This will be the lowest Z value of the surface)
 retinaRadius   = 12.000000; %mm
 retinaSemiDiam = 3.942150;  %mm
 
 retinaDiag = retinaSemiDiam*1.4142*2; % sqrt(2)*2
 
+%% Define rendering parameters
 
-%% Define film
 filmDiagonal  = 10; % mm
 rowresolution = 256; % number of pixels
 colresolution = 256; % number of pixels
@@ -57,7 +65,6 @@ pixelsize = filmDiagonal/sqrt(rowresolution^2+colresolution^2);
 % Total size of the film in mm
 row_physicalwidth= pixelsize*rowresolution;
 col_physicalwidth= pixelsize*colresolution;
-
 
 %% Sample positions for the lookup table
 
@@ -79,7 +86,14 @@ for r=1:rowcols(1)
         filmRes   = struct;        
         filmRes.x = rowcols(1);        
         filmRes.y = rowcols(2);
+
+        % The Mara code ran on a sphere and used a spherical region.
+        % We are going to shift to a square (x,y) grid to make it
+        % easier to visualize in the oiWindow, later.
         point = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance);
+        %[point.x,point.y] = meshgrid(1:rowcols(1),1:rowcols(2));
+        %point.z = (retinaDistance + bump(point.x,point.y))*-1*mm2meter;
+        % mesh(point.x,point.y,point.z);
 
         % PBRT expects meters for lookuptable not milimeters.
         % The retina is typically around -16.2 mm from the lens, which is
@@ -111,7 +125,7 @@ subplot(122);
 imagesc(Zbump_mm,[-retinaDistance -15]);
 axis image; colorbar;
 
-%% From utilities/filmshape
+%% Set up the sceneEye and bumpy film (retinal) surfaces
 
 thisSE = sceneEye('letters at depth','eye model','arizona');
 
@@ -127,12 +141,12 @@ thisSE.set('film shape file',fname);
 % code to index the positions.
 fs = jsonread(fname);
 
-% We render with one long list of positions.  We set the film resolution to
+% We render with a long list of positions.  We set the film resolution to
 % have one point for each resolution.
 % Resolution is (x,y), not row, col
 thisSE.set('film resolution',[fs.numberofpoints 1]);
 
-% The samplers have some issues with TG's code, and sobol seems the least
+% The samplers have some issues with TG's code; sobol seems the least
 % problematic.
 thisSE.set('sampler subtype','sobol');
 thisSE.set('rays per pixel',64);
@@ -141,16 +155,14 @@ thisSE.set('rays per pixel',64);
 thisD = dockerWrapper.humanEyeDocker;
 % oi = thisSE.render('docker wrapper',thisD);
 
-% We cannot view yet, because the data are in the format of a long line.
+% The data are returned in the format of a long vector, not an image.
 oi = thisSE.piWRS('docker wrapper',thisD,'show',false);
 
-%%
-% If a general case, we have (x,y,z) in the JSON file and
-% corresponding radiance and illuminance ... 
-illuminance = oiGet(oi,'illuminance');
+%%  Deal with reformatting the OI vector so we can visualize
 
-% Try to find the mesh method in t_retinalShapes
-%
+% Each returned point is measured at an (x,y,z) position in the fs
+% JSON file. This is the illuminance from those points.
+illuminance = oiGet(oi,'illuminance');
 
 % Each point in the rendered oi corresponds to a position specified by
 % the lookup table.
@@ -158,11 +170,11 @@ illuminance = oiGet(oi,'illuminance');
 % The film shape table specifies the point and its index
 %
 pixelvalue = zeros(fs.numberofpoints,1);
-position = zeros(fs.numberofpoints,3);
+position   = zeros(fs.numberofpoints,3);
 for t=1:fs.numberofpoints
     pixelvalue(t) = illuminance(fs.table(t).index+1); 
     
-    % Record position
+    % (x,y,z) position
     position(t,1:3) = fs.table(t).point;
 end
 
@@ -230,7 +242,6 @@ oiWindow(oi);
 
 %% END
 
-%% END
 
 
 

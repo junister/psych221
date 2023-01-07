@@ -39,10 +39,6 @@ thisR.show('objects');
 %
 %      dir(piDirGet('textures'))
 %
-% This could be better thought through.  For example, I think PBRT already
-% has a texture of 'checkerboard' built in, yet we have a checkerboard png
-% file (my fault, BW).
-%
 materialName = 'squarewave_h_04';   % 'squarewave_h_04';
 
 % First the texture
