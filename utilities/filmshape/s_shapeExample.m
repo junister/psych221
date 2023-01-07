@@ -1,5 +1,7 @@
 % s_shapeExample
 %
+% TO BE DEPRECATED USING s_shapeModern examples.
+%
 % In the newest version  of Human Eye in PBRT v4 (TG), we have the
 % ability to give PBRT an arbitrary lookuptable to represent positions
 % on the surface. This is supposed to reproduce the results from the
@@ -11,7 +13,7 @@
 % to do, but it ran through the first visualization.
 %
 % See also
-%
+%  s_shapeModern
 
 %%
 ieInit;
