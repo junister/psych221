@@ -49,7 +49,7 @@ MatNames = thisR.get('material', 'names');
 fprintf('\nScene materials: %s\n',sceneName);
 fprintf('-------------------------------\n');
 for ii =1:numel(MatNames)
-    rows{ii, :} = num2str(ii);
+    rows{ii, :} = num2str(ii); %#ok<*AGROW> 
     names{ii,:} = MatNames{ii};
     types{ii,:} = thisR.materials.list(MatNames{ii}).type;
 end
