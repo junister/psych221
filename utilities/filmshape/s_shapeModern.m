@@ -95,9 +95,14 @@ switch ieParamFormat(shapeType)
             end
         end
     case 'gaussianbump'
-        height_mm = 0.3;
-        bump = fspecial('gaussian',rowcols,10);
-        bump = ieScale(bump,0,height_mm);
+        % center = [-filmWidth/4,filmWidth/4]; 
+        center = [0,0];
+        sigma = filmWidth/12; height_mm = 0.3;
+        [X,Y] = meshgrid(x,y);
+        bump =  retinalBump(X,Y,center,sigma);
+        
+        % bump = fspecial('gaussian',rowcols,10);
+        % bump = ieScale(bump,0,height_mm);
         for r=1:rowcols(1)
             for c=1:rowcols(2)
                 z = (-16.32 + bump(r,c))*1e-3;
@@ -113,14 +118,13 @@ end
 
 ieNewGraphWin;
 filmSurface = XW2RGBFormat(filmXYZ_m,rowcols(1),rowcols(2));
-surf(filmSurface(:,:,3));
+mesh(filmSurface(:,:,1),filmSurface(:,:,2),filmSurface(:,:,3));
 % set(gca,'zlim',[-16.5 -16]*1e-3)
 
 %{
 mesh(filmSurface(:,:,3));
 set(gca,'zlim',[-16.5 -16]*1e-3)
 %}
-%%
 
 %% From utilities/filmshape
 
@@ -167,11 +171,13 @@ p = imageRotate(p,'cw');
 % ieNewGraphWin;
 % imagesc(tmp); axis image; colormap(gray);
 oi = oiSet(oi,'photons',p);
+% oi = piAIdenoise(oi);
 oiWindow(oi);
 
 % p = reshape(oi.data.photons,256,256,31);
 
 %%
+
 % If a general case, we have (x,y,z) in the JSON file and
 % corresponding radiance and illuminance ... 
 illuminance = oiGet(oi,'illuminance');
@@ -188,6 +194,7 @@ colormap(gray);
 
 % Try to find the mesh method in s_retinalShapes
 %
+%%
 
 % Each point in the rendered oi corresponds to a position specified by
 % the lookup table.

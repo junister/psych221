@@ -1,5 +1,7 @@
 function [combinedLens, cmd]  = piCameraInsertMicrolens(microLens,imagingLens,varargin)
-% Deprecate:  Combine a microlens with an imaging lens into a lens file
+% Deprecate: Use piMicrolensInsert
+% 
+% Combine a microlens with an imaging lens into a lens file
 %
 % Syntax
 %   combinedLens  = piCameraInsertMicrolens(microLens,imagingLens,varargin)

@@ -1,4 +1,6 @@
-%% Experiment with microlens offsets
+%% s_sensorDPAFOffset
+% 
+% Experiment with microlens offsets
 %
 % We are introducing piMicrolensWrite() so we control the microlens.
 % It works with the omni branch and the GPU code on MUX.  We are
