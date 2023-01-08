@@ -74,10 +74,24 @@ mNames = p.Results.names;
 if ischar(mType), mType = {mType}; end
 if ischar(mNames), mNames = {mNames}; end
 
+
+
 %% We should have either material type (mType) or material names (mNames)
 
 % Individually named materials
 if ~isempty(mNames{1})
+
+    % Remove the mNames entries that are already present, informing the
+    % user.
+    Names = thisR.get('material', 'names');
+
+    % A 1 entry in lst means the name is already present in the recipe.
+    lst = contains(mNames,Names);
+    fprintf('Materials already in the recipe\n  %s  \n',mNames{lst});
+
+    % Preserve the names that are NOT in the recipe.
+    mNames = mNames(~lst);
+
     for ii=1:numel(mNames)
         
         newMat = piMaterialPresets(mNames{ii},mNames{ii});

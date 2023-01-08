@@ -12,6 +12,8 @@
 %
 % The standard material is a struct with multiple slots.
 %
+% To learn about how to use the standard PBRT textures, see the examples in
+% t_piIntro_material and t_materials
 
 %%
 ieInit;
@@ -36,10 +38,6 @@ thisR.show('objects');
 % To see the textures that are in there now, have a look at this:
 %
 %      dir(piDirGet('textures'))
-%
-% This could be better thought through.  For example, I think PBRT already
-% has a texture of 'checkerboard' built in, yet we have a checkerboard png
-% file (my fault, BW).
 %
 materialName = 'squarewave_h_04';   % 'squarewave_h_04';
 

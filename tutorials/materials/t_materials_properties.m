@@ -1,7 +1,5 @@
 % t_material_properties - Understand Material Properties
 %
-% Needs updating.  See comments in text below.
-%
 % This tutorial  explores the properties of 4 commonly used materials:
 % matte, glass, plastic, and uber. It uses multiple lights to showcase how
 % properties affect the image. 
@@ -22,59 +20,30 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Create recipe
 
-thisR = piRecipeDefault('scene name', 'sphere');
-thisR.set('light', 'all','delete');
+thisR = piRecipeCreate('sphere');
 thisR.set('skymap','room.exr');
 
-
-%% Set the render quality
 % A low resolution rendering for speed
 thisR.set('film resolution',[200 150]);
 thisR.set('rays per pixel',48);
 thisR.set('nbounces',5); 
 thisR.set('fov',45);
 
-%% Add in lights
-% 
-% % Distant Light
-% distLight = piLightCreate('new dist',...
-%                            'type', 'distant', ...
-%                            'spd', [1 1 1],...
-%                            'specscale float', 10,...
-%                            'cameracoordinate', true);
-% thisR.set('light', distLight, 'add');                       
-
-% Environment Light
-% An environment light starts from an image, in this case pngExample.png
-% The image is then mapped on the inside surface of a sphere. So if you
-% were standing inside this sphere, you would see a stretched out version
-% of the image all around you. Every point in this space is a pixel, so we
-% can construct a scene by tracing the light from the image map to every
-% pixel. Then when an object is placed inside of the image map, pbrt knows
-% how the light from the image map affects the object.
-% fileName = 'pngExample.png';
-% imshow(fileName); % show image map
-% exampleEnvLight = piLightCreate('field light','type', 'infinite',...
-%     'mapname', fileName);
-% exampleEnvLight = piLightSet(exampleEnvLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});
-% thisR.set('lights', exampleEnvLight, 'add'); 
-% thisR.get('lights print');
-
 %% Understanding the environment light
-% To better visualize what the environment map does, we change the matte
-% sphere to a mirror sphere
-% Creating mirror material
-% To see the list of materials use
+
+% To see a list of the preset materials in a window, and printed to the
+% command window, you can use 
 %
-%   piMaterialPresets('help')
+%   piMaterialPresets('help');
 %
 
+% To insert one of those materials into the recipe, 
 mirrorName = 'mirror';
 piMaterialsInsert(thisR,'name',mirrorName);
 
 % Assigning mirror to sphere
-assetID = piAssetSearch(thisR,'object name','001_Sphere_O');
-thisR.set('asset', assetID, 'material name', mirrorName);
+assetSphere = piAssetSearch(thisR,'object name','001_Sphere_O');
+thisR.set('asset', assetSphere, 'material name', mirrorName);
 
 % Change the camera coordinate to better see the environmental light's
 % effect
@@ -91,12 +60,6 @@ piWRS(thisR,'name','flipped mirror','render flag','hdr');
 
 %% Return to reference scene to explore properties
 
-%%%%%%%%%%%%%%%
-% Editing for updates needed below this point
-%
-% BW
-%%%%%%%%%%%%%%%
-
 % Before we begin exploring properties, we must set up our reference scene
 
 thisR.set('asset', assetName, 'material name', 'white');
@@ -104,7 +67,7 @@ thisR.set('to', [0 0 -499]);
 thisR.set('from', [0 0 -500]);
 thisR.set('fov', 60);
 
-piWrite(thisR);
+piWRS(thisR);
 scene = piRender(thisR, 'render type', 'radiance','meanluminance', -1);
 scene = sceneSet(scene, 'name', 'reference scene');
 
