@@ -53,7 +53,7 @@ switch assetType
     case 'groupobj'
         gnames = thisR.get('group names');
 
-        fprintf('\nGroup obj names\n===============\n');
+        fprintf('\nGroup obj names\n----------\n');
         for ii=1:numel(gnames)
             fprintf('level %d ',ii);
             for jj = 1:numel(gnames{ii})
@@ -65,7 +65,7 @@ switch assetType
         % Print out the children showing level and which group obj they are
         % part of
         cnames = thisR.get('children names');
-        fprintf('\nChildren names\n===============\n');
+        fprintf('\nChildren names\n------------\n');
         sz = numel(cnames);
         for ii=1:sz(1)
             fprintf('level %d ',ii);
