@@ -87,7 +87,9 @@ if ~isempty(mNames{1})
 
     % A 1 entry in lst means the name is already present in the recipe.
     lst = contains(mNames,Names);
-    fprintf('Materials already in the recipe\n  %s  \n',mNames{lst});
+    if sum(lst) > 0
+        fprintf('Materials already in the recipe\n  %s  \n',mNames{lst});
+    end
 
     % Preserve the names that are NOT in the recipe.
     mNames = mNames(~lst);
