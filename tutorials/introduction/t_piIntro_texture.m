@@ -23,7 +23,7 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
-thisR = piRecipeDefault('scene name', 'flatSurfaceWhiteTexture');
+thisR = piRecipeCreate('flatSurfaceWhiteTexture');
 
 %% Add a light and render
 
@@ -58,7 +58,7 @@ piWRS(thisR,'name','random color');
 % Textures are attached to a material.  The checks, dots and others are
 % created and inserted this way - see the code there if you want to do it
 % yourself.
-thisR = piMaterialsInsert(thisR,'names','checkerboard');
+thisR   = piMaterialsInsert(thisR,'names','checkerboard');
 
 cubeIDX = piAssetSearch(thisR,'object name','Cube');
 
