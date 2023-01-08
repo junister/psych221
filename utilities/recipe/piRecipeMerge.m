@@ -24,7 +24,7 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   sceneR   - scene recipe with added objects
 %
 % See also
-%   piAssetLoad, piAssetList
+%   piAssetLoad
 
 %% Parse input
 varargin = ieParamFormat(varargin);
