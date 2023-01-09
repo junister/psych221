@@ -25,7 +25,7 @@
 % REQUIRES ISETLens on your path.
 %
 % See also
-%  s_sensorDPAF (ISETCam)
+%  s_sensorDPAFMicrolen, t_cameraDPAF, t_cameraLightField
 
 %% Initialize a scene and oi
 ieInit;
