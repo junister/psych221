@@ -17,43 +17,34 @@
 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-if ~piCamBio
-    warning('Script requires ISETCam.  Returning');
-    return;
-end
+
+chdir(fullfile(piRootPath,'local'))
 if isempty(which('lensC')) 
     error('You must add the isetlens repository to your path'); 
 end
 
-if ~piCamBio, error('Requires ISETCam, not ISETBio'); end
-
-% Run this from the local directorys
-chdir(fullfile(piRootPath,'local'))
-
 %% Read the pbrt files
-testScenes = {'chessSet','livingroom','kitchen'};
-thisR = piRecipeDefault('scene name',testScenes{1}); 
+thisR = piRecipeCreate('Chess Set');
+
+% This will run if you want.
+% piWRS(thisR);
 
 %% Read in the microlens and set its size
-%
-% This is a simple microlens file.
-microlens     = lensC('filename','microlens.json');
 
-% Adjust its size to 12 microns using the adjustSize method of the lensC
-% class.
+% This is a simple microlens file.
+% We are making it big. 12 microns 
+microlens     = lensC('filename','microlens.json');
 desiredHeight = 0.012;                       % mm
 microlens.adjustSize(desiredHeight);
-fprintf('Focal length =  %.3f (mm)\nHeight = %.3f (mm)F-number %.3f\n',...
-    microlens.focalLength,microlens.get('lens height'), microlens.focalLength/microlens.get('lens height'));
+microlens.draw;
 
 %% Choose the imaging lens 
 
 % For the double gauss lenses 22deg is the half width of the field of view.
 % This focal length produces a decent part of the central scene.
 imagingLens     = lensC('filename','dgauss.22deg.12.5mm.json');
+imagingLens.draw;
 
-fprintf('Focal length =  %.3f (mm)\nHeight = %.3f\n',...
-    imagingLens.focalLength,imagingLens.get('lens height'))
 
 %% Set up the microlens array and film size
 
@@ -75,18 +66,13 @@ pixelsPerMicrolens = 7;  % The 2D array of pixels is this number squared
 pixelSize  = microlens.get('lens height')/pixelsPerMicrolens;   % mm
 filmresolution = [filmheight, filmwidth]/pixelSize;
 
-%% Build the lens file using the docker lenstool
-
-% The combined lens includes the imaging lens and the microlens array.
-[combinedlens,cmd] = piCameraInsertMicrolens(microlens,imagingLens, ...
-    'xdim',nMicrolens(1),  'ydim',nMicrolens(2),...
-    'film width',filmwidth,'film height',filmheight);
+%% Build the combined lens file
+[combinedlens, info] = piMicrolensInsert(microlens,imagingLens,...
+    'n microlens',nMicrolens);
 
 %% Create the camera with the lens+microlens
 
-thisLens = combinedlens;
-fprintf('Using lens: %s\n',thisLens);
-thisR.camera = piCameraCreate('omni','lensFile',thisLens);
+thisR.camera = piCameraCreate('omni','lensFile',combinedlens);
 
 %{
 % You might adjust the focus for different scenes.  Use piRender with
@@ -112,22 +98,6 @@ thisR.set('film diagonal',sqrt(filmwidth^2 + filmheight^2));
 % Film resolution -
 thisR.set('film resolution',filmresolution);
 
-%{
-% Chess set case
-% Pick out a bit of the image to look at.  Middle dimension is up.
-% Third dimension is z.  I picked a from/to that put the ruler in the
-% middle.  The in focus is about the pawn or rook.
- thisR.set('from',from);          % Get higher and back away than default
- thisR.set('to',  to);            % Look down default compared to default
- thisR.set('rays per pixel',32);  % 32 is small
-%}
-%{
-% Simple scene
- thisR.set('from',from);     % Get higher and back away than default
- thisR.set('to',  to);       % Look down default compared to default
- thisR.set('rays per pixel',128);
-%}
-
 % We can use bdpt if you are using the docker with the "test" tag (see
 % header). Otherwise you must use 'path'
 thisR.integrator.subtype = 'path';  
@@ -139,28 +109,12 @@ thisR.summarize('all');
 
 %% Render and display
 
-% Change this for depth of field effects.
-piWrite(thisR);
-
-[oi, result] = piRender(thisR,'render type','radiance');
-
-% Parse the result for the lens to film distance and the in-focus
-% distance in the scene.  The lensFilm is the separation between the film
-% and the microlens, which is the effective back of this lens (imaging lens
-% plus microlens).  The infocusDistance is the distance in the scene that
-% is rendered in good focus by the optics.
-%
-%  [lensFilm, infocusDistance] = piRenderResult(result);
-%
-
-% Name and show the OI
-
 oiName = sprintf('%s-%d',thisR.get('input basename'),thisR.get('aperture diameter'));
-oi = oiSet(oi,'name',oiName);
-oiWindow(oi);
+oi = piWRS(thisR,'name',oiName);
 
 %% Lightfield manipulations
 
+% These are based on
 % Pull out the oi samples
 rgb = oiGet(oi,'rgb');
 
@@ -171,14 +125,6 @@ LF = LFImage2buffer(rgb,nMicrolens(2),nMicrolens(1));
 % show them as separate images
 [imgArray, imgCorners] = LFbuffer2SubApertureViews(LF);
 
-%{
-imSize = size(LF,[1 2]);
-thisCorner = imgCorners(3,3,:);
-r = thisCorner(1):(thisCorner(1)+imSize(1));
-c = thisCorner(2):(thisCorner(2)+imSize(2));
-thisImg = imgArray(r,c,:);
-ieNewGraphWin; imagesc(thisImg); axis image;
-%}
 % Notice how the pixelsPerMicrolens x pixelsPerMicrolens images are looking
 % through the imaging lens from slightly different points of view.  Also,
 % notice how we lose photons at the corner samples.
