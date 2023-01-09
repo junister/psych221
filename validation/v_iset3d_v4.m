@@ -156,7 +156,7 @@ glData = opengl('data');
 disp(strcat("v_ISET3d-v4 (LOCAL) ran  on: ", glData.Vendor, " ", glData.Renderer, "with driver version: ", glData.Version));
 disp(strcat("v_ISET3d-v4 (LOCAL) ran  in: ", string(afterTime - beforeTime), " seconds of CPU time."));
 disp(strcat("v_ISET3d-v4 ran  in: ", string(tTotal), " total seconds."));
-disp('===========');
+disp('---------');
 vprintf('Docker:     ', getpref('ISET3d','tvdockerTime'));
 vprintf('Depth:      ', getpref('ISET3d','tvdepthTime'));
 vprintf('Omni:       ', getpref('ISET3d','tvomniTime'));

@@ -1,6 +1,5 @@
 % s_shapeExample
 %
-<<<<<<< Updated upstream
 % TO BE DEPRECATED USING s_shapeModern examples.
 %
 % In the newest version  of Human Eye in PBRT v4 (TG), we have the
@@ -8,13 +7,6 @@
 % on the surface. This is supposed to reproduce the results from the
 % legacy code that maps a position on the film to a position on a
 % spherical surface.
-=======
-% In the newest version  of Human Eye in PBRT v4 (TG), we can give
-% PBRT a lookuptable to represent 3D positions on the film points. 
-% 
-% This new approach extends the code from Mike Mara and Trisha that
-% maps a position on the film to a position on a spherical surface.
->>>>>>> Stashed changes
 %
 % This script illustrates how we made a bumpy retina and then rendered
 % a scene using sceneEye.  Various quality of life things left to do,
