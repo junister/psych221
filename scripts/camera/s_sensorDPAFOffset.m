@@ -1,12 +1,12 @@
 %% s_sensorDPAFOffset
 % 
-% Experiment with microlens offsets
+% Experiment with microlens offsets can be based on this script.
 %
-% We are introducing piMicrolensWrite() so we control the microlens.
-% It works with the omni branch and the GPU code on MUX.  We are
-% writing Matlab code to control the offsets.
+% To get here, we implemented the uLens iLens combination directly in
+% matlab, rather than using the lenstool method in the PBRT docker.
 %
-% The logic of the ray trace using the offsets needs some explanation.
+% Then we experimented with the offset of the microlens from the
+% sensor.  This logic needs some explanation.
 %
 % PBRT traces rays from each film sample point (pixel.  This code
 % places a 2x2 grid below each microlens.  So if we create a microlens
@@ -15,8 +15,7 @@
 %
 % The tracing starts with a pixel and then traces through the
 % microlens at the corresponding position.  Each pixel is always
-% (implicitly) assigned one microlens from the list of 256 x 256.  How
-% does it choose its microlens?  
+% (implicitly) assigned one microlens from the list of 256 x 256.
 %
 % Once it has its microlens, it looks up the microlens surface and
 % offset properties to trace into the imaging lens and then to the
@@ -47,7 +46,7 @@ nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 
 % Read the microlens and scale its diameter
 uLensDiameter = 2.8;        % Microns
-uLensDiameterM = 2.8*1e-6;  % Microns
+uLensDiameterM = 2.8*1e-6;  % Meters
 
 uLens = lensC('file name',uLensName);
 d = uLens.get('lens diameter','microns');
@@ -56,13 +55,14 @@ fprintf('Microlens diameter (um):  %.2f\n',uLens.get('lens diameter','microns'))
 
 iLens = lensC('file name',iLensName);
 
-% Zero offset of the microlens by default.
-[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
+% Zero offset of the microlens by default.  To introduce a linear
+% scaling of the offset, set maxOffset to non-zero.
+% maxOffset = 0;
+maxOffset = uLensDiameterM/4;
 
 % Linearly scaled offset of the microlens array
-%
-% [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens,...
-%     'offset method','linear','max offset',uLensDiameterM/4);
+ [combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens,...
+     'offset method','linear','max offset',uLensDiameterM/4);
 
 thisR.set('film size',info.filmSize);
 
@@ -93,39 +93,31 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',256);
 
-thisR.set('render type',{'radiance','depth'});
+% The default:
+% thisR.set('render type',{'radiance','depth'});
 
 %% Render
 
+% As described in the header:
+%
+%   The microlens offset for small amounts makes sense.  The rays are
+% traced from the pixel to the microlens, and only those get through.
+% When the offset is small, many angles are traced.  When the offset
+% is large, however, the only rays from the pixel to the microlens are
+% along the very narrow on-axis path.  It's kind of a weird model
+% because each pixel only traces through its own microlens.
 thisR.set('microlens sensor offset',5e-6);
-
 oi = piWRS(thisR);
 
 %{
-rgb = oiGet(oi,'rgb'); imtool(rgb);
+% To look at the image up close
+ rgb = oiGet(oi,'rgb'); imtool(rgb);
 %}
-
-thisR.get('microlens sensor offset','um')
 
 %% Make a dual pixel sensor that has rectangular pixels
 
+% The empty slot is for 'pixel'
 sensor = sensorCreate('dual pixel',[], oi, nMicrolens);
-%{
-% This is about what the create does.
-%
-sensor = sensorCreate;
-sz = sensorGet(sensor,'pixel size');
-
-% We make the height
-sensor = sensorSet(sensor,'pixel width',sz(2)/2);
-
-% Add more columns
-rowcol = sensorGet(sensor,'size');
-sensor = sensorSet(sensor,'size',[rowcol(1)*2, rowcol(2)*4]);
-
-% Set the CFA pattern accounting for the dual pixel architecture
-sensor = sensorSet(sensor,'pattern',[2 2 1 1; 3 3 2 2]);
-%}
 
 % Notice that we get the spatial structure of the image right, even though
 % the pixels are rectangular.
@@ -165,20 +157,28 @@ ieNewGraphWin;
 plot(leftSensorData.pos{1},leftSensorData.data{1},'b-',...
     rightSensorData.pos{1},rightSensorData.data{1},'r-');
 
-%%
+%% Create the combined image, using both pixels
+
+% We make a virtual sensor that combines the left and right into a
+% single pixel
 bothVolts = (leftVolts + rightVolts)/2;
 sensorBoth = rightSensor;
 sensorBoth = sensorSet(sensorBoth,'volts',bothVolts);
 sensorWindow(sensorBoth);
+
+% Then we use the usual image processing method
 ipBoth = ipCreate;
 ipBoth = ipCompute(ipBoth,sensorBoth);
 ipWindow(ipBoth);
 
-%%
+%% Create the image processed images that might be used for depth est.
+
+% This creates the double wide image, just showing that we have it.
 ip = ipCreate;
 ip = ipCompute(ip,sensor);
 ipWindow(ip);
 
+% Now, we pull out the left and right images separately
 leftip = ipCreate;
 leftip = ipCompute(leftip,leftSensor);
 ipWindow(leftip);
@@ -188,5 +188,6 @@ rightip = ipCreate;
 rightip = ipCompute(rightip,rightSensor);
 ipWindow(rightip);
 rightuData = ipPlot(rightip,'horizontal line',[89 89]);
+
 %% END
 
