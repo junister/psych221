@@ -1,22 +1,28 @@
-function startingPoint = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance)
-% Matlab implementation of the corresponding humanEye function in PBRT
-% (c++)
+function startingPoint = piMapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,retinaRadius,retinaDistance)
+% Matlab implementation of the corresponding humanEye function in PBRT(c++)
+%
+% Synopsis
+%    startingPoint = piMapToSphere(pFilm,filmRes,retinaDiag, ...
+%         retinaSemiDiam,retinaRadius,retinaDistance)
 %
 % Brief description
-%   Creates the (x,y,z) values of the receptor positions used for the
-%   retina when calculating with the default human eye code, as
-%   published in the JOV paper.
+%   Creates the (x,y,z) values of the retinal surface positions when
+%   calculating with the default human eye code, as published in the
+%   JOV paper (Lian et al.).
 %
-%  INPUTS
-%     pFilm - struct with fields pFilm.x, pFilm.y containing the index of
-%               the film pixel (row column)
-%     filmRes - struct with fields filmRes.x filmRes.y containing the
-%               number of data points in each direction (x: rows, y : cols)
+% Inputs
+%  pFilm   - pFilm.x, pFilm.y containing the position on the  film of
+%             a pixel as a float to allow for jitter in the rendering.
+%              The representation is pixel, not physical units.
+%  filmRes - filmRes.x filmRes.y the number of sample points in each
+%            direction (uncertain if row/col or col/row).
 %
-%     retinaSemiDiag- Semi-diameter of retina (mm)
-%     retinaRadius - Retina radius (mm)
-%     retinaDiag = retinaSemiDiam*1.4142*2; % sqrt(2)*2
-%     retinaDistance (mm)
+% The default parameters from PBRT human eye model are:
+%
+%     retinaSemiDiam - Semi-diameter of retina Default: (6 mm)
+%     retinaRadius   - Retina radius Default: 12 mm
+%     retinaDiag     - thisSE.get('retina semidiam')*sqrt(2)*2
+%     retinaDistance - Distance from lens to retina.  Default: 16.32 mm
 %
 % Optional key/val
 %   N/A
@@ -29,6 +35,19 @@ function startingPoint = mapToSphere(pFilm,filmRes,retinaDiag,retinaSemiDiam,ret
 % See also
 %
 
+% TODO:
+%   This could take as an input the recipe, which would have the
+%   various retinal shape parameters encoded in it.  
+
+% Examples:
+%{
+ 
+%}
+
+%% Parse
+
+
+%% 
 % To calculate the "film diagonal", we use the retina semi-diameter.
 % The film diagonal is the diagonal of the rectangular image rendered
 % out by PBRT, in real units. Since we restrict samples to a circular
@@ -109,5 +128,6 @@ if(retinaRadius ~= 0)
     startingPoint.y=yc;
     startingPoint.z=zc;
 end
+
 end
 
