@@ -1,8 +1,28 @@
 function [newRotM, rotDegs] = piTransformRotationInAbsSpace(rotVec, curRotM, varargin)
-%{
+% Compute a new rotation matrix based on a new rotation vector
+%
+% Synopsis:
+%   [newRotM, rotDegs] = piTransformRotationInAbsSpace(rotVec, curRotM)
+%
 % Description:
 %   Get rotation matrix and rotation degrees in another space
-%}
+%
+% Input
+%   rotVec - Rotation vector to apply
+%   curRotM - Current rotation matrix
+%
+% Optional key/val
+%   N/A
+%
+% Return
+%   newRotM - New rotation matrix
+%   rotDegs - Rotation around x, y and z axis of the object (degs)
+%
+% space
+%
+% See also
+%  piTransformRotM2Degs, recipeSet('asset',.... world rotation)
+
 %%
 p = inputParser;
 p.addRequired('rotVec', @isvector);

@@ -1,6 +1,7 @@
 %% s_makeSimpleScene
 %
-
+% Not up to date ... either fix or deprecate
+%
 thisR = piRecipeDefault('scene name','simple scene');
 thisR.set('assets','Camera_B','delete');
 thisR.set('assets','001_mirror_O','delete');

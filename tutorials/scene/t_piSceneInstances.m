@@ -1,14 +1,16 @@
 %% t_piSceneInstances
 %
-% Show how to add additional instances of an asset to a scene. 
-%
-%  piObjectInstanceCreate
-%
-% Also illustrate
-%
-%  piObjectInstanceRemove
-%
+% Show how to add multiple instances of an object into a scene.  
+% 
+% The original object stores the mesh data of an object.  To reuse the
+% mesh but transformed, we create an instance.  The instance has a
+% different transform, but references the original mesh.
+% 
+% Instances are used heavily in the ISETAuto work and will also be used for
+% text rendering (e.g., piTextInsert).  Some day.
+%  
 % See also
+%  piObjectInstanceCreate, piObjectInstanceRemove
 %
  
 %%
@@ -18,10 +20,13 @@ if ~piDockerExists, piDockerConfig; end
 %% Render the basic scene
 
 thisR = piRecipeDefault('scene name','simple scene');
+piWRS(thisR);
+
+%% Create a second instance of the yellow guy
+
+% Converts the whole recipe.  Is this necessary or 
 piObjectInstance(thisR);
 % thisR.show;
-
-%% Create a second instance if the yellow guy
 
 % Maybe this should be thisR.get('asset',idx,'top branch')
 yellowID = piAssetSearch(thisR,'object name','figure_6m');
@@ -45,18 +50,14 @@ for ii=1:numel(steps)
     thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
 end
 
-%% The necessity of unique names has to do with speed and ISETAuto
-
-% See comments at the end of piObjectInstanceCreate
-thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
 
-%% Try it with the Chess Set
-thisR = piRecipeDefault('scene name','Chess Set');
-piObjectInstance(thisR);
+%% Use the Chess Set
+
+thisR = piRecipeCreate('Chess Set');
 piWRS(thisR,'render flag','hdr');
 
-%% Copy the pieces
+%% Copy the king using instances
 
 % To see the different pieces, try
 %   [idMap, oList] = piLabel(thisR);
@@ -64,17 +65,22 @@ piWRS(thisR,'render flag','hdr');
 %
 % Click on the pieces to see the index
 % Then use oList(idx) to see the mesh name
-% 72 is the ruler.  The king is 7.  The queen is 141.
+% 72 is the ruler.  The king is made of two meshes: mesh 7 and mesh 65.
+%
+% The queen is 141.
+
+piObjectInstance(thisR);
 
 pieceID = piAssetSearch(thisR,'object name','ChessSet_mesh_00007');
-p2Root = thisR.get('asset',pieceID,'pathtoroot');
+p2Root  = thisR.get('asset',pieceID,'pathtoroot');
 idx = p2Root(end);
 
 % This position is relative to the position of the original object
 % The Chess set dimensions are small.  
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
-    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    [~,newBranch] = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    disp(newBranch)
 end
 
 topID = piAssetSearch(thisR,'object name','ChessSet_mesh_00065');
@@ -85,13 +91,10 @@ idx = p2Root(end);
 % The Chess set dimensions are small.  
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
-    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    [~,newBranch] = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    disp(newBranch)
 end
 
-%% The necessity of unique names has to do with speed and ISETAuto
-
-thisR.assets = thisR.assets.uniqueNames;
 piWRS(thisR,'render flag','hdr');
-
 
 %% END

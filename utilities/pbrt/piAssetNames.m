@@ -1,4 +1,6 @@
 function [gnames,cnames] = piAssetNames(thisR,varargin)
+% DEPRECATED - Use piAssetLoad('help' or 'list')
+% 
 % Retrieve the names of the group objs and children in the asset struct
 %
 % Synopsis

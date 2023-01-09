@@ -1,5 +1,5 @@
 function piMaterialWrite(thisR)
-%%
+% Write the contents of the _material file
 % Synopsis:
 %   piMaterialWrite(thisR)
 %

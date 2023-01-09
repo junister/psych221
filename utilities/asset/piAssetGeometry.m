@@ -1,11 +1,11 @@
 function [coords,boxRange,hdl] = piAssetGeometry(thisR,varargin)
-% Find and plot the object coords in the world
+% Plot the object world positions, along with auxiliary information
 %
 % Synopsis
 %  [coords,boxRange,hdl] = piAssetGeometry(thisR,vararign)
 %
 % Input
-%   thisR - Recipe
+%   thisR - ISET3d recipe
 %
 % Optional key/val
 %   size - Logical, add size to graph (default false)
@@ -15,8 +15,10 @@ function [coords,boxRange,hdl] = piAssetGeometry(thisR,varargin)
 %   show     - Show (or not) the image; used to just return coords and boxRange
 %
 % Outputs
-%    coords
-%    boxRange dim 1 min max; dim 2 min max; dim 3 min max;
+%    coords   - Coordinates of the object positions
+%    boxRange - Bounding box around all the objects - about 10 percent
+%               bigger than the true range
+%               dim 1 min max; dim 2 min max; dim 3 min max; 
 %    hdl - Figure handle
 %
 % To set the xz plane or xy plane views use
@@ -88,8 +90,7 @@ else
     coords = objectcoords;
 end
 
-
-% These are the notes we attach to the objects.
+% The notes we plot alongside the objects.
 notes = cell(size(names));
 for ii=1:numel(notes), notes{ii} = ' '; end   % Start them out empty
 

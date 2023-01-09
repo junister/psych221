@@ -122,6 +122,12 @@ if isequal(thisR.get('optics type'),'lens')
     end
 end
 
+% This should only run for the human eye case for now.  Someday more
+% general. (TG/BW).
+if ~isempty(thisR.get('film shape file'))
+    piWriteFilmshape(thisR);
+end
+
 %% Open up the main PBRT scene file.
 
 outFile = thisR.get('output file');
@@ -296,6 +302,33 @@ else
         delete(outputLensFile);
         copyfile(inputLensFile,outputLensFile);
     end
+end
+
+end
+
+%% Write lens information
+function piWriteFilmshape(thisR)
+% Write JSON file that specifies the film shape.  Used for retina
+% shape now.  Could be used for OMNI in the future.
+%
+% See also
+%   navarroWrite, navarroLensCreate, setNavarroAccommodation
+
+% Make sure the we have the full path to the input lens file
+inputFilmshapeFile = thisR.get('film shape file');
+
+outputDir      = thisR.get('output dir');
+outputFilmshapeDir  = fullfile(outputDir,'filmshape');
+if ~exist(outputFilmshapeDir,'dir'), mkdir(outputFilmshapeDir); end
+outputFilmshapeFile = thisR.get('film shape output');
+
+% Always overwite.
+if isequal(inputFilmshapeFile,outputFilmshapeFile)
+    warning('input and output film shape files are the same (%s).',inputFilmshapeFile);
+else
+    % It must exist.  So if we are supposed overwrite
+    delete(outputFilmshapeFile);
+    copyfile(inputFilmshapeFile,outputFilmshapeFile);
 end
 
 end

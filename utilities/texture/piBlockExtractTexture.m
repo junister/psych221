@@ -1,6 +1,16 @@
 function texturelist = piBlockExtractTexture(thisR, textureLines)
+% Extract parameteters from a texture block
+%
+% Called by piTextureRead.  That only seems to be called by piRead_Blender,
+% though.  So is this really used?  Just wrote these notes in Jan, 2023.
+% (BW).
+%
+% Synopsis
+%   texturelist = piBlockExtractTexture(thisR, textureLines)
+%
+% See also
+%   piTextureRead, piTextureCreate
 
-%%
 nLines   = numel(textureLines);
 %% Parse the string on the material line
 for ii=1:nLines
