@@ -833,12 +833,19 @@ switch param
                     end
                     return;
                 case {'delete', 'remove'}
+                    % With the container/key method, we use the 'remove'
+                    % function to delete the material from the list and
+                    % from the order.  This requires using the name of the
+                    % material, not just its numeric value.  So, we get the
+                    % name.
                     if isnumeric(varargin{1})
-                        thisR.materials.list(varargin{1}) = [];
+                        names = keys(thisR.materials.list);
+                        thisName = names(varargin{1});
                     else
-                        remove(thisR.materials.list, varargin{1})
+                        thisName = varargin{1};
                     end
-                    [~,idx] = ismember(varargin{1},thisR.materials.order);
+                    remove(thisR.materials.list, thisName);
+                    [~,idx] = ismember(thisName,thisR.materials.order);
                     thisR.materials.order(idx) = [];
                     return;
                 case {'replace'}

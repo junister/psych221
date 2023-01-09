@@ -217,6 +217,10 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
         thisR.set('lights','all','delete');
 
+        % Remove the '' (empty) texture.  We used to advice setting the
+        % surface texture of the Cube.  But no longer.
+        thisR.set('material','delete',1);
+
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('new distant',...
@@ -227,7 +231,6 @@ switch ieParamFormat(rName)
         thisR.set('light', lgt, 'add');
         idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
-        warning('No obvious texture.  Use checkerboard.')
 
     case 'lettersatdepth'
         thisR = piRecipeDefault('scene name',rName);

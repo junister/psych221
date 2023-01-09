@@ -229,6 +229,15 @@ switch tp
         texture.tex2.type = 'float';
         texture.tex2.value = [];
 
+        % BW - We should ask Zheng about these spectral fields for the
+        % checkerboard
+        %
+        % texture.spectrumtex1.type = 'float';
+        % texture.spectrumtex1.val = [];
+        
+        % texture.spectrumtex2.type = 'float';
+        % texture.spectrumtex2.val = [];
+        
         texture.aamode.type = 'string';
         texture.aamode.value = '';
 
