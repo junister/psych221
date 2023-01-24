@@ -15,7 +15,7 @@ function [opticalImage, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %  focal length
 %  pixel size
 %  max luminance
-%  sensor size
+%  sensor offset
 %  dirt aperture
 %  dirty level
 %
