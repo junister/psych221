@@ -174,7 +174,9 @@ for ww = 1:numel(waveList)
         numberOfPixelsAfter = numberOfPixelsBefore;
     end
 
-    centerPixelIndex = ceil((pupilImageWidth-1)/2)+1;
+    % We need to be careful not to have the crop exceed the pupil size
+    % Formerly adding 1 here caused overflow on 1024 x 1024.
+    centerPixelIndex = ceil((pupilImageWidth-1)/2);
 
     cropRows = (centerPixelIndex - numberOfPixelsBefore) : ...
         (centerPixelIndex + numberOfPixelsAfter);
