@@ -100,6 +100,8 @@ if dirtylevel>0
 end
 
 for ww = 1:numel(waveList)
+
+    % conver to nanometers
     wavelength = waveList(ww) * 1e-9; % (m)
 
     pupilSampleStep = 1 / (psfsamplespacing * pupilImageWidth) * wavelength * focalLength;
@@ -122,6 +124,7 @@ for ww = 1:numel(waveList)
 
     pupilMask = pupilRadialDistance <= pupilRadius;
 
+    % Calculate the effect of specific aperture blades if needed
     if numSidesAperture>0
         maskDiamter = find(pupilMask(pupilImageWidth/2,:));
         centerPoint = [pupilImageWidth/2+1,pupilImageWidth/2+1];
@@ -131,7 +134,8 @@ for ww = 1:numel(waveList)
         pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), pupilImageWidth, pupilImageWidth);
         pupilMask = pupilMask.*pgonmask;
     end
-    
+
+    % add "dirt" (smudges, etc) effect
     if dirtylevel>0
         pupilMask = pupilMask .* dirtyApertrue;
     end
@@ -160,7 +164,6 @@ for ww = 1:numel(waveList)
 
     shiftedPsf = shiftedPsf ./ normalizingFactor;
 
-
     % Crop the PSF to the correct spatial size (mimic ZEMAX)
     sizeIsEven = mod(psfOutSize,2) == 0;
     if( sizeIsEven )
@@ -187,12 +190,11 @@ for ww = 1:numel(waveList)
 end
 
 opticalImage = piOICreate(photons_fl, 'focalLength',focalLength);
-
 opticalImage = oiSet(opticalImage, 'wAngular', 2*atand((pupilImageWidth*psfsamplespacing/2)/focalLength));
 
 end
 
-%% Below function is modified from google-flare code.
+%% The function below is modified from google-flare code.
 % https://github.com/google-research/google-research/tree/master/flare_removal
 
 function im = RandomDirtyAperture(imagewidth, dirty_level)
@@ -221,7 +223,6 @@ function im = RandomDirtyAperture(imagewidth, dirty_level)
 %     "scratches").
 %
 % Required toolboxes: Computer Vision Toolbox.
-
 
 n = imagewidth;
 im = ones([n,n], 'single');
