@@ -55,6 +55,10 @@ classdef recipe < matlab.mixin.Copyable
     properties (Dependent)
     end
 
+     methods (Static)
+        files = list(varargin);
+     end
+     
     methods
         % Constructor
         function obj = recipe(varargin)

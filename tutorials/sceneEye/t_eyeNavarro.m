@@ -63,7 +63,7 @@ thisSE.recipe.set('render type', {'radiance','depth'});
 %% Render as a scene with the GPU docker wrapper
 
 thisDocker = dockerWrapper;
-scene = thisSE.piWRS('docker wrapper',thisDocker);
+scene = thisSE.piWRS('docker wrapper',thisDocker,'name','pinhole');
 
 % scene = thisSE.render('docker wrapper',thisDWrapper);
 % sceneWindow(scene);   
@@ -101,10 +101,10 @@ thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
 % We can reduce the rendering noise by using more rays. This takes a while.
-thisSE.set('rays per pixel',512);      
+thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);     
+thisSE.set('spatial samples',384);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
@@ -116,7 +116,7 @@ thisSE.set('accommodation',1/distA);
 
 % Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
 thisDocker = dockerWrapper.humanEyeDocker;
-thisSE.piWRS('docker wrapper',thisDocker);
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
 
 % Summarize
 thisSE.summary;
@@ -127,7 +127,7 @@ thisSE.set('accommodation',1/distC);
 
 % Default renderer for sceneEye is humanEyeDocker, so try just the
 % default.  Should also work. 
-thisSE.piWRS;
+thisSE.piWRS('name','navarro-C');
 
 thisSE.summary;
 

@@ -235,16 +235,26 @@ switch param
         subType = thisR.get('camera subtype');
         switch subType
             case {'humaneye'}
-                % For the human eye models accommodation gets baked into
-                % the lens itself
-                lensName = thisR.get('lens basename');
-                lensDir = thisR.get('lens dir output');
-                switch lensName(1:5)
-                    case 'navar'
-                        setNavarroAccommodation(thisR,val,lensDir);
-                    case 'arizo'
-                        setArizonaAccommodation(thisR,val,lensDir);
-                    case 'legra'
+                % For the human eye models accommodation is baked into
+                % the lens itself, and stored in the lens file.
+                eyeModel = thisR.get('human eye model');
+                % lensDir = thisR.get('lens dir output');
+
+                % Perhaps we should write out silently?  The lens file
+                % is always written to the lens output dir.  We used
+                % to use the functions setNavarroAccommodation and
+                % setArizonaAccommodation.  But they are now
+                % deprecated.
+                switch eyeModel
+                    case 'navarro'
+                        % The accommodation sent in by the user is
+                        % converted to a different value because TL
+                        % tested and felt that was proper.  See
+                        % comments.
+                        navarroWrite(thisR,val);
+                    case 'arizona'
+                        arizonaWrite(thisR,val);                        
+                    case 'legrand'
                         warning('The LeGrand eye does not allow accommodation adjustment.')
                     otherwise
                         error('Unknown human eye model %s',modelName);

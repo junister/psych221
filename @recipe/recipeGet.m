@@ -524,12 +524,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         lensfullbasename = thisR.get('lens full basename');
         val = fullfile(outputDir,'lens',lensfullbasename);
     case 'lensaccommodation'
-        % Some eye models have an accommodation value for the
+        % Some human eye models have an accommodation value for the
         % lens/cornea.  The retina distance is held fixed, and
         % accommodation is achieved by rebuilding the eye model.
         %
-        % For typical lenses (not eye models) the accommodation refers
-        % to the 1/focal distance.  So people say that a simple lens
+        % For typical optics (not eye models) the accommodation means
+        % 1/focal distance.  So people say loosely that a simple lens
         % is accommodated to a focal distance and its accommodation is
         % the inverse of that distance.
         %
@@ -539,8 +539,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         if isequal(thisR.get('camera subtype'),'humaneye')
             % If it is a human eye model do this
 
-            % Read the lens file
-            txtLines = piReadText(thisR.get('lensfile'));
+            % Read the output lens file
+            txtLines = piReadText(thisR.get('lensfile output'));
 
             % Find the text that has '(Diopters)' in it.  Normally this is
             % line 10 in the lens file.
@@ -598,11 +598,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                 switch thisR.get('camera subtype')
                     case {'humaneye'}
                         % For the human eye, this is built into the
-                        % definition (accommodation) of the lens model
-                        val = 1/thisR.get('accommodation');                        
+                        % the lens model.  The accommodation is found
+                        % in the header of an existing lens file.
+                        val = 1/thisR.get('lens accommodation');                        
                     otherwise
-                        % For other types of lenses this can be set, and
-                        % PBRT adjusts the film distance to achieve this.
+                        % For other types of lenses this value can be
+                        % set, and PBRT adjusts the film distance to
+                        % achieve this.
                         val = thisR.camera.focusdistance.value; % Meters
                 end
 
