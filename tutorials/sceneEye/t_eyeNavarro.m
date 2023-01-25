@@ -55,7 +55,7 @@ thisSE.set('to',toB);
 thisSE.set('use pinhole',true);
 
 % Given the distance from the scene, this FOV captures everything we want
-thisSE.set('fov',25);             % Degrees
+thisSE.set('fov',30);             % Degrees
 
 % Render the scene
 thisSE.recipe.set('render type', {'radiance','depth'});
@@ -100,14 +100,6 @@ thisSE.set('to',toB); distB = thisSE.get('object distance');
 thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
-% This is the distance we set our accommodation to that. Try distC + 0.5
-% and then distA.  At a resolution of 512, I can see the difference.  I
-% don't really understand the units here, though.  (BW).
-%
-% thisSE.set('accommodation',1/(distC + 0.5));  
-
-thisSE.set('object distance',distC);  
-
 % We can reduce the rendering noise by using more rays. This takes a while.
 thisSE.set('rays per pixel',512);      
 
@@ -118,6 +110,9 @@ thisSE.set('spatial samples',512);
 thisSE.set('n bounces',3);
 
 %% This takes longer than the pinhole rendering
+
+% Set the accommodation distance to match the distance to the A
+thisSE.set('accommodation',1/distA);  
 
 % Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
 thisDocker = dockerWrapper.humanEyeDocker;
@@ -130,7 +125,8 @@ thisSE.summary;
 
 thisSE.set('accommodation',1/distC);  
 
-% Default is humanEyeDocker, so try just the default.  Should also work.
+% Default renderer for sceneEye is humanEyeDocker, so try just the
+% default.  Should also work. 
 thisSE.piWRS;
 
 thisSE.summary;

@@ -67,7 +67,12 @@ switch (resourceType)
         resourceDir = fullfile(ourData,'materials','textures');
     case {'lens', 'lenses'}
         % Changed July 30, 2020 - now in isetcam
-        resourceDir = fullfile(isetRootPath,'data','lens');
+        if piCamBio
+            resourceDir = fullfile(isetRootPath,'data','lens');
+        else
+            warning('Lenses are in isetcam/data/lens. We need a strategy for isetbio.  Use a human eye model. Returning empty');
+        end
+
     case {'scenes','scene'}
         resourceDir = fullfile(ourData,'scenes');
     case {'skymaps'}

@@ -163,7 +163,9 @@ thisSE.piWRS('docker wrapper',thisDockerGPU);  % Render and show
 thisSE.set('use pinhole',false);
 thisSE.set('object distance',20);
 
-oi = thisSE.piWRS('name','SB Arizona','show',false);
+thisDocker = dockerWrapper.humanEyeDocker;
+oi = thisSE.piWRS('docker wrapper',thisDocker,'show',false);
+% oi = thisSE.piWRS('name','SB Arizona','show',false);
 oi = piAIdenoise(oi); 
 oiWindow(oi);
 
