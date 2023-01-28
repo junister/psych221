@@ -41,8 +41,7 @@ for ii = 0:9
 end
 
 %% Generate letters
-% H is broken
-Alphabet_UC = 'ABCDEFGIJKLMNOPQRSTUVWXYZ';
+Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 Alphabet_LC = lower(Alphabet_UC);
 
 allLetters = [Alphabet_LC Alphabet_UC];
@@ -57,6 +56,52 @@ for ii = 1:numel(allLetters)
     else
         characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
     end
+
+    if ~exist(characterRecipe,'file')
+        warning("Help! %s\n", characterRecipe)
+    end
+    thisR = piRead(characterRecipe);
+
+    % We do not want the input file to have the user's full path.  So we
+    % reduce it to just the name of the pbrt file.
+    thisR.set('inputfile',characterRecipe);
+
+    % Assets do not get rendered directly.  They get merged into another
+    % scene which has its own output. So they do not need an output file or
+    % directory.
+    thisR.set('outputfile','');
+
+    % piRead changes asset names to lower case
+    % This means things break when we merge UC letters into recipes
+    
+    n = thisR.get('asset names');
+
+    % Save in assets/characters instead...
+    saveFileStub = erase(characterRecipe,'.pbrt');
+    saveFile = [saveFileStub '.mat'];
+    %{
+    % not sure why we needed this?
+    if isequal(upper(allLetters(ii)),allLetters(ii))
+        saveFile = [saveFileStub '.mat'];
+    else
+        saveFile = [saveFileStub '.mat'];
+    end
+    %}
+    oFile = thisR.save(fullfile(charAssetDir,saveFile));
+
+    letter = allLetters(ii); % hard-code for testing
+    mergeNode = [letter,'_B'];
+    save(oFile,'mergeNode','-append');
+end
+
+% UC-Courier-Bold
+for ii = 1:numel(Alphabet_UC)
+    disp(ii);
+%    if isequal(upper(allLetters(ii)),allLetters(ii))
+        characterRecipe = [lower(allLetters(ii)) '_UC-Courier-Bold-pbrt.pbrt'];
+%    else
+%        characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
+%    end
 
     if ~exist(characterRecipe,'file')
         warning("Help! %s\n", characterRecipe)
