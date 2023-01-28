@@ -84,7 +84,7 @@ thisR = recipeSet(thisR, 'up', [0 1 0]);
 thisR = recipeSet(thisR, 'objectDistance', objectDistance);
 
 % color our letters -- matte black might be better if we have one?
-letterMaterial = 'mattewhite';
+letterMaterial = 'glossy-black';
 
 % add letters by row
 for ii = 1:numel(rowLetters)
@@ -152,9 +152,9 @@ else
     end
 
     % we can render the cone mosaics, but another option is an eye model
-    coneMosaic = false;
+    useConeMosaic = true;
 
-    if coneMosaic
+    if useConeMosaic
         % Create the coneMosaic object
         tic
         cMosaic = coneMosaic;
@@ -184,22 +184,17 @@ else
         end
     else % Try Arizona eye model
 
-        thisSE = thisR;
-
-        % humaneye is part of the latest CPU docker images
-        % but is not currently supported on the GPU
-        thisDWrapper = dockerWrapper;
-        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-        thisDWrapper.gpuRendering = 0;
-
+        % Create a sceneEye()?
+        % But we're not getting a humaneye model
+        % I'll let Brian take it from here
+        thisSE = sceneEye();
+        thisSE.recipe = thisR;
         thisSE.recipe.set('render type', {'radiance','depth'});
 
         %%  Render
-
-        scene = thisSE.render('docker wrapper',thisDWrapper);
+        scene = thisSE.render();
 
         sceneWindow(scene);
-
         thisSE.summary;
 
         %% Now use the optics model with chromatic aberration
@@ -240,20 +235,12 @@ else
         thisSE.set('n bounces',3);
 
         %% Have a at the letters. Lots of things you can plot in this window.
-
-        dockerWrapper.reset();
-        thisDWrapper = dockerWrapper;
-        thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-        thisDWrapper.gpuRendering = 0;
-        thisSE.recipe.set('render type', {'radiance','depth'});
-
-        % Runs on the CPU on mux for humaneye case.
-        oi = thisSE.render('docker wrapper',thisDWrapper);
+        oi = thisSE.render();
 
         oiWindow(oi);
 
         % Summarize
-        thisSE.summary;
+        thisSE.summarize;
     end
 
 end
