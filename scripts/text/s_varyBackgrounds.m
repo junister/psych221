@@ -7,8 +7,7 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-% Something still isn't quite right about the H and I assets
-Alphabet_UC = 'ABCDEFGJKLMNOPQRSTUVWXYZ';
+Alphabet_UC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 chartRows = 4;
 chartCols = 6;
 
@@ -28,9 +27,6 @@ else
     % create a modern human eye ready scene
     thisSE = sceneEye('MacBethChecker');
     thisSE.recipe = addLight(thisSE.recipe);
-    % humaneye is part of the latest CPU docker images
-    % but is not currently supported on the GPU
-    thisDWrapper = dockerWrapper.humanEyeDocker();
 
     % set our recipe
     thisR = thisSE.recipe;
@@ -59,6 +55,7 @@ letterIndex = 0;
 letterSize = [0.12,0.1,0.12];
 letterRotation = [0 0 0];
 letterMaterial = 'wood-light-large-grain';
+piMaterialsInsert(thisR, 'names', {letterMaterial});
 
 letterNames = {};
 for ii = 1:chartRows
@@ -68,7 +65,7 @@ for ii = 1:chartRows
         % Move right based on ii, down based on jj, don't change depth for
         % now
         pos = to + [((jj-1) *horizontalDelta) ((ii-1)*verticalDelta) 0]; %#ok<SAGROW>
-        [thisR, addLetters] = charactersRender(thisR, letter,'letterSize',letterSize,'letterRotation',letterRotation,'letterPosition',pos,'letterMaterial',letterMaterial);
+        [thisR, addLetters] = textRender(thisR, letter,'letterSize',letterSize,'letterRotation',letterRotation,'letterPosition',pos,'letterMaterial',letterMaterial);
         letterNames{end+1} = addLetters;
     end
 end
@@ -81,15 +78,11 @@ end
 if humanEye
     varyLettersSE = thisSE.copy();
     varyPatchSE = thisSE.copy();
-else
-    varyLettersR = thisR.copy();
-    varyPatchR = thiSR.copy();
 end
 
 if humanEye
     %%  Render
-    oiVanilla = eyeRender(thisSE, 'dockerWrapper', thisDWrapper, ...
-        'fovScale', .5);
+    oiVanilla = eyeRender(thisSE, 'fovScale', .5);
 else
     piWRS(thisR);
 end
@@ -100,8 +93,7 @@ addMaterials(thisR);
 % Now vary the materials that compose the letters
 varyLettersR = doMaterials(thisR,'type','letters','letterNames',letterNames);
 if humanEye
-    oiVaryLetters = eyeRender(varyLettersSE, 'show', true, ...
-        'dockerWrapper', thisDWrapper);
+    oiVaryLetters = eyeRender(varyLettersSE, 'show', true);
 else
     piWRS(varyLettersR);
 end
@@ -109,8 +101,7 @@ end
 % Vary patch materials -- except inherits the letter materials also
 varyPatchR = doMaterials(thisR,'type','patch');
 if humanEye
-    oiVaryBackgrounds = eyeRender(varyPatchSE, 'show', true,...
-        'dockerWrapper',thisDWrapper);
+    oiVaryBackgrounds = eyeRender(varyPatchSE, 'show', true);
 else
     piWRS(varyPatchR);
 end

@@ -19,7 +19,11 @@ function [oi, cMosaic] = eyeRender(thisSE, options)
         Warning("Can't use eye rendering without ISETBio");
         return
     else
-        oi = thisSE.render('docker wrapper',options.dockerWrapper);
+        if ~isempty(options.dockerWrapper)
+            oi = thisSE.render('docker wrapper',options.dockerWrapper);
+        else
+            oi = thisSE.render();
+        end
         if options.show, oiWindow(oi); end
 
         % Mod for faster parpool startup
