@@ -276,13 +276,13 @@ outputLensFile = thisR.get('lens file output');
 outputLensDir  = fullfile(outputDir,'lens');
 if ~exist(outputLensDir,'dir'), mkdir(outputLensDir); end
 
-if isequal(thisR.get('realistic eye model'),'navarro')
+if isequal(thisR.get('human eye model'),'navarro')
     % Write lens file and the ior files into the output directory.
     navarroWrite(thisR);
-elseif isequal(thisR.get('realistic eye model'),'legrand')
+elseif isequal(thisR.get('human eye model'),'legrand')
     % Write lens file and the ior files into the output directory.
     legrandWrite(thisR);
-elseif isequal(thisR.get('realistic eye model'),'arizona')
+elseif isequal(thisR.get('human eye model'),'arizona')
     % Write lens file into the output directory.
     % Still tracking down why no IOR files are associated with this model.
     arizonaWrite(thisR);
