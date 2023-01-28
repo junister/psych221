@@ -84,7 +84,7 @@ thisR = recipeSet(thisR, 'up', [0 1 0]);
 thisR = recipeSet(thisR, 'objectDistance', objectDistance);
 
 % color our letters -- matte black might be better if we have one?
-letterMaterial = 'glossy-black';
+letterMaterial = 'mattewhite';
 
 % add letters by row
 for ii = 1:numel(rowLetters)
@@ -104,7 +104,7 @@ for ii = 1:numel(rowLetters)
         letterPosition = [spaceLetter letterVertical 0] + chartPlacement;
 
         % Need to decide on the object node name to merge
-        thisR = charactersRender(thisR, rowLetters{ii}(jj), ...
+        thisR = textRender(thisR, rowLetters{ii}(jj), ...
             'letterSize', letterSize, ...
             'letterSpacing', [letterSpacing letterVertical chartDistance], ...
             'letterMaterial', letterMaterial,...
