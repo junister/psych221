@@ -58,7 +58,7 @@ letterMaterial = 'wood-light-large-grain';
 piMaterialsInsert(thisR, 'names', {letterMaterial});
 
 letterNames = {};
-useBold = false;
+useBold = true; % test bold
 for ii = 1:chartRows
     for jj = 1:chartCols
         letterIndex = letterIndex + 1;

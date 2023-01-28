@@ -120,7 +120,7 @@ for ii = 1:length(recipelist)
             dstDir    = sceneR.get('output dir');
 
             % Copy the assets from source to destination
-            sourceAssets_v1 = fullfile(sourceDir, 'scene/PBRT/pbrt-geometry');
+            sourceAssets_v1 = fullfile(sourceDir, 'scene','PBRT','pbrt-geometry');
             sourceAssets_v2 = fullfile(sourceDir, 'geometry');
             if isfolder(sourceAssets_v1) && ~isempty(dir(fullfile(sourceAssets_v1,'*.pbrt')))
                 

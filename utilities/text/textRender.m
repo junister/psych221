@@ -173,11 +173,11 @@ for ii = 1:strlength(aString)
     if ~isempty(options.letterMaterial)
         % we can assume our caller has already loaded the material?
         % outputR = piMaterialsInsert(outputR,'names',{options.letterMaterial});
-        ourLetterAsset.thisR = outputR.set('asset',letterObject(1),...
+        outputR.set('asset',letterObject(1),...
             'material name',options.letterMaterial);
     end
 
-    ourLetterAsset.thisR = outputR.set('asset', letterObject(1), ...
+    outputR.set('asset', letterObject(1), ...
         'rotate', options.letterRotation);
 
     % We want to scale by our characterSize compared with the desired size

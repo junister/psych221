@@ -98,7 +98,7 @@ end
 for ii = 1:numel(Alphabet_UC)
     disp(ii);
 %    if isequal(upper(allLetters(ii)),allLetters(ii))
-        characterRecipe = [lower(allLetters(ii)) '_UC-Courier-Bold-pbrt.pbrt'];
+        characterRecipe = [Alphabet_UC(ii) '_UC-Courier-Bold-pbrt.pbrt'];
 %    else
 %        characterRecipe = [allLetters(ii) '-pbrt.pbrt'];
 %    end
@@ -135,7 +135,7 @@ for ii = 1:numel(Alphabet_UC)
     %}
     oFile = thisR.save(lower(fullfile(charAssetDir,saveFile)));
 
-    letter = allLetters(ii); % hard-code for testing
+    letter = Alphabet_UC(ii); % hard-code for testing
     letter = [letter '_UC-Courier-Bold'];
     mergeNode = [letter,'_B'];
     save(oFile,'mergeNode','-append');
