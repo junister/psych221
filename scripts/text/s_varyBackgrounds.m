@@ -58,6 +58,7 @@ letterMaterial = 'wood-light-large-grain';
 piMaterialsInsert(thisR, 'names', {letterMaterial});
 
 letterNames = {};
+useBold = false;
 for ii = 1:chartRows
     for jj = 1:chartCols
         letterIndex = letterIndex + 1;
@@ -65,7 +66,11 @@ for ii = 1:chartRows
         % Move right based on ii, down based on jj, don't change depth for
         % now
         pos = to + [((jj-1) *horizontalDelta) ((ii-1)*verticalDelta) 0]; %#ok<SAGROW>
-        [thisR, addLetters] = textRender(thisR, letter,'letterSize',letterSize,'letterRotation',letterRotation,'letterPosition',pos,'letterMaterial',letterMaterial);
+        if useBold
+            [thisR, addLetters] = textRender(thisR, letter,'letterSize',letterSize,'letterRotation',letterRotation,'letterPosition',pos,'letterMaterial',letterMaterial, 'letterTreatment', 'bold');
+        else
+            [thisR, addLetters] = textRender(thisR, letter,'letterSize',letterSize,'letterRotation',letterRotation,'letterPosition',pos,'letterMaterial',letterMaterial);
+        end
         letterNames{end+1} = addLetters;
     end
 end

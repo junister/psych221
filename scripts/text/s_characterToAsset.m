@@ -136,6 +136,7 @@ for ii = 1:numel(Alphabet_UC)
     oFile = thisR.save(lower(fullfile(charAssetDir,saveFile)));
 
     letter = allLetters(ii); % hard-code for testing
+    letter = [letter '_UC-Courier-Bold'];
     mergeNode = [letter,'_B'];
     save(oFile,'mergeNode','-append');
 end
