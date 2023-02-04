@@ -1,4 +1,4 @@
-function [opticalImage, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
+function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 % Add lens flare to a scene/optical image.
 %
 % Synopsis:
@@ -39,9 +39,10 @@ scene = sceneSet(scene, 'distance',0.05);
 sceneSampleSize = sceneGet(scene,'sample size','m');
 [oi,pupilmask, psf] = piFlareApply(scene,...
                     'psf sample spacing', sceneSampleSize, ...
-                    'numsidesaperture', 5, ...
-                    'psfsize', 512, 'dirtylevel',0);
-ip = piOI2IP(oi,'etime',1/30);
+                    'numsidesaperture', 100, ...
+                    'psfsize', 512, 'dirtylevel',0.5);
+
+ip = piOI2IP(oi,'etime',1/100);
 ipWindow(ip);
 %}
 %%
@@ -55,13 +56,13 @@ p = inputParser;
 p.addRequired('scene', @(x)isequal(class(x),'struct'));
 p.addParameter('psfsamplespacing',0.25e-6); % PSF sample spacing (m)
 p.addParameter('pupilimagewidth', 1024); % square image is used (pixels)
-p.addParameter('psfsize',1024); % output psf size (pixels)
+p.addParameter('psfsize',0); % output psf size (pixels)
 
 % number of blades for aperture, 0 for circular aperture.
 p.addParameter('numsidesaperture',0);
 p.addParameter('focallength',4.5e-3); % Focal length (m)
-p.addParameter('dirtylevel',1);       % Bigger number is more dirt.
-p.addParameter('normalizePSF',true);  % whether normalize the calculatedPSF
+p.addParameter('dirtylevel',0);       % Bigger number is more dirt.
+% p.addParameter('normalizePSF',true);  % whether normalize the calculatedPSF
 p.addParameter('fnumber', 5); % F-Number
 
 % some parameters for defocus
@@ -84,36 +85,65 @@ dirtylevel       = p.Results.dirtylevel;
 focalLength      = p.Results.focallength;
 fNumber          = p.Results.fnumber;
 
-normalizePSF     = p.Results.normalizePSF;
+% normalizePSF     = p.Results.normalizePSF;
 waveList         = p.Results.wavelist;
 
 pupilDiameter   = focalLength / fNumber; % (m)
 
 %%
-[height, width, channel] = size(scene.data.photons);
+[sceneHeight, sceneWidth, ~] = size(scene.data.photons);
 
-photons_fl = zeros(height, width, channel);
+oi = piOICreate(scene.data.photons, 'focalLength', focalLength, 'fNumber', fNumber);
+
+oi = oiSet(oi,'photons',oiCalculateIrradiance(scene,oi));
+
+offaxismethod = opticsGet(oi.optics,'off axis method');
+switch lower(offaxismethod)
+    case {'skip','none',''}
+    case 'cos4th'
+        oi = opticsCos4th(oi);
+    otherwise
+        fprintf('\n-----\nUnknown offaxis method: %s.\nUsing cos4th.',optics.offaxis);
+        oi = opticsCos4th(oi);
+end
+
+% Pad the optical image to allow for light spread (code from isetcam)
+padSize  = round([sceneHeight sceneWidth]/8);
+padSize(3) = 0;
+sDist = sceneGet(scene,'distance');
+oi = oiPad(oi,padSize,sDist);
+
+oiSize = oiGet(oi,'size');
+oiHeight = oiSize(1); oiWidth = oiSize(2);
+
+oi = oiSet(oi, 'wAngular', 2*atand((oiWidth*psfsamplespacing/2)/focalLength));
 
 % Generate dirty aperture mask
 if dirtylevel>0
-    dirtyApertrue = RandomDirtyAperture(pupilImageWidth, dirtylevel);
+    if oiWidth>oiHeight
+        imgSize = oiWidth;
+    else 
+        imgSize = oiHeight;
+    end
+    dirtyApertrue = RandomDirtyAperture(imgSize, dirtylevel); % crop this into scene size
 end
 
 for ww = 1:numel(waveList)
     wavelength = waveList(ww) * 1e-9; % (m)
 
-    pupilSampleStep = 1 / (psfsamplespacing * pupilImageWidth) * wavelength * focalLength;
+    pupilSampleStepX = 1 / (psfsamplespacing * oiWidth) * wavelength * focalLength;
 
-    pupilSupportX = (-0.5: 1/pupilImageWidth: 0.5-1/pupilImageWidth) * pupilSampleStep * pupilImageWidth;
+    pupilSupportX = (-0.5: 1/oiWidth: 0.5-1/oiWidth) * pupilSampleStepX * oiWidth;
     
-    pupilSupportY = pupilSupportX;
+    pupilSampleStepY = 1 / (psfsamplespacing * oiHeight) * wavelength * focalLength;
+    pupilSupportY = (-0.5: 1/oiHeight: 0.5-1/oiHeight) * pupilSampleStepY * oiHeight;
 
     [pupilX, pupilY] = meshgrid(pupilSupportX, pupilSupportY);
 
     pupilRadius = 0.5*pupilDiameter;
 
     pupilRadialDistance = sqrt(pupilX.^2 + pupilY.^2);
-    %%
+    %% wavefront aberration for defocus
     W2_object = -( sqrt(focusDistance^2 - pupilDiameter.^2/4 ) ...
         - sqrt( objectDistance.^2 - pupilDiameter^2/4 ) - ...
         (focusDistance - objectDistance) );
@@ -123,24 +153,23 @@ for ww = 1:numel(waveList)
     pupilMask = pupilRadialDistance <= pupilRadius;
 
     if numSidesAperture>0
-        maskDiamter = find(pupilMask(pupilImageWidth/2,:));
-        centerPoint = [pupilImageWidth/2+1,pupilImageWidth/2+1];
+        maskDiamter = find(pupilMask(oiWidth/2,:));
+        centerPoint = [oiWidth/2+1,oiHeight/2+1];
         % create n sides polygon
         pgon1 = nsidedpoly(numSidesAperture, 'Center', centerPoint, 'radius', floor(numel(maskDiamter)/2));
         % create a binary image with the polygon
-        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), pupilImageWidth, pupilImageWidth);
+        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), oiWidth, oiHeight);
         pupilMask = pupilMask.*pgonmask;
     end
     
     if dirtylevel>0
-        pupilMask = pupilMask .* dirtyApertrue;
+        pupilMask = pupilMask .* imresize(dirtyApertrue,[oiHeight, oiWidth]);
     end
 
     pupilRho = pupilRadialDistance./pupilRadius;
 
     % For defocus, the OPD is defined as a parabolic phase shift that gets
     % multiplied into the pupil mask.
-
     wavefront_object = W2_object.*pupilRho.^2/wavelength;
     wavefront_image = W2_image.*pupilRho.^2/wavelength;
 
@@ -152,43 +181,20 @@ for ww = 1:numel(waveList)
     inten = psfFnAmp .* conj(psfFnAmp);    % unnormalized PSF.
     shiftedPsf = real(inten);
 
-    if normalizePSF
-        normalizingFactor = sum(shiftedPsf(:));
-    else
-        normalizingFactor = 1;
-    end
+    PSF = shiftedPsf./sum(shiftedPsf(:));
+    PSF = PSF ./ sum(PSF(:));
 
-    shiftedPsf = shiftedPsf ./ normalizingFactor;
-
-
-    % Crop the PSF to the correct spatial size (mimic ZEMAX)
-    sizeIsEven = mod(psfOutSize,2) == 0;
-    if( sizeIsEven )
-        numberOfPixelsBefore = psfOutSize / 2 - 1;
-        numberOfPixelsAfter = psfOutSize / 2;
-    else
-        numberOfPixelsBefore = (psfOutSize-1)/2;
-        numberOfPixelsAfter = numberOfPixelsBefore;
-    end
-
-    centerPixelIndex = ceil((pupilImageWidth-1)/2)+1;
-
-    cropRows = (centerPixelIndex - numberOfPixelsBefore) : ...
-        (centerPixelIndex + numberOfPixelsAfter);
-
-    cropCols = (centerPixelIndex - numberOfPixelsBefore) : ...
-        (centerPixelIndex + numberOfPixelsAfter);
-
-    psf_spectral(:,:,ww) = shiftedPsf(cropRows, cropCols);
+    psf_spectral(:,:,ww) = PSF;
 
     %% apply psf to scene
-    photons_fl(:,:,ww) = ImageConvFrequencyDomain(scene.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
+    photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
 
-opticalImage = piOICreate(photons_fl, 'focalLength',focalLength);
+oi = oiSet(oi,'photons',photons_fl);
 
-opticalImage = oiSet(opticalImage, 'wAngular', 2*atand((pupilImageWidth*psfsamplespacing/2)/focalLength));
+illuminance = oiCalculateIlluminance(oi);
+oi = oiSet(oi,'illuminance',illuminance);
 
 end
 
