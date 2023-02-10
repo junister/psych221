@@ -145,8 +145,14 @@ setpref('ISET3d', 'tvskymapTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
 %% Textures (re-inserted, Aug 10 2022)
 disp('*** TEXTURES -- t_piIntro_texture')
 setpref('ISET3d', 'tvtextureStart', tic);
-t_piIntro_texture;
-setpref('ISET3d', 'tvtextureTime', toc(getpref('ISET3d', 'tvskymapStart', 0)));
+try
+    t_piIntro_texture;
+    setpref('ISET3d', 'tvtextureTime', toc(getpref('ISET3d', 'tvtextureStart', 0)));
+catch ME
+    warning('texture validation failed');
+    warning(ME.identifier,'%s',ME.message);
+    setpref('ISET3d','tvtextureTime', -1);
+end
 
 %% Summary
 tTotal = toc(getpref('ISET3d','tStart'));
