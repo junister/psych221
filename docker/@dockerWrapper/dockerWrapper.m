@@ -693,7 +693,9 @@ classdef dockerWrapper < handle
                                     useDockerImage = 'camerasimulation/pbrt-v4-gpu-t4';
                                 case {'geforcertx3070', 'nvidiageforcertx3070'}
                                     useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
-                                case {'geforcertx3090', 'nvidiageforcertx3090'}
+                                    % NVIDIA GeForce RTX 3090 Ti in Orange
+                                case {'geforcertx3090', 'nvidiageforcertx3090', ...
+                                        'nvidiageforcertx3090ti'}
                                     useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                                 case {'geforcertx2080', 'nvidiageforcertx2080', ...
                                         'geforcertx2080ti', 'nvidiageforcertx2080ti'}
