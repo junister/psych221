@@ -155,6 +155,22 @@ if isequal(options.length, 'long')
 
 end
 
+%% Let's try getting to orange now
+%
+% Let's figure the Matlab prefs are set for muxreconrt.  See
+%  getpref('docker')
+%
+
+thisD = dockerWrapper;
+
+% To point this to orange we do:
+thisD.remoteMachine = 'orange.stanford.edu';
+thisD.remoteImage   = 'digitalprodev/pbrt-v4-gpu-ampere-ti:latest';
+thisD.renderContext = 'remote-orange';
+
+
+
+
 %% Parting comment.
 if result < 0
     disp('At least one test case failed.')

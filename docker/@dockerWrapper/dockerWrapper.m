@@ -875,55 +875,66 @@ classdef dockerWrapper < handle
 
         % validates rendering context if remote rendering
         % will try to create one if none is available
-        function useContext = getRenderContext(obj, serverName)
+        function ourContext = getRenderContext(obj)
+            % Get or create the rendering context for the docker container
+            % on a specific server.  The context is based on remoteMachine
+            % name.
+            %
+            % The string defining the context should always be
+            %
+            %    remote-remoteMachine-modifier
+            %
+            % Such as remote-mux or remote-orange.
+            %
+            % Note: A docker context ('docker context create ...') is a set
+            % of parameters that define how to address the remote docker
+            % container from our local computer.
+            %
+            % Example:
+            %   useContext = thisD.getRenderContext('orange'); 
+            %   useContext = thisD.getRenderContext('muxreconrt');
+
             if isempty(obj.renderContext)
                 ourContext = 'remote-mux';
             else
                 ourContext = obj.renderContext;
             end
-            % Get or set-up the rendering context for the docker container
-            %
-            % A docker context ('docker context create ...') is a set of
-            % parameters we define to address the remote docker container
-            % from our local computer.
-            %
-            if ~exist('serverName','var'), serverName = obj.remoteMachine; end
-
-            switch serverName
-                case obj.vistalabDefaultServer()
-                    % Check that the Docker context exists.
-                    checkContext = sprintf('docker context list');
-                    [status, result] = system(checkContext);
-
-                    if status ~= 0 || ~contains(result,ourContext)
-                        % If we do not have it, create it
-                        % e.g. ssh://<username>@<server>
-                        % use the pref for remote username,
-                        % otherwise assume it is the same as our local user
-                        if isempty(obj.remoteUser)
-                            rUser = getUserName(obj);
-                        else
-                            rUser = obj.remoteUser;
-                        end
-
-                        contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            rUser, obj.vistalabDefaultServer);
-                        createContext = sprintf('docker context create %s %s',...
-                            contextString, ourContext);
-
-                        [status, result] = system(createContext);
-                        if status ~= 0 || numel(result) == 0
-                            warning("Failed to create context: %s -- Might already exist.\n",ourContext);
-                            disp(result)
-                        else
-                            fprintf("Created docker context %s for Vistalab server\n",ourContext);
-                        end
-                    end
-                    useContext = 'remote-mux';
-                otherwise
-                    % User is on their own to make sure they have a valid
-                    % context
+            if isempty(obj.remoteMachine)
+                sprintf('Setting remote machine to %s\n',obj.vistalabDefaultServer);
+                obj.remoteMachine = obj.vistalabDefaultServer;
             end
+
+            % Check that the Docker context exists.
+            checkContext = sprintf('docker context list');
+            [status, currentContexts] = system(checkContext);
+
+            if status ~= 0 || ~contains(currentContexts,ourContext)
+                % If we do not have it, create it
+                % e.g. ssh://<username>@<server>
+                % use the pref for remote username,
+                % otherwise assume it is the same as our local user
+                if isempty(obj.remoteUser)
+                    rUser = getUserName(obj);
+                else
+                    rUser = obj.remoteUser;
+                end
+
+                contextString = sprintf(' --docker host=ssh://%s@%s',...
+                    rUser, obj.remoteMachine);
+                createContext = sprintf('docker context create %s %s',...
+                    contextString, ourContext);
+
+                [status, currentContexts] = system(createContext);
+                if status ~= 0 || numel(currentContexts) == 0
+                    warning("Failed to create context: %s -- Might already exist.\n",ourContext);
+                    disp(currentContexts)
+                else
+                    fprintf("Created docker context %s for Vistalab server\n",ourContext);
+                end
+            else
+                % We found it!  We can use the ourContext.
+            end
+
         end
 
     end
