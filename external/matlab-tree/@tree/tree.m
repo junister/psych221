@@ -29,10 +29,10 @@ classdef tree
         Parent = [ 0 ]; %#ok<NBRAK>
         
         % ZLY: four maps that helps quick inquiry of idx based on name
-        mapFullName2Idx;
-        mapShortName2Idx;
-        mapLgtFullName2Idx;
-        mapLgtShortName2Idx;
+        mapFullName2Idx = containers.Map;
+        mapShortName2Idx = containers.Map;
+        mapLgtFullName2Idx = containers.Map;
+        mapLgtShortName2Idx = containers.Map;
     end
     
     methods

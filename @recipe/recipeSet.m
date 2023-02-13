@@ -1090,7 +1090,7 @@ switch param
                     newLightAsset.lght{1} = newLight;
                     defaultBranch = piAssetCreate('type', 'branch');
                     defaultBranch.name = [newLight.name(1:end-1), 'B'];
-                    thisR.set('asset', 'root_B', 'add', defaultBranch);
+                    thisR.set('asset', 1, 'add', defaultBranch);
                     thisR.set('asset', defaultBranch.name, 'add', newLightAsset);
                 elseif iscell(newLight)
                     for ii=1:numel(newLight)

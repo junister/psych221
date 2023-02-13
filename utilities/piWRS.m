@@ -101,9 +101,9 @@ piWrite(thisR);
 [~,username] = system('whoami');
 
 if strncmp(username,'zhenyi',6)
-    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
+    [obj, results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
 else
-    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
+    [obj, results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
 end
 
 if isempty(obj),  error('Render failed.'); end
