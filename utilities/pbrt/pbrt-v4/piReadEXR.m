@@ -45,8 +45,10 @@ switch dataType
     case "zdepth"
         output = piEXR2Mat(filename, 'Pz');
     case "alldepth"
+        % retrieve all depth channels at once
+        % will fail if any don't exist, in which case use 'depth'
           allDepthMap = piEXR2Mat(filename, ["Px", "Py", "Pz"]);
-          output = sqrt(allDepthMap.^2);
+          output = sum(sqrt(allDepthMap.^2),3);
     case "depth"
         % We only want to sum the depths that we have, so we need to 
         % look for errors when we retrieve each one
