@@ -143,6 +143,7 @@ for ww = 1:numel(waveList)
     pupilRadius = 0.5*pupilDiameter;
 
     pupilRadialDistance = sqrt(pupilX.^2 + pupilY.^2);
+    
     %% wavefront aberration for defocus
     W2_object = -( sqrt(focusDistance^2 - pupilDiameter.^2/4 ) ...
         - sqrt( objectDistance.^2 - pupilDiameter^2/4 ) - ...
@@ -184,9 +185,22 @@ for ww = 1:numel(waveList)
     PSF = shiftedPsf./sum(shiftedPsf(:));
     PSF = PSF ./ sum(PSF(:));
 
+    % ZL to check and add if the logic is correct.  It will speed things
+    % up.
+    %{
+    if ww == 1
+        sz = size(PSF);
+        psf_spectral = zeros(sz(1),sz(2),numel(waveList));
+        sz = oiGet(oi,'size');
+        photons_fl = zeros(sz(1),sz(2),numel(wavelist));
+    end
+    %}
+
     psf_spectral(:,:,ww) = PSF;
 
     %% apply psf to scene
+    % Maybe add a spectral weight here so that the blur is wavelength
+    % dependent.
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
