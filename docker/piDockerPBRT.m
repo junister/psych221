@@ -25,24 +25,22 @@ function [status,result,dockercmd] = piDockerPBRT(varargin)
 
 %% Parse
 
-command = ieParamFormat(command);
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
 
 p.addParameter('infile','',@(x)(exist(x,'file')));
-p.addParameter('outfile','',@ischar);
+p.addParameter('outfile','pbrt-output.exr',@ischar);
 
 p.addParameter('dockerimage',dockerWrapper.localImage(),@ischar);
 
 p.addParameter('verbose',true,@islogical);
+p.parse(varargin{:});
 
 % Maybe outfile should be handled separately as above.
 
-% dockerimage = 'camerasimulation/pbrt-v4-cpu:latest';
-p.parse(command,varargin{:});
-
 dockerimage = p.Results.dockerimage;
+outputFile = p.Results.outfile;
 
 % This is the pbrt recipe file
 if ~isempty(p.Results.infile)
@@ -67,8 +65,8 @@ end
 %}
 
 basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
-cmd = sprintf('pbrt %s --outfile pbrt-%s', ...
-    dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(fname));
+cmd = sprintf('pbrt %s --outfile %s', ...
+    dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(outputFile));
 
 dockercmd = sprintf(basecmd, ...
     dockerWrapper.pathToLinux(workdir), ...
