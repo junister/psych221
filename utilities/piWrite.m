@@ -207,6 +207,7 @@ if overwriteresources && ~isempty(inputDir)
                     fprintf('Copying %s\n',thisFile)
                 end
                 status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
+                %status = status && system(sprintf('cp -r %s %s \n',thisFile, fullfile(outputDir,sources(i).name)));
             end
         end
     end

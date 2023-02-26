@@ -459,7 +459,15 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             % thisShape.filename = fullfile(p, [n e]);
             if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
                 if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
-                    error('%s not exist',thisShape.filename);
+                    % Allow for meshes to be along our path
+                    [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
+                    if which([shapeFile shapeExtension])
+                        thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                        thisShape.meshshape = 'plymesh';
+                        shapeText = piShape2Text(thisShape);            
+                    else
+                        error('%s not exist',thisShape.filename);
+                    end
                 else
                     thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
                     thisShape.meshshape = 'plymesh';
