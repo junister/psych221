@@ -80,7 +80,7 @@ dockercmd = sprintf(basecmd, ...
 % Run dockercmd and show any result.  Maybe
 [status,result] = system(dockercmd);
 if p.Results.verbose || status ~= 0
-    fprintf('Run command:  %s\n',cmd);
+    fprintf('Run command:  %s\n',dockercmd);
     fprintf('Status %d (0 is good)\n',status);
     if ~isempty(result)
         disp(result)
