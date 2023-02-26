@@ -21,6 +21,11 @@ function [status,result,dockercmd] = piDockerPBRT(varargin)
 
 % Example:
 %{
+% NOTE: This is a complex scene, requiring > 8GB of GPU RAM
+tic
+infile = fullfile(iaFileDataRoot, 'Ford', 'SceneRecipes', '1113181929_skymap.pbrt');
+[status, result, dockercmd] = piDockerPBRT('infile',infile);
+toc
 %}
 
 %% Parse
@@ -32,8 +37,8 @@ p = inputParser;
 p.addParameter('infile','',@(x)(exist(x,'file')));
 p.addParameter('outfile','pbrt-output.exr',@ischar);
 
-p.addParameter('dockerimage',dockerWrapper.localImage(),@ischar);
-
+%p.addParameter('dockerimage',dockerWrapper.localImage(),@ischar);
+p.addParameter('dockerimage', 'digitalprodev/pbrt-v4-gpu-ampere-ti', @ischar);
 p.addParameter('verbose',true,@islogical);
 p.parse(varargin{:});
 
@@ -52,20 +57,14 @@ end
 
 
 if ~ispc
-    runDocker = 'docker run -ti ';
+    runDocker = 'docker run -ti --gpus device=0';
 else
-    runDocker = 'docker run -i ';
+    runDocker = 'docker run -i --gpus device =0';
 end
 
-% piDockerImgtool('denoise','infile',fullPathFile)
-%{
-            usage: imgtool denoise [options] <filename>
-            options: options:
-                --outfile <name>   Filename to use for the denoised image.
-%}
 
 basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
-cmd = sprintf('pbrt %s --outfile %s', ...
+cmd = sprintf('pbrt --gpu %s --outfile %s', ...
     dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(outputFile));
 
 dockercmd = sprintf(basecmd, ...
