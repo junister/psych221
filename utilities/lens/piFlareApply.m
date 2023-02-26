@@ -115,7 +115,8 @@ for ww = 1:numel(waveList)
     pupilRadius = 0.5*pupilDiameter;
 
     pupilRadialDistance = sqrt(pupilX.^2 + pupilY.^2);
-    %%
+    
+    %% wavefront aberration for defocus
     W2_object = -( sqrt(focusDistance^2 - pupilDiameter.^2/4 ) ...
         - sqrt( objectDistance.^2 - pupilDiameter^2/4 ) - ...
         (focusDistance - objectDistance) );
@@ -162,32 +163,23 @@ for ww = 1:numel(waveList)
         normalizingFactor = 1;
     end
 
-    shiftedPsf = shiftedPsf ./ normalizingFactor;
-
-    % Crop the PSF to the correct spatial size (mimic ZEMAX)
-    sizeIsEven = mod(psfOutSize,2) == 0;
-    if( sizeIsEven )
-        numberOfPixelsBefore = psfOutSize / 2 - 1;
-        numberOfPixelsAfter = psfOutSize / 2;
-    else
-        numberOfPixelsBefore = (psfOutSize-1)/2;
-        numberOfPixelsAfter = numberOfPixelsBefore;
+    % ZL to check and add if the logic is correct.  It will speed things
+    % up.
+    %{
+    if ww == 1
+        sz = size(PSF);
+        psf_spectral = zeros(sz(1),sz(2),numel(waveList));
+        sz = oiGet(oi,'size');
+        photons_fl = zeros(sz(1),sz(2),numel(wavelist));
     end
+    %}
 
-    % We need to be careful not to have the crop exceed the pupil size
-    % Formerly adding 1 here caused overflow on 1024 x 1024.
-    centerPixelIndex = ceil((pupilImageWidth-1)/2);
-
-    cropRows = (centerPixelIndex - numberOfPixelsBefore) : ...
-        (centerPixelIndex + numberOfPixelsAfter);
-
-    cropCols = (centerPixelIndex - numberOfPixelsBefore) : ...
-        (centerPixelIndex + numberOfPixelsAfter);
-
-    psf_spectral(:,:,ww) = shiftedPsf(cropRows, cropCols);
+    psf_spectral(:,:,ww) = PSF;
 
     %% apply psf to scene
-    photons_fl(:,:,ww) = ImageConvFrequencyDomain(scene.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
+    % Maybe add a spectral weight here so that the blur is wavelength
+    % dependent.
+    photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
 
