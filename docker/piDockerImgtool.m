@@ -15,6 +15,7 @@ function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %      convert
 %      denoise - We have another denoiser, though this one should work
 %                some day! 
+%      denoise-optix - GPU denoiser
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
@@ -65,7 +66,7 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 
-validCommands = {'makesky','makeequiarea','convert','denoise','help'};
+validCommands = {'makesky','makeequiarea','convert','denoise','denoise-optix','help'};
 p.addRequired('command',@(x)(ismember(x,validCommands)));
 p.addParameter('infile','',@(x)(exist(x,'file')));
 p.addParameter('outfile','',@ischar);
@@ -170,7 +171,7 @@ switch command
                       e.g. imgtool convert --exr2bin Radiance --outfile /path/to/dir/filename pbrt.exr
                       Default: all channels at the same directory with pbrt.exr
         %}
-    case 'denoise'
+    case {'denoise'}
         % piDockerImgtool('denoise','infile',fullPathFile)
         %{
             usage: imgtool denoise [options] <filename>
@@ -190,7 +191,23 @@ switch command
             dockerWrapper.pathToLinux(workdir), ...
             dockerimage, ...
             cmd);
+    case 'denoise-optix'
+        % only works with Nvidia GPU and optix library
+        %{
+        fullPathFile = which('room.exr');
+        piDockerImgtool('denoise-optix','infile',fullPathFile,'dockerimage','digitalprodev/pbrt-v4-gpu-ampere-ti')
+        %}
+        runDocker = [runDocker ' --gpus all'];
+        basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
+        cmd = sprintf('imgtool denoise-optix %s --outfile denoise-%s', ...
+            dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(fname));
 
+        dockercmd = sprintf(basecmd, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            workdir, ...
+            dockerWrapper.pathToLinux(workdir), ...
+            dockerimage, ...
+            cmd);
     case 'makeequiarea'
         %  piDockerImgtool('make equiarea','infile',filename);
 
