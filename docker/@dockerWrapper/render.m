@@ -109,12 +109,12 @@ if ~obj.localRender
     % mounted
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath, sceneDir));
 
-    geoCommand = 'cp -n -r geometry/* /ISETResources/geometry || rm -rf geometry || ln -s /ISETResources/geometry geometry';
-    texCommand = 'cp -n -r textures/* /ISETResources/textures || rm -rf textures || ln -s /ISETResources/textures textures';
-    spdCommand = 'cp -n -r spds/* /ISETResources/spds || rm -rf spds || ln -s /ISETResources/spds spds'; 
-    lgtCommand = 'cp -n -r lights/* /ISETResources/lights || rm -rf lights || ln -s /ISETResources/lights lights';
-    skyCommand = 'cp -n skymaps/* /ISETResources/skymaps || rm -rf skymaps || ln -s /ISETResources/skymaps skymaps';
-    symlinkCommand =  sprintf(' %s ||  %s || %s || %s || %s ', ...
+    geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
+    texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
+    spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'; 
+    lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
+    skyCommand = 'cp -n skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
+    symlinkCommand =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
         geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
 
         % need to cd to our scene, and remove all old renders
