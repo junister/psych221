@@ -111,8 +111,9 @@ if ~obj.localRender
 
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
-    containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
-        useContext, flags, useContainer, shortOut, renderCommand);
+    symlinkCommand = 'ln -s /ISETResources/geometry geometry && ln -s /ISETResources/textures textures && ln -s /ISETResources/spds spds && ln -s /ISETResources/lights lights && ln -s /ISETResources/skymaps skymaps';
+    containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s"',...
+        useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand);
     if verbose > 0
         fprintf('Command: %s\n', containerCommand);
     end

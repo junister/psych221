@@ -534,7 +534,13 @@ classdef dockerWrapper < handle
 
             containerLocalPath = dockerWrapper.pathToLinux(obj.relativeScenePath);
 
-            volumeMap = sprintf("-v %s:%s", hostLocalPath, containerLocalPath);
+            % We mount both the working directory and the ISETResource
+            % (Hard-Coded so far) Directory now
+
+            isetResourceFolder = '/acorn/data/iset/Resources';
+            volumeMap = sprintf("-v %s:%s -v %s:%s ", ...
+                hostLocalPath, containerLocalPath, ...
+                isetResourceFolder, '/ISETResources');
             placeholderCommand = 'bash';
 
             % Start adding functionality for shared ISET Resources on
