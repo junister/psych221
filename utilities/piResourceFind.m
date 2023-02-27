@@ -1,5 +1,5 @@
-function resourceFileName = piFindResource(rType, rName)
-%PIFINDRESOURCE A unified way of finding resource files
+function resourceFileName = piResourceFind(rType, rName)
+%PIRESOURCEFind A unified way of finding resource files
 
 %   Input --
 %     rType -- Starting with Textures
@@ -21,7 +21,7 @@ switch rType
 
         % Then check our textures library
 
-        
+
     otherwise
         warning("Resource type %s unknown\n", rType);
 end

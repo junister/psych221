@@ -110,7 +110,7 @@ for ii=1:numel(textureParams)
                 % directories. I am worried how often this happens. (BW)
 
                 % Check whether we have it a texture file
-                imgFile = piResourceGet('texture',thisVal);
+                imgFile = piResourceFind('texture',thisVal);
 
                 % At this point, either we have imgFile or it is empty.
                 if isempty(imgFile) 
