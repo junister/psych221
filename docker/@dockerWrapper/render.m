@@ -109,6 +109,15 @@ if ~obj.localRender
     % mounted
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath, sceneDir));
 
+    % Moving forward, we will start assuming that needed resource files are
+    % available to our docker container on the rendering server via a
+    % volume mounted as /ISETResources. 
+
+    % As a "fail-safe" way to populate that volume and the recipes
+    % we copy any correctly placed resources into the shared resource
+    % folders and delete the per-recipe sub-folders that were synced
+    % over so that we can replace them with symbolic links to the shared
+    % versions. 
     geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
     texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
     spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'; 
