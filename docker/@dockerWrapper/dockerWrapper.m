@@ -537,6 +537,11 @@ classdef dockerWrapper < handle
             volumeMap = sprintf("-v %s:%s", hostLocalPath, containerLocalPath);
             placeholderCommand = 'bash';
 
+            % Start adding functionality for shared ISET Resources on
+            % server. A little tricky since we typically aren't on the
+            % server to know what the path is
+            %ISETResourceMap = sprintf("-v %s:%s", <serverResourcePath>, <containerResourcePath);
+
             % We use the default context for local docker containers
             if obj.localRender
                 contextFlag = ' --context default ';
