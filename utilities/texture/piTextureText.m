@@ -109,25 +109,8 @@ for ii=1:numel(textureParams)
                 % a hack, but probably I should fix the original scene
                 % directories. I am worried how often this happens. (BW)
 
-                % Check whether we have it in
-                % the imageTextures directory.
-                if exist(fullfile(piDirGet('textures'),thisVal),'file')
-                    % Found it!  We will need to copy it later.
-                    imgFile = fullfile(piDirGet('textures'),thisVal);
-                else
-                    % Not in materials/textures, look elsewhere.
-                    imgFile = which(thisVal);
-                    if ~isempty(imgFile)
-                        % See if it is in a subdirectory of the material
-                        % directory or in the scenes directory.  Both are
-                        % OK.  If not, then warn the user where it was
-                        % found.
-                        p = fileparts(imgFile);
-                        if ~contains(p,piDirGet('material')) && ~contains(p,piDirGet('scenes'))
-                            warning('Texture file found in %s.\n',p);
-                        end
-                    end
-                end
+                % Check whether we have it a texture file
+                imgFile = piResourceGet('texture',thisVal);
 
                 % At this point, either we have imgFile or it is empty.
                 if isempty(imgFile) 
