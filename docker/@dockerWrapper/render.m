@@ -1,4 +1,4 @@
-function [status, result] = render(obj, renderCommand, outputFolder)
+function [status, result] = render(obj, renderCommand, outputFolder, varargin)
 % Render radiance and depth using the dockerWrapper method
 %
 % Synopsis
@@ -14,14 +14,23 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 %  result - Stdout text returned here
 %
 % Notes:
-%   (Author?) Currently we have an issue where GPU rendering ignores
+%   DJC: Currently we have an issue where GPU rendering ignores
 %   objects that have ActiveTranforms. Maybe scan for those & set
 %   container back to CPU (perhaps ideally a beefy, remote, CPU).
 %
 % See also
 %  piRender, sceneEye.render
-%
-% See debugging note at end.
+
+p = inputParser();
+
+addParameter(p, 'denoiseflag', false, @boolean);
+
+% Okay to get params we don't understand
+p.KeepUnmatched = true;
+
+p.parse(varargin{:});
+
+denoiseFlag = p.Results.denoiseflag;
 
 %% Build up the render command
 
@@ -52,6 +61,8 @@ else
 end
 % container is Linux, so convert
 outputFolder = dockerWrapper.pathToLinux(outputFolder);
+
+denoiseCommand = ''; %default
 
 % sync data over
 if ~obj.localRender
@@ -103,7 +114,16 @@ if ~obj.localRender
         fprintf('Done (%4.2f sec)\n', toc(putData))
     end
     if rStatus ~= 0, error(rResult); end
-    
+
+    % We currently only offer optix for the remote case
+    if denoiseFlag
+        % this pathing is sort of ugly, but needed
+        % since pbrt is on Linux and we might be on Windows
+        renderOutFile = ['renderings/' sceneDir '.exr'];
+        noiseOutFile = ['renderings/' sceneDir '-denoise.exr'];
+        denoiseCommand = sprintf(' imgtool denoise-optix --outfile %s %s', ...
+            noiseOutFile, renderOutFile);
+    end
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
@@ -129,8 +149,14 @@ if ~obj.localRender
         % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
 
-    containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s"',...
-        useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand);
+    if ~isempty(denoiseCommand) 
+        % Use the optix denoiser if asked
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s && %s"',...
+            useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand, denoiseCommand);
+    else
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
+            useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand);
+    end
     if verbose > 0
         fprintf('Command: %s\n', containerCommand);
     end

@@ -122,6 +122,9 @@ p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
 
+% Allow passthrough of arguments
+p.KeepUnmatched = true;
+
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
 scalePupilArea   = p.Results.scalepupilarea;  % Fix this
@@ -231,7 +234,7 @@ end
 % renderDocker is a dockerWrapper object.  The parameters control which
 % machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
-[status, result] = renderDocker.render(renderCommand, outputFolder);
+[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:});
 
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file

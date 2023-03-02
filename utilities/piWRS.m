@@ -62,7 +62,11 @@ p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 
+% allow parameter passthrough
+p.KeepUnmatched = true;
+
 p.parse(thisR,varargin{:});
+
 ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
@@ -103,7 +107,7 @@ piWrite(thisR);
 if strncmp(username,'zhenyi',6)
     [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
 else
-    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
+    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker, varargin{:});
 end
 
 if isempty(obj),  error('Render failed.'); end
