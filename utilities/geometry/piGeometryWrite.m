@@ -32,6 +32,7 @@ p = inputParser;
 % varargin = ieParamFormat(varargin);
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
+p.addParameter('useremoteresources', false, @boolean);
 p.parse(thisR,varargin{:});
 
 %% Create the default file name
@@ -466,7 +467,8 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
                         thisShape.meshshape = 'plymesh';
                         shapeText = piShape2Text(thisShape);            
                     else
-                        error('%s not exist',thisShape.filename);
+                        % We no longer care, as resources can be remote
+                        %error('%s not exist',thisShape.filename);
                     end
                 else
                     thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');

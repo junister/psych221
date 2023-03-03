@@ -8,6 +8,7 @@ function val = piMaterialText(material, thisR, varargin)
 p = inputParser;
 p.addRequired('material', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
+p.addParameter('useremoteresources', false);
 
 p.parse(material, thisR, varargin{:});
 
@@ -62,20 +63,20 @@ for ii=1:numel(matParams)
 
 
         if strcmp(matParams{ii},'normalmap')
-            if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
-                imgFile = which(thisVal);
-                if isempty(imgFile)||isequal(imgFile,'')
-                    error('Normal Map %s not found! Changing it to difuse', thisVal);
-                else
-                    if ispc % try to fix filename for the Linux docker container
-                        imgFile = dockerWrapper.pathToLinux(imgFile);
-                    end
+            if ~p.Results.useremoteresources
 
-                    % In the future we might want to copy the texture files
-                    % into a folder.
-                    thisText = strrep(thisText,thisVal, imgFile);
-                    %                     piTextureFileFormat(imgFile);
-                    copyfile(imgFile,thisR.get('output dir'));
+                if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
+                    imgFile = which(thisVal);
+                    if isempty(imgFile)||isequal(imgFile,'')
+                        error('Normal Map %s not found! Changing it to difuse', thisVal);
+                    else
+                        if ispc % try to fix filename for the Linux docker container
+                            imgFile = dockerWrapper.pathToLinux(imgFile);
+                        end
+
+                        thisText = strrep(thisText,thisVal, imgFile);
+                        copyfile(imgFile,thisR.get('output dir'));
+                    end
                 end
             end
         end
