@@ -637,11 +637,15 @@ classdef dockerWrapper < handle
                     else
                         cFlag = '';
                     end
-
+                    
+                    % this check can take close to a second on a remote
+                    % connection. Don't know if it is really worth doing?
+                    %{
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
+                    %}
                     containerName = obj.staticVar('get', 'PBRT-CPU', '');
                 otherwise
                     warning("No container found");
