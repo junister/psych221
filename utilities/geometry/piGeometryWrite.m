@@ -28,8 +28,7 @@ function  piGeometryWrite(thisR,varargin)
 
 p = inputParser;
 
-% Not needed now.
-% varargin = ieParamFormat(varargin);
+varargin = ieParamFormat(varargin);
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('useremoteresources', false, @boolean);

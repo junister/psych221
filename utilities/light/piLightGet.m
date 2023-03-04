@@ -142,7 +142,8 @@ if pbrtText && ~isempty(val) &&...
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'mapname' % in v4 this changes to filename
-            txt = sprintf(' "string filename" "%s"', val);
+            % DJC Use skymaps only where they belong
+            txt = sprintf(' "string filename" "skymaps/%s"', val);
         case 'fov'
             txt = sprintf(' "float fov" [%.4f]', val);
         case 'nsamples'

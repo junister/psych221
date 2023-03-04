@@ -315,7 +315,7 @@ end
 
 end
 
-%% Write lens information
+%% Write Film information
 function piWriteFilmshape(thisR)
 % Write JSON file that specifies the film shape.  Used for retina
 % shape now.  Could be used for OMNI in the future.
@@ -342,7 +342,7 @@ end
 
 end
 
-%% LookAt and Scale fields
+%% Write LookAt and Scale fields
 function piWriteLookAtScale(thisR,fileID)
 
 % Optional Scale
@@ -394,7 +394,7 @@ fprintf(fileID,'\n');
 
 end
 
-%% Transform times
+%% Write Transform times
 function piWriteTransformTimes(thisR, fileID)
 % Get transform times
 startTime = thisR.get('transform times start');
