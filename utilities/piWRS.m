@@ -68,6 +68,8 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 
+useRemoteResources = p.Results.useremoteresources;
+
 ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
@@ -101,7 +103,7 @@ oldRenderType = thisR.get('render type');
 % But the user may have given us a new render type
 thisR.set('render type',renderType);
 
-piWrite(thisR, 'useremoteresources', p.Results.useremoteresources);
+piWrite(thisR, 'useremoteresources', useRemoteResources);
 
 [~,username] = system('whoami');
 

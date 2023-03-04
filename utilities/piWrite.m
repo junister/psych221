@@ -85,8 +85,10 @@ p.parse(thisR,varargin{:});
 % We're going to get the resources we need on the server when we render
 % so don't try to find and copy them now
 if p.Results.useremoteresources
+    useRemoteResources = true;
     overwriteresources  = false;
 else
+    useRemoteResources = false;
     overwriteresources  = true;
 end
 overwritepbrtfile   = true;
@@ -169,12 +171,12 @@ if ~isempty(thisR.materials.list)
 %     this again
 
     % Write critical files.
-    piWriteMaterials(thisR,overwritematerials, p.Results.useremoteresources);
+    piWriteMaterials(thisR,overwritematerials, useRemoteResources);
 end
 
 %% Write the scene_geometry.pbrt
 if ~isequal(exporter,'Copy')
-    piWriteGeometry(thisR,overwritegeometry, p.Results.useremoteresources);
+    piWriteGeometry(thisR,overwritegeometry, useRemoteResources);
 end
 
 end   % End of piWrite
