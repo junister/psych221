@@ -61,6 +61,7 @@ p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
+p.addParameter('useremoteresources',false,@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -100,7 +101,7 @@ oldRenderType = thisR.get('render type');
 % But the user may have given us a new render type
 thisR.set('render type',renderType);
 
-piWrite(thisR);
+piWrite(thisR, 'useremoteresources', p.Results.useremoteresources);
 
 [~,username] = system('whoami');
 

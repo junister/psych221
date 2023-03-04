@@ -31,7 +31,7 @@ p = inputParser;
 varargin = ieParamFormat(varargin);
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-p.addParameter('useremoteresources', false, @boolean);
+p.addParameter('useremoteresources', false, @logical);
 p.parse(thisR,varargin{:});
 
 %% Create the default file name
