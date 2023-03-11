@@ -39,7 +39,7 @@ scene = sceneSet(scene, 'distance',0.05);
 sceneSampleSize = sceneGet(scene,'sample size','m');
 [oi,pupilmask, psf] = piFlareApply(scene,...
                     'psf sample spacing', sceneSampleSize, ...
-                    'numsidesaperture', 0, ...
+                    'numsidesaperture', 5, ...
                     'fnumber',5,...
                     'psfsize', 512, 'dirtylevel',0);
 
@@ -154,12 +154,12 @@ for ww = 1:numel(waveList)
     pupilMask = pupilRadialDistance <= pupilRadius;
 
     if numSidesAperture>0
-        maskDiamter = find(pupilMask(oiWidth/2,:));
+        maskDiamter = find(pupilMask(oiHeight/2,:));
         centerPoint = [oiWidth/2+1,oiHeight/2+1];
         % create n sides polygon
         pgon1 = nsidedpoly(numSidesAperture, 'Center', centerPoint, 'radius', floor(numel(maskDiamter)/2));
         % create a binary image with the polygon
-        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), oiWidth, oiHeight);
+        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), oiHeight, oiWidth);
         pupilMask = pupilMask.*pgonmask;
     end
     
