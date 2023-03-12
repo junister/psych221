@@ -33,6 +33,10 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %             the recipe unchanged).  A value of N reduces the resolution
 %             by a factor of N.  Bounces and number of rays are reduced,
 %             too.
+%    'remote resources' - Applies to cases when the remote device has all
+%             of the graphics resources needed (textures, meshes) and the
+%             main PBRT file will be able to reference them without copying
+%             from the local computer.  (Better comment needed)
 %
 % Returns
 %   obj     - a scene or oi
@@ -62,13 +66,18 @@ p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 p.addParameter('useremoteresources',false,@islogical);
+p.addParameter('remoteresources',false,@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 
+% BW wanted the shorter name but didn't want to disturb the original just
+% yet.
+remoteResources = p.Results.remoteresources;
 useRemoteResources = p.Results.useremoteresources;
+remoteResources = useRemoteResources || remoteResources;
 
 ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
@@ -103,7 +112,9 @@ oldRenderType = thisR.get('render type');
 % But the user may have given us a new render type
 thisR.set('render type',renderType);
 
-piWrite(thisR, 'useremoteresources', useRemoteResources);
+% Write the local/pbrt directory being aware about whether the resources
+% are expected to be present remotely.
+piWrite(thisR, 'useremoteresources', remoteResources);
 
 [~,username] = system('whoami');
 

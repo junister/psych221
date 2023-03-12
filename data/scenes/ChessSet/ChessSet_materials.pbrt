@@ -1,34 +1,13 @@
-Texture "cadyou.com_Sapeli_color" "spectrum" "imagemap"
-    "string encoding " "gamma 2.2"     "string filename" [ "cadyou.com_Sapeli.exr" ]
-MakeNamedMaterial "Lyse_brikker_008"
-    "string type" [ "coateddiffuse" ]
-    "texture reflectance" [ "cadyou.com_Sapeli_color" ]
-Texture "Dark_Mahony_color" "spectrum" "imagemap"
-    "string encoding " "gamma 2.2"     "string filename" [ "Dark_Mahony.exr" ]
-MakeNamedMaterial "Mrke_brikker_004"
-    "string type" [ "coateddiffuse" ]
-    "texture reflectance" [ "Dark_Mahony_color" ]
-MakeNamedMaterial "Filt_004"
-    "string type" [ "diffuse" ]
-    "rgb reflectance" [ 0 0 0 ]
-MakeNamedMaterial "Mtl"
-    "string type" [ "coateddiffuse" ]
-    "rgb reflectance" [ 0.554617 0.5517313 0.5490753 ]
-    "float roughness" [ 0.024286 ]
-MakeNamedMaterial "Mtl8"
-    "string type" [ "diffuse" ]
-    "rgb reflectance" [ 0 0 0 ]
-Texture "beigemarble_color" "spectrum" "imagemap"
-    "string encoding " "gamma 2.2"     "string filename" [ "beigeMarble.exr" ]
-MakeNamedMaterial "GroundMaterial"
-    "string type" [ "coateddiffuse" ]
-    "texture reflectance" [ "beigemarble_color" ]
-    "float roughness" [ 0.67357874 ]
-MakeNamedMaterial "planeTan"
-    "string type" [ "coateddiffuse" ]
-    "texture reflectance" [ "cadyou.com_Sapeli_color" ]
-    "float roughness" [ 0.01 ]
-MakeNamedMaterial "planeBrown"
-    "string type" [ "coateddiffuse" ]
-    "texture reflectance" [ "Dark_Mahony_color" ]
-    "float roughness" [ 0.01 ]
+# Exported by piMaterialWrite on 2023/3/12 16:12:28.75 
+Texture "cadyou.com_Sapeli_color" "spectrum" "imagemap" "string filename" "textures/cadyou.com_Sapeli.exr" "string encoding" "gamma 2.2"
+Texture "Dark_Mahony_color" "spectrum" "imagemap" "string filename" "textures/Dark_Mahony.exr" "string encoding" "gamma 2.2"
+Texture "beigemarble_color" "spectrum" "imagemap" "string filename" "textures/beigeMarble.exr" "string encoding" "gamma 2.2"
+Material "coateddiffuse" "rgb reflectance" [0.0936 0.1097 0.1280]
+MakeNamedMaterial "Lyse_brikker_008" "string type" [ "coateddiffuse" ] "texture reflectance" "cadyou.com_Sapeli_color"
+MakeNamedMaterial "Mrke_brikker_004" "string type" [ "coateddiffuse" ] "texture reflectance" "Dark_Mahony_color"
+MakeNamedMaterial "Filt_004" "string type" [ "diffuse" ] "rgb reflectance" [0.0000 0.0000 0.0000]
+MakeNamedMaterial "Mtl" "string type" [ "coateddiffuse" ] "rgb reflectance" [0.5546 0.5517 0.5491] "float roughness" [0.0243]
+MakeNamedMaterial "Mtl8" "string type" [ "diffuse" ] "rgb reflectance" [0.0000 0.0000 0.0000]
+MakeNamedMaterial "GroundMaterial" "string type" [ "coateddiffuse" ] "texture reflectance" "beigemarble_color" "float roughness" [0.6736]
+MakeNamedMaterial "planeTan" "string type" [ "coateddiffuse" ] "texture reflectance" "cadyou.com_Sapeli_color" "float roughness" [0.0100]
+MakeNamedMaterial "planeBrown" "string type" [ "coateddiffuse" ] "texture reflectance" "Dark_Mahony_color" "float roughness" [0.0100]

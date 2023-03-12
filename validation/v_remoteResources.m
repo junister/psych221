@@ -1,5 +1,11 @@
 % Validate whether we can render our scenes using remote resources
 
+%{
+% Make sure you have checked for docker configuration 
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%}
 % bunny has no light sources, need more code
 %thisR = piRecipeDefault('scene name', 'bunny');
 %piWRS(thisR, 'useremoteresources', true);
@@ -12,10 +18,13 @@ piWRS(thisR, 'useRemoteResources', true);
 %piWRS(thisR, 'useRemoteResources', true);
 
 thisR = piRecipeDefault('scene name', 'checkerboard');
-piWRS(thisR, 'useRemoteResources', true);
-
+piWRS(thisR, 'useRemoteResources', false);
+%{
+S = piRender(thisR);
+sceneWindow(S);
+%}
 thisR = piRecipeDefault('scene name', 'ChessSet');
-piWRS(thisR, 'useRemoteResources', true);
+piWRS(thisR, 'remoteResources', false);
 
 % needs light source
 %thisR = piRecipeDefault('scene name', 'coordinate');
