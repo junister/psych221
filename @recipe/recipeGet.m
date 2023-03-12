@@ -1227,6 +1227,10 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'materialsoutputfile'}
         % Unclear why this is still here.  Probably deprecated.
         val = thisR.materials.outputfile;
+        
+    case {'mediaoutputfile'}
+        % Unclear why this is still here.  Probably deprecated.
+        val = thisR.media.outputfile;
 
         % Getting ready for textures
     case{'texture', 'textures'}

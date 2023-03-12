@@ -415,7 +415,7 @@ end
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
 
 if ~isempty(thisNode.mediumInterface)
-    fprintf(fid, strcat(spacing, indentSpacing, "MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
+    fprintf(fid, strcat(spacing, indentSpacing, sprintf("MediumInterface ""%s"" ""%s""\n", thisNode.mediumInterface.inside, thisNode.mediumInterface.outside)));
 end
 
 % Write out material
@@ -425,6 +425,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
     else
         material = thisNode.material;
     end
+    
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));

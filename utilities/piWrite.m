@@ -85,6 +85,7 @@ overwritepbrtfile   = true;
 overwritelensfile   = true;
 overwritematerials  = true;
 overwritegeometry   = true;
+overwritemedia      = true;
 
 % creatematerials     = p.Results.creatematerials;
 verbosity           = p.Results.verbose;
@@ -95,7 +96,7 @@ exporter = thisR.get('exporter');
 
 % Input must exist
 inputDir   = thisR.get('input dir');
-if ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); end
+if ~isempty(inputDir) && ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); end
 
 % Make working dir if it does not already exist
 workingDir = thisR.get('output dir');
@@ -135,6 +136,13 @@ fileID = fopen(outFile,'w');
 
 %% Write header
 piWriteHeader(thisR,fileID)
+
+%% Write media
+% Media can interact with the camera
+% and can be defined before WorldBegin
+if ~isempty(thisR.media.list)
+    piWriteMedia(thisR, overwritemedia);
+end
 
 %% Write Scale and LookAt commands first
 piWriteLookAtScale(thisR,fileID);
@@ -438,25 +446,18 @@ for ofns = outerFields'
         continue;
     end
 
-    % Deal with camera and medium
-    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
-       if ~isempty(thisR.(ofn).medium)
-           currentMedium = [];
-           for j=1:length(thisR.media.list)
-                if strcmp(thisR.media.list(j).name,thisR.(ofn).medium)
-                    currentMedium = thisR.media.list;
-                end
-           end
-           fprintf(fileID,'MakeNamedMedium "%s" "string type" "water" "string absFile" "spds/%s_abs.spd" "string vsfFile" "spds/%s_vsf.spd"\n', ...
-               currentMedium.name,...
-               currentMedium.name,currentMedium.name);
-           fprintf(fileID,'MediumInterface "" "%s"\n',currentMedium.name);
-       end
-    end
-
     % Write header that identifies which block this is
     fprintf(fileID,'# %s \n',ofn);
 
+    % If the camera is submerged, then the medium needs to be defined.
+    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
+       if ~isempty(thisR.(ofn).medium)
+           fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', thisR.get('output basename')));
+           fprintf(fileID,'MediumInterface "" "%s"\n',thisR.(ofn).medium);
+       end
+    end
+    
+    
     % Write out the main type and subtypes
     fprintf(fileID,'%s "%s" \n',thisR.(ofn).type,...
         thisR.(ofn).subtype);
@@ -596,6 +597,8 @@ basename = thisR.get('output basename');
 lineMaterials = find(contains(thisR.world, {'_materials.pbrt'}));
 lineGeometry  = find(contains(thisR.world, {'_geometry.pbrt'}));
 lineLights    = find(contains(thisR.world, {'_lights.pbrt'}));
+lineMedia     = find(contains(thisR.world, {'_media.pbrt'}));
+
 
 % For the Copy case, we just copy the world and Include the lights and materials.
 if isequal(thisR.exporter, 'Copy')
@@ -661,12 +664,18 @@ for ii = 1:length(thisR.world)
         %         end
     end
 
-    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials)
+    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials.list)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
     end
+    
+    if piContains(currLine,'WorldBegin') && isempty(lineMedia) && ~isempty(thisR.media.list) && ...
+       (~isfield(thisR.camera,'medium') || (isfield(thisR.camera,'medium') && isempty(thisR.camera.medium)))
+        % Insert the materials file
+        fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', basename));
+    end
 
-    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets)
+    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets.Node)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
     end
@@ -692,6 +701,24 @@ if overwritematerials
     fname_materials = sprintf('%s_materials.pbrt',basename);
     thisR.set('materials output file',fullfile(outputDir,fname_materials));
     piMaterialWrite(thisR);
+end
+
+end
+
+%%
+
+function piWriteMedia(thisR,overwritemedia)
+% Write both materials and textures files into the output directory
+
+% We create the materials file.  Its name is the same as the output pbrt
+% file, but it has an _materials inserted.
+if overwritemedia
+    outputDir  = thisR.get('output dir');
+    basename   = thisR.get('output basename');
+    % [~,n] = fileparts(thisR.inputFile);
+    fname_media = sprintf('%s_media.pbrt',basename);
+    thisR.set('media output file',fullfile(outputDir,fname_media));
+    piMediaWrite(thisR);
 end
 
 end

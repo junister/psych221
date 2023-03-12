@@ -58,7 +58,7 @@ function material = piMaterialCreate(name, varargin)
 validmaterials = ...
     {'diffuse','coateddiffuse','coatedconductor','conductor',...
     'diffusetransmission','dielectric','thindielectric','hair', ...
-    'measured','subsurface','mix'};
+    'measured','subsurface','mix','interface'};
 
 %% Replace the space in parameters.
 
@@ -368,6 +368,10 @@ switch tp
 
         material.amount.type = 'float';
         material.amount.value = [];
+        
+    case 'interface'
+        material.type = 'interface';
+        
     otherwise
         warning('Material type: %s does not exist', tp)
         return;
