@@ -70,6 +70,7 @@ p.addParameter('gamma',[],@isnumeric);
 p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
+p.addParameter('meanluminance',-1,@isscalar);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -78,6 +79,7 @@ p.parse(thisR,varargin{:});
 
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
+meanLuminance = p.Results.meanluminance;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;

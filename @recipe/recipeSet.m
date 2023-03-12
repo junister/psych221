@@ -793,6 +793,72 @@ switch param
         thisR.set('film',val.film);
         thisR.filter = thisR.set('filter',val.filter);
 
+    case {'medium','media'}
+        
+        % Get index and material struct from the material list
+        % Search by name or index
+        if isstruct(val)
+            % They sent in a struct
+            if isfield(val,'name'), medName = val.name;
+                % It has a name slot.
+                thisMed = thisR.medium.list(medName);
+            else
+                error('Bad struct.');
+            end
+        elseif ischar(val)
+            % It is either a special command (add, delete, replace) or
+            % the material name
+            switch val
+                case {'add'}
+                    newMed = varargin{1};
+                    
+                    if isstruct(newMed) && isfield(newMed,'medium')
+                        thisName = newMed.media.name;
+                        thisR.media.list(thisName) = newMed.material;
+                        thisR.media.order{end + 1} = thisName;
+                    else
+                        % Not part of newMat.material, just a material
+                        thisR.media.list(newMed.name) = newMed;
+                        thisR.media.order{end + 1} = newMed.name;
+                    end
+                    return;
+                case {'delete', 'remove'}
+                    % With the container/key method, we use the 'remove'
+                    % function to delete the material from the list and
+                    % from the order.  This requires using the name of the
+                    % material, not just its numeric value.  So, we get the
+                    % name.
+                    if isnumeric(varargin{1})
+                        names = keys(thisR.media.list);
+                        thisName = names(varargin{1});
+                    else
+                        thisName = varargin{1};
+                    end
+                    remove(thisR.media.list, thisName);
+                    [~,idx] = ismember(thisName,thisR.media.order);
+                    thisR.media.order(idx) = [];
+                    return;
+                case {'replace'}
+                    % thisR.set('materials',matName,'replace',newMaterial)
+                    thisR.media.list(varargin{1}) = varargin{2};
+                    [~,idx] = ismember(varargin{1},thisR.media.order);
+                    thisR.media.order{idx} = varargin{2}.name;
+                    return;
+                otherwise
+                    % Probably the material name.
+                    medName = val;
+                    thisMed = thisR.media.list(val);
+            end
+        end
+
+         % At this point we have the medium.
+        if numel(varargin{1}) == 1
+            % A material struct was sent in as the only argument.  We
+            % should check it, make sure its name is unique, and then set
+            % it.
+            thisR.media.list(medName) = varargin{1};
+        end
+        
         % Materials should be built up here.
     case {'materials', 'material'}
         % Act on the list of materials
@@ -900,6 +966,10 @@ switch param
     case {'materialsoutputfile'}
         % Deprecated?
         thisR.materials.outputfile = val;
+        
+    case {'mediaoutputfile'}
+        % Deprecated?
+        thisR.media.outputfile = val;
 
     case {'textures', 'texture'}
         % thisR.set('texture',textureName,parameter,value);
