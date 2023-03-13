@@ -52,9 +52,17 @@ scene = sceneSet(scene, 'distance',0.05);
 sceneSampleSize = sceneGet(scene,'sample size','m');
 [oi,pupilmask, psf] = piFlareApply(scene,...
                     'psf sample spacing', sceneSampleSize, ...
-                    'numsidesaperture', 5, ...
-                    'fnumber',5,...
-                    'psfsize', 512, 'dirtylevel',0);
+                    'numsidesaperture', 10, ...
+                    'fnumber',5, 'dirtylevel',0);
+
+ip = piOI2IP(oi,'etime',1/10);
+ipWindow(ip);
+% defocus
+[oi,pupilmask, psf] = piFlareApply(scene,...
+                    'psf sample spacing', sceneSampleSize, ...
+                    'numsidesaperture', 10, ...
+                    'fnumber',5, 'dirtylevel',0,...
+                    'defocus term',2);
 
 ip = piOI2IP(oi,'etime',1/10);
 ipWindow(ip);
@@ -70,8 +78,6 @@ p = inputParser;
 
 p.addRequired('scene', @(x)isequal(class(x),'struct'));
 p.addParameter('psfsamplespacing',0.25e-6); % PSF sample spacing (m)
-p.addParameter('pupilimagewidth', 1024); % square image is used (pixels)
-p.addParameter('psfsize',0); % output psf size (pixels)
 
 % number of blades for aperture, 0 for circular aperture.
 p.addParameter('numsidesaperture',0);
@@ -81,26 +87,20 @@ p.addParameter('dirtylevel',0);       % Bigger number is more dirt.
 p.addParameter('fnumber', 5); % F-Number
 
 % some parameters for defocus
-p.addParameter('objectdistance', 1.0); % object distance in meters.
-p.addParameter('focusdistance', 1.0); % focus distance in meters.
-p.addParameter('sensoroffset', 0); % sensor offset from main lens in meters
+p.addParameter('defocusterm', 0); % Zernike defocus term
 
 p.addParameter('wavelist', 400:10:700, @isnumeric); % (nm)
 
 p.parse(scene, varargin{:});
 
 psfsamplespacing = p.Results.psfsamplespacing;
-focusDistance    = p.Results.focusdistance;
-objectDistance   = p.Results.objectdistance;
-sensorOffset     = p.Results.sensoroffset;
-% pupilImageWidth  = p.Results.pupilimagewidth;
-% psfOutSize       = p.Results.psfsize;
+
 numSidesAperture = p.Results.numsidesaperture;
 dirtylevel       = p.Results.dirtylevel;
 focalLength      = p.Results.focallength;
 fNumber          = p.Results.fnumber;
 
-% normalizePSF     = p.Results.normalizePSF;
+defocusTerm      = p.Results.defocusterm;
 waveList         = p.Results.wavelist;
 
 pupilDiameter   = focalLength / fNumber; % (m)
@@ -166,13 +166,6 @@ for ww = 1:nWave
 
     pupilRadialDistance = sqrt(pupilX.^2 + pupilY.^2);
 
-    % Wavefront aberration for defocus - needs more documentation
-    W2_object = -( sqrt(focusDistance^2 - pupilDiameter.^2/4 ) ...
-        - sqrt( objectDistance.^2 - pupilDiameter^2/4 ) - ...
-        (focusDistance - objectDistance) );
-
-    % Needs more documentation
-    W2_image = sensorOffset / (8*fNumber^2);
 
     % Valid parts of the pupil
     pupilMask = pupilRadialDistance <= pupilRadius;
@@ -192,15 +185,21 @@ for ww = 1:nWave
     end
 
     pupilRho = pupilRadialDistance./pupilRadius;
+    % ----------------Comments From Google Flare Calculation---------------
+    % Compute the Zernike polynomial of degree 2, order 0. 
+    % Zernike polynomials form a complete, orthogonal basis over the unit disk. The 
+    % "degree 2, order 0" component represents defocus, and is defined as (in 
+    % unnormalized form):
+    %
+    %     Z = 2 * r^2 - 1.
+    %
+    % Reference:
+    % Paul Fricker (2021). Analyzing LASIK Optical Data Using Zernike Functions.
+    % https://www.mathworks.com/company/newsletters/articles/analyzing-lasik-optical-data-using-zernike-functions.html
+    % ---------------------------------------------------------------------
+    wavefront = zeros(size(pupilRho)) + defocusTerm*(2 * pupilRho .^2 - 1);
 
-    % For defocus, the optical path difference (OPD) is defined as a
-    % parabolic phase shift that gets multiplied into the pupil mask.  I am
-    % not sure about the image and object wavefront terms here (BW).
-    wavefront_object = W2_object .* pupilRho.^2/wavelength;
-    wavefront_image  = W2_image .* pupilRho.^2/wavelength;
-
-    Wavefront = wavefront_image + wavefront_object;
-    phase_term = exp(1i*2 * pi .* Wavefront);
+    phase_term = exp(1i*2 * pi .* wavefront);
     OPD = phase_term.*pupilMask;
 
     % Calculate the PSF from the pupil function
