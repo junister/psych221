@@ -1,7 +1,12 @@
 function oi = piOICreate(photons,varargin)
-% Create an oi from radiance data
+% Create an oi from radiance data in photons
 %
 %     oi = piOICreate(photons,varargin)
+%
+% Brief description
+%    In some cases we have multispectral photon data and we just want to
+%    initialize an optical image for some other purpose.  This is used by
+%    ISET3d when reading in rendered and in piFlareApply. 
 %
 % Required
 %    photons - row x col x nwave data, computed by PBRT usually
@@ -20,12 +25,15 @@ function oi = piOICreate(photons,varargin)
 %        If fov is set, we use it
 %        If fov is not set, we use filmdiag.
 %  
+% See also
+%   piFlareApply,piEXR2ISET
+
 % Example
 %{
   oi = piOICreate(abs(randi(128,128,31)));
   oi = piOICreate(abs(randi(128,128,31)),'mean illuminance',10);
 %}
-% BW, SCIENTSTANFORD, 2017
+% BW, SCIEN STANFORD, 2017
 
 %%
 p = inputParser;
