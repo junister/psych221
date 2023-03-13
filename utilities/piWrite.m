@@ -75,12 +75,22 @@ p = inputParser;
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
+p.addParameter('useremoteresources', false);
 p.parse(thisR,varargin{:});
 
 % We need to get rid of these variables down below.  Historically, these
 % were parameters. Until we get rid of these in the subroutines, we leave
 % them here. 
-overwriteresources  = true;
+
+% We're going to get the resources we need on the server when we render
+% so don't try to find and copy them now
+if p.Results.useremoteresources
+    useRemoteResources = true;
+    overwriteresources  = false;
+else
+    useRemoteResources = false;
+    overwriteresources  = true;
+end
 overwritepbrtfile   = true;
 overwritelensfile   = true;
 overwritematerials  = true;
@@ -161,12 +171,12 @@ if ~isempty(thisR.materials.list)
 %     this again
 
     % Write critical files.
-    piWriteMaterials(thisR,overwritematerials);
+    piWriteMaterials(thisR,overwritematerials, useRemoteResources);
 end
 
 %% Write the scene_geometry.pbrt
 if ~isequal(exporter,'Copy')
-    piWriteGeometry(thisR,overwritegeometry);
+    piWriteGeometry(thisR,overwritegeometry, useRemoteResources);
 end
 
 end   % End of piWrite
@@ -307,7 +317,7 @@ end
 
 end
 
-%% Write lens information
+%% Write Film information
 function piWriteFilmshape(thisR)
 % Write JSON file that specifies the film shape.  Used for retina
 % shape now.  Could be used for OMNI in the future.
@@ -334,7 +344,7 @@ end
 
 end
 
-%% LookAt and Scale fields
+%% Write LookAt and Scale fields
 function piWriteLookAtScale(thisR,fileID)
 
 % Optional Scale
@@ -386,7 +396,7 @@ fprintf(fileID,'\n');
 
 end
 
-%% Transform times
+%% Write Transform times
 function piWriteTransformTimes(thisR, fileID)
 % Get transform times
 startTime = thisR.get('transform times start');
@@ -681,7 +691,7 @@ end
 end
 
 %%
-function piWriteMaterials(thisR,overwritematerials)
+function piWriteMaterials(thisR,overwritematerials, useRemoteResources)
 % Write both materials and textures files into the output directory
 
 % We create the materials file.  Its name is the same as the output pbrt
@@ -692,17 +702,17 @@ if overwritematerials
     % [~,n] = fileparts(thisR.inputFile);
     fname_materials = sprintf('%s_materials.pbrt',basename);
     thisR.set('materials output file',fullfile(outputDir,fname_materials));
-    piMaterialWrite(thisR);
+    piMaterialWrite(thisR, 'useremoteresources', useRemoteResources);
 end
 
 end
 
 %% Write the scene_geometry file
 
-function piWriteGeometry(thisR,overwritegeometry)
+function piWriteGeometry(thisR,overwritegeometry, useRemoteResources)
 % Write the geometry file into the output dir
 %
 if overwritegeometry && ~isempty(thisR.assets)
-    piGeometryWrite(thisR);
+    piGeometryWrite(thisR, 'useremoteresources', useRemoteResources);
 end
 end

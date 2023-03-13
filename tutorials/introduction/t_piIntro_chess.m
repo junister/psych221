@@ -42,7 +42,7 @@ thisR.set('render type',{'radiance','depth'});
 
 % The main way we write, render and show the recipe.  The render flag
 % is optional, and there are several other optional piWRS flags.
-scene = piWRS(thisR,'render flag','hdr');
+scene = piWRS(thisR,'render flag','hdr', 'useremoteresources', true);
 
 %% By default, we have also computed the depth map, so we can render it
 
@@ -64,7 +64,7 @@ thisR.set('light',pointLight,'add');
 % For now only radiance. Because we can.
 thisR.set('render type',{'radiance'});
 
-piWRS(thisR,'name','Point light');
+piWRS(thisR,'name','Point light', 'useremoteresources', true);
 
 %% Add a skymap
 
@@ -72,18 +72,18 @@ piWRS(thisR,'name','Point light');
 
 thisR.get('light print');
 
-piWRS(thisR, 'name', 'Point light and skymap');
+piWRS(thisR, 'name', 'Point light and skymap', 'useremoteresources', true);
 
 %% Rotate the skymap
 
 thisR.set('light',skyMap.name,'rotate',[30 0 0]);
 
-piWRS(thisR, 'name','Rotated skymap');
+piWRS(thisR, 'name','Rotated skymap', 'useremoteresources', true);
 
 %% World orientation
 thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
 thisR.get('light', skyMap.name, 'world orientation')
 
-piWRS(thisR, 'name','No rotation skymap');
+piWRS(thisR, 'name','No rotation skymap', 'useremoteresources', true);
 
 %% END
