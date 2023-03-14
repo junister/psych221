@@ -107,7 +107,7 @@ for ii = 1:numel(children)
 
     % If a branch, put id in the nodeList
     if isequal(thisNode.type, 'branch')
-        
+
         % It would be much better to pre-allocate if possible.  For speed
         % with scenes and many assets. Ask Zhenyi Liu how he wants to
         % handle this (BW)
@@ -330,7 +330,7 @@ for ii = 1:numel(children)
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 10 &&...
                 isequal(thisNode.name(7:8), 'ID')
-            
+
             % remove instance suffix
             endIndex = strfind(thisNode.name, '_I_');
             if ~isempty(endIndex),    endIndex =endIndex-1;
@@ -437,9 +437,9 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
     % end
 
     % Deal with possibility of a cell array for the shape
-    if ~iscell(thisNode.shape) 
+    if ~iscell(thisNode.shape)
         thisShape = thisNode.shape;
-    elseif iscell(thisNode.shape) && numel(thisNode.shape) 
+    elseif iscell(thisNode.shape) && numel(thisNode.shape)
         thisShape = thisNode.shape{1};
     else
         thisShape = thisNode.shape{nMat};
@@ -464,7 +464,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
                     if which([shapeFile shapeExtension])
                         thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
                         thisShape.meshshape = 'plymesh';
-                        shapeText = piShape2Text(thisShape);            
+                        shapeText = piShape2Text(thisShape);
                     else
                         % We no longer care, as resources can be remote
                         %error('%s not exist',thisShape.filename);
@@ -473,14 +473,19 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
                     thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
                     thisShape.meshshape = 'plymesh';
                     shapeText = piShape2Text(thisShape);
+
                 end
             else
                 if isequal(e, '.ply')
                     thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
                     thisShape.meshshape = 'trianglemesh';
                     shapeText = piShape2Text(thisShape);
+                    % we aren't a .ply anymore, need to write the .pbrt
+                    e = '.pbrt';
                 end
             end
+
+
             if isequal(e, '.ply')
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
@@ -498,6 +503,23 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
         end
         fprintf(fid,'\n');
+    else
+        % for some Included .pbrt files we don't get a shape
+        % since it is in the file. So  we need to write out
+        % the include statement instead
+        % If it does not have ply file, do this
+        % There is a shape slot we also open the geometry file.
+        name = thisNode.name;
+        % HACK! to test -- DJC
+        name = strrep(name,'_001_001_001','_001');
+        name = strrep(name,'_B','');
+        % I think this may already exist in our case:
+        %geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
+        %fprintf(geometryFile,'%s',shapeText);
+        %fclose(geometryFile);
+        fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
+        fprintf(fid,'\n');
+
     end
 end
 end
