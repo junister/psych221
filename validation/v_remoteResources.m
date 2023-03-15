@@ -1,11 +1,10 @@
 % Validate whether we can render our scenes using remote resources
 
-%{
-% Make sure you have checked for docker configuration 
+
+% Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%}
 % bunny has no light sources, need more code
 %thisR = piRecipeDefault('scene name', 'bunny');
 %piWRS(thisR, 'useremoteresources', true);
@@ -66,6 +65,7 @@ thisR = piRecipeDefault('scene name', 'stepfunction');
 piWRS(thisR, 'useRemoteResources', true);
 
 %% Teapot Fails!
+% with true or false Gets material2 not defined, although I can't see why
 try
     thisR = piRecipeDefault('scene name', 'teapot');
     piWRS(thisR, 'useRemoteResources', true);
