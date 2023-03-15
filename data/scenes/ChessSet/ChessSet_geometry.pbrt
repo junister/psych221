@@ -264,8 +264,8 @@ AttributeBegin
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "planeTan"
-            Include "geometry/020_001_planeTan-382090_O.pbrt"
-
+	    # Include "geometry/020_001_planeTan-382090_O.pbrt"
+            Shape "trianglemesh" "string filename" "geometry/020_001_planeTan-382090_O.pbrt"
         AttributeEnd
     AttributeEnd
 AttributeEnd
@@ -524,8 +524,8 @@ AttributeBegin
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "planeBrown"
-            Include "geometry/040_001_planeBrown-397357_O.pbrt"
-
+            # Include "geometry/040_001_planeBrown-397357_O.pbrt"
+            Shape "trianglemesh" "string filename" "geometry/040_001_planeBrown-397357_O.pbrt"
         AttributeEnd
     AttributeEnd
 AttributeEnd
@@ -823,7 +823,8 @@ AttributeBegin
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
-            Include "geometry/063_001_Lyse_brikker_008-641181_O.pbrt"
+            #Include "geometry/063_001_Lyse_brikker_008-641181_O.pbrt"
+            Shape "trianglemesh" "string filename"  "geometry/063_001_Lyse_brikker_008-641181_O.pbrt"	    
 
         AttributeEnd
     AttributeEnd
@@ -875,8 +876,8 @@ AttributeBegin
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "planeBrown"
-            Include "geometry/067_001_planeBrown-153748_O.pbrt"
-
+            # Include "geometry/067_001_planeBrown-153748_O.pbrt"
+            Shape "trianglemesh" "string filename"  "geometry/067_001_planeBrown-153748_O.pbrt"
         AttributeEnd
     AttributeEnd
 AttributeEnd
@@ -1018,8 +1019,8 @@ AttributeBegin
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "GroundMaterial"
-            Include "geometry/078_001_GroundMaterial-215172_O.pbrt"
-
+            # Include "geometry/078_001_GroundMaterial-215172_O.pbrt"
+            Shape "trianglemesh" "string filename" "geometry/078_001_GroundMaterial-215172_O.pbrt"
         AttributeEnd
     AttributeEnd
 AttributeEnd

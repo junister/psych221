@@ -489,9 +489,13 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
             if isequal(e, '.ply')
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
-                % In this case it is a .pbrt file, we will write it
-                % out.
-                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', thisNode.shape.filename)),'\n');
+                % In this case it is a .pbrt file, we will write it out.
+                if iscell(thisNode.shape)
+                    fname = thisNode.shape{1}.filename;
+                else
+                    fname = thisNode.shape.filename;
+                end
+                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', fname)),'\n');
             end
         else
             % If it does not have ply file, do this
@@ -509,6 +513,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         % the include statement instead
         % If it does not have ply file, do this
         % There is a shape slot we also open the geometry file.
+        warning('hack')
         name = thisNode.name;
         % HACK! to test -- DJC
         name = strrep(name,'_001_001_001','_001');
