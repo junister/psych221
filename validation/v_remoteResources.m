@@ -5,6 +5,24 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+% Working web scenes:
+% kitchen
+% landscape
+% bmw-m6 (although with a sleight-of-hand for the skymap)
+%
+% Kind of working:)
+% bistro -- needs the same skymap hack as bmw
+%           but also looks really bad, so something else is up
+%
+% Not-working web scenes:
+% contemporary-bathroom
+%
+% TBD:
+% 
+% bistro
+% ...
+%
+
 % bunny has no light sources, need more code
 %thisR = piRecipeDefault('scene name', 'bunny');
 %piWRS(thisR, 'useremoteresources', true);
