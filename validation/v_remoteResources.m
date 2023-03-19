@@ -22,19 +22,16 @@ if ~piDockerExists, piDockerConfig; end
 %
 %{
 % Test via:
-thisR = piRead(fullfile(piDirGet('data'),'web','pbrt-v4-scenes',<scenename>,<pbrtfile>);
+thisR = piRead(fullfile(piDirGet('data'),'scenes','web','pbrt-v4-scenes',<scenename>,<pbrtfile>);
 piWRS(thisR);
 
-OR simply:
-
-scene = piRender(fullfile(piDirGet('data'),'web','pbrt-v4-scenes',<scenename>,<pbrtfile>);
-sceneWindow(scene);
+OR can we simply render the pbrt file if it doesn't read? To test it:
 
 %}
 
 % sportscar: Vertex indices "indices" must be provided with bilinear patch mesh shape.
 % clouds: piRead -> Error using piMaterialCreate
-% [WINDOWS?] crown: piRead -> Error using parseBlockTexture
+% crown: piRead -> Error using parseBlockTexture
 %                  Cannot find file textures/arc/saphire_bump.png
 % dambreak0&1: piWrite -> Error in piLightGet (line 91)
 %                       elseif strcmpi(lght.type, 'infinite')
@@ -42,7 +39,7 @@ sceneWindow(scene);
 %               The value of 'type' is invalid. It must satisfy the function: @(x)(ismember(x,validmaterials)).
 % disney-cloud: piRead -> Error using piMaterialCreate
 %               The value of 'type' is invalid. It must satisfy the function: @(x)(ismember(x,validmaterials)).
-% [WINDOWS?] book: (Can't find texture file)
+% book: (Can't find texture file)
 %
 % Also noted: These scenes aren't in our pbrt-v4 download, so RecipeDefault can't load them:
 % classroom 
