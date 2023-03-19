@@ -411,20 +411,26 @@ fprintf(fid, strcat(spacing, indentSpacing,...
 
 end
 
-%% Write out an object?  Needs comments
+%% 
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
+% Write out an object, including its named material and shape
+% information.
 
+% This might be Henryk related?  Something about the participating
+% media?
 if ~isempty(thisNode.mediumInterface)
     fprintf(fid, strcat(spacing, indentSpacing, "MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
 end
 
-% Write out material
-for nMat = 1:numel(thisNode.material) % object can contain multiple material and shapes
+% Write out material and shape properties of the object
+% An object can contain multiple material and shapes
+for nMat = 1:numel(thisNode.material) 
     if iscell(thisNode.material)
         material = thisNode.material{nMat};
     else
         material = thisNode.material;
     end
+    
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));
@@ -433,8 +439,6 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         materialTxt = piMaterialText(material, thisR);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
-
-    % end
 
     % Deal with possibility of a cell array for the shape
     if ~iscell(thisNode.shape)
@@ -451,12 +455,16 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
         shapeText = piShape2Text(thisShape);
 
         if ~isempty(thisShape.filename)
-            % If the shape has ply info, do this
-            % Convert shape struct to text
+            % If the shape has a file specification, we do this
+            
+            % Figure out the extension.
             [p, n, e] = fileparts(thisShape.filename);
 
             % For Windows we need to "fix" the path
             % thisShape.filename = fullfile(p, [n e]);
+
+            % The file can be a ply or a pbrt file. We seem to be
+            % testing these here.
             if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
                 if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
                     % Allow for meshes to be along our path
