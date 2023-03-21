@@ -516,12 +516,14 @@ for nMat = 1:numel(thisNode.material)
         end
         fprintf(fid,'\n');
     else
+        % thisShape is empty.  That can't be good.
+
         % for some Included .pbrt files we don't get a shape
         % since it is in the file. So  we need to write out
         % the include statement instead
         % If it does not have ply file, do this
         % There is a shape slot we also open the geometry file.
-        warning('hack')
+        warning('hack:  thisShape is empty for material %d in node %s.\n',nMat,thisNode.name)
         name = thisNode.name;
         % HACK! to test -- DJC
         name = strrep(name,'_001_001_001','_001');

@@ -77,7 +77,7 @@ S = piRender(thisR);
 sceneWindow(S);
 %}
 thisR = piRecipeDefault('scene name', 'ChessSet');
-piWRS(thisR, 'remoteResources', false);
+[r,s] = piWRS(thisR, 'remoteResources', true);
 
 % needs light source
 %thisR = piRecipeDefault('scene name', 'coordinate');

@@ -36,6 +36,7 @@ for objIndex = 1:numel(objBeginLocs)
         txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
     
     if ~isempty(subnodes)
+        % If there are subnodes, then this is a branch
         subtree = subnodes.subtree(2);
         branchNode = subtree.Node{1};
         branchNode.isObjectInstance = 1;
@@ -45,8 +46,9 @@ for objIndex = 1:numel(objBeginLocs)
     end
     txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
 end
-
 newWorld = txt(~cellfun('isempty',txt));
+
+% The tree gets built in here and then assigned
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 if trees.Parent == 0
     trees = subnodes;   
