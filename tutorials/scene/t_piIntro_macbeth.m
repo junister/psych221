@@ -68,6 +68,6 @@ thisR.set('filmresolution', [640, 360]*2);
 % distance from camera to each point along the line of sight.  See
 % t_piIntro_macbeth_zmap for how to compute a zmap.
 thisR.set('render type', {'radiance', 'depth'});
-scene = piWRS(thisR, 'useRemoteResources', true);
+scene = piWRS(thisR);
 
 %% END

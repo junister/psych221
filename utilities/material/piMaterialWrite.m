@@ -25,7 +25,7 @@ function piMaterialWrite(thisR, varargin)
 %%
 p = inputParser;
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-p.addParameter('useremoteresources', false);
+p.addParameter('remoteresources', false);
 p.parse(thisR, varargin{:});
 
 %% Create txtLines for texture struct array
@@ -51,7 +51,7 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     textureTxt = [];
     for ii = 1:numel(textureKeys)
         tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR, ...
-            'useremoteresources', p.Results.useremoteresources);
+            'remoteresources', p.Results.remoteresources);
         if piContains(tmpTxt,'texture tex')
             % This texture has a property defined by another texture
             TextureTex{tt} = tmpTxt;
@@ -86,7 +86,7 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     end
     for ii=1:length(materialTxt)
         % Converts the material struct to text
-        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR, 'useremoteresources', p.Results.useremoteresources);
+        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR, 'remoteresources', p.Results.remoteresources);
         matTypeList{ii} = thisR.materials.list(materialKeys{ii}).type;
     end
 else
