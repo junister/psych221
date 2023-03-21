@@ -125,6 +125,9 @@ while i <= length(txt)
                 % This is the base name, with the _O part removed.  It has
                 % the object index in it.
                 baseName = lastNode.name(1:end-2);
+                %                 if contains(lastNode.name,'008')
+                %                     pause;
+                %                 end
 
                 % Label the other subnodes with the same name but _B, if
                 % they are previously unlabeled.
