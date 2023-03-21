@@ -17,11 +17,11 @@ function val = piTextureText(texture, thisR, varargin)
 p = inputParser;
 p.addRequired('texture', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
-p.addParameter('useremoteresources', false);
+p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 
 p.parse(texture, thisR, varargin{:});
 
-useRemoteResources = p.Results.useremoteresources;
+remoteResources = p.Results.remoteresources;
 
 %% String starts with Texture name
 
@@ -114,7 +114,7 @@ for ii=1:numel(textureParams)
                 % directories. I am worried how often this happens. (BW)
 
                 % Check whether we have it a texture file
-                if p.Results.useremoteresources
+                if remoteResources
                     % We trust that the texture will be there on the server
                     imgFile = ['textures/' thisVal];
                 else
@@ -137,7 +137,7 @@ for ii=1:numel(textureParams)
                         thisText = strrep(thisText, imgFile, ['textures/',thisVal]);
                     end
 
-                    if ~useRemoteResources
+                    if ~remoteResources
                         texturesDir = [thisR.get('output dir'),'/textures'];
                         if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
                         copyfile(imgFile,texturesDir);

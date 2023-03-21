@@ -65,19 +65,14 @@ p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
-p.addParameter('useremoteresources',false,@islogical);
-p.addParameter('remoteresources',false,@islogical);
+p.addParameter('remoteresources',getpref('docker','remoteResources',false),@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 
-% BW wanted the shorter name but didn't want to disturb the original just
-% yet.
 remoteResources = p.Results.remoteresources;
-useRemoteResources = p.Results.useremoteresources;
-remoteResources = useRemoteResources || remoteResources;
 
 ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
@@ -114,7 +109,7 @@ thisR.set('render type',renderType);
 
 % Write the local/pbrt directory being aware about whether the resources
 % are expected to be present remotely.
-piWrite(thisR, 'useremoteresources', remoteResources);
+piWrite(thisR, 'remoteresources', remoteResources);
 
 [~,username] = system('whoami');
 

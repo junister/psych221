@@ -75,7 +75,7 @@ p = inputParser;
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
-p.addParameter('useremoteresources', false);
+p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 p.parse(thisR,varargin{:});
 
 % We need to get rid of these variables down below.  Historically, these
@@ -84,11 +84,11 @@ p.parse(thisR,varargin{:});
 
 % We're going to get the resources we need on the server when we render
 % so don't try to find and copy them now
-if p.Results.useremoteresources
-    useRemoteResources = true;
+if p.Results.remoteresources
+    remoteResources = true;
     overwriteresources  = false;
 else
-    useRemoteResources = false;
+    remoteResources = false;
     overwriteresources  = true;
 end
 overwritepbrtfile   = true;
@@ -109,7 +109,17 @@ if ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); en
 
 % Make working dir if it does not already exist
 workingDir = thisR.get('output dir');
-if ~exist(workingDir,'dir'), mkdir(workingDir); end
+
+% If we are using remote resources, remove leftover /local
+% files so they don't need to be rsynced
+if remoteResources
+    rmdir(workingDir, "s");
+    mkdir(workingDir);
+% our traditional case:    
+elseif ~exist(workingDir,'dir')
+    mkdir(workingDir); 
+end
+
 
 % Make a geometry directory
 geometryDir = thisR.get('geometry dir');
@@ -171,12 +181,12 @@ if ~isempty(thisR.materials.list)
 %     this again
 
     % Write critical files.
-    piWriteMaterials(thisR,overwritematerials, useRemoteResources);
+    piWriteMaterials(thisR,overwritematerials, remoteResources);
 end
 
 %% Write the scene_geometry.pbrt
 if ~isequal(exporter,'Copy')
-    piWriteGeometry(thisR,overwritegeometry, useRemoteResources);
+    piWriteGeometry(thisR,overwritegeometry, remoteResources);
 end
 
 end   % End of piWrite
@@ -691,7 +701,7 @@ end
 end
 
 %%
-function piWriteMaterials(thisR,overwritematerials, useRemoteResources)
+function piWriteMaterials(thisR,overwritematerials, remoteResources)
 % Write both materials and textures files into the output directory
 
 % We create the materials file.  Its name is the same as the output pbrt
@@ -702,17 +712,17 @@ if overwritematerials
     % [~,n] = fileparts(thisR.inputFile);
     fname_materials = sprintf('%s_materials.pbrt',basename);
     thisR.set('materials output file',fullfile(outputDir,fname_materials));
-    piMaterialWrite(thisR, 'useremoteresources', useRemoteResources);
+    piMaterialWrite(thisR, 'remoteresources', remoteResources);
 end
 
 end
 
 %% Write the scene_geometry file
 
-function piWriteGeometry(thisR,overwritegeometry, useRemoteResources)
+function piWriteGeometry(thisR,overwritegeometry, remoteResources)
 % Write the geometry file into the output dir
 %
 if overwritegeometry && ~isempty(thisR.assets)
-    piGeometryWrite(thisR, 'useremoteresources', useRemoteResources);
+    piGeometryWrite(thisR, 'remoteresources', remoteResources);
 end
 end

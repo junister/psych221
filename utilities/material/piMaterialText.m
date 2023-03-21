@@ -8,9 +8,11 @@ function val = piMaterialText(material, thisR, varargin)
 p = inputParser;
 p.addRequired('material', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
-p.addParameter('useremoteresources', false);
+p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 
 p.parse(material, thisR, varargin{:});
+
+remoteResources = p.Results.remoteresources;
 
 %% Concatatenate string
 if ~strcmp(material.name, '')
@@ -63,7 +65,7 @@ for ii=1:numel(matParams)
 
 
         if strcmp(matParams{ii},'normalmap')
-            if ~p.Results.useremoteresources
+            if ~remoteResources
 
                 if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
                     imgFile = which(thisVal);
