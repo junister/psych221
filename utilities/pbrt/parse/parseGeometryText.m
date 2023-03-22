@@ -11,7 +11,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %
 % Inputs:
 %   thisR       - a scene recipe
-%   txt         - text to parse
+%   txt         - text of the PBRT geometry information that we parse
 %   name        - current object name
 %
 % Outputs:
@@ -239,7 +239,10 @@ while i <= length(txt)
 
 
             % If these variables are present, it is an object node
-            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')                
+            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var') 
+                % We create object (assets) here.  If the shape is
+                % empty for an asset, we will have a problem later.
+                % So check how that can happen.
                 resObject = piAssetCreate('type', 'object');
                 if exist('name','var')
                     resObject.name = sprintf('%s_O', name);

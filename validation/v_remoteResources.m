@@ -8,7 +8,7 @@ if ~piDockerExists, piDockerConfig; end
 % Working web scenes:
 % kitchen
 %{
-thisR = piRecipeDefault('scene name', 'landscape');
+thisR = piRecipeDefault('scene name', 'contemporary-bathroom');
 piWRS(thisR, 'remoteResources', true);
 %}
 % landscape
