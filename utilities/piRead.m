@@ -133,8 +133,11 @@ thisR.set('outputFile',outputFile);
 
 %% Split text lines into pre-WorldBegin and WorldBegin sections
 [txtLines, ~] = piReadText(thisR.inputFile);
+
+% Replace left and right bracks with double-quote.  ISET3d formatting.
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
+
 [options, ~] = piReadWorldText(thisR, txtLines);
 
 %% Read options information
@@ -203,9 +206,10 @@ end
 
 %%  Read world information for the Include files
 world = thisR.world;
+
+% If we have an Include file in the world section, the txt lines in the
+% file is merged into thisR.world.
 if any(piContains(world, 'Include'))
-    % If we have an Include file in the world section, the txt lines in the
-    % file is merged into thisR.world.
 
     % Find all the lines in world that have an 'Include'
     inputDir = thisR.get('inputdir');
@@ -230,6 +234,7 @@ if any(piContains(world, 'Include'))
     end
 end
 
+%
 thisR.world = piFormatConvert(thisR.world);
 
 if strcmpi(exporter, 'Copy')
@@ -329,22 +334,26 @@ end
 %% Find the text in WorldBegin/End section
 function [options, world] = piReadWorldText(thisR,txtLines)
 %
-% Finds all the text lines from WorldBegin
-% It puts the world section into the thisR.world.
+% Finds all the text lines beginning with WorldBegin
+%
+% It puts the original world section into the thisR.world.
 % Then it removes the world section from the txtLines
 %
-% Question: Why doesn't this go to WorldEnd?  We are hoping that nothing is
-% important after WorldEnd.  In our experience, we see some files that
-% never even have a WorldEnd, just a World Begin.
-
-% The general parser (toply) writes out the PBRT file in a block format with
-% indentations.  Zheng's Matlab parser (started with Cinema4D), expects the
-% blocks to be in a single line.
+% Question: Why doesn't this stop at WorldEnd?  In our experience, we
+% see some files that never even have a WorldEnd, just a World Begin.
 %
-% This function converts the blocks to a single line.  This function is
-% used a few places in piRead().
+% This function converts the blocks to a single line.  We need this
+% format because Zheng's Matlab parser expects the blocks to be in a
+% single line. Some files PBRT files come to us with blocks separated
+% onto multiple lines.  These are converted from format-X to PBRT by
+% the PBRT parser (toply).  (BW)
+%
+% See also
+%  piRead -> piReadWorldText -> piFormatConvert
+
 txtLines = piFormatConvert(txtLines);
 
+% Look for WorldBegin
 worldBeginIndex = 0;
 for ii = 1:length(txtLines)
     currLine = txtLines{ii};
@@ -354,7 +363,6 @@ for ii = 1:length(txtLines)
     end
 end
 
-% fprintf('Through the loop\n');
 if(worldBeginIndex == 0)
     warning('Cannot find WorldBegin.');
     worldBeginIndex = ii;

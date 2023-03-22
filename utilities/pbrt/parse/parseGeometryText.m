@@ -5,13 +5,13 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %   [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %
 % Brief:
-%   PBRT files include a great deal of geometry information about the
-%   assets.  We parse the text file here to build up the asset tree in the
-%   recipe.  We can do this for some, but not all, PBRT files.
+%   We parse the geometry text file here to build up the asset tree in the
+%   recipe.  We succeed for some, but not all, PBRT files.  We
+%   continue to add special cases.  Called by parseObjectInstanceText
 %
 % Inputs:
 %   thisR       - a scene recipe
-%   txt         - remaining text to parse
+%   txt         - text to parse
 %   name        - current object name
 %
 % Outputs:
@@ -47,6 +47,9 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %       branch' node will always have children.  'Object' and 'Light' notes
 %       are the leafs of the tree and have no children. Instance nodes are
 %       copies of Objects and thus also at the leaf.
+%
+% See also
+%   parseObjectInstanceText
 
 % res = [];
 % groupobjs = [];

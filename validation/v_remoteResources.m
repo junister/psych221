@@ -7,6 +7,10 @@ if ~piDockerExists, piDockerConfig; end
 
 % Working web scenes:
 % kitchen
+%{
+thisR = piRecipeDefault('scene name', 'landscape');
+piWRS(thisR, 'remoteResources', true);
+%}
 % landscape
 % bmw-m6 (although with a sleight-of-hand for the skymap)
 % head (once skymap is copied over & remoteResources is used)
@@ -77,7 +81,7 @@ S = piRender(thisR);
 sceneWindow(S);
 %}
 thisR = piRecipeDefault('scene name', 'ChessSet');
-[r,s] = piWRS(thisR, 'remoteResources', true);
+[r,s] = piWRS(thisR, 'remoteResources', false);
 
 % needs light source
 %thisR = piRecipeDefault('scene name', 'coordinate');

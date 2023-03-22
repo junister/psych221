@@ -277,7 +277,8 @@ switch ieParamFormat(sceneDir)
         if isempty(sceneFile)
             sceneFile = 'view-0.pbrt';
         end
-        exporter = 'Copy';
+        % exporter = 'Copy';
+        exporter = 'PARSE';
     case {'bistro'}
         % Downloaded from the computer, cardinal, put in data/scenes/web
         % Other versions of this scene are
