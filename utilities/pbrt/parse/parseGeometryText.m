@@ -196,19 +196,16 @@ while i <= length(txt)
         shape{nShape} = piParseShape(currentLine);
 
     elseif strcmp(currentLine,'AttributeEnd')
-        % This is the end of this recursive step. 
-        % 
         % At this point we know what kind of node we have, so we create a
         % node of the right type.
         %
         % Another if/else sequence.
         %
-        %   * See if some properties are defined.  Only then do we
-        %   process.  Otherwise we jump ahead and create a new branch node
-        %   * If there are properties, check various conditions to fill in
-        %   the node parameters
+        %   * If certain properties are defined, we process this node
+        %   further. 
+        %   * The properties depend on the node type (light or asset)
 
-        % If any of these variables were created, we have a known node.
+        % Fill in light node type properties
         if exist('areaLight','var') || exist('lght','var') ...
                 || exist('rot','var') || exist('translation','var') || ...
                 exist('shape','var') || ...
@@ -238,7 +235,7 @@ while i <= length(txt)
                 % trees = subtrees;
 
 
-            % If these variables are present, it is an object node
+            % Fill in object node properties
             elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var') 
                 % We create object (assets) here.  If the shape is
                 % empty for an asset, we will have a problem later.
@@ -251,8 +248,13 @@ while i <= length(txt)
 
                     % If we parse a valid name already, do this.
                     if ~isempty(name)
-
+                        % Assign a name, but add _O to denote that
+                        % this is an object. 
                         resObject.name = sprintf('%s_O', name);
+                        % Maybe we need to add the shape here.  I see
+                        % that if isempty(name), we add the shape
+                        % below.  Could this be why we have objects
+                        % with missing shapes?
 
                     % Otherwise we set the role of assigning object name in
                     % with priority:
@@ -261,7 +263,7 @@ while i <= length(txt)
                     %   (3) (Worst case) Only material type exists
                     elseif exist('shape','var')
                         if iscell(shape)
-                            shape = shape{1};% tmp fix
+                            shape = shape{1};  % tmp fix
                         end
                         if ~isempty(shape.filename)
                             [~, n, ~] = fileparts(shape.filename);
@@ -275,15 +277,17 @@ while i <= length(txt)
                             resObject.name = sprintf('%s_O', n);
                         elseif ~isempty(mat)
                             % We need a way to assign a name to this
-                            % object.  We want them unique.  So for now, we
-                            % just pick a random number.  Some chance of a
-                            % duplicate, but not much.
+                            % object.  We want them unique.  So for
+                            % now, we just pick a random number.  Some
+                            % chance of a duplicate, but not much.
                             mat = mat{1}; % tmp fix
                             resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
                         end
                     end
                 end
 
+                % Maybe we check here.  If this is an object, it
+                % really needs to have a shape.
                 if exist('shape','var')
                     resObject.shape = shape;
                 end
