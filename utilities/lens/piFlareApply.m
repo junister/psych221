@@ -8,8 +8,8 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %   Apply a 'scattering flare' PSF to a scene and generate an optical
 %   image. 
 %
-%   The scattering flare is implemented based on the paper "How to Train Neural
-%   Networks for Flare Removal" by Wu et al. 
+%   The scattering flare is implemented based on the paper "How to
+%   Train Neural Networks for Flare Removal" by Wu et al.
 %
 % Inputs:
 %   scene: An ISET scene structure.
