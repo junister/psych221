@@ -537,4 +537,5 @@ for nMat = 1:numel(thisNode.material)
 
     end
 end
+
 end
