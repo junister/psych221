@@ -5,54 +5,77 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %   [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %
 % Brief description
-%   The txt is usually the world text from the PBRT file.  It is
-%   parsed into objects and materials.  This function relies on
-%   parseGeometryText, but handles the special cases of object
-%   instaces
+%   The txt is the world text from the PBRT file.  It is parsed into
+%   objects and materials, creating the asset tree.  The assets
+%   include objects and lights.
+% 
+%   This function relies on parseGeometryText, which works on
+%   AttributeBegin/End sequences.  The code here also handles the
+%   special cases of ObjectBegin/End instances.
 %
 % Inputs
 %   thisR - ISET3d recipe
 %   txt -  Cell array of text strings, usually from the WorldBegin ...
 %
 % Outputs
-%   trees -  Assets in a tree format
+%   trees    -  Assets in a tree format
 %   newWorld - Modified world text to use, after removing unnecessary
 %              lines.
 %
 % See also
 %   parseGeometryText
 
-%%
+%% Create the tree root and initialize the tree
 rootAsset = piAssetCreate('type', 'branch');
 rootAsset.name = 'root_B';
 trees = tree(rootAsset);
+
+% Identify the lines with objects
 objBeginLocs = find(contains(txt,'ObjectBegin'));
 objEndLocs   = find(contains(txt, 'ObjectEnd'));
 
-for objIndex = 1:numel(objBeginLocs)
-    name = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
-    
-    [subnodes, ~] = parseGeometryText(thisR,...
-        txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
-    
-    if ~isempty(subnodes)
-        % If there are subnodes, then this is a branch
-        subtree = subnodes.subtree(2);
-        branchNode = subtree.Node{1};
-        branchNode.isObjectInstance = 1;
-        branchNode.name = sprintf('%s_B',name);
-        subtree = subtree.set(1, branchNode);
-        trees = trees.graft(1, subtree);
+% For each line with an ObjectBegin, we do some pre-processing.  What?
+% This seems like special case because many scenes never enter this
+% ObjectBegin processing.  We need some more comments here (BW).
+if ~isempty(objBeginLocs)
+    disp('ObjectBegin processing.');
+    for objIndex = 1:numel(objBeginLocs)
+
+        % Find its name.  Sometimes this is empty.  Hmm.
+        name = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
+
+        % Parse the text to create a node of the tree
+        [subnodes, ~] = parseGeometryText(thisR,...
+            txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
+
+        % If we have a node of the tree, further process
+        if ~isempty(subnodes)
+            % If there are subnodes, then this is a branch
+            subtree = subnodes.subtree(2);
+            branchNode = subtree.Node{1};
+            branchNode.isObjectInstance = 1;
+            branchNode.name = sprintf('%s_B',name);
+            subtree = subtree.set(1, branchNode);
+            trees = trees.graft(1, subtree);
+        end
+
+        % Needs comment
+        txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
-    txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
 end
+
+% Remove empty lines
 newWorld = txt(~cellfun('isempty',txt));
 
-% The tree gets built in here and then assigned
+% The asset tree is built here.  This is the main work.
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
+
+% We assign the returned subnodes to the tree
 if trees.Parent == 0
+    % Usually, we are here.
     trees = subnodes;   
 else
+    % We might be here if we entered the ObjectBegin loop.
     if ~isempty(subnodes)
         subtree = subnodes.subtree(2);
         trees = trees.graft(1, subtree);
@@ -61,11 +84,20 @@ end
 
 if ~isempty(trees)
     % In some parsing we do not yet have a tree allocated.  If there
-    % is just NamedMaterial in the Begin/End
+    % is just NamedMaterial in the Begin/End.  But almost always, we
+    % have a tree.
     trees = trees.uniqueNames;
+else
+    warning('Empty tree.');
 end
-parsedUntil(parsedUntil>numel(newWorld))=numel(newWorld);
-%remove parsed line from world
+
+% We should have parsed all of the lines in newWorld.  So if
+% parsedUntil exceeds the number of lines in newWorld, we just set it
+% to be equal to those lines.
+parsedUntil(parsedUntil>numel(newWorld)) = numel(newWorld);
+
+% Remove all the parsed lines from world because, well, we have
+% already parsed them and they are not needed.
 newWorld(2:parsedUntil)=[];
 
 end

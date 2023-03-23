@@ -20,33 +20,40 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %
 % Description:
 %
-%   We parse the lines of text in 'txt' cell array and recrursively create
-%   a tree structure of geometric objects.  The naming logic has been a
-%   constant struggle, and I attempt to clarify here.
+%   We parse the lines of text in 'txt' which is a cell array that has
+%   been formatted so that each main object or material or light is on
+%   a single line.
 %
-%   This parseGeometryText method works recursively, parsing the geometry
-%   text line by line. We do not have an overview of the whole situation at
-%   the beginning.  The limits how clever we can be. This might be our
-%   original sin.
-% 
+%   We create a tree structure of assets, which includes objects and
+%   lights. We also learn about named materials. The naming of these
+%   assets has been a constant struggle, and I attempt to clarify
+%   here.
+%
+%   This parseGeometryText method works recursively, parsing the
+%   geometry text line by line. We do not have an overview of the
+%   whole 'world' text at the beginning.  The limits how clever we can
+%   be.
+%
 %   If the current text line is
 %
-%       a) 'AttributeBegin': this is the beginning of a section. We will
-%       keep looking for node/object/light information until we reach the
-%       'AttributeEnd'.  Remember, though, this is recursive.  So we might
-%       have multiple Begin/End pairs within a Begin/End pair.  
+%       a) 'AttributeBegin': this is the beginning of a block. We will
+%       keep looking for node/object/light information until we reach
+%       the 'AttributeEnd'.  Remember, though, this is recursive.  So
+%       we might have multiple Begin/End pairs within a Begin/End
+%       pair.
 %
 %       b) Node/object/light information: The text within a Begin/End
 %       section may contain multiple types of information.  For example,
 %       about the object rotation, position, scaling, shape, material
 %       properties, light spectrum information. We do our best to parse
 %       this information, and then the parameters are stored in the
-%       appropriate location within the recipe. (When things go well).
+%       appropriate location within the asset tree in the recipe.
 %
-%       c) 'AttributeEnd': We close up this node and add it to the tree. A
-%       branch' node will always have children.  'Object' and 'Light' notes
-%       are the leafs of the tree and have no children. Instance nodes are
-%       copies of Objects and thus also at the leaf.
+%       c) 'AttributeEnd': We close up this node and add it to the
+%       array of what we call 'subnodes'. We know whether it is a
+%       branch node by whether it  has children.  'Object' and 'Light'
+%       nodes are the leaves of the tree and have no children. Instance
+%       nodes are copies of Objects and thus also are leaves.
 %
 % See also
 %   parseObjectInstanceText
@@ -56,7 +63,8 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % children = [];
 
 % This routine processes the text and returns a cell array of trees that
-% will be part of the whole asset tree
+% will be part of the whole asset tree or in many cases it will be the
+% whole asset tree.
 subtrees = {};
 
 % We sometimes have multiple objects inside one Begin/End group that have
@@ -65,62 +73,65 @@ subtrees = {};
 objectIndex = 0;
 
 % Multiple material and shapes can be used for one object.
-nMaterial   = 0;  
-nShape      = 0; 
+nMaterial   = 0;
+nShape      = 0;
 
-i = 1;          
-while i <= length(txt)
+% Counts which line we are on.  At the end we say how many lines we
+% have counted
+cnt = 1;
+while cnt <= length(txt)
 
-    currentLine = txt{i};
+    currentLine = txt{cnt};
 
-    % Strip trailing spaces from the current line.  That has hurt us
+    % Remove trailing spaces from the current line.  That has hurt us
     % multiple times in the parsing.
     idx = find(currentLine ~=' ',1,'last');
     currentLine = currentLine(1:idx);
 
-    % ObjectInstances are treated specially.  I do not yet understand this
-    % (BW).
+    % ObjectInstances are treated specially. I do not yet understand
+    % this (BW).
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        InstanceName = erase(currentLine(16:end),'"');
+        InstanceName = erase(currentLine(length('ObjectInstance '):end),'"');
     end
 
-    % Return if we've reached the end of current attribute
-
     if strcmp(currentLine,'AttributeBegin')
-        % We reached a line with an AttributeBegin. So we start to process.
-        % There may be additional Begin/Ends on the next line. So, we
-        % dig our way down to the lowest level by recursively calling
-        [subnodes, retLine] = parseGeometryText(thisR, txt(i+1:end), name);
-        
-        % We processed the next line (through this same routine!) and it
-        % returned to us a section of a tree.  The 'subnodes'.  It also
-        % told us which line to start continuing our analysis from
-        % (retLine).
+        % We reached a line with AttributeBegin. If the next line is
+        % also an AttributeBegin (nested) we will be back here after
+        % the following call.  If it is not, we will parse the
+        % contents of the next line using other parts of this routine
+        % to generate a subnode.
+        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
+
+        % We now have a subnode and a returned line, where we should
+        % continue our analysis at line number (retLine) next time
+        % around.
+
+        % We are mostly dealing with the names of the subnodes in
+        % here.
         %
-        % We have a lot things to check, and that is what the long series
-        % of if/else choices accomplishes.  The logic of each of those
-        % choices is described through the if/else sequence.  This code
-        % remains a work in progress.
-        %
-        % For piLabel to work, we need to have this be >=2.
-        % But in that case, the labels can get pretty ugly, with recursive
-        % objectIndex values. It would be much better if the labels were
-        % based on the == 2 condition, not this >= 2 case.
+        % For piLabel (the pixel level labeling algorithm) to work, we
+        % need to have subnodes.Node to be >=2. But in that case, the
+        % labels can get pretty ugly, with recursive objectIndex
+        % values. It would be much better if the labels were based on
+        % the == 2 condition, not this >= 2 case. (BW: I think I wrote
+        % this.  I am confused by it).
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
             % The last node is an object.  When we only process for == 2,
-            % piLabel fails.
+            % the pixel-wise labeling method, piLabel, fails. So we
+            % don't come in here for == 2.
             lastNode = subnodes.Node{end};
             if strcmp(lastNode.type,'object')
-                % Why do we add the objectIndex at all?
+                % The last node is an object and we are careful about
+                % its name.
                 %
                 % In some cases (e.g., the Macbeth color checker) there is
                 % one ObjectName in the comment, but multiple components to
                 % the object (the patches). We need to distinguish the
-                % components. We use the objectIndex to distinguish them.                
+                % components. We use the objectIndex to distinguish them.
                 %
-                % But when we allow processing when there are >2 nodes, we
-                % repeatedly add an objectIndex to the node name.  That's
-                % ugly, but runs.
+                % But when we allow processing with >2 nodes, we
+                % repeatedly add an objectIndex to the node name.
+                % That's ugly, but runs.
                 objectIndex = objectIndex+1;
                 lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
                 subnodes = subnodes.set(numel(subnodes.Node),lastNode);
@@ -128,16 +139,14 @@ while i <= length(txt)
                 % This is the base name, with the _O part removed.  It has
                 % the object index in it.
                 baseName = lastNode.name(1:end-2);
-                %                 if contains(lastNode.name,'008')
-                %                     pause;
-                %                 end
 
-                % Label the other subnodes with the same name but _B, if
-                % they are previously unlabeled.
+                % The other subnodes above the object are checked.  If
+                % they are unlabeled we give them the same name but
+                % _B, rather than _O.
                 for ii=(numel(subnodes.Node)-1):-1:1
                     thisNode = subnodes.Node{ii};
                     if isequal(thisNode.name,'_B')
-                        % An empty name.  So let's chanage it and put it
+                        % An empty name.  So let's change it and put it
                         % in place.
                         thisNode.name = sprintf('%s_B',baseName);
                         subnodes = subnodes.set(ii,thisNode);
@@ -146,8 +155,10 @@ while i <= length(txt)
             end
         end
 
+        % This is the main point of this section.  Add the subnodes to
+        % the subtrees.
         subtrees = cat(1, subtrees, subnodes);
-        i =  i + retLine;
+        cnt =  cnt + retLine;
 
     elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
@@ -157,7 +168,7 @@ while i <= length(txt)
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')
-        
+
         % Translation
         [translation, rot, scale] = parseTransform(currentLine);
 
@@ -167,10 +178,11 @@ while i <= length(txt)
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
         nMaterial = nMaterial+1;
-        mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW> 
+        mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW>
 
     elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
 
+        % Material
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
@@ -180,7 +192,7 @@ while i <= length(txt)
     elseif piContains(currentLine,'LightSource') ||...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
-        
+
         % Usually light source contains only one line. Exception is there
         % are rotations or scalings
         if ~exist('lght','var')
@@ -190,22 +202,26 @@ while i <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
-        
+
         % Shape
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
 
     elseif strcmp(currentLine,'AttributeEnd')
+
+        % Let's make this a separate function.  This is what we do after we
+        % get to the AttributeEnd line in the block.
+
         % At this point we know what kind of node we have, so we create a
         % node of the right type.
         %
         % Another if/else sequence.
         %
         %   * If certain properties are defined, we process this node
-        %   further. 
+        %   further.
         %   * The properties depend on the node type (light or asset)
 
-        % Fill in light node type properties
+        %  Do we have something at all worth doing?
         if exist('areaLight','var') || exist('lght','var') ...
                 || exist('rot','var') || exist('translation','var') || ...
                 exist('shape','var') || ...
@@ -222,6 +238,8 @@ while i <= length(txt)
                 if exist('areaLight','var')
                     resLight.lght = piLightGetFromText({areaLight}, 'print', false);
                     if exist('shape', 'var')
+                        % What happens to an area light without a
+                        % shape?
                         resLight.lght{1}.shape = shape;
                     end
                 end
@@ -229,39 +247,31 @@ while i <= length(txt)
                 if exist('name', 'var')
                     resLight.name = sprintf('%s_L', name);
                     resLight.lght{1}.name = resLight.name;
+                else
+                    warning('No name for light on line %d',cnt);
                 end
 
+                % Add the light asset to the collection of subtrees.
                 subtrees = cat(1, subtrees, tree(resLight));
-                % trees = subtrees;
 
-
-            % Fill in object node properties
-            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var') 
+                % ------- Fill in object node properties
+            elseif exist('shape','var') || exist('mediumInterface','var') || exist('mat','var')
                 % We create object (assets) here.  If the shape is
                 % empty for an asset, we will have a problem later.
                 % So check how that can happen.
                 resObject = piAssetCreate('type', 'object');
+
+                % Set the object name
                 if exist('name','var')
-                    resObject.name = sprintf('%s_O', name);
 
-                    % This was prepared for empty object name case.
-
-                    % If we parse a valid name already, do this.
-                    if ~isempty(name)
-                        % Assign a name, but add _O to denote that
-                        % this is an object. 
-                        resObject.name = sprintf('%s_O', name);
-                        % Maybe we need to add the shape here.  I see
-                        % that if isempty(name), we add the shape
-                        % below.  Could this be why we have objects
-                        % with missing shapes?
-
-                    % Otherwise we set the role of assigning object name in
-                    % with priority:
+                    % Name might be empty. In that case we assign a
+                    % real name later, with priority:
                     %   (1) Check if ply file exists
                     %   (2) Check if named material exists
                     %   (3) (Worst case) Only material type exists
-                    elseif exist('shape','var')
+                    resObject.name = sprintf('%s_O', name);
+
+                    if exist('shape','var')
                         if iscell(shape)
                             shape = shape{1};  % tmp fix
                         end
@@ -275,29 +285,45 @@ while i <= length(txt)
                             end
 
                             resObject.name = sprintf('%s_O', n);
-                        elseif ~isempty(mat)
-                            % We need a way to assign a name to this
-                            % object.  We want them unique.  So for
-                            % now, we just pick a random number.  Some
-                            % chance of a duplicate, but not much.
-                            mat = mat{1}; % tmp fix
-                            resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
+
                         end
+                    elseif ~isempty(mat)
+                        % This is a problem for remote rendering.
+                        %
+                        % We need a way to assign a name to this
+                        % material/texture object.  We want them
+                        % unique.  For now, we just pick a random
+                        % number.  Some chance of a duplicate, but
+                        % not much.
+                        mat = mat{1}; % tmp fix
+                        resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
+
+                    elseif exist('medium','var')
+                        % If we get here, figure out how to set the
+                        % name.
+                        warning('medium, but no name set.');
+                        resObject.medium = medium;
                     end
+                else
+                    warning('No name for this case.');
                 end
 
-                % Maybe we check here.  If this is an object, it
-                % really needs to have a shape.
+
+                % Always set these, even if there is no name. 
+                % Why wouldn't there be a name?                 
+                % {
                 if exist('shape','var')
                     resObject.shape = shape;
                 end
 
-                if exist('mat','var')
-                    resObject.material = mat;
+                if exist('mat','var')  && ~isempty(mat)
+                   resObject.material = mat;
                 end
+
                 if exist('medium','var')
                     resObject.medium = medium;
                 end
+                %}
 
                 subtrees = cat(1, subtrees, tree(resObject));
 
@@ -305,14 +331,14 @@ while i <= length(txt)
 
             % This path if it is a 'branch' node
             resCurrent = piAssetCreate('type', 'branch');
-            
+
             % If present populate fields.
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
-            
+
             if exist('InstanceName','var')
                 resCurrent.referenceObject = InstanceName;
             end
-            
+
             if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
@@ -326,8 +352,10 @@ while i <= length(txt)
             end
 
         elseif exist('name','var')
-            % We got this far, and all we have is a name.
-            % So we create a branch, add it to the main tree.
+            % We got this far, and all we have is a name. With no
+            % properties. So we create a branch, with no parameters,
+            % and add it to the main tree.
+            % warning('Empty branch added on line %d',cnt);
             resCurrent = piAssetCreate('type', 'branch');
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
             trees = tree(resCurrent);
@@ -336,25 +364,30 @@ while i <= length(txt)
             end
         end
 
-        parsedUntil = i;
+        parsedUntil = cnt;
         return;
     else
-       %  warning('Current line skipped: %s', currentLine);
-    end
-    i = i+1;
-end
-parsedUntil = i;
+        % warning('Current line skipped: %s', currentLine);
+    end % AttributeBegin
 
-% We build the main tree from any defined subtrees.  Each subtree is an
-% asset.
+    cnt = cnt+1;
+end
+parsedUntil = cnt;  % Returned.
+
+%% We build the main tree that is returned from any defined subtrees
+
+% Debugging.
+fprintf('Identified %d assets and we parsed up to line %d\n',numel(subtrees),cnt);
+
+% Each subtree is an asset.
 if ~isempty(subtrees)
     % ZLY: modified the root node to a identity transformation branch node.
     % Need more test
     rootAsset = piAssetCreate('type', 'branch');
     rootAsset.name = 'root_B';
     trees = tree(rootAsset);
-    % trees = tree('root');
-    % Add each of the subtrees to the root
+
+    % Graft each of the subtrees to the root node
     for ii = 1:numel(subtrees)
         trees = trees.graft(1, subtrees(ii));
     end

@@ -57,14 +57,12 @@ txtLines = regexprep(txtLines, '\t', ' ');
 % We concatenate all the lines prior to this until we come to a stop.
 % That way the block is on a single line for Zheng's parser.
 
-%{
-% These are the lines with a right bracket.  We will merge them with
-% the prior line.  Maybe we should call this routine something like
-% 'put block into single line'.   BW and DJC ran a lot of examples and
-% it never went in here.  So we commented it out (03-22-2023)
+% These are the lines with nothing but a right bracket.  We will merge
+% them with the prior line.  This happens in the
+% MacBethChecker_geometry.pbrt, and therefore someone else in the
+% universe might have done this. 
 idxList = find(strcmp(txtLines,']'));
 for idx = 1:numel(idxList)
-    disp('**]**')
     % For each one we concatenate the prior line with this one.
     txtLines{idxList(idx)-1} = strcat(txtLines{idxList(idx)-1},txtLines{idxList(idx)});
     % Then we set this line to empty.  Empty lines will be removed shortly.
