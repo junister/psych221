@@ -9,6 +9,27 @@ if ~piDockerExists, piDockerConfig; end
 % kitchen
 %{
 thisR = piRecipeDefault('scene name', 'contemporary-bathroom');
+
+% Find the empty shapes and delete them
+idx = thisR.get('objects');
+for ii=numel(idx):-1:1
+    s = thisR.get('asset',idx(ii),'shape');
+    if isempty(s)
+        fprintf('Deleting %d\n',idx(ii));
+        thisR = thisR.set('asset',idx(ii),'delete');
+    end
+end
+piWRS(thisR);
+
+% Are there any empty shapes?  All black now.  Not sure why.
+idx = thisR.get('objects');
+for ii=numel(idx):-1:1
+    s = thisR.get('asset',idx(ii),'shape');
+    if isempty(s)
+        disp(idx(ii))
+    end
+end
+
 piWRS(thisR, 'remoteResources', true);
 %}
 % landscape

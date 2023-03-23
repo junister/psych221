@@ -259,6 +259,11 @@ while cnt <= length(txt)
                 % We create object (assets) here.  If the shape is
                 % empty for an asset, we will have a problem later.
                 % So check how that can happen.
+                %
+                % I don't understand why we are creating materials or
+                % mediumInterface here.  I need to ask Zhenyi, Henryk,
+                % and Zheng. Such materials do get created in
+                % contemporary-bathroom, but not, say, in kitchen.
                 resObject = piAssetCreate('type', 'object');
 
                 % Set the object name
@@ -290,11 +295,10 @@ while cnt <= length(txt)
                     elseif ~isempty(mat)
                         % This is a problem for remote rendering.
                         %
-                        % We need a way to assign a name to this
-                        % material/texture object.  We want them
-                        % unique.  For now, we just pick a random
-                        % number.  Some chance of a duplicate, but
-                        % not much.
+                        % We need a way to assign a named material to
+                        % this object.  We want the name to be unique.
+                        % For now, we just pick a random number.  Some
+                        % chance of a duplicate, but not much.
                         mat = mat{1}; % tmp fix
                         resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
 
