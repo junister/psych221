@@ -114,7 +114,11 @@ workingDir = thisR.get('output dir');
 % files so they don't need to be rsynced
 if remoteResources
     if isfolder(workingDir)
-        rmdir(workingDir, "s");
+        try
+            rmdir(workingDir, "s");
+        catch
+            % sometimes matlab  has it locked
+        end
     end
     mkdir(workingDir);
 % our traditional case:    

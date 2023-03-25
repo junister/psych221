@@ -476,6 +476,9 @@ for nMat = 1:numel(thisNode.material)
                     else
                         % We no longer care, as resources can be remote
                         %error('%s not exist',thisShape.filename);
+                        % Instead we'll just leave it along to be
+                        % passed to the renderer
+                        shapeText = piShape2Text(thisShape);
                     end
                 else
                     thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
@@ -518,6 +521,8 @@ for nMat = 1:numel(thisNode.material)
     else
         % thisShape is empty.  That can't be good.
 
+        % For instances, we don't seem to get passed something we can use
+
         % for some Included .pbrt files we don't get a shape
         % since it is in the file. So  we need to write out
         % the include statement instead
@@ -525,14 +530,26 @@ for nMat = 1:numel(thisNode.material)
         % There is a shape slot we also open the geometry file.
         warning('hack:  thisShape is empty for material %d in node %s.\n',nMat,thisNode.name)
         name = thisNode.name;
-        % HACK! to test -- DJC
-        name = strrep(name,'_001_001_001','_001');
-        name = strrep(name,'_B','');
-        % I think this may already exist in our case:
-        %geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
-        %fprintf(geometryFile,'%s',shapeText);
-        %fclose(geometryFile);
-        fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
+        % HACK! to test if getting rid of instancing helps-- DJC
+        if isequal(regexp(name,'\d\d\d_\d\d\d_\d\d\d_'), 1)
+            name = name(13:end);
+        end
+        if isequal(min(regexp(name,'\d\d\d_\d\d\d_')), 1)
+            name = name(9:end);
+        end
+        if isequal(min(regexp(name,'\d\d\d_')), 1)
+            name = name(5:end);
+        end
+        % interferes with B* assets
+        %name = strrep(name,'_B','');
+        
+        % Super-weenie HACK!
+        % For starters not all materials are 0:!
+        % So fails on others
+        name = strrep(name,'_O','_mat0');
+        
+        fprintf(fid, strcat(spacing, indentSpacing, ...
+            sprintf('Shape "plymesh" "string filename" "geometry/%s.ply"', name)),'\n');
         fprintf(fid,'\n');
 
     end
