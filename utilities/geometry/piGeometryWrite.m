@@ -411,7 +411,7 @@ fprintf(fid, strcat(spacing, indentSpacing,...
 
 end
 
-%% 
+%%
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
 % Write out an object, including its named material and shape
 % information.
@@ -424,13 +424,13 @@ end
 
 % Write out material and shape properties of the object
 % An object can contain multiple material and shapes
-for nMat = 1:numel(thisNode.material) 
+for nMat = 1:numel(thisNode.material)
     if iscell(thisNode.material)
         material = thisNode.material{nMat};
     else
         material = thisNode.material;
     end
-    
+
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));
@@ -456,7 +456,7 @@ for nMat = 1:numel(thisNode.material)
 
         if ~isempty(thisShape.filename)
             % If the shape has a file specification, we do this
-            
+
             % Figure out the extension.
             [p, n, e] = fileparts(thisShape.filename);
 
@@ -531,25 +531,31 @@ for nMat = 1:numel(thisNode.material)
         warning('hack:  thisShape is empty for material %d in node %s.\n',nMat,thisNode.name)
         name = thisNode.name;
         % HACK! to test if getting rid of instancing helps-- DJC
-        if isequal(regexp(name,'\d\d\d_\d\d\d_\d\d\d_'), 1)
-            name = name(13:end);
+        instanceHack = false;
+        if instanceHack
+            if isequal(regexp(name,'\d\d\d_\d\d\d_\d\d\d_'), 1)
+                name = name(13:end);
+            end
+            if isequal(min(regexp(name,'\d\d\d_\d\d\d_')), 1)
+                name = name(9:end);
+            end
+            if isequal(min(regexp(name,'\d\d\d_')), 1)
+                name = name(5:end);
+            end
+            % interferes with B* assets
+            %name = strrep(name,'_B','');
+
+            % Super-weenie HACK!
+            % For starters not all materials are 0:!
+            % So fails on others
+            name = strrep(name,'_O','_mat0');
+
+            fprintf(fid, strcat(spacing, indentSpacing, ...
+                sprintf('Shape "plymesh" "string filename" "geometry/%s.ply"', name)),'\n');
+        else
+            % Currently running code!
+            fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
         end
-        if isequal(min(regexp(name,'\d\d\d_\d\d\d_')), 1)
-            name = name(9:end);
-        end
-        if isequal(min(regexp(name,'\d\d\d_')), 1)
-            name = name(5:end);
-        end
-        % interferes with B* assets
-        %name = strrep(name,'_B','');
-        
-        % Super-weenie HACK!
-        % For starters not all materials are 0:!
-        % So fails on others
-        name = strrep(name,'_O','_mat0');
-        
-        fprintf(fid, strcat(spacing, indentSpacing, ...
-            sprintf('Shape "plymesh" "string filename" "geometry/%s.ply"', name)),'\n');
         fprintf(fid,'\n');
 
     end
