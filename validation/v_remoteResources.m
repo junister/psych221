@@ -6,10 +6,23 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 % Working web scenes:
+% Can we always use piRead to read back in the PBRT files written by
+% piWrite?
+% {
 % kitchen
-%{
 thisR = piRecipeDefault('scene name', 'kitchen');
-piWrite(thisR);
+thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
+piWRS(thisR);
+
+out = thisR.get('outputfile');
+
+newOut = fullfile(piRootPath, 'local', 'test', 'kitchen.pbrt');
+newOut = fullfile(piRootPath, 'local', 'test', 'bistro-vespa.pbrt');
+
+thisR.set('input file',out);
+thisR.set('output file',newOut);
+piWRS(thisR);
+
 %}
 %{
 thisR = piRecipeDefault('scene name', 'contemporary-bathroom');

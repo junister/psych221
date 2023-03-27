@@ -302,6 +302,7 @@ while cnt <= length(txt)
                         % chance of a duplicate, but not much.
                         mat = mat{1}; % tmp fix
                         resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
+                        warning('Random material name %s',resObject.name);
 
                     elseif exist('medium','var')
                         % If we get here, figure out how to set the
