@@ -8,6 +8,10 @@ if ~piDockerExists, piDockerConfig; end
 % Working web scenes:
 % kitchen
 %{
+thisR = piRecipeDefault('scene name', 'kitchen');
+piWrite(thisR);
+%}
+%{
 thisR = piRecipeDefault('scene name', 'contemporary-bathroom');
 
 % Find the empty shapes and delete them
@@ -102,7 +106,27 @@ S = piRender(thisR);
 sceneWindow(S);
 %}
 thisR = piRecipeDefault('scene name', 'ChessSet');
-[r,s] = piWRS(thisR, 'remoteResources', false);
+[r,s] = piWRS(thisR, 'remoteResources', true);
+
+%{
+
+  % We seem to have to call reset when we change the parameters
+
+  setpref('docker','remoteMachine','muxreconrt.stanford.edu');
+  setpref('docker','renderContext','remote-mux');
+  setpref('docker','remoteImage','digitalprodev/pbrt-v4-gpu-ampere-mux');
+  dockerWrapper.reset;
+  dockerMux = getpref('docker');
+
+  setpref('docker','remoteMachine','orange.stanford.edu');
+  setpref('docker','renderContext','remote-orange');
+  setpref('docker','remoteImage','digitalprodev/pbrt-v4-gpu-ampere-ti');
+  dockerWrapper.reset;
+  dockerOrange = getpref('docker');
+
+  thisD = dockerWrapper;
+  thisD.getPrefs;
+%}
 
 % needs light source
 %thisR = piRecipeDefault('scene name', 'coordinate');
@@ -117,6 +141,9 @@ thisR = piRecipeDefault('scene name', 'CornellBoxReference');
 piWRS(thisR, 'remoteResources', true);
 
 thisR = piRecipeDefault('scene name', 'lettersAtDepth');
+% piWrite(thisR);
+% s = piRender(thisR); sceneWindow(s);
+
 piWRS(thisR, 'remoteResources', true);
 
 % Needs a light source

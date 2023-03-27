@@ -113,7 +113,13 @@ workingDir = thisR.get('output dir');
 % If we are using remote resources, remove leftover /local
 % files so they don't need to be rsynced
 if remoteResources
-    rmdir(workingDir, "s");
+    if isfolder(workingDir)
+        try
+            rmdir(workingDir, "s");
+        catch
+            % sometimes matlab  has it locked
+        end
+    end
     mkdir(workingDir);
 % our traditional case:    
 elseif ~exist(workingDir,'dir')

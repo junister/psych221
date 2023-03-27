@@ -70,7 +70,7 @@ for ii=1:numel(matParams)
                 if ~exist(fullfile(thisR.get('output dir'),thisVal),'file')
                     imgFile = which(thisVal);
                     if isempty(imgFile)||isequal(imgFile,'')
-                        error('Normal Map %s not found! Changing it to difuse', thisVal);
+                        warning('Normal Map %s not found! Changing it to diffuse', thisVal);
                     else
                         if ispc % try to fix filename for the Linux docker container
                             imgFile = dockerWrapper.pathToLinux(imgFile);
