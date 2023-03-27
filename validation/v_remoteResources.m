@@ -17,7 +17,7 @@ thisR = piRecipeDefault('scene name', 'contemporary-bathroom');
 % Find the empty shapes and delete them
 idx = thisR.get('objects');
 for ii=numel(idx):-1:1
-    s = thisR.get('asset',idx(ii),'shape');
+    s = thisR.get('assets',idx(ii),'shape');
     if isempty(s)
         fprintf('Deleting %d\n',idx(ii));
         thisR = thisR.set('asset',idx(ii),'delete');

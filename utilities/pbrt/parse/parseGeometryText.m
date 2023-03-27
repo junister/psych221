@@ -186,10 +186,10 @@ while cnt <= length(txt)
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
-
+        % lght is not created here. The light is created below.
         areaLight = currentLine;
 
-    elseif piContains(currentLine,'LightSource') ||...
+    elseif piContains(currentLine,'LightSource') || ...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
 
@@ -245,6 +245,7 @@ while cnt <= length(txt)
                 end
 
                 if exist('name', 'var')
+                    if isempty(name), name = sprintf('light-%d',randi(1000,1)); end
                     resLight.name = sprintf('%s_L', name);
                     resLight.lght{1}.name = resLight.name;
                 else
