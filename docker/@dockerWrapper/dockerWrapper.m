@@ -177,8 +177,8 @@ classdef dockerWrapper < handle
 
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
-        % gray, etc). Contexts are created via docker on the local system,
-        % and if needed one is created by default
+        % orange, etc). Contexts are created via docker on the local
+        % system, and if needed one is created by default
         renderContext;
         defaultContext;   % docker context used for everything else
         localImageName;
@@ -656,9 +656,11 @@ classdef dockerWrapper < handle
 
         %% Get the name of the docker image.
         function useDockerImage = getPBRTImage(obj, processorType)
-            % Returns the name of the docker image, both for the case of
-            % local and remote execution.
+            % Returns the name of the PBRT docker image, both for the case
+            % of local and remote execution.
             %
+            % See also
+            %   startPBRT, dockerWrapper initialization
 
             if ~obj.localRender && obj.gpuRendering
                 % We are running remotely and want GPU, we try to figure out which
@@ -748,19 +750,24 @@ classdef dockerWrapper < handle
         % implemented someplace, need to find the code!
         %end
 
-        %% Inserted from getRenderer.  thisD is a dockerWrapper (obj)
+        %% 
         function getRenderer(thisD)
-            %GETRENDERER uses the 'docker' parameters to insert the
-            %renderer
+            %GETRENDERER uses the Matlab prefs in 'docker' to determine the
+            %  docker image we use to render. It is set in thisD.remoteImage
+            %  renderer
             %
             % Description
-            %  The initial dockerWrapper is filled in with the user's
-            %  preferences from (getpref('docker')).  This method builds on
-            %  those to set a few additional parameters that are
-            %  site-specific.
+            %  The dockerWrapper is initialized with the user's preferences
+            %  from (getpref('docker')).  This method reads the current
+            %  environment and makes sure to set key (remote) parameters
+            %  that are site-specific. The parameters set here are
+            %
+            %    remoteRoot
+            %    remoteMachine
+            %    remoteImage
             %
             %  You can adjust the default parameters, which are stored
-            %  in the Matlab prefs under 'docker' using the method
+            %  in the Matlab prefs under 'docker'. using the method
             %
             %       dockerWrapper.setPrefs(varargin)
             %
@@ -818,14 +825,15 @@ classdef dockerWrapper < handle
                     % If the remoteMachine was not set in prefs, we get the
                     % default. The user may have multiple opportunities
                     % for this.  For now we default to the
-                    % vistalabDefaultServer.
+                    % vistalabDefaultServer, which is
+                    % muxreconrt.stanford.edu
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
                 % We allow one remote render context
                 % if the user specifies one, make sure it exists
                 % otherwise create one
-                thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
+                thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.remoteMachine));
 
                 if isempty(thisD.remoteImage)
                     % If we know the remote machine, but not the remote
@@ -892,59 +900,83 @@ classdef dockerWrapper < handle
 
         end
 
-        % validates rendering context if remote rendering
+        
+        % Validates rendering context if remote rendering
         % will try to create one if none is available
-        function useContext = getRenderContext(obj, serverName)
-            if isempty(obj.renderContext)
-                ourContext = 'remote-mux';
-            else
-                ourContext = obj.renderContext;
-            end
-            % Get or set-up the rendering context for the docker container
+        function thisContext = getRenderContext(obj, serverName)
+            % Gets the context, and if necessary creates it
             %
-            % A docker context ('docker context create ...') is a set of
-            % parameters we define to address the remote docker container
-            % from our local computer.
+            % dockerWrapper.getRender('mux')
+            % dockerWrapper.getRender('orange')
+            % dockerWrapper.getRender();   % Uses the default, which is mux
+            % We would like both of these to work.
             %
-            if ~exist('serverName','var'), serverName = obj.remoteMachine; end
+            % A Docker context is a way of specifying a Docker environment
+            % and the resources it can access. It allows you to switch
+            % between different Docker environments, such as local and
+            % remote environments, and manage the resources available to
+            % them.
+            %
+            % See also
+            %  getRenderer
 
-            switch serverName
-                case obj.vistalabDefaultServer()
-                    % Check that the Docker context exists.
-                    checkContext = sprintf('docker context list');
-                    [status, result] = system(checkContext);
+            %{
+             % Online manual
+             https://docs.docker.com/engine/reference/commandline/context_create/
 
-                    if status ~= 0 || ~contains(result,ourContext)
-                        % If we do not have it, create it
-                        % e.g. ssh://<username>@<server>
-                        % use the pref for remote username,
-                        % otherwise assume it is the same as our local user
-                        if isempty(obj.remoteUser)
-                            rUser = getUserName(obj);
-                        else
-                            rUser = obj.remoteUser;
-                        end
+             Usage:  docker context create [OPTIONS] CONTEXT       
+             Example:
+             $ docker context create my-context 
+                      --description "some description" 
+                      --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
 
-                        contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            rUser, obj.vistalabDefaultServer);
-                        createContext = sprintf('docker context create %s %s',...
-                            contextString, ourContext);
-
-                        [status, result] = system(createContext);
-                        if status ~= 0 || numel(result) == 0
-                            warning("Failed to create context: %s -- Might already exist.\n",ourContext);
-                            disp(result)
-                        else
-                            fprintf("Created docker context %s for Vistalab server\n",ourContext);
-                        end
-                    end
-                    useContext = 'remote-mux';
-                otherwise
-                    % User is on their own to make sure they have a valid
-                    % context
+            %}
+            % The user can define an alternative context.  At Stanford,
+            % remote-orange is a common alternative. This is usually
+            % defined at dockerWrapper initialization via the
+            % getpref(). It can also be set programmatically.
+            thisContext = obj.renderContext;
+            if isempty(thisContext)
+                % Default render context at Stanford is on MUX
+                thisContext = 'remote-mux';
             end
+
+            % These are the existing contexts
+            [status, contexts] = system(sprintf('docker context list'));
+            if status ~= 0
+                warning('Unable to list docker contexts. %d',status); 
+            end
+
+            % We assume Get or set-up the rendering context for the docker
+            % container 
+            if ~exist('serverName','var')
+                serverName = obj.remoteMachine; 
+            end
+
+            if ~contains(contexts,thisContext)
+                % If we do not have this context, we try to create it.
+                if isempty(obj.remoteUser), rUser = getUserName(obj);
+                else,                       rUser = obj.remoteUser;
+                end
+
+                % Create the command string
+                contextString = sprintf(' --docker host=ssh://%s@%s',...
+                    rUser, serverName);
+                createContext = sprintf('docker context create %s %s',...
+                    contextString, thisContext);
+
+                % Call the system command
+                [status, contexts] = system(createContext);
+
+                % Check the returns
+                if status ~= 0 || numel(contexts) == 0
+                    warning("Failed to create context: %s -- Might already exist.\n",thisContext);
+                    disp(contexts)
+                else
+                    fprintf("Created docker context %s \n",thisContext);
+                end
+            end            
         end
-
     end
 end
 

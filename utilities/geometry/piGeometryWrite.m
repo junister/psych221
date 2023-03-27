@@ -458,15 +458,19 @@ for nMat = 1:numel(thisNode.material)
             % If the shape has a file specification, we do this
 
             % Figure out the extension.
-            [p, n, e] = fileparts(thisShape.filename);
+            [~, ~, fileext] = fileparts(thisShape.filename);
 
             % For Windows we need to "fix" the path
             % thisShape.filename = fullfile(p, [n e]);
 
-            % The file can be a ply or a pbrt file. We seem to be
-            % testing these here.
+            % The file can be a ply or a pbrt file. 
+            % We seem to be testing these here.
             if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
+                % No PBRT file matching the shape.  Go to line 493.
+
                 if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
+                    % No PLY file matching the shape
+
                     % Allow for meshes to be along our path
                     [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
                     if which([shapeFile shapeExtension])
@@ -487,17 +491,18 @@ for nMat = 1:numel(thisNode.material)
 
                 end
             else
-                if isequal(e, '.ply')
+                if isequal(fileext, '.ply')
                     thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
                     thisShape.meshshape = 'trianglemesh';
                     shapeText = piShape2Text(thisShape);
-                    % we aren't a .ply anymore, need to write the .pbrt
-                    e = '.pbrt';
+                    % we are going to write the .pbrt
+                    fileext = '.pbrt';
                 end
             end
 
 
-            if isequal(e, '.ply')
+            if isequal(fileext, '.ply')
+                % Write out the line
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
                 % In this case it is a .pbrt file, we will write it out.
@@ -509,13 +514,27 @@ for nMat = 1:numel(thisNode.material)
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', fname)),'\n');
             end
         else
-            % If it does not have ply file, do this
-            % There is a shape slot we also open the geometry file.
-            name = thisNode.name;
+            % If it does not have a shape file name, but it has a non-empty
+            % shape slot, we assume that the shapeText has a lot of points
+            % and nodes and such that define the shape.  We print those out
+            % into a PBRT file that we will include.  We do not keep that
+            % information in the main pbrt scene file.
+            % 
+            % We open inside of the geometry folder a file with the name of
+            % this node. We add an Include line for that geometry file into
+            % the scene_geometry.pbrt file.
+            %
+            % We are concerned to make thisNode.name something reliable and
+            % repeatable.  It shouldn't depend on the node id, for example.
+            
+            name = thisNode.name;  % Maybe we choose a better name.  No ID.
+            tmp = split(name,'_');
+            name = [tmp{end-2},tmp{end-1},tmp{end}];
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
             fprintf(geometryFile,'%s',shapeText);
             fclose(geometryFile);
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
+
         end
         fprintf(fid,'\n');
     else
