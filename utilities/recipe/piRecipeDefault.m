@@ -271,8 +271,8 @@ switch ieParamFormat(sceneDir)
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
-        exporter = 'Copy';
-        % exporter = 'PARSE';  % Does not work yet.
+        % exporter = 'Copy';
+        exporter = 'PARSE';  % Worked in dev-resources on March 27, 2023
     case {'landscape'}
         sceneDir = 'landscape';
         if isempty(sceneFile)
