@@ -103,7 +103,8 @@ exporter = thisR.get('exporter');
 
 %% Check the input and output directories
 
-% Input must exist
+% Input should exist.  Even if it doesn't, we can still render just
+% from the recipe alone.  Unless we need to copy something.
 inputDir   = thisR.get('input dir');
 if ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); end
 
