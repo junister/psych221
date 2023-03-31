@@ -97,6 +97,8 @@ thisR.version = 4;
 [~, inputname, input_ext] = fileparts(fname);
 
 %% If input is a FBX file, we convert it into PBRT file
+% I am starting to experiment with using this even on V4 files to get
+% a standard format.  Tried on Cornell box, and a complete bust.
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
@@ -110,13 +112,8 @@ end
 % This seems like a big fix, but latter code assumes
 % that inputFile is a full path!
 if exist(infile,'file')
-    if isempty(which(infile))
-        % It is already a full path
-        thisR.inputFile = infile;
-    else
-        % It exists and this should make it a full path.
-        thisR.inputFile = which(infile);
-    end
+    % Force it to be a full path
+    thisR.inputFile = which(infile);
 else
     error('Can not find %s\n',infile);
 end
@@ -132,7 +129,7 @@ thisR.set('outputFile',outputFile);
 
 
 %% Split text lines into pre-WorldBegin and WorldBegin sections
-[txtLines, ~] = piReadText(thisR.inputFile);
+txtLines = piReadText(thisR.inputFile);
 
 % Replace left and right bracks with double-quote.  ISET3d formatting.
 txtLines = strrep(txtLines, '[ "', '"');
@@ -573,7 +570,7 @@ if any(piContains(world, 'Include'))
         IncFileNamePath = fullfile(inputDir, IncFileName);
 
         % Read the text from the include file
-        [IncLines, ~] = piReadText(IncFileNamePath);
+        IncLines = piReadText(IncFileNamePath);
 
         % Erase the include line.
         thisR.world{IncludeIdxList(IncludeIdx)} = [];

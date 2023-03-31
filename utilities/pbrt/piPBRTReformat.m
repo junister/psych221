@@ -1,5 +1,5 @@
 function outputFull = piPBRTReformat(fname,varargin)
-%% format a pbrt file from arbitrary source to standard format
+%% Format a pbrt file from arbitrary source to standard format
 %
 % Syntax:
 %    outputFull = piPBRTReformat(fname,varargin)
@@ -79,7 +79,9 @@ dockercontainerName = ['ISET3d-',thisName,'-',num2str(randi(20000))];
 % The Docker base command includes 'toply'.  In that case, it does not
 % render the data, it just converts it.
 % basecmd = 'docker run -t --name %s --volume="%s":"%s" %s pbrt --toply %s > %s && ls';
+
 %% Build the command
+%{
 if false % disable for now ispc
     renderDocker = dockerWrapper();
     renderDocker.dockerCommand = 'docker run';
@@ -97,27 +99,24 @@ if false % disable for now ispc
     [~, result] = renderDocker.run();
 
 else
-    if ispc
-        flags = '-i ';
-    else
-        flags = '-it ';
-    end
-        
-    basecmd = 'docker run %s --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
-    dockercmd = sprintf(basecmd, flags, dockercontainerName, volume, ...
-        dockerWrapper.pathToLinux(volume), dockerimage, dockerWrapper.pathToLinux(fname), [thisName, ext]);
-    % dockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
-    % disp(dockercmd)
-    %% Run the command
-    % The variable 'result' has the formatted data.
-    [status_format, result] = system(dockercmd);
+    %}
+if ispc
+    flags = '-i ';
+else
+    flags = '-it ';
 end
 
+basecmd = 'docker run %s --name %s --volume="%s":"%s" %s /bin/bash -c "pbrt --toply %s > %s; ls mesh_*.ply"';
+dockercmd = sprintf(basecmd, flags, dockercontainerName, volume, ...
+    dockerWrapper.pathToLinux(volume), dockerimage, dockerWrapper.pathToLinux(fname), [thisName, ext]);
+% d ockercmd = sprintf(basecmd, dockercontainerName, volume, volume, dockerimage, fname, outputFull);
+% disp(dockercmd)
+%% Run the command
+% The variable 'result' has the formatted data.
+[status_format, result] = system(dockercmd);
+%end
 
-
-
-
-% Copy formatted pbrt files to local directory.
+%% Copy formatted pbrt files to local directory.
 % I think only assimp puts them in build, so why are we looking there?
 %cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], dockerWrapper.pathToLinux(outputDir));
 cpcmd = sprintf('docker cp %s:/pbrt/pbrt-v4/build/%s %s',dockercontainerName, [thisName, ext], outputDir);
@@ -198,39 +197,3 @@ end
 
 end
 
-%% piCopyFolder
-%{
-% Changed to a utility function piCopyFolder
-% Should be deleted after a while.
-%
-function copyFolder(inputDir, outputDir)
-    sources = dir(inputDir);
-    status  = true;
-    for i=1:length(sources)
-        if startsWith(sources(i).name(1),'.')
-            % Skip dot-files
-            continue;
-        elseif sources(i).isdir && (strcmpi(sources(i).name,'spds') || strcmpi(sources(i).name,'textures'))
-            % Copy the spds and textures directory files.
-            status = status && copyfile(fullfile(sources(i).folder, sources(i).name), fullfile(outputDir,sources(i).name));
-        else
-            % Selectively copy the files in the scene root folder
-            [~, ~, extension] = fileparts(sources(i).name);
-            if ~(piContains(extension,'pbrt') || piContains(extension,'zip') || piContains(extension,'json'))
-                thisFile = fullfile(sources(i).folder, sources(i).name);
-                fprintf('Copying %s\n',thisFile)
-                status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
-            end
-        end
-    end
-
-    if(~status)
-        error('Failed to copy input directory to docker working directory.');
-    else
-        fprintf('Copied resources from:\n');
-        fprintf('%s \n',inputDir);
-        fprintf('to \n');
-        fprintf('%s \n \n',outputDir);
-    end
-end
-%}
