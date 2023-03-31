@@ -138,18 +138,18 @@ thisR.set('outputFile',outputFile);
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
 
-[options, ~] = piReadWorldText(thisR, txtLines);
+pbrtOptions = piReadWorldText(thisR, txtLines);
 
 %% Read options information
 % think about using piParameterGet;
 % Extract camera block
-thisR.camera = piParseOptions(options, 'Camera');
+thisR.camera = piParseOptions(pbrtOptions, 'Camera');
 
 % Extract sampler block
-thisR.sampler = piParseOptions(options,'Sampler');
+thisR.sampler = piParseOptions(pbrtOptions,'Sampler');
 
 % Extract film block
-thisR.film    = piParseOptions(options,'Film');
+thisR.film    = piParseOptions(pbrtOptions,'Film');
 
 % always use 'gbuffer' for multispectral rendering
 thisR.film.subtype = 'gbuffer';
@@ -170,19 +170,19 @@ catch
 end
 
 % Extract transform time block
-thisR.transformTimes = piParseOptions(options, 'TransformTimes');
+thisR.transformTimes = piParseOptions(pbrtOptions, 'TransformTimes');
 
 % Extract surface pixel filter block
-thisR.filter = piParseOptions(options,'PixelFilter');
+thisR.filter = piParseOptions(pbrtOptions,'PixelFilter');
 
 % Extract (surface) integrator block
-thisR.integrator = piParseOptions(options,'Integrator');
+thisR.integrator = piParseOptions(pbrtOptions,'Integrator');
 
 % % Extract accelerator
 % thisR.accelerator = piParseOptions(options,'Accelerator');
 
 % Set thisR.lookAt and determine if we need to flip the image
-flipping = piReadLookAt(thisR,options);
+flipping = piReadLookAt(thisR,pbrtOptions);
 
 % Sometimes the axis flip is "hidden" in the concatTransform matrix. In
 % this case, the flip flag will be true. When the flip flag is true, we
@@ -196,7 +196,7 @@ end
 % sometimes we stick in a Scale -1 1 1 to flip the x-axis. If this scaling
 % is already in the PBRT file, we want to keep it around.
 % fprintf('Reading scale\n');
-[~, scaleBlock] = piParseOptions(options,'Scale');
+[~, scaleBlock] = piParseOptions(pbrtOptions,'Scale');
 if(isempty(scaleBlock))
     thisR.scale = [];
 else
@@ -205,6 +205,10 @@ else
 end
 
 %%  Read world information for the Include files
+
+piReadWorldInclude(thisR);
+
+%{
 world = thisR.world;
 
 % If we have an Include file in the world section, the txt lines in the
@@ -236,7 +240,7 @@ end
 
 %
 thisR.world = piFormatConvert(thisR.world);
-
+%}
 if strcmpi(exporter, 'Copy')
     % what does this mean since we then parse it?
     %disp('Scene will not be parsed. Maybe we can parse in the future');
@@ -541,6 +545,47 @@ if isequal(blockName,'Integrator') && isempty(s)
     fprintf('Setting integrator to "path" with 5 bounces.\n')
 end
 
+end
+
+%% Include files into world text
+function piReadWorldInclude(thisR)
+% Insert text from the Include files in the world section
+%
+% We also change the World txt lines into the single line format
+%
+% See also
+%  piRead, piReadText
+%
+
+world = thisR.world;
+
+if any(piContains(world, 'Include'))
+
+    % Find all the lines in world that have an 'Include'
+    inputDir = thisR.get('inputdir');
+    IncludeIdxList = find(piContains(world, 'Include'));
+
+    % For each of those lines ....
+    for IncludeIdx = 1:numel(IncludeIdxList)
+        % Find the include file
+        IncStrSplit = strsplit(world{IncludeIdxList(IncludeIdx)},' ');
+        IncFileName = erase(IncStrSplit{2},'"');
+        IncFileNamePath = fullfile(inputDir, IncFileName);
+
+        % Read the text from the include file
+        [IncLines, ~] = piReadText(IncFileNamePath);
+
+        % Erase the include line.
+        thisR.world{IncludeIdxList(IncludeIdx)} = [];
+
+        % Add the text to the world section
+        thisR.world = {thisR.world, IncLines};
+        thisR.world = cat(1, thisR.world{:});
+    end
+end
+
+%
+thisR.world = piFormatConvert(thisR.world);
 end
 
 %% END
