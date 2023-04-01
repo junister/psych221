@@ -128,16 +128,28 @@ outputFile       = fullfile(outFilepath,[inputname,'.pbrt']);
 thisR.set('outputFile',outputFile);
 
 
-%% Split text lines into pre-WorldBegin and WorldBegin sections
+%% Read PBRT options about camera, film, sampler ...
+
+%  The text lines for the options, which are in pre-WorldBegin, are
+%  returned, and the remaining ;world' text is placed in the
+%  recipe.world slot.
+
+% All the text lines
 txtLines = piReadText(thisR.inputFile);
 
 % Replace left and right bracks with double-quote.  ISET3d formatting.
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
 
+% Split the text into the options and world
+% The recipe.world slot is filled with the correct world text after
+% this call.
 pbrtOptions = piReadWorldText(thisR, txtLines);
 
 %% Read options information
+
+% This could be piReadOptions(thisR,pbrtOptions)
+
 % think about using piParameterGet;
 % Extract camera block
 thisR.camera = piParseOptions(pbrtOptions, 'Camera');
@@ -205,39 +217,8 @@ end
 
 piReadWorldInclude(thisR);
 
-%{
-world = thisR.world;
+%% Decide whether to Copy or Parse
 
-% If we have an Include file in the world section, the txt lines in the
-% file is merged into thisR.world.
-if any(piContains(world, 'Include'))
-
-    % Find all the lines in world that have an 'Include'
-    inputDir = thisR.get('inputdir');
-    IncludeIdxList = find(piContains(world, 'Include'));
-
-    % For each of those lines ....
-    for IncludeIdx = 1:numel(IncludeIdxList)
-        % Find the include file
-        IncStrSplit = strsplit(world{IncludeIdxList(IncludeIdx)},' ');
-        IncFileName = erase(IncStrSplit{2},'"');
-        IncFileNamePath = fullfile(inputDir, IncFileName);
-
-        % Read the text from the include file
-        [IncLines, ~] = piReadText(IncFileNamePath);
-
-        % Erase the include line.
-        thisR.world{IncludeIdxList(IncludeIdx)} = [];
-
-        % Add the text to the world section
-        thisR.world = {thisR.world, IncLines};
-        thisR.world = cat(1, thisR.world{:});
-    end
-end
-
-%
-thisR.world = piFormatConvert(thisR.world);
-%}
 if strcmpi(exporter, 'Copy')
     % what does this mean since we then parse it?
     %disp('Scene will not be parsed. Maybe we can parse in the future');
@@ -318,13 +299,6 @@ else
     end
 
 end
-
-verbosity = 0;
-if verbosity > 0
-    disp('***Scene parsed.');
-end
-
-
 
 end
 
