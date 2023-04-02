@@ -220,8 +220,9 @@ piReadWorldInclude(thisR);
 %% Decide whether to Copy or Parse
 
 if strcmpi(exporter, 'Copy')
-    % what does this mean since we then parse it?
-    %disp('Scene will not be parsed. Maybe we can parse in the future');
+    % It would be best if this went away, and we could always parse.
+    % What does this mean since we then parse it?
+    % disp('Scene will not be parsed. Maybe we can parse in the future');
         % Read material and texture
     [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
     thisR.world = newWorld;
@@ -245,6 +246,7 @@ else
     thisR.world = newWorld;
     fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
 
+    % Build the asset tree of objects and lights
     [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
     thisR.world = newWorld;
     thisR.materials.list = materialLists;
@@ -255,7 +257,7 @@ else
     thisR.textures.list = textureList;
     thisR.textures.order = texNameList;
 
-    % Convert texture file format to PNG
+    % Convert texture files format to PNG
     thisR = piTextureFileFormat(thisR);
 
     if exist('trees','var') && ~isempty(trees)

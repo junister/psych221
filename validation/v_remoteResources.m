@@ -11,6 +11,7 @@ if ~piDockerExists, piDockerConfig; end
 % {
 % kitchen
 thisR = piRecipeDefault('scene name', 'kitchen');
+thisR = piRecipeCreate('cornell_box');
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
 piWRS(thisR);
 

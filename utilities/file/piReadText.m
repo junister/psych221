@@ -19,7 +19,16 @@ fileID = fopen(fname);
 tmp = textscan(fileID,'%s','Delimiter','\n');
 
 txtLines = tmp{1};
+
 fclose(fileID);
+
+% Remove empty lines here?
+
+% We remove any trailing blank spaces from the text lines here. (BW).
+for ii=1:numel(txtLines)
+    idx = find(txtLines{ii} ~=' ',1,'last');
+    txtLines{ii} = txtLines{ii}(1:idx);
+end
 
 %{
 % It seems like in the past we excluded the comment lines.  But then
