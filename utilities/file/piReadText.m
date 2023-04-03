@@ -4,6 +4,14 @@ function txtLines = piReadText(fname)
 % Synopsis
 %    txtLines = piReadText(fname)
 %
+% Brief description:
+%   Read the text lines in the PBRT scene file.  Also strips any
+%   trailing blanks on the line and does some fix for square brackets.
+%   The square bracket thing is historical.
+%
+%   Comment lines are left as part of the text because they sometimes
+%   contain useful information about object names.
+%
 % Inputs
 %   fname = PBRT scene file name.  
 %
@@ -30,10 +38,15 @@ for ii=1:numel(txtLines)
     txtLines{ii} = txtLines{ii}(1:idx);
 end
 
+% Replace left and right bracks with double-quote.  ISET3d formatting.
+txtLines = strrep(txtLines, '[ "', '"');
+txtLines = strrep(txtLines, '" ]', '"');
+
 %{
-% It seems like in the past we excluded the comment lines.  But then
+% In the past we excluded the comment lines.  But then
 % we included them, probably so we can get the objectnames.  That made
 % this bit of code redundant.  I am removing (BW, March 31, 2023).
+%
 fileID = fopen(fname);
 tmp = textscan(fileID,'%s','Delimiter','\n');
 header = tmp{1};

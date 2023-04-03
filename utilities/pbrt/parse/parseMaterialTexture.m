@@ -2,8 +2,7 @@ function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMa
 % Parse the txtLines to specify the materials and textures
 %
 % Synopsis
-%
-%   [materialMap, textureMap, txtLines] = parseMaterialTexture(txtLines)
+%   [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMaterialTexture(thisR)
 %
 % Input
 %   txtLines - Usually thisR.world text
@@ -14,10 +13,11 @@ function [materialMap, textureMap, txtLines, matNameList, texNameList] = parseMa
 %   txtLines    -  The txtLines that are NOT material or textures
 %   matNameList - MaterialName list (order is important for mixed material and textures!!)
 %   texNameList - TextureName list (order is important for mixed material and textures!!)
+%
 % ZL and ZYL
 %
 % See also
-%
+%   piRead, parseBlockMaterial
 
 %% Initialize the parameters we return
 
@@ -84,8 +84,10 @@ for ii = numel(txtLines):-1:1
         txtLines{ii} = thisLine;
     end
 end
+
 % Flip the order because we parse the material and texture from back to
 % front.
 matNameList = flip(matNameList);
 texNameList = flip(texNameList);
+
 end

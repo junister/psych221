@@ -26,18 +26,34 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %   these assets has been a constant struggle, and I attempt to clarify
 %   here.
 %
-%   This parseGeometryText method works recursively, parsing the geometry
-%   text line by line. The parsing mainly looks for an AttributeBegin/End
-%   block and creates an asset for that block.  Because these can be
-%   nested (i.e., we have AttributeBegin/End within such a block), this
-%   routine is recursive (calls itself).
+%   This parseGeometryText method creates the asset tree. It reads the
+%   geometry text in the PBRT scene file (and the includes) line by
+%   line. It tries to find the materials and shapes to create the
+%   assets.  It also tries to find the transforms for the branch node
+%   above the object node. 
+% 
+%   There are two types of parsing that this routine handles. 
+
+%   AttributeBegin/End 
+%    Each such block and creates an asset.  Because these can be
+%    nested (i.e., we have AttributeBegin/End within such a block), this 
+%    routine is recursive (calls itself).
 %
-%   Because we do not have an overview of the whole 'world' text at the
-%   beginning, we are limited limited in how clever we can be. Maybe we
-%   should do a quick first pass?  To see whether everything is between an
-%   AttributeBegin/End grouping?
+%   NamedMaterial-Shapes
+%    Some scenes do not have a Begin/End, just a series of
+%    NamedMaterial followed by shapes.
 %
-%   If the current text line is
+%   This routine fails on some 'wild' type PBRT scenes. In those
+%   casses we try setting thisR.exporter = 'Copy'. 
+%
+%   A limitation si that we do not have an overview of the whole
+%   'world' text at the beginning. Maybe we should do a quick first
+%   pass?  To see whether everything is between an AttributeBegin/End
+%   grouping, or to determine the Material-Shapes sequences?
+%
+% More details
+%
+%   For the AttributeBegin/End case
 %
 %       a) 'AttributeBegin': this is the beginning of a block. We will
 %       keep looking for node/object/light information until we reach
@@ -58,6 +74,19 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %       it is a branch node by whether it  has children.  'Object' and
 %       'Light' nodes are the leaves of the tree and have no children.
 %       Instance nodes are copies of Objects and thus also are leaves.
+%
+%  If we do not have AttributeBegin/End blocks, for example in the
+%  kitchen.pbrt scene, we may have lines like
+%
+%     NamedMaterial
+%     Shape
+%     Shape
+%     NamedMaterial
+%     Shape
+%     NamedMaterial
+%
+%  In that case we create a new object for each shape line, and we
+%  assign it the material listed above the shape.
 %
 % See also
 %   parseObjectInstanceText
