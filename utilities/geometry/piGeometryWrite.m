@@ -525,8 +525,11 @@ for nMat = 1:numel(thisNode.material)
             % The shape name is associated with the scene and a hash
             % based on its 3D points.  I am only taking the first 8
             % characters of the hash - 8^16 possibilities should be enough!
-            str = ieHash(thisShape.point3p);
-            name = sprintf('%s-%s',thisR.get('input basename'),str(1:8));
+            % Should call piShapeNameCreate() here
+            isNode = false;
+            name = piShapeNameCreate(thisShape,isNode, thisR.get('input basename'));
+            %             str = ieHash(thisShape.point3p);
+            %             name = sprintf('%s-%s',thisR.get('input basename'),str(1:8));
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
 
             shapeText = piShape2Text(thisShape);

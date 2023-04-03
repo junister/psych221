@@ -303,9 +303,9 @@ while cnt <= length(txt)
                 % Add the light asset to the collection of subtrees.
                 subtrees = cat(1, subtrees, tree(resLight));
 
-                % ------- Fill in object node properties
-            elseif exist('shape','var') || exist('medium','var') || exist('mat','var')
-                % It is an object, medium, or material
+                % ------- A shape.  Create an object node
+            elseif exist('shape','var') % || exist('medium','var') || exist('mat','var')
+                % We have a shape, medium, or material
 
                 % This AttributeBegin/End has a material or medium, but no
                 % shape.  We don't want to change the tree.  The material
@@ -331,60 +331,16 @@ while cnt <= length(txt)
                 % and Zheng. Such materials do get created in
                 % contemporary-bathroom, but not, say, in kitchen.
                 resObject = piAssetCreate('type', 'object');
+                resObject.shape = shape;
 
                 % Set the object name
                 if exist('name','var')
                     resObject.name = sprintf('%s_O', name);
                 else
-                    % Name not found. In that case we assign an object
-                    % name with priority:
-                    %
-                    %   (1) Check if ply file name exists
-                    %   (2) Check if named material exists
-                    %   (3) (Worst case) Only material type exists
-                    %
-                    if ~isempty(shape.filename)
-                        [~, n, ~] = fileparts(shape.filename);
-
-                        % If there was a '_mat0' added to the ply file name
-                        % remove it.
-                        if contains(n,'_mat0'), n = erase(n,'_mat0'); end
-
-                        % Add the _O because it is an object.
-                        resObject.name = sprintf('%s_O', n);
-                    elseif ~isempty(mat)
-                        warning('Assigning the object a material name with no shape.filename or name.')
-                        resObject.name = sprintf('%s_O',mat.namedmaterial);
-                    else
-                        warning('No name for this (shape or mat or medium).');
-                    end
+                    resObject.name = piShapeNameCreate(shape);
                 end
-                %{
-                    elseif ~isempty(mat)
-                        % This is a problem for remote rendering.
-                        %
-                        % We need a way to assign a named material to
-                        % this object.  We want the name to be unique.
-                        % For now, we just pick a random number.  Some
-                        % chance of a duplicate, but not much.
-                        mat = mat{1}; % tmp fix
-                        resObject.name = sprintf('%s-%d_O',mat.namedmaterial,randi(1e6,1));
-                        warning('Random material name %s',resObject.name);
-
-                    elseif exist('medium','var')
-                        % If we get here, figure out how to set the
-                        % name.
-                        warning('medium, but no name set.');
-                        resObject.medium = medium;
-                    end
-                %}
-
-                % Always set these, even if there is no name.
-                % Why wouldn't there be a name?
-                % Also, can we have a material or a medium, but not both?
-                % {
-                resObject.shape = shape;
-
+                
+                % Hopefully we have a material or medium for this object.
                 if exist('mat','var')  && ~isempty(mat)
                     resObject.material = mat;
                 end
@@ -396,8 +352,8 @@ while cnt <= length(txt)
 
             end
 
-            % Create a branch node that will sit on top of the light or
-            % object, containing the transformation information
+            % Create a branch node with the transform information.
+            % This should be the parent of the light or object,            
             resCurrent = piAssetCreate('type', 'branch');
 
             % If present populate fields.
@@ -441,9 +397,44 @@ while cnt <= length(txt)
         parsedUntil = cnt;
         return;
     else
-        % WorldBegin gets here.  Other stuff?
-        % warning('Current line skipped: %s', currentLine);
-        %
+        % WorldBegin gets here.  Also, if there is no AttributeBegin
+        % but there is a shape, we get here.  Perhaps there has been a
+        % transform, as well.
+        %        
+        if strcmp(currentLine,'WorldBegin')
+            % Do nothing
+        elseif exist('shape','var') && exist('mat','var')
+            if iscell(shape), shape = shape{1}; end
+
+            % We create object (assets) here.  If the shape is
+            % empty for an asset, we will have a problem later.
+            % So check how that can happen.
+            %
+            % I don't understand why we are creating materials or
+            % mediumInterface here.  I need to ask Zhenyi, Henryk,
+            % and Zheng. Such materials do get created in
+            % contemporary-bathroom, but not, say, in kitchen.
+            resObject = piAssetCreate('type', 'object');
+            resObject.shape = shape;
+
+            % Set the object name
+            if exist('name','var')
+                resObject.name = sprintf('%s_O', name);
+            else
+                resObject.name = piReadObjectName(shape);
+            end
+
+            % Hopefully we have a material or medium for this object.
+            if exist('mat','var')  && ~isempty(mat)
+                resObject.material = mat;
+            end
+
+            if exist('medium','var'), resObject.medium = medium; end
+
+            % Add this object into the subtrees.
+            subtrees = cat(1, subtrees, tree(resObject));
+        end
+
     end % AttributeBegin
 
     cnt = cnt+1;
@@ -451,7 +442,7 @@ while cnt <= length(txt)
 end
 parsedUntil = cnt;  % Returned.
 
-%% We build the main tree that is returned from any defined subtrees
+%% We build the tree that is returned from any of the defined subtrees
 
 % Debugging.
 fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
