@@ -30,3 +30,8 @@ disp(thisR)
 
 % See if the file in kitchen-new renders
 piWRS(thisR);
+
+%% Reformat the simple scene
+
+thisR = piRecipeDefault('scene name','Simple scene');
+

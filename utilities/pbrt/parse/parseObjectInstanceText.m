@@ -5,13 +5,14 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %   [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %
 % Brief description
-%   The txt is the world text from the PBRT file.  It is parsed into
-%   objects and materials, creating the asset tree.  The assets
-%   include objects and lights.
+%   The txt is the world text from a PBRT file.  It is parsed into
+%   objects creating the asset tree.  The assets include objects and
+%   lights.
 % 
 %   This function relies on parseGeometryText, which works on
-%   AttributeBegin/End sequences.  The code here also handles the
-%   special cases of ObjectBegin/End instances.
+%   AttributeBegin/End sequences and certain other simple file
+%   formats.  The code here also handles the special cases of
+%   ObjectBegin/End instances, but that may be deprecated.
 %
 % Inputs
 %   thisR - ISET3d recipe
@@ -19,8 +20,7 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %
 % Outputs
 %   trees    -  Assets in a tree format
-%   newWorld - Modified world text to use, after removing unnecessary
-%              lines.
+%   newWorld - Modified world text, after removing unnecessary lines.
 %
 % See also
 %   parseGeometryText
@@ -69,11 +69,9 @@ if ~isempty(objBeginLocs)
     end
 end
 
-%% Remove empty lines.  Shouldn't this be handled in piReadText?
-newWorld = txt(~cellfun('isempty',txt));
-
 %% The asset tree is built here.  This is the main work.
-[subnodes, parsedUntil] = parseGeometryText(thisR,newWorld,'');
+newWorld = txt;
+[subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
 if trees.Parent == 0
@@ -88,9 +86,8 @@ else
 end
 
 if ~isempty(trees)
-    % In some parsing we do not yet have a tree allocated.  If there
-    % is just NamedMaterial in the Begin/End.  But almost always, we
-    % have a tree.
+    % In some parsing we do not yet have a tree.  But almost always,
+    % we have a tree.  Trying to find the cases where parsing fails.
     trees = trees.uniqueNames;
 else
     warning('Empty tree.');

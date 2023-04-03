@@ -112,7 +112,7 @@ else
     infile = fname;
 end
 
-% Exist checks on the whole path.
+%% Exist checks on the whole path.
 if exist(infile,'file')
     % Force the string to be a full path
     thisR.inputFile = which(infile);
@@ -130,13 +130,9 @@ outFilepath      = fullfile(piRootPath,'local',outputdirname);
 outputFile       = fullfile(outFilepath,[outputdirname,'.pbrt']);
 thisR.set('outputFile',outputFile);
 
-%% Read PBRT options about camera, film, sampler ...
+%% Read PBRT options and world text.
 
-%  The text lines for the options, which are in pre-WorldBegin, are
-%  returned, and the remaining ;world' text is placed in the
-%  recipe.world slot.
-
-% All the text lines in the PBRT scene file
+% The text includes just the main PBRT scene file, with the 'Includes'
 txtLines = piReadText(thisR.inputFile);
 
 %% Split the text into the options and world
@@ -149,12 +145,14 @@ pbrtOptions = piReadWorldText(thisR, txtLines);
 
 %% Read options information
 
-% This could be piReadOptions(thisR,pbrtOptions)
+% Act on the pbrtOptions, setting the recipe slots (i.e., thisR).
 piReadOptions(thisR,pbrtOptions);
 
 %% Insert the text from the Include files
 
-% These are usually _geometry.pbrt and _materials.pbrt
+% These are usually _geometry.pbrt and _materials.pbrt.  At this
+% point, we can have shapes that have no names.  These are defined in
+% thisR.world just by their points and normals.
 piReadWorldInclude(thisR);
 
 %% Read Materials and Textures
@@ -177,16 +175,13 @@ thisR = piTextureFileFormat(thisR);
 
 fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
 
-%% Decide whether to Copy or Parse
+%% Decide whether to Copy or Parse to get the asset tree filled up
 
 if strcmpi(exporter, 'Copy')
     % On Copy we copy the assets, we do not parse them.
     % It would be best if we could always parse the objects.
-    % We do always parse the Materials and Textures.
-
 else
-    % Parse the assets
-
+    % Try to parse the assets
     % Build the asset tree of objects and lights
     [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
     thisR.world = newWorld;
@@ -230,15 +225,73 @@ end
 end
 
 %% Helper functions
+% piReadText
 % piReadOptions
 % piReadWorldText
 % piReadLookAt
 % piParseOptions
 % piReadWorldInclude
 %
-% piReadText is in utilities/file.  I should probably put it back
-% in here.
+
+%% Open, read, close excluding comment lines
+function txtLines = piReadText(fname)
 %
+% Synopsis
+%    txtLines = piReadText(fname)
+%
+% Brief description:
+%   Read the text lines in a PBRT file. Also 
+%
+%    * strips any trailing blanks on the line
+%    * does some fix for square brackets (some historical thing)
+%    * Removes all blank lines
+%
+%   Comment lines are included because they sometimes contain useful
+%   information about object names.
+%
+% Inputs
+%   fname = PBRT scene file name.  
+%
+% Outputs
+%   txtLines - Cell array of each of the text lines in the file.
+%
+% See also
+%   piRead
+
+%% Open the PBRT scene file
+fileID = fopen(fname);
+
+tmp = textscan(fileID,'%s','Delimiter','\n');
+
+txtLines = tmp{1};
+
+fclose(fileID);
+
+% Remove empty lines.  Shouldn't this be handled in piReadText?
+txtLines = txtLines(~cellfun('isempty',txtLines));
+
+% We remove any trailing blank spaces from the text lines here. (BW).
+for ii=1:numel(txtLines)
+    idx = find(txtLines{ii} ~=' ',1,'last');
+    txtLines{ii} = txtLines{ii}(1:idx);
+end
+
+% Replace left and right bracks with double-quote.  ISET3d formatting.
+txtLines = strrep(txtLines, '[ "', '"');
+txtLines = strrep(txtLines, '" ]', '"');
+
+%{
+% In the past we excluded the comment lines.  But then
+% we included them, probably so we can get the objectnames.  That made
+% this bit of code redundant.  I am removing (BW, March 31, 2023).
+%
+fileID = fopen(fname);
+tmp = textscan(fileID,'%s','Delimiter','\n');
+header = tmp{1};
+fclose(fileID);
+%}
+
+end
 
 %% Step through each of the pbrtOption lines and updated the recipe
 function piReadOptions(thisR,pbrtOptions)

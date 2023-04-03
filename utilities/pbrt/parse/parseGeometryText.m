@@ -109,6 +109,10 @@ objectIndex = 0;
 nMaterial   = 0;
 nShape      = 0;
 
+% This code seems designed to work only with the AttributeBegin/End
+% format.  Perhaps we should look for AttributeBegin, and if there are
+% none in the txt, we should parse with the other style (BW).
+
 % Counts which line we are on.  At the end we return how many lines we
 % have counted (parsedUntil)
 cnt = 1;
@@ -308,7 +312,11 @@ while cnt <= length(txt)
                 % or medium should have been handled by the parse
                 % materials.
                 if ~exist('shape','var')
-                    warning('Material or medium with no shape.')
+                    % This is not the right way to return.  Need to
+                    % figure it out.
+                    warning('Material or medium with no shape.');
+                    trees = [];
+                    parsedUntil = cnt;
                     return;
                 elseif iscell(shape) %#ok<NODEF>
                     shape = shape{1};
@@ -446,7 +454,7 @@ parsedUntil = cnt;  % Returned.
 %% We build the main tree that is returned from any defined subtrees
 
 % Debugging.
-fprintf('Identified %d assets and we parsed up to line %d\n',numel(subtrees),cnt);
+fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
 
 % Each subtree is an asset.
 if ~isempty(subtrees)

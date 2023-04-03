@@ -6,11 +6,16 @@ function thisR = piRecipeDefault(varargin)
 %
 % Description:
 %  piRecipeDefault reads in PBRT scene text files in the data/V3
-%  repository.  It is also capable of using ieWebGet to retrieve pbrt
-%  scenes, from the web and install them locally.
+%  repository.  It can also call ieWebGet to retrieve pbrt scenes,
+%  from the web and install them locally.
+%
+%  Some of these scenes are missing lights and will not render, or
+%  they will render in an awkward view.  I created piRecipeCreate() as
+%  a wrapper that calls this function and then adds the necessary
+%  lights and viewpoints for a reasonable piWRS() render.
 %
 % Inputs
-%   N/A  - Default returns the MCC scene
+%   N/A  - Default returns the Macbeth Checker scene 
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name based on the directory.
@@ -34,45 +39,29 @@ function thisR = piRecipeDefault(varargin)
  recipe.list;
 %}
 %{
- thisR = piRecipeDefault; piWRS(thisR);
+ thisR = piRecipeCreate('macbeth checker');  %Adds a light
+ piWRS(thisR);
 %}
 %{
  thisR = piRecipeDefault('scene name','SimpleScene');
  piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','checkerboard');
-   piWrite(thisR);
-   scene = piRender(thisR);
-   scene = piRender(thisR,'render type','illuminant');
-   sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','checkerboard');
+ piWRS(thisR);
 %}
 %{
-   % #ETTBSkip - Zheng should look at and make fix the issue with the light.
-   thisR = piRecipeDefault('scene name','slantedBar');
-   piWrite(thisR);
-   scene = piRender(thisR,'render type','radiance');
-   scene = sceneSet(scene,'mean luminance',100);
-   sceneWindow(scene);
+ thisR = piRecipeCreate('slanted edge');  % Adds a light
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','chessSet');
-   piWrite(thisR);
-   scene = piRender(thisR, 'render type', 'both');
-   sceneWindow(scene);
-%}
-
-%{
-   thisR = piRecipeDefault('scene name','teapot');
-   piWrite(thisR);
-   scene = piRender(thisR);
-   sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','chessSet');
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','MacBeth Checker CusLight');
-   piWrite(thisR);
-   [scene, results] = piRender(thisR);
-   sceneWindow(scene);
+ % An error about materials not being defined.  DEBUG this!
+ thisR = piRecipeDefault('scene name','teapot');
+ piWRS(thisR);
 %}
 
 %%  Figure out the scene and whether you want to write it out
@@ -100,18 +89,22 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'MacBethChecker';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-    case 'macbethcheckerbox'
-        sceneDir = 'MacBethCheckerBox';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'PARSE';
-    case 'macbethcheckercus'
-        sceneDir = 'MacBethCheckerCus';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'PARSE';
-    case {'macbethcheckercb', 'mcccb'}
-        sceneDir = 'mccCB';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'PARSE';
+        %     case 'macbethcheckerbox'
+        %         sceneDir = 'MacBethCheckerBox';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
+        %     case 'macbethcheckercus'
+        %         sceneDir = 'MacBethCheckerCus';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
+        %     case 'macbethcheckercuslight'
+        %         sceneDir = 'MacBethCheckerCusLight';
+        %         sceneFile = ['MacBethCheckerCus','.pbrt'];
+        %         exporter = 'PARSE';
+        %     case {'macbethcheckercb', 'mcccb'}
+        %         sceneDir = 'mccCB';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
     case {'flashcards'}
         sceneDir = 'flashCards';
         sceneFile = [sceneDir,'.pbrt'];
@@ -203,10 +196,6 @@ switch ieParamFormat(sceneDir)
     case 'simplescenelight'
         sceneDir = 'SimpleSceneLight';
         sceneFile = 'SimpleScene.pbrt';
-        exporter = 'PARSE';
-    case 'macbethcheckercuslight'
-        sceneDir = 'MacBethCheckerCusLight';
-        sceneFile = ['MacBethCheckerCus','.pbrt'];
         exporter = 'PARSE';
     case 'bunny'
         sceneDir = 'bunny';

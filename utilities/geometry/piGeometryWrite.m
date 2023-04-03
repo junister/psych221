@@ -63,7 +63,7 @@ if ~isempty(obj)
     % Write tree structure in main geometry file
     lvl = 0;
     writeGeometryFlag = 0;
-    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag);
+    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR);
 else
     % if no assets were found
     for ii = numel(thisR.world)
@@ -172,18 +172,6 @@ for ii = 1:numel(children)
         % Define object node
     elseif isequal(thisNode.type, 'object')
         % Deal with object node properties in recursiveWriteAttributes;
-        %{
-                while numel(thisNode.name) >= 8 &&...
-                        isequal(thisNode.name(5:6), 'ID')
-                    thisNode.name = thisNode.name(8:end);
-                end
-
-                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
-                % write out objects
-                ObjectWrite(fid, thisNode, rootPath, "", "");
-                fprintf(fid,'\n');
-                fprintf(fid, 'ObjectEnd\n\n');
-        %}
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
     else
@@ -202,7 +190,7 @@ end
 
 %% Recursive write for attributes?
 
-function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag)
+function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
 % Write attribute sections. The logic is:
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
@@ -325,7 +313,7 @@ for ii = 1:numel(children)
         end
 
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, ...
-            outFilePath, writeGeometryFlag);
+            outFilePath, writeGeometryFlag, thisR);
 
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 10 &&...
@@ -346,7 +334,7 @@ for ii = 1:numel(children)
             % We have a cross-platform problem here?
             %[p,n,e ] = fileparts(thisNode.shape{1}.filename);
             %thisNode.shape{1}.filename = fullfile(p, [n e]);
-            ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
+            ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing, thisR);
             fprintf(fid,'\n');
         else
             % use reference object
@@ -412,7 +400,7 @@ fprintf(fid, strcat(spacing, indentSpacing,...
 end
 
 %%
-function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
+function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing,thisR)
 % Write out an object, including its named material and shape
 % information.
 
@@ -452,29 +440,27 @@ for nMat = 1:numel(thisNode.material)
     % If there is a shape, act here.
     if ~isempty(thisShape)
 
-        shapeText = piShape2Text(thisShape);
-
+        % The text ight
         if ~isempty(thisShape.filename)
             % If the shape has a file specification, we do this
 
+            % The file can be a ply or a pbrt file. 
             % Figure out the extension.
             [~, ~, fileext] = fileparts(thisShape.filename);
 
-            % For Windows we need to "fix" the path
-            % thisShape.filename = fullfile(p, [n e]);
-
-            % The file can be a ply or a pbrt file. 
             % We seem to be testing these here.
-            if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
+            pbrtName = strrep(thisShape.filename,'.ply','.pbrt');
+            if ~exist(fullfile(rootPath, pbrtName),'file')
                 % No PBRT file matching the shape.  Go to line 493.
 
-                if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
+                plyName = strrep(thisShape.filename,'.pbrt','.ply');
+                if ~exist(fullfile(rootPath, plyName),'file')
                     % No PLY file matching the shape
 
                     % Allow for meshes to be along our path
                     [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
                     if which([shapeFile shapeExtension])
-                        thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                        thisShape.filename = plyName;
                         thisShape.meshshape = 'plymesh';
                         shapeText = piShape2Text(thisShape);
                     else
@@ -485,14 +471,14 @@ for nMat = 1:numel(thisNode.material)
                         shapeText = piShape2Text(thisShape);
                     end
                 else
-                    thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                    thisShape.filename = plyName;
                     thisShape.meshshape = 'plymesh';
                     shapeText = piShape2Text(thisShape);
 
                 end
             else
                 if isequal(fileext, '.ply')
-                    thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
+                    thisShape.filename = pbrtName;
                     thisShape.meshshape = 'trianglemesh';
                     shapeText = piShape2Text(thisShape);
                     % we are going to write the .pbrt
@@ -514,23 +500,36 @@ for nMat = 1:numel(thisNode.material)
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', fname)),'\n');
             end
         else
-            % If it does not have a shape file name, but it has a non-empty
-            % shape slot, we assume that the shapeText has a lot of points
-            % and nodes and such that define the shape.  We print those out
-            % into a PBRT file that we will include.  We do not keep that
-            % information in the main pbrt scene file.
+            % There is no shape file name, but there is a shape
+            % struct. That means the shapeText has a lot of points and
+            % nodes that define the shape.  We print those out into a
+            % PBRT file and change the shapeText line so that it
+            % includes the file name.
             % 
-            % We open inside of the geometry folder a file with the name of
-            % this node. We add an Include line for that geometry file into
+            % We create the geometry file inside the geometry folder.
+            % We use a unique identifier for the file name so that
+            % whenever we have the same points, we have the same name.
+            % We then add an Include line for that geometry file into  
             % the scene_geometry.pbrt file.
             %
-            % We are concerned to make thisNode.name something reliable and
-            % repeatable.  It shouldn't depend on the node id, for example.
+            % In the past, we used the node name.  That was not
+            % unique.            
             
+            %{
+            % Changed April 3rd, 2023
             name = thisNode.name;  % Maybe we choose a better name.  No ID.
             tmp = split(name,'_');
             name = [tmp{end-2},tmp{end-1},tmp{end}];
+            %}
+
+            % The shape name is associated with the scene and a hash
+            % based on its 3D points.  I am only taking the first 8
+            % characters of the hash - 8^16 possibilities should be enough!
+            str = ieHash(thisShape.point3p);
+            name = sprintf('%s-%s',thisR.get('input basename'),str(1:8));
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
+
+            shapeText = piShape2Text(thisShape);
             fprintf(geometryFile,'%s',shapeText);
             fclose(geometryFile);
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
