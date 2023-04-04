@@ -136,11 +136,11 @@ while cnt <= length(txt)
     end
 
     if strcmp(currentLine,'AttributeBegin')
-        % We reached a line with AttributeBegin. If the next line is
-        % also an AttributeBegin (nested) we will be back here after
-        % the following call.  If it is not, we will parse the
-        % contents of the next line using other parts of this routine
-        % to generate a subnode.
+        % We reached a line with AttributeBegin. 
+        % 
+        % Parse the next few lines for materials, shapes, lights. If
+        % we run into another AttributeBegin, we recursively come back
+        % here.
         [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
 
         % We now have a subnode and a returned line, where we should
@@ -243,15 +243,15 @@ while cnt <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
-
-        % Shape
+        % Shape - We have a shape.  Why don't we create the object
+        % now?  And we add any existing material to it?
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
 
     elseif strcmp(currentLine,'AttributeEnd')
-        % What do we do if we have a namedmaterial (light) and a shape
-        % (trianglemesh)? What kind of a node is that?  cornell_box.pbrt
-        %
+        % We have come to the AttributeEnd. We accumulate the
+        % information we have read into a node.  The type of node will
+        % depend on what we read since the AttributeBegin line.
 
         % Let's make this a separate function.  This is what we do after we
         % get to the AttributeEnd line in the block.
@@ -275,7 +275,12 @@ while cnt <= length(txt)
             % material or medium.  Create the subtree with the added light
             % or object.
             if exist('areaLight','var') || exist('lght','var')
-                % It is a light
+                % We detected a light of some type.
+
+                isNode = true;
+                baseName = thisR.get('input basename');
+                % function resLight = parseGeometryLight();
+                % end
 
                 resLight = piAssetCreate('type', 'light');
                 if exist('lght','var')
@@ -286,42 +291,39 @@ while cnt <= length(txt)
                 if exist('areaLight','var')
                     resLight.lght = piLightGetFromText({areaLight}, 'print', false);
                     if exist('shape', 'var')
-                        % What happens to an area light without a
-                        % shape?
                         resLight.lght{1}.shape = shape;
+                    else, warning("Area light with no shape.");
                     end
                 end
 
-                if exist('name', 'var')
-                    if isempty(name), name = sprintf('light-%d',randi(1000,1)); end
-                    resLight.name = sprintf('%s_L', name);
-                    resLight.lght{1}.name = resLight.name;
-                else
-                    warning('No name for light on line %d',cnt);
+                % Manage the name with an _L at the end.
+                if isempty(name), name = piLightNameCreate(resLight.lght,isNode,baseName);
+                elseif ~isequal(name(end-1:end),'_L')
+                    name = sprintf('%s_L', name);
                 end
+
+                % We have two names.  One for the node and one for the
+                % object itself, I guess. (BW).
+                resLight.name = name;
+                resLight.lght{1}.name = resLight.name;
 
                 % Add the light asset to the collection of subtrees.
                 subtrees = cat(1, subtrees, tree(resLight));
 
                 % ------- A shape.  Create an object node
             elseif exist('shape','var') % || exist('medium','var') || exist('mat','var')
-                % We have a shape, medium, or material
+                % We have a shape.  We just exited from an
+                % AttributeEnd
 
-                % This AttributeBegin/End has a material or medium, but no
-                % shape.  We don't want to change the tree.  The material
-                % or medium should have been handled by the parse
-                % materials.
-                if ~exist('shape','var')
-                    % This is not the right way to return.  Need to
-                    % figure it out.
-                    warning('Material or medium with no shape.');
-                    trees = [];
-                    parsedUntil = cnt;
-                    return;
-                elseif iscell(shape) %#ok<NODEF>
-                    shape = shape{1};
-                end
+                if iscell(shape), shape = shape{1}; end
 
+                % Find a nicer way to do this.
+                if exist('name','var'),oNAME = name; else, oNAME = []; end
+                if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
+                if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
+                resObject = parseGeometryObject(shape,oNAME,oMAT,oMEDIUM);
+
+                %{
                 % We create object (assets) here.  If the shape is
                 % empty for an asset, we will have a problem later.
                 % So check how that can happen.
@@ -334,64 +336,64 @@ while cnt <= length(txt)
                 resObject.shape = shape;
 
                 % Set the object name
-                if exist('name','var')
-                    resObject.name = sprintf('%s_O', name);
-                else
-                    resObject.name = piShapeNameCreate(shape);
+                if exist('name','var'), resObject.name = sprintf('%s_O', name);
+                else,                   resObject.name = piShapeNameCreate(shape);
                 end
                 
                 % Hopefully we have a material or medium for this object.
-                if exist('mat','var')  && ~isempty(mat)
-                    resObject.material = mat;
-                end
+                if exist('mat','var')  && ~isempty(mat), resObject.material = mat;  end
 
                 if exist('medium','var'), resObject.medium = medium; end
-
+                %}
                 % Add this object into the subtrees.
                 subtrees = cat(1, subtrees, tree(resObject));
 
             end
 
+            % Build the node
+            if exist('name','var'),oNAME = name; else, oNAME = []; end
+            if exist('sz','var'),oSZ = sz; else, oSZ = []; end
+            if exist('rot','var'), oROT = rot; else, oROT = []; end
+            if exist('translation','var'),oTRANS = translation; else, oTRANS = []; end
+            if exist('scale','var'),oSCALE = scale; else, oSCALE = []; end
+
+            resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
+
+            %{
             % Create a branch node with the transform information.
             % This should be the parent of the light or object,            
             resCurrent = piAssetCreate('type', 'branch');
 
             % If present populate fields.
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
-
-            if exist('InstanceName','var')
-                resCurrent.referenceObject = InstanceName;
-            end
-
+            
             if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
                 if exist('sz','var'), resCurrent.size = sz; end
                 if exist('rot','var'), resCurrent.rotation = {rot}; end
                 if exist('translation','var'), resCurrent.translation = {translation}; end
                 if exist('scale','var'), resCurrent.scale = {scale}; end
             end
+            %}
+
+            if exist('InstanceName','var'), resCurrent.referenceObject = InstanceName; end
 
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
-                % TODO: solve the empty node name problem here
                 trees = trees.graft(1, subtrees(ii));
             end
 
         elseif exist('name','var')
-            % We got this far, but all we have is a name. There are no
-            % light or object properties.
-            %
-            % So we create a branch, with no parameters, and add it to the
-            % main tree.
-            %
-            % Should we add this?
-            % warning('Empty branch added on line %d',cnt);
+            % We got this far, but all we have is a name. This happens
+            % when we have an AttributeEnd on the currentLine.  Let's
+            % fix it.
+            warning('Empty branch added on line %d: %s',cnt,currentLine);
             resCurrent = piAssetCreate('type', 'branch');
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
             end
-        end
+        end  % AttributeEnd
 
         % Return, indicating how far we have gotten in the txt
         parsedUntil = cnt;
@@ -400,7 +402,6 @@ while cnt <= length(txt)
         % WorldBegin gets here.  Also, if there is no AttributeBegin
         % but there is a shape, we get here.  Perhaps there has been a
         % transform, as well.
-        %        
         if strcmp(currentLine,'WorldBegin')
             % Do nothing
         elseif exist('shape','var') && exist('mat','var')
@@ -449,7 +450,8 @@ fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
 
 % Each subtree is an asset.
 if ~isempty(subtrees)
-    % ZLY: modified the root node to a identity transformation branch node.
+    % ZLY: 
+    % Modified the root node to a identity transformation branch node.
     % Need more test
     rootAsset = piAssetCreate('type', 'branch');
     rootAsset.name = 'root_B';
@@ -464,3 +466,43 @@ else
 end
 
 end
+
+%% Helper functions
+% parseGeometryBranch
+% parseGeometryObject
+
+%% Make a branch node
+function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
+% Create a branch node with the transform information.
+
+% This should be the parent of the light or object,
+resCurrent = piAssetCreate('type', 'branch');
+
+% If present populate fields.
+if ~isempty('name'), resCurrent.name = sprintf('%s_B', name); end
+
+if ~isempty(sz), resCurrent.size = sz; end
+if ~isempty(rot), resCurrent.rotation = {rot}; end
+if ~isempty(translation), resCurrent.translation = {translation}; end
+if ~isempty(scale), resCurrent.scale = {scale}; end
+
+end
+
+%% Make an object node
+function resObject = parseGeometryObject(shape,name,mat,medium)
+% Create an object node with the shape and material information
+
+resObject = piAssetCreate('type', 'object');
+resObject.shape = shape;
+
+% Set the object name
+if ~isempty(name), resObject.name = sprintf('%s_O', name);
+else,              resObject.name = piShapeNameCreate(shape);
+end
+
+% Hopefully we have a material or medium for this object.
+if ~isempty(mat),      resObject.material = mat;  end
+if ~isempty(medium), resObject.medium = medium; end
+
+end
+

@@ -6,19 +6,26 @@ function name = piShapeNameCreate(shape,isNode,baseName)
 %
 % Input
 %   shape  - Shape struct built by piRead and parseGeometryText
-%   isNode - This is shape node name.  If not, then this is a filename.
-%             Default (true)
+%   isNode - This is a shape node name or a shape filename.
+%            Default (true, a node)
 %   baseName - Scene base name (thisR.get('input basename'));
 %
 % Output
 %    name - The node or file name
 %
 % Brief description
-%   (1) Use file name if it is already part of the shape struct
-%   (2) Hash on the point3p slot in the shape struct
+%   (1) If shape.filename is part of the shape struct, use it.
+%   (2) If not, use ieHash on the point3p slot in the shape struct to
+%     create a name using the baseName and the hash on point3p.  We only
+%     use the first 8 characters in the hex hash. I think that should be
+%     enough (8^16), especially combined with the base scene name.
 %
-% If this is a node name, we append an _O. If it is a file, we do not
-% append an _O. 
+% If this is a node name, we append an _O to indicate it is an object.
+% If it is a filename, we do not append an _O.
+%
+% I am not sure why, but we sometimes have a _mat0 in the filename.
+% We erase that.  Some historian needs to tell me how that gets there
+% (BW 4/4/2023).
 %
 % See also
 %   parseGeometryText, piGeometryWrite

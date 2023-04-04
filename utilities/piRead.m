@@ -5,25 +5,30 @@ function thisR = piRead(fname,varargin)
 %    thisR = piRead(fname, varargin)
 %
 % Description
-%  piREAD parses a pbrt scene file and returns the full set of rendering
-%  information in the slots of the "x@J8HDaCMm3LxM3Lrecipe" object. The recipe object
-%  contains all the information used by PBRT to render the scene.
+%  Parses a pbrt scene file and returns the full set of rendering
+%  information in the slots of the "recipe" object. The recipe object
+%  contains all the information needed by PBRT to render the scene.
 %
-%  We extract blocks with these names from the text prior to WorldBegin
+%  We extract blocks with these names from the text prior to
+%  WorldBegin block.  We call these the pbrtOptions
 %
 %    Camera, Sampler, Film, PixelFilter, SurfaceIntegrator (V2, or
 %    Integrator in V3), Renderer, LookAt, Transform, ConcatTransform,
 %    Scale
 %
-%  After creating this recipe object in Matlab, we can modify it
-%  programmatically.  We use piWrite with the modified recipe to
-%  create an updated version of the PBRT files for rendering. These
-%  updated PBRT files are rendered using piRender, which executes the
-%  PBRT docker image and return an ISETCam scene or oi format).
+%  We then read the World block, following WorldBegin.
 %
-%  Because we have write, render and show, we also have a single
-%  function (piWRS) that performs all three of these functions in a
-%  single call.
+%  We typically modify the recipe object programmatically. When we are
+%  finished, we use piWrite to write the modified recipe into an
+%  updated version of the PBRT scene files for rendering. These are
+%  typically written in local/.  The updated PBRT files in local/ are
+%  rendered using piRender, which executes the PBRT docker image and
+%  return an ISETCam (scene or oi format).  The rendering is typically
+%  done remotely on a machine with GPUs and with the Resource files.
+%
+%  Because we commonly execute write, render and show, we also have a
+%  single function (piWRS) that performs all three of these functions
+%  in a single call.
 %
 % Required inputs
 %   fname - full path to a pbrt scene file.  The geometry, materials
@@ -66,14 +71,11 @@ function thisR = piRead(fname,varargin)
 
 % Examples:
 %{
- thisR = piRecipeDefault('scene name','MacBethChecker');
+ thisR = piRecipeCreate('MacBethChecker');
  thisR.set('skymap','room.exr');
  % thisR = piRecipeDefault('scene name','SimpleScene');
  % thisR = piRecipeDefault('scene name','teapot');
-
- piWrite(thisR);
- scene =  piRender(thisR);
- sceneWindow(scene);
+ piWRS(thisR);
 %}
 
 %% Parse the inputs

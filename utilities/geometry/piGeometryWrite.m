@@ -404,43 +404,46 @@ function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing,thisR)
 % Write out an object, including its named material and shape
 % information.
 
-% This might be Henryk related?  Something about the participating
-% media?
+%% The participating media PBRT line.  More comments needed
 if ~isempty(thisNode.mediumInterface)
     fprintf(fid, strcat(spacing, indentSpacing, "MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
 end
 
-% Write out material and shape properties of the object
+%% Write out material properties
 % An object can contain multiple material and shapes
 for nMat = 1:numel(thisNode.material)
-    if iscell(thisNode.material)
-        material = thisNode.material{nMat};
-    else
-        material = thisNode.material;
+
+    if iscell(thisNode.material), material = thisNode.material{nMat};
+    else,                         material = thisNode.material;
     end
 
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));
     catch
-        % we should never go here
+        % we should never be here
+        warning('Material write issue.')
         materialTxt = piMaterialText(material, thisR);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
 
-    % Deal with possibility of a cell array for the shape
+    % Deal with possibility of a cell array for the shape.  This logic
+    % seems off to me (BW, 4/4/2023)
     if ~iscell(thisNode.shape)
         thisShape = thisNode.shape;
     elseif iscell(thisNode.shape) && numel(thisNode.shape)
+        % At least one entry in the cell?
         thisShape = thisNode.shape{1};
     else
         thisShape = thisNode.shape{nMat};
     end
 
-    % If there is a shape, act here.
+    % There is a shape.  We create the text line for the shape and
+    % potentially a file that will be included.
     if ~isempty(thisShape)
 
-        % The text ight
+        % There is a filename that will be included to define the
+        % shape
         if ~isempty(thisShape.filename)
             % If the shape has a file specification, we do this
 
@@ -477,79 +480,80 @@ for nMat = 1:numel(thisNode.material)
 
                 end
             else
+                % There is no filename.
+                % We are going to write one out based on the data in shape.  
                 if isequal(fileext, '.ply')
                     thisShape.filename = pbrtName;
                     thisShape.meshshape = 'trianglemesh';
                     shapeText = piShape2Text(thisShape);
-                    % we are going to write the .pbrt
                     fileext = '.pbrt';
                 end
             end
 
-
+            % Write out the PBRT text line for this shape
             if isequal(fileext, '.ply')
-                % Write out the line
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
-                % In this case it is a .pbrt file, we will write it out.
-                if iscell(thisNode.shape)
-                    fname = thisNode.shape{1}.filename;
-                else
-                    fname = thisNode.shape.filename;
-                end
-                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', fname)),'\n');
+                % 4/4/2023 - Removed code and used pbrtName
+                %
+                %                 if iscell(thisNode.shape)
+                %                     fname = thisNode.shape{1}.filename;
+                %                 else
+                %                     fname = thisNode.shape.filename;
+                %                 end
+                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', pbrtName)),'\n');
             end
         else
             % There is no shape file name, but there is a shape
-            % struct. That means the shapeText has a lot of points and
-            % nodes that define the shape.  We print those out into a
-            % PBRT file and change the shapeText line so that it
-            % includes the file name.
+            % struct. That means the shapeText has points and nodes
+            % that define the shape.  We write those out into a PBRT
+            % file inside geometry/ and change the shapeText line to
+            % include the file name.
             % 
-            % We create the geometry file inside the geometry folder.
-            % We use a unique identifier for the file name so that
-            % whenever we have the same points, we have the same name.
-            % We then add an Include line for that geometry file into  
-            % the scene_geometry.pbrt file.
+            % We use an identifier for the file name based on the
+            % shape itself. Whenever we have the same points, we have
+            % the same name.
             %
-            % In the past, we used the node name.  That was not
-            % unique.            
-            
+
             %{
             % Changed April 3rd, 2023
+            % In the past, we used the node name for the file.  That
+            % was not unique, and changed every time we ran the code.
             name = thisNode.name;  % Maybe we choose a better name.  No ID.
             tmp = split(name,'_');
             name = [tmp{end-2},tmp{end-1},tmp{end}];
             %}
 
-            % The shape name is associated with the scene and a hash
-            % based on its 3D points.  I am only taking the first 8
-            % characters of the hash - 8^16 possibilities should be enough!
-            % Should call piShapeNameCreate() here
             isNode = false;
             name = piShapeNameCreate(thisShape,isNode, thisR.get('input basename'));
-            %             str = ieHash(thisShape.point3p);
-            %             name = sprintf('%s-%s',thisR.get('input basename'),str(1:8));
-            geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
-
             shapeText = piShape2Text(thisShape);
+
+            % Open the shape specification PBRT file and write the shape data
+            geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
             fprintf(geometryFile,'%s',shapeText);
             fclose(geometryFile);
+
+            % Include the file in the scene_geometry.pbrt file
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
 
         end
-        fprintf(fid,'\n');
+        fprintf(fid,'\n');  % Enjoy a carriage return.
     else
-        % thisShape is empty.  That can't be good.
-
-        % For instances, we don't seem to get passed something we can use
-
-        % for some Included .pbrt files we don't get a shape
+        % thisShape is empty.  That can't be good.  
+        % On 4/4/2023 this worked for ChessSet, SimpleScene, and the
+        % fixed up 'kitchen' scene with AttributeBegin/End.  Also with
+        % Macbeth Check via piRecipeCreate.  So a decent set of tests.
+        % 
+        % But no testing for complex auto scenes with multiple
+        % instances. 
+        error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
+        
+        %{
+        % For some Included .pbrt files we don't get a shape
         % since it is in the file. So  we need to write out
         % the include statement instead
         % If it does not have ply file, do this
         % There is a shape slot we also open the geometry file.
-        warning('hack:  thisShape is empty for material %d in node %s.\n',nMat,thisNode.name)
         name = thisNode.name;
         % HACK! to test if getting rid of instancing helps-- DJC
         instanceHack = false;
@@ -578,7 +582,7 @@ for nMat = 1:numel(thisNode.material)
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
         end
         fprintf(fid,'\n');
-
+        %}
     end
 end
 
