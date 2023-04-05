@@ -1,4 +1,5 @@
-function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+function [trees, parsedUntil] = parseGeometryText(thisR, txt)
+% function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % Parse the text from a Geometry file, returning an asset subtree
 %
 % Synopsis
@@ -30,13 +31,13 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %   geometry text in the PBRT scene file (and the includes) line by
 %   line. It tries to find the materials and shapes to create the
 %   assets.  It also tries to find the transforms for the branch node
-%   above the object node. 
-% 
-%   There are two types of parsing that this routine handles. 
+%   above the object node.
+%
+%   There are two types of parsing that this routine handles.
 
-%   AttributeBegin/End 
+%   AttributeBegin/End
 %    Each such block and creates an asset.  Because these can be
-%    nested (i.e., we have AttributeBegin/End within such a block), this 
+%    nested (i.e., we have AttributeBegin/End within such a block), this
 %    routine is recursive (calls itself).
 %
 %   NamedMaterial-Shapes
@@ -44,7 +45,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %    NamedMaterial followed by shapes.
 %
 %   This routine fails on some 'wild' type PBRT scenes. In those
-%   casses we try setting thisR.exporter = 'Copy'. 
+%   casses we try setting thisR.exporter = 'Copy'.
 %
 %   A limitation si that we do not have an overview of the whole
 %   'world' text at the beginning. Maybe we should do a quick first
@@ -109,10 +110,13 @@ objectIndex = 0;
 nMaterial   = 0;
 nShape      = 0;
 
-% This code seems designed to work only with the AttributeBegin/End
-% format.  Perhaps we should look for AttributeBegin, and if there are
-% none in the txt, we should parse with the other style (BW).
+% Strip WorldBegin
+if isequal(txt{1},'WorldBegin'),  txt = txt(2:end); end
 
+% This code is initially designed to work only with the
+% AttributeBegin/End format.  Perhaps we should look for
+% AttributeBegin, and if there are none in the txt, we should parse
+% with the other style (BW).
 % Counts which line we are on.  At the end we return how many lines we
 % have counted (parsedUntil)
 cnt = 1;
@@ -136,19 +140,20 @@ while cnt <= length(txt)
     end
 
     if strcmp(currentLine,'AttributeBegin')
-        % We reached a line with AttributeBegin. 
-        % 
+        % We reached a line with AttributeBegin.
+        %
         % Parse the next few lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
-        % here.
-        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
+        % here.  Typically, we return here with the subnodes from the
+        % AttributeBegin/End block.
+        % [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
+        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end));
+        
+        % We now have the collection of nodes from the
+        % AttributeBegin/End block, and the returned line number
+        % (retLine) to continue.
 
-        % We now have a subnode and a returned line, where we should
-        % continue our analysis at line number (retLine) next time
-        % around.
-
-        % We are mostly dealing with the names of the subnodes in
-        % here.
+        % Incomprehensible - but relevant for piLabel (and isetauto?)
         %
         % For piLabel (the pixel level labeling algorithm) to work, we
         % need to have subnodes.Node to be >=2. But in that case, the
@@ -156,44 +161,54 @@ while cnt <= length(txt)
         % values. It would be much better if the labels were based on
         % the == 2 condition, not this >= 2 case. (BW: I think I wrote
         % this.  I am confused by it).
+
+        % We are handling a special labeling case here.  It seems this
+        % is where we are adding the extra string of '001', '002'.  It
+        % arises in the case of the Macbeth Checker but hardly
+        % anywhere else.  We should figure out when we need to add the
+        % objectIndex and when we do not!!
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
-            % The last node is an object.  When we only process for == 2,
+            % The last node is an object, not a light.
+            % When we only process for == 2,
             % the pixel-wise labeling method, piLabel, fails. So we
             % don't come in here for == 2.
             lastNode = subnodes.Node{end};
-            if strcmp(lastNode.type,'object')
-                % The last node is an object and we are careful about
-                % its name.
-                %
-                % In some cases (e.g., the Macbeth color checker) there is
-                % one ObjectName in the comment, but multiple components to
-                % the object (the patches). We need to distinguish the
-                % components. We use the objectIndex to distinguish them.
-                %
-                % But when we allow processing with >2 nodes, we
-                % repeatedly add an objectIndex to the node name.
-                % That's ugly, but runs.
-                objectIndex = objectIndex+1;
-                lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
-                subnodes = subnodes.set(numel(subnodes.Node),lastNode);
 
-                % This is the base name, with the _O part removed.  It has
-                % the object index in it.
-                baseName = lastNode.name(1:end-2);
+            % The last node is an object.  So we are going to
+            % adjust the node names.
+            %
+            % In certain cases (e.g., the Macbeth color checker) there is
+            % one ObjectName in the comment, but multiple components to
+            % the object (the patches). We need to distinguish the
+            % components. We use the objectIndex to distinguish them.
+            %
+            % But when we allow processing with >2 nodes, we
+            % repeatedly add an objectIndex to the node name.
+            % That's ugly, but runs.
+            objectIndex = objectIndex+1;
+            lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
+            subnodes = subnodes.set(numel(subnodes.Node),lastNode);
 
-                % The other subnodes above the object are checked.  If
-                % they are unlabeled we give them the same name but
-                % _B, rather than _O.
-                for ii=(numel(subnodes.Node)-1):-1:1
-                    thisNode = subnodes.Node{ii};
-                    if isequal(thisNode.name,'_B')
-                        % An empty name.  So let's change it and put it
-                        % in place.
-                        thisNode.name = sprintf('%s_B',baseName);
-                        subnodes = subnodes.set(ii,thisNode);
-                    end
+            %{
+            % This is the base name, with the _O part removed.  It has
+            % the object index in it.
+            baseName = lastNode.name(1:end-2);
+
+            % The other subnodes above the object are checked.  If
+            % they are unlabeled we give them the same name but
+            % _B, rather than _O.  Given all the recent work on
+            % naming, however, this may no longer happen?  Need to
+            % check with isetauto examples, though.
+            for ii=(numel(subnodes.Node)-1):-1:1
+                thisNode = subnodes.Node{ii};
+                if isequal(thisNode.name,'_B')
+                    % An empty name.
+                    warning('subnode processing, empty name');
+                    thisNode.name = sprintf('%s_B',baseName);
+                    subnodes = subnodes.set(ii,thisNode);
                 end
             end
+            %}
         end
 
         % This is the main point of this section.  Add the subnodes to
@@ -297,7 +312,8 @@ while cnt <= length(txt)
                 end
 
                 % Manage the name with an _L at the end.
-                if isempty(name), name = piLightNameCreate(resLight.lght,isNode,baseName);
+                if ~exist('name','var') || isempty(name)
+                    name = piLightNameCreate(resLight.lght,isNode,baseName);
                 elseif ~isequal(name(end-1:end),'_L')
                     name = sprintf('%s_L', name);
                 end
@@ -316,64 +332,33 @@ while cnt <= length(txt)
                 % AttributeEnd
 
                 if iscell(shape), shape = shape{1}; end
-
-                % Find a nicer way to do this.
-                if exist('name','var'),oNAME = name; else, oNAME = []; end
+                name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+                
+                % We create object (assets) here.
                 if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
                 if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
-                resObject = parseGeometryObject(shape,oNAME,oMAT,oMEDIUM);
+                resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
 
-                %{
-                % We create object (assets) here.  If the shape is
-                % empty for an asset, we will have a problem later.
-                % So check how that can happen.
-                %
-                % I don't understand why we are creating materials or
-                % mediumInterface here.  I need to ask Zhenyi, Henryk,
-                % and Zheng. Such materials do get created in
-                % contemporary-bathroom, but not, say, in kitchen.
-                resObject = piAssetCreate('type', 'object');
-                resObject.shape = shape;
-
-                % Set the object name
-                if exist('name','var'), resObject.name = sprintf('%s_O', name);
-                else,                   resObject.name = piShapeNameCreate(shape);
-                end
-                
-                % Hopefully we have a material or medium for this object.
-                if exist('mat','var')  && ~isempty(mat), resObject.material = mat;  end
-
-                if exist('medium','var'), resObject.medium = medium; end
-                %}
                 % Add this object into the subtrees.
                 subtrees = cat(1, subtrees, tree(resObject));
 
             end
 
-            % Build the node
-            if exist('name','var'),oNAME = name; else, oNAME = []; end
-            if exist('sz','var'),oSZ = sz; else, oSZ = []; end
+            % Create a branch node with the transform information.
+            % This should be the parent of the light or object.
+            % Sometimes we end up here following an AttributeEnd and
+            % we put in a branch node.  I am not sure why.  To keep
+            % things moving, I make up an AttributeEnd name for such a
+            % node.  Otherwise, we have a name.
+            if exist('name','var'),oNAME = name; else, oNAME = 'AttributeEnd'; 
+            end
+            if exist('sz','var'),  oSZ = sz; else, oSZ = []; end
             if exist('rot','var'), oROT = rot; else, oROT = []; end
             if exist('translation','var'),oTRANS = translation; else, oTRANS = []; end
             if exist('scale','var'),oSCALE = scale; else, oSCALE = []; end
 
+            if isempty(oNAME), warning('Empty branch node name.'); end
             resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
-
-            %{
-            % Create a branch node with the transform information.
-            % This should be the parent of the light or object,            
-            resCurrent = piAssetCreate('type', 'branch');
-
-            % If present populate fields.
-            if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
-            
-            if exist('rot','var') || exist('translation','var') || exist('scale', 'var')
-                if exist('sz','var'), resCurrent.size = sz; end
-                if exist('rot','var'), resCurrent.rotation = {rot}; end
-                if exist('translation','var'), resCurrent.translation = {translation}; end
-                if exist('scale','var'), resCurrent.scale = {scale}; end
-            end
-            %}
 
             if exist('InstanceName','var'), resCurrent.referenceObject = InstanceName; end
 
@@ -386,24 +371,38 @@ while cnt <= length(txt)
             % We got this far, but all we have is a name. This happens
             % when we have an AttributeEnd on the currentLine.  Let's
             % fix it.
-            warning('Empty branch added on line %d: %s',cnt,currentLine);
+            % warning('Empty branch added on line %d: %s',cnt,currentLine);
+            % trees = subtrees;
+            % {
             resCurrent = piAssetCreate('type', 'branch');
             if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
             end
+            %}
+        else
+            % No objects or name.  This is probably an empty block
+            %   AttributeBegin
+            %   AttributeEnd
+            % Maybe we just return subtrees as the trees.
+            trees = subtrees;
+
         end  % AttributeEnd
 
         % Return, indicating how far we have gotten in the txt
         parsedUntil = cnt;
+
+        if ~exist('trees','var'), warning('trees not defined'); end
+
         return;
     else
-        % WorldBegin gets here.  Also, if there is no AttributeBegin
-        % but there is a shape, we get here.  Perhaps there has been a
-        % transform, as well.
+        % WorldBegin gets here.
+        % Also, if there is no AttributeBegin but there is a shape, we
+        % get here.  Perhaps there has been a transform, as well.
         if strcmp(currentLine,'WorldBegin')
             % Do nothing
+            disp('WorldBegin')
         elseif exist('shape','var') && exist('mat','var')
             if iscell(shape), shape = shape{1}; end
 
@@ -450,7 +449,7 @@ fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
 
 % Each subtree is an asset.
 if ~isempty(subtrees)
-    % ZLY: 
+    % ZLY:
     % Modified the root node to a identity transformation branch node.
     % Need more test
     rootAsset = piAssetCreate('type', 'branch');
@@ -464,6 +463,8 @@ if ~isempty(subtrees)
 else
     trees=[];
 end
+
+if ~exist('trees','var'), warning('trees not defined'); end
 
 end
 
@@ -494,14 +495,10 @@ function resObject = parseGeometryObject(shape,name,mat,medium)
 
 resObject = piAssetCreate('type', 'object');
 resObject.shape = shape;
-
-% Set the object name
-if ~isempty(name), resObject.name = sprintf('%s_O', name);
-else,              resObject.name = piShapeNameCreate(shape);
-end
+resObject.name = name;
 
 % Hopefully we have a material or medium for this object.
-if ~isempty(mat),      resObject.material = mat;  end
+if ~isempty(mat),    resObject.material = mat;  end
 if ~isempty(medium), resObject.medium = medium; end
 
 end

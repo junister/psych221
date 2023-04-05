@@ -1864,20 +1864,21 @@ switch ieParamFormat(param)  % lower case, no spaces
                             val(2) = range(pts(2:3:end))*thisScale(2);
                             val(3) = range(pts(3:3:end))*thisScale(3);
                         elseif ~isempty(theShape.filename)
-                            % Read a ply file.  The problem is the ply file
-                            % needs to be in the output directory.  This is
-                            % a limitation.  For example, if we have a
-                            % character, the file might be in the asset
-                            % directory and not yet copied to the output
-                            % directory. (BW).
-                            plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
-                            if exist(plyFile,'file')
-                                tmp = pcread(plyFile);
-                                val(1) = tmp.XLimits(2) - tmp.XLimits(1);
-                                val(2) = tmp.YLimits(2) - tmp.YLimits(1);
-                                val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
-                            else
-                                warning('ply file not yet in output dir.')
+                            % Read a ply file.  The ply file needs to
+                            % be in the output directory. (BW).
+                            [~,~,ext] = fileparts(theShape.filename);
+                            if isequal(ext,'.ply')
+                                plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
+                                if exist(plyFile,'file')
+                                    tmp = pcread(plyFile);
+                                    val(1) = tmp.XLimits(2) - tmp.XLimits(1);
+                                    val(2) = tmp.YLimits(2) - tmp.YLimits(1);
+                                    val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
+                                else
+                                    warning('ply file not yet in output dir.')
+                                end
+                            elseif isequal(ext,'.pbrt')
+                                % disp('PBRT size not yet implemented.')
                             end
                         end
                     else

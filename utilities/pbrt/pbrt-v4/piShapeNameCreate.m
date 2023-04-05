@@ -36,20 +36,22 @@ if ~isNode && ~exist('baseName','var')
 end
 
 if ~isempty(shape.filename)
-    [~, n, ~] = fileparts(shape.filename);
+    [~, name, ~] = fileparts(shape.filename);
 
     % If there was a '_mat0' added to the ply file name
     % remove it.
-    if contains(n,'_mat0'), n = erase(n,'_mat0'); end
+    if contains(name,'_mat0'), name = erase(name,'_mat0'); end
 
     % Add the _O because it is an object.
-    if isNode, name = sprintf('%s_O', n);
-    else,  name = n;
+    if isNode && ~isequal(name(end-1:end),'_O')
+        name = sprintf('%s_O', name);    
     end
 else
     str = ieHash(shape.point3p);
     name = sprintf('%s-%s',baseName,str(1:8));
-    if isNode, name = sprintf('%s_O', name); end
+    if isNode && ~isequal(name(end-1:end),'_O')
+        name = sprintf('%s_O', name); 
+    end
 end
 
 end
