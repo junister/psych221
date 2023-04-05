@@ -224,6 +224,22 @@ else
     end
 end
 
+% Make the object names unique.
+%
+% This is important when there is a global object name (colorChecker) and
+% each components is assigned the global name, but given a different shape.
+% It happens for the Macbeth case. Ugh.
+oNames = thisR.get('object names no id');
+if numel(oNames) ~= numel(unique(oNames))
+    % make them unique here
+    idx = thisR.get('objects');
+    oNames = matlab.lang.makeUniqueStrings(oNames);
+    for ii=1:length(idx)
+        thisR.set('asset',idx(ii),'name',oNames{ii});
+    end
+    thisR.assets.uniqueNames;
+end
+
 end
 
 %% Helper functions
