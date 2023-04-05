@@ -351,6 +351,8 @@ while cnt <= length(txt)
                 if ~exist('name','var')
                     % The name might have been passed in
                     name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+                elseif ~isequal(name(end-1:end),'_O')
+                    name = sprintf('%s_O',name);
                 end
 
                 % We create object (assets) here.
