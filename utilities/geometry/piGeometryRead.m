@@ -85,7 +85,7 @@ thisR.assets = parseGeometryText(thisR, txtLines,'');
 [thisR.assets, ~] = thisR.assets.uniqueNames;
 end
 
-%%
+%{
 %
 function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %
@@ -322,3 +322,4 @@ end
 parsedUntil = i;
 
 end
+%}

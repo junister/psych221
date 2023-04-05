@@ -10,10 +10,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "001_001_geometry/ChessSet_mesh_00001_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "ChessSet_mesh_00001_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00001_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00001_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -23,10 +23,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "002_001_geometry/ChessSet_mesh_00002_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "002_ChessSet_mesh_00002_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00002_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00002_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -36,10 +36,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "003_001_geometry/ChessSet_mesh_00003_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "003_ChessSet_mesh_00003_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.07119 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00003_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00003_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -49,10 +49,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "004_001_geometry/ChessSet_mesh_00004_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "004_ChessSet_mesh_00004_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.03869 0.05206 -0.05485 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00004_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00004_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -62,10 +62,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "005_001_geometry/ChessSet_mesh_00005_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "005_ChessSet_mesh_00005_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00005_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00005_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -75,10 +75,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "006_001_geometry/ChessSet_mesh_00006_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "006_ChessSet_mesh_00006_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04742 0.05206 -0.05478 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00006_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00006_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -88,10 +88,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "007_001_geometry/ChessSet_mesh_00007_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "007_ChessSet_mesh_00007_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00007_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00007_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -101,10 +101,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "008_001_geometry/ChessSet_mesh_00008_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "008_ChessSet_mesh_00008_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00008_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00008_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -114,10 +114,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "009_001_geometry/ChessSet_mesh_00009_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "009_ChessSet_mesh_00009_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.07119 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00009_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00009_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -127,10 +127,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "010_001_geometry/ChessSet_mesh_00010_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "010_ChessSet_mesh_00010_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01099 0.05206 -0.03791 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00010_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00010_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -140,10 +140,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "011_001_geometry/ChessSet_mesh_00011_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "011_ChessSet_mesh_00011_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.00815 0.05206 -0.01009 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00011_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00011_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -153,10 +153,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "012_001_geometry/ChessSet_mesh_00012_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "012_ChessSet_mesh_00012_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01465 0.05206 -0.00515 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00012_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00012_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -166,10 +166,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "013_001_geometry/ChessSet_mesh_00013_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "013_ChessSet_mesh_00013_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.00386 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00013_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00013_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -179,10 +179,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "014_001_geometry/ChessSet_mesh_00014_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "014_ChessSet_mesh_00014_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00014_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00014_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -192,10 +192,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "015_001_geometry/ChessSet_mesh_00015_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "015_ChessSet_mesh_00015_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.03025 0.05206 -0.01418 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00015_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00015_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -205,10 +205,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "016_001_geometry/ChessSet_mesh_00016_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "016_ChessSet_mesh_00016_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.01614 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00016_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00016_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -218,10 +218,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "017_001_geometry/ChessSet_mesh_00017_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "017_ChessSet_mesh_00017_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00017_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00017_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -231,10 +231,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "018_001_geometry/ChessSet_mesh_00018_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "018_ChessSet_mesh_00018_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00018_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00018_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -244,10 +244,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "019_001_geometry/ChessSet_mesh_00019_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "019_ChessSet_mesh_00019_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00019_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00019_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -270,10 +270,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "021_001_geometry/ChessSet_mesh_00020_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "021_ChessSet_mesh_00020_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04856 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00020_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00020_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -283,10 +283,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "022_001_geometry/ChessSet_mesh_00021_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "022_ChessSet_mesh_00021_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.00386 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00021_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00021_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -296,10 +296,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "023_001_geometry/ChessSet_mesh_00022_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "023_ChessSet_mesh_00022_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00022_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00022_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -309,10 +309,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "024_001_geometry/ChessSet_mesh_00023_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "024_ChessSet_mesh_00023_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01465 0.05206 -0.00515 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00023_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00023_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -322,10 +322,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "025_001_geometry/ChessSet_mesh_00024_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "025_ChessSet_mesh_00024_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.03278 0.05392 0.14116 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00024_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00024_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -335,10 +335,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "026_001_geometry/ChessSet_mesh_00025_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "026_ChessSet_mesh_00025_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04417 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00025_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00025_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -348,10 +348,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "027_001_geometry/ChessSet_mesh_00026_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "027_ChessSet_mesh_00026_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.05665 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00026_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00026_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -361,10 +361,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "028_001_geometry/ChessSet_mesh_00027_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "028_ChessSet_mesh_00027_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00027_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00027_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -374,10 +374,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "029_001_geometry/ChessSet_mesh_00028_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "029_ChessSet_mesh_00028_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.09314 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00028_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00028_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -387,10 +387,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "030_001_geometry/ChessSet_mesh_00029_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "030_ChessSet_mesh_00029_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.00398 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00029_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00029_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -400,10 +400,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "031_001_geometry/ChessSet_mesh_00030_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "031_ChessSet_mesh_00030_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04856 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00030_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00030_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -413,10 +413,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "032_001_geometry/ChessSet_mesh_00031_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "032_ChessSet_mesh_00031_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.00815 0.05206 -0.01009 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00031_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00031_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -426,10 +426,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "033_001_geometry/ChessSet_mesh_00032_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "033_ChessSet_mesh_00032_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.07330 0.05206 0.04345 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00032_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00032_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -439,10 +439,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "034_001_geometry/ChessSet_mesh_00033_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "034_ChessSet_mesh_00033_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.05665 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00033_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00033_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -452,10 +452,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "035_001_geometry/ChessSet_mesh_00034_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "035_ChessSet_mesh_00034_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00034_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00034_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -465,10 +465,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "036_001_geometry/ChessSet_mesh_00035_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "036_ChessSet_mesh_00035_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00035_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00035_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -478,10 +478,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "037_001_geometry/ChessSet_mesh_00036_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "037_ChessSet_mesh_00036_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04856 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00036_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00036_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -491,10 +491,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "038_001_geometry/ChessSet_mesh_00037_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "038_ChessSet_mesh_00037_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00037_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00037_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -504,10 +504,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "039_001_geometry/ChessSet_mesh_00038_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "039_ChessSet_mesh_00038_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00038_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00038_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -530,10 +530,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "041_001_geometry/ChessSet_mesh_00039_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "041_ChessSet_mesh_00039_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00039_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00039_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -543,10 +543,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "042_001_geometry/ChessSet_mesh_00040_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "042_ChessSet_mesh_00040_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00040_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00040_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -556,10 +556,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "043_001_geometry/ChessSet_mesh_00041_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "043_ChessSet_mesh_00041_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.02756 0.05089 0.13030 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00041_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00041_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -569,10 +569,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "044_001_geometry/ChessSet_mesh_00042_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "044_ChessSet_mesh_00042_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00042_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00042_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -582,10 +582,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "045_001_geometry/ChessSet_mesh_00043_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "045_ChessSet_mesh_00043_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00043_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00043_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -595,10 +595,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "046_001_geometry/ChessSet_mesh_00044_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "046_ChessSet_mesh_00044_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.00815 0.05206 -0.01009 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00044_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00044_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -608,10 +608,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "047_001_geometry/ChessSet_mesh_00045_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "047_ChessSet_mesh_00045_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.01614 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00045_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00045_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -621,10 +621,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "048_001_geometry/ChessSet_mesh_00046_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "048_ChessSet_mesh_00046_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.09314 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00046_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00046_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -634,10 +634,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "049_001_geometry/ChessSet_mesh_00047_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "049_ChessSet_mesh_00047_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.01238 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00047_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00047_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -647,10 +647,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "050_001_geometry/ChessSet_mesh_00048_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "050_ChessSet_mesh_00048_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00048_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00048_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "planeTan"
@@ -660,10 +660,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "051_001_geometry/ChessSet_mesh_00049_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "051_ChessSet_mesh_00049_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04417 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00049_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00049_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -673,10 +673,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "052_001_geometry/ChessSet_mesh_00050_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "052_ChessSet_mesh_00050_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01465 0.05206 -0.00515 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00050_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00050_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -686,10 +686,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "053_001_geometry/ChessSet_mesh_00051_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "053_ChessSet_mesh_00051_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.04742 0.05206 -0.05478 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00051_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00051_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -699,10 +699,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "054_001_geometry/ChessSet_mesh_00052_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "054_ChessSet_mesh_00052_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.03025 0.05206 -0.01418 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00052_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00052_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -712,10 +712,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "055_001_geometry/ChessSet_mesh_00053_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "055_ChessSet_mesh_00053_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00053_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00053_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -725,10 +725,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "056_001_geometry/ChessSet_mesh_00054_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "056_ChessSet_mesh_00054_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01019 0.05206 -0.03788 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00054_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00054_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -738,10 +738,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "057_001_geometry/ChessSet_mesh_00055_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "057_ChessSet_mesh_00055_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.01614 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00055_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00055_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -751,10 +751,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "058_001_geometry/ChessSet_mesh_00056_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "058_ChessSet_mesh_00056_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.02756 0.05089 0.13030 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00056_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00056_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -764,10 +764,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "059_001_geometry/ChessSet_mesh_00057_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "059_ChessSet_mesh_00057_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00057_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00057_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -777,10 +777,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "060_001_geometry/ChessSet_mesh_00058_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "060_ChessSet_mesh_00058_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00058_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00058_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -790,10 +790,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "061_001_geometry/ChessSet_mesh_00059_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "061_ChessSet_mesh_00059_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00059_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00059_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -803,10 +803,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "062_001_geometry/ChessSet_mesh_00060_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "062_ChessSet_mesh_00060_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00060_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00060_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -830,10 +830,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "064_001_geometry/ChessSet_mesh_00061_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "064_ChessSet_mesh_00061_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.03869 0.05206 -0.05485 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00061_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00061_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mrke_brikker_004"
@@ -843,10 +843,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "065_001_geometry/ChessSet_mesh_00062_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "065_ChessSet_mesh_00062_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.00398 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00062_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00062_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -856,10 +856,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "066_001_geometry/ChessSet_mesh_00063_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "066_ChessSet_mesh_00063_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00063_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00063_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -882,10 +882,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "068_001_geometry/ChessSet_mesh_00064_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "068_ChessSet_mesh_00064_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00064_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00064_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -895,10 +895,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "069_001_geometry/ChessSet_mesh_00065_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "069_ChessSet_mesh_00065_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00065_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00065_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -908,10 +908,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "070_001_geometry/ChessSet_mesh_00066_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "070_ChessSet_mesh_00066_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.01238 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00066_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00066_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -921,10 +921,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "071_001_geometry/ChessSet_mesh_00067_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "071_ChessSet_mesh_00067_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.07330 0.05206 0.04345 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00067_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00067_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -934,10 +934,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "072_001_geometry/ChessSet_mesh_00068_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "072_ChessSet_mesh_00068_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.02050 0.05206 0.00863 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00068_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00068_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -947,10 +947,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "073_001_geometry/ChessSet_mesh_00069_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "073_ChessSet_mesh_00069_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.01099 0.05206 -0.03791 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00069_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00069_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -960,10 +960,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "074_001_geometry/ChessSet_mesh_00070_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "074_ChessSet_mesh_00070_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 0.13569 0.05206 0.19678 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00070_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00070_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Lyse_brikker_008"
@@ -973,10 +973,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "075_001_geometry/ChessSet_mesh_00071_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "075_ChessSet_mesh_00071_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [-1.93136 -0.00000 0.83683 0.00000 -0.00000 2.10486 -0.00000 0.00000 -0.83683 -0.00000 -1.93136 0.00000 -0.03278 0.05392 0.14116 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00071_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00071_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Filt_004"
@@ -986,10 +986,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "076_001_geometry/ChessSet_mesh_00072_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "076_ChessSet_mesh_00072_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [0.00000 0.00000 4.70344 0.00000 4.70283 -0.07552 0.00000 0.00000 0.07552 4.70284 0.00000 0.00000 0.01273 0.02390 0.03115 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00072_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00072_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mtl"
@@ -999,10 +999,10 @@ AttributeBegin
     AttributeEnd
 AttributeEnd
 AttributeBegin
-    #MeshName: "077_001_geometry/ChessSet_mesh_00073_B" #Dimension:[0.0000 0.0000 0.0000]
+    #MeshName: "077_ChessSet_mesh_00073_B" #Dimension:[0.0000 0.0000 0.0000]
     ConcatTransform [0.00000 0.00000 4.70344 0.00000 4.70283 -0.07552 0.00000 0.00000 0.07552 4.70284 0.00000 0.00000 0.01273 0.02590 0.03115 1.00000]
     AttributeBegin
-        #MeshName: "001_geometry/ChessSet_mesh_00073_B" #Dimension:[0.0000 0.0000 0.0000]
+        #MeshName: "ChessSet_mesh_00073_B" #Dimension:[0.0000 0.0000 0.0000]
         ConcatTransform [1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000 0.00000 0.00000 0.00000 0.00000 1.00000]
         AttributeBegin
             NamedMaterial "Mtl8"
