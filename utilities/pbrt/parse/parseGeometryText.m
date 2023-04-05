@@ -1,4 +1,4 @@
-function [trees, parsedUntil] = parseGeometryText(thisR, txt)
+function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % Parse the text from a Geometry file, returning an asset subtree
 %
@@ -13,7 +13,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt)
 % Inputs:
 %   thisR       - a scene recipe
 %   txt         - text of the PBRT geometry information that we parse
-%   name        - current object name
+%   name        - Use this object name
 %
 % Outputs:
 %   trees       - A tree class that describes the assets and their geometry
@@ -146,8 +146,7 @@ while cnt <= length(txt)
         % we run into another AttributeBegin, we recursively come back
         % here.  Typically, we return here with the subnodes from the
         % AttributeBegin/End block.
-        % [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
-        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end));
+        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
         
         % We now have the collection of nodes from the
         % AttributeBegin/End block, and the returned line number
@@ -332,8 +331,11 @@ while cnt <= length(txt)
                 % AttributeEnd
 
                 if iscell(shape), shape = shape{1}; end
-                name = piShapeNameCreate(shape,true,thisR.get('input basename'));
-                
+                if ~exist('name','var')
+                    % The name might have been passed in
+                    name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+                end
+
                 % We create object (assets) here.
                 if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
                 if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end

@@ -71,8 +71,7 @@ end
 
 %% The asset tree is built here.  This is the main work.
 newWorld = txt;
-% [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
-[subnodes, parsedUntil] = parseGeometryText(thisR, newWorld);
+[subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
 if trees.Parent == 0
