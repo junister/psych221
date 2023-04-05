@@ -104,7 +104,8 @@ subtrees = {};
 % We sometimes have multiple objects inside one Begin/End group that have
 % the same name.  We add an index in this routine to distinguish them.  See
 % below.
-objectIndex = 0;
+% Removed when we changed to making the object names unique in piRead.
+% objectIndex = 0;
 
 % Multiple material and shapes can be used for one object.
 nMaterial   = 0;
@@ -119,6 +120,7 @@ if isequal(txt{1},'WorldBegin'),  txt = txt(2:end); end
 % with the other style (BW).
 % Counts which line we are on.  At the end we return how many lines we
 % have counted (parsedUntil)
+if isempty(txt{1}), warning('Empty text line.'); end
 cnt = 1;
 while cnt <= length(txt)
 

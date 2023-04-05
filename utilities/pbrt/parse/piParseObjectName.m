@@ -29,20 +29,20 @@ for ii = 1:numel(patternList)
     if isempty(loc)
         continue;
     else
-        loc_dimenstion = strfind(txt,'#Dimension');
+        loc_dimension = strfind(txt,'#Dimension');
         break;
     end
 end
 
 % Look for a colon
 % pos = strfind(txt,':');
-if isempty(loc_dimenstion)
+if isempty(loc_dimension)
     name = txt(loc(1)+length(pattern) + 1:end);
     sz.l = [];
     sz.w = [];
     sz.h = [];
 else
-    name = txt(loc(1)+length(pattern) + 1:loc_dimenstion-1);
+    name = txt(loc(1)+length(pattern) + 1:loc_dimension-1);
 
     posA = strfind(txt,'[');
     posB = strfind(txt,']');

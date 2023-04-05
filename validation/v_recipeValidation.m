@@ -10,7 +10,8 @@ validNames = piRecipeCreate('list');
 
 %% This loop should work.
 for ii=1:numel(validNames)
-    disp(validNames{ii})
+    fprintf('\n-----------\n');
+    fprintf('Scene:  %s\n',validNames{ii})
     try
         thisR = piRecipeCreate(validNames{ii});
         piWRS(thisR);

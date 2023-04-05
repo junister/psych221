@@ -58,7 +58,7 @@ rootID = 1;
 % Write object and light definitions in the main geometry
 % and any needed child geometry files
 if ~isempty(obj)
-    recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile);
+    recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile, thisR);
 
     % Write tree structure in main geometry file
     lvl = 0;
@@ -78,7 +78,7 @@ end
 %% ---------  Geometry file writing helpers
 
 %% Recursively write nodes
-function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
+function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath, thisR)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
 % (2) path to each child geometry file
@@ -162,7 +162,7 @@ for ii = 1:numel(children)
                 end
                 lvl = 1;
                 writeGeometryFlag = 1;
-                recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag);
+                recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag, thisR);
                 fprintf(fid, 'ObjectEnd\n\n');
                 % nodeID == 1 is rootID.
                 if nodeID ~=1, return; end
@@ -195,6 +195,7 @@ function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeo
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
 %
+
 %% Get children of this node
 children = obj.getchildren(thisNode);
 %% Loop through children at this level
@@ -312,6 +313,7 @@ for ii = 1:numel(children)
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
 
+        % (fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, ...
             outFilePath, writeGeometryFlag, thisR);
 
