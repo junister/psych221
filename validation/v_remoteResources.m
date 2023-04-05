@@ -10,10 +10,15 @@ if ~piDockerExists, piDockerConfig; end
 % piWrite?
 % {
 % kitchen - original debug ...
-thisR = piRecipeDefault('scene name', 'kitchen');
+thisR = piRecipeDefault('scene name','Simple Scene');
+thisR = piRecipeDefault('scene name','ChessSet');
+
+% I may not have the edited version at home! (BW)
+thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
 
 thisR = piRecipeCreate('cornell_box');
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
+
 piWRS(thisR);
 
 out = thisR.get('outputfile');

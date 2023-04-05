@@ -160,21 +160,37 @@ while cnt <= length(txt)
         % values. It would be much better if the labels were based on
         % the == 2 condition, not this >= 2 case. (BW: I think I wrote
         % this.  I am confused by it).
-
+        
         % We are handling a special labeling case here.  It seems this
         % is where we are adding the extra string of '001', '002'.  It
         % arises in the case of the Macbeth Checker but hardly
         % anywhere else.  We should figure out when we need to add the
         % objectIndex and when we do not!!
+        %{
         if numel(subnodes.Node) >= 2 && strcmp(subnodes.Node{end}.type, 'object')
-            % The last node is an object, not a light.
-            % When we only process for == 2,
+        
+            % Eliminating this, I could still run ChessSet, SimpleScene and
+            % MacbethChecker.  It is possible (likely) that the problems
+            % arise with piLabel.  See below.  Also, colorChecker has a
+            % problem printing out the objects because it has duplicate row
+            % names.
+            %
+            % So, perhaps we should do a pass on the asset tree
+            %{
+             idx = thisR.get('objects');
+             for ii=1:numel(idx)
+               thisR.assets.Node{idx(ii)}.name
+             end
+            %}
+            
+            % When we only process for == 2 subnodes,
             % the pixel-wise labeling method, piLabel, fails. So we
             % don't come in here for == 2.
+
+            % The last node is an object.
             lastNode = subnodes.Node{end};
 
-            % The last node is an object.  So we are going to
-            % adjust the node names.
+            % We are going to adjust the node names.
             %
             % In certain cases (e.g., the Macbeth color checker) there is
             % one ObjectName in the comment, but multiple components to
@@ -183,7 +199,7 @@ while cnt <= length(txt)
             %
             % But when we allow processing with >2 nodes, we
             % repeatedly add an objectIndex to the node name.
-            % That's ugly, but runs.
+            % That's ugly, but runs.  I do not understand (BW).
             objectIndex = objectIndex+1;
             lastNode.name = sprintf('%03d_%s',objectIndex, lastNode.name);
             subnodes = subnodes.set(numel(subnodes.Node),lastNode);
@@ -209,7 +225,8 @@ while cnt <= length(txt)
             end
             %}
         end
-
+        %}
+        
         % This is the main point of this section.  Add the subnodes to
         % the subtrees.
         subtrees = cat(1, subtrees, subnodes);
@@ -352,14 +369,14 @@ while cnt <= length(txt)
             % we put in a branch node.  I am not sure why.  To keep
             % things moving, I make up an AttributeEnd name for such a
             % node.  Otherwise, we have a name.
-            if exist('name','var'),oNAME = name; else, oNAME = 'AttributeEnd'; 
+            if exist('name','var') && ~isempty(name)
+                oNAME = name; else, oNAME = 'AttributeEnd'; 
             end
             if exist('sz','var'),  oSZ = sz; else, oSZ = []; end
             if exist('rot','var'), oROT = rot; else, oROT = []; end
             if exist('translation','var'),oTRANS = translation; else, oTRANS = []; end
             if exist('scale','var'),oSCALE = scale; else, oSCALE = []; end
 
-            if isempty(oNAME), warning('Empty branch node name.'); end
             resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
 
             if exist('InstanceName','var'), resCurrent.referenceObject = InstanceName; end

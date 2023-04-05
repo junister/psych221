@@ -405,22 +405,27 @@ classdef tree
             % tree. 
             
             % Update all nodes
-            obj.mapFullName2Idx = containers.Map;
-            obj.mapShortName2Idx = containers.Map;
-            obj.mapLgtFullName2Idx = containers.Map;
+            obj.mapFullName2Idx     = containers.Map;
+            obj.mapShortName2Idx    = containers.Map;
+            obj.mapLgtFullName2Idx  = containers.Map;
             obj.mapLgtShortName2Idx = containers.Map;
             if ~exist('id','var') || isempty(id)
-                % Some nodes may already have an ID.  So we strip the ID
-                % from all the nodes.
+                % Some nodes already have an ID.  So we strip the ID from
+                % all the nodes.
                 stripNames = obj.stripID([],'');
                 names = cell(1, numel(stripNames));
                 if obj.nnodes > 999999
                     warning('Number of nodes: %d exceeds 999999', obj.nnodes);
                 end
                 
-                % Then we do the renaming.  We are considering if we need
-                % to use %04ID to allow 10,000 nodes for the driving
-                % scenes.
+                % We will assign a unique ID to each node, which make them
+                % unique. But first, if two nodes are part of a single object and
+                % thus have the but have the same name, we add an
+                % additional index to its name. That way one object (e.g.,
+                % colorChecker) with multiple components (the patches) can
+                % identify the different patches as distinct objects.
+                % We used to do this in parseGeometryText.  But that code
+                % was incomprehensible.
                 for ii=1:obj.nnodes
                     if isstruct(obj.Node{ii})
                         obj.Node{ii}.name = sprintf('%06dID_%s', ii, stripNames{ii});
