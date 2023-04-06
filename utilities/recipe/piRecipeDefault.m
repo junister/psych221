@@ -289,8 +289,8 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Blender';   % Blender
     case {'testplane'}
-        sceneDir = 'testplane';
-        sceneFile = [sceneDir, '.fbx'];
+        sceneDir  = 'testplane';
+        sceneFile = 'testplane-converted.pbrt';
         exporter = 'Copy';
     case {'stepfunction'}
         sceneDir = 'stepfunction';

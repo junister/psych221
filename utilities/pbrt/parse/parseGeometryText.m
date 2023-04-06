@@ -332,7 +332,7 @@ while cnt <= length(txt)
                 % Manage the name with an _L at the end.
                 if ~exist('name','var') || isempty(name)
                     name = piLightNameCreate(resLight.lght,isNode,baseName);
-                elseif ~isequal(name(end-1:end),'_L')
+                elseif length(name) < 2 || ~isequal(name(end-1:end),'_L')
                     name = sprintf('%s_L', name);
                 end
 
@@ -353,7 +353,7 @@ while cnt <= length(txt)
                 if ~exist('name','var')
                     % The name might have been passed in
                     name = piShapeNameCreate(shape,true,thisR.get('input basename'));
-                elseif ~isequal(name(end-1:end),'_O')
+                elseif length(name) < 2 || ~isequal(name(end-1:end),'_O')
                     name = sprintf('%s_O',name);
                 end
 

@@ -16,15 +16,21 @@ function thisR = piRead(fname,varargin)
 %    Integrator in V3), Renderer, LookAt, Transform, ConcatTransform,
 %    Scale
 %
-%  We then read the World block, following WorldBegin.
+%  We then read and parse the World block, which is the text following
+%  WorldBegin.  This returns the asset tree that is part of the
+%  recipe.
 %
-%  We typically modify the recipe object programmatically. When we are
-%  finished, we use piWrite to write the modified recipe into an
-%  updated version of the PBRT scene files for rendering. These are
-%  typically written in local/.  The updated PBRT files in local/ are
-%  rendered using piRender, which executes the PBRT docker image and
-%  return an ISETCam (scene or oi format).  The rendering is typically
-%  done remotely on a machine with GPUs and with the Resource files.
+%  After reading the PBRT files and building the recipe, we typically
+%  modify the recipe object programmatically. When we are finished, we
+%  use piWrite to write the modified recipe into an updated version of
+%  the PBRT scene files for rendering. These are written in the
+%  directory local/ inside of the ISET3d root.
+%
+%  The updated PBRT files in local/ are rendered using piRender, which
+%  executes the PBRT docker image and return an ISETCam (scene or oi
+%  format).  The rendering is typically done remotely on a machine
+%  with GPUs and with the Resource files.  The rendering returns an
+%  ISET scene or oi, which we then show.
 %
 %  Because we commonly execute write, render and show, we also have a
 %  single function (piWRS) that performs all three of these functions
@@ -53,11 +59,14 @@ function thisR = piRead(fname,varargin)
 %
 %  piRead assumes that
 %
-%     * There is a block of text before WorldBegin and no more text after
-%     * Comments (indicated by '#' in the first character) and blank lines
-%        are ignored.
-%     * When a block is encountered, the text lines that follow beginning
-%       with a '"' are included in the block.
+%     * There is a block of text before WorldBegin 
+%     * After WorldBegin the assets are defined by PBRT commands, such
+%       as Shape and NamedMaterials. 
+%     * Most comments (indicated by '#' in the first character) and
+%       blank lines are ignored.  But some special comment lines are
+%       interpreted
+%     * When an AttributeBegin block is encountered, the text lines
+%       that follow beginning with a '"' are included in the block. 
 %
 %  piRead will not work with PBRT files that do not meet these criteria.
 %
@@ -224,20 +233,29 @@ else
     end
 end
 
-% Make the object names unique.
-%
+%% Fixing up the object names
+
+% If we have assets, including objects, make the object names unique.
 % This is important when there is a global object name (colorChecker) and
 % each components is assigned the global name, but given a different shape.
 % It happens for the Macbeth case. Ugh.
-oNames = thisR.get('object names no id');
-if numel(oNames) ~= numel(unique(oNames))
-    % make them unique here
-    idx = thisR.get('objects');
-    oNames = matlab.lang.makeUniqueStrings(oNames);
-    for ii=1:length(idx)
-        thisR.set('asset',idx(ii),'name',oNames{ii});
+if ~isempty(thisR.assets)
+    oNames = thisR.get('object names no id');
+
+    % Make unique names
+    if numel(oNames) ~= numel(unique(oNames))
+        idx = thisR.get('objects');
+
+        % Strip the _O.  Maybe this should be a recipeGet method.
+        for ii=1:numel(oNames), oNames{ii} = oNames{ii}(1:end-2); end
+
+        % make them unique here
+        oNames = matlab.lang.makeUniqueStrings(oNames);
+        for ii=1:length(idx)
+            thisR.set('asset',idx(ii),'name',sprintf('%s_O',oNames{ii}));
+        end
+        thisR.assets.uniqueNames;
     end
-    thisR.assets.uniqueNames;
 end
 
 end

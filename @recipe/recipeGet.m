@@ -1399,7 +1399,7 @@ switch ieParamFormat(param)  % lower case, no spaces
     case 'objectsimplenames'
         % Names of the objects
         % We think there is ID_Instance_ObjectName_O.
-        % So we try to delete the first two and the O atthe end.
+        % So we try to delete the first two and the O at the end.
         % If there are fewer parts, we delete less.
         ids = thisR.get('object ids');
         names = thisR.assets.names;
