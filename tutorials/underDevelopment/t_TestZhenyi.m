@@ -1,4 +1,9 @@
-fileName = fullfile(piRootPath, 'data/V4/low-poly-taxi/low-poly-taxi.pbrt');
+% This is an example of an isetauto scene
+%
+% It has object instances
+%
+
+fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
 
 thisR = piRead(fileName);
 
