@@ -5,13 +5,14 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %   [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %
 % Brief description
-%   The txt is the world text from the PBRT file.  It is parsed into
-%   objects and materials, creating the asset tree.  The assets
-%   include objects and lights.
+%   The txt is the world text from a PBRT file.  It is parsed into
+%   objects creating the asset tree.  The assets include objects and
+%   lights.
 % 
 %   This function relies on parseGeometryText, which works on
-%   AttributeBegin/End sequences.  The code here also handles the
-%   special cases of ObjectBegin/End instances.
+%   AttributeBegin/End sequences and certain other simple file
+%   formats.  The code here also handles the special cases of
+%   ObjectBegin/End instances, but that may be deprecated.
 %
 % Inputs
 %   thisR - ISET3d recipe
@@ -19,8 +20,7 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %
 % Outputs
 %   trees    -  Assets in a tree format
-%   newWorld - Modified world text to use, after removing unnecessary
-%              lines.
+%   newWorld - Modified world text, after removing unnecessary lines.
 %
 % See also
 %   parseGeometryText
@@ -30,10 +30,22 @@ rootAsset = piAssetCreate('type', 'branch');
 rootAsset.name = 'root_B';
 trees = tree(rootAsset);
 
-% Identify the lines with objects
-objBeginLocs = find(contains(txt,'ObjectBegin'));
-objEndLocs   = find(contains(txt, 'ObjectEnd'));
+%% Identify the lines with objects
 
+% We should probably eliminate this because we are not consistent with V3
+% any more anyway. Perhaps we need it if we are still writing out with
+% piWrite the ObjectInstance (BW,ZLY) 
+
+objBeginLocs = find(contains(txt,'ObjectBegin'));
+objEndLocs   = find(contains(txt,'ObjectEnd'));
+
+% Can I replace ObjectBegin with AttributeBegin?
+for ii=1:numel(objBeginLocs)
+    txt{objBeginLocs(ii)} = 'AttributeBegin';
+    txt{objEndLocs(ii)} = 'AttributeEnd';
+end
+
+%{
 % For each line with an ObjectBegin, we do some pre-processing.  What?
 % This seems like special case because many scenes never enter this
 % ObjectBegin processing.  We need some more comments here (BW).
@@ -59,18 +71,20 @@ if ~isempty(objBeginLocs)
             trees = trees.graft(1, subtree);
         end
 
-        % Needs comment
+        % We need to remove the empty lines here.
         txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
+    % Remove any empty cells
+    txt = txt(~cellfun('isempty',txt));
 end
+%}
 
-% Remove empty lines
-newWorld = txt(~cellfun('isempty',txt));
 
-% The asset tree is built here.  This is the main work.
+%% The asset tree is built here.  This is the main work.
+newWorld = txt;
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
-% We assign the returned subnodes to the tree
+%% We assign the returned subnodes to the tree
 if trees.Parent == 0
     % Usually, we are here.
     trees = subnodes;   
@@ -83,9 +97,8 @@ else
 end
 
 if ~isempty(trees)
-    % In some parsing we do not yet have a tree allocated.  If there
-    % is just NamedMaterial in the Begin/End.  But almost always, we
-    % have a tree.
+    % In some parsing we do not yet have a tree.  But almost always,
+    % we have a tree.  Trying to find the cases where parsing fails.
     trees = trees.uniqueNames;
 else
     warning('Empty tree.');

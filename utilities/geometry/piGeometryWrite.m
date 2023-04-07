@@ -58,12 +58,12 @@ rootID = 1;
 % Write object and light definitions in the main geometry
 % and any needed child geometry files
 if ~isempty(obj)
-    recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile);
+    recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile, thisR);
 
     % Write tree structure in main geometry file
     lvl = 0;
     writeGeometryFlag = 0;
-    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag);
+    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR);
 else
     % if no assets were found
     for ii = numel(thisR.world)
@@ -78,7 +78,7 @@ end
 %% ---------  Geometry file writing helpers
 
 %% Recursively write nodes
-function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath)
+function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath, thisR)
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
 % (2) path to each child geometry file
@@ -162,7 +162,7 @@ for ii = 1:numel(children)
                 end
                 lvl = 1;
                 writeGeometryFlag = 1;
-                recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag);
+                recursiveWriteAttributes(fid, obj, children(ii), lvl, outFilePath, writeGeometryFlag, thisR);
                 fprintf(fid, 'ObjectEnd\n\n');
                 % nodeID == 1 is rootID.
                 if nodeID ~=1, return; end
@@ -172,18 +172,6 @@ for ii = 1:numel(children)
         % Define object node
     elseif isequal(thisNode.type, 'object')
         % Deal with object node properties in recursiveWriteAttributes;
-        %{
-                while numel(thisNode.name) >= 8 &&...
-                        isequal(thisNode.name(5:6), 'ID')
-                    thisNode.name = thisNode.name(8:end);
-                end
-
-                fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name);
-                % write out objects
-                ObjectWrite(fid, thisNode, rootPath, "", "");
-                fprintf(fid,'\n');
-                fprintf(fid, 'ObjectEnd\n\n');
-        %}
     elseif isequal(thisNode.type, 'light') || isequal(thisNode.type, 'marker') || isequal(thisNode.type, 'instance')
         % That's okay but do nothing.
     else
@@ -202,11 +190,12 @@ end
 
 %% Recursive write for attributes?
 
-function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag)
+function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
 % Write attribute sections. The logic is:
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
 %
+
 %% Get children of this node
 children = obj.getchildren(thisNode);
 %% Loop through children at this level
@@ -324,8 +313,9 @@ for ii = 1:numel(children)
                 sprintf('ObjectInstance "%s"', thisNode.referenceObject), '\n'));
         end
 
+        % (fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
         recursiveWriteAttributes(fid, obj, children(ii), lvl + 1, ...
-            outFilePath, writeGeometryFlag);
+            outFilePath, writeGeometryFlag, thisR);
 
     elseif isequal(thisNode.type, 'object') || isequal(thisNode.type, 'instance')
         while numel(thisNode.name) >= 10 &&...
@@ -346,7 +336,7 @@ for ii = 1:numel(children)
             % We have a cross-platform problem here?
             %[p,n,e ] = fileparts(thisNode.shape{1}.filename);
             %thisNode.shape{1}.filename = fullfile(p, [n e]);
-            ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
+            ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing, thisR);
             fprintf(fid,'\n');
         else
             % use reference object
@@ -412,69 +402,70 @@ fprintf(fid, strcat(spacing, indentSpacing,...
 end
 
 %%
-function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
+function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing,thisR)
 % Write out an object, including its named material and shape
 % information.
 
-% This might be Henryk related?  Something about the participating
-% media?
+%% The participating media PBRT line.  More comments needed
 if ~isempty(thisNode.mediumInterface)
     fprintf(fid, strcat(spacing, indentSpacing, "MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
 end
 
-% Write out material and shape properties of the object
+%% Write out material properties
 % An object can contain multiple material and shapes
 for nMat = 1:numel(thisNode.material)
-    if iscell(thisNode.material)
-        material = thisNode.material{nMat};
-    else
-        material = thisNode.material;
+
+    if iscell(thisNode.material), material = thisNode.material{nMat};
+    else,                         material = thisNode.material;
     end
 
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));
     catch
-        % we should never go here
+        % we should never be here
+        warning('Material write issue.')
         materialTxt = piMaterialText(material, thisR);
         fprintf(fid, strcat(materialTxt, '\n'));
     end
 
-    % Deal with possibility of a cell array for the shape
+    % Deal with possibility of a cell array for the shape.  This logic
+    % seems off to me (BW, 4/4/2023)
     if ~iscell(thisNode.shape)
         thisShape = thisNode.shape;
     elseif iscell(thisNode.shape) && numel(thisNode.shape)
+        % At least one entry in the cell?
         thisShape = thisNode.shape{1};
     else
         thisShape = thisNode.shape{nMat};
     end
 
-    % If there is a shape, act here.
+    % There is a shape.  We create the text line for the shape and
+    % potentially a file that will be included.
     if ~isempty(thisShape)
 
-        shapeText = piShape2Text(thisShape);
-
+        % There is a filename that will be included to define the
+        % shape
         if ~isempty(thisShape.filename)
             % If the shape has a file specification, we do this
 
+            % The file can be a ply or a pbrt file. 
             % Figure out the extension.
             [~, ~, fileext] = fileparts(thisShape.filename);
 
-            % For Windows we need to "fix" the path
-            % thisShape.filename = fullfile(p, [n e]);
-
-            % The file can be a ply or a pbrt file. 
             % We seem to be testing these here.
-            if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.ply','.pbrt')),'file')
+            pbrtName = strrep(thisShape.filename,'.ply','.pbrt');
+            if ~exist(fullfile(rootPath, pbrtName),'file')
                 % No PBRT file matching the shape.  Go to line 493.
 
-                if ~exist(fullfile(rootPath, strrep(thisShape.filename,'.pbrt','.ply')),'file')
+                plyName = strrep(thisShape.filename,'.pbrt','.ply');
+                if ~exist(fullfile(rootPath, plyName),'file')
                     % No PLY file matching the shape
 
                     % Allow for meshes to be along our path
                     [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
                     if which([shapeFile shapeExtension])
-                        thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                        thisShape.filename = plyName;
                         thisShape.meshshape = 'plymesh';
                         shapeText = piShape2Text(thisShape);
                     else
@@ -485,69 +476,86 @@ for nMat = 1:numel(thisNode.material)
                         shapeText = piShape2Text(thisShape);
                     end
                 else
-                    thisShape.filename = strrep(thisShape.filename,'.pbrt','.ply');
+                    thisShape.filename = plyName;
                     thisShape.meshshape = 'plymesh';
                     shapeText = piShape2Text(thisShape);
 
                 end
             else
+                % There is no filename.
+                % We are going to write one out based on the data in shape.  
                 if isequal(fileext, '.ply')
-                    thisShape.filename = strrep(thisShape.filename,'.ply','.pbrt');
+                    thisShape.filename = pbrtName;
                     thisShape.meshshape = 'trianglemesh';
                     shapeText = piShape2Text(thisShape);
-                    % we are going to write the .pbrt
                     fileext = '.pbrt';
                 end
             end
 
-
+            % Write out the PBRT text line for this shape
             if isequal(fileext, '.ply')
-                % Write out the line
                 fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
-                % In this case it is a .pbrt file, we will write it out.
-                if iscell(thisNode.shape)
-                    fname = thisNode.shape{1}.filename;
-                else
-                    fname = thisNode.shape.filename;
-                end
-                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', fname)),'\n');
+                % 4/4/2023 - Removed code and used pbrtName
+                %
+                %                 if iscell(thisNode.shape)
+                %                     fname = thisNode.shape{1}.filename;
+                %                 else
+                %                     fname = thisNode.shape.filename;
+                %                 end
+                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', pbrtName)),'\n');
             end
         else
-            % If it does not have a shape file name, but it has a non-empty
-            % shape slot, we assume that the shapeText has a lot of points
-            % and nodes and such that define the shape.  We print those out
-            % into a PBRT file that we will include.  We do not keep that
-            % information in the main pbrt scene file.
+            % There is no shape file name, but there is a shape
+            % struct. That means the shapeText has points and nodes
+            % that define the shape.  We write those out into a PBRT
+            % file inside geometry/ and change the shapeText line to
+            % include the file name.
             % 
-            % We open inside of the geometry folder a file with the name of
-            % this node. We add an Include line for that geometry file into
-            % the scene_geometry.pbrt file.
+            % We use an identifier for the file name based on the
+            % shape itself. Whenever we have the same points, we have
+            % the same name.
             %
-            % We are concerned to make thisNode.name something reliable and
-            % repeatable.  It shouldn't depend on the node id, for example.
-            
+
+            %{
+            % Changed April 3rd, 2023
+            % In the past, we used the node name for the file.  That
+            % was not unique, and changed every time we ran the code.
             name = thisNode.name;  % Maybe we choose a better name.  No ID.
             tmp = split(name,'_');
             name = [tmp{end-2},tmp{end-1},tmp{end}];
+            %}
+
+            isNode = false;
+            name = piShapeNameCreate(thisShape,isNode, thisR.get('input basename'));
+            shapeText = piShape2Text(thisShape);
+
+            % Open the shape specification PBRT file and write the shape data
             geometryFile = fopen(fullfile(rootPath,'geometry',sprintf('%s.pbrt',name)),'w');
             fprintf(geometryFile,'%s',shapeText);
             fclose(geometryFile);
+
+            % Include the file in the scene_geometry.pbrt file
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
 
         end
-        fprintf(fid,'\n');
+        fprintf(fid,'\n');  % Enjoy a carriage return.
     else
-        % thisShape is empty.  That can't be good.
-
-        % For instances, we don't seem to get passed something we can use
-
-        % for some Included .pbrt files we don't get a shape
+        % thisShape is empty.  That can't be good.  
+        % On 4/4/2023 this worked for ChessSet, SimpleScene, and the
+        % fixed up 'kitchen' scene with AttributeBegin/End.  Also with
+        % Macbeth Check via piRecipeCreate.  So a decent set of tests.
+        % 
+        % But no testing for complex auto scenes with multiple
+        % instances. 
+        error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
+        
+        %{
+        % For some Included .pbrt files we don't get a shape
         % since it is in the file. So  we need to write out
         % the include statement instead
         % If it does not have ply file, do this
         % There is a shape slot we also open the geometry file.
-        warning('hack:  thisShape is empty for material %d in node %s.\n',nMat,thisNode.name)
         name = thisNode.name;
         % HACK! to test if getting rid of instancing helps-- DJC
         instanceHack = false;
@@ -576,7 +584,7 @@ for nMat = 1:numel(thisNode.material)
             fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
         end
         fprintf(fid,'\n');
-
+        %}
     end
 end
 

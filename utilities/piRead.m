@@ -5,25 +5,36 @@ function thisR = piRead(fname,varargin)
 %    thisR = piRead(fname, varargin)
 %
 % Description
-%  piREAD parses a pbrt scene file and returns the full set of rendering
-%  information in the slots of the "x@J8HDaCMm3LxM3Lrecipe" object. The recipe object
-%  contains all the information used by PBRT to render the scene.
+%  Parses a pbrt scene file and returns the full set of rendering
+%  information in the slots of the "recipe" object. The recipe object
+%  contains all the information needed by PBRT to render the scene.
 %
-%  We extract blocks with these names from the text prior to WorldBegin
+%  We extract blocks with these names from the text prior to
+%  WorldBegin block.  We call these the pbrtOptions
 %
 %    Camera, Sampler, Film, PixelFilter, SurfaceIntegrator (V2, or
 %    Integrator in V3), Renderer, LookAt, Transform, ConcatTransform,
 %    Scale
 %
-%  After creating this recipe object in Matlab, we can modify it
-%  programmatically.  We use piWrite with the modified recipe to
-%  create an updated version of the PBRT files for rendering. These
-%  updated PBRT files are rendered using piRender, which executes the
-%  PBRT docker image and return an ISETCam scene or oi format).
+%  We then read and parse the World block, which is the text following
+%  WorldBegin.  This returns the asset tree that is part of the
+%  recipe.
 %
-%  Because we have write, render and show, we also have a single
-%  function (piWRS) that performs all three of these functions in a
-%  single call.
+%  After reading the PBRT files and building the recipe, we typically
+%  modify the recipe object programmatically. When we are finished, we
+%  use piWrite to write the modified recipe into an updated version of
+%  the PBRT scene files for rendering. These are written in the
+%  directory local/ inside of the ISET3d root.
+%
+%  The updated PBRT files in local/ are rendered using piRender, which
+%  executes the PBRT docker image and return an ISETCam (scene or oi
+%  format).  The rendering is typically done remotely on a machine
+%  with GPUs and with the Resource files.  The rendering returns an
+%  ISET scene or oi, which we then show.
+%
+%  Because we commonly execute write, render and show, we also have a
+%  single function (piWRS) that performs all three of these functions
+%  in a single call.
 %
 % Required inputs
 %   fname - full path to a pbrt scene file.  The geometry, materials
@@ -36,7 +47,7 @@ function thisR = piRead(fname,varargin)
 %        the exporterflag is set and we read the materials file.  If
 %        you do not want to read that file, set this to false.
 %
-%   exporter - The exporter determines ... (MORE HERE).  
+%   exporter - The exporter determines ... (MORE HERE).
 %              One of 'PARSE','Copy'.  Default is PARSE.
 %
 % Output
@@ -44,15 +55,18 @@ function thisR = piRead(fname,varargin)
 %            new pbrt scene file for rendering.  Normally, we write
 %            out the new files in (piRootPath)/local/scenename
 %
-% Assumptions:  
-% 
+% Assumptions:
+%
 %  piRead assumes that
 %
-%     * There is a block of text before WorldBegin and no more text after
-%     * Comments (indicated by '#' in the first character) and blank lines
-%        are ignored.
-%     * When a block is encountered, the text lines that follow beginning
-%       with a '"' are included in the block.
+%     * There is a block of text before WorldBegin 
+%     * After WorldBegin the assets are defined by PBRT commands, such
+%       as Shape and NamedMaterials. 
+%     * Most comments (indicated by '#' in the first character) and
+%       blank lines are ignored.  But some special comment lines are
+%       interpreted
+%     * When an AttributeBegin block is encountered, the text lines
+%       that follow beginning with a '"' are included in the block. 
 %
 %  piRead will not work with PBRT files that do not meet these criteria.
 %
@@ -66,14 +80,11 @@ function thisR = piRead(fname,varargin)
 
 % Examples:
 %{
- thisR = piRecipeDefault('scene name','MacBethChecker');
+ thisR = piRecipeCreate('MacBethChecker');
  thisR.set('skymap','room.exr');
  % thisR = piRecipeDefault('scene name','SimpleScene');
  % thisR = piRecipeDefault('scene name','teapot');
-
- piWrite(thisR);
- scene =  piRender(thisR);
- sceneWindow(scene);
+ piWRS(thisR);
 %}
 
 %% Parse the inputs
@@ -83,22 +94,25 @@ p = inputParser;
 
 p.addRequired('fname', @(x)(exist(fname,'file')));
 validExporters = {'Copy','PARSE'};
-p.addParameter('exporter', 'PARSE', @(x)(ismember(x,validExporters))); 
+p.addParameter('exporter', 'PARSE', @(x)(ismember(x,validExporters)));
 
 % We use meters in PBRT, assimp uses centimeter as base unit
 % Blender scene has a scale factor equals to 100.
 % Not sure whether other type of FBX file has this problem.
 % p.addParameter('convertunit',false,@islogical);
 
+% We will use the output in local with this name.
+%    local/outputdirname/outdirname.pbrt
 p.parse(fname,varargin{:});
+[~, outputdirname, input_ext] = fileparts(fname);
 
 thisR = recipe;
 thisR.version = 4;
-[~, inputname, input_ext] = fileparts(fname);
 
 %% If input is a FBX file, we convert it into PBRT file
 % I am starting to experiment with using this even on V4 files to get
 % a standard format.  Tried on Cornell box, and a complete bust.
+%{
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
@@ -106,51 +120,227 @@ if strcmpi(input_ext, '.fbx')
     disp('Formating PBRT file...')
     infile = piPBRTReformat(pbrtFile);
 else
+    % Typical
     infile = fname;
 end
+%}
 
-% This seems like a big fix, but latter code assumes
-% that inputFile is a full path!
+infile = fname;
+
+%% Exist checks on the whole path.
 if exist(infile,'file')
-    % Force it to be a full path
+    % Force the string to be a full path
     thisR.inputFile = which(infile);
 else
-    error('Can not find %s\n',infile);
+    error('Can not find %s on the path.\n',infile);
 end
 
 % Copy?  Or some other method?
 exporter = p.Results.exporter;
 thisR.exporter = exporter;
 
-%% Set the default output directory
-outFilepath      = fullfile(piRootPath,'local',inputname);
-outputFile       = fullfile(outFilepath,[inputname,'.pbrt']);
+%% Set the output directory in local that piWrite will use
+
+outFilepath      = fullfile(piRootPath,'local',outputdirname);
+outputFile       = fullfile(outFilepath,[outputdirname,'.pbrt']);
 thisR.set('outputFile',outputFile);
 
+%% Read PBRT options and world text.
 
-%% Read PBRT options about camera, film, sampler ...
-
-%  The text lines for the options, which are in pre-WorldBegin, are
-%  returned, and the remaining ;world' text is placed in the
-%  recipe.world slot.
-
-% All the text lines
+% The text includes just the main PBRT scene file, with the 'Includes'
 txtLines = piReadText(thisR.inputFile);
+
+%% Split the text into the options and world
+
+% The pbrt options means the camera, film, sampler and other
+% properties that are present prior to WorldBegin
+%
+% The recipe.world slot is filled with the world text on return.
+pbrtOptions = piReadWorldText(thisR, txtLines);
+
+%% Read options information
+
+% Act on the pbrtOptions, setting the recipe slots (i.e., thisR).
+piReadOptions(thisR,pbrtOptions);
+
+%% Insert the text from the Include files
+
+% These are usually _geometry.pbrt and _materials.pbrt.  At this
+% point, we can have shapes that have no names.  These are defined in
+% thisR.world just by their points and normals.
+piReadWorldInclude(thisR);
+
+%% Read Materials and Textures
+
+% Read material and texture
+[materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
+thisR.world = newWorld;
+
+thisR.materials.list = materialLists;
+thisR.materials.order = matNameList;
+
+% Add the material lib
+thisR.materials.lib = piMateriallib;
+
+thisR.textures.list = textureList;
+thisR.textures.order = texNameList;
+
+% Convert texture file format to PNG
+thisR = piTextureFileFormat(thisR);
+
+fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
+
+%% Decide whether to Copy or Parse to get the asset tree filled up
+
+if strcmpi(exporter, 'Copy')
+    % On Copy we copy the assets, we do not parse them.
+    % It would be best if we could always parse the objects.
+else
+    % Try to parse the assets
+    % Build the asset tree of objects and lights
+    [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
+    thisR.world = newWorld;
+
+    if exist('trees','var') && ~isempty(trees)
+        thisR.assets = trees.uniqueNames;
+
+        % Additional information for instanced objects
+        %
+        % PBRT does not allow instance lights, however in the cases that
+        % we would like to instance an object with some lights on it, we will
+        % need to save that additional information to it, and then repeatedly
+        % write the attributes when the objectInstance is used in attribute
+        % pairs. --Zhenyi
+        for ii  = 1:numel(thisR.assets.Node)
+            thisNode = thisR.assets.Node{ii};
+            if isfield(thisNode, 'isObjectInstance') && isfield(thisNode, 'referenceObject')
+                if isempty(thisNode.referenceObject) || thisNode.isObjectInstance == 1
+                    continue
+                end
+
+                [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
+
+                if isempty(ParentNode), continue;end
+
+                ParentNode = ParentNode{1};
+                ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
+                ParentNode.camera = thisR.lookAt;
+                thisR.assets = thisR.assets.set(ParentId, ParentNode);
+            end
+        end
+    else
+        % needs to add function to read structure like this:
+        % transform [...] / Translate/ rotate/ scale/
+        % material ... / NamedMaterial
+        % shape ...
+        disp('*** No tree returned by parseObjectInstanceText. recipe.assets is empty');
+    end
+end
+
+%% Fixing up the object names
+
+% If we have assets, including objects, make the object names unique.
+% This is important when there is a global object name (colorChecker) and
+% each components is assigned the global name, but given a different shape.
+% It happens for the Macbeth case. Ugh.
+if ~isempty(thisR.assets)
+    oNames = thisR.get('object names no id');
+
+    % Make unique names
+    if numel(oNames) ~= numel(unique(oNames))
+        idx = thisR.get('objects');
+
+        % Strip the _O.  Maybe this should be a recipeGet method.
+        for ii=1:numel(oNames), oNames{ii} = oNames{ii}(1:end-2); end
+
+        % make them unique here
+        oNames = matlab.lang.makeUniqueStrings(oNames);
+        for ii=1:length(idx)
+            thisR.set('asset',idx(ii),'name',sprintf('%s_O',oNames{ii}));
+        end
+        thisR.assets.uniqueNames;
+    end
+end
+
+end
+
+%% Helper functions
+% piReadText
+% piReadOptions
+% piReadWorldText
+% piReadLookAt
+% piParseOptions
+% piReadWorldInclude
+%
+
+%% Open, read, close excluding comment lines
+function txtLines = piReadText(fname)
+%
+% Synopsis
+%    txtLines = piReadText(fname)
+%
+% Brief description:
+%   Read the text lines in a PBRT file. Also 
+%
+%    * strips any trailing blanks on the line
+%    * does some fix for square brackets (some historical thing)
+%    * Removes all blank lines
+%
+%   Comment lines are included because they sometimes contain useful
+%   information about object names.
+%
+% Inputs
+%   fname = PBRT scene file name.  
+%
+% Outputs
+%   txtLines - Cell array of each of the text lines in the file.
+%
+% See also
+%   piRead
+
+%% Open the PBRT scene file
+fileID = fopen(fname);
+
+tmp = textscan(fileID,'%s','Delimiter','\n');
+
+txtLines = tmp{1};
+
+fclose(fileID);
+
+% Remove empty lines.  Shouldn't this be handled in piReadText?
+txtLines = txtLines(~cellfun('isempty',txtLines));
+
+% We remove any trailing blank spaces from the text lines here. (BW).
+for ii=1:numel(txtLines)
+    idx = find(txtLines{ii} ~=' ',1,'last');
+    txtLines{ii} = txtLines{ii}(1:idx);
+end
 
 % Replace left and right bracks with double-quote.  ISET3d formatting.
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
 
-% Split the text into the options and world
-% The recipe.world slot is filled with the correct world text after
-% this call.
-pbrtOptions = piReadWorldText(thisR, txtLines);
+end
 
-%% Read options information
+%% Step through each of the pbrtOption lines and updated the recipe
+function piReadOptions(thisR,pbrtOptions)
+%
+% Synopsis
+%   piReadOptions(thisR,pbrtOptions)
+%
+% Inputs
+%   thisR - PBRT recipe
+%   pbrtOptions - Text extracted from PBRT scene file containing the
+%     options for Camera, Sample, Filme, TransformTimes, PixelFilter,
+%     Integrator, and Scale
+%
+% Output
+%   thisR is updated
+%
+% See also
+%   piRead, piParseOptions
 
-% This could be piReadOptions(thisR,pbrtOptions)
 
-% think about using piParameterGet;
 % Extract camera block
 thisR.camera = piParseOptions(pbrtOptions, 'Camera');
 
@@ -213,98 +403,7 @@ else
     thisR.scale = [values{2} values{3} values{4}];
 end
 
-%%  Read world information for the Include files
-
-piReadWorldInclude(thisR);
-
-%% Decide whether to Copy or Parse
-
-if strcmpi(exporter, 'Copy')
-    % what does this mean since we then parse it?
-    %disp('Scene will not be parsed. Maybe we can parse in the future');
-        % Read material and texture
-    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
-    thisR.world = newWorld;
-    fprintf('Read %d materials and %d textures.\n', materialLists.Count, textureList.Count);
-
-    thisR.materials.list = materialLists;
-    thisR.materials.order = matNameList;
-    % Call material lib
-    thisR.materials.lib = piMateriallib;
-
-    thisR.textures.list = textureList;
-    thisR.textures.order = texNameList;
-
-    % Convert texture file format to PNG
-    thisR = piTextureFileFormat(thisR);
-
-    thisR.world = newWorld;
-else
-    % Read material and texture
-    [materialLists, textureList, newWorld, matNameList, texNameList] = parseMaterialTexture(thisR);
-    thisR.world = newWorld;
-    fprintf('Read %d materials and %d textures..\n', materialLists.Count, textureList.Count);
-
-    [trees, newWorld] = parseObjectInstanceText(thisR, thisR.world);
-    thisR.world = newWorld;
-    thisR.materials.list = materialLists;
-    thisR.materials.order = matNameList;
-    % Call material lib
-    thisR.materials.lib = piMateriallib;
-
-    thisR.textures.list = textureList;
-    thisR.textures.order = texNameList;
-
-    % Convert texture file format to PNG
-    thisR = piTextureFileFormat(thisR);
-
-    if exist('trees','var') && ~isempty(trees)
-        thisR.assets = trees.uniqueNames;
-    else
-        % needs to add function to read structure like this:
-        % transform [...] / Translate/ rotate/ scale/
-        % material ... / NamedMaterial
-        % shape ...
-        disp('*** No AttributeBegin/End pair found. Set recipe.assets to empty');
-    end
-
-    %%  Additional information for instanced objects
-
-    % PBRT does not allow instance lights, however in the cases that
-    % we would like to instance an object with some lights on it, we will
-    % need to save that additional information to it, and then repeatedly
-    % write the attributes when the objectInstance is used in attribute
-    % pairs. --Zhenyi
-    %
-    % OK, but this code breaks on the teapot because there are no
-    % assets.  So need to check that there are assets. -- BW
-    if ~isempty(thisR.assets)
-        for ii  = 1:numel(thisR.assets.Node)
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode, 'isObjectInstance') && isfield(thisNode, 'referenceObject')
-                if isempty(thisNode.referenceObject) || thisNode.isObjectInstance == 1
-                    continue
-                end
-
-                [ParentId, ParentNode] = piAssetFind(thisR, 'name', [thisNode.referenceObject,'_B']);
-
-                if isempty(ParentNode), continue;end
-
-                ParentNode = ParentNode{1};
-                ParentNode.extraNode = thisR.get('asset', ii, 'subtree','true');
-                ParentNode.camera = thisR.lookAt;
-                thisR.assets = thisR.assets.set(ParentId, ParentNode);
-            end
-        end
-    end
-
 end
-
-end
-
-%% Helper functions
-% Moved piReadText to utilities/file.  Will probably move piRead
-% there, too.
 
 %% Find the text in WorldBegin/End section
 function [options, world] = piReadWorldText(thisR,txtLines)

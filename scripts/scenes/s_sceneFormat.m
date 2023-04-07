@@ -2,6 +2,10 @@
 %
 % We take some of the complex scripts from the wild, and convert them
 % to our format.
+%{
+ ieInit;
+ if ~piDockerExists, piDockerConfig; end
+%}
 
 % kitchen
 % landscape
@@ -26,3 +30,8 @@ disp(thisR)
 
 % See if the file in kitchen-new renders
 piWRS(thisR);
+
+%% Reformat the simple scene
+
+thisR = piRecipeDefault('scene name','Simple scene');
+

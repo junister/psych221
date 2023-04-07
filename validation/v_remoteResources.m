@@ -9,9 +9,16 @@ if ~piDockerExists, piDockerConfig; end
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
 % {
-% kitchen
-thisR = piRecipeDefault('scene name', 'kitchen');
+% kitchen - original debug ...
+thisR = piRecipeDefault('scene name','Simple Scene');
+thisR = piRecipeDefault('scene name','ChessSet');
+
+% I may not have the edited version at home! (BW)
+thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
+
+thisR = piRecipeCreate('cornell_box');
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
+
 piWRS(thisR);
 
 out = thisR.get('outputfile');
