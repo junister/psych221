@@ -3,6 +3,16 @@
 % It has object instances
 %
 
+%%
+
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%%
+chdir(piRootPath);
+addpath(genpath(pwd));
+
+%%
 fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
 
 thisR = piRead(fileName);
