@@ -39,7 +39,7 @@ trees = tree(rootAsset);
 objBeginLocs = find(contains(txt,'ObjectBegin'));
 objEndLocs   = find(contains(txt,'ObjectEnd'));
 
-% Can I resplace ObjectBegin with AttributeBegin?
+% Can I replace ObjectBegin with AttributeBegin?
 for ii=1:numel(objBeginLocs)
     txt{objBeginLocs(ii)} = 'AttributeBegin';
     txt{objEndLocs(ii)} = 'AttributeEnd';

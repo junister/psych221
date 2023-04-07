@@ -112,6 +112,7 @@ thisR.version = 4;
 %% If input is a FBX file, we convert it into PBRT file
 % I am starting to experiment with using this even on V4 files to get
 % a standard format.  Tried on Cornell box, and a complete bust.
+%{
 if strcmpi(input_ext, '.fbx')
     disp('Converting FBX file into PBRT file...')
     pbrtFile = piFBX2PBRT(fname);
@@ -122,6 +123,9 @@ else
     % Typical
     infile = fname;
 end
+%}
+
+infile = fname;
 
 %% Exist checks on the whole path.
 if exist(infile,'file')
@@ -200,7 +204,7 @@ else
     if exist('trees','var') && ~isempty(trees)
         thisR.assets = trees.uniqueNames;
 
-        %  Additional information for instanced objects
+        % Additional information for instanced objects
         %
         % PBRT does not allow instance lights, however in the cases that
         % we would like to instance an object with some lights on it, we will
@@ -315,17 +319,6 @@ end
 % Replace left and right bracks with double-quote.  ISET3d formatting.
 txtLines = strrep(txtLines, '[ "', '"');
 txtLines = strrep(txtLines, '" ]', '"');
-
-%{
-% In the past we excluded the comment lines.  But then
-% we included them, probably so we can get the objectnames.  That made
-% this bit of code redundant.  I am removing (BW, March 31, 2023).
-%
-fileID = fopen(fname);
-tmp = textscan(fileID,'%s','Delimiter','\n');
-header = tmp{1};
-fclose(fileID);
-%}
 
 end
 
