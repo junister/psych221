@@ -96,6 +96,8 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % groupobjs = [];
 % children = [];
 
+persistent ABLoop;
+
 % This routine processes the text and returns a cell array of trees that
 % will be part of the whole asset tree. In many cases the returned tree
 % will be the whole asset tree for the recipe.
@@ -120,7 +122,7 @@ if isequal(txt{1},'WorldBegin'),  txt = txt(2:end); end
 % with the other style (BW).
 % Counts which line we are on.  At the end we return how many lines we
 % have counted (parsedUntil)
-if isempty(txt{1}), warning('Empty text line.'); end
+% if isempty(txt{1}), warning('Empty text line.'); end
 cnt = 1;
 while cnt <= length(txt)
 
@@ -141,9 +143,12 @@ while cnt <= length(txt)
         InstanceName = erase(currentLine(length('ObjectInstance '):end),'"');
     end
 
+    ABLoop = false;
     if strcmp(currentLine,'AttributeBegin')
-        % We reached a line with AttributeBegin.
-        %
+        % Entering an AttributeBegin/End block
+        ABLoop = true;
+        fprintf('loop = %d - %s\n',ABLoop,currentLine);
+
         % Parse the next few lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
         % here.  Typically, we return here with the subnodes from the
@@ -253,7 +258,11 @@ while cnt <= length(txt)
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
         nMaterial = nMaterial+1;
         mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW>
-
+        %{
+        if ~ABLoop
+            fprintf('Named material out of loop: %s\n',mat{nMaterial}.namedmaterial);
+        end
+        %}
     elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
 
         % Material
@@ -280,8 +289,22 @@ while cnt <= length(txt)
         % now?  And we add any existing material to it?
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
-
+        %{
+        if ~ABLoop
+            % We are not in an AttributeBegin Loop.  In that case,
+            % every time we find a shape, we add it and the current
+            % material to the subnodes.  We will need to update
+            % nShape, also.
+            fprintf('%d: %s\n',cnt,currentLine);
+            fprintf('nShape = %d\n',nShape);
+            fprintf('%s\n',mat{end}.namedmaterial);
+            pause;
+        end
+        %}
     elseif strcmp(currentLine,'AttributeEnd')
+        ABLoop = false;  % Exiting a Begin/End block
+        fprintf('loop = %d - %s\n',ABLoop,currentLine);
+
         % We have come to the AttributeEnd. We accumulate the
         % information we have read into a node.  The type of node will
         % depend on what we read since the AttributeBegin line.
