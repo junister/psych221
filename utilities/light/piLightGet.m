@@ -143,6 +143,8 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'mapname' % in v4 this changes to filename
             % DJC Use skymaps only where they belong
+            % We don't always have skymaps folder, so we should allow a
+            % full path here.
             if ~contains(val,'skymaps/')
                 prefix = 'skymaps/';
             else

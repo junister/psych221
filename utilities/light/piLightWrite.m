@@ -218,7 +218,7 @@ for ii = 1:numel(thisR.lights)
                 if ~isempty(mapnameTxt)
                     lghtDef = strcat(lghtDef, mapnameTxt);
 
-                    if ~exist(fullfile(thisR.get('output dir'),mapName),'file')
+                    if ~exist(fullfile(thisR.get('output dir'),'skymaps',mapName),'file')
                         mapFile = which(mapName);
                         if ~isempty(mapFile)
                             copyfile(mapFile,thisR.get('output dir'));

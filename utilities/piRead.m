@@ -129,8 +129,13 @@ infile = fname;
 
 %% Exist checks on the whole path.
 if exist(infile,'file')
+    if ~isempty(which(infile))
     % Force the string to be a full path
-    thisR.inputFile = which(infile);
+        thisR.inputFile = which(infile);
+    else
+        % file is not in matlab path, but exist.
+        thisR.inputFile = infile;
+    end
 else
     error('Can not find %s on the path.\n',infile);
 end

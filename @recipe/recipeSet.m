@@ -997,7 +997,12 @@ switch param
                 exrFile = which(skymapFileName);
                 if ~isempty(exrFile)
                     fprintf('Using skymap:  %s\n',exrFile);
-                    copyfile(exrFile,thisR.get('output dir'));
+                    % We keep all skymap files in this folder now.
+                    skymapdir = fullfile(thisR.get('output dir'),'skymaps');
+                    if ~exist(skymapdir ,'dir')
+                        mkdir(skymapdir);
+                    end
+                    copyfile(exrFile, skymapdir);
                 else
                     % If skymapFileName exists at different location, we
                     % move it to the output folder.
