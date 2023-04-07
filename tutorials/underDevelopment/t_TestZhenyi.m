@@ -4,7 +4,6 @@ thisR = piRead(fileName);
 
 % add a skymap
 thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
-% thisR.set('asset','night_B','rotation', [0 0 -35]); 
 
 scene = piWRS(thisR);
 
@@ -13,14 +12,17 @@ ip = piRadiance2RGB(scene,'etime',1/30);
 ipWindow(ip);
 
 
-%% move camera far away
+%% Add a different car
 carName = 'taxi';
 
 rotationMatrix = piRotationMatrix('z', -15);
-position       = [-5 -12 0];
+position       = [-4 0 0];
 
-thisR   = piObjectInstanceCreate(thisR, [carName,'_B'], ...
+thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position);
+thisR.assets = thisR.assets.uniqueNames;
+
+scene = piWRS(thisR);
 
 ip = piRadiance2RGB(scene,'etime',1/30);
 
