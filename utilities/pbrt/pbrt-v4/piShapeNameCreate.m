@@ -40,7 +40,9 @@ if ~isempty(shape.filename)
 
     % If there was a '_mat0' added to the ply file name
     % remove it.
-    if contains(name,'_mat0'), name = erase(name,'_mat0'); end
+    % DJC did this for some reason.  It's probably a mistake.  Let's leave
+    % the mat in the name if it was there.
+    % if contains(name,'_mat0'), name = erase(name,'_mat0'); end
 
     % Add the _O because it is an object.
     if isNode && ~isequal(name(end-1:end),'_O')
