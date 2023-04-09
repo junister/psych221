@@ -38,14 +38,7 @@ trees = tree(rootAsset);
 
 objBeginLocs = find(contains(txt,'ObjectBegin'));
 objEndLocs   = find(contains(txt,'ObjectEnd'));
-%{
-% Can I replace ObjectBegin with AttributeBegin?
-for ii=1:numel(objBeginLocs)
-    txt{objBeginLocs(ii)} = 'AttributeBegin';
-    txt{objEndLocs(ii)} = 'AttributeEnd';
-end
-%}
-%
+
 % For each line with an ObjectBegin, we do some pre-processing.  What?
 % This seems like special case because many scenes never enter this
 % ObjectBegin processing.  We need some more comments here (BW).
@@ -74,10 +67,10 @@ if ~isempty(objBeginLocs)
         % We need to remove the empty lines here.
         txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
+    
     % Remove any empty cells
     txt = txt(~cellfun('isempty',txt));
 end
-%}
 
 
 %% The asset tree is built here.  This is the main work.
