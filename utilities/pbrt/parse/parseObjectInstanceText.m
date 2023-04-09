@@ -30,21 +30,23 @@ rootAsset = piAssetCreate('type', 'branch');
 rootAsset.name = 'root_B';
 trees = tree(rootAsset);
 
-%% Identify the lines with objects
+%% Identify the objects
 
-% We should probably eliminate this because we are not consistent with V3
-% any more anyway. Perhaps we need it if we are still writing out with
-% piWrite the ObjectInstance (BW,ZLY) 
+% This code section might be able to be placed in parseGeometryText.
 
+% The ObjectBegin/End sections define an object that will be reused as an
+% ObjectInstance elsewhere, probably with different position, scale, or
+% even materials.  Here are the lines with objects.
 objBeginLocs = find(contains(txt,'ObjectBegin'));
 objEndLocs   = find(contains(txt,'ObjectEnd'));
 
-% For each line with an ObjectBegin, we do some pre-processing.  What?
-% This seems like special case because many scenes never enter this
-% ObjectBegin processing.  We need some more comments here (BW).
+% For each objectBegin/End section we process to create a reusable asset.
+% The 'trees' variable stores the objects we create.  The code between
+% ObjectBegin/End is parsed in the usual way via parseGeometryText.
 if ~isempty(objBeginLocs)
-    disp('ObjectBegin processing.');
+    disp('Start Object processing.');
     for objIndex = 1:numel(objBeginLocs)
+        fprintf('Object %d: ',objIndex);
 
         % Find its name.  Sometimes this is empty.  Hmm.
         name = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
@@ -64,46 +66,59 @@ if ~isempty(objBeginLocs)
             trees = trees.graft(1, subtree);
         end
 
-        % We need to remove the empty lines here.
+        % We remove the object lines here, creating an empty cell
         txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
     
-    % Remove any empty cells
+    % Remove all the empty cells created by removing the objects.
     txt = txt(~cellfun('isempty',txt));
 end
+disp('Finished Object processing.');
 
+%% Build the asset tree apart from the Object instances
 
-%% The asset tree is built here.  This is the main work.
+% The txt has no ObjectBegin/End cases, those have been processed and
+% removed.  It does have AttributeBegin/End sequences.  We parse them and
+% create the subnodes here.
 newWorld = txt;
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
 if trees.Parent == 0
-    % Usually, we are here.
+    % These are the subnodes return by parseGeometryText. There is no tree
+    % from the ObjectBegin/End.  So we use the subnodes
     trees = subnodes;   
 else
-    % We might be here if we entered the ObjectBegin loop.
+    % A tree was built in the ObjectBegin loop.  We graft the returned
+    % subnodes onto that tree.
     if ~isempty(subnodes)
         subtree = subnodes.subtree(2);
         trees = trees.graft(1, subtree);
     end
 end
 
+% The if/elses seems unnecessary to me.
 if ~isempty(trees)
     % In some parsing we do not yet have a tree.  But almost always,
     % we have a tree.  Trying to find the cases where parsing fails.
     trees = trees.uniqueNames;
 else
-    warning('Empty tree.');
+    % This seems impossible to me.  So a warning.
+    warning('Empty tree.  Hard to see how that could happen.');
 end
 
-% We should have parsed all of the lines in newWorld.  So if
-% parsedUntil exceeds the number of lines in newWorld, we just set it
-% to be equal to those lines.
-parsedUntil(parsedUntil>numel(newWorld)) = numel(newWorld);
+% We first parsed all of the lines in txt between ObjectBegin/End. We then
+% parsed the lines in newWorld.  If parsedUntil exceeds the number of lines
+% in newWorld, we set it to be equal to that number. But really, we expect
+% it to be numel(newWorld)
+if parsedUntil ~= numel(newWorld), warning('Incomplete parsing'); end
+parsedUntil = min(parsedUntil,numel(newWorld));
+% Old code that I didn't understand.  Seemed wrong, but it ran.
+% parsedUntil(parsedUntil>numel(newWorld)) = numel(newWorld);
 
-% Remove all the parsed lines from world because, well, we have
-% already parsed them and they are not needed.
+% Remove the parsed lines from newWorld. I am unclear about the 'Include'
+% lines.  I think we always need those.  Perhaps piWrite handles the
+% matter?
 newWorld(2:parsedUntil)=[];
 
 end
