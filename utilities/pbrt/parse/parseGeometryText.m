@@ -136,7 +136,7 @@ while cnt <= length(txt)
     % after the string 'ObjectInstance '
     % Why (BW?)
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        InstanceName = erase(currentLine(length('ObjectInstance '):end),'"');
+        InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');
     end
 
     % ABLoop = false;
@@ -225,7 +225,7 @@ while cnt <= length(txt)
         end
         %}
     elseif strcmp(currentLine,'AttributeEnd')
-        ABLoop = false;  % Exiting a Begin/End block
+        % ABLoop = false;  % Exiting a Begin/End block
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % We have come to the AttributeEnd. We accumulate the
@@ -330,7 +330,11 @@ while cnt <= length(txt)
 
             resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
 
-            if exist('InstanceName','var'), resCurrent.referenceObject = InstanceName; end
+            % If we have defined an Instance (ObjectBegin/End) then we
+            % assign it to a branch node here.
+            if exist('InstanceName','var')
+                resCurrent.referenceObject = InstanceName; 
+            end
 
             % Adding this resCurrent branch above the light and object
             % nodes in this subtree.  The subtrees are below this branch
