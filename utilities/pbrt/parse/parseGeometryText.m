@@ -125,19 +125,16 @@ while cnt <= length(txt)
     % For debugging, I removed the semicolon
     currentLine = txt{cnt};
 
-    % Remove trailing spaces from the current line.
-    % This is now done in piReadText
-    %
-    % idx = find(currentLine ~=' ',1,'last');
-    % currentLine = currentLine(1:idx);
-
-    % ObjectInstances are treated specially. If the line specifies an
-    % ObjectInstance and is not a comment, we delete any quotation marks
-    % after the string 'ObjectInstance '
-    % Why (BW?)
+    % The ObjectInstances are currently created in parseObjectInstanceText.
+    % When we have an ObjectInstance line here, it is a text string that
+    % refers to an object instance.  We set this strength as the
+    % referenceObject below. 
+    % BW moved this test into the if/else...  cases below rather than here.
+    %{
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
         InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');
     end
+    %}
 
     % ABLoop = false;
     if strcmp(currentLine,'AttributeBegin')
@@ -167,6 +164,11 @@ while cnt <= length(txt)
 
         % Name
         [name, sz] = piParseObjectName(currentLine);
+
+    elseif contains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
+        % The object instance will be assigned to the branch node after
+        % AttributeEnd.
+        InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');    
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')

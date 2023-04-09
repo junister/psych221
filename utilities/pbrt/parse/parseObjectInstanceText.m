@@ -25,14 +25,13 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 % See also
 %   parseGeometryText
 
-%% Create the tree root and initialize the tree
+%% Initialize the asset tree root
 rootAsset = piAssetCreate('type', 'branch');
 rootAsset.name = 'root_B';
 trees = tree(rootAsset);
 
 %% Identify the objects
-
-% This code section might be able to be placed in parseGeometryText.
+% This section might be placed in parseGeometryText.
 
 % The ObjectBegin/End sections define an object that will be reused as an
 % ObjectInstance elsewhere, probably with different position, scale, or
@@ -51,13 +50,13 @@ if ~isempty(objBeginLocs)
         % Find its name.  Sometimes this is empty.  Hmm.
         name = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
 
-        % Parse the text to create a node of the tree
+        % Parse the text to create the subnodes of the object tree
         [subnodes, ~] = parseGeometryText(thisR,...
             txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
 
-        % If we have a node of the tree, further process
+        % If subnodes were returned, then this is a branch.  Graft it onto
+        % the main tree from above.
         if ~isempty(subnodes)
-            % If there are subnodes, then this is a branch
             subtree = subnodes.subtree(2);
             branchNode = subtree.Node{1};
             branchNode.isObjectInstance = 1;
@@ -66,14 +65,14 @@ if ~isempty(objBeginLocs)
             trees = trees.graft(1, subtree);
         end
 
-        % We remove the object lines here, creating an empty cell
+        % Remove the object lines here, creating an empty cell
         txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
     
-    % Remove all the empty cells created by removing the objects.
+    % We remove the empty cells which were created by removing the objects.
     txt = txt(~cellfun('isempty',txt));
+    disp('Finished Object processing.');
 end
-disp('Finished Object processing.');
 
 %% Build the asset tree apart from the Object instances
 
@@ -81,6 +80,7 @@ disp('Finished Object processing.');
 % removed.  It does have AttributeBegin/End sequences.  We parse them and
 % create the subnodes here.
 newWorld = txt;
+fprintf('Attribute processing: ');
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
