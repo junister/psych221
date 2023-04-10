@@ -29,10 +29,6 @@ thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
 thisR.assets = thisR.assets.uniqueNames;
 thisR.get('object names no id')
 thisR.get('object names')
-
-
-thisR.show;
-
 thisR.show('objects');
 
 piWRS(thisR);

@@ -63,16 +63,15 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %{
   % Calculate only the radiance.
   thisR = piRecipeDefault('scene name','ChessSet');
-  piWrite(thisR);
-  [scene, result] = piRender(thisR,'render type','radiance');
-  sceneWindow(scene);
+  piWRS(thisR);  
 %}
 %{
   % Calculate the (x,y,z) coordinates of every surface point in the
   % scene.  If there is no surface a zero is returned.  This should
   % probably either a Inf or a NaN when there is no surface.  We might
   % replace those with a black color or something.
-  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  thisR = piRecipeDefault('scene name', 'ChessSet'); 
+  piWrite(thisR,'remote resources',true);
   [coords, result] = piRender(thisR, 'render type','coordinates');
   ieNewGraphWin; imagesc(coords(:,:,1));
   ieNewGraphWin; imagesc(coords(:,:,2));
