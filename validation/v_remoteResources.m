@@ -5,6 +5,24 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%{
+fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
+carName = 'taxi';
+rotationMatrix = piRotationMatrix('z', -15);
+position       = [-4 0 0];
+
+% We do not want to call the unique names a lot. We run
+% piObjectInstanceCreate a lot, and that's why uniquenames is held out.
+thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
+    'rotation',rotationMatrix, 'position',position);
+thisR.assets = thisR.assets.uniqueNames;
+
+piWRS(thisR,'remote resources',true);
+thisR.show('objects');
+%}
+
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
@@ -17,6 +35,8 @@ thisR = piRecipeDefault('scene name','ChessSet');
 thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
 
 thisR = piRecipeCreate('cornell_box');
+
+% This is really big (almost 1300 assets and 10K lines).
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
 
 piWRS(thisR);

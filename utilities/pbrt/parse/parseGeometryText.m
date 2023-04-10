@@ -227,7 +227,8 @@ while cnt <= length(txt)
         end
         %}
     elseif strcmp(currentLine,'AttributeEnd')
-        % ABLoop = false;  % Exiting a Begin/End block
+        % ABLoop = false;  
+        % Exiting a Begin/End block
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % We have come to the AttributeEnd. We accumulate the
@@ -252,6 +253,8 @@ while cnt <= length(txt)
                 exist('shape','var') || ...
                 exist('mediumInterface','var') || exist('mat','var')
 
+            % This if block should be a separate function.
+            
             % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
 
@@ -299,15 +302,15 @@ while cnt <= length(txt)
                 if iscell(shape), shape = shape{1}; end
                 if ~exist('name','var')
                     % The name might have been passed in
-                    name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+                    oName = piShapeNameCreate(shape,true,thisR.get('input basename'));
                 elseif length(name) < 2 || ~isequal(name(end-1:end),'_O')
-                    name = sprintf('%s_O',name);
+                    oName = sprintf('%s_O',name);
                 end
 
                 % We create object (assets) here.
                 if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
                 if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
-                resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
+                resObject = parseGeometryObject(shape,oName,oMAT,oMEDIUM);
 
                 % Makes a tree of this object and adds that into the
                 % collection of subtrees we are building.
@@ -320,16 +323,25 @@ while cnt <= length(txt)
             % Sometimes we end up here following an AttributeEnd and
             % we put in a branch node.  I am not sure why.  To keep
             % things moving, I make up an AttributeEnd name for such a
-            % node.  Otherwise, we have a name.
-            if exist('name','var') && ~isempty(name)
-                oNAME = name; else, oNAME = 'AttributeEnd'; 
+            % node.  Otherwise, we have a name and we put a _B at the
+            % end.
+            if ~exist('name','var')
+                bNAME = [oName(:,end-2),'_B'];
+            elseif exist('name','var') && ~isempty(name)
+                bNAME = sprintf('%s_B',name); 
+            else
+                % This happens at the end of ChessSet.  There is an
+                % AttributeBegin/End withonly a transform in it, and
+                % no mesh name.
+                bNAME = 'AttributeEnd'; 
             end
+
             if exist('sz','var'),  oSZ = sz; else, oSZ = []; end
             if exist('rot','var'), oROT = rot; else, oROT = []; end
             if exist('translation','var'),oTRANS = translation; else, oTRANS = []; end
             if exist('scale','var'),oSCALE = scale; else, oSCALE = []; end
 
-            resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
+            resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
 
             % If we have defined an Instance (ObjectBegin/End) then we
             % assign it to a branch node here.
@@ -377,7 +389,7 @@ while cnt <= length(txt)
         % Return, indicating how far we have gotten in the txt
         parsedUntil = cnt;
 
-        if ~exist('trees','var'), warning('trees not defined'); end
+        % if ~exist('trees','var'), warning('trees not defined'); end
 
         return;
     else
@@ -432,9 +444,8 @@ parsedUntil = cnt;  % Return and start at this line.
 % Debugging.
 fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
 
-% We need to place a root node on top of all of the nodes we collected.  We
-% create the root node here, placing it as the root of all of the subtree
-% branches.
+% We create the root node here, placing it as the root of all of the
+% subtree branches.
 if ~isempty(subtrees)
     rootAsset = piAssetCreate('type', 'branch');
     rootAsset.name = 'root_B';
@@ -446,7 +457,8 @@ if ~isempty(subtrees)
     end
 else
     % Hmm. There were no subtrees.  So no root.  Send the whole thing back
-    % as empty.  
+    % as empty.
+    warning('Empty tree.')
     trees=[];
 end
 
