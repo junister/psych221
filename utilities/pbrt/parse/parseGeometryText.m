@@ -92,11 +92,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % See also
 %   parseObjectInstanceText
 
-% res = [];
-% groupobjs = [];
-% children = [];
-
-persistent ABLoop;
+% persistent ABLoop;
 
 % This routine processes the text and returns a cell array of trees that
 % will be part of the whole asset tree. In many cases the returned tree
@@ -129,39 +125,38 @@ while cnt <= length(txt)
     % For debugging, I removed the semicolon
     currentLine = txt{cnt};
 
-    % Remove trailing spaces from the current line.
-    % This is now done in piReadText
-    %
-    % idx = find(currentLine ~=' ',1,'last');
-    % currentLine = currentLine(1:idx);
-
-    % ObjectInstances are treated specially. If the line specifies an
-    % ObjectInstance and is not a comment, we delete any quotation marks
-    % after the string 'ObjectInstance '
-    % Why (BW?)
+    % The ObjectInstances are currently created in parseObjectInstanceText.
+    % When we have an ObjectInstance line here, it is a text string that
+    % refers to an object instance.  We set this strength as the
+    % referenceObject below. 
+    % BW moved this test into the if/else...  cases below rather than here.
+    %{
     if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        InstanceName = erase(currentLine(length('ObjectInstance '):end),'"');
+        InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');
     end
+    %}
 
-    ABLoop = false;
+    % ABLoop = false;
     if strcmp(currentLine,'AttributeBegin')
         % Entering an AttributeBegin/End block
-        ABLoop = true;
+        % ABLoop = true;
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
-        % Parse the next few lines for materials, shapes, lights. If
+        % Parse the next lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
         % here.  Typically, we return here with the subnodes from the
         % AttributeBegin/End block.
         [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
         
-        % We now have the collection of nodes from the
-        % AttributeBegin/End block, and the returned line number
-        % (retLine) to continue.        
+        % We now have the collection of subnodes from this
+        % AttributeBegin/End block.  Also we know the returned line number
+        % (retLine) where we will continue.
         
-        % This is the main point of this section.  Add the subnodes to
-        % the subtrees.
+        % Group the subnodes from this Begin/End block with the others that
+        % have collected into the variable subtrees.
         subtrees = cat(1, subtrees, subnodes);
+
+        % Update where we start from
         cnt =  cnt + retLine;
 
     elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
@@ -169,6 +164,11 @@ while cnt <= length(txt)
 
         % Name
         [name, sz] = piParseObjectName(currentLine);
+
+    elseif contains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
+        % The object instance will be assigned to the branch node after
+        % AttributeEnd.
+        InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');    
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')
@@ -227,7 +227,7 @@ while cnt <= length(txt)
         end
         %}
     elseif strcmp(currentLine,'AttributeEnd')
-        ABLoop = false;  % Exiting a Begin/End block
+        % ABLoop = false;  % Exiting a Begin/End block
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % We have come to the AttributeEnd. We accumulate the
@@ -246,17 +246,14 @@ while cnt <= length(txt)
         %   further.
         %   * The properties depend on the node type (light or asset)
 
-        %  Do we have something at all worth doing?
+        %  We have a light or a object if this conditions is met
         if exist('areaLight','var') || exist('lght','var') ...
                 || exist('rot','var') || exist('translation','var') || ...
                 exist('shape','var') || ...
                 exist('mediumInterface','var') || exist('mat','var')
 
-            % We have something.  It is either a 'light' or an 'object',
-            % material or medium.  Create the subtree with the added light
-            % or object.
+            % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
-                % We detected a light of some type.
 
                 isNode = true;
                 baseName = thisR.get('input basename');
@@ -289,7 +286,9 @@ while cnt <= length(txt)
                 resLight.name = name;
                 resLight.lght{1}.name = resLight.name;
 
-                % Add the light asset to the collection of subtrees.
+                % Makes a tree out of the resLight
+                % Adds the new light asset to the collection of subtrees
+                % that we are building.
                 subtrees = cat(1, subtrees, tree(resLight));
 
                 % ------- A shape.  Create an object node
@@ -310,7 +309,8 @@ while cnt <= length(txt)
                 if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
                 resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
 
-                % Add this object into the subtrees.
+                % Makes a tree of this object and adds that into the
+                % collection of subtrees we are building.
                 subtrees = cat(1, subtrees, tree(resObject));
 
             end
@@ -331,8 +331,15 @@ while cnt <= length(txt)
 
             resCurrent = parseGeometryBranch(oNAME,oSZ,oROT,oTRANS,oSCALE);
 
-            if exist('InstanceName','var'), resCurrent.referenceObject = InstanceName; end
+            % If we have defined an Instance (ObjectBegin/End) then we
+            % assign it to a branch node here.
+            if exist('InstanceName','var')
+                resCurrent.referenceObject = InstanceName; 
+            end
 
+            % Adding this resCurrent branch above the light and object
+            % nodes in this subtree.  The subtrees are below this branch
+            % with its transformation.
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
@@ -342,6 +349,12 @@ while cnt <= length(txt)
             % We got this far, but all we have is a name. This happens
             % when we have an AttributeEnd on the currentLine.  Let's
             % fix it.
+            %
+            % Zheng remembers that we used this for the Cinema4D case when
+            % we hung a camera under a marker position.  It is possible
+            % that we should stop doing that.  We should try to get rid of
+            % this condition.
+            %
             % warning('Empty branch added on line %d: %s',cnt,currentLine);
             % trees = subtrees;
             % {
@@ -368,13 +381,13 @@ while cnt <= length(txt)
 
         return;
     else
-        % WorldBegin gets here.
+        % Starting to manage the case of kitchen.pbrt where there are no
+        % AttributeBegin/End blocks.  This section of code is not properly
+        % tested and should be clarified.
+
         % Also, if there is no AttributeBegin but there is a shape, we
         % get here.  Perhaps there has been a transform, as well.
-        if strcmp(currentLine,'WorldBegin')
-            % Do nothing
-            disp('WorldBegin')
-        elseif exist('shape','var') && exist('mat','var')
+        if exist('shape','var') && exist('mat','var')
             if iscell(shape), shape = shape{1}; end
 
             % We create object (assets) here.  If the shape is
@@ -408,21 +421,21 @@ while cnt <= length(txt)
 
     end % AttributeBegin
 
+    % We were at the AttributeEnd.  We move one more step forward.
     cnt = cnt+1;
 
 end
-parsedUntil = cnt;  % Returned.
+parsedUntil = cnt;  % Return and start at this line.
 
 %% We build the tree that is returned from any of the defined subtrees
 
 % Debugging.
 fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
 
-% Each subtree is an asset.
+% We need to place a root node on top of all of the nodes we collected.  We
+% create the root node here, placing it as the root of all of the subtree
+% branches.
 if ~isempty(subtrees)
-    % ZLY:
-    % Modified the root node to a identity transformation branch node.
-    % Need more test
     rootAsset = piAssetCreate('type', 'branch');
     rootAsset.name = 'root_B';
     trees = tree(rootAsset);
@@ -432,10 +445,12 @@ if ~isempty(subtrees)
         trees = trees.graft(1, subtrees(ii));
     end
 else
+    % Hmm. There were no subtrees.  So no root.  Send the whole thing back
+    % as empty.  
     trees=[];
 end
 
-if ~exist('trees','var'), warning('trees not defined'); end
+% if ~exist('trees','var'), warning('trees not defined'); end
 
 end
 
@@ -468,7 +483,8 @@ resObject = piAssetCreate('type', 'object');
 resObject.shape = shape;
 resObject.name = name;
 
-% Hopefully we have a material or medium for this object.
+% Hopefully we have a material or medium for this object. If not, then PBRT
+% uses coateddiffuse as a default, I think.
 if ~isempty(mat),    resObject.material = mat;  end
 if ~isempty(medium), resObject.medium = medium; end
 

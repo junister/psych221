@@ -104,26 +104,10 @@ p.addParameter('exporter', 'PARSE', @(x)(ismember(x,validExporters)));
 % We will use the output in local with this name.
 %    local/outputdirname/outdirname.pbrt
 p.parse(fname,varargin{:});
-[~, outputdirname, input_ext] = fileparts(fname);
+[~, outputdirname] = fileparts(fname);
 
 thisR = recipe;
 thisR.version = 4;
-
-%% If input is a FBX file, we convert it into PBRT file
-% I am starting to experiment with using this even on V4 files to get
-% a standard format.  Tried on Cornell box, and a complete bust.
-%{
-if strcmpi(input_ext, '.fbx')
-    disp('Converting FBX file into PBRT file...')
-    pbrtFile = piFBX2PBRT(fname);
-
-    disp('Formating PBRT file...')
-    infile = piPBRTReformat(pbrtFile);
-else
-    % Typical
-    infile = fname;
-end
-%}
 
 infile = fname;
 

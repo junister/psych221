@@ -147,6 +147,23 @@ classdef recipe < matlab.mixin.Copyable
                     coords  = obj.get('object coordinates');
                     oSizes  = obj.get('object sizes');
                     
+                    % When there are ObjectInstances, we have multiple
+                    % objects with the same name. We remove the duplicates
+                    % before displaying in the table. 
+                    [uNames,idx] = unique(names);
+                    if ~isequal(numel(names),numel(uNames))                        
+                        names    = uNames;
+                        indices  = indices(idx);
+                        matT     = matT(idx);
+                        coords   = coords(idx,:);
+                        oSizes   = oSizes(idx,:);
+                        % unique() returns a different order. We return to
+                        % the ordering by indices
+                        [indices,ia] = sort(indices);
+                        names = names(ia); matT = matT(ia);
+                        coords = coords(ia,:); oSizes = oSizes(ia,:);
+                    end
+
                     positionT = cell(size(names));
                     sizeT = cell(size(names));
                     for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
