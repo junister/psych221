@@ -254,7 +254,7 @@ while cnt <= length(txt)
                 exist('mediumInterface','var') || exist('mat','var')
 
             % This if block should be a separate function.
-            
+
             % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
 
@@ -279,14 +279,14 @@ while cnt <= length(txt)
 
                 % Manage the name with an _L at the end.
                 if ~exist('name','var') || isempty(name)
-                    name = piLightNameCreate(resLight.lght,isNode,baseName);
+                    lName = piLightNameCreate(resLight.lght,isNode,baseName);
                 elseif length(name) < 2 || ~isequal(name(end-1:end),'_L')
-                    name = sprintf('%s_L', name);
+                    lName = sprintf('%s_L', name);
                 end
 
                 % We have two names.  One for the node and one for the
                 % object itself, I guess. (BW).
-                resLight.name = name;
+                resLight.name = lName;
                 resLight.lght{1}.name = resLight.name;
 
                 % Makes a tree out of the resLight
@@ -327,7 +327,7 @@ while cnt <= length(txt)
             % end.
             if ~exist('name','var')
                 bNAME = [oName(:,end-2),'_B'];
-            elseif exist('name','var') && ~isempty(name)
+            elseif exist('name','var') && ~isempty(name) && ~isequal(name(end-1:end),'_B')
                 bNAME = sprintf('%s_B',name); 
             else
                 % This happens at the end of ChessSet.  There is an
@@ -367,11 +367,14 @@ while cnt <= length(txt)
             % that we should stop doing that.  We should try to get rid of
             % this condition.
             %
-            % warning('Empty branch added on line %d: %s',cnt,currentLine);
-            % trees = subtrees;
             % {
             resCurrent = piAssetCreate('type', 'branch');
-            if exist('name','var'), resCurrent.name = sprintf('%s_B', name); end
+
+            if length(name) < 2 || ~isequal(name(end-1:end),'_B')            
+                resCurrent.name = sprintf('%s_B', name); 
+            else  % Already ends with '_B'
+                resCurrent.name = name;
+            end
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
@@ -415,7 +418,9 @@ while cnt <= length(txt)
 
             % Set the object name
             if exist('name','var')
-                resObject.name = sprintf('%s_O', name);
+                if length(name) < 2  || isequal(name(end-1:end),'_O'), resObject.name = name;
+                else, resObject.name = sprintf('%s_O', name);
+                end
             else
                 resObject.name = piReadObjectName(shape);
             end
@@ -478,7 +483,11 @@ function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
 resCurrent = piAssetCreate('type', 'branch');
 
 % If present populate fields.
-if ~isempty('name'), resCurrent.name = sprintf('%s_B', name); end
+if ~isempty('name') && ~isequal(name(end-1:end),'_B')
+    resCurrent.name = sprintf('%s_B', name); 
+else
+    resCurrent.name = name;
+end
 
 if ~isempty(sz), resCurrent.size = sz; end
 if ~isempty(rot), resCurrent.rotation = {rot}; end

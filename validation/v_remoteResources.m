@@ -1,6 +1,21 @@
 % Validate whether we can render our scenes using remote resources
 
+% {
+n = thisR.get('n nodes')
+for ii=1:n
+    a =  thisR.get('asset',ii,'type')
+    name = thisR.get('asset',ii,'name')
+    switch a
+        case 'branch'
+            
+        case 'object'
+        case 'light'
+        otherwise
+            disp(a)
+    end
+end
 
+%}
 % Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
