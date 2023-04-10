@@ -23,37 +23,41 @@ function workingDir = piWrite(thisR,varargin)
 %                 The direction is set in the recipe:
 %        thisR.get('output dir')
 %
-% The pbrt scene file and all the relevant resource files (geometry,
-% materials, spds, others) are written out in a working directory. 
+% Description
+%
+% In the original implementation, which still runs, the pbrt scene file and
+% all the relevant resource files (geometry, materials, spds, others) are
+% written out in a working directory. During rendering, these files are
+% mounted by the docker container and used by PBRT to create the radiance,
+% depth, mesh metadata outputs. 
 % 
-% In the original implementation, which still runs, these files are written
-% out, mounted by the docker container, and used by PBRT to create the
-% radiance, depth, mesh metadata outputs. We included multiple options as
-% to whether or not to overwrite files that are already present in the
-% output directory.  The logic and conditions about these overwrites was
-% quite complex, and we have deprecated those options.  We write the files
-% all the time.
-%
 % We have now implemented a second approach based on the idea that there is
-% a central, shared, rendering machine.  This is implemented by the 'remote
-% resources' option:  when that flag is true, we assume that the necessary
-% asset files (objects, skymaps, others) are already present on the remote
-% server.  Thus, the local files are not copied over, saving time.  Rather,
-% the scene PBRT file and the _geometry and _material files are copied
-% over. The remote assets are in the subdirectories that are mounted by the
-% remote Docker container.
+% a central, shared, rendering machine.  If the user sets the 'remote
+% resources' option to true, we assume that the necessary asset files
+% (objects, skymaps, others) are present on the remote server. Thus, there
+% is little copying. Only, the scene PBRT file and the _geometry and _material
+% files are copied over. The remote assets are in the subdirectories that
+% are mounted by the remote Docker container.
 %
-% In addition to saving rsync work to move the data - not necessary because
-% the data is already there - this approach saves space. This is because
-% multiple PBRT scenes use the same resources files.  Thus there is no need
-% to have the same bunny, or sphere, present in the directory for different
-% scenes.  The asset is available to all the scenes in the remote resource.
+% In addition to saving time by not moving the data this approach saves
+% space. This is because multiple PBRT scenes use the same resources files.
+% Thus there is no need to have the same bunny, or sphere, present in the
+% directory for different scenes.  The asset or skymap is available to all
+% the scenes in the remote resource.
+%
+% Note: In the original, we included multiple options as to whether or not
+% to overwrite files that are already present in the output directory.  The
+% logic and conditions about these overwrites was quite complex, and we
+% have deprecated those options.  At present, we write the files all the
+% time.
+%
+% Note:  There are many helper files in this function
 %
 % TL Scien Stanford 2017
 % DJC - remote resource
 %
 % See also
-%   piRead, piRender
+%   piRead, piWRS, piRender
 
 % Examples:
 %{
@@ -67,6 +71,7 @@ function workingDir = piWrite(thisR,varargin)
  piWRS(thisR,'remote resources',true);
 %}
 %{
+% Works with a lens
 thisR = piRecipeDefault('scene name','chessSet');
 lensfile = 'fisheye.87deg.6.0mm.json';
 
@@ -85,17 +90,13 @@ oi = piWRS(thisR,'remote resources',true);
 varargin = ieParamFormat(varargin);
 p = inputParser;
 
-% When varargin contains a number, the ieParamFormat() method fails.
-% It takes only a string or cell.  We should look into that.
-% varargin = ieParamFormat(varargin);
-
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
 p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 p.parse(thisR,varargin{:});
 
-% We're going to get many of the resources we need on the server when we
-% render.  Most can be found there.
+% Most resources are on the server.  Hence, setting 'remote resources' to
+% true generally works for remote rendering.
 if p.Results.remoteresources
     remoteResources = true;
     overwriteresources  = false;
@@ -129,15 +130,21 @@ workingDir = thisR.get('output dir');
 % If we are using remote resources, remove leftover /local
 % files so they don't need to be rsynced
 if remoteResources
+    % Empty the working directory and make a fresh copy.
     if isfolder(workingDir)
         try
+            % This produces many annoying warning messages.  We should
+            % figure out how to suppress them.
+            q = warning('query');
+            warning('off','all');
             rmdir(workingDir, "s");
+            warning(q);
         catch
             % sometimes matlab  has it locked
         end
     end
     mkdir(workingDir);
-% our traditional case:    
+% the traditional case:    
 elseif ~exist(workingDir,'dir')
     mkdir(workingDir); 
 end
