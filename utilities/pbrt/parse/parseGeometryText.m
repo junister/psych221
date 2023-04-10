@@ -232,11 +232,9 @@ while cnt <= length(txt)
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % We have come to the AttributeEnd. We accumulate the
-        % information we have read into a node.  The type of node will
-        % depend on what we read since the AttributeBegin line.
-
-        % Let's make this a separate function.  This is what we do after we
-        % get to the AttributeEnd line in the block.
+        % parameters we read into a node.  The type of node will
+        % depend on the parameters we found since the AttributeBegin
+        % line.
 
         % At this point we know what kind of node we have, so we create a
         % node of the right type.
@@ -258,11 +256,15 @@ while cnt <= length(txt)
             % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
 
+                parseGeometryLight(thisR,lght,name)
                 isNode = true;
                 baseName = thisR.get('input basename');
+                
                 % function resLight = parseGeometryLight();
                 % end
 
+                % function resLight = parseGeometryAreaLight();
+                % end
                 resLight = piAssetCreate('type', 'light');
                 if exist('lght','var')
                     % Wrap the light text into attribute section
@@ -278,7 +280,7 @@ while cnt <= length(txt)
                 end
 
                 % Manage the name with an _L at the end.
-                if ~exist('name','var') || isempty(name) || ~isequal(name(end-1:end),'_L')
+                if ~exist('name','var') || isempty(name) 
                     name = piLightNameCreate(resLight.lght,isNode,baseName);
                 end
 
