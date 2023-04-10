@@ -252,7 +252,6 @@ while cnt <= length(txt)
                 exist('shape','var') || ...
                 exist('mediumInterface','var') || exist('mat','var')
 
-
             % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
 

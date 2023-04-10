@@ -126,6 +126,19 @@ catch ME
     setpref('ISET3d','tvrecipeTime', -1);
 end
 
+%% Check objectBegin/End implementation
+
+disp('*** RECIPES -- v_ObjectInstance')
+setpref('ISET3d', 'tvrecipeStart', tic);
+try
+    v_ObjectInstance;
+    setpref('ISET3d', 'tvrecipeTime', toc(getpref('ISET3d', 'tvrecipeStart', 0)));
+catch ME
+    warning('recipe validation failed');
+    warning(ME.identifier,'%s',ME.message);
+    setpref('ISET3d','tvrecipeTime', -1);
+end
+
 
 %% This does not run in v4 yet
 %{

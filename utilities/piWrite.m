@@ -1,51 +1,70 @@
 function workingDir = piWrite(thisR,varargin)
 % Write a PBRT scene file based on its renderRecipe
 %
+% Brief
+%   Write the scene PBRT files from the recipe (thisR). By default they are
+%   written to the local/sceneName directory. 
+%
 % Syntax
 %   workingDir = piWrite(thisR,varargin)
-%
-% The pbrt scene file and all the relevant resource files (geometry,
-% materials, spds, others) are written out in a working directory. These
-% are the files that will be mounted by the docker container and used by
-% PBRT to create the radiance, depth, mesh metadata outputs.
-%
-% There are multiple options as to whether or not to overwrite files that
-% are already present in the output directory.  The logic and conditions
-% about these overwrites is quite complex right now, and we need to
-% simplify.
-%
-% In some cases, multiple PBRT scenes use the same resources files.  If you
-% know the resources files are already there, you can set
-% overwriteresources to false.  Similarly if you do not want to overwrite
-% the pbrt scene file, set overwritepbrtfile to false.
 %
 % Input
 %   thisR: a recipe object describing the rendering parameters.
 %
 % Optional key/value parameters
-%
-%   verbose -- how chatty we are
+%   remote resources - Use the remote resources on the server (boolean,
+%     default false, can be set using
+%         setpref('docker','remoteResources',true or false)
+%   verbose -- how chatty to be in this routine.
 %
 % Return
 %    workingDir - path to the output directory mounted by the Docker
-%                 container.  This return is not necessary, however,
-%                 because it is in the recipe as: thisR.get('output dir')
+%                 container.  This return is not necessary.
+%                 The direction is set in the recipe:
+%        thisR.get('output dir')
+%
+% The pbrt scene file and all the relevant resource files (geometry,
+% materials, spds, others) are written out in a working directory. 
+% 
+% In the original implementation, which still runs, these files are written
+% out, mounted by the docker container, and used by PBRT to create the
+% radiance, depth, mesh metadata outputs. We included multiple options as
+% to whether or not to overwrite files that are already present in the
+% output directory.  The logic and conditions about these overwrites was
+% quite complex, and we have deprecated those options.  We write the files
+% all the time.
+%
+% We have now implemented a second approach based on the idea that there is
+% a central, shared, rendering machine.  This is implemented by the 'remote
+% resources' option:  when that flag is true, we assume that the necessary
+% asset files (objects, skymaps, others) are already present on the remote
+% server.  Thus, the local files are not copied over, saving time.  Rather,
+% the scene PBRT file and the _geometry and _material files are copied
+% over. The remote assets are in the subdirectories that are mounted by the
+% remote Docker container.
+%
+% In addition to saving rsync work to move the data - not necessary because
+% the data is already there - this approach saves space. This is because
+% multiple PBRT scenes use the same resources files.  Thus there is no need
+% to have the same bunny, or sphere, present in the directory for different
+% scenes.  The asset is available to all the scenes in the remote resource.
 %
 % TL Scien Stanford 2017
-% JNM -- Add Windows support 01/25/2019
+% DJC - remote resource
 %
 % See also
 %   piRead, piRender
 
 % Examples:
 %{
- thisR = piRecipeDefault('scene name','MacBethChecker');
- % thisR = piRecipeDefault('scene name','SimpleScene');
- % thisR = piRecipeDefault('scene name','teapot');
-
- piWrite(thisR);
- scene =  piRender(thisR,'render type','radiance');
- sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','teapotset');
+ piWRS(thisR,'remote resources',true); 
+%}
+%{
+ % Note the speed-up
+ thisR = piRecipeDefault('scene name','ChessSet');
+ piWRS(thisR,'remote resources',false);
+ piWRS(thisR,'remote resources',true);
 %}
 %{
 thisR = piRecipeDefault('scene name','chessSet');
@@ -59,10 +78,7 @@ thisR.set('film diagonal',10);
 thisR.integrator.subtype = 'path';
 thisR.sampler.subtype = 'sobol';
 thisR.set('aperture diameter',3);
-
-piWrite(thisR);
-oi = piRender(thisR,'render type','radiance');
-oiWindow(oi);
+oi = piWRS(thisR,'remote resources',true);
 %}
 
 %% Parse inputs
@@ -78,12 +94,8 @@ p.addParameter('verbose', 0, @isnumeric);
 p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 p.parse(thisR,varargin{:});
 
-% We need to get rid of these variables down below.  Historically, these
-% were parameters. Until we get rid of these in the subroutines, we leave
-% them here. 
-
-% We're going to get the resources we need on the server when we render
-% so don't try to find and copy them now
+% We're going to get many of the resources we need on the server when we
+% render.  Most can be found there.
 if p.Results.remoteresources
     remoteResources = true;
     overwriteresources  = false;
@@ -91,6 +103,9 @@ else
     remoteResources = false;
     overwriteresources  = true;
 end
+
+% These need to be removed from the subroutines, and then we can remove
+% them here.
 overwritepbrtfile   = true;
 overwritelensfile   = true;
 overwritematerials  = true;
@@ -126,7 +141,6 @@ if remoteResources
 elseif ~exist(workingDir,'dir')
     mkdir(workingDir); 
 end
-
 
 % Make a geometry directory
 geometryDir = thisR.get('geometry dir');
@@ -199,6 +213,18 @@ end
 end   % End of piWrite
 
 %% ---------  Helper functions
+%
+%  piWriteCopy
+%  piWriteHeader
+%  piWriteLens
+%  piWriteFilmshape
+%  piWriteLookAtScale
+%  piWriteTransformTimes
+%  piWriteBlocks
+%  piIncludeLines
+%  piWriteMaterials
+%  piWriteGeometry
+%
 
 %% Copy the input resources to the output directory
 function piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
