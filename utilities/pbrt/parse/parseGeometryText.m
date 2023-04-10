@@ -255,8 +255,6 @@ while cnt <= length(txt)
 
             % In this case, we detected a light of some type.
             if exist('areaLight','var') || exist('lght','var')
-
-                parseGeometryLight(thisR,lght,name)
                 isNode = true;
                 baseName = thisR.get('input basename');
                 
