@@ -1,5 +1,5 @@
 %% v_ObjectInstance
-% Test the ObjectInstance creation
+% Test ObjectInstance creation
 
 % Read a simple car scene.  One car.  Skymap. Ground plane.  The car has a
 % lot of parts, though.
@@ -7,6 +7,8 @@ fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
 thisR = piRead(fileName);
 thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
 thisR.show('objects');
+
+% The light names are not right.  Debug why.
 thisR.show('lights');
 
 % We need a way to know the names of the objectBegin instances we have
@@ -27,11 +29,8 @@ position       = [-4 0 0];
 thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position);
 thisR.assets = thisR.assets.uniqueNames;
-thisR.get('object names no id')
-thisR.get('object names')
+
 thisR.show('objects');
+piWRS(thisR,'remote resources',true);
 
-piWRS(thisR);
-
-% This fails because of duplicate names in the table.
-% thisR.show('objects');
+%% End
