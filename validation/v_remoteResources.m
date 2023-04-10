@@ -23,7 +23,9 @@ if ~piDockerExists, piDockerConfig; end
 %{
 fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
 thisR = piRead(fileName);
-thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
+% thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
+thisR.set('skymap','room.exr');
+
 carName = 'taxi';
 rotationMatrix = piRotationMatrix('z', -15);
 position       = [-4 0 0];
@@ -54,7 +56,7 @@ thisR = piRecipeCreate('cornell_box');
 % This is really big (almost 1300 assets and 10K lines).
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
 
-piWRS(thisR);
+piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
 

@@ -1864,7 +1864,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                             val(2) = range(pts(2:3:end))*thisScale(2);
                             val(3) = range(pts(3:3:end))*thisScale(3);
                         elseif ~isempty(theShape.filename)
-                            % Read a ply file.  The ply file needs to
+                            % Read a shape file.  The shape file needs to
                             % be in the output directory. (BW).
                             [~,~,ext] = fileparts(theShape.filename);
                             if isequal(ext,'.ply')
@@ -1875,7 +1875,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                                     val(2) = tmp.YLimits(2) - tmp.YLimits(1);
                                     val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
                                 else
-                                    warning('ply file not yet in output dir.')
+                                    % warning('Size: No shape file in output dir.')
                                 end
                             elseif isequal(ext,'.pbrt')
                                 % disp('PBRT size not yet implemented.')

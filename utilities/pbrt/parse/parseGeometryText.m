@@ -278,15 +278,13 @@ while cnt <= length(txt)
                 end
 
                 % Manage the name with an _L at the end.
-                if ~exist('name','var') || isempty(name)
-                    lName = piLightNameCreate(resLight.lght,isNode,baseName);
-                elseif length(name) < 2 || ~isequal(name(end-1:end),'_L')
-                    lName = sprintf('%s_L', name);
+                if ~exist('name','var') || isempty(name) || ~isequal(name(end-1:end),'_L')
+                    name = piLightNameCreate(resLight.lght,isNode,baseName);
                 end
 
                 % We have two names.  One for the node and one for the
                 % object itself, I guess. (BW).
-                resLight.name = lName;
+                resLight.name = name;
                 resLight.lght{1}.name = resLight.name;
 
                 % Makes a tree out of the resLight
@@ -302,15 +300,13 @@ while cnt <= length(txt)
                 if iscell(shape), shape = shape{1}; end
                 if ~exist('name','var')
                     % The name might have been passed in
-                    oName = piShapeNameCreate(shape,true,thisR.get('input basename'));
-                elseif length(name) < 2 || ~isequal(name(end-1:end),'_O')
-                    oName = sprintf('%s_O',name);
+                    name = piShapeNameCreate(shape,true,thisR.get('input basename'));
                 end
 
                 % We create object (assets) here.
                 if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
                 if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
-                resObject = parseGeometryObject(shape,oName,oMAT,oMEDIUM);
+                resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
 
                 % Makes a tree of this object and adds that into the
                 % collection of subtrees we are building.
@@ -320,20 +316,16 @@ while cnt <= length(txt)
 
             % Create a branch node with the transform information.
             % This should be the parent of the light or object.
-            % Sometimes we end up here following an AttributeEnd and
-            % we put in a branch node.  I am not sure why.  To keep
-            % things moving, I make up an AttributeEnd name for such a
-            % node.  Otherwise, we have a name and we put a _B at the
-            % end.
-            if ~exist('name','var')
-                bNAME = [oName(:,end-2),'_B'];
-            elseif exist('name','var') && ~isempty(name) && ~isequal(name(end-1:end),'_B')
-                bNAME = sprintf('%s_B',name); 
-            else
-                % This happens at the end of ChessSet.  There is an
-                % AttributeBegin/End withonly a transform in it, and
-                % no mesh name.
-                bNAME = 'AttributeEnd'; 
+            % Sometimes we end up here with some transform information
+            % (following an AttributeEnd), and we put in a branch
+            % node.  When there is no name, I make up this special
+            % case.
+
+            % This happens at the end of ChessSet.  There is an
+            % AttributeBegin/End with only a transform, but
+            % no mesh name.
+            if ~exist('name','var'), bNAME = 'AttributeEnd'; 
+            else, bNAME = name;
             end
 
             if exist('sz','var'),  oSZ = sz; else, oSZ = []; end
@@ -482,10 +474,23 @@ function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
 % This should be the parent of the light or object,
 resCurrent = piAssetCreate('type', 'branch');
 
-% If present populate fields.
-if ~isempty('name') && ~isequal(name(end-1:end),'_B')
-    resCurrent.name = sprintf('%s_B', name); 
+% It is a branch.  Adjust the name
+if length(name) < 3  
+    % Could be a single character name, such as 'A'
+    resCurrent.name = sprintf('%s_B', name);
+elseif ~isequal(name(end-1:end),'_B')
+    % At least 3, but not the right ending.
+    switch name(end-1:end)
+        case {'_L','_O'}
+            % Replace with _B
+            name(end-1:end) = '_B';
+            resCurrent.name = name;
+        otherwise
+            % Append _B
+            resCurrent.name = sprintf('%s_B', name);
+    end
 else
+    % >= 3 and ends in _B.  Good to go.
     resCurrent.name = name;
 end
 
@@ -502,7 +507,12 @@ function resObject = parseGeometryObject(shape,name,mat,medium)
 
 resObject = piAssetCreate('type', 'object');
 resObject.shape = shape;
-resObject.name = name;
+if length(name) < 3 || ~isequal(name(end-1:end),'_O')
+    resObject.name = sprintf('%s_O', name);
+else
+    resObject.name = name;
+end
+
 
 % Hopefully we have a material or medium for this object. If not, then PBRT
 % uses coateddiffuse as a default, I think.
