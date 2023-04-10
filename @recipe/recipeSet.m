@@ -987,18 +987,18 @@ switch param
             mkdir(fullfile(thisR.get('output dir')));
         end
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
-            
+            % We keep all skymap files in this folder now.
+            skymapdir = fullfile(thisR.get('output dir'),'skymaps');
             % If it is not in the local directory, check the data/lights
             if isfile(fullfile(piDirGet('lights'), skymapFileName))
                 copyfile(fullfile(piDirGet('lights'), skymapFileName),...
-                    thisR.get('output dir'));
+                    skymapdir);
             else
                 % Not found yet, look for it on the path
                 exrFile = which(skymapFileName);
                 if ~isempty(exrFile)
                     fprintf('Using skymap:  %s\n',exrFile);
-                    % We keep all skymap files in this folder now.
-                    skymapdir = fullfile(thisR.get('output dir'),'skymaps');
+
                     if ~exist(skymapdir ,'dir')
                         mkdir(skymapdir);
                     end
