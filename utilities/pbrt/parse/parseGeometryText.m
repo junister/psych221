@@ -311,23 +311,28 @@ while cnt <= length(txt)
 
         end  % AttributeEnd
 
-        % Return, indicating how far we have gotten in the txt
+        % Return, indicating how far we have gotten in the txt within
+        % this block
         parsedUntil = cnt;
 
+        % Returned from the AttributeBegin/End block, not the file.
         return;
 
     end % AttributeBegin
 
-    % We were at the AttributeEnd.  We move one more step forward.
+    % Next line in this file.
+    fprintf('Recursive block parsing %d\n',cnt);
     cnt = cnt+1;
 
 end
-parsedUntil = cnt;  % Return and start at this line.
+
+% We made it in through the whole file
+parsedUntil = cnt;  
 
 %% We build the tree that is returned from any of the defined subtrees
 
-% Debugging.
-fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
+% Finished with all the AttributeBegin/End blocks
+fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),parsedUntil);
 
 % We create the root node here, placing it as the root of all of the
 % subtree branches.
@@ -433,10 +438,10 @@ end
 % Adding this resCurrent branch above the light and object
 % nodes in this subtree.  The subtrees are below this branch
 % with its transformation.
-% trees = tree(resCurrent);
-% for ii = 1:numel(subtrees)
-%     trees = trees.graft(1, subtrees(ii));
-% end
+trees = tree(resCurrent);
+for ii = 1:numel(subtrees)
+    trees = trees.graft(1, subtrees(ii));
+end
 
 end
 
