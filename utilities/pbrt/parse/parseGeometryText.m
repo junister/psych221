@@ -251,47 +251,19 @@ while cnt <= length(txt)
                 exist('shape','var') || ...
                 exist('mediumInterface','var') || exist('mat','var')
 
-            % This if block should be a separate function.
-
             % In this case, we detected a light of some type.
-            if exist('areaLight','var') || exist('lght','var')
-
-                parseGeometryLight(thisR,lght,name)
-                isNode = true;
-                baseName = thisR.get('input basename');
-                
-                % function resLight = parseGeometryLight();
-                % end
-
-                % function resLight = parseGeometryAreaLight();
-                % end
-                resLight = piAssetCreate('type', 'light');
-                if exist('lght','var')
-                    % Wrap the light text into attribute section
-                    lghtWrap = [{'AttributeBegin'}, lght(:)', {'AttributeEnd'}];
-                    resLight.lght = piLightGetFromText(lghtWrap, 'print', false);
-                end
-                if exist('areaLight','var')
-                    resLight.lght = piLightGetFromText({areaLight}, 'print', false);
-                    if exist('shape', 'var')
-                        resLight.lght{1}.shape = shape;
-                    else, warning("Area light with no shape.");
-                    end
-                end
-
-                % Manage the name with an _L at the end.
-                if ~exist('name','var') || isempty(name) 
-                    name = piLightNameCreate(resLight.lght,isNode,baseName);
-                end
-
-                % We have two names.  One for the node and one for the
-                % object itself, I guess. (BW).
-                resLight.name = name;
-                resLight.lght{1}.name = resLight.name;
-
-                % Makes a tree out of the resLight
-                % Adds the new light asset to the collection of subtrees
+            if exist('areaLight','var') 
+                % Adds the area light asset to the collection of subtrees
                 % that we are building.
+                if ~exist('shape','var'), shape = []; end
+                if ~exist('name','var'), name = '';   end
+                resLight = parseGeometryAreaLight(thisR,areaLight,name,shape);
+                subtrees = cat(1, subtrees, tree(resLight));
+
+            elseif exist('lght','var')
+                
+                if ~exist('name','var'), name = '';   end
+                resLight = parseGeometryLight(thisR,lght,name);
                 subtrees = cat(1, subtrees, tree(resLight));
 
                 % ------- A shape.  Create an object node
@@ -299,6 +271,7 @@ while cnt <= length(txt)
                 % We have a shape.  We just exited from an
                 % AttributeEnd
 
+                % Shouldn't we be looping over numel(shape)?
                 if iscell(shape), shape = shape{1}; end
                 if ~exist('name','var')
                     % The name might have been passed in
@@ -313,19 +286,19 @@ while cnt <= length(txt)
                 % Makes a tree of this object and adds that into the
                 % collection of subtrees we are building.
                 subtrees = cat(1, subtrees, tree(resObject));
-
             end
 
-            % Create a branch node with the transform information.
-            % This should be the parent of the light or object.
-            % Sometimes we end up here with some transform information
+            % Create a parent branch node with the transform information for
+            % the object, light, or arealight.
+            %
+            % Sometimes are here with some transform information
             % (following an AttributeEnd), and we put in a branch
-            % node.  When there is no name, I make up this special
-            % case.
+            % node.  
 
-            % This happens at the end of ChessSet.  There is an
-            % AttributeBegin/End with only a transform, but
-            % no mesh name.
+            % When there is no name, I make up this special case. This
+            % happens at the end of ChessSet.  There is an
+            % AttributeBegin/End with only a transform, but no mesh
+            % name.
             if ~exist('name','var'), bNAME = 'AttributeEnd'; 
             else, bNAME = name;
             end
@@ -352,16 +325,13 @@ while cnt <= length(txt)
             end
 
         elseif exist('name','var')
-            % We got this far, but all we have is a name. This happens
-            % when we have an AttributeEnd on the currentLine.  Let's
-            % fix it.
+            % We have a name, but not shape, lght or arealight.
             %
             % Zheng remembers that we used this for the Cinema4D case when
             % we hung a camera under a marker position.  It is possible
             % that we should stop doing that.  We should try to get rid of
             % this condition.
             %
-            % {
             resCurrent = piAssetCreate('type', 'branch');
 
             if length(name) < 2 || ~isequal(name(end-1:end),'_B')            
@@ -373,7 +343,6 @@ while cnt <= length(txt)
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
             end
-            %}
         else
             % No objects or name.  This is probably an empty block
             %   AttributeBegin
@@ -386,6 +355,7 @@ while cnt <= length(txt)
         % Return, indicating how far we have gotten in the txt
         parsedUntil = cnt;
 
+        % We always have the trees at this point.
         % if ~exist('trees','var'), warning('trees not defined'); end
 
         return;
@@ -523,3 +493,52 @@ if ~isempty(medium), resObject.medium = medium; end
 
 end
 
+%% Make an area light struct forthe tree
+function resLight = parseGeometryAreaLight(thisR,areaLight,name,shape)
+
+isNode = true;
+baseName = thisR.get('input basename');
+
+resLight = piAssetCreate('type', 'light');
+
+resLight.lght = piLightGetFromText({areaLight}, 'print', false);
+if ~isempty(shape)
+    resLight.lght{1}.shape = shape;
+else, warning("Area light with no shape.");
+end
+
+% Manage the name with an _L at the end.
+if isempty(name)
+    name = piLightNameCreate(resLight.lght,isNode,baseName);
+end
+
+% We have two names.  One for the node and one for the
+% object itself, I guess. (BW).
+resLight.name = name;
+resLight.lght{1}.name = resLight.name;
+end
+
+%% Make a light struct for the tree
+function resLight = parseGeometryLight(thisR,lght,name)
+
+isNode = true;
+baseName = thisR.get('input basename');
+
+resLight = piAssetCreate('type', 'light');
+
+if exist('lght','var')
+    % Wrap the light text into attribute section
+    lghtWrap = [{'AttributeBegin'}, lght(:)', {'AttributeEnd'}];
+    resLight.lght = piLightGetFromText(lghtWrap, 'print', false);
+end
+
+if isempty(name)
+    name = piLightNameCreate(resLight.lght,isNode,baseName);
+end
+
+% We have two names.  One for the node and one for the
+% object itself, I guess. (BW).
+resLight.name = name;
+resLight.lght{1}.name = resLight.name;
+
+end
