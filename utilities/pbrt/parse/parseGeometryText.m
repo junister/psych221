@@ -90,7 +90,7 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %  assign it the material listed above the shape.
 %
 % See also
-%   parseObjectInstanceText
+%   parseObjectInstanceText, See helper routines below
 
 % persistent ABLoop;
 
@@ -438,6 +438,8 @@ end
 %% Helper functions
 % parseGeometryBranch
 % parseGeometryObject
+% parseGeometryAreaLight
+% parseGeometryLight
 
 %% Make a branch node
 function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
