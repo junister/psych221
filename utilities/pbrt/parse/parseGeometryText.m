@@ -363,7 +363,7 @@ while cnt <= length(txt)
         % Starting to manage the case of kitchen.pbrt where there are no
         % AttributeBegin/End blocks.  This section of code is not properly
         % tested and should be clarified.
-
+        warning('Untested section.  We should not be here.')
         % Also, if there is no AttributeBegin but there is a shape, we
         % get here.  Perhaps there has been a transform, as well.
         if exist('shape','var') && exist('mat','var')
