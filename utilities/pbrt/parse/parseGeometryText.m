@@ -161,19 +161,17 @@ while cnt <= length(txt)
 
     elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
-
-        % Name
+        
         [name, sz] = piParseObjectName(currentLine);
 
     elseif contains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        % The object instance will be assigned to the branch node after
-        % AttributeEnd.
+        % The object instance name will be assigned to a branch node 
+        % This happens after the AttributeEnd.
         InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');    
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')
-
-        % Translation
+        % Transformation information
         [translation, rot, scale] = parseTransform(currentLine);
 
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
@@ -181,6 +179,9 @@ while cnt <= length(txt)
         medium = currentLine;
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
+        % We can have multiple materials, but I don't see how this
+        % could work.  Here we should only have one namedMaterial at a
+        % time (BW).
         nMaterial = nMaterial+1;
         mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW>
         %{
@@ -189,20 +190,20 @@ while cnt <= length(txt)
         end
         %}
     elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
-
-        % Material
+        % Material.  But the materials shouldn't be here.  They are
+        % parsed and written out separately.
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
-        % lght is not created here. The light is created below.
+        % The area light is created below, after the AttributeEnd
         areaLight = currentLine;
 
     elseif piContains(currentLine,'LightSource') || ...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
-
-        % Usually light source contains only one line. Exception is there
-        % are rotations or scalings
+        % The light source is created below, after the AttributeEnd
+        % Usually it contains only one line. Exception is there are
+        % rotations or scalings.  I hope we handle that (BW).
         if ~exist('lght','var')
             lght{1} = currentLine;
         else
@@ -210,10 +211,11 @@ while cnt <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
-        % Shape - We have a shape.  Why don't we create the object
-        % now?  And we add any existing material to it?
+        % Shape - Created below.  Why do we allow a cell array of
+        % multiple shapes? 
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
+        if nShape > 1, fprintf('shape %d\n',nShape); end
         %{
         if ~ABLoop
             % We are not in an AttributeBegin Loop.  In that case,
@@ -227,9 +229,9 @@ while cnt <= length(txt)
         end
         %}
     elseif strcmp(currentLine,'AttributeEnd')
-        % ABLoop = false;  
         % Exiting a Begin/End block
         % fprintf('loop = %d - %s\n',ABLoop,currentLine);
+        % ABLoop = false;  
 
         % We have come to the AttributeEnd. We accumulate the
         % parameters we read into a node.  The type of node will
@@ -255,14 +257,17 @@ while cnt <= length(txt)
             if exist('areaLight','var') 
                 % Adds the area light asset to the collection of subtrees
                 % that we are building.
+                
                 if ~exist('shape','var'), shape = []; end
-                if ~exist('name','var'), name = '';   end
+                if ~exist('name','var'), name = ''; end
+
+                % if ~exist('name','var'), name = '';   end
                 resLight = parseGeometryAreaLight(thisR,areaLight,name,shape);
                 subtrees = cat(1, subtrees, tree(resLight));
 
             elseif exist('lght','var')
                 
-                if ~exist('name','var'), name = '';   end
+                if ~exist('name','var'), name = ''; end
                 resLight = parseGeometryLight(thisR,lght,name);
                 subtrees = cat(1, subtrees, tree(resLight));
 
@@ -325,7 +330,7 @@ while cnt <= length(txt)
             end
 
         elseif exist('name','var')  && ~isempty(name)
-            % We have a name, but not shape, lght or arealight.
+            % We have a name, but not a shape, lght or arealight.
             %
             % Zheng remembers that we used this for the Cinema4D case when
             % we hung a camera under a marker position.  It is possible
@@ -344,10 +349,13 @@ while cnt <= length(txt)
                 trees = trees.graft(1, subtrees(ii));
             end
         else
-            % No objects or name.  This is probably an empty block
+            % No name, shape, light or arealight.  This is probably an
+            % empty block 
+            %
             %   AttributeBegin
             %   AttributeEnd
-            % Maybe we just return subtrees as the trees.
+            %
+            % We just return subtrees as the trees.
             trees = subtrees;
 
         end  % AttributeEnd
@@ -355,11 +363,10 @@ while cnt <= length(txt)
         % Return, indicating how far we have gotten in the txt
         parsedUntil = cnt;
 
-        % We always have the trees at this point.
-        % if ~exist('trees','var'), warning('trees not defined'); end
-
         return;
     else
+        % We are not in an AttributeBegin/End block.  What to do?
+        %
         % Starting to manage the case of kitchen.pbrt where there are no
         % AttributeBegin/End blocks.  This section of code is not properly
         % tested and should be clarified.
@@ -440,6 +447,7 @@ end
 % parseGeometryObject
 % parseGeometryAreaLight
 % parseGeometryLight
+% parseGeometryLightName
 
 %% Make a branch node
 function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
@@ -511,12 +519,13 @@ end
 
 % Manage the name with an _L at the end.
 if isempty(name)
-    name = piLightNameCreate(resLight.lght,isNode,baseName);
+    resLight.name = parseGeometryLightName(resLight.lght,isNode,baseName);
+elseif length(name) < 3 || ~isequal(name(end-1:end),'_L') 
+    resLight.name = sprintf('%s_L',name);
 end
 
 % We have two names.  One for the node and one for the
 % object itself, I guess. (BW).
-resLight.name = name;
 resLight.lght{1}.name = resLight.name;
 end
 
@@ -535,12 +544,64 @@ if exist('lght','var')
 end
 
 if isempty(name)
-    name = piLightNameCreate(resLight.lght,isNode,baseName);
+    resLight.name = parseGeometryLightName(resLight.lght,isNode,baseName);
+elseif length(name) < 3 || ~isequal(name(end-1:end),'_L')
+    resLight.name = sprintf('%s_L',name);
 end
 
 % We have two names.  One for the node and one for the
 % object itself, I guess. (BW).
-resLight.name = name;
 resLight.lght{1}.name = resLight.name;
 
 end
+
+%% Create a name for a light.  Area or other light. 
+function name = parseGeometryLightName(lght,isNode,baseName)
+%
+% Synopsis
+%   name = parseGeometryLightName(lght,[isNode = true],[baseName = 'unlabeledLight'])
+%
+% Input
+%   lght   - A light or arealight built by piRead and parseGeometryText
+%   isNode - This is a light node name or a light filename.
+%            Default (true, a node)
+%   baseName - Scene base name (thisR.get('input basename'));
+%
+% Output
+%    name - The name of the node or file name
+%
+% Brief description
+%   (1) If lght.filename is part of the lght struct, use it.
+%   (2) If not, use baseName and ieHash on the final cell entry of the
+%       lght. We use the first 8 characters in the hex hash. I think
+%       that should be enough (8^16), especially combined with the
+%       base scene name. 
+%
+% See also
+%   parseGeometryText, piGeometryWrite
+
+if iscell(lght), lght = lght{1}; end
+if ieNotDefined('isNode'),isNode = true; end
+if ieNotDefined('baseName')
+    if isfield(lght,'filename'), [~,baseName] = fileparts(lght.filename);
+    else, baseName = 'unlabeledLight';
+    end
+end
+
+% Get the name or create a name based on a hash of the data
+if isstruct(lght) 
+    if isfield(lght,'name'), name = lght.name;
+    else, warning('No name for this lght.');
+    end
+elseif iscell(lght)
+    str = ieHash(lght{end});  % Last entry of the cell for the hash
+    name = sprintf('%s-%s',baseName,str(1:8));
+end
+
+% If this is a node, we make sure the name ends with _L
+if isNode && (length(name) < 3 || ~isequal(name(end-1:end),'_L'))
+    name = sprintf('%s_L', name);
+end
+
+end
+

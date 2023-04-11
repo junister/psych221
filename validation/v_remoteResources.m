@@ -30,7 +30,7 @@ thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position);
 thisR.assets = thisR.assets.uniqueNames;
 %}
-% {
+%{
 n = thisR.get('n nodes')
 for ii=1:n
     a =  thisR.get('asset',ii,'type')
@@ -67,6 +67,7 @@ thisR = piRecipeDefault('scene name','ChessSet');
 thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
 
 thisR = piRecipeCreate('cornell_box');
+thisR = piRecipeCreate('Macbeth checker');
 
 % This is really big (almost 1300 assets and 10K lines).
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');

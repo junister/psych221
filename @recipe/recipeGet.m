@@ -1703,7 +1703,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = numel(thisR.get('light', 'names'));
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
-        piLightPrint(thisR);
+        [~,val] = piLightPrint(thisR);
 
         % Node (asset) gets
     case {'node','nodes','asset', 'assets'}
