@@ -36,7 +36,7 @@ thisR = piRecipeDefault('scene name','checkerboard');
 thisR.get('light print');
 
 % We can get a specific light by its name
-thisR.get('light', 'distant_light_L')
+thisR.get('light', 'distant_light')
 
 % Or we can get the light from its index (number) in this list.
 idx = piAssetSearch(thisR,'light name','distant_light');

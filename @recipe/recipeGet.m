@@ -1619,9 +1619,15 @@ switch ieParamFormat(param)  % lower case, no spaces
                     warning("We should not be in this code segment.");
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
-                    % Search for the light by name, find its index
-                    varargin{1} = piLightNameFormat(varargin{1});
-                    thisLight = thisR.get('asset', varargin{1});
+                    % Search for the light by name.  We search first
+                    % without appending the _L and if that fails we do
+                    % append.
+                    try
+                        thisLight = thisR.get('asset', varargin{1});
+                    catch
+                        varargin{1} = piLightNameFormat(varargin{1});
+                    end
+
                 end
 
                 if isempty(thisLight)
