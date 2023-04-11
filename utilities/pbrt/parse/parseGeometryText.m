@@ -324,7 +324,7 @@ while cnt <= length(txt)
                 trees = trees.graft(1, subtrees(ii));
             end
 
-        elseif exist('name','var')
+        elseif exist('name','var')  && ~isempty(name)
             % We have a name, but not shape, lght or arealight.
             %
             % Zheng remembers that we used this for the Cinema4D case when
