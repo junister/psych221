@@ -5,12 +5,13 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   [thisR, instanceBranchName, OBJsubtreeNew]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
 % Brief
-%   Instancing enables the system to store a single copy of the object mesh
-%   and define multiple copies (instances) that differ based on the
-%   transformations that place it in the scene. Instancing is an efficient
-%   method of copying.
+%   Instancing enables the system to store a single copy of the object
+%   mesh and define multiple copies (instances) that differ based on
+%   the transformations that place it in the scene. Instancing is an
+%   efficient method of copying.
 %
-%   Running this function can change all of the node indices.
+%   Running this function can change all of the node indices and
+%   potentially introduce some name changes.  
 %
 % Inputs:
 %   thisR     - scene recipe
@@ -22,6 +23,7 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   rotation  - 3x4 rotation
 %   scale     - 1x3 scale
 %   motion    - motion struct which contains animated position and rotation
+%   unique    - run uniquenames prior to exit (default:  false)
 %
 % Outputs:
 %   thisR     - scene recipe
@@ -43,6 +45,19 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 % See also
 %   piObjectInstance, t_piSceneInstances
 
+% Example
+%{
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
+
+carName = 'taxi';
+rotationMatrix = piRotationMatrix('z', -15);
+position = [-4 0 0];
+thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
+    'rotation',rotationMatrix, 'position',position,'unique',true);
+piWRS(thisR,'remote resources',true);
+%}
 %% Read the parameters
 
 p = inputParser;
@@ -53,6 +68,7 @@ p.addParameter('rotation',piRotationMatrix);
 p.addParameter('scale',[1,1,1]);
 p.addParameter('motion',[], @(x)isstruct);
 p.addParameter('graftnow',1);
+p.addParameter('unique',false,@(x)(islogical(x)));
 
 p.parse(thisR, assetname, varargin{:});
 
@@ -169,6 +185,10 @@ instanceBranchName = OBJsubtree_branch.name;
 
 % I fixed some lazy coding in the tree and this runs a lot faster
 % Hopefully that means we can leave it in place (DJC?)
-thisR.assets = thisR.assets.uniqueNames;
+%
+% Zhenyi said he wanted it removed.  So we turned it into an option.
+%
+if p.Results.unique, thisR.assets = thisR.assets.uniqueNames; end
+
 
 end
