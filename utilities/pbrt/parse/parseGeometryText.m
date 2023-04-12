@@ -92,8 +92,6 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % See also
 %   parseObjectInstanceText, See helper routines below
 
-% persistent ABLoop;
-
 % This routine processes the text and returns a cell array of trees that
 % will be part of the whole asset tree. In many cases the returned tree
 % will be the whole asset tree for the recipe.
@@ -130,7 +128,6 @@ while cnt <= length(txt)
     if strcmp(currentLine,'AttributeBegin')
         % Entering an AttributeBegin/End block
         ABLoop = true;
-        % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % Parse the next lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
@@ -174,11 +171,7 @@ while cnt <= length(txt)
         % time (BW).
         nMaterial = nMaterial+1;
         mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW>
-        %{
-        if ~ABLoop
-            fprintf('Named material out of loop: %s\n',mat{nMaterial}.namedmaterial);
-        end
-        %}
+
     elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
         % Material.  But the materials shouldn't be here.  They are
         % parsed and written out separately.
@@ -209,7 +202,7 @@ while cnt <= length(txt)
         % {
         if ~ABLoop
 
-            disp('Shape but no AttributeBegin block.')
+            % disp('Shape but no AttributeBegin block.')
 
             % Build parms and update the trees with a branch node,
             % object node, or both
@@ -228,7 +221,7 @@ while cnt <= length(txt)
             % the nodes in this subtree. The subtrees are below this
             % branch with its transformation.
             if piBranchIdentity(resCurrent)
-                disp('Identity branch.  The subtrees added later.');
+                % disp('Identity branch.  The subtrees added later.');
             else
                 trees = tree(resCurrent);
                 for ii = 1:numel(subtrees)
@@ -244,26 +237,17 @@ while cnt <= length(txt)
         end
     elseif strcmp(currentLine,'AttributeEnd')
         % Exiting a Begin/End block
-        % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
-        % We have come to the AttributeEnd. We accumulate the
-        % parameters we read into a node.  The type of node will
-        % depend on the parameters we found since the AttributeBegin
-        % line.
-
+        % We accumulate the parameters we read into a node.  The type of
+        % node will depend on the parameters we found since the
+        % AttributeBegin line.
+        %
         % At this point we know what kind of node we have, so we create a
         % node of the right type.
-        %
-        % Another if/else sequence.
-        %
-        %   * If certain properties are defined, we process this node
-        %   further.
-        %   * The properties depend on the node type (light or asset)
-
         
         % Set this to false because we are now ending the loop.
         ABLoop = false;
-        disp('AttributeEnd block.')
+        % disp('AttributeEnd block.')
 
         if exist('areaLight','var') ...
                 || exist('lght','var') ...
@@ -295,7 +279,7 @@ while cnt <= length(txt)
             % nodes in this subtree.  The subtrees are below this branch
             % with its transformation.
             if piBranchIdentity(resCurrent)
-                disp('Identity branch.');
+                % disp('Identity branch.');
                 trees = subtrees;
             else
                 trees = tree(resCurrent);
@@ -312,7 +296,7 @@ while cnt <= length(txt)
             % that we should stop doing that.  We should try to get rid of
             % this condition.
             %
-            disp('Name only branch.')
+            % disp('Name only branch.')
             resCurrent = piAssetCreate('type', 'branch');
 
             if length(name) < 3 || ~isequal(name(end-1:end),'_B')            
@@ -333,7 +317,7 @@ while cnt <= length(txt)
             %   AttributeEnd
             %
             % We just return subtrees as the trees.
-            disp('No name, no object or light.')
+            % disp('No name, no object or light.')
             trees = subtrees;
 
         end  % AttributeEnd
