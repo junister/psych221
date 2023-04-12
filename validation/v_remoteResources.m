@@ -13,33 +13,8 @@ position = [-4 0 0];
 thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position,'unique',true);
 piWRS(thisR,'remote resources',true);
-
-
-% We need a way to know the names of the objectBegin instances we have
-% created.  Right now they are used as a reference object.  I think the
-% objects have the slot isObjectInstance set to 0. Also, we are using the
-% string '_I_' in the node name to indicate an instance.
-
 %}
-%{
-n = thisR.get('n nodes')
-for ii=1:n
-    a =  thisR.get('asset',ii,'type');
-    name = thisR.get('asset',ii,'name');
-    switch a
-        case 'branch'
-           b = thisR.get('asset',ii);
-           if b.isObjectInstance
-              fprintf('Branch %d is an instance\n',ii);
-           end
-        case 'object'
-        case 'light'
-        otherwise
-            % disp(a)
-    end
-end
-thisR.get('instances')
-%}
+
 % Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
