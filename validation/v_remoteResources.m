@@ -29,7 +29,10 @@ position       = [-4 0 0];
 thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position);
 thisR.assets = thisR.assets.uniqueNames;
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 piWRS(thisR,'remote resources',true);
 %}
 %{
