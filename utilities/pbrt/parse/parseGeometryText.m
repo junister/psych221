@@ -208,6 +208,9 @@ while cnt <= length(txt)
         if nShape > 1, fprintf('shape %d\n',nShape); end
         % {
         if ~ABLoop
+
+            disp('Shape but no AttributeBegin block.')
+
             % Build parms and update the trees with a branch node,
             % object node, or both
             if exist('areaLight','var'), parms.areaLight = areaLight; end
@@ -215,20 +218,29 @@ while cnt <= length(txt)
             if exist('shape','var'),     parms.shape = shape; end
             if exist('rot','var'),       parms.rot = rot; end
             if exist('translation','var'), parms.translation = translation; end
-            if exist('mediumInterface','var'), parms.mediumInterface = mediumInterface; end
+            if exist('mediumInterface','var'), parms.mediumInterface = medium; end
             if exist('mat','var'), parms.mat = mat; end
             if exist('InstanceName','var'), parms.InstanceName = InstanceName; end
 
             [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
-            % Adding this resCurrent branch above the light and object
-            % nodes in this subtree.  The subtrees are below this branch
-            % with its transformation.
-            trees = tree(resCurrent);
-            for ii = 1:numel(subtrees)
-                trees = trees.graft(1, subtrees(ii));
+
+            % If not the identity, we add the resCurrent branch above
+            % the nodes in this subtree. The subtrees are below this
+            % branch with its transformation.
+            if piBranchIdentity(resCurrent)
+                disp('Identity branch.  The subtrees added later.');
+            else
+                trees = tree(resCurrent);
+                for ii = 1:numel(subtrees)
+                    trees = trees.graft(1, subtrees(ii));
+                end
             end
+            %             trees = tree(resCurrent);
+            %             for ii = 1:numel(subtrees)
+            %                 trees = trees.graft(1, subtrees(ii));
+            %             end
             nShape = 0;
-            nMaterial = 0;
+            nMaterial = 0;                        
         end
     elseif strcmp(currentLine,'AttributeEnd')
         % Exiting a Begin/End block
@@ -249,7 +261,9 @@ while cnt <= length(txt)
         %   * The properties depend on the node type (light or asset)
 
         
+        % Set this to false because we are now ending the loop.
         ABLoop = false;
+        disp('AttributeEnd block.')
 
         if exist('areaLight','var') ...
                 || exist('lght','var') ...
@@ -258,6 +272,7 @@ while cnt <= length(txt)
                 || exist('translation','var') ...
                 || exist('mediumInterface','var') ...
                 || exist('mat','var')
+            
 
             % Build parms and update the trees with a branch node,
             % object node, or both
@@ -272,12 +287,19 @@ while cnt <= length(txt)
 
             [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
 
+            % We should test that resCurrent is NOT the identity
+
             % Adding this resCurrent branch above the light and object
             % nodes in this subtree.  The subtrees are below this branch
             % with its transformation.
-            trees = tree(resCurrent);
-            for ii = 1:numel(subtrees)
-                trees = trees.graft(1, subtrees(ii));
+            if piBranchIdentity(resCurrent)
+                disp('Identity branch.');
+                trees = subtrees;
+            else
+                trees = tree(resCurrent);
+                for ii = 1:numel(subtrees)
+                    trees = trees.graft(1, subtrees(ii));
+                end
             end
 
         elseif exist('name','var')  && ~isempty(name)
@@ -288,13 +310,15 @@ while cnt <= length(txt)
             % that we should stop doing that.  We should try to get rid of
             % this condition.
             %
+            disp('Name only branch.')
             resCurrent = piAssetCreate('type', 'branch');
 
-            if length(name) < 2 || ~isequal(name(end-1:end),'_B')            
+            if length(name) < 3 || ~isequal(name(end-1:end),'_B')            
                 resCurrent.name = sprintf('%s_B', name); 
             else  % Already ends with '_B'
                 resCurrent.name = name;
             end
+            
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
@@ -307,6 +331,7 @@ while cnt <= length(txt)
             %   AttributeEnd
             %
             % We just return subtrees as the trees.
+            disp('No name, no object or light.')
             trees = subtrees;
 
         end  % AttributeEnd
@@ -315,13 +340,15 @@ while cnt <= length(txt)
         % this block
         parsedUntil = cnt;
 
-        % Returned from the AttributeBegin/End block, not the file.
+        % Returned from the AttributeBegin/End block
+        % Because this is recursive, the value is just the block
+        % count.
         return;
 
     end % AttributeBegin
 
-    % Next line in this file.
-    fprintf('Recursive block parsing %d\n',cnt);
+    % We get here if we are starting the next Block. 
+    % fprintf('Next AttributeBegin block starts at %d\n',cnt);
     cnt = cnt+1;
 
 end
@@ -435,6 +462,9 @@ if isfield(parms,'InstanceName')
     resCurrent.referenceObject = parms.InstanceName;
 end
 
+%{
+% We do this on return now.  Not sure where is better.
+%
 % Adding this resCurrent branch above the light and object
 % nodes in this subtree.  The subtrees are below this branch
 % with its transformation.
@@ -442,7 +472,7 @@ trees = tree(resCurrent);
 for ii = 1:numel(subtrees)
     trees = trees.graft(1, subtrees(ii));
 end
-
+%}
 end
 
 
