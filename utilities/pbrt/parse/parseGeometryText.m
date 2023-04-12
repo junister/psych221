@@ -1,9 +1,9 @@
-function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
-% function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+function [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
+% function [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
 % Parse the text from a Geometry file, returning an asset subtree
 %
 % Synopsis
-%   [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+%   [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
 %
 % Brief:
 %   We parse the geometry text file to build up the asset tree in the
@@ -14,6 +14,10 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %   thisR       - a scene recipe
 %   txt         - text of the PBRT geometry information that we parse
 %   name        - Use this object name
+%
+% Optional
+%   beBlock     - True if called from within a AttributeBegin/End block
+%   (default: false)
 %
 % Outputs:
 %   trees       - A tree class that describes the assets and their geometry
@@ -102,6 +106,7 @@ subtrees = {};
 % below.
 % Removed when we changed to making the object names unique in piRead.
 % objectIndex = 0;
+if ~exist('beBlock','var'), beBlock = false; end
 
 % Multiple material and shapes can be used for one object.
 nMaterial   = 0;
@@ -118,7 +123,6 @@ if isequal(txt{1},'WorldBegin'),  txt = txt(2:end); end
 % have counted (parsedUntil)
 % if isempty(txt{1}), warning('Empty text line.'); end
 cnt = 1;
-ABLoop = false;
 
 while cnt <= length(txt)
 
@@ -127,13 +131,12 @@ while cnt <= length(txt)
 
     if strcmp(currentLine,'AttributeBegin')
         % Entering an AttributeBegin/End block
-        ABLoop = true;
 
         % Parse the next lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
         % here.  Typically, we return here with the subnodes from the
         % AttributeBegin/End block.
-        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
+        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name, true);
         
         % We now have the collection of subnodes from this
         % AttributeBegin/End block.  Also we know the returned line number
@@ -199,8 +202,11 @@ while cnt <= length(txt)
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
         if nShape > 1, fprintf('shape %d\n',nShape); end
-        % {
-        if ~ABLoop
+        
+        % We need a way to decide whether we are in an ABLoop
+        if ~beBlock
+            % If not in an begin/end block, we create the shape and add it
+            % to the subtrees here            
 
             % disp('Shape but no AttributeBegin block.')
 
@@ -237,6 +243,7 @@ while cnt <= length(txt)
         end
     elseif strcmp(currentLine,'AttributeEnd')
         % Exiting a Begin/End block
+        % beBlock = false;
 
         % We accumulate the parameters we read into a node.  The type of
         % node will depend on the parameters we found since the
@@ -246,7 +253,7 @@ while cnt <= length(txt)
         % node of the right type.
         
         % Set this to false because we are now ending the loop.
-        ABLoop = false;
+        % ABLoop = false;
         % disp('AttributeEnd block.')
 
         if exist('areaLight','var') ...
@@ -594,8 +601,8 @@ function name = parseGeometryLightName(lght,isNode,baseName)
 %   parseGeometryText, piGeometryWrite
 
 if iscell(lght), lght = lght{1}; end
-if ieNotDefined('isNode'),isNode = true; end
-if ieNotDefined('baseName')
+if ~exist('isNode','var') || isempty(isNode), isNode = true; end
+if ~exist('baseName','var') || isempty(baseName)
     if isfield(lght,'filename'), [~,baseName] = fileparts(lght.filename);
     else, baseName = 'unlabeledLight';
     end
