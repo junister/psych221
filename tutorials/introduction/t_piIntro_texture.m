@@ -27,12 +27,12 @@ thisR = piRecipeCreate('flatSurfaceWhiteTexture');
 
 %% Add a light and render
 
-thisR.set('lights','all','delete');
-newDistLight = piLightCreate('Distant 1',...
-    'type', 'distant',...
-    'cameracoordinate', true,...
-    'spd', 'equalEnergy');
-thisR.set('light',  newDistLight, 'add');
+% thisR.set('lights','all','delete');
+% newDistLight = piLightCreate('Distant 1',...
+%     'type', 'distant',...
+%     'cameracoordinate', true,...
+%     'spd', 'equalEnergy');
+% thisR.set('light',  newDistLight, 'add');
 
 % This is a description of the scene properties
 thisR.show('objects');
@@ -60,7 +60,7 @@ piWRS(thisR,'name','random color');
 % yourself.
 thisR   = piMaterialsInsert(thisR,'names','checkerboard');
 
-cubeIDX = piAssetSearch(thisR,'object name','Cube');
+cubeIDX = piAssetSearch(thisR,'object name','flatSurface');
 
 % Set the material to the object
 thisR.set('asset',cubeIDX,'material name','checkerboard');
