@@ -267,6 +267,7 @@ while cnt <= length(txt)
 
             % Build parms and update the trees with a branch node,
             % object node, or both
+            if exist('name','var'), parms.name = name; end
             if exist('areaLight','var'), parms.areaLight = areaLight; end
             if exist('lght','var'),      parms.lght = lght; end
             if exist('shape','var'),     parms.shape = shape; end
@@ -415,6 +416,7 @@ elseif isfield(parms,'shape')
     if ~isfield(parms,'name')
         % The name might have been passed in
         name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+    else, name = parms.name;
     end
 
     % We create object (assets) here.
