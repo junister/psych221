@@ -213,7 +213,7 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);
-        idx = piAssetSearch(thisR,'object name','flatSurface');
+        idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
         thisR.set('lights','all','delete');
 
@@ -229,7 +229,7 @@ switch ieParamFormat(rName)
             'spd spectrum', lightSpectrum,...
             'cameracoordinate', true);
         thisR.set('light', lgt, 'add');
-        idx = piAssetSearch(thisR,'object name','flatSurface');
+        idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
 
     case 'lettersatdepth'

@@ -60,7 +60,7 @@ piWRS(thisR,'name','random color');
 % yourself.
 thisR   = piMaterialsInsert(thisR,'names','checkerboard');
 
-cubeIDX = piAssetSearch(thisR,'object name','flatSurface');
+cubeIDX = piAssetSearch(thisR,'object name','Cube');
 
 % Set the material to the object
 thisR.set('asset',cubeIDX,'material name','checkerboard');
