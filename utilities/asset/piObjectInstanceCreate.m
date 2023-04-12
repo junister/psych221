@@ -168,7 +168,7 @@ instanceBranchName = OBJsubtree_branch.name;
 % This call takes a quite a long time to run for driving scene.
 
 % I fixed some lazy coding in the tree and this runs a lot faster
-% Hopefully that means we can leave it in place
+% Hopefully that means we can leave it in place (DJC?)
 thisR.assets = thisR.assets.uniqueNames;
 
 end
