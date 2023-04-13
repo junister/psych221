@@ -119,7 +119,7 @@ else
     end
 end
 
-% add instance to parent object
+% Add instance to parent object - on dev-kitchen the branch name has no ID
 thisR.assets = thisR.assets.set(idx, OBJsubtree_branch);
 
 InstanceSuffix = sprintf('_I_%d',indexCount);
