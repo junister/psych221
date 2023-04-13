@@ -1443,42 +1443,32 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = zeros(nObjects,3);
         for ii=1:nObjects
             val(ii,:) = thisR.get('asset',idx(ii),'size');
-        end
-
-        % Old code for 'size' - Updated in various ways by BW Dec 31 2022.
-        %
-        % case 'size'
-        %         % All the objects
-        %         % thisR.get('object sizes')
-        %         Objects  = thisR.get('objects');
-        %         nObjects = numel(Objects);
-        %         val = zeros(nObjects,3);
-        %         for ii=1:nObjects
-        %             thisNode = thisR.get('assets',Objects(ii));
-        %             if iscell(thisNode), thisNode = thisNode{1}; end
-        %             thisScale = thisR.get('assets',Objects(ii),'world scale');
-        %
-        %             % All the object points
-        %             if isfield(thisNode.shape{1},'point3p')
-        %                 pts = thisNode.shape{1}.point3p;
-        %                 if ~isempty(pts)
-        %                     % Range of points times any scale factors on the path
-        %                     val(ii,1) = range(pts(1:3:end))*thisScale(1);
-        %                     val(ii,2) = range(pts(2:3:end))*thisScale(2);
-        %                     val(ii,3) = range(pts(3:3:end))*thisScale(3);
-        %                 else
-        %                     val(ii,:) = NaN;
-        %                 end
-        %             else
-        %                 % There is no shape point information.  So we return NaNs.
-        %                 val(ii,:) = NaN;
-        %             end
-        %
-        %         end
+        end       
 
         % -------Instances
-    case {'instance'}
-        % thisR.get('instance',id,'param')
+    case {'instance','instances'}
+        % idx   = thisR.get('instances');   % Return idx of instances
+        % param = thisR.get('instance',id,'param')
+        %
+        % How can we have an instance without a reference object?
+        % What is the extraNode slot?
+        if isempty(varargin)
+            % Return all the indices of the branch indices
+            n = thisR.get('n nodes');
+            val = zeros(1,n);
+            for ii=1:n
+                if isequal(thisR.get('asset',ii,'type'),'branch')
+                    b = thisR.get('asset',ii);
+                    if b.isObjectInstance
+                        val(ii) = 1; 
+                    end
+                end
+            end
+            val = find(val);
+            return;
+        end
+
+        % We have an asset index or name and possibly a parameter
         if ischar(varargin{1})
             [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
             % If only one asset matches, turn it from cell to struct.
@@ -1494,23 +1484,27 @@ switch ieParamFormat(param)  % lower case, no spaces
             error('Could not find asset %s\n',varargin{1});
         end
         if iscell(thisAsset), thisAsset = thisAsset{1}; end
-        assert(contains(thisAsset.name,'_I_'));
+        
+        % We are not getting the _I_ into the name.  Maybe we do not
+        % need to because we have the isObjectInstance field? (BW)
+        % assert(contains(thisAsset.name,'_I_'));
 
         % Enable various parameters - todo!!!!
-        switch ieParamFormat(varargin{2})
-            case 'name'
-                val = thisAsset.name;
-            otherwise
-                error('Unknown instance property.')
+        try
+            val = thisAsset.(varargin{2});
+        catch
+            disp('Unknown parameter')
+            val = fieldnames(thisAsset);
+            disp(val)
         end
         
         % These are the other form, without a parameter
     case {'instanceid','instanceids'}
-        % We have a problem identifying instances.  They should be of
-        % 'type' instance.  But now, they are of type branch and have an
-        % _I_ in them.  The _I_ is largely OK but we sometimes have the
-        % capital letter _I_ represented.  That has an 'uc' so I tried to
-        % avoid the error.  
+        % See above.  We are having a problem identifying by the name
+        % (with the _I_).  I am identifying by the isObjectInstance
+        % field for now.
+        val = thisR.get('instances');
+        %{
         val = [];
         if isempty(thisR.assets), return; end
         nnodes = thisR.assets.nnodes;
@@ -1522,19 +1516,15 @@ switch ieParamFormat(param)  % lower case, no spaces
                 end
             end
         end
+        %}
     case {'instancenames'}
         % thisR.get('instance names')
-        %
-        % Full names with id of every branch node
-        if isempty(thisR.assets), return; end
-        ids = thisR.get('instance ids');
-        names = thisR.assets.names;   % Names of everything.
-        val = cell(1,numel(ids));
-        for ii = 1:numel(ids)
-            % Includes ids and everything
-            val{ii} = names{ids(ii)};
-        end
-        
+        % Returns names without the IDs.
+        % Instances are a subset of the branch nodes.
+        if isempty(thisR.assets), return; end        
+        idx   = thisR.get('instances');
+        names = thisR.get('asset names');  % No ID in the name
+        val = names(idx(:));
 
         % ---------  Lights
     case {'lightsimplenames'}
@@ -1703,7 +1693,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = numel(thisR.get('light', 'names'));
     case {'lightsprint', 'printlights', 'lightprint', 'printlight'}
         % thisR.get('lights print');
-        piLightPrint(thisR);
+        [~,val] = piLightPrint(thisR);
 
         % Node (asset) gets
     case {'node','nodes','asset', 'assets'}
@@ -1757,7 +1747,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % The extra varargin which allows the user to specify
                     % the 'replace' value as true or false.  By default,
                     % replace seems to be true.
-                    %
+                    
+                    % Get the subtree of this asset
                     val = thisR.assets.subtree(id);
 
                     % The current IDs only make sense as part of the whole

@@ -1,9 +1,9 @@
-function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
-% function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+function [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
+% function [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
 % Parse the text from a Geometry file, returning an asset subtree
 %
 % Synopsis
-%   [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
+%   [trees, parsedUntil] = parseGeometryText(thisR, txt, name, beBlock)
 %
 % Brief:
 %   We parse the geometry text file to build up the asset tree in the
@@ -14,6 +14,10 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 %   thisR       - a scene recipe
 %   txt         - text of the PBRT geometry information that we parse
 %   name        - Use this object name
+%
+% Optional
+%   beBlock     - True if called from within a AttributeBegin/End block
+%   (default: false)
 %
 % Outputs:
 %   trees       - A tree class that describes the assets and their geometry
@@ -92,8 +96,6 @@ function [trees, parsedUntil] = parseGeometryText(thisR, txt, name)
 % See also
 %   parseObjectInstanceText, See helper routines below
 
-% persistent ABLoop;
-
 % This routine processes the text and returns a cell array of trees that
 % will be part of the whole asset tree. In many cases the returned tree
 % will be the whole asset tree for the recipe.
@@ -104,6 +106,7 @@ subtrees = {};
 % below.
 % Removed when we changed to making the object names unique in piRead.
 % objectIndex = 0;
+if ~exist('beBlock','var'), beBlock = false; end
 
 % Multiple material and shapes can be used for one object.
 nMaterial   = 0;
@@ -120,33 +123,20 @@ if isequal(txt{1},'WorldBegin'),  txt = txt(2:end); end
 % have counted (parsedUntil)
 % if isempty(txt{1}), warning('Empty text line.'); end
 cnt = 1;
+
 while cnt <= length(txt)
 
     % For debugging, I removed the semicolon
     currentLine = txt{cnt};
 
-    % The ObjectInstances are currently created in parseObjectInstanceText.
-    % When we have an ObjectInstance line here, it is a text string that
-    % refers to an object instance.  We set this strength as the
-    % referenceObject below. 
-    % BW moved this test into the if/else...  cases below rather than here.
-    %{
-    if piContains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');
-    end
-    %}
-
-    % ABLoop = false;
     if strcmp(currentLine,'AttributeBegin')
         % Entering an AttributeBegin/End block
-        % ABLoop = true;
-        % fprintf('loop = %d - %s\n',ABLoop,currentLine);
 
         % Parse the next lines for materials, shapes, lights. If
         % we run into another AttributeBegin, we recursively come back
         % here.  Typically, we return here with the subnodes from the
         % AttributeBegin/End block.
-        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name);
+        [subnodes, retLine] = parseGeometryText(thisR, txt(cnt+1:end), name, true);
         
         % We now have the collection of subnodes from this
         % AttributeBegin/End block.  Also we know the returned line number
@@ -161,19 +151,17 @@ while cnt <= length(txt)
 
     elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
-
-        % Name
+        
         [name, sz] = piParseObjectName(currentLine);
 
     elseif contains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
-        % The object instance will be assigned to the branch node after
-        % AttributeEnd.
+        % The object instance name will be assigned to a branch node 
+        % This happens after the AttributeEnd.
         InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');    
 
     elseif strncmp(currentLine,'Transform ',10) ||...
             piContains(currentLine,'ConcatTransform')
-
-        % Translation
+        % Transformation information
         [translation, rot, scale] = parseTransform(currentLine);
 
     elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
@@ -181,28 +169,31 @@ while cnt <= length(txt)
         medium = currentLine;
 
     elseif piContains(currentLine,'NamedMaterial') && ~strcmp(currentLine(1),'#')
+        % We can have multiple materials, but I don't see how this
+        % could work.  Here we should only have one namedMaterial at a
+        % time (BW).
         nMaterial = nMaterial+1;
         mat{nMaterial} = piParseGeometryMaterial(currentLine); %#ok<AGROW>
-        %{
-        if ~ABLoop
-            fprintf('Named material out of loop: %s\n',mat{nMaterial}.namedmaterial);
-        end
-        %}
-    elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
 
-        % Material
+    elseif strncmp(currentLine,'Material',8) && ~strcmp(currentLine(1),'#')
+        % Material.  But the materials shouldn't be here.  They are
+        % parsed and written out separately.
         mat = parseBlockMaterial(currentLine);
 
     elseif piContains(currentLine,'AreaLightSource') && ~strcmp(currentLine(1),'#')
-        % lght is not created here. The light is created below.
+        % The area light is created below, after the AttributeEnd
         areaLight = currentLine;
 
     elseif piContains(currentLine,'LightSource') || ...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
-
-        % Usually light source contains only one line. Exception is there
-        % are rotations or scalings
+        % If this is a light source, it is created below, after the
+        % AttributeEnd.
+        % 
+        % We have a case in contemporary-bathroom where there is a
+        % Rotate without a LightSource.  I don't think we are handling
+        % that correctly.  Perhaps this elseif clause should be split
+        % into separate LightSource, Rotate, and Scale?
         if ~exist('lght','var')
             lght{1} = currentLine;
         else
@@ -210,208 +201,163 @@ while cnt <= length(txt)
         end
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
-        % Shape - We have a shape.  Why don't we create the object
-        % now?  And we add any existing material to it?
+        % Shape - Created below.  Why do we allow a cell array of
+        % multiple shapes? 
         nShape = nShape+1;
         shape{nShape} = piParseShape(currentLine);
-        %{
-        if ~ABLoop
-            % We are not in an AttributeBegin Loop.  In that case,
-            % every time we find a shape, we add it and the current
-            % material to the subnodes.  We will need to update
-            % nShape, also.
-            fprintf('%d: %s\n',cnt,currentLine);
-            fprintf('nShape = %d\n',nShape);
-            fprintf('%s\n',mat{end}.namedmaterial);
-            pause;
+        if nShape > 1, fprintf('shape %d\n',nShape); end
+        
+        % We need a way to decide whether we are in an ABLoop
+        if ~beBlock
+            % If not in an begin/end block, we create the shape and add it
+            % to the subtrees here            
+
+            % disp('Shape but no AttributeBegin block.')
+
+            % Build parms and update the trees with a branch node,
+            % object node, or both
+            if exist('areaLight','var'), parms.areaLight = areaLight; end
+            if exist('lght','var'),      parms.lght = lght; end
+            if exist('shape','var'),     parms.shape = shape; end
+            if exist('rot','var'),       parms.rot = rot; end
+            if exist('translation','var'), parms.translation = translation; end
+            if exist('mediumInterface','var'), parms.mediumInterface = medium; end
+            if exist('mat','var'), parms.mat = mat; end
+            if exist('InstanceName','var'), parms.InstanceName = InstanceName; end
+
+            [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
+
+            % If not the identity, we add the resCurrent branch above
+            % the nodes in this subtree. The subtrees are below this
+            % branch with its transformation.
+            if piBranchIdentity(resCurrent)
+                % disp('Identity branch.  The subtrees added later.');
+            else
+                trees = tree(resCurrent);
+                for ii = 1:numel(subtrees)
+                    trees = trees.graft(1, subtrees(ii));
+                end
+            end
+            %             trees = tree(resCurrent);
+            %             for ii = 1:numel(subtrees)
+            %                 trees = trees.graft(1, subtrees(ii));
+            %             end
+            nShape = 0;
+            nMaterial = 0;                        
         end
-        %}
     elseif strcmp(currentLine,'AttributeEnd')
-        % ABLoop = false;  
         % Exiting a Begin/End block
-        % fprintf('loop = %d - %s\n',ABLoop,currentLine);
+        % beBlock = false;
 
-        % We have come to the AttributeEnd. We accumulate the
-        % parameters we read into a node.  The type of node will
-        % depend on the parameters we found since the AttributeBegin
-        % line.
-
+        % We accumulate the parameters we read into a node.  The type of
+        % node will depend on the parameters we found since the
+        % AttributeBegin line.
+        %
         % At this point we know what kind of node we have, so we create a
         % node of the right type.
-        %
-        % Another if/else sequence.
-        %
-        %   * If certain properties are defined, we process this node
-        %   further.
-        %   * The properties depend on the node type (light or asset)
+        
+        % Set this to false because we are now ending the loop.
+        % ABLoop = false;
+        % disp('AttributeEnd block.')
 
-        %  We have a light or a object if this conditions is met
-        if exist('areaLight','var') || exist('lght','var') ...
-                || exist('rot','var') || exist('translation','var') || ...
-                exist('shape','var') || ...
-                exist('mediumInterface','var') || exist('mat','var')
+        if exist('areaLight','var') ...
+                || exist('lght','var') ...
+                || exist('shape','var') ...
+                || exist('rot','var')  ...
+                || exist('translation','var') ...
+                || exist('mediumInterface','var') ...
+                || exist('mat','var')
+            
 
-            % In this case, we detected a light of some type.
-            if exist('areaLight','var') 
-                % Adds the area light asset to the collection of subtrees
-                % that we are building.
-                if ~exist('shape','var'), shape = []; end
-                if ~exist('name','var'), name = '';   end
-                resLight = parseGeometryAreaLight(thisR,areaLight,name,shape);
-                subtrees = cat(1, subtrees, tree(resLight));
+            % Build parms and update the trees with a branch node,
+            % object node, or both
+            if exist('name','var'), parms.name = name; end
+            if exist('areaLight','var'), parms.areaLight = areaLight; end
+            if exist('lght','var'),      parms.lght = lght; end
+            if exist('shape','var'),     parms.shape = shape; end
+            if exist('rot','var'),       parms.rot = rot; end
+            if exist('scale','var'),     parms.scale = scale; end
+            if exist('sz','var'),        parms.sz = sz; end
+            if exist('translation','var'), parms.translation = translation; end
+            if exist('mediumInterface','var'), parms.mediumInterface = mediumInterface; end
+            if exist('mat','var'), parms.mat = mat; end
+            if exist('InstanceName','var'), parms.InstanceName = InstanceName; end
 
-            elseif exist('lght','var')
-                
-                if ~exist('name','var'), name = '';   end
-                resLight = parseGeometryLight(thisR,lght,name);
-                subtrees = cat(1, subtrees, tree(resLight));
+            [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
 
-                % ------- A shape.  Create an object node
-            elseif exist('shape','var') % || exist('medium','var') || exist('mat','var')
-                % We have a shape.  We just exited from an
-                % AttributeEnd
-
-                % Shouldn't we be looping over numel(shape)?
-                if iscell(shape), shape = shape{1}; end
-                if ~exist('name','var')
-                    % The name might have been passed in
-                    name = piShapeNameCreate(shape,true,thisR.get('input basename'));
-                end
-
-                % We create object (assets) here.
-                if exist('mat','var'), oMAT = mat;   else, oMAT = []; end
-                if exist('medium','var'), oMEDIUM = medium; else, oMEDIUM = []; end
-                resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
-
-                % Makes a tree of this object and adds that into the
-                % collection of subtrees we are building.
-                subtrees = cat(1, subtrees, tree(resObject));
-            end
-
-            % Create a parent branch node with the transform information for
-            % the object, light, or arealight.
-            %
-            % Sometimes are here with some transform information
-            % (following an AttributeEnd), and we put in a branch
-            % node.  
-
-            % When there is no name, I make up this special case. This
-            % happens at the end of ChessSet.  There is an
-            % AttributeBegin/End with only a transform, but no mesh
-            % name.
-            if ~exist('name','var'), bNAME = 'AttributeEnd'; 
-            else, bNAME = name;
-            end
-
-            if exist('sz','var'),  oSZ = sz; else, oSZ = []; end
-            if exist('rot','var'), oROT = rot; else, oROT = []; end
-            if exist('translation','var'),oTRANS = translation; else, oTRANS = []; end
-            if exist('scale','var'),oSCALE = scale; else, oSCALE = []; end
-
-            resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
-
-            % If we have defined an Instance (ObjectBegin/End) then we
-            % assign it to a branch node here.
-            if exist('InstanceName','var')
-                resCurrent.referenceObject = InstanceName; 
-            end
+            % We should test that resCurrent is NOT the identity
 
             % Adding this resCurrent branch above the light and object
             % nodes in this subtree.  The subtrees are below this branch
             % with its transformation.
-            trees = tree(resCurrent);
-            for ii = 1:numel(subtrees)
-                trees = trees.graft(1, subtrees(ii));
+            if piBranchIdentity(resCurrent)
+                % disp('Identity branch.');
+                trees = subtrees;
+            else
+                trees = tree(resCurrent);
+                for ii = 1:numel(subtrees)
+                    trees = trees.graft(1, subtrees(ii));
+                end
             end
 
         elseif exist('name','var')  && ~isempty(name)
-            % We have a name, but not shape, lght or arealight.
+            % We have a name, but not a shape, lght or arealight.
             %
             % Zheng remembers that we used this for the Cinema4D case when
             % we hung a camera under a marker position.  It is possible
             % that we should stop doing that.  We should try to get rid of
             % this condition.
             %
+            % disp('Name only branch.')
             resCurrent = piAssetCreate('type', 'branch');
 
-            if length(name) < 2 || ~isequal(name(end-1:end),'_B')            
+            if length(name) < 3 || ~isequal(name(end-1:end),'_B')            
                 resCurrent.name = sprintf('%s_B', name); 
             else  % Already ends with '_B'
                 resCurrent.name = name;
             end
+            
             trees = tree(resCurrent);
             for ii = 1:numel(subtrees)
                 trees = trees.graft(1, subtrees(ii));
             end
         else
-            % No objects or name.  This is probably an empty block
+            % No name, shape, light or arealight.  This is probably an
+            % empty block 
+            %
             %   AttributeBegin
             %   AttributeEnd
-            % Maybe we just return subtrees as the trees.
+            %
+            % We just return subtrees as the trees.
+            % disp('No name, no object or light.')
             trees = subtrees;
 
         end  % AttributeEnd
 
-        % Return, indicating how far we have gotten in the txt
+        % Return, indicating how far we have gotten in the txt within
+        % this block
         parsedUntil = cnt;
 
-        % We always have the trees at this point.
-        % if ~exist('trees','var'), warning('trees not defined'); end
-
+        % Returned from the AttributeBegin/End block
+        % Because this is recursive, the value is just the block
+        % count.
         return;
-    else
-        % Starting to manage the case of kitchen.pbrt where there are no
-        % AttributeBegin/End blocks.  This section of code is not properly
-        % tested and should be clarified.
-        warning('Untested section.  We should not be here.')
-        % Also, if there is no AttributeBegin but there is a shape, we
-        % get here.  Perhaps there has been a transform, as well.
-        if exist('shape','var') && exist('mat','var')
-            if iscell(shape), shape = shape{1}; end
-
-            % We create object (assets) here.  If the shape is
-            % empty for an asset, we will have a problem later.
-            % So check how that can happen.
-            %
-            % I don't understand why we are creating materials or
-            % mediumInterface here.  I need to ask Zhenyi, Henryk,
-            % and Zheng. Such materials do get created in
-            % contemporary-bathroom, but not, say, in kitchen.
-            resObject = piAssetCreate('type', 'object');
-            resObject.shape = shape;
-
-            % Set the object name
-            if exist('name','var')
-                if length(name) < 2  || isequal(name(end-1:end),'_O'), resObject.name = name;
-                else, resObject.name = sprintf('%s_O', name);
-                end
-            else
-                resObject.name = piReadObjectName(shape);
-            end
-
-            % Hopefully we have a material or medium for this object.
-            if exist('mat','var')  && ~isempty(mat)
-                resObject.material = mat;
-            end
-
-            if exist('medium','var'), resObject.medium = medium; end
-
-            % Add this object into the subtrees.
-            subtrees = cat(1, subtrees, tree(resObject));
-        end
 
     end % AttributeBegin
 
-    % We were at the AttributeEnd.  We move one more step forward.
+    % We get here if we are starting the next Block. 
+    % fprintf('Next AttributeBegin block starts at %d\n',cnt);
     cnt = cnt+1;
 
 end
-parsedUntil = cnt;  % Return and start at this line.
+
+% We made it in through the whole file
+parsedUntil = cnt;  
 
 %% We build the tree that is returned from any of the defined subtrees
 
-% Debugging.
-fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),cnt);
+% Finished with all the AttributeBegin/End blocks
+fprintf('Identified %d assets; parsed up to line %d\n',numel(subtrees),parsedUntil);
 
 % We create the root node here, placing it as the root of all of the
 % subtree branches.
@@ -426,8 +372,10 @@ if ~isempty(subtrees)
     end
 else
     % Hmm. There were no subtrees.  So no root.  Send the whole thing back
-    % as empty.
-    warning('Empty tree.')
+    % as empty. I used to print a warning, but nothing bad has
+    % happened, so I deleted the warning.
+    %
+    % warning('Empty tree.')
     trees=[];
 end
 
@@ -435,11 +383,99 @@ end
 
 end
 
-%% Helper functions
+%% ------------- Helper functions
+% parseGeometryAttEnd
 % parseGeometryBranch
 % parseGeometryObject
 % parseGeometryAreaLight
 % parseGeometryLight
+% parseGeometryLightName
+
+function [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms)
+% We reached an attributeEnd.  Process and add to the trees.
+
+% In this case, we detected a light of some type.
+if isfield(parms,'areaLight')
+    % Adds the area light asset to the collection of subtrees
+    % that we are building.
+    areaLight = parms.areaLight;
+    if isfield(parms,'name'),  name = parms.name; else, name = ''; end
+    if isfield(parms,'shape'), shape = parms.shape; else, shape = []; end
+
+    % if ~exist('name','var'), name = '';   end
+    resLight = parseGeometryAreaLight(thisR,areaLight,name,shape);
+    subtrees = cat(1, subtrees, tree(resLight));
+
+elseif isfield(parms,'lght') 
+    lght = parms.lght;
+
+    if isfield(parms,'name'),  name = parms.name; else, name = ''; end
+    resLight = parseGeometryLight(thisR,lght,name);
+    subtrees = cat(1, subtrees, tree(resLight));
+
+    % ------- A shape.  Create an object node
+elseif isfield(parms,'shape')
+    shape = parms.shape;
+
+    % Shouldn't we be looping over numel(shape)?
+    if iscell(shape), shape = shape{1}; end
+    if ~isfield(parms,'name')
+        % The name might have been passed in
+        name = piShapeNameCreate(shape,true,thisR.get('input basename'));
+    else, name = parms.name;
+    end
+
+    % We create object (assets) here.
+    if isfield(parms,'mat'), oMAT = parms.mat;   else, oMAT = []; end
+    if isfield(parms,'medium'), oMEDIUM = parms.medium; else, oMEDIUM = []; end
+    resObject = parseGeometryObject(shape,name,oMAT,oMEDIUM);
+
+    % Makes a tree of this object and adds that into the
+    % collection of subtrees we are building.
+    subtrees = cat(1, subtrees, tree(resObject));
+end
+
+% Create a parent branch node with the transform information for
+% the object, light, or arealight.
+%
+% Sometimes are here with some transform information
+% (following an AttributeEnd), and we put in a branch
+% node.
+
+% When there is no name, I make up this special case. This
+% happens at the end of ChessSet.  There is an
+% AttributeBegin/End with only a transform, but no mesh
+% name.
+if isfield(parms,'name'), bNAME = parms.name;
+else, bNAME = 'AttributeEnd';
+end
+
+if isfield(parms,'sz'),  oSZ = parms.sz; else, oSZ = []; end
+if isfield(parms,'rot'), oROT = parms.rot; else, oROT = []; end
+if isfield(parms,'translation'),oTRANS = parms.translation; else, oTRANS = []; end
+if isfield(parms,'scale'),oSCALE = parms.scale; else, oSCALE = []; end
+
+resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
+
+% If we have defined an Instance (ObjectBegin/End) then we
+% assign it to a branch node here.
+if isfield(parms,'InstanceName')
+    resCurrent.referenceObject = parms.InstanceName;
+end
+
+%{
+% We do this on return now.  Not sure where is better.
+%
+% Adding this resCurrent branch above the light and object
+% nodes in this subtree.  The subtrees are below this branch
+% with its transformation.
+trees = tree(resCurrent);
+for ii = 1:numel(subtrees)
+    trees = trees.graft(1, subtrees(ii));
+end
+%}
+end
+
 
 %% Make a branch node
 function resCurrent = parseGeometryBranch(name,sz,rot,translation,scale)
@@ -511,12 +547,13 @@ end
 
 % Manage the name with an _L at the end.
 if isempty(name)
-    name = piLightNameCreate(resLight.lght,isNode,baseName);
+    resLight.name = parseGeometryLightName(resLight.lght,isNode,baseName);
+elseif length(name) < 3 || ~isequal(name(end-1:end),'_L') 
+    resLight.name = sprintf('%s_L',name);
 end
 
 % We have two names.  One for the node and one for the
 % object itself, I guess. (BW).
-resLight.name = name;
 resLight.lght{1}.name = resLight.name;
 end
 
@@ -535,12 +572,64 @@ if exist('lght','var')
 end
 
 if isempty(name)
-    name = piLightNameCreate(resLight.lght,isNode,baseName);
+    resLight.name = parseGeometryLightName(resLight.lght,isNode,baseName);
+elseif length(name) < 3 || ~isequal(name(end-1:end),'_L')
+    resLight.name = sprintf('%s_L',name);
 end
 
 % We have two names.  One for the node and one for the
 % object itself, I guess. (BW).
-resLight.name = name;
 resLight.lght{1}.name = resLight.name;
 
 end
+
+%% Create a name for a light.  Area or other light. 
+function name = parseGeometryLightName(lght,isNode,baseName)
+%
+% Synopsis
+%   name = parseGeometryLightName(lght,[isNode = true],[baseName = 'unlabeledLight'])
+%
+% Input
+%   lght   - A light or arealight built by piRead and parseGeometryText
+%   isNode - This is a light node name or a light filename.
+%            Default (true, a node)
+%   baseName - Scene base name (thisR.get('input basename'));
+%
+% Output
+%    name - The name of the node or file name
+%
+% Brief description
+%   (1) If lght.filename is part of the lght struct, use it.
+%   (2) If not, use baseName and ieHash on the final cell entry of the
+%       lght. We use the first 8 characters in the hex hash. I think
+%       that should be enough (8^16), especially combined with the
+%       base scene name. 
+%
+% See also
+%   parseGeometryText, piGeometryWrite
+
+if iscell(lght), lght = lght{1}; end
+if ~exist('isNode','var') || isempty(isNode), isNode = true; end
+if ~exist('baseName','var') || isempty(baseName)
+    if isfield(lght,'filename'), [~,baseName] = fileparts(lght.filename);
+    else, baseName = 'unlabeledLight';
+    end
+end
+
+% Get the name or create a name based on a hash of the data
+if isstruct(lght) 
+    if isfield(lght,'name'), name = lght.name;
+    else, warning('No name for this lght.');
+    end
+elseif iscell(lght)
+    str = ieHash(lght{end});  % Last entry of the cell for the hash
+    name = sprintf('%s-%s',baseName,str(1:8));
+end
+
+% If this is a node, we make sure the name ends with _L
+if isNode && (length(name) < 3 || ~isequal(name(end-1:end),'_L'))
+    name = sprintf('%s_L', name);
+end
+
+end
+

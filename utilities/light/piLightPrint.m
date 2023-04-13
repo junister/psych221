@@ -1,8 +1,8 @@
-function nLights = piLightPrint(thisR)
+function [nLights,lightNames] = piLightPrint(thisR)
 % Print a table of lights in the recipe
 %
 % Synopsis
-%   nLights = piLightPrint(thisR)
+%   [nLights,lightNames] = piLightPrint(thisR)
 %
 % To get information about light names or their IDs use
 %
@@ -22,6 +22,7 @@ function nLights = piLightPrint(thisR)
 %
 
 nLights = thisR.get('n lights');
+lightNames = {};
 
 if nLights == 0
     disp('---------------------')

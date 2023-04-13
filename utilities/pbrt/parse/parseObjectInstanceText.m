@@ -9,10 +9,11 @@ function [trees, newWorld] = parseObjectInstanceText(thisR, txt)
 %   objects creating the asset tree.  The assets include objects and
 %   lights.
 % 
-%   This function relies on parseGeometryText, which works on
+%   This function relies heavily on parseGeometryText, which works on
 %   AttributeBegin/End sequences and certain other simple file
-%   formats.  The code here also handles the special cases of
-%   ObjectBegin/End instances, but that may be deprecated.
+%   formats.  The code here handles the case of ObjectBegin/End
+%   instances, which are comprised of AttributeBegin/End blocks.
+%   These define an object that is reused as an instance.
 %
 % Inputs
 %   thisR - ISET3d recipe
@@ -39,9 +40,11 @@ trees = tree(rootAsset);
 objBeginLocs = find(contains(txt,'ObjectBegin'));
 objEndLocs   = find(contains(txt,'ObjectEnd'));
 
-% For each objectBegin/End section we process to create a reusable asset.
-% The 'trees' variable stores the objects we create.  The code between
+% For each objectBegin/End section we process to create a reusable
+% asset. The 'trees' variable stores these objects.  The code between
 % ObjectBegin/End is parsed in the usual way via parseGeometryText.
+% If there are objects, this block reads them and adds them to the
+% 'trees' variable.
 if ~isempty(objBeginLocs)
     disp('Start Object processing.');
     for objIndex = 1:numel(objBeginLocs)
@@ -54,8 +57,9 @@ if ~isempty(objBeginLocs)
         [subnodes, ~] = parseGeometryText(thisR,...
             txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
 
-        % If subnodes were returned, then this is a branch.  Graft it onto
-        % the main tree from above.
+        % If subnodes were returned, graft them onto the main tree
+        % from above. Let's do a better job commenting what is
+        % happening here. (BW).
         if ~isempty(subnodes)
             subtree = subnodes.subtree(2);
             branchNode = subtree.Node{1};
@@ -65,60 +69,57 @@ if ~isempty(objBeginLocs)
             trees = trees.graft(1, subtree);
         end
 
-        % Remove the object lines here, creating an empty cell
+        % Remove the object lines we processed, creating an empty cell
         txt(objBeginLocs(objIndex):objEndLocs(objIndex)) = cell(objEndLocs(objIndex)-objBeginLocs(objIndex)+1,1);
     end
     
-    % We remove the empty cells which were created by removing the objects.
+    % We remove the empty cells which were created as we removed the
+    % objects.
     txt = txt(~cellfun('isempty',txt));
     disp('Finished Object processing.');
 end
 
 %% Build the asset tree apart from the Object instances
 
-% The txt has no ObjectBegin/End cases, those have been processed and
-% removed.  It does have AttributeBegin/End sequences.  We parse them and
-% create the subnodes here.
+% The remaining txt has no ObjectBegin/End cases, those have been
+% processed and removed above. It does have AttributeBegin/End
+% sequences that we parse here, returning the subnodes of a tree.
 newWorld = txt;
 fprintf('Attribute processing: ');
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
 if trees.Parent == 0
-    % These are the subnodes return by parseGeometryText. There is no tree
-    % from the ObjectBegin/End.  So we use the subnodes
+    % The subnodes return by parseGeometryText. There is a
+    % root node and that's all we need.
     trees = subnodes;   
 else
-    % A tree was built in the ObjectBegin loop.  We graft the returned
-    % subnodes onto that tree.
+    % We graft the returned subnodes onto a root.  I think this
+    % happens in the case of ObjectInstances.    
     if ~isempty(subnodes)
         subtree = subnodes.subtree(2);
         trees = trees.graft(1, subtree);
     end
 end
 
-% The if/elses seems unnecessary to me.
-if ~isempty(trees)
-    % In some parsing we do not yet have a tree.  But almost always,
-    % we have a tree.  Trying to find the cases where parsing fails.
-    trees = trees.uniqueNames;
-else
-    % This seems impossible to me.  So a warning.
-    warning('Empty tree.  Hard to see how that could happen.');
-end
+% In some parsing we do not yet have a tree.  But almost always,
+% we have a tree.  Trying to find the cases where parsing fails.
+trees = trees.uniqueNames;
 
-% We first parsed all of the lines in txt between ObjectBegin/End. We then
-% parsed the lines in newWorld.  If parsedUntil exceeds the number of lines
-% in newWorld, we set it to be equal to that number. But really, we expect
-% it to be numel(newWorld)
-if parsedUntil ~= numel(newWorld), warning('Incomplete parsing'); end
-parsedUntil = min(parsedUntil,numel(newWorld));
-% Old code that I didn't understand.  Seemed wrong, but it ran.
+% We first parsed all of the lines in txt between ObjectBegin/End. We
+% then parsed the remaining lines in newWorld.  parsedUntil should
+% equal the number of lines in newWorld.
+
+% Old code I didn't understand.  Seemed wrong, but it ran.  But
+% replaced with lines below.
 % parsedUntil(parsedUntil>numel(newWorld)) = numel(newWorld);
 
-% Remove the parsed lines from newWorld. I am unclear about the 'Include'
-% lines.  I think we always need those.  Perhaps piWrite handles the
-% matter?
+% I have never seen this warning.
+% So we can probably just delete these two lines.
+if parsedUntil ~= numel(newWorld), warning('Incomplete parsing'); end
+parsedUntil = min(parsedUntil,numel(newWorld));
+
+% Remove the parsed lines from newWorld, leaving only WorldBegin
 newWorld(2:parsedUntil)=[];
 
 end

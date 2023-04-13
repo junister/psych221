@@ -256,7 +256,7 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
         % exporter = 'Copy';  % Mostly OK.  Not sure all OK.
-        exporter = 'PARSE';  % Mostly OK.  Not sure all OK.
+        exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
@@ -273,11 +273,15 @@ switch ieParamFormat(sceneDir)
         % Downloaded from the computer, cardinal, put in data/scenes/web
         % Other versions of this scene are
         %    bistro_boulangerie.pbrt and 'bistro_cafe.pbrt'
+        %
+        % April 12, 2023.  Failing with dev-kitchen piRead branch with PARSE. 
+        % Also getting a non-square error on sky.exr even with Copy.
+        warning('Bistro not yet working.');
         sceneDir = 'bistro';
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
         end
-        exporter = 'PARSE';
+        exporter = 'Copy';
    case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];

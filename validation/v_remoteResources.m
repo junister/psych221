@@ -3,84 +3,54 @@
 %{
 % Read a simple car scene.  One car.  Skymap. Ground plane.  The car has a
 % lot of parts, though.
-fileName = fullfile(piRootPath, 'data/scenes/low-poly-taxi/low-poly-taxi.pbrt');
+fileName = fullfile('low-poly-taxi.pbrt');
 thisR = piRead(fileName);
-thisR.set('skymap',fullfile(piRootPath,'data/skymaps','sky-rainbow.exr'));
-thisR.show('objects');
+thisR.set('skymap','sky-rainbow.exr');
+thisR.get('instances')
+piWRS(thisR,'remote resources',true);
 
-% The light names are not right.  Debug why.
-thisR.show('lights');
-
-% We need a way to know the names of the objectBegin instances we have
-% created.  Right now they are used as a reference object.  I think the
-% objects have the slot isObjectInstance set to 0. Also, we are using the
-% string '_I_' in the node name to indicate an instance.
-
-% The object is called taxi, but it does not show up in the object list.
-% Here we add an instance of the taxi object, which references all of the
-% subparts.  We may not be handling this correctly in parseGeometryText
-% because we end up with duplicates in the asset tree.
 carName = 'taxi';
 rotationMatrix = piRotationMatrix('z', -15);
-position       = [-4 0 0];
+position = [-4 0 0];
+thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
+    'rotation',rotationMatrix, 'position',position,'unique',true);
 
-% We do not want to call the unique names a lot. We run
-% piObjectInstanceCreate a lot, and that's why uniquenames is held out.
-thisR   = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
-    'rotation',rotationMatrix, 'position',position);
-thisR.assets = thisR.assets.uniqueNames;
-%}
-% {
-n = thisR.get('n nodes')
-for ii=1:n
-    a =  thisR.get('asset',ii,'type')
-    name = thisR.get('asset',ii,'name')
-    switch a
-        case 'branch'
-            
-        case 'object'
-        case 'light'
-        otherwise
-            disp(a)
-    end
-end
+thisR.show;
 
+thisR.get('instances')
+
+piWRS(thisR,'remote resources',true);
 %}
+
 % Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %{
-th
 thisR.show('objects');
 %}
 
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
-% {
-% kitchen - original debug ...
 thisR = piRecipeDefault('scene name','Simple Scene');
 thisR = piRecipeDefault('scene name','ChessSet');
 
-% I may not have the edited version at home! (BW)
 thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
-
 thisR = piRecipeCreate('cornell_box');
+thisR = piRecipeCreate('Macbeth checker');
+piWRS(thisR,'remote resources',true);
 
 % This is really big (almost 1300 assets and 10K lines).
+% We should figure out where the bottleneck is.
+% The bistro does not work.
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
+thisR = piRecipeDefault('scene name','contemporary-bathroom');
 
 piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
 
-newOut = fullfile(piRootPath, 'local', 'test', 'kitchen.pbrt');
-newOut = fullfile(piRootPath, 'local', 'test', 'bistro-vespa.pbrt');
-
-thisR.set('input file',out);
-thisR.set('output file',newOut);
-piWRS(thisR);
 
 %}
 %{

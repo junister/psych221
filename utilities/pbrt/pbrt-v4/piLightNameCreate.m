@@ -27,23 +27,24 @@ function name = piLightNameCreate(lght,isNode,baseName)
 %
 % See also
 %   parseGeometryText, piGeometryWrite
+warning('Deprecated.  Use helper in parseGeometryText:  parseGeometryLightName.')
 
 if iscell(lght), lght = lght{1}; end
 if ieNotDefined('isNode'),isNode = true; end
 if ieNotDefined('baseName'), baseName = 'light'; end
 
+% Get the name or create a name based on a hash of the data
 if isstruct(lght) 
-    if isfield(lght,'name')
-        name = lght.name;
-    else
-        warning('No name for this lght.');
+    if isfield(lght,'name'), name = lght.name;
+    else,         warning('No name for this lght.');
     end
 elseif iscell(lght)
-    str = ieHash(lght{end});
+    str = ieHash(lght{end});  % Last entry of the cell for the hash
     name = sprintf('%s-%s',baseName,str(1:8));
 end
 
-if isNode && ~isequal(name(end-1:end),'_L')
+% When this is a node, we want the name to always end with _L
+if isNode && (length(name) < 3 || ~isequal(name(end-1:end),'_L'))
     name = sprintf('%s_L', name);
 end
 
