@@ -372,8 +372,10 @@ if ~isempty(subtrees)
     end
 else
     % Hmm. There were no subtrees.  So no root.  Send the whole thing back
-    % as empty.
-    warning('Empty tree.')
+    % as empty. I used to print a warning, but nothing bad has
+    % happened, so I deleted the warning.
+    %
+    % warning('Empty tree.')
     trees=[];
 end
 
