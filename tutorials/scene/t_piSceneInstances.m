@@ -37,6 +37,8 @@ idx = p2Root(end);
 for ii=1:3
     thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0 0.0]);
 end
+% Done this way, we need to adjust the names of the nodes after inserting.
+thisR.assets = thisR.assets.uniqueNames;
 
 %% Blue man copies
 
@@ -45,17 +47,19 @@ p2Root = thisR.get('asset',blueID,'pathtoroot');
 idx = p2Root(end);
 
 % This position is relative to the position of the original object
+% Note: It is also possible to run the create setting the 'unique'
+% flag to true.
 steps = [-0.3 0.3];
 for ii=1:numel(steps)
-    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0],'unique',true);
 end
 
-piWRS(thisR,'render flag','hdr');
+piWRS(thisR);
 
 %% Use the Chess Set
 
 thisR = piRecipeCreate('Chess Set');
-piWRS(thisR,'render flag','hdr');
+piWRS(thisR);
 
 %% Copy the king using instances
 
@@ -79,7 +83,9 @@ idx = p2Root(end);
 % The Chess set dimensions are small.  
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
-    [~,newBranch] = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    [~,newBranch] = piObjectInstanceCreate(thisR, idx, ...
+        'position',[steps(ii) 0 0.0], ...
+        'unique',true);
     disp(newBranch)
 end
 
@@ -91,10 +97,12 @@ idx = p2Root(end);
 % The Chess set dimensions are small.  
 steps = [-0.2 0.2]*1e-1;
 for ii=1:numel(steps)
-    [~,newBranch] = piObjectInstanceCreate(thisR, idx, 'position',[steps(ii) 0 0.0]);
+    [~,newBranch] = piObjectInstanceCreate(thisR, idx, ...
+        'position',[steps(ii) 0 0.0], ...
+        'unique',true);
     disp(newBranch)
 end
 
-piWRS(thisR,'render flag','hdr');
+piWRS(thisR,'gamma',0.6);
 
 %% END
