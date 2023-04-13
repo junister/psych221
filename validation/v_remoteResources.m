@@ -6,12 +6,19 @@
 fileName = fullfile('low-poly-taxi.pbrt');
 thisR = piRead(fileName);
 thisR.set('skymap','sky-rainbow.exr');
+thisR.get('instances')
+piWRS(thisR,'remote resources',true);
 
 carName = 'taxi';
 rotationMatrix = piRotationMatrix('z', -15);
 position = [-4 0 0];
 thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
     'rotation',rotationMatrix, 'position',position,'unique',true);
+
+thisR.show;
+
+thisR.get('instances')
+
 piWRS(thisR,'remote resources',true);
 %}
 
@@ -20,37 +27,30 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %{
-th
 thisR.show('objects');
 %}
 
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
-% {
-% kitchen - original debug ...
 thisR = piRecipeDefault('scene name','Simple Scene');
 thisR = piRecipeDefault('scene name','ChessSet');
 
-% I may not have the edited version at home! (BW)
 thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
-
 thisR = piRecipeCreate('cornell_box');
 thisR = piRecipeCreate('Macbeth checker');
+piWRS(thisR,'remote resources',true);
 
 % This is really big (almost 1300 assets and 10K lines).
+% We should figure out where the bottleneck is.
+% The bistro does not work.
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
+thisR = piRecipeDefault('scene name','contemporary-bathroom');
 
 piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
 
-newOut = fullfile(piRootPath, 'local', 'test', 'kitchen.pbrt');
-newOut = fullfile(piRootPath, 'local', 'test', 'bistro-vespa.pbrt');
-
-thisR.set('input file',out);
-thisR.set('output file',newOut);
-piWRS(thisR);
 
 %}
 %{

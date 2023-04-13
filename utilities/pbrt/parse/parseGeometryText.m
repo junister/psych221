@@ -187,9 +187,13 @@ while cnt <= length(txt)
     elseif piContains(currentLine,'LightSource') || ...
             piContains(currentLine, 'Rotate') ||...
             piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
-        % The light source is created below, after the AttributeEnd
-        % Usually it contains only one line. Exception is there are
-        % rotations or scalings.  I hope we handle that (BW).
+        % If this is a light source, it is created below, after the
+        % AttributeEnd.
+        % 
+        % We have a case in contemporary-bathroom where there is a
+        % Rotate without a LightSource.  I don't think we are handling
+        % that correctly.  Perhaps this elseif clause should be split
+        % into separate LightSource, Rotate, and Scale?
         if ~exist('lght','var')
             lght{1} = currentLine;
         else

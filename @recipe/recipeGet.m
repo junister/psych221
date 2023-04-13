@@ -1747,7 +1747,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % The extra varargin which allows the user to specify
                     % the 'replace' value as true or false.  By default,
                     % replace seems to be true.
-                    %
+                    
+                    % Get the subtree of this asset
                     val = thisR.assets.subtree(id);
 
                     % The current IDs only make sense as part of the whole

@@ -6,12 +6,13 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %
 % Brief
 %   Instancing enables the system to store a single copy of the object
-%   mesh and define multiple copies (instances) that differ based on
+%   mesh and render multiple copies (instances) that differ based on
 %   the transformations that place it in the scene. Instancing is an
 %   efficient method of copying.
 %
-%   Running this function can change all of the node indices and
-%   potentially introduce some name changes.  
+%   Running this function can change the node indices and potentially
+%   introduce some name changes. See the discussion at the end about
+%   'uniqueNames'
 %
 % Inputs:
 %   thisR     - scene recipe
@@ -31,10 +32,10 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   OBJsubtreeNew - this is the subtree of the instance
 %
 % Description
-%   Instances can be used with scenes that have an 'assets' slot.  To use
-%   instances, we first prepare the recipe using the function
-%   (piObjectInstance). This code makes an instance (light weight copy) of
-%   a particular asset. 
+%   Instances can be used with scenes that have created an 'assets'
+%   slot.  To use instances, we first prepare the recipe using the
+%   function (piObjectInstanceText). This code finds the
+%   ObjectBegin/End code and makes an instance of these objects.
 % 
 %   The code is explained in the tutorial script
 %
@@ -97,7 +98,7 @@ end
 
 %% We have a valid index.  Start the operations.
 
-% Get the subtree but do not replace the
+% Get the subtree of the object instance. 
 OBJsubtree = thisR.get('asset', idx, 'subtree','false');
 
 OBJsubtree_branch = OBJsubtree.get(1);
@@ -178,15 +179,12 @@ end
 % Returned
 instanceBranchName = OBJsubtree_branch.name;
 
-% BW Added.  Worked for SimpleScene and the test nightdrive scene.
-% Eliminates the need to make the call after the return from this routine,
-% piObjectInstanceCreate
-% This call takes a quite a long time to run for driving scene.
-
-% I fixed some lazy coding in the tree and this runs a lot faster
-% Hopefully that means we can leave it in place (DJC?)
+% The uniqueNames call takes a quite a long time to run for driving
+% scene. Though, I (DJC?) fixed some lazy coding in the tree and this
+% runs a lot faster. Hopefully that means we can leave it in place
+% (DJC?)
 %
-% Zhenyi said he wanted it removed.  So we turned it into an option.
+% Zhenyi said he wanted it removed.  So BW turned it into an option.
 %
 if p.Results.unique, thisR.assets = thisR.assets.uniqueNames; end
 
