@@ -546,9 +546,12 @@ for nMat = 1:numel(thisNode.material)
         % fixed up 'kitchen' scene with AttributeBegin/End.  Also with
         % Macbeth Check via piRecipeCreate.  So a decent set of tests.
         % 
-        % But no testing for complex auto scenes with multiple
-        % instances. 
-        error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
+        % We get this awkward situation in our Auto @recipes. That might
+        % indicate an issue with the recipe creation, but for now we need
+        % to let it through in order to render them
+        fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
+        % Causes Auto scenes to fail
+        %error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
         
         %{
         % For some Included .pbrt files we don't get a shape
