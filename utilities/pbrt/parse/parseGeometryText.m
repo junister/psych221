@@ -457,6 +457,9 @@ if isfield(parms,'scale'),oSCALE = parms.scale; else, oSCALE = []; end
 
 resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
 
+if piBranchIdentity(resCurrent)
+    disp(resCurrent.name)
+end
 % If we have defined an Instance (ObjectBegin/End) then we
 % assign it to a branch node here.
 if isfield(parms,'InstanceName')
