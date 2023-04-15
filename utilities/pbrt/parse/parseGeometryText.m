@@ -149,12 +149,14 @@ while cnt <= length(txt)
         % Update where we start from
         cnt =  cnt + retLine;
 
-    elseif contains(currentLine,{'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
+    elseif contains(currentLine,...
+            {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
             strcmp(currentLine(1),'#')
         
         [name, sz] = piParseObjectName(currentLine);
 
-    elseif contains(currentLine, 'ObjectInstance') && ~strcmp(currentLine(1),'#')
+    elseif contains(currentLine, 'ObjectInstance') && ...
+            ~strcmp(currentLine(1),'#')
         % The object instance name will be assigned to a branch node 
         % This happens after the AttributeEnd.
         InstanceName = erase(currentLine(length('ObjectInstance ')+1:end),'"');    
@@ -164,7 +166,8 @@ while cnt <= length(txt)
         % Transformation information
         [translation, rot, scale] = parseTransform(currentLine);
 
-    elseif piContains(currentLine,'MediumInterface') && ~strcmp(currentLine(1),'#')
+    elseif piContains(currentLine,'MediumInterface') && ...
+            ~strcmp(currentLine(1),'#')
         % MediumInterface could be water or other scattering media.
         medium = currentLine;
 
@@ -271,16 +274,16 @@ while cnt <= length(txt)
 
             % Build parms and update the trees with a branch node,
             % object node, or both
-            if exist('name','var'), parms.name = name; end
+            if exist('name','var'),      parms.name = name; end
             if exist('areaLight','var'), parms.areaLight = areaLight; end
             if exist('lght','var'),      parms.lght = lght; end
             if exist('shape','var'),     parms.shape = shape; end
             if exist('rot','var'),       parms.rot = rot; end
             if exist('scale','var'),     parms.scale = scale; end
             if exist('sz','var'),        parms.sz = sz; end
-            if exist('translation','var'), parms.translation = translation; end
+            if exist('translation','var'),  parms.translation = translation; end
             if exist('mediumInterface','var'), parms.mediumInterface = mediumInterface; end
-            if exist('mat','var'), parms.mat = mat; end
+            if exist('mat','var'),          parms.mat = mat; end
             if exist('InstanceName','var'), parms.InstanceName = InstanceName; end
 
             [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
@@ -459,6 +462,9 @@ resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
 
 if piBranchIdentity(resCurrent)
     disp(resCurrent.name)
+    fprintf('%f\n',oSCALE);
+    fprintf('%f\n',oTRANS);
+    fprintf('%f\n',oROT);
 end
 % If we have defined an Instance (ObjectBegin/End) then we
 % assign it to a branch node here.
