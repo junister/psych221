@@ -30,6 +30,10 @@ if ~piDockerExists, piDockerConfig; end
 thisR.show('objects');
 %}
 
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
+
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
@@ -50,7 +54,6 @@ thisR = piRecipeDefault('scene name','contemporary-bathroom');
 piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
-
 
 %}
 %{

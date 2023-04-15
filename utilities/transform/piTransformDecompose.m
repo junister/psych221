@@ -1,5 +1,10 @@
 function [translation, rotation, scale] = piTransformDecompose(tMatrix)
-%% From Amy's piGeometryRead_Blender
+% Moved in to parseTransform.m
+%
+% That was the only place it was called.
+%
+
+error('Deprecated.  Moved into parseTransform.')
 
 if numel(tMatrix(:)) == 16
     tMatrix = reshape(tMatrix,[4,4]);

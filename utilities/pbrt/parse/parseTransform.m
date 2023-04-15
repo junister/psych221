@@ -1,24 +1,50 @@
 function [translation, rotation, scale] = parseTransform(txt)
-%% From Amy's piGeometryRead_Blender
+% Convert a ConcatTransform line into our units
+%
+% Synopsis
+%   [translation, rotation, scale] = parseTransform(txt)
+%
+% Brief:
+%   The encoding in the ConcatTransform to rotation, translate and scale is
+%   done here.
+%
+% From Amy Ni's piGeometryRead_Blender
 % 
-% Get transformation matrix from the input (the 'Transform' line)
+% See also
+%   parseGeometryText (via piRead)
+
+% Read the values from the input (the 'Transform' or 'ConcatTransform' line)
+
 openidx  = strfind(txt,'[');
 closeidx = strfind(txt,']');
 tmp = sscanf(txt(openidx(1):closeidx(1)), '[%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
+
+% Reformat
 T = reshape(tmp,[4,4]);
 
+% Do the calculations in here
 [translation, rotation, scale] = piTransformDecompose(T);
-%{
-% This part goes into piTransformDecompose.m
+
+end
+
+%% Main calculation
+function [translation, rotation, scale] = piTransformDecompose(tMatrix)
+
+if numel(tMatrix(:)) == 16
+    tMatrix = reshape(tMatrix,[4,4]);
+else
+    error('Transform matrix has to be 4 by 4');
+end
+
 % Extract translation from the transformation matrix
-translation = reshape(T(13:15),[3,1]);
+translation = reshape(tMatrix(13:15),[3,1]);
 
 % Compute new transformation matrix without translation
-T = T(1:3,1:3);
+tMatrix = tMatrix(1:3,1:3);
 
 % Extract the pure rotation component of the new transformation matrix
 % using polar decomposition (the pbrt method)
-R = T;
+R = tMatrix;
 ii=0;
 normii=1;
 while ii<100 && normii>.0001
@@ -62,9 +88,8 @@ rotation = [rotz, roty, rotx; fliplr(eye(3))];
 % TODO: Deal with flip
 
 % Compute scale matrix using rotation matrix and transformation matrix
-S = R\T;
+S = R\tMatrix;
 
 % Set up scale parameters in pbrt format
 scale = [S(1,1) S(2,2), S(3,3)];
-%}
 end
