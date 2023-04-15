@@ -455,16 +455,18 @@ for nMat = 1:numel(thisNode.material)
 
             % We seem to be testing these here.
             pbrtName = strrep(thisShape.filename,'.ply','.pbrt');
-            if ~exist(fullfile(rootPath, pbrtName),'file')
+            if ~isfile(fullfile(rootPath, pbrtName))
                 % No PBRT file matching the shape.  Go to line 493.
 
                 plyName = strrep(thisShape.filename,'.pbrt','.ply');
-                if ~exist(fullfile(rootPath, plyName),'file')
+                if ~isfile(fullfile(rootPath, plyName))
                     % No PLY file matching the shape
 
                     % Allow for meshes to be along our path
+                    % This is expensive and we are now expecting
+                    % meshes to be where they belong, I think
                     [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
-                    if which([shapeFile shapeExtension])
+                    if false % which([shapeFile shapeExtension])
                         thisShape.filename = plyName;
                         thisShape.meshshape = 'plymesh';
                         shapeText = piShape2Text(thisShape);
