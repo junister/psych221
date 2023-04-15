@@ -294,7 +294,7 @@ while cnt <= length(txt)
             % nodes in this subtree.  The subtrees are below this branch
             % with its transformation.
             if piBranchIdentity(resCurrent)
-                fprintf('Identity branch %s\n',resCurrent.name)
+                % fprintf('Identity branch %s\n',resCurrent.name)
                 trees = subtrees;
             else
                 trees = tree(resCurrent);
@@ -460,12 +460,12 @@ if isfield(parms,'scale'),oSCALE = parms.scale; else, oSCALE = []; end
 
 resCurrent = parseGeometryBranch(bNAME,oSZ,oROT,oTRANS,oSCALE);
 
-if piBranchIdentity(resCurrent)
-    disp(resCurrent.name)
-    fprintf('%f\n',oSCALE);
-    fprintf('%f\n',oTRANS);
-    fprintf('%f\n',oROT);
-end
+% if piBranchIdentity(resCurrent)
+%     disp(resCurrent.name)
+%     fprintf('%f\n',oSCALE);
+%     fprintf('%f\n',oTRANS);
+%     fprintf('%f\n',oROT);
+% end
 % If we have defined an Instance (ObjectBegin/End) then we
 % assign it to a branch node here.
 if isfield(parms,'InstanceName')
