@@ -285,13 +285,13 @@ while cnt <= length(txt)
 
             [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
 
-            % We should test that resCurrent is NOT the identity
+            % We test that resCurrent is NOT the identity
 
             % Adding this resCurrent branch above the light and object
             % nodes in this subtree.  The subtrees are below this branch
             % with its transformation.
             if piBranchIdentity(resCurrent)
-                % disp('Identity branch.');
+                fprintf('Identity branch %s\n',resCurrent.name)
                 trees = subtrees;
             else
                 trees = tree(resCurrent);
