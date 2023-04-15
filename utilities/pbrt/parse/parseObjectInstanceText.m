@@ -51,21 +51,30 @@ if ~isempty(objBeginLocs)
         fprintf('Object %d: ',objIndex);
 
         % Find its name.  Sometimes this is empty.  Hmm.
-        name = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
+        objectName = erase(txt{objBeginLocs(objIndex)}(13:end),'"');
 
         % Parse the text to create the subnodes of the object tree
         [subnodes, ~] = parseGeometryText(thisR,...
             txt(objBeginLocs(objIndex)+1:objEndLocs(objIndex)-1), '');
 
-        % If subnodes were returned, graft them onto the main tree
-        % from above. Let's do a better job commenting what is
-        % happening here. (BW).
-        if ~isempty(subnodes)
-            subtree = subnodes.subtree(2);
-            branchNode = subtree.Node{1};
-            branchNode.isObjectInstance = 1;
-            branchNode.name = sprintf('%s_B',name);
-            subtree = subtree.set(1, branchNode);
+        % If subnodes were returned, they always contain a root (1) and
+        % two additional subnodes defining the transform (2) and the
+        % object itself (3).  We add the transformation and object to
+        % the main tree we are building.
+        if ~isempty(subnodes)            
+            % To make it easy to set the isObjectInstance, we extract
+            % the node from the tree and then set it back.
+            subtree = subnodes.subtree(2);    % The tree below the root
+            branchNode = subtree.Node{1};     % The branch node
+            branchNode.isObjectInstance = 1;  % This is a reference object 
+            % Name the branch to match the object name
+            if length(objectName) < 3 || ~isequal(objectName(end-1:end),'_B')
+                branchNode.name = sprintf('%s_B',objectName);  
+            else
+                branchNode.name = objectName;
+            end
+
+            subtree = subtree.set(1, branchNode); % Get rid 
             trees = trees.graft(1, subtree);
         end
 
