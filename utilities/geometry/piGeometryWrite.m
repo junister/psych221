@@ -118,14 +118,15 @@ for ii = 1:numel(children)
         % do not write object instance repeatedly
         if isfield(thisNode,'isObjectInstance')
             if thisNode.isObjectInstance ==1
-                indentSpacing = "    ";
+                indentSpacing = '    ';
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(10:end-2));
                 if ~isempty(thisNode.motion)
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'ActiveTransform StartTime \n'));
                 end
 
-                piGeometryTransformWrite(fid, thisNode, "", indentSpacing);
+                spacing = ''; % faster if not a string
+                piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
 
                 % Write out motion
                 if ~isempty(thisNode.motion)
@@ -206,7 +207,7 @@ children = obj.getchildren(thisNode);
 spacing = blanks(lvl * 4);
 
 % indent spacing
-indentSpacing = "    ";
+indentSpacing = '    ';
 
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
@@ -394,9 +395,11 @@ tMatrix = reshape(tMatrix,[1,16]);
 
 transformType = 'ConcatTransform';
 
-fprintf(fid, strcat(spacing, indentSpacing,...
-    sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
-    transformType, tMatrix(:)), '\n'));
+% This takes a lot of time, let's break it up to see why
+printString = sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
+    transformType, tMatrix(:));
+fullLine = [spacing indentSpacing printString '\n'];
+fprintf(fid, fullLine);
 
 end
 
