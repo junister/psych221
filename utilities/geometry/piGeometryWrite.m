@@ -34,6 +34,8 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 p.parse(thisR,varargin{:});
 
+remoteResources = p.Results.remoteresources;
+
 %% Create the default file name
 
 % Get the fullname of the geometry file to write
@@ -63,7 +65,7 @@ if ~isempty(obj)
     % Write tree structure in main geometry file
     lvl = 0;
     writeGeometryFlag = 0;
-    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR);
+    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR, 'remoteresources', remoteResources);
 else
     % if no assets were found
     for ii = numel(thisR.world)
@@ -190,7 +192,7 @@ end
 
 %% Recursive write for attributes?
 
-function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
+function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR, varargin)
 % Write attribute sections. The logic is:
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
@@ -201,10 +203,7 @@ children = obj.getchildren(thisNode);
 %% Loop through children at this level
 
 % Generate spacing to make the tree structure more beautiful
-spacing = "";
-for ii = 1:lvl
-    spacing = strcat(spacing, "    ");
-end
+spacing = blanks(lvl * 4);
 
 % indent spacing
 indentSpacing = "    ";
@@ -231,7 +230,7 @@ for ii = 1:numel(children)
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
     end
 
-    fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
+    fprintf(fid, [spacing, 'AttributeBegin\n']);
     if isequal(thisNode.type, 'branch')
         % get the name after stripping ID for this Node
         while numel(thisNode.name) >= 10 &&...
