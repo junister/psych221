@@ -239,11 +239,11 @@ for ii = 1:numel(children)
             thisNode.name = thisNode.name(10:end);
         end
         % Write the object's dimensions
-        fprintf(fid, strcat(spacing, indentSpacing,...
+        fprintf(fid, [spacing, indentSpacing,...
             sprintf('#MeshName: "%s" #Dimension:[%.4f %.4f %.4f]',thisNode.name,...
             thisNode.size.l,...
             thisNode.size.w,...
-            thisNode.size.h), '\n'));
+            thisNode.size.h), '\n']);
 
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.  For now, this is not
@@ -363,7 +363,7 @@ for ii = 1:numel(children)
     end
 
 
-    fprintf(fid, strcat(spacing, 'AttributeEnd\n'));
+    fprintf(fid, [spacing, 'AttributeEnd\n']);
 end
 
 end
