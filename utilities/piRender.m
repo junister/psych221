@@ -192,7 +192,7 @@ if ispc  % Windows
     % with Linux-based Docker pbrt container
     pFile = fopen(currFile,'rt');
     tFileName = tempname;
-    tFile = fopen(tFileName,'wt');
+    tFile = fopen(tFileName,'Wt');
     while true
         thisline = fgets(pFile);
         if ~ischar(thisline); break; end  %end of file

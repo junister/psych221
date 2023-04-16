@@ -190,7 +190,7 @@ end
 %% Open up the main PBRT scene file.
 
 outFile = thisR.get('output file');
-fileID = fopen(outFile,'w');
+fileID = fopen(outFile,'W');
 
 %% Write header
 piWriteHeader(thisR,fileID)

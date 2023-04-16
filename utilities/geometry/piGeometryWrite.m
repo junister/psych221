@@ -50,7 +50,7 @@ obj = thisR.assets;
 fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
 % Open the file and write out the assets
-fid_obj = fopen(fname_obj,'w');
+fid_obj = fopen(fname_obj,'W');
 % fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
 fprintf(fid_obj,'# Exported by piGeometryWrite %s \n  \n',string(datetime));
 
