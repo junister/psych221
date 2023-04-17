@@ -147,7 +147,7 @@ if ~obj.localRender
     if ~isempty(denoiseCommand) 
         % Use the optix denoiser if asked
         containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s && %s"',...
-            useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand, denoiseCommand);
+            useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
     else
         containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
             useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand);
