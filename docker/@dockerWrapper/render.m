@@ -65,7 +65,8 @@ outputFolder = dockerWrapper.pathToLinux(outputFolder);
 denoiseCommand = ''; %default
 
 % sync data over
-if ~obj.localRender
+% try adding a remote resource option for local processing on servers
+if ~obj.localRender || obj.remoteResources
     % Running remotely.
     if ispc
         rSync = 'wsl rsync';
