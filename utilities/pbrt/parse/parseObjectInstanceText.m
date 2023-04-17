@@ -86,6 +86,16 @@ if ~isempty(objBeginLocs)
     % objects.
     txt = txt(~cellfun('isempty',txt));
     disp('Finished Object processing.');
+
+    % If we have any empty AttributeBegin/End blocks, remove them too.
+    attBeginLocs = find(contains(txt,'AttributeBegin'));
+    attEndLocs = find(contains(txt,'AttributeEnd'));
+    for ii=1:numel(attBeginLocs)
+        if attBeginLocs(ii) == attEndLocs(ii) - 1
+            fprintf('**** Empty AttBegin/End block %d',attBeginLocs(ii));
+        end
+    end
+
 end
 
 %% Build the asset tree apart from the Object instances
@@ -98,6 +108,8 @@ fprintf('Attribute processing: ');
 [subnodes, parsedUntil] = parseGeometryText(thisR, newWorld,'');
 
 %% We assign the returned subnodes to the tree
+
+%fprintf('Grafting subnodes to main tree ...')
 if trees.Parent == 0
     % The subnodes return by parseGeometryText. There is a
     % root node and that's all we need.
@@ -110,10 +122,7 @@ else
         trees = trees.graft(1, subtree);
     end
 end
-
-% In some parsing we do not yet have a tree.  But almost always,
-% we have a tree.  Trying to find the cases where parsing fails.
-trees = trees.uniqueNames;
+% fprintf('\n');
 
 % We first parsed all of the lines in txt between ObjectBegin/End. We
 % then parsed the remaining lines in newWorld.  parsedUntil should
@@ -130,5 +139,8 @@ parsedUntil = min(parsedUntil,numel(newWorld));
 
 % Remove the parsed lines from newWorld, leaving only WorldBegin
 newWorld(2:parsedUntil)=[];
+
+% Maybe this should be optional?
+trees = trees.uniqueNames;
 
 end
