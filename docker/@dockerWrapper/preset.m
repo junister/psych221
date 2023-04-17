@@ -1,4 +1,4 @@
-function preset(obj, presetName)
+function preset(presetName)
 %PRESET Load dockerWrapper prefs from a list of presets
 
 switch presetName
@@ -46,8 +46,10 @@ switch presetName
         switch presetName
             case {'remoteMux', 'remoteMux-alt'}
                 dockerWrapper.setPrefs('renderContext', 'remote-mux');
+                dockerWrapper.setPrefs('remoteMachine', 'muxreconrt.stanford.edu');
             case {'remoteOrange', 'remoteOrange-alt'}
                 dockerWrapper.setPrefs('renderContext', 'remote-orange');
+                dockerWrapper.setPrefs('remoteMachine', 'orange.stanford.edu');
         end
 
         % also pick GPU and docker image
