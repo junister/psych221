@@ -17,7 +17,9 @@ function val = piTextureText(texture, thisR, varargin)
 p = inputParser;
 p.addRequired('texture', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
-p.addParameter('remoteresources', getpref('docker','remoteResources',false));
+
+% remote should be passed in to us if needed
+p.addParameter('remoteresources', false);
 
 p.parse(texture, thisR, varargin{:});
 

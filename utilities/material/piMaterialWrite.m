@@ -101,7 +101,7 @@ nonMixMaterialText = materialTxt(~mixMatIndex);
 
 %% Write the texture and material information into scene_material.pbrt
 output = thisR.get('materials output file');
-fileID = fopen(output,'w');
+fileID = fopen(output,'W');
 fprintf(fileID,'# Exported by piMaterialWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
 
 if ~isempty(textureTxt)

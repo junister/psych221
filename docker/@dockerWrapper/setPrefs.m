@@ -66,6 +66,9 @@ p.addParameter('remoteImageTag','',@ischar);
 p.addParameter('remoteRoot','',@ischar);
 p.addParameter('remoteRender','',@islogical);  % Inverted form of localRender
 
+% for using shared resources
+p.addParameter('remoteResources','',@islogical);
+
 p.addParameter('renderContext','',@ischar);
 
 p.addParameter('localRoot','',@ischar);
@@ -112,6 +115,9 @@ if ~isempty(p.Results.renderContext)
 end
 if ~isempty(p.Results.remoteMachine)
     setpref('docker', 'remoteMachine', p.Results.remoteMachine);
+end
+if ~isempty(p.Results.remoteResources)
+    setpref('docker', 'remoteResources', p.Results.remoteResources);
 end
 
 % Local rendering parameters

@@ -8,7 +8,7 @@ function val = piMaterialText(material, thisR, varargin)
 p = inputParser;
 p.addRequired('material', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
-p.addParameter('remoteresources', getpref('docker','remoteResources',false));
+p.addParameter('remoteresources', false);
 
 p.parse(material, thisR, varargin{:});
 

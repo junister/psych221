@@ -34,6 +34,8 @@ p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('remoteresources', getpref('docker','remoteResources',false));
 p.parse(thisR,varargin{:});
 
+remoteResources = p.Results.remoteresources;
+
 %% Create the default file name
 
 % Get the fullname of the geometry file to write
@@ -48,7 +50,7 @@ obj = thisR.assets;
 fname_obj = fullfile(Filepath,sprintf('%s%s',n,e));
 
 % Open the file and write out the assets
-fid_obj = fopen(fname_obj,'w');
+fid_obj = fopen(fname_obj,'W');
 % fprintf(fid_obj,'# Exported by piGeometryWrite on %i/%i/%i %i:%i:%f \n  \n',clock);
 fprintf(fid_obj,'# Exported by piGeometryWrite %s \n  \n',string(datetime));
 
@@ -63,7 +65,7 @@ if ~isempty(obj)
     % Write tree structure in main geometry file
     lvl = 0;
     writeGeometryFlag = 0;
-    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR);
+    recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR, 'remoteresources', remoteResources);
 else
     % if no assets were found
     for ii = numel(thisR.world)
@@ -116,14 +118,15 @@ for ii = 1:numel(children)
         % do not write object instance repeatedly
         if isfield(thisNode,'isObjectInstance')
             if thisNode.isObjectInstance ==1
-                indentSpacing = "    ";
+                indentSpacing = '    ';
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(10:end-2));
                 if ~isempty(thisNode.motion)
                     fprintf(fid, strcat(spacing, indentSpacing,...
                         'ActiveTransform StartTime \n'));
                 end
 
-                piGeometryTransformWrite(fid, thisNode, "", indentSpacing);
+                spacing = ''; % faster if not a string
+                piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
 
                 % Write out motion
                 if ~isempty(thisNode.motion)
@@ -190,7 +193,7 @@ end
 
 %% Recursive write for attributes?
 
-function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR)
+function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR, varargin)
 % Write attribute sections. The logic is:
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
@@ -201,13 +204,10 @@ children = obj.getchildren(thisNode);
 %% Loop through children at this level
 
 % Generate spacing to make the tree structure more beautiful
-spacing = "";
-for ii = 1:lvl
-    spacing = strcat(spacing, "    ");
-end
+spacing = blanks(lvl * 4);
 
 % indent spacing
-indentSpacing = "    ";
+indentSpacing = '    ';
 
 for ii = 1:numel(children)
     thisNode = obj.get(children(ii));
@@ -231,7 +231,7 @@ for ii = 1:numel(children)
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
     end
 
-    fprintf(fid, strcat(spacing, 'AttributeBegin\n'));
+    fprintf(fid, [spacing, 'AttributeBegin\n']);
     if isequal(thisNode.type, 'branch')
         % get the name after stripping ID for this Node
         while numel(thisNode.name) >= 10 &&...
@@ -239,11 +239,11 @@ for ii = 1:numel(children)
             thisNode.name = thisNode.name(10:end);
         end
         % Write the object's dimensions
-        fprintf(fid, strcat(spacing, indentSpacing,...
+        fprintf(fid, [spacing, indentSpacing,...
             sprintf('#MeshName: "%s" #Dimension:[%.4f %.4f %.4f]',thisNode.name,...
             thisNode.size.l,...
             thisNode.size.w,...
-            thisNode.size.h), '\n'));
+            thisNode.size.h), '\n']);
 
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.  For now, this is not
@@ -363,7 +363,7 @@ for ii = 1:numel(children)
     end
 
 
-    fprintf(fid, strcat(spacing, 'AttributeEnd\n'));
+    fprintf(fid, [spacing, 'AttributeEnd\n']);
 end
 
 end
@@ -395,9 +395,11 @@ tMatrix = reshape(tMatrix,[1,16]);
 
 transformType = 'ConcatTransform';
 
-fprintf(fid, strcat(spacing, indentSpacing,...
-    sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
-    transformType, tMatrix(:)), '\n'));
+% This takes a lot of time, let's break it up to see why
+printString = sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
+    transformType, tMatrix(:));
+fullLine = [spacing indentSpacing printString '\n'];
+fprintf(fid, fullLine);
 
 end
 
