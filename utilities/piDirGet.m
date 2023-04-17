@@ -7,7 +7,7 @@ function resourceDir = piDirGet(resourceType)
 % Input
 %   resourceType - One of
 %     {'data','assets', 'lights', 'imageTextures', 
-%     'lens', 'scenes','local',
+%     'lens', 'scenes','local', 'resources',
 %     'server local', 'character-assets', 'character-recipes'}
 %
 % Output
@@ -33,7 +33,7 @@ function resourceDir = piDirGet(resourceType)
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
     'scenes','scene','local','server local', 'character-assets', ...
-    'character-recipes','skymaps'};
+    'character-recipes','skymaps','resources'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -88,6 +88,9 @@ switch (resourceType)
     case 'server local'
         % should really be someplace else!
         resourceDir = '/iset/iset3d-v4/local'; % default
+    case 'resources'
+        % default for Vistalab, other sites need to change
+        resourceDir =  getpref('docker','resourceLocation','/acorn/data/iset/Resources');
 end
 
 
