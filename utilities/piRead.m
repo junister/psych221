@@ -232,6 +232,8 @@ end
 % This is important when there is a global object name (colorChecker) and
 % each components is assigned the global name, but given a different shape.
 % It happens for the Macbeth case. Ugh.
+
+% fprintf('Fixing object names...')
 if ~isempty(thisR.assets)
     oNames = thisR.get('object names no id');
 
@@ -242,14 +244,32 @@ if ~isempty(thisR.assets)
         % Strip the _O.  Maybe this should be a recipeGet method.
         for ii=1:numel(oNames), oNames{ii} = oNames{ii}(1:end-2); end
 
-        % make them unique here
+        % make the base object names unique
         oNames = matlab.lang.makeUniqueStrings(oNames);
+
+        % This for loop takes 0.226 sec
+        assets = thisR.assets;
+        for ii=1:length(idx)
+            thisNode = assets.Node{idx(ii)};
+            thisNode.name = sprintf('%s_O',oNames{ii});
+            assets.set(idx(ii),thisNode);
+        end
+        thisR.assets = assets;
+
+        %{
+        % N.B.  This for loop takes 30 sec.  Hmmm.  Fix the call
+        % via thisR.set. 
         for ii=1:length(idx)
             thisR.set('asset',idx(ii),'name',sprintf('%s_O',oNames{ii}));
         end
-        thisR.assets.uniqueNames;
+        toc
+        %}
+
+        % Set IDs.
+        thisR.assets = thisR.assets.uniqueNames;
     end
 end
+% fprintf('\n');
 
 end
 

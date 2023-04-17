@@ -150,8 +150,11 @@ while cnt <= length(txt)
         cnt =  cnt + retLine;
 
     elseif contains(currentLine,...
-            {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
+            {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName', '# Name'}) && ...
             strcmp(currentLine(1),'#')
+        % # Name in contemporary bathroom at the end of the
+        % AttBegin/End.  I am not sure that the names in that file are
+        % all the useful, though.
         
         [name, sz] = piParseObjectName(currentLine);
 
@@ -187,9 +190,8 @@ while cnt <= length(txt)
         % The area light is created below, after the AttributeEnd
         areaLight = currentLine;
 
-    elseif piContains(currentLine,'LightSource') || ...
-            piContains(currentLine, 'Rotate') ||...
-            piContains(currentLine, 'Scale') && ~strcmp(currentLine(1),'#')
+    elseif piContains(currentLine,'LightSource') ...
+            && ~strcmp(currentLine(1),'#')
         % If this is a light source, it is created below, after the
         % AttributeEnd.
         % 
@@ -202,6 +204,18 @@ while cnt <= length(txt)
         else
             lght{end+1} = currentLine; %#ok<AGROW>
         end
+
+        % We need to deal with these separately.  They were grouped with
+        % LightSource.
+        %
+    elseif piContains(currentLine, 'Rotate')
+        fprintf('Ignoring Rotate: %s\n',currentLine);
+
+    elseif piContains(currentLine, 'Scale')
+        fprintf('Ignoring Scale: %s\n',currentLine);
+        
+    elseif  piContains(currentLine,'ReverseOrientation')
+        fprintf('Ignoring ReverseOrientation: %s\n', currentLine);
 
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         % Shape - Created below.  Why do we allow a cell array of

@@ -30,6 +30,10 @@ if ~piDockerExists, piDockerConfig; end
 thisR.show('objects');
 %}
 
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
+
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
@@ -50,7 +54,6 @@ thisR = piRecipeDefault('scene name','contemporary-bathroom');
 piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
-
 
 %}
 %{
@@ -215,7 +218,7 @@ piWRS(thisR, 'remoteResources', true);
 %% Teapot Fails!
 % with true or false Gets material2 not defined, although I can't see why
 try
-    thisR = piRecipeDefault('scene name', 'teapot');
+    thisR = piRecipeDefault('scene name', 'teapot set');
     piWRS(thisR, 'remoteResources', true);
 catch err
     fprintf("Teapot Failed with error %s!!! \n", err.message);
