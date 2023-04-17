@@ -176,7 +176,7 @@ classdef dockerWrapper < handle
         remoteImageTag;  % Seems to apply to both GPU and CPU?
 
         % flag for whether we have resources in the local file system
-        remoteResources = getpre('docker','remoteResources',true);
+        remoteResources = getpref('docker','remoteResources',true);
         
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &

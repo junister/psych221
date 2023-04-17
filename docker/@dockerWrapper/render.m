@@ -66,7 +66,7 @@ denoiseCommand = ''; %default
 
 % sync data over
 % try adding a remote resource option for local processing on servers
-if ~obj.localRender || obj.remoteResources
+if ~obj.localRender
     % Running remotely.
     if ispc
         rSync = 'wsl rsync';
@@ -139,13 +139,7 @@ if ~obj.localRender || obj.remoteResources
     % folders and delete the per-recipe sub-folders that were synced
     % over so that we can replace them with symbolic links to the shared
     % versions. 
-    geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
-    texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
-    spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'; 
-    lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
-    skyCommand = 'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
-    symlinkCommand =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
-        geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
+    symLinkCommand = getSymLinks();
 
         % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
@@ -199,8 +193,16 @@ if ~obj.localRender || obj.remoteResources
 else
     % Running locally.        
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
-    
+
+    % Add support for 'remoteResources' even in local case
+    if obj.remoteResources
+        symLinkCommand = getSymLinks();
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
+            flags, useContainer, shortOut, symLinkCommand, renderCommand);
+    else
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+    end
+
     tic;
     [status, result] = system(containerCommand);
     if verbose > 0
@@ -215,6 +217,17 @@ fprintf('Container command: %s\n',containerCommand);
 fprintf('PBRT command: %s\n',renderCommand);
 fprintf('\n------------------\n');
 
-
 end
+
+function getLinks = getSymLinks()
+    geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
+    texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
+    spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'; 
+    lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
+    skyCommand = 'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
+    getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
+        geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
+end
+
+
 
