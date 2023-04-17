@@ -150,7 +150,7 @@ if ~obj.localRender
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
     else
         containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
-            useContext, flags, useContainer, shortOut, symlinkCommand, renderCommand);
+            useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
     end
     if verbose > 0
         fprintf('Command: %s\n', containerCommand);
