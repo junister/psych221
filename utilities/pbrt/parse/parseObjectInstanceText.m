@@ -86,6 +86,9 @@ if ~isempty(objBeginLocs)
     % objects.
     txt = txt(~cellfun('isempty',txt));
     disp('Finished Object processing.');
+
+    % If we have any empty AttributeBegin/End blocks, remove them too.
+    % TODO
 end
 
 %% Build the asset tree apart from the Object instances

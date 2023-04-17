@@ -150,8 +150,11 @@ while cnt <= length(txt)
         cnt =  cnt + retLine;
 
     elseif contains(currentLine,...
-            {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName'}) && ...
+            {'#ObjectName','#object name','#CollectionName','#Instance','#MeshName', '# Name'}) && ...
             strcmp(currentLine(1),'#')
+        % # Name in contemporary bathroom at the end of the
+        % AttBegin/End.  I am not sure that the names in that file are
+        % all the useful, though.
         
         [name, sz] = piParseObjectName(currentLine);
 
@@ -211,6 +214,9 @@ while cnt <= length(txt)
     elseif piContains(currentLine, 'Scale')
         fprintf('Ignoring Scale: %s\n',currentLine);
         
+    elseif  piContains(currentLine,'ReverseOrientation')
+        fprintf('Ignoring ReverseOrientation: %s\n', currentLine);
+
     elseif piContains(currentLine,'Shape') && ~strcmp(currentLine(1),'#')
         % Shape - Created below.  Why do we allow a cell array of
         % multiple shapes? 
