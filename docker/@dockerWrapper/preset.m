@@ -14,6 +14,7 @@ switch presetName
 
         % Different machines have diffrent GPU configurations
         [status, host] = system('hostname');
+        host = strtrim(host); % trim trailing spaces
         switch host
             case 'orange'
                 dockerWrapper.setPrefs('localImage', 'digitalprodev/pbrt-v4-gpu-ampere-ti');
@@ -31,7 +32,7 @@ switch presetName
                     case 'localGPU-alt'
                         dockerWrapper.setPrefs('whichGPU', 1);
                 end
-            case default
+            otherwise
                 dockerWrapper.setPrefs('whichGPU',0);
         end
     case {'remoteMux', 'remoteOrange', 'remoteOrange-alt', 'remoteMux-alt'}
