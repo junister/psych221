@@ -302,20 +302,25 @@ while cnt <= length(txt)
 
             [resCurrent, subtrees] = parseGeometryAttEnd(thisR, subtrees, parms);
 
-            % We test that resCurrent is NOT the identity
-
-            % Adding this resCurrent branch above the light and object
-            % nodes in this subtree.  The subtrees are below this branch
-            % with its transformation.
-            if piBranchIdentity(resCurrent)
-                % fprintf('Identity branch %s\n',resCurrent.name)
+            trees = tree(resCurrent);
+            for ii = 1:numel(subtrees)
+                trees = trees.graft(1, subtrees(ii));
+            end
+            %{
+            if piBranchIdentity(resCurrent) && ~isempty(subtrees)
+                % If the branch transform is the identity, and there are
+                % subtrees, we add them.
                 trees = subtrees;
             else
+                % If the transform is not the identity, we add it
+                % (resCurrent) above the light and object nodes in this
+                % subtree.
                 trees = tree(resCurrent);
                 for ii = 1:numel(subtrees)
                     trees = trees.graft(1, subtrees(ii));
                 end
             end
+            %}
 
         elseif exist('name','var')  && ~isempty(name)
             % We have a name, but not a shape, lght or arealight.
