@@ -17,7 +17,7 @@ function [status, result] = gpuStatus(obj)
         rUser = obj.remoteUser;
         if isempty(rUser)
             % if not set try our current username
-            rUser = getUserName();
+            rUser = obj.getUserName();
         end
         statusCmd = sprintf('ssh %s@%s nvidia-smi', rUser, obj.remoteMachine);
         [status, result] = system(statusCmd);
