@@ -86,6 +86,7 @@ switch presetName
             case {'remoteorange', 'remoteorange-alt'}
                 dockerWrapper.setPrefs('renderContext', 'remote-orange');
                 dockerWrapper.setPrefs('remoteMachine', 'orange.stanford.edu');
+                % dockerWrapper.setPrefs('remoteRoot',userName);
         end
 
         % also pick GPU and docker image
