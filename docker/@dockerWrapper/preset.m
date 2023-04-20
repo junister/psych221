@@ -78,15 +78,19 @@ switch presetName
         dockerWrapper.setPrefs('localRender',false);
         dockerWrapper.setPrefs('remoteResources',true);
 
+        % find our current user name -- seems like Matlab doesn't have a
+        % function?
+        userName = char(java.lang.System.getProperty('user.name'));
         % pick the correct context
         switch presetName
             case {'remotemux', 'remotemux-alt'}
                 dockerWrapper.setPrefs('renderContext', 'remote-mux');
                 dockerWrapper.setPrefs('remoteMachine', 'muxreconrt.stanford.edu');
+                dockerWrapper.setPrefs('remoteRoot',['/home/' userName]);
             case {'remoteorange', 'remoteorange-alt'}
                 dockerWrapper.setPrefs('renderContext', 'remote-orange');
                 dockerWrapper.setPrefs('remoteMachine', 'orange.stanford.edu');
-                % dockerWrapper.setPrefs('remoteRoot',userName);
+                dockerWrapper.setPrefs('remoteRoot',['/home/' userName]);
         end
 
         % also pick GPU and docker image

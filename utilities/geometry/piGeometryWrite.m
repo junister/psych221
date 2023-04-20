@@ -554,9 +554,7 @@ for nMat = 1:numel(thisNode.material)
         % We get this awkward situation in our Auto @recipes. That might
         % indicate an issue with the recipe creation, but for now we need
         % to let it through in order to render them
-        fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
-        % Causes Auto scenes to fail
-        %error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
+        %fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
         
         %{
         % For some Included .pbrt files we don't get a shape
