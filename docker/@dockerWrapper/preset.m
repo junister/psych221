@@ -20,6 +20,23 @@ function preset(presetName)
 % See also
 %
 
+% TODO
+%{
+% To set up for the CPU on MUX you can use this
+% humanEyeDocker
+%
+    thisDWrapper = dockerWrapper;
+    thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+    thisDWrapper.gpuRendering = 0;
+%}
+%{
+% Maybe this should read as in these examples
+%
+   thisD = dockerWrapper.preset('machine','orange','gpu rendering',true,'which gpu',1);
+   thisD = dockerWrapper.preset('machine','mux','gpu rendering',true);
+   thisD = dockerWrapper.preset('machine','mux','gpu rendering',false);
+   thisD = dockerWrapper.preset('machine','local','gpu rendering',false);
+%}
 presetName = ieParamFormat(presetName);
 
 validNames = {'localgpu','localgpu-alt','remotemux','remotemux-alt','remoteorange','remoteorange-alt'}; 

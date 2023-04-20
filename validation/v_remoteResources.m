@@ -25,7 +25,9 @@ piWRS(thisR,'remote resources',true);
 % Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
-
+%{
+dockerWrapper.preset('remote orange');
+%}
 %{
 thisR.show('objects');
 %}
