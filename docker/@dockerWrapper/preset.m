@@ -1,8 +1,8 @@
-function preset(presetName)
+function preset(presetName,varargin)
 %PRESET - Set dockerWrapper prefs from a list of preset computer/GPUs
 %
 % Synopsis
-%   dockerWrapper.preset(name)
+%   dockerWrapper.preset(name,'save',[false])
 %
 % Brief
 %   We support a number of remote rendering configurations at

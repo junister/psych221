@@ -191,7 +191,8 @@ thisR = piRecipeDefault('scene name', 'lettersAtDepth');
 % piWrite(thisR);
 % s = piRender(thisR); sceneWindow(s);
 
-piWRS(thisR, 'remoteResources', true);
+thisD = dockerWrapper.humanEyeDocker;
+piWRS(thisR, 'remoteResources', true,'docker wrapper', thisD);
 
 % Needs a light source
 %thisR = piRecipeDefault('scene name', 'MacBethChecker');
