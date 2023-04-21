@@ -297,8 +297,8 @@ classdef dockerWrapper < handle
 
         end
 
-        function prefread(obj)
-            % Read the current dockerWrapper settings in the Matlab
+        function preload(obj)
+            % Load the current dockerWrapper settings in the Matlab
             % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
@@ -316,6 +316,28 @@ classdef dockerWrapper < handle
             obj.localImageTag = getpref('docker','localImageTag','latest');
 
             obj.verbosity = getpref('docker','verbosity',1);
+
+        end
+
+        function params = prefread(obj)
+            % Read the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d).  We should probably check if there
+            % is a 'docker' prefs and do something about that.
+
+            disp('Reading prefs from Matlab prefs "docker"');
+            params.localRender = getpref('docker','localRender',0);
+
+            params.remoteMachine = getpref('docker','remoteMachine','');
+            params.remoteRoot    = getpref('docker','remoteRoot','');
+            params.remoteUser    = getpref('docker','remoteUser','');
+            params.remoteImageTag= getpref('docker','remoteImageTag','latest');
+
+            params.gpuRendering = getpref('docker','gpuRendering',1);
+            params.whichGPU     = getpref('docker','whichGPU',0);
+
+            params.localImageTag = getpref('docker','localImageTag','latest');
+
+            params.verbosity = getpref('docker','verbosity',1);
 
         end
 
