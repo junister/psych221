@@ -279,66 +279,50 @@ classdef dockerWrapper < handle
             % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
-            disp('Saving prefs to "docker"');
+            % Not sure about these:
+            %   Not setting 'defaultContext'
+            %   Not setting relativeScenePath
+
+            disp('Saving prefs to Matlab prefs "docker"');
             setpref('docker','localRender',obj.localRender);
 
             setpref('docker','remoteMachine',obj.remoteMachine);
             setpref('docker','remoteRoot',obj.remoteRoot);
             setpref('docker','remoteUser',obj.remoteUser);
+            setpref('docker','remoteImage',obj.remoteImage);
+            setpref('docker','remoteCPUImage',obj.remoteCPUImage);
             setpref('docker','remoteImageTag',obj.remoteImageTag);
+            setpref('docker','remoteResources',obj.remoteResources);
+            setpref('docker','renderContext',obj.renderContext);
 
             setpref('docker','gpuRendering',obj.gpuRendering);
             setpref('docker','whichGPU',obj.whichGPU);
 
+            setpref('docker','localImageName',obj.localImageName);
             setpref('docker','localImageTag',obj.localImageTag);
             setpref('docker','localRoot',obj.localRoot);
+            setpref('docker','localVolumePath',obj.localVolumePath);
 
             setpref('docker','verbosity',obj.verbosity);
 
         end
 
-        function preload(obj)
+        function prefload(obj)
             % Load the current dockerWrapper settings in the Matlab
-            % prefs (under iset3d).  We should probably check if there
-            % is a 'docker' prefs and do something about that.
+            % prefs (under iset3d) into the dockerWrapper values.
 
-            disp('Reading prefs from Matlab prefs "docker"');
-            obj.localRender = getpref('docker','localRender',0);
-
-            obj.remoteMachine = getpref('docker','remoteMachine','');
-            obj.remoteRoot    = getpref('docker','remoteRoot','');
-            obj.remoteUser    = getpref('docker','remoteUser','');
-            obj.remoteImageTag= getpref('docker','remoteImageTag','latest');
-
-            obj.gpuRendering = getpref('docker','gpuRendering',1);
-            obj.whichGPU     = getpref('docker','whichGPU',0);
-
-            obj.localImageTag = getpref('docker','localImageTag','latest');
-
-            obj.verbosity = getpref('docker','verbosity',1);
+            disp('Loading and setting prefs from Matlab prefs "docker"');
+            obj.init;
 
         end
 
-        function params = prefread(obj)
+        function params = prefread(~)
             % Read the current dockerWrapper settings in the Matlab
-            % prefs (under iset3d).  We should probably check if there
-            % is a 'docker' prefs and do something about that.
+            % prefs (under iset3d) and return them as a struct.             
 
             disp('Reading prefs from Matlab prefs "docker"');
-            params.localRender = getpref('docker','localRender',0);
-
-            params.remoteMachine = getpref('docker','remoteMachine','');
-            params.remoteRoot    = getpref('docker','remoteRoot','');
-            params.remoteUser    = getpref('docker','remoteUser','');
-            params.remoteImageTag= getpref('docker','remoteImageTag','latest');
-
-            params.gpuRendering = getpref('docker','gpuRendering',1);
-            params.whichGPU     = getpref('docker','whichGPU',0);
-
-            params.localImageTag = getpref('docker','localImageTag','latest');
-
-            params.verbosity = getpref('docker','verbosity',1);
-
+            params = getpref('docker');
+              
         end
 
     end
@@ -356,7 +340,6 @@ classdef dockerWrapper < handle
         % Methods defined in this file, static or not, do not need to be
         % listed here.
 
-        preset(presetName);
         thisDWrapper = humanEyeDocker();
         setPrefs(varargin);
         getPrefs(varargin);
@@ -381,8 +364,6 @@ classdef dockerWrapper < handle
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
         end
-        
-        
 
         %% reset - Resets the running Docker containers
         function reset()

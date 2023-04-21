@@ -25,6 +25,8 @@ function config(obj, varargin)
 
 %% Parse input arguments
 
+warning('dockerWrapper.config is Deprecated.')
+
 p = inputParser;
 p.addParameter('machine', 'default', @ischar);
 p.addParameter('debug', false, @islogical);
