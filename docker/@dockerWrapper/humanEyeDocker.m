@@ -5,8 +5,10 @@ function thisDWrapper = humanEyeDocker()
 %
 %   TBD: Add an options.remote so you can also get a local version
 
-    thisDWrapper = dockerWrapper;
-    thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-    thisDWrapper.gpuRendering = 0;
+fprintf('Suggest using thisD.preset(''human eye'')\n');
+
+thisDWrapper = dockerWrapper;
+thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+thisDWrapper.gpuRendering = 0;
 
 end
