@@ -71,10 +71,10 @@ thisSE.set('rays per pixel',256);
 % Print a summary
 thisSE.summary;
 
-oi = thisSE.piWRS;
+% oi = thisSE.piWRS;
 
 % Radiance only for speed
-oi = thisSE.render('render type','radiance');    
+oi = thisSE.render;    
 oiWindow(oi);
 %{
 oi = piAIdenoise(oi);
