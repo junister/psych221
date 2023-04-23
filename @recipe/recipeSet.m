@@ -999,7 +999,7 @@ switch param
                 if ~isempty(exrFile)
                     fprintf('Using skymap:  %s\n',exrFile);
 
-                    if ~exist(skymapdir ,'dir')
+                    if ~isfolder(skymapdir)
                         mkdir(skymapdir);
                     end
                     copyfile(exrFile, skymapdir);
