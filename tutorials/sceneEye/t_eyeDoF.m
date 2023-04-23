@@ -33,7 +33,7 @@ if ~piDockerExists, piDockerConfig; end
 %% Load scene
 
 % This version of the chess set is scaled to the right physical dimensions
-thisSE = sceneEye('chessSetScaled');
+thisSE = sceneEye('chessSet');
 
 fprintf('Pupil diameter:  %0.1f mm\n',thisSE.get('pupil diameter','mm'));
 
@@ -43,10 +43,8 @@ fprintf('Pupil diameter:  %0.1f mm\n',thisSE.get('pupil diameter','mm'));
 thisSE.set('fov',20);             % deg
 
 thisSE.set('use pinhole',true);
-
-% Create the scene
-scene = thisSE.render;
-sceneWindow(scene);
+thisSE.set('render type',{'radiance','depth'});
+scene = thisSE.piWRS;
 
 % Summarize what we did
 thisSE.summary;
@@ -73,8 +71,10 @@ thisSE.set('rays per pixel',256);
 % Print a summary
 thisSE.summary;
 
+% oi = thisSE.piWRS;
+
 % Radiance only for speed
-oi = thisSE.render('render type','radiance');    
+oi = thisSE.render;    
 oiWindow(oi);
 %{
 oi = piAIdenoise(oi);

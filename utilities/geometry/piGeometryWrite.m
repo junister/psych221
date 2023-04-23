@@ -464,26 +464,27 @@ for nMat = 1:numel(thisNode.material)
                 if ~isfile(fullfile(rootPath, plyName))
                     % No PLY file matching the shape
 
-                    % Allow for meshes to be along our path
-                    % This is expensive and we are now expecting
+                    % In the past, we allowed for meshes to be along
+                    % our path This is expensive. We are now expecting
                     % meshes to be where they belong, I think
-                    [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
-                    if false % which([shapeFile shapeExtension])
-                        thisShape.filename = plyName;
-                        thisShape.meshshape = 'plymesh';
-                        shapeText = piShape2Text(thisShape);
-                    else
-                        % We no longer care, as resources can be remote
-                        %error('%s not exist',thisShape.filename);
-                        % Instead we'll just leave it along to be
-                        % passed to the renderer
-                        shapeText = piShape2Text(thisShape);
-                    end
+                    % [~, shapeFile, shapeExtension] = fileparts(thisShape.filename);
+                    %     if false % which([shapeFile shapeExtension])
+                    %         thisShape.filename = plyName;
+                    %         thisShape.meshshape = 'plymesh';
+                    %         shapeText = piShape2Text(thisShape);
+                    %      else
+                    %         shapeText = piShape2Text(thisShape);
+                    %      end
+                    %
+                    % We no longer care, as resources can be remote
+                    % error('%s not exist',thisShape.filename);
+                    % Instead we'll just leave it along to be
+                    % passed to the renderer
+                    shapeText = piShape2Text(thisShape);                    
                 else
                     thisShape.filename = plyName;
                     thisShape.meshshape = 'plymesh';
                     shapeText = piShape2Text(thisShape);
-
                 end
             else
                 % There is no filename.
@@ -545,7 +546,7 @@ for nMat = 1:numel(thisNode.material)
         end
         fprintf(fid,'\n');  % Enjoy a carriage return.
     else
-        % thisShape is empty.  That can't be good.  
+        % thisShape is empty. 
         % On 4/4/2023 this worked for ChessSet, SimpleScene, and the
         % fixed up 'kitchen' scene with AttributeBegin/End.  Also with
         % Macbeth Check via piRecipeCreate.  So a decent set of tests.
@@ -553,9 +554,7 @@ for nMat = 1:numel(thisNode.material)
         % We get this awkward situation in our Auto @recipes. That might
         % indicate an issue with the recipe creation, but for now we need
         % to let it through in order to render them
-        fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
-        % Causes Auto scenes to fail
-        %error('thisShape is empty for material %d in node %s.  Find out why and fix it.\n',nMat,thisNode.name)      
+        %fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
         
         %{
         % For some Included .pbrt files we don't get a shape

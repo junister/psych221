@@ -279,48 +279,56 @@ classdef dockerWrapper < handle
             % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
-            disp('Saving prefs to "docker"');
+            % Not sure about these:
+            %   Not setting 'defaultContext'
+            %   Not setting relativeScenePath
+
+            disp('Saving prefs to Matlab prefs "docker"');
             setpref('docker','localRender',obj.localRender);
 
             setpref('docker','remoteMachine',obj.remoteMachine);
             setpref('docker','remoteRoot',obj.remoteRoot);
             setpref('docker','remoteUser',obj.remoteUser);
+            setpref('docker','remoteImage',obj.remoteImage);
+            setpref('docker','remoteCPUImage',obj.remoteCPUImage);
             setpref('docker','remoteImageTag',obj.remoteImageTag);
+            setpref('docker','remoteResources',obj.remoteResources);
+            setpref('docker','renderContext',obj.renderContext);
 
             setpref('docker','gpuRendering',obj.gpuRendering);
             setpref('docker','whichGPU',obj.whichGPU);
 
+            setpref('docker','localImageName',obj.localImageName);
             setpref('docker','localImageTag',obj.localImageTag);
             setpref('docker','localRoot',obj.localRoot);
+            setpref('docker','localVolumePath',obj.localVolumePath);
 
             setpref('docker','verbosity',obj.verbosity);
 
         end
 
-        function prefread(obj)
-            % Read the current dockerWrapper settings in the Matlab
-            % prefs (under iset3d).  We should probably check if there
-            % is a 'docker' prefs and do something about that.
+        function prefload(obj)
+            % Load the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d) into the dockerWrapper values.
 
-            disp('Reading prefs from "docker"');
-            obj.localRender = getpref('docker','localRender',0);
-
-            obj.remoteMachine = getpref('docker','remoteMachine','');
-            obj.remoteRoot    = getpref('docker','remoteRoot','');
-            obj.remoteUser    = getpref('docker','remoteUser','');
-            obj.remoteImageTag= getpref('docker','remoteImageTag','latest');
-
-            obj.gpuRendering = getpref('docker','gpuRendering',1);
-            obj.whichGPU     = getpref('docker','whichGPU',0);
-
-            obj.localImageTag = getpref('docker','localImageTag','latest');
-
-            obj.verbosity = getpref('docker','verbosity',1);
+            disp('Loading and setting prefs from Matlab prefs "docker"');
+            obj.init;
 
         end
+
+        function params = prefread(~)
+            % Read the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d) and return them as a struct.             
+
+            disp('Reading prefs from Matlab prefs "docker"');
+            params = getpref('docker');
+              
+        end
+
     end
 
-
+        %% Validates rendering context and creates one if none is available
+        
     methods (Static=true)
         %% Static functions
         %
@@ -332,7 +340,6 @@ classdef dockerWrapper < handle
         % Methods defined in this file, static or not, do not need to be
         % listed here.
 
-        preset(presetName);
         thisDWrapper = humanEyeDocker();
         setPrefs(varargin);
         getPrefs(varargin);
@@ -357,7 +364,7 @@ classdef dockerWrapper < handle
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
         end
-        
+
         %% reset - Resets the running Docker containers
         function reset()
             % Calls the method 'cleanup' and sets several parameters
@@ -398,7 +405,7 @@ classdef dockerWrapper < handle
             if status == 0
                 sprintf('Removed container %s\n',containerName);
             else
-                disp("Failed to cleanup.\n System message:\n %s", result);
+                fprintf("Failed to cleanup.\n System message:\n %s", result);
             end
         end
 
@@ -596,6 +603,84 @@ classdef dockerWrapper < handle
             end
         end
 
+        function thisContext = getRenderContext(obj,serverName)
+            % Gets the context, and if necessary creates it
+            %
+            % First make a dockerWrapper
+            %  thisD = dockerWrapper;
+            %
+            % Then you can get or create a render context
+            %  thisD.getRenderContext('mux')    % 
+            %  thisD.getRenderContext('orange') % remote-orange
+            %  thisD.getRenderContext();   % Uses a default name
+            %  (remote-servername) read from the 
+            %
+            % A Docker context is a way of specifying a Docker environment
+            % and the resources it can access. It allows you to switch
+            % between different Docker environments, such as local and
+            % remote environments, and manage the resources available to
+            % them.
+            %
+            % See also
+            %  getRenderer
+
+            %{
+             % Online manual
+             https://docs.docker.com/engine/reference/commandline/context_create/
+
+             Usage:  docker context create [OPTIONS] CONTEXT       
+             Example:
+             $ docker context create my-context 
+                      --description "some description" 
+                      --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
+            %}
+
+            % We assume Get or set-up the rendering context for the docker
+            % container
+            if ~exist('serverName','var')
+                serverName = obj.remoteMachine;
+            end
+
+            % The user can define an alternative context.  At Stanford,
+            % remote-orange is a common alternative. This is usually
+            % defined at dockerWrapper initialization via the
+            % getpref(). It can also be set programmatically.
+            thisContext = obj.renderContext;
+            if isempty(thisContext)
+                % Default naming convention
+                thisContext = sprintf('remote-%s',serverName);
+            end
+
+            % These are the existing contexts
+            [status, contexts] = system(sprintf('docker context list'));
+            if status ~= 0
+                warning('Unable to list docker contexts. %d',status);
+            end
+
+            if ~contains(contexts,thisContext)
+                % If we do not have this context, we try to create it.
+                if isempty(obj.remoteUser), rUser = getUserName(obj);
+                else,                       rUser = obj.remoteUser;
+                end
+
+                % Create the command string
+                contextString = sprintf(' --docker host=ssh://%s@%s',...
+                    rUser, serverName);
+                createContext = sprintf('docker context create %s %s',...
+                    contextString, thisContext);
+
+                % Call the system command
+                [status, contexts] = system(createContext);
+
+                % Check the returns
+                if status ~= 0 || numel(contexts) == 0
+                    warning("Failed to create context: %s -- Might already exist.\n",thisContext);
+                    disp(contexts)
+                else
+                    fprintf("Created docker context %s \n",thisContext);
+                end
+            end
+        end
 
         %% The container name for different types of docker runs.  
         function containerName = getContainer(obj,containerType)
@@ -904,83 +989,6 @@ classdef dockerWrapper < handle
 
         end
 
-        
-        % Validates rendering context if remote rendering
-        % will try to create one if none is available
-        function thisContext = getRenderContext(obj, serverName)
-            % Gets the context, and if necessary creates it
-            %
-            % dockerWrapper.getRender('mux')
-            % dockerWrapper.getRender('orange')
-            % dockerWrapper.getRender();   % Uses the default, which is mux
-            % We would like both of these to work.
-            %
-            % A Docker context is a way of specifying a Docker environment
-            % and the resources it can access. It allows you to switch
-            % between different Docker environments, such as local and
-            % remote environments, and manage the resources available to
-            % them.
-            %
-            % See also
-            %  getRenderer
-
-            %{
-             % Online manual
-             https://docs.docker.com/engine/reference/commandline/context_create/
-
-             Usage:  docker context create [OPTIONS] CONTEXT       
-             Example:
-             $ docker context create my-context 
-                      --description "some description" 
-                      --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
-
-            %}
-            % The user can define an alternative context.  At Stanford,
-            % remote-orange is a common alternative. This is usually
-            % defined at dockerWrapper initialization via the
-            % getpref(). It can also be set programmatically.
-            thisContext = obj.renderContext;
-            if isempty(thisContext)
-                % Default render context at Stanford is on MUX
-                thisContext = 'remote-mux';
-            end
-
-            % These are the existing contexts
-            [status, contexts] = system(sprintf('docker context list'));
-            if status ~= 0
-                warning('Unable to list docker contexts. %d',status); 
-            end
-
-            % We assume Get or set-up the rendering context for the docker
-            % container 
-            if ~exist('serverName','var')
-                serverName = obj.remoteMachine; 
-            end
-
-            if ~contains(contexts,thisContext)
-                % If we do not have this context, we try to create it.
-                if isempty(obj.remoteUser), rUser = getUserName(obj);
-                else,                       rUser = obj.remoteUser;
-                end
-
-                % Create the command string
-                contextString = sprintf(' --docker host=ssh://%s@%s',...
-                    rUser, serverName);
-                createContext = sprintf('docker context create %s %s',...
-                    contextString, thisContext);
-
-                % Call the system command
-                [status, contexts] = system(createContext);
-
-                % Check the returns
-                if status ~= 0 || numel(contexts) == 0
-                    warning("Failed to create context: %s -- Might already exist.\n",thisContext);
-                    disp(contexts)
-                else
-                    fprintf("Created docker context %s \n",thisContext);
-                end
-            end            
-        end
     end
 end
 

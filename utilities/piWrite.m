@@ -133,7 +133,9 @@ exporter = thisR.get('exporter');
 % Input should exist.  Even if it doesn't, we can still render just
 % from the recipe alone.  Unless we need to copy something.
 inputDir   = thisR.get('input dir');
-if ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); end
+if ~exist(inputDir,'dir') && ~getpref('docker','remoteResources')
+    warning('Could not find local inputDir: %s\n',inputDir); 
+end
 
 % Make working dir if it does not already exist
 workingDir = thisR.get('output dir');
