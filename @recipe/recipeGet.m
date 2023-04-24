@@ -1341,6 +1341,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
+    case {'nobjects'}
+        % Count the number of objects
+        val = numel(thisR.get('objects'));
+
     case {'objectnamematerial'}
         % val = thisR.get('object name material');
         %
@@ -1544,7 +1548,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             thisPos = thisR.get('light',lightIDX(ii),'world position');
             if isnumeric(thisPos) && (sum(isinf(thisPos)) == 0)
                 cnt = cnt + 1;
-                val.positions(cnt,:) = thisPos; %#ok<AGROW> 
+                val.positions(cnt,:) = thisPos;  
                 val.names{cnt} = thisR.get('light',lightIDX(ii),'name simple');
             end
         end
