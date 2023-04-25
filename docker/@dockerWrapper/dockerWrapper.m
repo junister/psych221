@@ -591,6 +591,9 @@ classdef dockerWrapper < handle
             % doesn't have a timeout flag, but it'd be good if we could
             % find a way to validate context & server that errors out
             % more gracefully. TBD
+            if verbose > 0
+                fprintf('Starting Docker with: %s\n', cmd);
+            end
             [status, result] = system(cmd);
             if verbose > 0
                 fprintf("Started Docker (status %d): %s\n", status, cmd);
