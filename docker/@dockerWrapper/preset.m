@@ -73,7 +73,7 @@ switch presetName
         host = strtrim(host); % trim trailing spaces
         switch host
             case 'orange'
-                thisD.localImage = 'digitalprodev/pbrt-v4-gpu-ampere-ti';
+                thisD.localImageName = 'digitalprodev/pbrt-v4-gpu-ampere-ti';
                 switch presetName
                     case 'localgpu'
                         thisD.whichGPU = 1;
@@ -81,7 +81,7 @@ switch presetName
                         thisD.whichGPU = 0;
                 end
             case {'mux', 'muxreconrt'}
-                thisD.localImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                thisD.localImageName = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                 switch presetName
                     case 'localgpu'
                         thisD.whichGPU = 0;
