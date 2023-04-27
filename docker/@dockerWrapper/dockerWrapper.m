@@ -242,6 +242,8 @@ classdef dockerWrapper < handle
             % Windows
             aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('server local'));
 
+            aDocker.remoteResources = getpref('docker','remoteResources', true);
+
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
             aDocker.localRoot = getpref('docker','localRoot','');
