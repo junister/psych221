@@ -64,8 +64,18 @@ outputFolder = dockerWrapper.pathToLinux(outputFolder);
 
 denoiseCommand = ''; %default
 
-% sync data over
-% try adding a remote resource option for local processing on servers
+% As a "fail-safe" way to populate that volume and the recipes
+% we copy any correctly placed resources into the shared resource
+% folders and delete the per-recipe sub-folders that were synced
+% over so that we can replace them with symbolic links to the shared
+% versions.
+if obj.remoteResources
+    symLinkCommand = getSymLinks();
+else
+    symLinkCommand = ''; %Use whatever we have locally
+end
+
+
 if ~obj.localRender
     % Running remotely.
     if ispc
@@ -132,19 +142,13 @@ if ~obj.localRender
 
     % Moving forward, we will start assuming that needed resource files are
     % available to our docker container on the rendering server via a
-    % volume mounted as /ISETResources. 
+    % volume mounted as /ISETResources.
 
-    % As a "fail-safe" way to populate that volume and the recipes
-    % we copy any correctly placed resources into the shared resource
-    % folders and delete the per-recipe sub-folders that were synced
-    % over so that we can replace them with symbolic links to the shared
-    % versions. 
-    symLinkCommand = getSymLinks();
 
-        % need to cd to our scene, and remove all old renders
+    % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
 
-    if ~isempty(denoiseCommand) 
+    if ~isempty(denoiseCommand)
         % Use the optix denoiser if asked
         containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s && %s"',...
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
@@ -191,7 +195,7 @@ if ~obj.localRender
         end
     end
 else
-    % Running locally.        
+    % Running locally.
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
 
     % Add support for 'remoteResources' even in local case
@@ -200,7 +204,7 @@ else
         containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
             flags, useContainer, shortOut, symLinkCommand, renderCommand);
     else
-        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
     end
 
     tic;
@@ -220,13 +224,13 @@ fprintf('\n------------------\n');
 end
 
 function getLinks = getSymLinks()
-    geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
-    texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
-    spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'; 
-    lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
-    skyCommand = 'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
-    getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
-        geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
+geoCommand = 'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
+texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
+spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds';
+lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
+skyCommand = 'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
+getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
+    geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
 end
 
 
