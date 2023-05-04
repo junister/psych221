@@ -70,7 +70,7 @@ denoiseCommand = ''; %default
 % over so that we can replace them with symbolic links to the shared
 % versions.
 if obj.remoteResources
-    symLinkCommand = getSymLinks();
+    symLinkCommand = ['&&' getSymLinks()];
 else
     symLinkCommand = ''; %Use whatever we have locally
 end
@@ -150,10 +150,10 @@ if ~obj.localRender
 
     if ~isempty(denoiseCommand)
         % Use the optix denoiser if asked
-        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s && %s"',...
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s && %s"',...
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
     else
-        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s "',...
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
     end
     if verbose > 0
@@ -200,8 +200,8 @@ else
 
     % Add support for 'remoteResources' even in local case
     if obj.remoteResources
-        symLinkCommand = getSymLinks();
-        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s && %s "',...
+        symLinkCommand = ['&&' getSymLinks()];
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s "',...
             flags, useContainer, shortOut, symLinkCommand, renderCommand);
     else
         containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
