@@ -144,6 +144,8 @@ end
 %% Set up the rendering type.
 
 % TODO:  Perhaps we should reconsider how we specify rendertype in V4.
+% We already set render type before piWrite, rendertype param here doesnt
+% seem to have any impact. --ZL
 % After this bit of logical, renderType is never empty.
 if isempty(renderType)
     % If renderType is empty, we get the value as a metadata type.
@@ -238,7 +240,7 @@ end
 % renderDocker is a dockerWrapper object.  The parameters control which
 % machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
-[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:});
+[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:}, 'rendertype', [renderType{:}]);
 
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file

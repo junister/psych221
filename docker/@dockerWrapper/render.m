@@ -24,6 +24,7 @@ function [status, result] = render(obj, renderCommand, outputFolder, varargin)
 p = inputParser();
 
 addParameter(p, 'denoiseflag', false, @logical);
+addParameter(p, 'rendertype',[]);
 
 % Okay to get params we don't understand
 p.KeepUnmatched = true;
@@ -31,6 +32,7 @@ p.KeepUnmatched = true;
 p.parse(varargin{:});
 
 denoiseFlag = p.Results.denoiseflag;
+renderType  = p.Results.rendertype;
 
 %% Build up the render command
 
@@ -40,7 +42,9 @@ verbose = obj.verbosity; % 0, 1, 2
 % Determine the container
 if obj.gpuRendering
     useContainer = obj.getContainer('PBRT-GPU');
-    renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
+    if ~strcmp(renderType,'instance')
+        renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
+    end
 else
     useContainer = obj.getContainer('PBRT-CPU');
 end
