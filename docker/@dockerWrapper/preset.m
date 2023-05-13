@@ -6,8 +6,9 @@ function preset(thisD, presetName,varargin)
 %
 % Brief
 %   We support a number of remote rendering configurations at
-%   vistalab. Specifying one of these returns a dockerWrapper
-%   configured to run on a specific machine and GPU
+%   vistalab. Specifying one of these configures a dockerWrapper
+%   instance, thisD, to run on a specific machine and GPU. To save
+%   this configuration as the default, use thisD.prefsave.
 %
 % Input
 %  presetName -
@@ -16,6 +17,10 @@ function preset(thisD, presetName,varargin)
 %
 %   'remoteMux','remoteMux-alt' - Run on MUX either GPU 0 or GPU 1
 %   'remoteOrange','remoteOrange-alt - Run on orange on GPU 0 or GPU 1
+%
+%   thisD = dockerWrapper;
+%   thisD.preset('remote mux');
+%   thisD.prefsave;
 %
 % See also
 %
