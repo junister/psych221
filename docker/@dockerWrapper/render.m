@@ -233,8 +233,9 @@ texCommand = 'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln
 spdCommand = 'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds';
 lgtCommand = 'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
 skyCommand = 'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
-getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ', ...
-    geoCommand, texCommand, spdCommand, lgtCommand, skyCommand);
+lensCommand = 'cp -n -r lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens';
+getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s %s', ...
+    geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
 end
 
 
