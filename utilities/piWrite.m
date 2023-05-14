@@ -97,6 +97,10 @@ p.addParameter('mainfileonly',false, @islogical);
 p.addParameter('overwriteresources', true, @islogical);
 p.addParameter('overwritematerials', true, @islogical);
 p.addParameter('overwritegeometry', true, @islogical);
+
+% Human eye writes its own, so we do not generally want to overwrite.
+p.addParameter('overwritelensfile', false, @islogical); 
+
 p.parse(thisR,varargin{:});
 
 % Most resources are on the server.  Hence, setting 'remote resources' to
@@ -112,8 +116,11 @@ end
 
 
 % Why we have these two? --Zhenyi
+% BW:  Having the lensfile true broke some of my code.  So I changed it as
+% above to a parameter
+overwritelensfile   = p.Results.overwritelensfile;
+% I left this line in, but like ZHenyi I am not sure why we need this (BW)
 overwritepbrtfile   = true;
-overwritelensfile   = true;
 
 overwritematerials  = p.Results.overwritematerials;
 overwritegeometry   = p.Results.overwritegeometry;
@@ -178,8 +185,14 @@ if isequal(thisR.get('optics type'),'lens')
     % realisticEye has a lens file slot but it is empty. So we check
     % whether there is a lens file or not.
 
-    if ~isempty(thisR.get('lensfile'))
-        piWriteLens(thisR,overwritelensfile);
+    lensFile = thisR.get('lensfile');
+    if ~isempty(lensFile)
+        % We have a nominal lens file.  Check that it exists, or that we
+        % have insisted on overwriting it.
+        if ~exist(lensFile,'file') || overwritelensfile
+            % piWriteLens(thisR,overwritelensfile);
+            piWriteLens(thisR);
+        end
     end
 end
 
@@ -342,6 +355,8 @@ function piWriteLens(thisR,overwritelensfile)
 % See also
 %   navarroWrite, navarroLensCreate, setNavarroAccommodation
 
+if notDefined('overwritelensfile'),overwritelensfile = false; end
+
 % Make sure the we have the full path to the input lens file
 inputLensFile = thisR.get('lens file');
 
@@ -359,7 +374,8 @@ elseif isequal(thisR.get('human eye model'),'legrand')
 elseif isequal(thisR.get('human eye model'),'arizona')
     % Write lens file into the output directory.
     % Still tracking down why no IOR files are associated with this model.
-    arizonaWrite(thisR);
+    accommodation = thisR.get('accommodation');
+    arizonaWrite(thisR, accommodation);
 else
     % If the working copy doesn't exist, copy it.
     % If it exists but there is a force overwrite, delete and copy.

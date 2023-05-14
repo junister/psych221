@@ -70,7 +70,10 @@ switch (resourceType)
         if piCamBio
             resourceDir = fullfile(isetRootPath,'data','lens');
         else
-            warning('Lenses are in isetcam/data/lens. We need a strategy for isetbio.  Use a human eye model. Returning empty');
+            % May 2023.  Put lenses in isetbio/isettools/data/lens
+            % I now prefer a strategy where use all of ISETCam for scene
+            % and optics.
+            resourceDir = fullfile(isetRootPath,'data','lens');
         end
 
     case {'scenes','scene'}

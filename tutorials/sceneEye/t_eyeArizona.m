@@ -47,10 +47,12 @@ thisSE.set('fov',30);             % Degrees
 
 %%  Render
 
+% Summary of status
+thisSE.summary;
+
 % Render the scene with the GPU
 thisDockerGPU = dockerWrapper;
 thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');
-thisSE.summary;
 
 %% Now use the optics model with chromatic aberration
 
@@ -100,11 +102,13 @@ thisSE.set('n bounces',3);
 %   thisDocker = dockerWrapper.humanEyeDocker;
 %   thisSE.piWRS('name','arizona-A','docker wrapper',thisDocker);
 
-thisSE.set('accommodation',1/distA);
-thisSE.piWRS('name','arizona-A');
-
 % Summarize
 thisSE.summary;
+
+thisSE.set('accommodation',1/distA);
+% thisSE.get('accommodation')
+
+thisSE.piWRS('name','arizona-A');
 
 %% Make an oi of the chess set scene using the LeGrand eye model
 

@@ -1,14 +1,22 @@
-function thisDWrapper = humanEyeDocker()
-%HUMANEYEDOCKER Get suitable docker Wrapper for human eye
-%   Currently that means forcing CPU rendering
-%   often on a remote and more powerful CPU
+function thisD = humanEyeDocker()
+%HUMANEYEDOCKER Get docker Wrapper for human eye rendering
 %
-%   TBD: Add an options.remote so you can also get a local version
-
-fprintf('Suggest using thisD.preset(''human eye'')\n');
-
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
-thisDWrapper.gpuRendering = 0;
+% Brief
+%  Currently the human eye rendering is only on CPU.  It can run remotely,
+%  however.
+%
+% Input
+%   N/A
+%
+% Output
+%  thisD - Configured for CPU and digitalprodev/pbrt-v4-cpu
+%
+% TODO:  Add an options.remote so you can run a local version
+%
+% See also
+%
+thisD = dockerWrapper;
+thisD.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu';
+thisD.gpuRendering = 0;
 
 end

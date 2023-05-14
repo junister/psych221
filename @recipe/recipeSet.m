@@ -260,11 +260,14 @@ switch param
                         error('Unknown human eye model %s',modelName);
                 end
             otherwise
-                % For most lenses, accommodation means focal distance,
-                % which is managed by adjusting the distance from the lens
-                % to the film (sensor)
-                thisR.set('focal distance',1/val);
+                % Nothing
         end
+
+        % Accommodation is the inverse of focal distance. Even for human.
+        % For cameras, we do not usually set accommodation. Rather, we
+        % adjust the distance from the lens to the film (sensor).  In any
+        % event, we store the focal distance here.
+        thisR.set('focal distance',1/val);        
 
     case {'focusdistance','focaldistance'}
         % lens.set('focus distance',m)
@@ -296,14 +299,24 @@ switch param
                 end
             case {'humaneye'}
                 % For the human eye models, the lens accommodation is
-                % created by the initialization function 
-                % (e.g., [na,txt] = navarroLensCreate(accommodation)) or by
-                % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
-                % [az, columnDescription]  = arizonaLensCreate(1);
-                thisR.camera.retinalDistance.value = val;
-                thisR.camera.retinalDistance.type = 'float';
+                % stored in the lens file, which is written out by either
+                % the Navarro or Arizona eye functions, such as
+                %
+                %    [na,txt] = navarroLensCreate(accommodation)) or by
+                %    thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
+                %    [az, columnDescription]  = arizonaLensCreate(1);
+                %
+                % We store the focaldistance in the camera slot.
+                % But until 05.2023 we (mistakenly) stored it in the
+                % retinalDistance slot.
+                % thisR.camera.retinalDistance.value = val;
+                % thisR.camera.retinalDistance.type = 'float';
+                thisR.camera.focaldistance.value = val;
+                thisR.camera.focaldistance.type = 'float';
 
-                % pbrt v4 does not allow this field
+                % pbrt v4 does not allow this field, but I am confused by
+                % this (BW).  It is used just belows in the omni case?
+                % Maybe we can't have both?
                 if isfield(thisR.camera,'focusdistance')
                     thisR.camera = rmfield(thisR.camera,'focusdistance');
                 end

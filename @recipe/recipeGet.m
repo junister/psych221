@@ -537,26 +537,34 @@ switch ieParamFormat(param)  % lower case, no spaces
         % file. Nov 2022 I took this approach (BW).
 
         if isequal(thisR.get('camera subtype'),'humaneye')
-            % If it is a human eye model do this
+            % If it is a human eye model and the lens file is written out,
+            % we get the accommodation from the file.
 
-            % Read the output lens file
-            txtLines = piReadText(thisR.get('lensfile output'));
+            lensFile = thisR.get('lensfile output');
+            if exist(lensFile,'file')
+                fprintf('Reading accommodation from output lens file: %s\n',lensFile);
+                % Read the output lens file
+                txtLines = piReadText(lensFile);
 
-            % Find the text that has '(Diopters)' in it.  Normally this is
-            % line 10 in the lens file.
-            tmp = strfind(txtLines,'s)');
+                % Find the text that has '(Diopters)' in it.  Normally this is
+                % line 10 in the lens file.
+                tmp = strfind(txtLines,'s)');
 
-            for ii=1:numel(tmp)
-                if ~isempty(tmp{ii})
-                    thisLine = txtLines{ii};  % Should be line 10
-                    % Find the string beyond Diopters and return it
-                    val = str2double(thisLine((tmp{ii}+2):end)); % ,'%f')
-                    return;
+                for ii=1:numel(tmp)
+                    if ~isempty(tmp{ii})
+                        thisLine = txtLines{ii};  % Should be line 10
+                        % Find the string beyond Diopters and return it
+                        val = str2double(thisLine((tmp{ii}+2):end)); % ,'%f')
+                        return;
+                    end
                 end
+            else
+                fprintf('Reading accommodation from focal distance.\n')
+                val = 1 / thisR.get('focal distance');
             end
         else
-            % For typical lenses people call the accommodation the
-            % inverse of the focal distance.
+            % For camera lenses people call the accommodation the inverse
+            % of the focal distance.
             val = 1 / thisR.get('focal distance');
         end
 
@@ -570,14 +578,16 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         % N.B.  The phrasing can be confusing.  This is the distance to the
         %       plane in OBJECT space that is in focus. This can be easily
-        %       confused the the lens' focal length - which is a different
+        %       confused with the lens' focal length - which is a different
         %       thing!
         %
-        %       In PBRT parlance this is stored differently depending on
-        %       the camera model.
+        %       In PBRT parlance this value is stored differently depending
+        %       on the camera model.
         %
-        %       For pinhole this is stored as focal distance.
-        %       For lens, this stored as focus distance.
+        %       For pinhole PBRT calls this focal distance.  But oddly, for
+        %            a pinhole, all distances are in focus.  So, maybe we
+        %            misunderstand something about PBRT here?
+        %       For lens, PBRT calls this focus distance.
         %
         opticsType = thisR.get('optics type');
         switch opticsType
@@ -600,7 +610,8 @@ switch ieParamFormat(param)  % lower case, no spaces
                         % For the human eye, this is built into the
                         % the lens model.  The accommodation is found
                         % in the header of an existing lens file.
-                        val = 1/thisR.get('lens accommodation');                        
+                        val = thisR.camera.focaldistance.value;
+                        % val = 1/thisR.get('lens accommodation');                        
                     otherwise
                         % For other types of lenses this value can be
                         % set, and PBRT adjusts the film distance to
