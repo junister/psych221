@@ -267,10 +267,15 @@ switch ieParamFormat(cameraType)
         % camera.focusdistance.value = 0.2;   % Meters.  Accommodation is 5 diopters
         % camera.focusdistance.type  = 'float';
 
+        % Added May, 2023.  Relates to accommodation (1/focaldistance)
+        camera.focaldistance.type    = 'float';
+        camera.focaldistance.value   = 1e4;  %mm
+
         % Default is units of meters.  If you have something in
         % millimeters, you should use this flag
         camera.mmUnits.value = 'false';
         camera.mmUnits.type  = 'bool';
+
 
         % Not used in V4.  The chromatic aberration must be handled
         % through the spectralpath integrator, which is separate from the

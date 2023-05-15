@@ -553,6 +553,14 @@ for ofns = outerFields'
 
     % Find and then loop through inner field names
     innerFields = fieldnames(thisR.(ofn));
+
+    % BW: May, 2023 Special case:  For humaneye, we do not want to write
+    % out the field 'focaldistance'.
+    if isequal(thisR.(ofn).subtype,'humaneye')
+        idx = strcmp(innerFields,'focaldistance');
+        innerFields(idx) = [];
+    end
+
     if(~isempty(innerFields))
         for ifns = innerFields'
             ifn = ifns{1};
