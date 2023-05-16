@@ -93,8 +93,6 @@ thisSE.set('spatial samples',256);
 thisSE.set('n bounces',3);
 
 %% Accommodate to letter A distance (in diopters)
-
-
 % Default docker for human eye is currently CPU on remote.  It will
 % remain so until we get humaneye running on the GPU.
 %
@@ -103,18 +101,19 @@ thisSE.set('n bounces',3);
 %   thisDocker = dockerWrapper.humanEyeDocker;
 %   thisSE.piWRS('name','arizona-A','docker wrapper',thisDocker);
 
-% Summarize
-thisSE.summary;
-
 thisSE.set('accommodation',1/distA);
 % thisSE.get('accommodation')
 
-thisSE.piWRS('name','arizona-A');
+% Summarize
+thisSE.summary;
+
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','arizona-A');
 
 %% Make an oi of the chess set scene using the LeGrand eye model
 
 thisSE.set('accommodation',1/distC);  
-thisSE.piWRS('name','arizona-C');
+thisSE.piWRS('docker wrapper',thisDocker,'name','arizona-C');
 
 %% Have a look with the slanted bar scene
 

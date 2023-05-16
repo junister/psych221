@@ -74,6 +74,7 @@ thisSE.piWRS;
 thisSE.summary;
 
 % You can see the depth map if you like
+%   scene = ieGetObject('scene');
 %   scenePlot(scene,'depth map');
 
 %% Now use the optics model with chromatic aberration
@@ -86,6 +87,9 @@ thisSE.set('use pinhole',false);
 % bands for speed and to get a rought sense. You can use up to 31.  It is
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
+%
+% May, 2023.  We are having an issue with spectralpath integrator.
+%
 % nSpectralBands = 8;
 % thisSE.set('chromatic aberration',nSpectralBands);
 

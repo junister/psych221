@@ -442,7 +442,7 @@ switch param
         if ~exist(val,'file')
             % Sometimes we set this without the file being copied yet.
             % Let's see if this warning does us any good.
-            warning('Lens file in out dir not yet found (%s)\n',val);
+            % warning('Lens file in out dir not yet found (%s)\n',val);
         end
         thisR.camera.lensfile.value = val;
         thisR.camera.lensfile.type = 'string';

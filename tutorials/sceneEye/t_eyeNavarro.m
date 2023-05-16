@@ -114,12 +114,12 @@ thisSE.set('n bounces',3);
 % Set the accommodation distance to match the distance to the A
 thisSE.set('accommodation',1/distA);  
 
+% Summarize
+thisSE.summary;
+
 % Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
 thisDocker = dockerWrapper.humanEyeDocker;
 thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
-
-% Summarize
-thisSE.summary;
 
 %% Set accommodation to a different distance.
 
@@ -127,7 +127,7 @@ thisSE.set('accommodation',1/distC);
 
 % Default renderer for sceneEye is humanEyeDocker, so try just the
 % default.  Should also work. 
-thisSE.piWRS('name','navarro-C');
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-C');
 
 thisSE.summary;
 
