@@ -69,9 +69,11 @@ thisSE.set('fov',15);             % Degrees
 
 thisSE.set('render type',{'radiance','depth'});
 
-thisSE.piWRS;
-
+% Summarize
 thisSE.summary;
+
+% Render
+thisSE.piWRS;
 
 % You can see the depth map if you like
 %   scene = ieGetObject('scene');
@@ -99,9 +101,12 @@ thisSE.set('rays per pixel',256);
 % Increase the spatial resolution by adding more spatial samples.
 thisSE.set('film resolution',384);     
 
-thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker);
-
 % Summarize
 thisSE.summary;
+
+% Render
+thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker);
+
+
 
 %% END
