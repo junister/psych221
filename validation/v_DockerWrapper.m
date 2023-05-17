@@ -79,7 +79,7 @@ try
     % test local rendering on CPU
     % need to turn off GPU rendering or we've given it conflicting
     % instructions in the case where the GPU is remote
-    ourDocker = dockerWrapper('localRender',true,'gpuRendering', false,'verbosity',0);
+    ourDocker = dockerWrapper('localRender',true,'gpuRendering', false,'verbosity',0, 'remoteResources', false);
     piWRS(sampleScene,'our docker', ourDocker);
 
     fprintf('succeeded\n');
