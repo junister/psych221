@@ -322,7 +322,7 @@ classdef dockerWrapper < handle
             % Read the current dockerWrapper settings in the Matlab
             % prefs (under iset3d) and return them as a struct.             
 
-            disp('Reading prefs from Matlab prefs "docker"');
+            disp('Reading and returning prefs from Matlab prefs "docker"');
             params = getpref('docker');
               
         end

@@ -5,25 +5,27 @@ function preset(thisD, presetName,varargin)
 %   dockerWrapper.preset(name,'save',[false])
 %
 % Brief
-%   We support a number of remote rendering configurations at
-%   vistalab. Specifying one of these configures a dockerWrapper
-%   instance, thisD, to run on a specific machine and GPU. To save
-%   this configuration as the default, use thisD.prefsave.
+%   We support a number of rendering configurations at vistalab. This
+%   dockerWrapper method (prset) configures a dockerWrapper instance.
+%   The options include remote rendering on mux and orange, as well as
+%   configuring for running on the human eye condition, which requires
+%   a CPU (not GPU) container.
+%   
+%   To save a preset result, use prefsave.  For example
+%
+%      thisD = dockerWrapper;
+%      thisD.preset('remote orange');
+%      thisD.prefsave;
 %
 % Input
 %  presetName -
-%   localGPU, localGPU-alt - we determine your local machine (host) and
-%           configure for GPU 0 or 1 (-alt)
-%
 %   'remoteMux','remoteMux-alt' - Run on MUX either GPU 0 or GPU 1
 %   'remoteOrange','remoteOrange-alt - Run on orange on GPU 0 or GPU 1
-%
-%   thisD = dockerWrapper;
-%   thisD.preset('remote mux');
-%   thisD.prefsave;
+%   'localGPU', 'localGPU-alt; - we determine your local machine (host) and
+%           configure for GPU 0 or 1 (-alt)
 %
 % See also
-%
+%   dockerWrapper.prefsave,prefread,prefload;
 
 % Examples
 %{
