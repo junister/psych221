@@ -67,14 +67,11 @@ p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
-p.addParameter('remoteresources',getpref('docker','remoteResources',false),@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
-
-remoteResources = p.Results.remoteresources;
 
 dWrapper   = p.Results.dockerwrapper;
 ourDocker  = p.Results.ourdocker;
@@ -113,7 +110,7 @@ thisR.set('render type',renderType);
 
 % Write the local/pbrt directory being aware about whether the resources
 % are expected to be present remotely.
-piWrite(thisR, 'remoteresources', remoteResources);
+piWrite(thisR, 'remoteResources', ourDocker.remoteResources);
 
 [~,username] = system('whoami');
 
