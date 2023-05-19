@@ -86,6 +86,12 @@ elseif ischar(renderType),  renderType = {renderType};     % Turn a string to ce
 elseif iscell(renderType)        % Good to go  
 end
 
+if ~isempty(p.Results.dockerwrapper)
+    ourDocker = p.Results.dockerwrapper;
+else
+    ourDocker = dockerWrapper();
+end
+
 name = p.Results.name;
 show = p.Results.show;
 speed = p.Results.speed;
