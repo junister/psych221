@@ -137,7 +137,7 @@ if ~isempty(p.Results.localRender)
     % logical variables, default's to false.
     setpref('docker', 'localRender', p.Results.localRender);
     if p.Results.localRender
-        if getpref('docker','gpuRendering')
+        if getpref('docker','gpuRendering','')
             disp('Set for local GPU rendering.')
         else
             disp('Set for local CPU rendering.');

@@ -42,7 +42,7 @@ thisR.set('render type',{'radiance','depth'});
 
 % The main way we write, render and show the recipe.  The render flag
 % is optional, and there are several other optional piWRS flags.
-scene = piWRS(thisR,'render flag','hdr','remote resources',true);
+scene = piWRS(thisR,'render flag','hdr');
 
 %% By default, we have also computed the depth map, so we can render it
 
