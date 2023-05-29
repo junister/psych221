@@ -58,7 +58,7 @@ thisSE.set('use pinhole',true);
 thisSE.set('fov',30);             % Degrees
 
 % Render the scene
-thisSE.recipe.set('render type', {'radiance','depth'});
+thisSE.set('render type', {'radiance','depth'});
 
 %% Render as a scene with the GPU docker wrapper
 
@@ -87,12 +87,11 @@ thisSE.set('mmUnits', false);
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
 
-%{
-% Needs to work with spectral path integrator.
-% Zhenyi will make that work in V4.
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
-%}
 
 % Distance in meters to objects to govern accommodation.
 thisSE.set('to',toA); distA = thisSE.get('object distance');

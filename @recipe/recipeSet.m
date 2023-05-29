@@ -591,11 +591,14 @@ switch param
 
         % User turned off chromatic abberations
         if isequal(val,false)
-            % Use path, not spectralpath, integrator and set nunCABand to
-            % 1.
-            % thisR.camera.chromaticAberrationEnabled.value = false;
+            % Use path, not spectralpath, integrator.
+            % Set nunCABand to 1.
             thisR.set('integrator subtype','path');
             thisR.set('integrator num ca bands',1);
+
+            % Set the enabled flag.
+            % This was deleted at some point.  Not sure why.
+            thisR.camera.chromaticAberrationEnabled.value = false;
             return;
         else
             % User sent in true or an integer number of bands which implies
@@ -604,11 +607,18 @@ switch param
             % This is the integrator that manages chromatic aberration.
             thisR.set('integrator subtype','spectralpath');
 
-            % Set the number of bands.  These are divided evenly into bands
-            % between 400 and 700 nm. There are  31 wavelength samples, so
-            % we should not have more than 30 wavelength bands
+            % Set the number of bands.  
             if islogical(val), val = 8; end  % Default number of bands
-            thisR.set('integrator num cabands',val);            
+
+            % The bands are divided evenly the 31 wavelength samples,
+            % between 400 and 700 nm. If the user sent in more than 30, we
+            % have a problem.  So ...
+            val = min(val,30);
+            thisR.set('integrator num cabands',val);
+
+            % Set the enabled flag to true.
+            thisR.camera.chromaticAberrationEnabled.type  = 'bool';
+            thisR.camera.chromaticAberrationEnabled.value = true;
         end
 
     case {'integratorsubtype','integrator'}
@@ -630,12 +640,16 @@ switch param
         % thisR.set('n bounces',val);
         % Number of surfaces a ray can bounce from
         %
-        % This can be set for some, but not all integrators.
-        % Also, sometimes the integrator slot is empty.  I am not sure what
+        % This can be set for some, but not all integrators. Also,
+        % sometimes the integrator slot is empty.  I am not sure what
         % happens then (BW).
-        
+        %
+        % I allowed spectralpath for multiple bounces.  Not sure that is
+        % OK, but will ask Zhenyi soon (BW).
         if(~strcmp(thisR.integrator.subtype,'path')) &&...
-                (~strcmp(thisR.integrator.subtype,'bdpt'))
+                ~(strcmp(thisR.integrator.subtype,'bdpt') || ...
+                strcmp(thisR.integrator.subtype,'spectralpath'))
+
             disp('Changing integrator sub type to "bdpt"');
 
             % When multiple bounces are needed, use this integrator

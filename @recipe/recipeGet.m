@@ -966,23 +966,19 @@ switch ieParamFormat(param)  % lower case, no spaces
     case 'diffraction'
         % thisR.get('diffraction');
         %
-        % Status of diffraction during rendering.  Works with realistic eye
-        % and omni.  Probably realisticEye, but we should ask TL.  It isn't
-        % quite running in the new version, July 11.
-        val = 'false';
+        val = false;  % If not set, return false
         if isfield(thisR.camera,'diffractionEnabled')
+            % val = thisR.camera.diffractionEnabled.type; = 'bool';
             val = thisR.camera.diffractionEnabled.value;
         end
-        if isequal(val,'true'), val = true; else, val = false; end
 
     case 'chromaticaberration'
         % thisR.get('chromatic aberration')
         % True or false (on or off)
-        val = 'false';
+        val = false;  % If it doesn't exist, call it false.
         if isfield(thisR.camera,'chromaticAberrationEnabled')
             val = thisR.camera.chromaticAberrationEnabled.value;
         end
-        if isequal(val,'true'), val = true; else, val = false; end
 
     case 'numcabands'
         % thisR.get('num ca bands')

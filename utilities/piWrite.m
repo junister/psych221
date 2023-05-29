@@ -555,10 +555,12 @@ for ofns = outerFields'
     innerFields = fieldnames(thisR.(ofn));
 
     % BW: May, 2023 Special case:  For humaneye, we do not want to write
-    % out the field 'focaldistance'.
+    % out the field 'focaldistance' or chromaticAberrationEnabled
     if isequal(thisR.(ofn).subtype,'humaneye')
         idx = strcmp(innerFields,'focaldistance');
-        innerFields(idx) = [];
+        if ~isempty(idx), innerFields(idx) = []; end
+        idx = strcmp(innerFields,'chromaticAberrationEnabled');
+        if ~isempty(idx), innerFields(idx) = []; end
     end
 
     if(~isempty(innerFields))

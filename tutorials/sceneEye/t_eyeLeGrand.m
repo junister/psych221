@@ -56,7 +56,7 @@ thisSE.set('rays per pixel',32);
 % Increase the spatial resolution by adding more spatial samples.
 thisSE.set('film resolution',384);  
 
-% Have a quick check with the pinhole
+%% Have a quick check with the pinhole
 thisSE.set('use pinhole',true);
 
 % thisSE.get('object distance')   % Default is 2.1674
@@ -72,8 +72,9 @@ thisSE.set('render type',{'radiance','depth'});
 % Summarize
 thisSE.summary;
 
-% Render
-thisSE.piWRS;
+%% Render the pinhole
+thisDocker = dockerWrapper;
+thisSE.piWRS('docker wrapper',thisDocker,'name','legrand-pinhole');
 
 % You can see the depth map if you like
 %   scene = ieGetObject('scene');
@@ -81,19 +82,15 @@ thisSE.piWRS;
 
 %% Now use the optics model with chromatic aberration
 
-% Turn off the pinhole.  The model eye (by default) is the Navarro model.
+% Turn off the pinhole. There is no way to adjust the LeGrand eye
+% accommodation.  We can for Arizona and Navarro.
 thisSE.set('use pinhole',false);
 
-% We turn on chromatic aberration.  That slows down the calculation, but
-% makes it more accurate and interesting.  We oftens use only 8 spectral
-% bands for speed and to get a rought sense. You can use up to 31.  It is
-% slow, but that's what we do here because we are only rendering once. When
-% the GPU work is completed, this will be fast!
-%
-% May, 2023.  We are having an issue with spectralpath integrator.
-%
-% nSpectralBands = 8;
-% thisSE.set('chromatic aberration',nSpectralBands);
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
+nSpectralBands = 8;
+thisSE.set('chromatic aberration',nSpectralBands);
 
 % Reduce the rendering noise by using more rays. 
 thisSE.set('rays per pixel',256);      
@@ -105,8 +102,6 @@ thisSE.set('film resolution',384);
 thisSE.summary;
 
 % Render
-thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker);
-
-
+thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker,'name','legrand');
 
 %% END
