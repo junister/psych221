@@ -37,7 +37,7 @@ thisSE.set('light',thisLight.name,'specscale',0.5);
 
 % Set up the image
 thisSE.set('fov',2);                % Field of view
-thisSE.set('spatial samples',[64, 256]);  % Number of OI sample points
+thisSE.set('spatial samples',[256, 256]);  % Number of OI sample points
 thisSE.set('rays per pixel',256);
 thisSE.set('n bounces',2);
 thisSE.set('focal distance',thisSE.get('object distance','m'));
