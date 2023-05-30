@@ -966,7 +966,7 @@ switch ieParamFormat(param)  % lower case, no spaces
     case 'diffraction'
         % thisR.get('diffraction');
         %
-        val = false;  % If not set, return false
+        val = 'false';  % If not set, return false
         if isfield(thisR.camera,'diffractionEnabled')
             % val = thisR.camera.diffractionEnabled.type; = 'bool';
             val = thisR.camera.diffractionEnabled.value;
@@ -1409,16 +1409,20 @@ switch ieParamFormat(param)  % lower case, no spaces
 
     case 'objectsimplenames'
         % Names of the objects
-        % We think there is ID_Instance_ObjectName_O.
+        % We think there may be: ID_Instance_ObjectName_O.
         % So we try to delete the first two and the O at the end.
-        % If there are fewer parts, we delete less.
+        % If there are fewer parts, we delete less.  There is surely
+        % a better algorithm for doing this.
         ids = thisR.get('object ids');
         names = thisR.assets.names;
         val = cell(1,numel(ids));
         for ii = 1:numel(ids)
             nameParts = split(names{ids(ii)},'_');
-            if numel(nameParts) > 2
+            if numel(nameParts) > 3
                 tmp = join(nameParts(3:(end-1)),'-');
+                val{ii} = tmp{1};
+            elseif numel(nameParts) > 2
+                tmp = join(nameParts(2:(end-1)),'-');
                 val{ii} = tmp{1};
             elseif numel(nameParts) > 1
                 val{ii} = nameParts{2};

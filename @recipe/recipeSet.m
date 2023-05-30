@@ -229,8 +229,9 @@ switch param
         % For typical lenses, accommodation is 1/focaldistance.
         % 
         % For the human eye models, we need to change the whole lens model
-        % using setNavarroAccommodation or setArizonaAccommodation. There
-        % is no way to adjust the LeGrand eye.
+        % using setNavarroAccommodation or setArizonaAccommodation. 
+        % 
+        % There is no way to adjust the LeGrand eye.
         %        
         subType = thisR.get('camera subtype');
         switch subType
@@ -265,8 +266,9 @@ switch param
 
         % Accommodation is the inverse of focal distance. Even for human.
         % For cameras, we do not usually set accommodation. Rather, we
-        % adjust the distance from the lens to the film (sensor).  In any
-        % event, we store the focal distance here.
+        % adjust the distance from the lens to the film (sensor).  We
+        % store the focal distance in the recipe (inside the camera
+        % slot) here.  
         thisR.set('focal distance',1/val);        
 
     case {'focusdistance','focaldistance'}
@@ -309,8 +311,14 @@ switch param
                 % We store the focaldistance in the camera slot.
                 % But until 05.2023 we (mistakenly) stored it in the
                 % retinalDistance slot.
-                % thisR.camera.retinalDistance.value = val;
-                % thisR.camera.retinalDistance.type = 'float';
+                %   thisR.camera.retinalDistance.value = val;
+                %   thisR.camera.retinalDistance.type = 'float';
+                %
+                % But setting this value does not change the
+                % accommodation file that we write out.  In the
+                % humaneye case, it should cause a write of the eye
+                % model file during piWrite.  Check whether this is
+                % happening.
                 thisR.camera.focaldistance.value = val;
                 thisR.camera.focaldistance.type = 'float';
 
