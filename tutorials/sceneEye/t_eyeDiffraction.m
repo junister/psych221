@@ -90,7 +90,7 @@ thisSE.set('rays per pixel',1024);
 thisSE.set('pupil diameter',1);
 thisSE.set('diffraction',false);
 thisSE.summary;
-q
+
 oi = thisSE.piWRS('name','1mm-nodiffraction','docker wrapper',humanDocker);
 
 %%

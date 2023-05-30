@@ -38,6 +38,8 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %             of the graphics resources needed (textures, meshes) and the
 %             main PBRT file will be able to reference them without copying
 %             from the local computer.  (Better comment needed)
+%    'denoise' - Run the piAIdenoise prior to returning
+%
 %
 % Returns
 %   obj     - a scene or oi
@@ -60,11 +62,12 @@ p.addRequired('thisR',@(x)(isa(x,'recipe')));
 % You can over-ride the render type with this argument
 p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
 
-p.addParameter('ourdocker','');
+% p.addParameter('ourdocker','');
 p.addParameter('dockerwrapper','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
+p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 
@@ -73,11 +76,8 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 
-dWrapper   = p.Results.dockerwrapper;
-ourDocker  = p.Results.ourdocker;
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
-if ~isempty(dWrapper), ourDocker = dWrapper; end
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
@@ -87,9 +87,9 @@ elseif iscell(renderType)        % Good to go
 end
 
 if ~isempty(p.Results.dockerwrapper)
-    ourDocker = p.Results.dockerwrapper;
+    thisD = p.Results.dockerwrapper;
 else
-    ourDocker = dockerWrapper();
+    thisD = dockerWrapper();
 end
 
 name = p.Results.name;
@@ -116,14 +116,14 @@ thisR.set('render type',renderType);
 
 % Write the local/pbrt directory being aware about whether the resources
 % are expected to be present remotely.
-piWrite(thisR, 'remoteResources', ourDocker.remoteResources);
+piWrite(thisR, 'remoteResources', thisD.remoteResources);
 
 [~,username] = system('whoami');
 
 if strncmp(username,'zhenyi',6)
-    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
+    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', thisD);
 else
-    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker, varargin{:});
+    [obj,results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
 end
 
 if isempty(obj),  error('Render failed.'); end
@@ -155,6 +155,10 @@ switch obj.type
         % seems like a good idea.  I considered the film, too, but
         % that doesn't have much extra.
         obj.camera = thisR.get('camera');
+end
+
+if p.Results.denoise
+    obj = piAIdenoise(obj);
 end
 
 %% Put parameters back.
