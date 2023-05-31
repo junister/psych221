@@ -213,7 +213,8 @@ switch ieParamFormat(cameraType)
         % piCameraCreate('humaneye',
 
         if piCamBio
-            warning('human eye camera type is for use with ISETBio')
+            % Merge of isetbio/isetcam makes this unnecessary
+            % warning('human eye camera type is for use with ISETBio')
         end
         camera.type           = 'Camera';
         camera.subtype        = 'humaneye';
