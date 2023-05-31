@@ -524,18 +524,28 @@ switch ieParamFormat(param)  % lower case, no spaces
         lensfullbasename = thisR.get('lens full basename');
         val = fullfile(outputDir,'lens',lensfullbasename);
     case 'lensaccommodation'
-        % Some human eye models have an accommodation value for the
-        % lens/cornea.  The retina distance is held fixed, and
-        % accommodation is achieved by rebuilding the eye model.
+        % This is called when the camera model is a human eye.  
         %
         % For typical optics (not eye models) the accommodation means
-        % 1/focal distance.  So people say loosely that a simple lens
-        % is accommodated to a focal distance and its accommodation is
-        % the inverse of that distance.
+        % 1/focal distance.  A simple lens is accommodated to a focal
+        % distance and its accommodation is the inverse of that
+        % distance.
         %
-        % We used to insert the accommodation in the name of the lens
-        % file. Nov 2022 I took this approach (BW).
+        % Given the new system for writing lens files when rendering,
+        % perhaps it could all be merged into 'accommodation'.  We
+        % always store focal dsitance and accommodation is its
+        % inverse.  Always.
+        %
+        % The Navarro and Arizona eye models have an accommodation
+        % value for the lens/cornea.  The retina distance is fixed,
+        % and accommodation is achieved by rebuilding the eye model
+        % file at render time.
+        %
+        % Trying that.
 
+        val = 1 / thisR.get('focal distance');
+
+        %{
         if isequal(thisR.get('camera subtype'),'humaneye')
             % If it is a human eye model and the lens file is written out,
             % we get the accommodation from the file.
@@ -567,7 +577,7 @@ switch ieParamFormat(param)  % lower case, no spaces
             % of the focal distance.
             val = 1 / thisR.get('focal distance');
         end
-
+        %}
 
     case {'focusdistance','focaldistance'}
         % Distance in object space that is in focus on the film. If the
@@ -643,13 +653,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
     case {'accommodation'}
-        % We allow specifying accommodation rather than focal distance.
-        % For typical lenses, accommodation is 1/focaldistance.
+        % For typical lenses, we return accommodation as 1/focaldistance.
         % 
         % For the human eye models, accommodation is built into the model
         % itself.  When we set the value, we use setNavarroAccommodation or
         % setArizonaAccommodation. There is no way to adjust the LeGrand eye.
-        %        
+        %
         switch thisR.get('camera subtype')
             case {'humaneye'}
                 val = thisR.get('lens accommodation');

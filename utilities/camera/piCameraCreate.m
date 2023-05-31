@@ -242,9 +242,20 @@ switch ieParamFormat(cameraType)
         % lens and cornea, which are written out in the lens file.
 
         % The distance from the back of the lens to the retina is the
-        % retinaDistance.
+        % retinaDistance.  We initialize at a distance estimated using
+        % the script t_eyeRetinaDistance. We place an edge at 10 m
+        % from the eye and adjust the distance so that the slanted
+        % edge chromatic fringe is as expected.  Hence, the default
+        % accommodation = 0 (distance is Inf).
         camera.retinaDistance.type = 'float';
-        camera.retinaDistance.value = 16.32;
+        switch eyeModel
+            case 'navarro'
+                camera.retinaDistance.value = 16.37;
+            case 'arizona'
+                camera.retinaDistance.value = 16.55;
+            case 'legrand'
+                camera.retinaDistance.value = 16.35;
+        end
 
         % The radius of the whole eyeball is retinaRadius.
         camera.retinaRadius.type    = 'float';

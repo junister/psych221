@@ -1,39 +1,33 @@
 %% t_eyeAccommodate.m
 %
-% We recommend you go through t_eyeIntro.m before running
-% this tutorial.
+% This tutorial renders a retinal image of "slanted edge" to check how
+% close the accommodation parameters match
 %
-% This tutorial renders a retinal image of "slanted edge." We can then use
-% this slanted bar to estimate the modulation transfer function of the
-% optical system.
+% We use the slanted bar set at 1 m from the eye.  We adjust the eye
+% model accommodation to bring the 1 m slanted edge into good focus.
 %
-% We show the color fringing along the edge of the bar due to
-% chromatic aberration. The calculation is done for different
-% accommodations of the Navarro and Arizona eye models.
+% The setting for the 'best' focus appears to be not 1 Diopter (e.g.,
+% 1m away) but closer to 1.2 D.
 %
-% Notes:  It may be that the assumed retinal distance for the eye
-% models and this calculation differ.  When I sweep through the focal
-% distances, I do not get the proper fringing when focal distance is
-% set to object distance, and retinal 
+% The Navarro model already has a conversion factor for this purpose.
+% The Arizona model does not.  I am considering whether or not to
+% implement an updated conversion for both of these models (BW).
+%
+% The LeGrand eye model does not have an accommodation.  It only works
+% for objects at a distance.
 %
 % Depends on: ISETBIO, Docker, ISETCam
 %
-%  
 % See also
-%   t_eyeArizona, t_eyeNavarro
+%   t_eyeRetinaDistance, t_eyeArizona, t_eyeNavarro
 %
 
 %% Check ISETBIO and initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Set up the slanted bar scene
-
+% Only these eye models (not legrand) can accommodate
 modelName = {'navarro','arizona'};
 mm = 1;
 
@@ -51,27 +45,20 @@ thisSE.set('spatial samples',[256, 256]);  % Number of OI sample points
 thisSE.set('film diagonal',2);          % mm
 thisSE.set('rays per pixel',256);
 thisSE.set('n bounces',2);
-% thisSE.set('focal distance',thisSE.get('object distance','m'));
 
 thisSE.set('lens density',0);       % Remove pigment. Yellow irradiance is harder to see.
 thisSE.set('diffraction',false);
 thisSE.set('pupil diameter',3);
 
+% We run this for a closer distance to see how close the accommodation
+% is to solving the new focal distance (object distance in focus).
 oDistance = 1;
 thisSE.set('object distance',oDistance);
 fprintf('Object distance %.2f m\n',oDistance);
 
-% piAssetGeometry(thisSE.recipe);
-% thisSE.recipe.show('lights');
-
-%% Scene
-
-% I checked multiple times and got tired of rendering this a lot.
-%
 %{
-thisDockerGPU = dockerWrapper;
-thisSE.set('use pinhole',true);
-thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');  % Render and show
+ piAssetGeometry(thisSE.recipe);
+ thisSE.recipe.show('lights');
 %}
 
 %% Render with model eye, varying diffraction setting
@@ -81,47 +68,32 @@ thisSE.set('use optics',true);
 
 thisSE.set('fov',1);                % Field of view
 
-% This sets the chromaticAberrationEnabled flag and the integrator to
-% spectral path.
-% Now works in V4 - May 28, 2023 (ZL)
+% This sets the chromaticAberrationEnabled flag.
+% Works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 
 thisSE.set('accommodation',1/oDistance);
 thisSE.get('focal distance')
+inFocusAcc = 1/oDistance;   % 1 diopter
 
-inFocusAcc = 1/oDistance;
-delta = 0.15*inFocusAcc;
-
-% thisSE.set('retina distance',16.32);  % Default
 %{
-For the Navarro eye, and an object far away (10m), the in focus retina
- distance is 16.32mm.
-For the Arizona eye, and an object far away (10m), the in focus retina
- distance is more like 16.55mm.
-
-For the Navarro eye, Foc D 1 m and Obj D 1 m match with Ret D 16.40
-For the Arizona eye, Foc D 1 m and Obj D 1 m match with Ret D 16.55
+ Navarro eye, Obj at 1 diopter, best accommodation is 1.2 D
+ Arizona eye, Obj at 1 diopter, best accommodation is 1.25 D.
 %}
 
-% For Arizona, when larger than default, we get a better agreement
-% between the chromatic blur and the actual distance.
-% I should check for Navarro, too.
-%
-% thisSE.set('retina distance',16.7);       
-% We step the accommodation to see the blur change.
+% We step the accommodation, hoping that the best focus matches the
+% object distance (1 diopter)
 humanDocker = dockerWrapper.humanEyeDocker;
-% for aa =  (-2*delta + inFocusAcc):2*delta:(2*delta + inFocusAcc)
-for rr =  16.1:0.15:16.75
-    % thisSE.set('accommodation',aa);
-    thisSE.set('retina distance',rr);
-    name = sprintf('%s Foc %.2f Obj %.2f Ret %0.2f',modelName{mm}(1:2),...
-        thisSE.get('focal distance'),...
-        oDistance,...
-        thisSE.get('retina distance','mm'));
+for aa =  0.8:.2:1.2
+    thisSE.set('accommodation',aa);
+    name = sprintf('%s Foc %.2f Obj %.2f (D)',modelName{mm}(1:2),...
+        thisSE.get('accommodation'));
     thisSE.summary;
     oi = thisSE.piWRS('name',name,'docker wrapper',humanDocker,'show',true);
-    % oi = ieGetObject('oi'); oi = piAIdenoise(oi); ,oiWindow(oi);
 end
+
+% oi = ieGetObject('oi'); oi = piAIdenoise(oi); ,oiWindow(oi);
+
 
 %% END
