@@ -24,19 +24,15 @@
 
 %% Check ISETBIO and initialize
 
-% if piCamBio
-%     fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-%     return;
-% end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Set up the slanted bar scene
 
+% This can be set for all of the eye models.
 modelName = {'navarro','arizona','legrand'};
 mm = 3;
 
-% Choose 1 or 2 for Navarro or Arizona
 thisSE = sceneEye('slantedEdge','eye model',modelName{mm});
 thisSE.set('to',[0 0 0]);
 
@@ -55,8 +51,8 @@ thisSE.set('lens density',0);       % Remove pigment. Yellow irradiance is harde
 thisSE.set('diffraction',false);
 thisSE.set('pupil diameter',3);
 
-% We run this for a couple of distances to make sure that the whole
-% system makes sense.
+% We run this for a distance edge.  We set the retina distance - to
+% have the right aberration for a far away edge.
 oDistance = 10;
 thisSE.set('object distance',oDistance);
 fprintf('Object distance %.2f m\n',oDistance);
@@ -88,13 +84,11 @@ delta = 0.15*inFocusAcc;
 %{
 Navarro eye Obj 10m the in focus retina distance is 16.35 - 16.4mm.
 Arizona eye Obj 10m the in focus retina distance is 16.55mm.
-Legrand eye Obj 10m the in focus retina distance
-
-For the Navarro eye, Foc D 1 m and Obj D 1 m match with Ret D 16.50
-For the Arizona eye, Foc D 1 m and Obj D 1 m match with Ret D 16.60
+Legrand eye Obj 10m the in focus retina distance is 16.35 mm
 %}
 
-% We step the retinal distance to see the blur change.
+% We sweep the retinal distance by 50 micron steps to see the blur
+% change.
 humanDocker = dockerWrapper.humanEyeDocker;
 for rr =  16.1:0.05:16.75
     thisSE.set('retina distance',rr);

@@ -254,7 +254,7 @@ switch ieParamFormat(cameraType)
             case 'arizona'
                 camera.retinaDistance.value = 16.55;
             case 'legrand'
-                camera.retinaDistance.value = 16.32;
+                camera.retinaDistance.value = 16.35;
         end
 
         % The radius of the whole eyeball is retinaRadius.
