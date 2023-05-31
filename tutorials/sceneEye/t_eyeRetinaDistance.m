@@ -1,4 +1,4 @@
-%% t_eyeRetinaD.m
+%% t_eyeRetinaDistance.m
 %
 % This tutorial renders a retinal image of "slanted edge." We can use
 % this slanted bar to estimate the modulation transfer function of the
@@ -9,6 +9,12 @@
 % Also of note, the fringe color changes nicely as we sweep out
 % different retinal distances.
 %
+% It is worth noting that small changes in the retinal distance (50
+% microns) have substantial effects on the fringing. The idea that the
+% visual system can absolutely count on the fringing for a precise
+% measurement, or that different people are the same, seems unlikely
+% to me (BW).
+%
 % Depends on: ISETBIO, Docker, ISETCam
 %
 %  
@@ -18,17 +24,17 @@
 
 %% Check ISETBIO and initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
+% if piCamBio
+%     fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
+%     return;
+% end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Set up the slanted bar scene
 
-modelName = {'navarro','arizona'};
-mm = 1;
+modelName = {'navarro','arizona','legrand'};
+mm = 3;
 
 % Choose 1 or 2 for Navarro or Arizona
 thisSE = sceneEye('slantedEdge','eye model',modelName{mm});
@@ -44,27 +50,20 @@ thisSE.set('spatial samples',[256, 256]);  % Number of OI sample points
 thisSE.set('film diagonal',2);          % mm
 thisSE.set('rays per pixel',256);
 thisSE.set('n bounces',2);
-% thisSE.set('focal distance',thisSE.get('object distance','m'));
 
 thisSE.set('lens density',0);       % Remove pigment. Yellow irradiance is harder to see.
 thisSE.set('diffraction',false);
 thisSE.set('pupil diameter',3);
 
+% We run this for a couple of distances to make sure that the whole
+% system makes sense.
 oDistance = 10;
 thisSE.set('object distance',oDistance);
 fprintf('Object distance %.2f m\n',oDistance);
 
-% piAssetGeometry(thisSE.recipe);
-% thisSE.recipe.show('lights');
-
-%% Scene
-
-% I checked multiple times and got tired of rendering this a lot.
-%
 %{
-thisDockerGPU = dockerWrapper;
-thisSE.set('use pinhole',true);
-thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');  % Render and show
+ piAssetGeometry(thisSE.recipe);
+ thisSE.recipe.show('lights');
 %}
 
 %% Render with model eye, varying diffraction setting
@@ -72,11 +71,10 @@ thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');  % Render and sho
 % Use model eye
 thisSE.set('use optics',true);
 
-thisSE.set('fov',1);                % Field of view
+thisSE.set('fov',1);                % Small Field of view
 
-% This sets the chromaticAberrationEnabled flag and the integrator to
-% spectral path.
-% Now works in V4 - May 28, 2023 (ZL)
+% This sets the chromaticAberrationEnabled flag.
+% Works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 
@@ -88,25 +86,17 @@ delta = 0.15*inFocusAcc;
 
 % thisSE.set('retina distance',16.32);  % Default
 %{
-For the Navarro eye, and an object far away (10m), the in focus retina
- distance is 16.32mm.
-For the Arizona eye, and an object far away (10m), the in focus retina
- distance is more like 16.55mm.
+Navarro eye Obj 10m the in focus retina distance is 16.35 - 16.4mm.
+Arizona eye Obj 10m the in focus retina distance is 16.55mm.
+Legrand eye Obj 10m the in focus retina distance
 
 For the Navarro eye, Foc D 1 m and Obj D 1 m match with Ret D 16.50
 For the Arizona eye, Foc D 1 m and Obj D 1 m match with Ret D 16.60
 %}
 
-% For Arizona, when larger than default, we get a better agreement
-% between the chromatic blur and the actual distance.
-% I should check for Navarro, too.
-%
-% thisSE.set('retina distance',16.7);       
-% We step the accommodation to see the blur change.
+% We step the retinal distance to see the blur change.
 humanDocker = dockerWrapper.humanEyeDocker;
-% for aa =  (-2*delta + inFocusAcc):2*delta:(2*delta + inFocusAcc)
 for rr =  16.1:0.05:16.75
-    % thisSE.set('accommodation',aa);
     thisSE.set('retina distance',rr);
     name = sprintf('%s Foc %.2f Obj %.2f Ret %0.2f',modelName{mm}(1:2),...
         thisSE.get('focal distance'),...
@@ -114,7 +104,11 @@ for rr =  16.1:0.05:16.75
         thisSE.get('retina distance','mm'));
     thisSE.summary;
     oi = thisSE.piWRS('name',name,'docker wrapper',humanDocker,'show',true);
-    % oi = ieGetObject('oi'); oi = piAIdenoise(oi); ,oiWindow(oi);
 end
+
+% If you want to reduce the rendering noise:
+%
+%   oi = ieGetObject('oi'); oi = piAIdenoise(oi); ,oiWindow(oi);
+%
 
 %% END
