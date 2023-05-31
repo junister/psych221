@@ -100,8 +100,8 @@ For the Navarro eye, and an object far away (10m), the in focus retina
 For the Arizona eye, and an object far away (10m), the in focus retina
  distance is more like 16.55mm.
 
-For the Navarro eye, an object at 1 m the in-focus retina distance
-  is 
+For the Navarro eye, Foc D 1 m and Obj D 1 m match with Ret D 16.40
+For the Arizona eye, Foc D 1 m and Obj D 1 m match with Ret D 16.55
 %}
 
 % For Arizona, when larger than default, we get a better agreement
