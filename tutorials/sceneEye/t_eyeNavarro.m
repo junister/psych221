@@ -58,6 +58,7 @@ thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
 thisSE.set('film diagonal',5);
+thisSE.set('fov',10);
 
 % Render the scene
 thisSE.set('render type', {'radiance','depth'});
