@@ -695,36 +695,10 @@ switch ieParamFormat(param)  % lower case, no spaces
         opticsType = thisR.get('optics type');
         switch opticsType
             case {'pinhole'}
-                % Calculate this from the fov, if it is not already stored.
-                if isfield(thisR.camera,'filmdistance')
-                    % Worried about the units.  mm or m?  Assuming meters.
-                    val = thisR.camera.filmdistance.value;
-                else
-                    % There is no film distance.
-                    % Compute the distance to achieve the diagonal fov.  We
-                    % might have to make this match the smaller size (x or
-                    % y) because of PBRT conventions.  Some day.  For now
-                    % we use the diagonal.
-                    fov = thisR.get('fov');  % Degrees
-                    filmDiag = thisR.get('film diagonal','m');  % m
-
-                    % Changed June 1, 2023.  I think there was an
-                    % error in the fov, which should have been fov/2
-                    % Also, we set the film distance to be consistent
-                    % with 'fov'.  But we should not have fov, film
-                    % distance and film diagonal.  They must be
-                    % consistent, so we should only be able to set 2
-                    % of the three
-                    %
-                    % Tangent in degrees.  
-                    % adjacent is film distance from pinhole.
-                    % filmDiag/2 is opposite.
-                    % tand(fov/2) = opp/adj;  
-                    % adj = opp/tand(fov/2)
-                    val = (filmDiag/2)/tand(fov/2);   % m
-                    thisR.set('film distance',val);
-                end
-
+                warning('No film distance for pinhole.  Only dfov');
+            case 'humaneye'
+                warning('Use retina distance for human eye.')
+                val = thisR.get('retina distance','mm');
             case 'lens'
                 % We separate out the omni and humaneye models
                 if strcmp(thisR.get('camera subtype'),'humaneye')
@@ -895,50 +869,13 @@ switch ieParamFormat(param)  % lower case, no spaces
         % recipe.get('fov') - degrees
         % This is the diagonal field of view.
         %
-        % We used to do this
-        %
-        %         if isfield(thisR.camera,'fov')
-        %             val = thisR.camera.fov.value;
-        %             return;
-        %         end
-
-        % Try to figure out from the other parameters. We have to deal
-        % with fov separately for different types of camera models.
-        filmDiag = thisR.get('film diagonal');
-        if isempty(filmDiag)
-            thisR.set('film diagonal',10,'mm'); % mm
-            warning('Set film diagonal to 10 mm, arbitrarily');
-            filmDiag = 10;
-        end
-        switch lower(thisR.get('camera subtype'))
-            case {'pinhole','perspective'}
-                % For the pinhole the film distance and the field of
-                % view always match.  The fov is normally stored which
-                % implies a film distance and film size.
-                if isfield(thisR.camera,'fov')
-                    % The fov was set.
-                    val = thisR.camera.fov.value;  % There is a FOV
-                    % A consistency check.  The field of view should make
-                    % sense for the film distance.
-                    if isfield(thisR.camera,'filmdistance')
-                        tst = atand(filmDiag/2/thisR.camera.filmdistance.value);
-                        assert(abs((val/tst) - 1) < 0.01);
-                    else
-                        warning('Setting film distance for consistency.')
-                    end
-                else
-                    % There is no FOV. We need a film distance and
-                    % size (film diagonal) to know the FOV.
-                    filmDistance = thisR.get('film distance','mm');  % film diag is mm too
-                    if isempty(filmDistance)
-                        filmDistance = 3*filmDiag;
-                        thisR.set('film distance',filmDistance);
-                        warning('Set film distance  to %f (arbitrarily)',filmDistance);
-                    end
-                    val = atand(filmDiag/2/filmDistance);
-                end
+        % This is required for a pinhole camera
+        switch thisR.get('optics type')
+            case 'pinhole'
+                val = thisR.camera.fov.value;
+                return;
             case 'humaneye'
-                % thisR.get('fov') - realisticEye case
+                % thisR.get('fov')
                 %
                 % The retinal geometry parameters are retinaDistance,
                 % retinaSemidiam and retinaRadius.
@@ -952,19 +889,30 @@ switch ieParamFormat(param)  % lower case, no spaces
                 rs = thisR.get('retina semidiam','mm');
                 val = atand(rs/rd)*2;
             otherwise
-                % Another lens model (not human)
+                % A lens model (not human).  Probably typical omni
+                % style.
                 %
-                % Coarse estimate of the diagonal FOV (degrees) for the
-                % lens case. Film diagonal size and distance from the film
+                % Estimate of the diagonal FOV (degrees) for the lens
+                % case. Film diagonal size and distance from the film
                 % to the back of the lens.
                 if ~exist('lensFocus','file')
-                    warning('To calculate FOV with a lens, you need isetlens on your path');
+                    warning('To calculate FOV of a lens, you need isetlens on your path');
                     return;
                 end
-                focusDistance = thisR.get('focus distance');    % meters
                 lensFile      = thisR.get('lens file');
-                filmDistance  = lensFocus(lensFile,1e+3*focusDistance); % mm
-                val           = atand(filmDiag/2/filmDistance);
+
+                filmDiag       = thisR.get('film diagonal','mm'); 
+
+                % Maybe we should always have this be Inf and thus the
+                % focal length of the lens.
+                objectDistance = thisR.get('focus distance','mm');
+
+                % Object distance is in mm and filmDistance is in mm
+                filmDistance  = lensFocus(lensFile,objectDistance);
+
+                % tand(fov/2) = (filmDiag/2) / filmDistance
+                % fov/2       = atand((filmDiag/2) / filmDistance)
+                val           = 2 * atand(filmDiag/2/filmDistance);
         end
     case {'fovhorizontal','hfov'}
         % thisR.get('fov horizontal')
@@ -1155,13 +1103,24 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
     case {'filmdiagonal','filmdiag'}
-        % recipe.get('film diagonal');  in mm
+        % thisR.get('film diagonal');  % in mm
+        %
+        % A pinhole camera can have a film size (film diagonal).  It
+        % is stored in film.diagonal.  
         if isfield(thisR.film,'diagonal')
             val = thisR.film.diagonal.value;
         else
-            % warning('Setting film diagonal to 10 mm. Previously unspecified');
-            thisR.set('film diagonal',10);
-            val = 10;
+            % Not sure we ever get here.
+            opticsType = thisR.get('optics type');
+            switch opticsType
+                case {'pinhole','humaneye'}
+                    warning('No film diagonal setting for pinhole and human eye.')
+                otherwise
+                    % Probably an omni case.
+                    warning('Setting %s unspecified film diagonal to 10 mm.',opticsType);
+                    thisR.set('film diagonal',10);
+                    val = 10;
+            end
         end
 
         % By default the film is stored in mm, unfortunately.  So we scale

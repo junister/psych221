@@ -24,33 +24,31 @@ fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), 
 
 %% Look around with a bigger film diagonal for a momoent
 
-% For a pinhole camera, should changing the film size also change the
-% field of view?  Definitely if the film distance does not change.
-% But it the @recipe logic changes the film distance with the
-% film diagonal, preserving the field of view.
-thisR.set('film diagonal',10);  % mm
+% For a pinhole camera, we store the FOV.  We do not store film
+% distance
 thisR.get('film distance','mm')
+
+% But we do store the film size in film diagonal, strangely.
+thisR.get('film diagonal','mm')
 
 % What happens if we change the distance, but not the diagonal.  Do we
 % get a change in the field of view?
-
-thisR.set('film distance',4.3e-3); % m
-thisR.get('film diagonal','mm')
 thisR.get('dfov')
 
-thisR.set('film distance',2*4.3e-3); % m
-thisR.get('film distance','mm')
-
-thisR.get('film diagonal','mm');
-thisR.get('fov')
+thisR.set('dfov',30);
+thisR.get('dfov')
 
 thisR.summarize('camera');
-%{
-Same number of samples, bigger film, so sample spacing increases.
-%}
 
 piWRS(thisR);
+fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), thisR.get('fov'));
 
+%% If we change the film size, the sample spacing changes
+% but the FOV stays the same
+
+thisR.set('film diagonal',5);
+thisR.summarize('camera');
+piWRS(thisR);
 fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), thisR.get('fov'));
 
 %% Changing the number of samples
@@ -61,19 +59,21 @@ ss = thisR.get('spatial samples');
 % Samples are (X,Y) in PBRT
 thisR.set('spatial samples',round([ss(1),ss(2)/2]));
 
+% Changing the number of samples also changes the sample spacing
 thisR.summarize('camera');
-%{
-The sample spacing has increased.  The film diagonal is the same.  The
-sample spacing increased because the diagonal now refers to a
-rectangle (320 x 160), not the original 320 x 320 square. So when we
-derive the spacing, it is no longer preserved.
-%}
+
+thisR.set('spatial samples',ss);
+thisR.summarize('camera');
+
+% Changing the field of view, does not change the sample spacing on
+% the film.  So, implicitly, it changes the film distance.
+thisR.set('fov diagonal',5)
+thisR.summarize('camera');
 
 % This is what the image looks like
+thisR.set('fov diagonal',45)
+thisR.summarize('camera');
 piWRS(thisR);
-
-fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), thisR.get('fov'));
-
 
 %% Doubling the original resolution
 
@@ -87,25 +87,25 @@ is the same.  The field of view is the same.
 %}
 piWRS(thisR);
 
-fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), thisR.get('fov'));
-
 %%  An extreme case of generating a line sample 
 %
 % TG does this for speed, sometimes, say in calculating an edge spread
 %
+
+% This is a problem.  I do not understand why we are seeing the whole
+% chess set.  We should only be seeing a strip through the chess set.
 thisR.set('spatial samples',round([ss(1),32]));
-
 thisR.summarize('camera');
+thisR.get('d fov')
+thisR.set('d fov',20);
 %{
-The sample spacing is very large because the 10 mm diagonal is along
-the line; when the image was square the horizontal distance was
-smaller so the sample spacing was smaller. The horizontal field of
-view is the same.
-
+The sample spacing is large because the diagonal is along the film line;
+when the image was square the horizontal distance was smaller so the
+sample spacing was smaller. The horizontal field of view is the same.
 %}
 piWRS(thisR);
 
-fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), thisR.get('fov'));
+rgb = imageSPD(p,[],0.5);
 
 %%
 
