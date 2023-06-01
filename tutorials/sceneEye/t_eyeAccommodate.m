@@ -27,6 +27,8 @@
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
+%% Set up scene and eye model
+
 % Only these eye models (not legrand) can accommodate
 modelName = {'navarro','arizona'};
 mm = 1;
