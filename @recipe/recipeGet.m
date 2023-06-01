@@ -85,7 +85,7 @@ function val = recipeGet(thisR, param, varargin)
 %                             of field, to specify the distance from the
 %                             pinhole and film
 %      'accommodation'      - Inverse of focus distance (diopters)
-%      'fov'                - Field of view, horizontal (deg)
+%      'fov'                - Field of view (deg)
 %      'aperture diameter'   - For most cameras, but not human eye
 %      'pupil diameter'      - For realisticEye.  Zero for pinhole
 %      'diffraction'         - Enabled or not
@@ -877,33 +877,30 @@ switch ieParamFormat(param)  % lower case, no spaces
         else, error('%s only exists for realisticEye model',param);
         end
 
-        % Back to the general camera case
-    case {'fov','dfov','fieldofview','fovdiagonal'}
+        % Back to the general case
+    case {'fov','fieldofview'}
         % recipe.get('fov') - degrees
-        % This is the diagonal field of view.
         %
-        % We used to do this
-        %
-        %         if isfield(thisR.camera,'fov')
-        %             val = thisR.camera.fov.value;
-        %             return;
-        %         end
+        if isfield(thisR.camera,'fov')
+            val = thisR.camera.fov.value;
+            return;
+        end
 
-        % Try to figure out from the other parameters. We have to deal
-        % with fov separately for different types of camera models.
+        % Try to figure out.  But we have to deal with fov separately for
+        % different types of camera models.
         filmDiag = thisR.get('film diagonal');
         if isempty(filmDiag)
-            thisR.set('film diagonal',10); % mm
+            thisR.set('film diagonal',10);
             warning('Set film diagonal to 10 mm, arbitrarily');
         end
         switch lower(thisR.get('camera subtype'))
             case {'pinhole','perspective'}
-                % For the pinhole the film distance and the field of
-                % view always match.  The fov is normally stored which
-                % implies a film distance and film size.
+                % For the pinhole the film distance and the field of view always
+                % match.  The fov is normally stored which implies a film distance
+                % and film size.
                 if isfield(thisR.camera,'fov')
                     % The fov was set.
-                    val = thisR.get('fov');  % There is a FOV
+                    val = thisR.get('fov');  % There is an FOV
                     if isfield(thisR.camera,'filmdistance')
                         % A consistency check.  The field of view should make
                         % sense for the film distance.
@@ -911,14 +908,14 @@ switch ieParamFormat(param)  % lower case, no spaces
                         assert(abs((val/tst) - 1) < 0.01);
                     end
                 else
-                    % There is no FOV. We need a film distance and
-                    % size (film diagonal) to know the FOV.
-                    filmDistance = thisR.get('film distance','mm');  % film diag is mm too
-                    if isempty(filmDistance)
-                        filmDistance = 3*filmDiag;
-                        thisR.set('film distance',filmDistance);
-                        warning('Set film distance  to %f (arbitrarily)',filmDistance);
-                    end
+                    % There is no FOV. We hneed a film distance and size to
+                    % know the FOV.  With no film distance, we are in
+                    % trouble.  So, we set an arbitrary distance and tell
+                    % the user to fix it.
+                    filmDistance = 3*filmDiag;  % Just made that up.
+                    thisR.set('film distance',filmDistance);
+                    warning('Set film distance  to %f (arbitrarily)',filmDistance);
+                    % filmDistance = thisR.set('film distance');
                     val = atand(filmDiag/2/filmDistance);
                 end
             case 'humaneye'
@@ -950,33 +947,6 @@ switch ieParamFormat(param)  % lower case, no spaces
                 filmDistance  = lensFocus(lensFile,1e+3*focusDistance); % mm
                 val           = atand(filmDiag/2/filmDistance);
         end
-    case {'fovhorizontal','hfov'}
-        % thisR.get('fov horizontal')
-        %
-        % Horizontal field of view
-        % Computed this way from diagonal field of view and ratio of x
-        % and y field of view
-        %
-        %   dfov = sqrt(x^2 + y^2)
-        %   y = kx, so k = y/x
-        %   dfov^2 = x^2 + (kx)^2
-        %   x = sqrt(dfov^2 / (1 + k^2))
-        dfov = thisR.get('fov diagonal');
-        ss = thisR.get('spatial samples');  % x,y        
-        k = ss(2)/ss(1);
-        val = sqrt(dfov^2 / (1 + k^2));
-    case {'fovvertical','vfov'}
-        % thisR.get('fov vertical')
-        %
-        % See log in fovhorizontal
-        %   dfov = sqrt(x^2 + y^2)
-        %   x = ky, so k = x/y
-        %   dfov^2 = (ky)^2 + y^2
-        %   y = sqrt(dfov^2 / (1 + k^2))
-        dfov = thisR.get('fov diagonal');
-        ss = thisR.get('spatial samples');  % x,y   
-        k = ss(1)/ss(2);
-        val = sqrt(dfov^2 / (1 + k^2));
 
     case 'depthrange'
         % dRange = thisR.get('depth range');

@@ -532,17 +532,12 @@ switch param
 
         thisR.camera.aperturediameter.value = val;
         thisR.camera.aperturediameter.type = 'float';
-    case {'dfov','fov','fovdiagonal'}
-    case {'hfov','fovhorizontal'}
-        % There is trouble because recipeGet looks at the film
-        % diagonal and spatial samples, not necessarily the camera.fov
-        % slot. Also, if this slot is printed to the PBRT file, I
-        % believe PBRT treats it as the diagonal field of view.
-        % (June 1, 2023).  Needs fixing. (BW).
+    case 'fov'
+        % This sets a horizontal fov
+        % We should check that this is a pinhole, I think
+        % This is only used for pinholes, not realistic camera case.
         subType = thisR.get('camera subtype');
         if isequal(subType,'pinhole')
-            % This sets a horizontal fov for pinhole cameras.
-
             if length(val)==1
                 thisR.camera.fov.value = val;
                 thisR.camera.fov.type = 'float';

@@ -22,7 +22,7 @@
 %   t_eyeRetinaDistance, t_eyeArizona, t_eyeNavarro
 %
 
-%% Initialize
+%% Check ISETBIO and initialize
 
 ieInit;
 if ~piDockerExists, piDockerConfig; end

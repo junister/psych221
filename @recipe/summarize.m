@@ -84,7 +84,7 @@ switch str
         % fprintf('\n');
         
     case 'camera'
-        fprintf('\nCamera\n-----------\n');
+        fprintf('\nCamera parameters\n-----------\n');
         if isempty(thisR.camera), return; end
         out = thisR.camera;
         
@@ -94,14 +94,11 @@ switch str
         fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
         fprintf('Exposure time (s):\t%f\n',thisR.get('exposure time'));
         fprintf('Field of view (deg):\t%f\n',thisR.get('fov'));
-        fprintf('Spatial samples:\t%d %d\n',thisR.get('spatial samples'));
-        fprintf('Sample spacing:\t%.1f um\n',thisR.get('sample spacing','um'));
-        fprintf('Film diagonal:\t%.1f mm\n',thisR.get('film diagonal','mm'));
         % fprintf('\n');
         
     case 'film'
         out = thisR.film;
-        fprintf('\nFilm\n-----------\n');
+        fprintf('\nFilm parameters\n-----------\n');
         fprintf('subtype: %s\n',out.subtype);
         fprintf('x,y resolution: %d %d (samples)\n',round(thisR.get('film resolution')));
         lensFile = thisR.get('lens file');
