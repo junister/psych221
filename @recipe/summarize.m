@@ -88,7 +88,7 @@ switch str
         if isempty(thisR.camera), return; end
         out = thisR.camera;
         
-        fprintf('Sub type: %s\n',thisR.camera.subtype);
+        fprintf('Sub type: %s\n',thisR.get('camera subtype'));
         fprintf('Lens file name:   %s\n',thisR.get('lens file'));
         fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
         fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
@@ -97,6 +97,8 @@ switch str
         fprintf('Spatial samples:\t%d %d\n',thisR.get('spatial samples'));
         fprintf('Sample spacing:\t%.1f um\n',thisR.get('sample spacing','um'));
         fprintf('Film diagonal:\t%.1f mm\n',thisR.get('film diagonal','mm'));
+        fprintf('Field of view (deg):\t%f\n',thisR.get('fov'));
+        fprintf('Film distance (mm):\t%0.2f\n',thisR.get('film distance','mm'));
         % fprintf('\n');
         
     case 'film'
