@@ -613,7 +613,6 @@ switch ieParamFormat(param)  % lower case, no spaces
                 disp('Panorama rendering. No focal distance');
                 val = NaN;
             case 'lens'
-
                 % Distance to the in-focus object. 
                 switch thisR.get('camera subtype')
                     case {'humaneye'}
@@ -633,7 +632,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % distance to the focal plane into millimeters and warn if
                 % there is no film distance that will bring the object into
                 % focus.
-                if exist('lensFocus','file')
+                if isempty(val) && exist('lensFocus','file')
                     % If isetlens is on the path, we run lensFocus to check
                     % that the specified focus distance is a legitimate
                     % value.
@@ -870,7 +869,8 @@ switch ieParamFormat(param)  % lower case, no spaces
         % This is the diagonal field of view.
         %
         % This is required for a pinhole camera
-        switch thisR.get('optics type')
+        opticsType = thisR.get('camera subtype');
+        switch opticsType
             case 'pinhole'
                 val = thisR.camera.fov.value;
                 return;

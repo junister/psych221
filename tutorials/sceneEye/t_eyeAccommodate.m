@@ -59,6 +59,9 @@ thisSE.set('object distance',oDistance);
 fprintf('Object distance %.2f m\n',oDistance);
 
 %{
+thisSE.piWRS;
+%}
+%{
  piAssetGeometry(thisSE.recipe);
  thisSE.recipe.show('lights');
 %}
