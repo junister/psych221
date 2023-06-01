@@ -91,7 +91,7 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 oi = ieGetObject('oi');
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title(name)
+title(oiGet(oi,'name'))
 %}
 
 %% Diffraction should not matter
@@ -110,7 +110,7 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 oi = ieGetObject('oi');
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title('4 mm no diffraction');
+title(oiGet(oi,'name'))
 %}
 
 %% Diffraction with a small pupil should matter
@@ -130,7 +130,7 @@ oi = thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 oi = ieGetObject('oi');
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title(name);
+title(oiGet(oi,'name'))
 %}
 
 %% Diffraction should matter.
@@ -149,12 +149,12 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 oi = ieGetObject('oi');
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title(name);
+title(oiGet(oi,'name'))
 %}
 
 %%  Maybe we should be smoothing the curve at the edge?
 
-thisSE.set('rays per pixel',4096);
+thisSE.set('rays per pixel',2048);
 thisSE.set('pupil diameter',0.5);
 thisSE.set('diffraction',true);
 name = sprintf('%s - pupil %.1f - diff %s',...
@@ -168,7 +168,7 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 oi = ieGetObject('oi');
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title('Half mm pupil diffraction on')
+title(oiGet(oi,'name'))
 %}
 %%  Maybe we should be smoothing the curve at the edge?
 
@@ -182,9 +182,10 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 
 %{
 oi = ieGetObject('oi');
+oi = piAIdenoise(oi);
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
-title('Half mm off')
+title(oiGet(oi,'name'))
 %}
 
 %% END
