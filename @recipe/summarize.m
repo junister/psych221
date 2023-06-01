@@ -84,28 +84,24 @@ switch str
         % fprintf('\n');
         
     case 'camera'
-        fprintf('\nCamera parameters\n-----------\n');
+        fprintf('\nCamera\n-----------\n');
         if isempty(thisR.camera), return; end
         out = thisR.camera;
         
         fprintf('Sub type: %s\n',thisR.camera.subtype);
         fprintf('Lens file name:   %s\n',thisR.get('lens file'));
-        switch thisR.get('optics type')
-            case 'pinhole'
-                fprintf('Aperture diameter (mm):\tPinhole\n');
-                fprintf('Focal distance (m):\tPinhole (no focal distance).\n');
-            otherwise
-                fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
-                fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
-        end
+        fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
+        fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
         fprintf('Exposure time (s):\t%f\n',thisR.get('exposure time'));
         fprintf('Field of view (deg):\t%f\n',thisR.get('fov'));
-        fprintf('Film distance (mm):\t%0.1f\n',thisR.get('film distance','mm'));
+        fprintf('Spatial samples:\t%d %d\n',thisR.get('spatial samples'));
+        fprintf('Sample spacing:\t%.1f um\n',thisR.get('sample spacing','um'));
+        fprintf('Film diagonal:\t%.1f mm\n',thisR.get('film diagonal','mm'));
         % fprintf('\n');
         
     case 'film'
         out = thisR.film;
-        fprintf('\nFilm parameters\n-----------\n');
+        fprintf('\nFilm\n-----------\n');
         fprintf('subtype: %s\n',out.subtype);
         fprintf('x,y resolution: %d %d (samples)\n',round(thisR.get('film resolution')));
         lensFile = thisR.get('lens file');
