@@ -90,10 +90,17 @@ switch str
         
         fprintf('Sub type: %s\n',thisR.camera.subtype);
         fprintf('Lens file name:   %s\n',thisR.get('lens file'));
-        fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
-        fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
+        switch thisR.get('optics type')
+            case 'pinhole'
+                fprintf('Aperture diameter (mm):\tPinhole\n');
+                fprintf('Focal distance (m):\tPinhole (no focal distance).\n');
+            otherwise
+                fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
+                fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
+        end
         fprintf('Exposure time (s):\t%f\n',thisR.get('exposure time'));
         fprintf('Field of view (deg):\t%f\n',thisR.get('fov'));
+        fprintf('Film distance (mm):\t%0.1f\n',thisR.get('film distance','mm'));
         % fprintf('\n');
         
     case 'film'

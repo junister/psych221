@@ -700,6 +700,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % Worried about the units.  mm or m?  Assuming meters.
                     val = thisR.camera.filmdistance.value;
                 else
+                    % There is no film distance.
                     % Compute the distance to achieve the diagonal fov.  We
                     % might have to make this match the smaller size (x or
                     % y) because of PBRT conventions.  Some day.  For now
@@ -707,9 +708,14 @@ switch ieParamFormat(param)  % lower case, no spaces
                     fov = thisR.get('fov');  % Degrees
                     filmDiag = thisR.get('film diagonal','m');  % m
 
-                    %   tand(fov) = opp/adj; adjacent is distance
-                    val = (filmDiag/2)/tand(fov);               % m
-
+                    % Changed June 1, 2023.  I think there was an
+                    % error in the fov, which should have been fov/2
+                    % Tangent in degrees.  
+                    % adjacent is film distance from pinhole.
+                    % filmDiag/2 is opposite.
+                    % tand(fov/2) = opp/adj;  
+                    % adj = opp/tand(fov/2)
+                    val = (filmDiag/2)/tand(fov/2);   % m
                 end
 
             case 'lens'
@@ -720,23 +726,23 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % meters here.
                     val = thisR.get('retina distance','m');
                 else
-                    % We calculate the focal length from the lens file
+                    % We assume the film is at the focal length of the
+                    % lens file. We calculate the focal length.
                     lensFile = thisR.get('lens file');
                     if exist('lensFocus','file')
                         % If isetlens is on the path, we convert the
                         % distance to the in-focus object plane into
                         % millimeters and see whether there is a film
                         % distance so that that object plane is in focus.
-                        % This is
                         %
-                        % But we return the value in meters
+                        % We return the value in meters
                         val = lensFocus(lensFile,1e+3*thisR.get('focal distance'))*1e-3;
+                        if ~isempty(val) && val < 0
+                            warning('%s lens cannot focus an object at this distance.', lensFile);
+                        end
                     else
                         % No lensFocus, so tell the user about isetlens
-                        warning('Add isetlens to your path if you want the film distance estimate')
-                    end
-                    if ~isempty(val) && val < 0
-                        warning('%s lens cannot focus an object at this distance.', lensFile);
+                        warning('Add isetlens to your path to calculate the film distance.')
                     end
                 end
             case 'environment'
