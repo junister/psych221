@@ -710,12 +710,19 @@ switch ieParamFormat(param)  % lower case, no spaces
 
                     % Changed June 1, 2023.  I think there was an
                     % error in the fov, which should have been fov/2
+                    % Also, we set the film distance to be consistent
+                    % with 'fov'.  But we should not have fov, film
+                    % distance and film diagonal.  They must be
+                    % consistent, so we should only be able to set 2
+                    % of the three
+                    %
                     % Tangent in degrees.  
                     % adjacent is film distance from pinhole.
                     % filmDiag/2 is opposite.
                     % tand(fov/2) = opp/adj;  
                     % adj = opp/tand(fov/2)
                     val = (filmDiag/2)/tand(fov/2);   % m
+                    thisR.set('film distance',val);
                 end
 
             case 'lens'
@@ -899,8 +906,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % with fov separately for different types of camera models.
         filmDiag = thisR.get('film diagonal');
         if isempty(filmDiag)
-            thisR.set('film diagonal',10); % mm
+            thisR.set('film diagonal',10,'mm'); % mm
             warning('Set film diagonal to 10 mm, arbitrarily');
+            filmDiag = 10;
         end
         switch lower(thisR.get('camera subtype'))
             case {'pinhole','perspective'}
@@ -909,12 +917,14 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % implies a film distance and film size.
                 if isfield(thisR.camera,'fov')
                     % The fov was set.
-                    val = thisR.get('fov');  % There is a FOV
+                    val = thisR.camera.fov.value;  % There is a FOV
+                    % A consistency check.  The field of view should make
+                    % sense for the film distance.
                     if isfield(thisR.camera,'filmdistance')
-                        % A consistency check.  The field of view should make
-                        % sense for the film distance.
                         tst = atand(filmDiag/2/thisR.camera.filmdistance.value);
                         assert(abs((val/tst) - 1) < 0.01);
+                    else
+                        warning('Setting film distance for consistency.')
                     end
                 else
                     % There is no FOV. We need a film distance and
