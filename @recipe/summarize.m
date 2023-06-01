@@ -83,32 +83,32 @@ switch str
         namelist = thisR.world;  % Abusive.  Change variable name.
         % fprintf('\n');
         
-    case 'camera'
-        fprintf('\nCamera parameters\n-----------\n');
+    case {'camera','film'}
+        fprintf('\nCamera\n-----------\n');
         if isempty(thisR.camera), return; end
         out = thisR.camera;
         
-        fprintf('Sub type: %s\n',thisR.camera.subtype);
-        fprintf('Lens file name:   %s\n',thisR.get('lens file'));
-        fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
-        fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
-        fprintf('Exposure time (s):\t%f\n',thisR.get('exposure time'));
-        fprintf('Field of view (deg):\t%f\n',thisR.get('fov'));
-        % fprintf('\n');
-        
-    case 'film'
-        out = thisR.film;
-        fprintf('\nFilm parameters\n-----------\n');
-        fprintf('subtype: %s\n',out.subtype);
-        fprintf('x,y resolution: %d %d (samples)\n',round(thisR.get('film resolution')));
-        lensFile = thisR.get('lens file');
-        if isequal(lensFile,'pinhole (perspective)')
-            % We should do something smart here.  This is not smart.
-        else
-            fprintf('diagonal:   %d (mm)\n',thisR.get('film diagonal'));
+        fprintf('Sub type:\t%s\n',thisR.get('camera subtype'));
+        fprintf('Lens file name:\t%s\n',thisR.get('lens file'));
+        switch thisR.get('optics type')
+            case 'pinhole'
+                % No aperture, focal distance or film distance for
+                % pinhole.  Only a diagonal fov.
+                fprintf('Aperture diam:\tpinhole\n');
+                fprintf('Focal distance:\tpinhole\n');
+                fprintf('Film distance (mm):\tpinhole\n');
+            otherwise
+                fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
+                fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
+                fprintf('Film distance (mm):\t%0.2f\n',thisR.get('film distance','mm'));
         end
+        fprintf('Exposure time (s):\t%.4f\n',thisR.get('exposure time'));
+        fprintf('Diagonal FOV (deg):\t%.1f\n',thisR.get('dfov'));
+        fprintf('Film diagonal (mm):\t%.1f\n',thisR.get('film diagonal','mm'));
+        fprintf('Spatial samples:\t%d %d\n',thisR.get('spatial samples'));
+        fprintf('Sample spacing (um):\t%.1f\n',thisR.get('sample spacing','um'));
         % fprintf('\n');
-        
+                
     case 'lookat'
         fprintf('\nLookat parameters\n-----------\n');
         if isempty(thisR.lookAt), return; end

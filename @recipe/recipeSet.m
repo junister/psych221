@@ -532,43 +532,14 @@ switch param
 
         thisR.camera.aperturediameter.value = val;
         thisR.camera.aperturediameter.type = 'float';
-    case 'fov'
-        % This sets a horizontal fov
-        % We should check that this is a pinhole, I think
-        % This is only used for pinholes, not realistic camera case.
-        subType = thisR.get('camera subtype');
-        if isequal(subType,'pinhole')
-            if length(val)==1
-                thisR.camera.fov.value = val;
-                thisR.camera.fov.type = 'float';
-            else
-                % camera types:  omni, humaneye, maybe others
-
-                % if two fov values are given [hor, ver], we should
-                % resize film acoordingly.  This is the current number
-                % of spatial samples for the two dimensions
-                filmRes = thisR.get('spatial samples');
-
-                % Set the field of view to the minimum of the two values
-                fov = min(val);
-
-                % horizontal resolution/ vertical resolution
-                resRatio = tand(val(1)/2)/tand(val(2)/2);
-
-                % Depending on which is the governing dimension, adjust the
-                % number of spatial samples, using the resolution ratio.
-                if fov == val(1)
-                    thisR.set('spatial samples',[max(filmRes)*resRatio, max(filmRes)]);
-                else
-                    thisR.set('spatial samples',[max(filmRes), max(filmRes)/resRatio]);
-                end
-                thisR.camera.fov.value = fov;
-                thisR.camera.fov.type = 'float';
-                disp('film ratio is changed!')
-            end
-        else
-            warning('fov not set for camera models');
-        end
+    case {'dfov','fov','fovdiagonal'}
+        % thisR.set('fov',deg)
+        % We only set the diagonal field of view.
+        % This is necessary for a pinhole (perspective) camera.
+        % Such cameras do not have a film distance or a film diagonal.
+        thisR.camera.fov.value = val;
+        thisR.camera.fov.type = 'float';
+    
     case 'diffraction'
         % thisR.set('diffraction');
         %
