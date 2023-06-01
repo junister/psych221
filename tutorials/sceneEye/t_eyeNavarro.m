@@ -21,10 +21,6 @@
 
 %% Check ISETBIO and initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -41,21 +37,27 @@ toC = [ 0.1458     0.0100     1.6667];
 % infinite depth of field (no focal distance).
 thisSE = sceneEye('letters at depth');
 
+% First render with pinhole
+thisSE.set('use pinhole',true);
+
 thisSE.set('render type',{'radiance','depth'});
 
 % Position the eye off to the side so we can see the 3D easily
 from = [0.25,0.3,-0.2];
 thisSE.set('from',from);
 
-% Look at the position with the 'B'.  The values for each of the letters
-% are included above.
+% Look at the position with the 'B'.
 thisSE.set('to',toB);
 
-% Have a quick check with the pinhole
-thisSE.set('use pinhole',true);
+% Set its distance
+thisSE.set('object distance',1);  % meters
 
-% Given the distance from the scene, this FOV captures everything we want
-thisSE.set('fov',30);             % Degrees
+thisSE.set('to',toA); distA = thisSE.get('object distance');
+thisSE.set('to',toB); distB = thisSE.get('object distance');
+thisSE.set('to',toC); distC = thisSE.get('object distance');
+thisSE.set('to',toB);
+
+thisSE.set('film diagonal',5);
 
 % Render the scene
 thisSE.set('render type', {'radiance','depth'});
@@ -65,21 +67,18 @@ thisSE.set('render type', {'radiance','depth'});
 thisDocker = dockerWrapper;
 scene = thisSE.piWRS('docker wrapper',thisDocker,'name','pinhole');
 
-% scene = thisSE.render('docker wrapper',thisDWrapper);
-% sceneWindow(scene);   
-
-thisSE.summary;
-
 % You can see the depth map if you like
 %   scenePlot(scene,'depth map');
 
 %% Now use the optics model with chromatic aberration
 
-% Turn off the pinhole.  The model eye (by default) is the Navarro model.
+% Use the model eye
 thisSE.set('use optics',true);
 
+thisSE.set('pupil diameter',3);
+
 % True by default anyway
-thisSE.set('mmUnits', false);
+% thisSE.set('mmUnits', false);
 
 % We turn on chromatic aberration.  That slows down the calculation, but
 % makes it more accurate and interesting.  We often use only 8 spectral
@@ -93,12 +92,6 @@ thisSE.set('mmUnits', false);
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 
-% Distance in meters to objects to govern accommodation.
-thisSE.set('to',toA); distA = thisSE.get('object distance');
-thisSE.set('to',toB); distB = thisSE.get('object distance');
-thisSE.set('to',toC); distC = thisSE.get('object distance');
-thisSE.set('to',toB);
-
 % We can reduce the rendering noise by using more rays. This takes a while.
 thisSE.set('rays per pixel',256);      
 
@@ -108,9 +101,14 @@ thisSE.set('spatial samples',384);
 % Ray bounces
 thisSE.set('n bounces',3);
 
+% We want the scene to be around 5-10 deg so we do not need a lot of
+% samples to resolve the blur.
+thisSE.set('fov',7);             % Degrees
+
+thisSE.get('sample spacing')
 %% This takes longer than the pinhole rendering
 
-% Set the accommodation distance to match the distance to the A
+% Focus on the A
 thisSE.set('accommodation',1/distA);  
 
 % Summarize
@@ -120,14 +118,23 @@ thisSE.summary;
 thisDocker = dockerWrapper.humanEyeDocker;
 thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
 
+%{
+oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow(oi);
+%}
+
 %% Set accommodation to a different distance.
 
+% Focus on the C
 thisSE.set('accommodation',1/distC);  
 
 % Default renderer for sceneEye is humanEyeDocker, so try just the
-% default.  Should also work. 
+% default.  Should also work.
+thisSE.summary;
 thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-C');
 
-thisSE.summary;
-
+%{
+oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow(oi);
+%}
 %% END

@@ -74,11 +74,8 @@ thisSE.set('fov',1);                % Small Field of view
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 
-thisSE.set('accommodation',1/oDistance);
+if mm < 3, thisSE.set('accommodation',1/oDistance); end
 thisSE.get('focal distance')
-
-inFocusAcc = 1/oDistance;
-delta = 0.15*inFocusAcc;
 
 % thisSE.set('retina distance',16.32);  % Default
 %{
