@@ -632,6 +632,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 % distance to the focal plane into millimeters and warn if
                 % there is no film distance that will bring the object into
                 % focus.
+                %{
                 if isempty(val) && exist('lensFocus','file')
                     % If isetlens is on the path, we run lensFocus to check
                     % that the specified focus distance is a legitimate
@@ -642,6 +643,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                         warning('%s lens cannot focus an object at this distance.', lensFile);
                     end
                 end
+                %}
             otherwise
                 error('Unknown camera type %s\n',opticsType);
         end
