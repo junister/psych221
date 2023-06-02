@@ -8,8 +8,8 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %   Apply a 'scattering flare' PSF to a scene and generate an optical
 %   image. 
 %
-%   The scattering flare is implemented based on the paper "How to Train Neural
-%   Networks for Flare Removal" by Wu et al. 
+%   The scattering flare is implemented based on the paper "How to
+%   Train Neural Networks for Flare Removal" by Wu et al.
 %
 % Inputs:
 %   scene: An ISET scene structure.
@@ -20,7 +20,6 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %  pixel size
 %  max luminance
 %  sensor size
-%  dirt aperture
 %  dirty level
 %
 % Output:
@@ -29,17 +28,22 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %   psf_spectral - Spectral point spread function
 %
 % Description
-%   The scattering flare is implemented as noisy perturbations on the pupil
-%   function (wavefront).  We still have several ideas to implement to
+%   The scattering flare is implemented as perturbations on the pupil
+%   function (wavefront).  We have several ideas to implement to
 %   extend the flare modeling
 %
-%      * We should implement more regular wavefront aberration patterns,
-%      not just random scratches
-%      * We should implement scratches that are wavelength-dependent. Now
+%      * Can we take in an OI and apply the flare to that?  How would
+%      that work? Maybe we should compute the Pupil function from any
+%      OI by estimating the point spread function and then deriving
+%      the Pupil function (psf = abs(fft(pupil)).  We can't really
+%      invert because of the abs, but maybe approximate?
+%      * We should implement additional regular wavefront aberration
+%      patterns, not just random scratches
+%      * We should implement wavelength-dependent scratches. Now
 %      the impact of the scratches is the same at all wavelengths
-%      * Accept a geometric transform and apply that to the OI. 
-%      * Or maybe, take in an OI and apply the flare to that.
-%
+%      * Accept a geometric transform and apply that to if we start
+%      with a scene.
+%      
 % See also
 %   opticsDLCompute, opticsOTF (ISETCam)
 
@@ -57,6 +61,7 @@ sceneSampleSize = sceneGet(scene,'sample size','m');
 
 ip = piOI2IP(oi,'etime',1/10);
 ipWindow(ip);
+
 % defocus
 [oi,pupilmask, psf] = piFlareApply(scene,...
                     'psf sample spacing', sceneSampleSize, ...
@@ -72,6 +77,7 @@ ipWindow(ip);
 %
 % The calculation enables creating a PSF with arbitrary wavefront
 % aberrations. These are optical path differences (OPD) in the pupil.
+
 %% Parse input
 varargin = ieParamFormat(varargin);
 p = inputParser;
@@ -135,7 +141,13 @@ oiHeight = oiSize(1); oiWidth = oiSize(2);
 
 oi = oiSet(oi, 'wAngular', 2*atand((oiWidth*psfsamplespacing/2)/focalLength));
 
-% Generate scratch and dirty markings in the aperture mask
+%% Generate scratch and dirty markings in the aperture mask
+
+% We now have an oi.  We use its parameters to create an wavefront
+% aberration arising from scratches.  Below here we need
+%
+%  oiWidth, oiHeight, imgSize, 
+
 if dirtylevel>0
     if oiWidth>oiHeight
         imgSize = oiWidth;

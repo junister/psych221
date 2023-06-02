@@ -12,6 +12,7 @@
 %% Initialize paths and such
 
 if piCamBio
+    % True means ISETCam. False means ISETBio.  
     fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
     return;
 end
@@ -47,10 +48,12 @@ thisSE.set('fov',30);             % Degrees
 
 %%  Render
 
+% Summary of status
+thisSE.summary;
+
 % Render the scene with the GPU
 thisDockerGPU = dockerWrapper;
 thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');
-thisSE.summary;
 
 %% Now use the optics model with chromatic aberration
 
@@ -66,12 +69,11 @@ thisSE.set('mmUnits', false);
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
 
-%{
-% Needs to work with spectral path integrator.
-% Zhenyi will make that work in V4.
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
-%}
 
 % Distance in meters to objects to govern accommodation.
 thisSE.set('to',toA); distA = thisSE.get('object distance');
@@ -90,8 +92,6 @@ thisSE.set('spatial samples',256);
 thisSE.set('n bounces',3);
 
 %% Accommodate to letter A distance (in diopters)
-
-
 % Default docker for human eye is currently CPU on remote.  It will
 % remain so until we get humaneye running on the GPU.
 %
@@ -101,15 +101,19 @@ thisSE.set('n bounces',3);
 %   thisSE.piWRS('name','arizona-A','docker wrapper',thisDocker);
 
 thisSE.set('accommodation',1/distA);
-thisSE.piWRS('name','arizona-A');
+% thisSE.get('accommodation')
 
 % Summarize
 thisSE.summary;
 
+%%
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','arizona-A');
+
 %% Make an oi of the chess set scene using the LeGrand eye model
 
 thisSE.set('accommodation',1/distC);  
-thisSE.piWRS('name','arizona-C');
+thisSE.piWRS('docker wrapper',thisDocker,'name','arizona-C');
 
 %% Have a look with the slanted bar scene
 
@@ -119,35 +123,36 @@ thisSE.piWRS('name','arizona-C');
 thisSE = sceneEye('slantedEdge','eye model','arizona');
 thisSE.set('to',[0 0 0]);
 
-thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1]);
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[0.5 0.5 1]);
 thisSE.set('light',thisLight, 'add');
 thisSE.set('light',thisLight.name,'specscale',0.5);
-thisSE.set('light',thisLight.name,'spd',[0.5 0.4 0.2]);
 thisSE.set('fov',2);
 
 thisSE.set('rays per pixel',256);  % Pretty quick, but not high quality
 
 thisSE.set('use pinhole',true);
 thisSE.piWRS('docker wrapper',thisDockerGPU);  % Render and show
-% scene = thisSE.render('docker wrapper',thisDockerGPU);  % Render and show
-% sceneWindow(scene);
 
-%% Now the human eye
-
-% CA not working in V4 yet.
-% thisSE.set('chromatic aberration',8);
+%% Now the human eye model
 
 thisSE.set('use pinhole',false);
+
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
+nSpectralBands = 8;
+thisSE.set('chromatic aberration',nSpectralBands);
+
 thisSE.set('object distance',20);
 
 thisDocker = dockerWrapper.humanEyeDocker;
-oi = thisSE.piWRS('docker wrapper',thisDocker,'show',false);
-% oi = thisSE.piWRS('name','SB Arizona','show',false);
+oi = thisSE.piWRS('docker wrapper',thisDocker,'show',false,'name','8bands');
+
+% Maybe we should set a denoise flag in piWRS?
 oi = piAIdenoise(oi); 
+
 oiWindow(oi);
 
-% oi = thisSE.render('docker wrapper',thisDWrapper);  % Render and show
-% oi = oiSet(oi,'name','SB Arizona','show',false);
 
 thisSE.summary;
 

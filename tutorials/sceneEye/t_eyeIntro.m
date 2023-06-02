@@ -99,7 +99,7 @@ if ~piDockerExists, piDockerConfig; end
 % You can select and read the data from a PBRT scene by initializing a
 % sceneEye object with the directory name of the PBRT files.  A collection
 % of files is part of the ISET3d repository (iset3d/data/V3).
-thisSE = sceneEye('Numbers at depth');
+thisSE = sceneEye('letters at depth');
 
 % theScene is a sceneEye object that has been initialized by reading the
 % PBRT files in the relevant directory.

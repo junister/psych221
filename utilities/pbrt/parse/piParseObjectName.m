@@ -19,7 +19,7 @@ function [name, sz] = piParseObjectName(txt)
 % objects.
 
 
-% Find the location of #ObjectName in the string
+% Find the location of one of these strings, such as #ObjectName
 patternList = {'#ObjectName','#object name','#CollectionName',...
     '#Instance MeshName','#MeshName','#Instance CollectionName','#Instance Parent'};
 
@@ -29,26 +29,20 @@ for ii = 1:numel(patternList)
     if isempty(loc)
         continue;
     else
-        loc_dimenstion = strfind(txt,'#Dimension');
+        loc_dimension = strfind(txt,'#Dimension');
         break;
     end
 end
-% if piContains(txt,'#ObjectName')
-%     pattern = '#ObjectName';
-%     loc = strfind(txt,pattern);
-%     loc_dimenstion = strfind(txt,'#Dimension');
-% end
-
 
 % Look for a colon
 % pos = strfind(txt,':');
-if isempty(loc_dimenstion)
+if isempty(loc_dimension)
     name = txt(loc(1)+length(pattern) + 1:end);
     sz.l = [];
     sz.w = [];
     sz.h = [];
 else
-    name = txt(loc(1)+length(pattern) + 1:loc_dimenstion-1);
+    name = txt(loc(1)+length(pattern) + 1:loc_dimension-1);
 
     posA = strfind(txt,'[');
     posB = strfind(txt,']');
@@ -64,8 +58,17 @@ else
     sz.w = res(2);   % depth  (Z)
     sz.h = res(3);   % height (Y)
 end
+
+% Remove quotes and spaces.  
 name = erase(name,'"');
 name = erase(name,' ');
-% if strcmp(name(end),' '), name(end)='';end
+
+% Consider this:
+%
+% If we only have the identifier, then treat name as empty.
+% if isequal(name,'_B') || isequal(name,'_L') || isequal(name,'_O')
+%     name = ''; 
+% end
+
 
 end

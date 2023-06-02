@@ -60,6 +60,9 @@ elseif piContains(match, ' L') && piContains(thisLine,'.spd')
 
     % If it is a spd file, load in the data as a vector
     if exist(value, 'file')
+        % One time this failed if not the full path.
+        value = which(value);  
+        
         fid = fopen(value, 'r');
         spd = textscan(fid, '%d %f');
         fclose(fid);

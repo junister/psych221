@@ -17,7 +17,13 @@ function val = piTextureText(texture, thisR, varargin)
 p = inputParser;
 p.addRequired('texture', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
+
+% remote should be passed in to us if needed
+p.addParameter('remoteresources', false);
+
 p.parse(texture, thisR, varargin{:});
+
+remoteResources = p.Results.remoteresources;
 
 %% String starts with Texture name
 
@@ -110,8 +116,12 @@ for ii=1:numel(textureParams)
                 % directories. I am worried how often this happens. (BW)
 
                 % Check whether we have it a texture file
-                imgFile = piResourceFind('texture',thisVal);
-
+                if remoteResources
+                    % We trust that the texture will be there on the server
+                    imgFile = ['textures/' thisVal];
+                else
+                    imgFile = piResourceFind('texture',thisVal);
+                end
                 % At this point, either we have imgFile or it is empty.
                 if isempty(imgFile) 
                     thisText = '';
@@ -129,9 +139,11 @@ for ii=1:numel(textureParams)
                         thisText = strrep(thisText, imgFile, ['textures/',thisVal]);
                     end
 
-                    texturesDir = [thisR.get('output dir'),'/textures'];
-                    if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
-                    copyfile(imgFile,texturesDir);
+                    if ~remoteResources
+                        texturesDir = [thisR.get('output dir'),'/textures'];
+                        if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
+                        copyfile(imgFile,texturesDir);
+                    end
                 end
             end
         end

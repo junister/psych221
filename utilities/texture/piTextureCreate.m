@@ -230,7 +230,11 @@ switch tp
         texture.tex2.value = [];
 
         % BW - We should ask Zheng about these spectral fields for the
-        % checkerboard
+        % checkerboard.  The parameters have been commented out in
+        % piTextureCreate, and piWrite routine should allow these
+        % parameters but write them out in a way I don't yet
+        % understand.  At this time, we simply ignore the parameters
+        % and issue a warning.
         %
         % texture.spectrumtex1.type = 'float';
         % texture.spectrumtex1.val = [];

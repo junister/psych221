@@ -23,6 +23,7 @@ Integrator "path"
 
 WorldBegin
 
+Include "stepfunction_materials.pbrt"
 
 AttributeBegin
     Translate 0 0 0
@@ -32,3 +33,4 @@ AttributeBegin
         "point3 P" [ -200 -200 0 -200 200 0 0 200 0 0 -200 0 ]
         "integer indices" [ 0 1 2 2 3 0 ]
 AttributeEnd
+

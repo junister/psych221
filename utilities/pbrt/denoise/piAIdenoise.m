@@ -1,4 +1,4 @@
-function [object, results] = piAIdenoise(object,varargin)
+function [object, results, outputHDR] = piAIdenoise(object,varargin)
 % A denoising method (AI based) that applies to scene photons
 %
 % Synopsis
@@ -19,15 +19,15 @@ function [object, results] = piAIdenoise(object,varargin)
 %
 % Runs executable for the Intel denoiser (oidn_pth).  The executable
 % must be installed on your machine.
-% 
+%
 % This is a Monte Carlo denoiser based on a trained model from intel
 % open image denoise: 'https://www.openimagedenoise.org/'.  You can
-% download versions for various types of architectures from 
+% download versions for various types of architectures from
 %
 % https://www.openimagedenoise.org/downloads.html
 %
 % We expect the directory location on a Mac to be
-% 
+%
 %   fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 %
 % Otherwise, we expect the oidnDenoise command to be in
@@ -56,23 +56,25 @@ p.addParameter('quiet',false,@islogical);
 
 % Try using Nvidia GPU de-noiser
 p.addParameter('useNvidia',false,@islogical);
+p.addParameter('keepHDR',false); % return the EXR file
 
 p.parse(object,varargin{:});
 
 quiet = p.Results.quiet;
+keepHDR = p.Results.keepHDR;
 
 %% Set up the denoiser path information and check
 
 if ~p.Results.useNvidia
-if ismac
-    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-elseif isunix
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
-elseif ispc
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
-else
-    warning("No denoise binary found.\n")
-end
+    if ismac
+        oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
+    elseif isunix
+        oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
+    elseif ispc
+        oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
+    else
+        warning("No denoise binary found.\n")
+    end
 else
     if ispc
         oidn_pth = fullfile(piRootPath, 'external', 'nvidia_denoiser.windows');
@@ -115,7 +117,7 @@ newPhotons = zeros(rows, cols, chs);
 
 %% Run it
 
-if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel denoiser'); end
+if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvidia denoiser'); end
 for ii = 1:chs
     % For every channel, get the photon data, normalize it, and
     % denoise it
@@ -145,8 +147,14 @@ for ii = 1:chs
     end
 
     newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
-
+    
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
+end
+
+if p.Results.useNvidia
+    exrwrite(newPhotons,DNImg_pth);
+else
+    warning("We don't export .pfm yet");
 end
 if ~quiet, close(h); end
 
@@ -160,7 +168,13 @@ switch object.type
 end
 
 % Clean up the temporary file.
-if exist(DNImg_pth,'file'), delete(DNImg_pth); end
+if ~keepHDR
+    if exist(DNImg_pth,'file'), delete(DNImg_pth);
+        outputHDR = '';
+    end
+else
+    outputHDR = DNImg_pth;
+end
 if exist(outputTmp,'file'), delete(outputTmp); end
 
 end

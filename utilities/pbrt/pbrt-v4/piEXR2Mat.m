@@ -39,6 +39,10 @@ if ~isMATLABReleaseOlderThan('R2022b')
         end
     else
         channels = channelname;
+        %{
+        %  We should check that the channels are present in the file here.
+        info = exrinfo(inputFile);
+        %}
     end
 
     data = exrread(inputFile, Channels=channels);

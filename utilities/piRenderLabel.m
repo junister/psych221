@@ -55,13 +55,7 @@ tmp = textscan(fileID,'%s','Delimiter','\n');
 txtLines = tmp{1};
 fclose(fileID);
 objectslist = txtLines(piContains(txtLines,'ObjectInstance'));
-if exist('renderLater','var') && renderLater
-    instanceIdMap = [];
-    [~, ~, renderCMD] = piRenderZhenyi(InstanceR, ...
-        'device','cpu', ...
-        'renderLater',true);
-else
-    instanceIdMap = piRenderZhenyi(InstanceR,'device','cpu');
-end
+
+instanceIdMap = piRender(InstanceR);
 
 end

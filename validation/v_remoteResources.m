@@ -1,28 +1,61 @@
 % Validate whether we can render our scenes using remote resources
 
+%{
+% Read a simple car scene.  One car.  Skymap. Ground plane.  The car has a
+% lot of parts, though.
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
+thisR.get('instances')
+piWRS(thisR,'remote resources',true);
+
+carName = 'taxi';
+rotationMatrix = piRotationMatrix('z', -15);
+position = [-4 0 0];
+thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
+    'rotation',rotationMatrix, 'position',position,'unique',true);
+
+thisR.show;
+
+thisR.get('instances')
+
+piWRS(thisR,'remote resources',true);
+%}
 
 % Check for docker configuration 
 ieInit;
 if ~piDockerExists, piDockerConfig; end
+%{
+dockerWrapper.preset('remote orange');
+%}
+%{
+thisR.show('objects');
+%}
+
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
 
 % Working web scenes:
 % Can we always use piRead to read back in the PBRT files written by
 % piWrite?
-% {
-% kitchen
-thisR = piRecipeDefault('scene name', 'kitchen');
+thisR = piRecipeDefault('scene name','Simple Scene');
+thisR = piRecipeDefault('scene name','ChessSet');
+
+thisR = piRecipeDefault('scene name', 'kitchen');  % New/old.  
+thisR = piRecipeCreate('cornell_box');
+thisR = piRecipeCreate('Macbeth checker');
+piWRS(thisR,'remote resources',true);
+
+% This is really big (almost 1300 assets and 10K lines).
+% We should figure out where the bottleneck is.
+% The bistro does not work.
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
-thisR.set('n bounces',2);
-piWRS(thisR);
+thisR = piRecipeDefault('scene name','contemporary-bathroom');
+
+piWRS(thisR,'remote resources',true);
 
 out = thisR.get('outputfile');
-
-newOut = fullfile(piRootPath, 'local', 'test', 'kitchen.pbrt');
-newOut = fullfile(piRootPath, 'local', 'test', 'bistro-vespa.pbrt');
-
-thisR.set('input file',out);
-thisR.set('output file',newOut);
-piWRS(thisR);
 
 %}
 %{
@@ -158,7 +191,8 @@ thisR = piRecipeDefault('scene name', 'lettersAtDepth');
 % piWrite(thisR);
 % s = piRender(thisR); sceneWindow(s);
 
-piWRS(thisR, 'remoteResources', true);
+thisD = dockerWrapper.humanEyeDocker;
+piWRS(thisR, 'remoteResources', true,'docker wrapper', thisD);
 
 % Needs a light source
 %thisR = piRecipeDefault('scene name', 'MacBethChecker');
@@ -187,7 +221,7 @@ piWRS(thisR, 'remoteResources', true);
 %% Teapot Fails!
 % with true or false Gets material2 not defined, although I can't see why
 try
-    thisR = piRecipeDefault('scene name', 'teapot');
+    thisR = piRecipeDefault('scene name', 'teapot set');
     piWRS(thisR, 'remoteResources', true);
 catch err
     fprintf("Teapot Failed with error %s!!! \n", err.message);
