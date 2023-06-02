@@ -31,7 +31,6 @@ piWRS(thisR);
 
 thisR.set('object distance',1);
 thisR.camera = piCameraCreate('omni','lens file','dgauss.22deg.12.5mm.json');
-thisR.set('film diagonal',10); % mm
 piWRS(thisR);
 
 %% Omni with a fisheye lens
@@ -47,9 +46,11 @@ lList = lensList('quiet',true);
 ll = 18;    % fisheye.87deg.50.0mm.json
 
 % Move the camera back a bit to capture more of the scene
-thisR.set('object distance',4);
+thisR.set('object distance',8);
 thisR.camera = piCameraCreate('omni', 'lens file',lList(ll).name);
-piWRS(thisR, 'denoiseflag', true);
+thisR.set('skymap','sky-cathedral_interior.exr');
+oi = piWRS(thisR);oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow;
 
 %% END
 
