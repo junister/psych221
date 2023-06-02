@@ -94,19 +94,21 @@ switch str
             case 'pinhole'
                 % No aperture, focal distance or film distance for
                 % pinhole.  Only a diagonal fov.
-                fprintf('Aperture diam:\tpinhole\n');
-                fprintf('Focal distance:\tpinhole\n');
-                fprintf('Film distance (mm):\tpinhole\n');
+                fprintf(' Film distance, diagonal, aperture and object distance\n are not used for pinhole rendering.\n\n')
+                %                 fprintf('Aperture diam:\tpinhole\n');
+                %                 fprintf('Focal distance:\tpinhole\n');
+                %                 fprintf('Film distance (mm):\tpinhole\n');
+                %                 fprintf('Film diagonal (mm):\tpinhole\n');
             otherwise
                 fprintf('Aperture diameter (mm): %0.2f\n',thisR.get('aperture diameter'));
                 fprintf('Focal distance (m):\t%0.2f\n',thisR.get('focal distance'));
                 fprintf('Film distance (mm):\t%0.2f\n',thisR.get('film distance','mm'));
+                fprintf('Film diagonal (mm):\t%.1f\n',thisR.get('film diagonal','mm'));
+                fprintf('Sample spacing (um):\t%.1f\n',thisR.get('sample spacing','um'));
         end
         fprintf('Exposure time (s):\t%.4f\n',thisR.get('exposure time'));
-        fprintf('Diagonal FOV (deg):\t%.1f\n',thisR.get('dfov'));
-        fprintf('Film diagonal (mm):\t%.1f\n',thisR.get('film diagonal','mm'));
+        fprintf('FOV (deg):\t\t%.1f\n',thisR.get('fov'));
         fprintf('Spatial samples:\t%d %d\n',thisR.get('spatial samples'));
-        fprintf('Sample spacing (um):\t%.1f\n',thisR.get('sample spacing','um'));
         % fprintf('\n');
                 
     case 'lookat'
