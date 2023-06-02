@@ -46,6 +46,7 @@ fprintf('FOV (h, v, d): %.1f %.1f %.1f\n',thisR.get('hfov'), thisR.get('vfov'), 
 %% If we change the film size, the sample spacing changes
 % but the FOV stays the same
 
+% When we are in pinhole mode, we should not have a film diagonal.
 thisR.set('film diagonal',5);
 thisR.summarize('camera');
 piWRS(thisR);

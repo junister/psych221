@@ -532,11 +532,12 @@ switch param
 
         thisR.camera.aperturediameter.value = val;
         thisR.camera.aperturediameter.type = 'float';
-    case {'dfov','fov','fovdiagonal'}
+    case {'fov'}
         % thisR.set('fov',deg)
-        % We only set the diagonal field of view.
-        % This is necessary for a pinhole (perspective) camera.
-        % Such cameras do not have a film distance or a film diagonal.
+        % This always refers to the shorter of the two dimensions (the
+        % limiting field of view).  Not the diagonal.
+        % https://pbrt.org/fileformat-v4
+        %
         thisR.camera.fov.value = val;
         thisR.camera.fov.type = 'float';
     
@@ -699,8 +700,14 @@ switch param
     case 'filmdiagonal'
         % thisR.set('film diagonal',val)
         % Default units are millimeters.
-        thisR.film.diagonal.type = 'float';
-        thisR.film.diagonal.value = val;
+        opticsType = thisR.get('camera subtype');
+        switch opticsType
+            case 'pinhole'
+                warning('Film diagonal is irrelevant for pinhole.');
+            otherwise
+                thisR.film.diagonal.type = 'float';
+                thisR.film.diagonal.value = val;
+        end
     case 'filmsize'
         % thisR.set('film size',[width,height] in mm);
         %

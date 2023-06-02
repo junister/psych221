@@ -64,7 +64,7 @@ thisDockerGPU = dockerWrapper;
 thisSE.set('use pinhole',true);
 thisSE.piWRS('docker wrapper',thisDockerGPU,'name','pinhole');  % Render and show
 
-%% Render with model eye, varying diffraction setting
+%% Render with model eye, with diffraction
 
 % Use model eye
 thisSE.set('use optics',true);
@@ -77,7 +77,8 @@ thisSE.set('chromatic aberration',nSpectralBands);
 
 % With diffraction and big pupil
 thisSE.set('diffraction',true);
-thisSE.set('pupil diameter',4);
+thisSE.set('pupil diameter',1);
+thisSE.set('rays per pixel',2048);
 
 humanDocker = dockerWrapper.humanEyeDocker;
 name = sprintf('%s - pupil %.1f - diff %s',...
@@ -94,9 +95,7 @@ set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
 title(oiGet(oi,'name'))
 %}
 
-%% Diffraction should not matter
-
-% Turn off diffraction.  With big pupil it shouldn't matter
+%% Turn off diffraction.  
 thisSE.set('diffraction',false);
 
 name = sprintf('%s - pupil %.1f - diff %s',...
@@ -108,6 +107,7 @@ thisSE.piWRS('name',name,'docker wrapper',humanDocker);
 
 %{
 oi = ieGetObject('oi');
+oi = piAIdenoise(oi);
 oiPlot(oi,'illuminance hline',[128 128]);
 set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
 title(oiGet(oi,'name'))
@@ -115,7 +115,7 @@ title(oiGet(oi,'name'))
 
 %% Diffraction with a small pupil should matter
 
-thisSE.set('rays per pixel',1024);
+thisSE.set('rays per pixel',256);
 thisSE.set('pupil diameter',1);
 thisSE.set('diffraction',false);
 

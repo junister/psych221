@@ -866,14 +866,15 @@ switch ieParamFormat(param)  % lower case, no spaces
         end
 
         % Back to the general camera case
-    case {'fov','dfov','fieldofview','fovdiagonal'}
+    case {'fov','fieldofview'}
         % recipe.get('fov') - degrees
-        % This is the diagonal field of view.
         %
-        % This is required for a pinhole camera
+        % Different for different lens models.
+        %
         opticsType = thisR.get('camera subtype');
         switch opticsType
             case 'pinhole'
+                % For pinhole is the shorter of the two dimensions.
                 val = thisR.camera.fov.value;
                 return;
             case 'humaneye'
@@ -905,9 +906,9 @@ switch ieParamFormat(param)  % lower case, no spaces
 
                 filmDiag       = thisR.get('film diagonal','mm'); 
 
-                % Maybe we should always have this be Inf and thus the
-                % focal length of the lens.
-                objectDistance = thisR.get('focus distance','mm');
+                % We always have this be very large and thus the focal
+                % length of the lens is how we specify the field of view
+                objectDistance = 1e6; % 1Kilometer
 
                 % Object distance is in mm and filmDistance is in mm
                 filmDistance  = lensFocus(lensFile,objectDistance);
