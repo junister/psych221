@@ -31,6 +31,7 @@ piWRS(thisR);
 
 thisR.set('object distance',1);
 thisR.camera = piCameraCreate('omni','lens file','dgauss.22deg.12.5mm.json');
+thisR.set('film diagonal',10); % mm
 piWRS(thisR);
 
 %% Omni with a fisheye lens
