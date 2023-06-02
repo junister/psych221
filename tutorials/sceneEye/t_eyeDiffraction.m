@@ -154,7 +154,7 @@ title(oiGet(oi,'name'))
 
 %%  Maybe we should be smoothing the curve at the edge?
 
-thisSE.set('rays per pixel',2048);
+thisSE.set('rays per pixel',1024);
 thisSE.set('pupil diameter',0.5);
 thisSE.set('diffraction',true);
 name = sprintf('%s - pupil %.1f - diff %s',...
