@@ -79,13 +79,14 @@ piWRS(thisR);
 
 % Read from the start and add the lens
 thisR = piRecipeCreate('chess set');
-ss = thisR.get('spatial samples');
 
 % Many lens files are named with their FOV and focal length
 lensfile  = 'dgauss.22deg.6.0mm.json';    % 
 
 % We replace the pinhole with the lens
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+
+ss = thisR.get('spatial samples');
 
 thisR.set('focal distance',1); % Meters
 thisR.set('film diagonal',4);
@@ -116,18 +117,96 @@ thisR.get('film distance','mm')
 
 %% The camera model uses the diagonal FOV
 
-thisR.get('fov')
+% Initialize the scene with a lens
+thisR = piRecipeCreate('chess set');
 
-% When we change the number of samples, we need to change the diagonal film
-% size.  But we do not.  Yet.  This set should change the FOV.
-thisR.set('spatial samples',[ss(1)/2 ss(2)]);
-thisR.get('fov')
+% Many lens files are named with their FOV and focal length
+lensfile  = 'dgauss.22deg.6.0mm.json';    % 
+thisR.camera = piCameraCreate('omni','lensFile',lensfile);
+thisR.set('film diagonal',3);
 
-piWRS(thisR);
+% Render the original and plot a horizontal illuminance line
+oi1 = piWRS(thisR);
+oi1 = piAIdenoise(oi1);
+sz = oiGet(oi1,'size');
+uData1 = oiPlot(oi1,'illuminance hline',[1,sz(1)/2]);
 
-% Put it back
+% Change the number of samples
+% We change the diagonal film size to keep the FOV the same.
+ss = thisR.get('spatial samples');
+fSize = thisR.get('film size','mm');
+x = fSize(1); y = fSize(2);
+k = [1, 0.1];
+newFD = sqrt((k(1)*x)^2 + (k(2)*y)^2);
+
+% Make the adjustment.  Probably the newFD should always be in
+% 'spatial samples' set
+thisR.set('spatial samples',k.*ss);
+thisR.set('film diagonal',newFD);
+oi2 = piWRS(thisR);
+oi2 = piAIdenoise(oi2);
+sz = oiGet(oi2,'size');
+uData2 = oiPlot(oi2,'illuminance hline',[1,sz(1)/2]);
+
+%% Now compare
+ieNewGraphWin([],'wide');
+subplot(1,2,1)
+plot(uData1.pos,uData1.data,'b--',uData2.pos,uData2.data,'r-');
+subplot(1,2,2)
+plot(uData1.data,uData2.data,'o'); identityLine; grid on;
+
+
+%% Put it back
 thisR.set('spatial samples',ss);
 thisR.get('fov')
 
 %% Human eye version
-thisR.summarize('camera');
+thisSE = sceneEye('chessset','eye model',modelName{mm});
+thisSE.set('use pinhole',true);
+thisSE.piWRS;
+
+humanD = dockerWrapper.humanEyeDocker;
+thisSE.set('use pinhole',false);
+thisSE.piWRS('docker wrapper',humanD);
+
+thisSE.get('fov')
+thisSE.set('fov',22);
+thisSE.piWRS('docker wrapper',humanD);
+
+ss = thisSE.get('spatial samples');
+thisSE.set('spatial samples',2*ss);
+thisSE.piWRS('docker wrapper',humanD);
+
+oi = ieGetObject('oi'); 
+oi = piAIdenoise(oi); ieReplaceObject(oi); 
+oiWindow;
+
+thisSE.set('spatial samples',ss);
+thisSE.set('render type',{'radiance','depth'});
+thisSE.piWRS('docker wrapper',humanD);
+oi = ieGetObject('oi'); 
+oi = piAIdenoise(oi); ieReplaceObject(oi); 
+oiWindow;
+
+
+%% 
+
+thisSE.set('semidiam')
+
+%% Adjust accommodation
+
+thisSE.set('pupil diameter',3);
+thisSE.set('spatial samples',2*ss);
+aa =[1/.3, 1/.5, 1, 1/2];
+for ii = 1:numel(aa)
+    thisSE.set('accommodation',aa(ii));
+    name = sprintf('Acc %.1f',aa(ii));
+    thisSE.piWRS('docker wrapper',humanD,'name',name);
+    oi = ieGetObject('oi');
+    oi = piAIdenoise(oi); ieReplaceObject(oi);
+    oiWindow;
+end
+
+%% END
+
+

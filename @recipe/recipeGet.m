@@ -108,6 +108,9 @@ function val = recipeGet(thisR, param, varargin)
 %      'film size'          - (width, height) in mm
 %
 %      % Special retinal properties for human eye models
+%      % See the discussion in sceneEye about the geometry of the
+%      % retinal model.  Also, have a look here
+%      
 %      'retina distance'
 %      'eye radius'
 %      'retina semidiam'
