@@ -137,12 +137,46 @@ switch ieParamFormat(lght.type)
         %}
 
     case 'goniometric'
-        %%  We a file name for goniometric light.
+        %%  We need a file name for goniometric light.
 
-        % We should find a valid file and make it the default here.  And
-        % document the file requirements.
+        % From the book
+        %{
+        % The goniometric light source approximation is widely used to
+        % model area light sources in the field of illumination
+        % engineering. The rule of thumb there is that once a
+        % reference point is five times an area light source%s radius
+        % away from it, a point light approximation has sufficient 
+        % accuracy for most applications. File format standards have
+        % been developed for encoding goniophotometric diagrams for
+        % these applications (Illuminating Engineering Society of
+        % North America 2002). Many lighting fixture manufacturers
+        % provide data in these formats on their Web sites.         
+        %}
+        %
+        % The file is an equal area type exr file that specifies the
+        % intensity of the light on the surface of a sphere.  But the
+        % sphere is mapped to a square using the this logic:
+        %
+        % https://github.com/mmp/pbrt-v4/blob/96347e744107f70fafb70eb6054f148f51ff12e4/src/pbrt/util/math.cpp#L292
+        %
+        % We should find a valid file and make it a default here.  And
+        % document the file requirements.  ChatGPT thinks the PBRT
+        % code might look like this:
+        %{
+        AttributeBegin
+            LightSource "goniometric"
+            "color I" [1 1 1]       # Specify the intensity of the light (RGB values)
+            "string filename" "myLightDiagram.exr"  # Provide the path to the goniometric diagram
+        AttributeEnd
+        %}
+        % The goniometric image showing the light distribution in
+        % different directions.
         lght.mapname.type = 'string';
         lght.mapname.value = '';
+
+        % Not sure about this or how piWrite should handle it (BW).
+        lght.spd.type = 'rgb';
+        lght.spd.value = [1 1 1];
 
     case 'infinite'
         % Is this the same as environmental?
