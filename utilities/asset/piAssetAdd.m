@@ -51,7 +51,10 @@ end
 
 %% Check if the parent node exists
 
-if ~isempty(thisR.assets.get(parentInfo))
+if parentInfo == 0
+    % Replace the root
+    [thisR.assets, id] = thisR.assets.addnode(parentInfo, node);
+elseif ~isempty(thisR.assets.get(parentInfo))
     [thisR.assets, id] = thisR.assets.addnode(parentInfo, node);
     % Format the new node name.
     [thisR.assets, ~] = thisR.assets.uniqueNames(id);

@@ -1,4 +1,4 @@
-function newMat = piMaterialPresets(keyword,materialName)
+function newMat = piMaterialPresets(keyword,materialName, options)
 % Create materials that are tuned for appearance (preset)
 %
 % Brief
@@ -63,7 +63,7 @@ function newMat = piMaterialPresets(keyword,materialName)
   newMat = piMaterialPresets('glass','glass-demo');
 %}
 %{
-  newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
+  newMat = piMaterialPresets('wood-medium-knots','woodfloor');
   newMat.material.name
 %}
 %{
@@ -76,8 +76,11 @@ function newMat = piMaterialPresets(keyword,materialName)
 %}
 %% Parameters
 
-if ~exist('keyword','var'), error('keyword is required.'); end
-if ~exist('materialName','var'), materialName = keyword; end
+arguments
+    keyword;
+    materialName = keyword;
+    options.show = true; % whether to show the help dialog
+end
 
 %% Depending on the key word, go for it.
 switch ieParamFormat(keyword)
@@ -125,6 +128,17 @@ switch ieParamFormat(keyword)
 
         fprintf('\n');
         newMat = presetList;
+
+        if options.show
+            % Now show it in a dialog box that can stay up in a screen window
+            % mats = piMaterialPresets('list');
+            h = helpdlg(presetList);
+
+            % I can change the font size, but the window clips the text.  So we
+            % would need to change the window size, too.  Maybe another time.
+            str = findall(h,'Type','Text');
+            str.FontSize = 10;
+        end
 
         % ------------ DIFFUSE
     case 'diffuselist'
@@ -283,14 +297,15 @@ switch ieParamFormat(keyword)
             'type', 'imagemap',...
             'filename', 'asphalt-002.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        % =============      Woods
-        %{'wood-floor-merbau',wood-medium-knots','wood-light-large-grain','wood-mahogany'}
-    case 'woodlist'
-        newMat = {'wood-floor-merbau','wood-medium-knots','wood-light-large-grain','wood-mahogany'};
 
-    case 'wood-floor-merbau'
-        newMat = polligon_materialCreate(materialName,...
-            'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
+        % --------       Woods
+        %{wood-medium-knots','wood-light-large-grain','wood-mahogany'}
+    case 'woodlist'
+        newMat = {'wood-medium-knots','wood-light-large-grain','wood-mahogany'};
+
+        %     case 'wood-floor-merbau'
+        %         newMat = polligon_materialCreate(materialName,...
+        %             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
 
     case 'wood-medium-knots'
         newMat.texture = piTextureCreate(materialName,...

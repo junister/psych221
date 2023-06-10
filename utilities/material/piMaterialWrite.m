@@ -1,5 +1,5 @@
 function piMaterialWrite(thisR)
-%%
+% Write the contents of the _material file
 % Synopsis:
 %   piMaterialWrite(thisR)
 %
@@ -116,14 +116,6 @@ end
 % write out mix materials
 for row=1:length(mixMaterialText)
     fprintf(fileID,'%s\n',mixMaterialText{row});
-end
-
-%% Write media to xxx_materials.pbrt
-
-if ~isempty(thisR.media)
-    for m=1:length(thisR.media.list)
-        fprintf(fileID, piMediumText(thisR.media.list(m), thisR.get('working directory')));
-    end
 end
 
 fclose(fileID);

@@ -4,13 +4,16 @@ function thisR = piRecipeCreate(rName,varargin)
 % Synopsis
 %   thisR = piRecipeCreate(rName,varargin)
 %
-% Briewf
+% Brief
 %   Many of the piRecipeDefault cases still need a light or to position the
 %   camera to be rendered.  This routine adjusts the recipe so that it can
 %   be rendered with piWRS immediately.
 %
+%   To see the valid recipe list use piRecipe
+%
 % Input
-%   rName - Recipe name from the piRecipeDefaults list
+%   rName - Recipe name from the cell array returned by 
+%          validNames = piRecipeCreate('help');
 %
 % Key/Val pairs
 %
@@ -47,11 +50,33 @@ function thisR = piRecipeCreate(rName,varargin)
 %}
 
 %% Input parsing
+
+validRecipes = {'macbethchecker','chessset',...
+    'cornell_box','cornellboxreference',...
+    'simplescene','arealight','bunny','car','checkerboard', ...
+    'lettersatdepth','materialball','materialball_cloth',...
+    'sphere','slantededge','stepfunction','testplane','teapotset'};
+
 varargin = ieParamFormat(varargin);
 
 p = inputParser;
 p.addRequired('rName',@ischar);
+p.addParameter('quiet',false,@islogical);
+
 p.parse(rName,varargin{:});
+
+rName    = ieParamFormat(rName);
+if isequal(rName,'help') || isequal(rName,'list')
+    thisR = validRecipes;
+    if p.Results.quiet, return;
+    else
+        fprintf('\n-------Known recipes-----\n\n')
+        for ii=1:numel(validRecipes)
+            fprintf('%02d - %s\n',ii,validRecipes{ii});
+        end
+    end
+    return;
+end
 
 %% 
 %{
@@ -192,6 +217,10 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
         thisR.set('lights','all','delete');
 
+        % Remove the '' (empty) texture.  We used to advice setting the
+        % surface texture of the Cube.  But no longer.
+        thisR.set('material','delete',1);
+
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('new distant',...
@@ -202,7 +231,6 @@ switch ieParamFormat(rName)
         thisR.set('light', lgt, 'add');
         idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
-        warning('No obvious texture.  Use checkerboard.')
 
     case 'lettersatdepth'
         thisR = piRecipeDefault('scene name',rName);

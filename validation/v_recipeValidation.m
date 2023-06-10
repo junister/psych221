@@ -6,49 +6,19 @@
 %%
 ieInit;
 if ~piDockerExists, piDockerConfig; end
+validNames = piRecipeCreate('list');
 
-%%
-thisR = piRecipeDefault('scene name','CornellBoxReference');
-thisR.set('skymap','room.exr');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','cornell_box');
-thisR.set('skymap','room.exr');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','lettersAtDepth');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','materialball_cloth');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','materialball');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','car');
-thisR.set('skymap','room.exr');
-piWRS(thisR);
-
-%%
-thisR = piRecipeDefault('scene name','bunny');
-thisR.set('nbounces',5);
-thisR.set('skymap','room.exr');
-bunnyID = piAssetSearch(thisR,'object name','Bunny');
-thisR.set('asset',bunnyID,'scale',3);
-piMaterialsInsert(thisR,'names','glossy-red');
-thisR.set('asset',bunnyID,'material name','glossy-red');
-piWRS(thisR);
-
-%%
-fname = fullfile(piRootPath,'data','scenes','teapot-set','TeaTime-converted.pbrt');
-if isfile(fname)
-    thisR = piRead(fname,'exporter','PARSE');
-    piWRS(thisR);
+%% This loop should work.
+for ii=1:numel(validNames)
+    disp(validNames{ii})
+    try
+        thisR = piRecipeCreate(validNames{ii});
+        piWRS(thisR);
+        fprintf('Succeeded on %s -- \n',validNames{ii});
+    catch
+        fprintf('Failed on %s -- \n',validNames{ii});
+    end
 end
+
 %% END
 

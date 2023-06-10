@@ -14,6 +14,9 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 % Parameter list (in progress, many more to be added)
 %
+%   Metadata:
+%    'name'
+%
 %   Data management
 %    'input file'
 %    'output file
@@ -156,6 +159,10 @@ param = ieParamFormat(p.Results.param);
 
 switch param
 
+    % Object metadata
+    case {'name'}
+        thisR.name = val;
+        
     % Rendering and Docker related
     case {'outputfile'}
         % thisR.set('outputfile',fullfilepath);
@@ -167,7 +174,7 @@ switch param
         % thisR.set('input file',filename);
         % This file should typically exist.  There are cases, however,
         % where we may set it before the file exists.  I think.
-        if ~isfile(val), warning('Specified input file not found.'); end
+        %if ~isfile(val), warning('Specified input file not found.'); end
         thisR.inputFile = val;
     case {'verbose'}
         thisR.verbose = val;
@@ -228,16 +235,26 @@ switch param
         subType = thisR.get('camera subtype');
         switch subType
             case {'humaneye'}
-                % For the human eye models accommodation gets baked into
-                % the lens itself
-                lensName = thisR.get('lens basename');
-                lensDir = thisR.get('lens dir output');
-                switch lensName(1:5)
-                    case 'navar'
-                        setNavarroAccommodation(thisR,val,lensDir);
-                    case 'arizo'
-                        setArizonaAccommodation(thisR,val,lensDir);
-                    case 'legra'
+                % For the human eye models accommodation is baked into
+                % the lens itself, and stored in the lens file.
+                eyeModel = thisR.get('human eye model');
+                % lensDir = thisR.get('lens dir output');
+
+                % Perhaps we should write out silently?  The lens file
+                % is always written to the lens output dir.  We used
+                % to use the functions setNavarroAccommodation and
+                % setArizonaAccommodation.  But they are now
+                % deprecated.
+                switch eyeModel
+                    case 'navarro'
+                        % The accommodation sent in by the user is
+                        % converted to a different value because TL
+                        % tested and felt that was proper.  See
+                        % comments.
+                        navarroWrite(thisR,val);
+                    case 'arizona'
+                        arizonaWrite(thisR,val);                        
+                    case 'legrand'
                         warning('The LeGrand eye does not allow accommodation adjustment.')
                     otherwise
                         error('Unknown human eye model %s',modelName);
@@ -284,7 +301,7 @@ switch param
                 % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
                 % [az, columnDescription]  = arizonaLensCreate(1);
                 thisR.camera.retinalDistance.value = val;
-                thisR.camera.focaldistance.type = 'float';
+                thisR.camera.retinalDistance.type = 'float';
 
                 % pbrt v4 does not allow this field
                 if isfield(thisR.camera,'focusdistance')
@@ -696,6 +713,18 @@ switch param
         % Set in meters. Sigh again.
         thisR.camera.filmdistance.type = 'float';
         thisR.camera.filmdistance.value = val;
+    case {'filmshapefile'}
+        % thisR.set('film shape file') = JSONFile;        
+        %
+        % Used for making arbitrary film shapes, as in the examples in
+        % the ISETBio directory retinaShape.
+        %
+        % We considered naming this filmshape.  To do that requires
+        % recompiling PBRT to look for 'filmshape' and rebuilding the
+        % Docker containers (TG/BW)
+        thisR.camera.lookuptable.type = 'string';
+        thisR.camera.lookuptable.value  = val;
+
     case {'spatialsamples','filmresolution','spatialresolution'}
         % thisR.set('spatial samples',256);
         %
@@ -751,6 +780,72 @@ switch param
         thisR.set('film',val.film);
         thisR.filter = thisR.set('filter',val.filter);
 
+    case {'medium','media'}
+        
+        % Get index and material struct from the material list
+        % Search by name or index
+        if isstruct(val)
+            % They sent in a struct
+            if isfield(val,'name'), medName = val.name;
+                % It has a name slot.
+                thisMed = thisR.medium.list(medName);
+            else
+                error('Bad struct.');
+            end
+        elseif ischar(val)
+            % It is either a special command (add, delete, replace) or
+            % the material name
+            switch val
+                case {'add'}
+                    newMed = varargin{1};
+                    
+                    if isstruct(newMed) && isfield(newMed,'medium')
+                        thisName = newMed.media.name;
+                        thisR.media.list(thisName) = newMed.material;
+                        thisR.media.order{end + 1} = thisName;
+                    else
+                        % Not part of newMat.material, just a material
+                        thisR.media.list(newMed.name) = newMed;
+                        thisR.media.order{end + 1} = newMed.name;
+                    end
+                    return;
+                case {'delete', 'remove'}
+                    % With the container/key method, we use the 'remove'
+                    % function to delete the material from the list and
+                    % from the order.  This requires using the name of the
+                    % material, not just its numeric value.  So, we get the
+                    % name.
+                    if isnumeric(varargin{1})
+                        names = keys(thisR.media.list);
+                        thisName = names(varargin{1});
+                    else
+                        thisName = varargin{1};
+                    end
+                    remove(thisR.media.list, thisName);
+                    [~,idx] = ismember(thisName,thisR.media.order);
+                    thisR.media.order(idx) = [];
+                    return;
+                case {'replace'}
+                    % thisR.set('materials',matName,'replace',newMaterial)
+                    thisR.media.list(varargin{1}) = varargin{2};
+                    [~,idx] = ismember(varargin{1},thisR.media.order);
+                    thisR.media.order{idx} = varargin{2}.name;
+                    return;
+                otherwise
+                    % Probably the material name.
+                    medName = val;
+                    thisMed = thisR.media.list(val);
+            end
+        end
+
+         % At this point we have the medium.
+        if numel(varargin{1}) == 1
+            % A material struct was sent in as the only argument.  We
+            % should check it, make sure its name is unique, and then set
+            % it.
+            thisR.media.list(medName) = varargin{1};
+        end
+        
         % Materials should be built up here.
     case {'materials', 'material'}
         % Act on the list of materials
@@ -814,12 +909,19 @@ switch param
                     end
                     return;
                 case {'delete', 'remove'}
+                    % With the container/key method, we use the 'remove'
+                    % function to delete the material from the list and
+                    % from the order.  This requires using the name of the
+                    % material, not just its numeric value.  So, we get the
+                    % name.
                     if isnumeric(varargin{1})
-                        thisR.materials.list(varargin{1}) = [];
+                        names = keys(thisR.materials.list);
+                        thisName = names(varargin{1});
                     else
-                        remove(thisR.materials.list, varargin{1})
+                        thisName = varargin{1};
                     end
-                    [~,idx] = ismember(varargin{1},thisR.materials.order);
+                    remove(thisR.materials.list, thisName);
+                    [~,idx] = ismember(thisName,thisR.materials.order);
                     thisR.materials.order(idx) = [];
                     return;
                 case {'replace'}
@@ -851,11 +953,19 @@ switch param
     case {'materialsoutputfile'}
         % Deprecated?
         thisR.materials.outputfile = val;
+        
+    case {'mediaoutputfile'}
+        % Deprecated?
+        thisR.media.outputfile = val;
 
     case {'textures', 'texture'}
-        % thisR = piRecipeDefault('scene name', 'flatSurfaceRandomTexture');
-
+        % thisR.set('texture',textureName,parameter,value);
+        % thisR.set('texture',textures
         if isempty(varargin)
+            % At this point thisR.textures has a slot for list
+            % (contains.Map) and a slot for order, a cell array of texture
+            % names.  The code here is not the right way to adjust
+            % thisR.textures.
             if iscell(val)
                 thisR.textures.list = val;
             else
@@ -917,15 +1027,16 @@ switch param
             end
         end
 
-        % At this point we have the texture.
+        % At this point we have the texture.  This code has not been used a
+        % lot and needs checking.  Maybe with Zheng's help. (BW).
         if numel(varargin{1}) == 1
-            % A material struct was sent in as the only argument.  We
+            % A texture struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
             % it.
             thisTexture = varargin{1};
             thisR.textures.list(thisTexture.name) = varargin{1};
         else
-            % A material name and property was sent in.  We set the
+            % A texture name and property was sent in.  We set the
             % property and then update the material in the list.
             thisTexture = piTextureSet(thisTexture, varargin{1}, varargin{2});
             thisR.set('textures', textureName, thisTexture);
@@ -1049,7 +1160,7 @@ switch param
                     newLightAsset.lght{1} = newLight;
                     defaultBranch = piAssetCreate('type', 'branch');
                     defaultBranch.name = [newLight.name(1:end-1), 'B'];
-                    thisR.set('asset', 'root_B', 'add', defaultBranch);
+                    thisR.set('asset', 1, 'add', defaultBranch);
                     thisR.set('asset', defaultBranch.name, 'add', newLightAsset);
                 elseif iscell(newLight)
                     for ii=1:numel(newLight)
@@ -1247,6 +1358,7 @@ switch param
                 piAssetSet(thisR, assetName, 'motion', []);
             case {'delete', 'remove'}
                 % thisR.set('asset',assetName,'delete');
+                % Do we need an 'all' option?
                 piAssetDelete(thisR, assetName);
             case {'insert'}
                 % thisR.set('asset',assetName,'insert');
@@ -1279,16 +1391,29 @@ switch param
                 else
                     error('val must be 4x4 matrix');
                 end
+            case {'size'}
+                % thisR.set('asset',assetID-Name,'size',[x y z meters]);
+                % Change the size of the asset (x,y,z) in meters
 
-                %thisR.assets.Node{id}.rotation = val;
+                % Get the current size, and then use scale to make a new
+                % size.
+                curSize = thisR.get('asset',assetName,'size');
+                thisR.set('asset',assetName,'scale',val./curSize);
+
             case {'worldrotate', 'worldrotation'}
-                % It adds rotation in the world space
+                % thisR.set('asset','assetID,'world rotate',vecDeg)
+                %
+                % Change the rotation in the world space
+                
                 % Get current rotation matrix
-                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); % Get new axis orientation
+                curRotM = thisR.get('asset', assetName, 'world rotation matrix'); 
+                
+                % Compute new axis rotation (orientation)
                 [~, rotDeg] = piTransformRotationInAbsSpace(val, curRotM);
                 
-                % BW: Removed many comments Feb 19 2022
+                % Set the rotation parameter PBRT will use
                 out = thisR.set('asset', assetName, 'rotate', rotDeg);
+
             case {'worldorientation'}
                 % curRot = thisR.get('asset', assetName, 'worldrotationangle');
                 curM = thisR.get('asset', assetName, 'worldrotationmatrix');
@@ -1375,9 +1500,13 @@ switch param
 
                 thisR.set('asset',geometryNode.name,'world rotation',wrotate);
 
-            case {'chop', 'cut'}
+            case {'subtreedelete','chop', 'cut'}
+                % thisR.set('asset',id,'subtree delete');
+                %
+                % Delete all the node and its subtree
                 id = thisR.get('asset', assetName, 'id');
                 thisR.assets = thisR.assets.chop(id);
+                thisR.assets = thisR.assets.uniqueNames;
             otherwise
                 % Set a parameter of an asset to val
                 % rotation is a parameter, but it is stopped above via the

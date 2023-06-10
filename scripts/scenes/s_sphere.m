@@ -5,7 +5,7 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
-thisR = piRecipeDefault('scene name','sphere','write', true);
+thisR = piRecipeDefault('scene name','sphere'); % ?? ,'write', true);
 
 %% Set parameters for recipe
 thisR.camera.fov.value = 50;

@@ -58,20 +58,8 @@ function material = piMaterialCreate(name, varargin)
 validmaterials = ...
     {'diffuse','coateddiffuse','coatedconductor','conductor',...
     'diffusetransmission','dielectric','thindielectric','hair', ...
-    'measured','subsurface','mix'};
-%{
-% need to check type, not name...
-if isequal(ieParamFormat(type),'listavailabletypes')
-    material = validmaterials;
-        %{
-        % V3 materials.  Now deprecated, sigh.
-        {'matte','uber','plastic','metal','mirror','glass', ...
-       'translucent','hair','kdsubsurface','disney','fourier', ...
-       'mix','substrate','subsurface'};
-        %}
-    return;
-end
-%}
+    'measured','subsurface','mix','interface'};
+
 %% Replace the space in parameters.
 
 % For example, 'rgb kd' won't pass parse with the space, but we need the
@@ -380,6 +368,10 @@ switch tp
 
         material.amount.type = 'float';
         material.amount.value = [];
+        
+    case 'interface'
+        material.type = 'interface';
+        
     otherwise
         warning('Material type: %s does not exist', tp)
         return;

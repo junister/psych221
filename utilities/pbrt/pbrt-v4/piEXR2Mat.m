@@ -19,7 +19,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 
 % tic
-if ~isMATLABReleaseOlderThan('R2022b')
+if exist('isMATLABReleaseOlderThan','builtin') && ~isMATLABReleaseOlderThan('R2022b')
     % Use Matlab builtin exrread from the image toolbox 
 
     % Matlab included exrread() in 2022b.  We included exread() in
@@ -41,9 +41,35 @@ if ~isMATLABReleaseOlderThan('R2022b')
         channels = channelname;
     end
 
-    data = exrread(inputFile, Channels=channels);
+    data = exrread(inputFile, Channels == channels);
     return;
 
+elseif isfile(fullfile(isetRootPath,'imgproc','openexr','exrread.m'))
+    
+    % Use the exrread() from ISETCam.
+    
+    if strcmpi(channelname,'radiance')
+        channels = cell(1,31);
+        for ii = 1:31
+            channels{ii} = sprintf('Radiance.C%02d',ii);
+        end
+    else
+        channels = channelname;
+    end
+    
+    channelData = exrreadchannels(inputFile, channels);
+    
+    if strcmpi(channelname,'radiance')
+        data = [];
+        for i=1:31
+            data = cat(3,data,channelData(channels{i}));
+        end
+    else
+        data = channelData;
+    end
+    
+    return;
+    
 else
 
     % Use the docker image to perform the EXR read.

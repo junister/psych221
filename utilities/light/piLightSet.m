@@ -11,9 +11,11 @@ function lght = piLightSet(lght, param, val, varargin)
 %
 % Describe
 %  The list of settable light parameters is determined by the light
-%  parameters in PBRT. That is defined on this web-page
+%  parameters in PBRT. For v3 those were defined on this web-page
 %
 %      https://www.pbrt.org/fileformat-v3.html#lights
+%
+% There isn't yet a similar list that incorporates all the changes in v4.
 %
 % Here is a partial list and there are some examples below.  We seem to be
 % missing the 'Projection' light type from our use cases (BW).

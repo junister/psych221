@@ -342,6 +342,10 @@ for ii = 1:numel(children)
         % if this is an arealight or object without a reference object
         if writeGeometryFlag || isempty(referenceObjectExist)
             [rootPath,~] = fileparts(outFilePath);
+
+            % We have a cross-platform problem here?
+            %[p,n,e ] = fileparts(thisNode.shape{1}.filename);
+            %thisNode.shape{1}.filename = fullfile(p, [n e]);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing);
             fprintf(fid,'\n');
         else
@@ -411,7 +415,7 @@ end
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing)
 
 if ~isempty(thisNode.mediumInterface)
-    fprintf(fid, strcat(spacing, indentSpacing, "MediumInterface ", '"', thisNode.mediumInterface, '" ','""', '\n'));
+    fprintf(fid, strcat(spacing, indentSpacing, sprintf("MediumInterface ""%s"" ""%s""\n", thisNode.mediumInterface.inside, thisNode.mediumInterface.outside)));
 end
 
 % Write out material
@@ -421,6 +425,7 @@ for nMat = 1:numel(thisNode.material) % object can contain multiple material and
     else
         material = thisNode.material;
     end
+    
     try
         fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
             material.namedmaterial, '"', '\n'));

@@ -14,9 +14,6 @@ function thisR = piRecipeDefault(varargin)
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name based on the directory.
-%      (e.g., MacBethChecker (default), SimpleScene, slantedBar,
-%          chessSet, teapot, numbers at depth. materialball,
-%          materialball_cloth)
 %   file  - The name of a file in the scene directory.  This is used
 %   because some PBRT have multiple files from different points of
 %   view.  We always have a default, but if you want one of the other
@@ -34,15 +31,14 @@ function thisR = piRecipeDefault(varargin)
 
 % Examples:
 %{
- thisR = recipe;
- thisR.list;
+ recipe.list;
 %}
 %{
-   thisR = piRecipeDefault; piWRS(thisR);
+ thisR = piRecipeDefault; piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','SimpleScene');
-   piWRS(thisR);
+ thisR = piRecipeDefault('scene name','SimpleScene');
+ piWRS(thisR);
 %}
 %{
    thisR = piRecipeDefault('scene name','checkerboard');
@@ -116,7 +112,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'mccCB';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-
+    case {'flashcards'}
+        sceneDir = 'flashCards';
+        sceneFile = [sceneDir,'.pbrt'];
+        exporter = 'PARSE';
     case 'whiteboard'
         sceneDir = 'WhiteBoard';
         sceneFile = [sceneDir,'.pbrt'];
@@ -258,11 +257,6 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'snellenAtDepth';
         sceneFile = ['snellen','.pbrt'];
         exporter = 'Copy';
-    case 'numbersatdepth'
-        sceneDir = 'NumbersAtDepth';
-        sceneFile = ['numbersAtDepth','.pbrt'];
-        % mmUnits = true;
-        exporter = 'Copy';
     case 'lettersatdepth'
         sceneDir = 'lettersAtDepth';
         sceneFile = [sceneDir,'.pbrt'];
@@ -272,12 +266,12 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'PARSE';  % Working towards PARSE
+        exporter = 'PARSE';  % Mostly OK.  Not sure all OK.
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
-        % exporter = 'Copy';
-        exporter = 'PARSE';
+        exporter = 'Copy';
+        % exporter = 'PARSE';  % Does not work yet.
     case {'landscape'}
         sceneDir = 'landscape';
         if isempty(sceneFile)
@@ -378,8 +372,6 @@ switch ieParamFormat(sceneDir)
         exporter = 'Copy';
         
         % End V3 to deprecate or update
-
-
         
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
@@ -424,6 +416,7 @@ thisR.set('exporter',exporter);
 [~,n,e] = fileparts(fname);
 outFile = fullfile(piRootPath,'local',sceneDir,[n,e]);
 thisR.set('outputfile',outFile);
+thisR.set('name',sceneDir);
 
 % Set defaults for very low resolution (for testing)
 thisR.integrator.subtype = 'path';

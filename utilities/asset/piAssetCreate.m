@@ -43,7 +43,7 @@ n = piAssetCreate('type','marker')
 
 %%
 p = inputParser;
-p.addParameter('type', 'branch', @(x)(ismember(x,{'branch','object','light','marker'})));
+p.addParameter('type', 'branch', @(x)(ismember(x,{'branch','object','light','marker','trianglemesh'})));
 p.parse(varargin{:});
 
 type = p.Results.type;
@@ -98,6 +98,20 @@ switch ieParamFormat(type)
             1 0 0];
         obj.concattransform=[];
         obj.motion = [];
+    case 'trianglemesh'
+        obj.meshshape = 'trianglemesh';
+        obj.filename = '';
+        obj.integerindices = [];
+        obj.point3p = [];
+        obj.point2uv = [];
+        obj.normaln = [];
+        obj.height = '';
+        obj.radius = '';
+        obj.zmin = '';
+        obj.zmax = '';
+        obj.p2 = '';
+        obj.phimax = '';
+        obj.alpha = '';
     otherwise
         error('Unknown asset type %s\n',type);
 end

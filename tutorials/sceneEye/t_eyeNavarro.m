@@ -58,20 +58,15 @@ thisSE.set('use pinhole',true);
 thisSE.set('fov',30);             % Degrees
 
 % Render the scene
+thisSE.recipe.set('render type', {'radiance','depth'});
 
-% For now, this is the only docker wrapper that should work for the
-% human eye model.
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
+%% Render as a scene with the GPU docker wrapper
 
-thisSE.recipe.set('render type', {'radiance'});
+thisDocker = dockerWrapper;
+scene = thisSE.piWRS('docker wrapper',thisDocker,'name','pinhole');
 
-%%
-scene = thisSE.render('docker wrapper',thisDWrapper);
-
-sceneWindow(scene);   
+% scene = thisSE.render('docker wrapper',thisDWrapper);
+% sceneWindow(scene);   
 
 thisSE.summary;
 
@@ -105,45 +100,23 @@ thisSE.set('to',toB); distB = thisSE.get('object distance');
 thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
-% This is the distance we set our accommodation to that. Try distC + 0.5
-% and then distA.  At a resolution of 512, I can see the difference.  I
-% don't really understand the units here, though.  (BW).
-%
-% thisSE.set('accommodation',1/(distC + 0.5));  
-
-thisSE.set('object distance',distC);  
-
 % We can reduce the rendering noise by using more rays. This takes a while.
 thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',256);     
+thisSE.set('spatial samples',384);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
 
 %% This takes longer than the pinhole rendering
 
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
+% Set the accommodation distance to match the distance to the A
+thisSE.set('accommodation',1/distA);  
 
-%{
-% A lot of debugging to clean up iset3d-v4 this way.
- piWrite(thisSE.recipe);
- [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
-%}
-
-% Runs on the CPU on mux for humaneye case.
-oi = thisSE.render('docker wrapper',thisDWrapper);
-
-% thisSE.get('lens file')
-
-%% Have a look.  Lots of things you can plot in this window.
-oiWindow(oi);
+% Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
 
 % Summarize
 thisSE.summary;
@@ -152,12 +125,10 @@ thisSE.summary;
 
 thisSE.set('accommodation',1/distC);  
 
-% This changes the distance to the camera.
-% thisSE.set('object distance',distA);  
+% Default renderer for sceneEye is humanEyeDocker, so try just the
+% default.  Should also work. 
+thisSE.piWRS('name','navarro-C');
 
-[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
-oiWindow(oi);
 thisSE.summary;
-
 
 %% END

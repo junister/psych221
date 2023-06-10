@@ -1,5 +1,5 @@
 function  setPrefs(varargin)
-% Set the Matlab prefs (getpref('docker')) variables.
+% Set a Matlab pref (getpref('docker')) variables.
 %
 % Syntax
 %    dockerWrapper.setPrefs(varargin)
@@ -8,6 +8,11 @@ function  setPrefs(varargin)
 %  Interface to Matlab setpref(), getpref().  The Matlab prefs are
 %  persistent across Matlab sessions.  When these parameters are changed,
 %  dockerWrapper.reset() is called.
+%
+% If you call this with no arguments, nothing happens.  The general
+% call should be 
+%
+%    dockerWrapper.setPrefs('remoteImage','YOUR IMAGE HERE');
 %
 % Inputs
 %   N/A
@@ -37,13 +42,17 @@ function  setPrefs(varargin)
 %                     dockerWrapper code.
 %
 % Return
-%   Changes the Matlab prefs
+%   No return.  Changes the Matlab prefs.  To see the new prefs use
+%
+%      dockerWrapper.getPrefs
 %
 % Notes
 %   developed to replace dockerWrapper.setParams
 %
 % See also
 %   dockerWrapper.getPrefs;  
+
+%% Parse
 
 p = inputParser;
 p.addParameter('verbosity','',@isnumeric);
@@ -65,7 +74,7 @@ p.addParameter('localImageTag','',@ischar);
 p.addParameter('localVolumePath','',@ischar);
 p.parse(varargin{:});
 
-
+%%
 % Interface
 if ~isempty(p.Results.verbosity)
     setpref('docker','verbosity', p.Results.verbosity);

@@ -95,16 +95,25 @@ for ii = 1:numel(label)
             % For the 'label' case, we seem to go here and this is empty.
             % Not sure why.
             if isempty(energy)
-                break;
-            end
-            
-            if isempty(find(energy(:,:,17),1))
-                energy = energy(:,:,1:16);
-                data_wave = 400:20:700;
-            else
+                error('No energy term returned.');
+            elseif ismatrix(energy)
+                % For some cases we have only a single row, such as
+                % the film shape case.
                 data_wave = 400:10:700;
+                [space,w] = size(energy);
+                % Always return as a row
+                energy = reshape(energy,1,space,w);
+                photons  = Energy2Quanta(data_wave,energy);
+            else
+                if isempty(find(energy(:,:,17),1))
+                    % Chromatic aberration only goes up to 16 wavebands.
+                    energy = energy(:,:,1:16);
+                    data_wave = 400:20:700;
+                else
+                    data_wave = 400:10:700;
+                end
+                photons  = Energy2Quanta(data_wave,energy);
             end
-            photons  = Energy2Quanta(data_wave,energy);
 
         case {'depth', 'zdepth'}
             try
