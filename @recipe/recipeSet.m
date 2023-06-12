@@ -702,8 +702,8 @@ switch param
         % Default units are millimeters.
         opticsType = thisR.get('camera subtype');
         switch opticsType
-            case 'pinhole'
-                warning('Film diagonal is irrelevant for pinhole.');
+            case {'pinhole','humaneye'}
+                disp('Film diagonal not used for pinhole and human eye');
             otherwise
                 thisR.film.diagonal.type = 'float';
                 thisR.film.diagonal.value = val;

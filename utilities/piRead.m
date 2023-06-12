@@ -320,13 +320,13 @@ if(isfield(thisR.film,'filename'))
     thisR.film = rmfield(thisR.film,'filename');
 end
 
-% Some PBRT files do not specify the film diagonal size.  We set it to
-% 1mm here.
+% Some PBRT files do not specify the film diagonal size.  We do not
+% need the film diagonal for pinhole cameras. We set it to 10mm here,
+% which is typically quite large.
 try
     thisR.get('film diagonal');
 catch
-    disp('Setting film diagonal size to 1 mm');
-    thisR.set('film diagonal',1);
+    thisR.set('film diagonal',10);
 end
 
 % Extract transform time block

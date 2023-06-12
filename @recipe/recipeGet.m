@@ -1110,18 +1110,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         %
         % A pinhole camera can store a film diagonal size in mm. But that
         % value is not used in the rendering.  It is only used by ISET3d so
-        % to calculate units for the sample spacing.
-        opticsType = thisR.get('optics type');
-        switch opticsType
-            case {'pinhole','humaneye'}
-                % warning('Film diagonal not used for PBRT pinhole and human eye rendering.')
-            otherwise
-        end
-        if isfield(thisR.film,'diagonal'), val = thisR.film.diagonal.value;
-        else
-            warning('Setting film diagonal to 10mm');
-            val = 10; 
-            thisR.set('film diagonal',val);            
+        % to calculate units for the sample spacing.        
+        if isfield(thisR.film,'diagonal')
+            val = thisR.film.diagonal.value;          
         end
 
         % By default the film diagonal is stored in mm.  So we scale to

@@ -28,7 +28,8 @@ if ~piDockerExists, piDockerConfig; end
 %% Initialize a default recipe for a simple scene
 
 % This the a simple scene with a variety of objects
-thisR = piRecipeDefault('scene name','SimpleScene');
+% thisR = piRecipeDefault('scene name','SimpleScene');
+thisR = piRecipeCreate('SimpleScene');
 
 % By default, the camera type for this scene is a 'perspective', which
 % means a pinhole camera. We'll display its properties here.
@@ -52,17 +53,20 @@ thisR.set('n bounces',5);
 %% Set up the lights and scene.
 thisR.show('lights')
 
-thisR.set('light','MoonLight_L','delete');
-thisR.set('light','Sky1_L','delete');
-thisR.set('light','_L','delete');
-thisR.set('light','Sunlight_L','delete');
+idx = piAssetSearch(thisR,'light','MoonLight');
+thisR.set('light',idx,'delete');
 
+idx = piAssetSearch(thisR,'light','Sky1');
+thisR.set('light',idx,'delete');
+
+idx = piAssetSearch(thisR,'light','Sunlight');
+thisR.set('light',idx,'delete');
+
+%% Add the skymap light
 thisR.set('skymap','room.exr');
 thisR.set('light','room_L','specscale',0.03);
-
 thisR.show('objects');
-%thisR.set('asset','001_glass_O','delete');
-% thisR.set('asset','001_mirror_O','delete');
+
 scene = piWRS(thisR);
 sceneWindow(scene);
 
@@ -81,15 +85,6 @@ thisR.get('fov')
 
 %% Write, render and denoise
 
-[oi, res] = piWRS(thisR);
-
-% piWrite(thisR);
-% oi = piRender(thisR);
-
-% show the result
-% oiWindow(oi);
-
-% If you are running with ISETBio, there is no render flag.  Yet.
-if piCamBio, oiSet(oi,'render flag','hdr'); end
+oi = piWRS(thisR);
 
 %% END
