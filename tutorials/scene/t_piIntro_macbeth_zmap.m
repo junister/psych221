@@ -3,9 +3,8 @@
 % Description:
 %   The zmap differs from the depth map.  It is the z-coordinate, not
 %   the distance from the camera to the point.
-%
-%   See t_piIntro_macbeth to calculate the depth map rather than the
-%   zmap, and how to compute an illumination map.
+%    
+%   We render both depth and coordinates here and compare them.
 % 
 %  
 % Index numbers for MacBeth color checker:
@@ -26,73 +25,38 @@
 % Author:
 %   ZLY, BW, 2020
 
-% History:
-%   10/28/20  dhb  Comments said this rendered an illuminant image, but it
-%                  doesn't.  Removed those comments, and point to
-%                  p_piIntro_macbeth for illumination map.
 
 %% init
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the recipe
-thisR = piRecipeDefault('write',false);
-
-%% Change the light
-
-% There is a default point light.  We delete that.
-%{
-    thisR.get('light print');
-%}
-thisR.set('light', 'all', 'delete');
-
-% Add an equal energy distant light
-lName = 'new dist light';
-lightSpectrum = 'equalEnergy';
-
-newDistLight = piLightCreate(lName,...
-                            'type', 'distant',...
-                            'spd', lightSpectrum,...
-                            'cameracoordinate', true);
-thisR.set('light', newDistLight, 'add');                        
+% thisR = piRecipeDefault('scene name','chessset');
+thisR = piRecipeCreate('macbeth checker');
+                      
 %% Set rendering parameters 
 
 thisR.set('integrator subtype','path');
 thisR.set('pixelsamples', 16);
 thisR.set('filmresolution', [640, 360]);
-thisR.set('film render type',{'radiance','depth'});
+thisR.set('film render type',{'radiance','depth','coordinates'});
 
-%% Write and render
-piWrite(thisR, 'overwritematerials', true);
+% Move the camera closer
+thisR.set('object distance',0.5);
 
-% This case uses the default docker image, that does not incorporate
-% fluorescence rendering.  'all' means the illuminant, depth, and
-% radiance. Here we just render the radiance image.
-[scene,  result] = piRender(thisR); %#ok<ASGLU>
-sceneWindow(scene);
+scene = piWRS(thisR);
+rect = [71     2   489   342];
+scene = sceneCrop(scene,rect);
 
-thisR.lookAt.from = [0.1 0.05 -4];
+%% Compare the z map and the depth map
 
-piWrite(thisR);
-[scene, result] = piRender(thisR);
-% Compute the zmap.
-%
-% Start by doing a rendering that returns the Z 3D coordinates of the visible
-% surfaces.
-[sceneWithDepth, result] = piRender(thisR, 'render type',{'coordinates'});
+ieNewGraphWin([],'wide');
+dmap = sceneGet(scene,'depth map');
+coords = scene.metadata.coordinates;
+zmap = imcrop(coords(:,:,3),rect);
 
-% Get where camera is looking from
-cameraCoord = thisR.lookAt.from;
+subplot(1,2,1); mesh(dmap);  view(-180,90); axis equal; colorbar; subtitle('Distance')
+subplot(1,2,2); mesh(zmap); view(-180,90); axis equal; colorbar; subtitle('Z-coord')
 
-% Compute the zmap -- Note that we currently only get 1D coordinates. Not
-% sure why?
-zmap = sceneWithDepth.depthMap - cameraCoord(3);
-
-%% Call this the 'depth map' and plot.
-%
-%  The z-map is flat.  The depth map is curved
-scene = sceneSet(scene,'depthmap',zmap);
-scenePlot(scene,'depth map');
-title('Z Map');
-
+%% End
 

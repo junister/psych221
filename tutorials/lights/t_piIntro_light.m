@@ -33,13 +33,13 @@ thisR = piRecipeDefault('scene name','checkerboard');
 %% Check the light list that came with the scene
 
 % To summarize the lights use this
-thisR.get('light print');
+lNames = thisR.get('light print');
 
 % We can get a specific light by its name
-thisR.get('light', 'distant_light_L')
+thisR.get('light', lNames{1})
 
 % Or we can get the light from its index (number) in this list.
-idx = piAssetSearch(thisR,'light name','distant_light');
+idx = piAssetSearch(thisR,'light name',lNames{1});
 thisR.get('light', idx)
 
 %% Remove all the lights

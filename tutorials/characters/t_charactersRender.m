@@ -25,8 +25,8 @@ ourString = 'BaF';
 
 %  'material_name','brickwall001',
 %  'material_name','diffuse-red'
-thisR = charactersRender(thisR, ourString, ...
-    'distance', 15, 'material_name','brickwall001', scaleLetter=.5);
+thisR = textRender(thisR, ourString, ...
+    'letterPosition', [0, 0, 0], 'letterMaterial','brickwall001');
 
 %idx = piAssetSearch(thisR,'object name','3_O');
 %thisR.set('asset',idx,'world position',[0 0 -1]);

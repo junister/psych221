@@ -66,6 +66,9 @@ p.addParameter('remoteImageTag','',@ischar);
 p.addParameter('remoteRoot','',@ischar);
 p.addParameter('remoteRender','',@islogical);  % Inverted form of localRender
 
+% for using shared resources
+p.addParameter('remoteResources','',@islogical);
+
 p.addParameter('renderContext','',@ischar);
 
 p.addParameter('localRoot','',@ischar);
@@ -113,6 +116,9 @@ end
 if ~isempty(p.Results.remoteMachine)
     setpref('docker', 'remoteMachine', p.Results.remoteMachine);
 end
+if ~isempty(p.Results.remoteResources)
+    setpref('docker', 'remoteResources', p.Results.remoteResources);
+end
 
 % Local rendering parameters
 if ~isempty(p.Results.localRoot)
@@ -131,7 +137,7 @@ if ~isempty(p.Results.localRender)
     % logical variables, default's to false.
     setpref('docker', 'localRender', p.Results.localRender);
     if p.Results.localRender
-        if getpref('docker','gpuRendering')
+        if getpref('docker','gpuRendering','')
             disp('Set for local GPU rendering.')
         else
             disp('Set for local CPU rendering.');

@@ -1,4 +1,4 @@
-function piMaterialWrite(thisR)
+function piMaterialWrite(thisR, varargin)
 % Write the contents of the _material file
 % Synopsis:
 %   piMaterialWrite(thisR)
@@ -25,7 +25,8 @@ function piMaterialWrite(thisR)
 %%
 p = inputParser;
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-p.parse(thisR);
+p.addParameter('remoteresources', false);
+p.parse(thisR, varargin{:});
 
 %% Create txtLines for texture struct array
 
@@ -49,7 +50,8 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     TextureTex = [];
     textureTxt = [];
     for ii = 1:numel(textureKeys)
-        tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR);
+        tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR, ...
+            'remoteresources', p.Results.remoteresources);
         if piContains(tmpTxt,'texture tex')
             % This texture has a property defined by another texture
             TextureTex{tt} = tmpTxt;
@@ -84,7 +86,7 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     end
     for ii=1:length(materialTxt)
         % Converts the material struct to text
-        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);
+        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR, 'remoteresources', p.Results.remoteresources);
         matTypeList{ii} = thisR.materials.list(materialKeys{ii}).type;
     end
 else
@@ -99,7 +101,7 @@ nonMixMaterialText = materialTxt(~mixMatIndex);
 
 %% Write the texture and material information into scene_material.pbrt
 output = thisR.get('materials output file');
-fileID = fopen(output,'w');
+fileID = fopen(output,'W');
 fprintf(fileID,'# Exported by piMaterialWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
 
 if ~isempty(textureTxt)

@@ -44,6 +44,9 @@ switch dataType
         output = piEXR2Mat(filename, 'Radiance');
     case "zdepth"
         output = piEXR2Mat(filename, 'Pz');
+    case "alldepth"
+          allDepthMap = piEXR2Mat(filename, ['Px', 'Py', 'Pz']);
+          output = sqrt(allDepthMap.^2);
     case "depth"
         % We only want to sum the depths that we have, so we need to 
         % look for errors when we retrieve each one

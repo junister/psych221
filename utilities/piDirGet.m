@@ -7,7 +7,7 @@ function resourceDir = piDirGet(resourceType)
 % Input
 %   resourceType - One of
 %     {'data','assets', 'lights', 'imageTextures', 
-%     'lens', 'scenes','local',
+%     'lens', 'scenes','local', 'resources',
 %     'server local', 'character-assets', 'character-recipes'}
 %
 % Output
@@ -33,7 +33,7 @@ function resourceDir = piDirGet(resourceType)
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
     'scenes','scene','local','server local', 'character-assets', ...
-    'character-recipes','skymaps'};
+    'character-recipes','skymaps','resources'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -70,7 +70,10 @@ switch (resourceType)
         if piCamBio
             resourceDir = fullfile(isetRootPath,'data','lens');
         else
-            warning('Lenses are in isetcam/data/lens. We need a strategy for isetbio.  Use a human eye model. Returning empty');
+            % May 2023.  Put lenses in isetbio/isettools/data/lens
+            % I now prefer a strategy where use all of ISETCam for scene
+            % and optics.
+            resourceDir = fullfile(isetRootPath,'data','lens');
         end
 
     case {'scenes','scene'}
@@ -88,6 +91,9 @@ switch (resourceType)
     case 'server local'
         % should really be someplace else!
         resourceDir = '/iset/iset3d-v4/local'; % default
+    case 'resources'
+        % default for Vistalab, other sites need to change
+        resourceDir =  getpref('docker','resourceLocation','/acorn/data/iset/Resources');
 end
 
 

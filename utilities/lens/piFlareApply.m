@@ -5,7 +5,11 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %   [opticalImage, aperture]  = piFlareApply(scene, varargin)
 %
 % Brief description:
-%   Apply a 'flare' PSF to a scene and generate an optical image.
+%   Apply a 'scattering flare' PSF to a scene and generate an optical
+%   image. 
+%
+%   The scattering flare is implemented based on the paper "How to
+%   Train Neural Networks for Flare Removal" by Wu et al.
 %
 % Inputs:
 %   scene: An ISET scene structure.
@@ -16,19 +20,32 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %  pixel size
 %  max luminance
 %  sensor size
-%  dirt aperture
 %  dirty level
 %
 % Output:
 %   opticalImage: An ISET optical image structure.
 %   aperture:  Scratched aperture
-%   psf_spectral -
+%   psf_spectral - Spectral point spread function
 %
 % Description
-%   The paper "How to Train Neural Networks for Flare Removal" by Wu et al.
+%   The scattering flare is implemented as perturbations on the pupil
+%   function (wavefront).  We have several ideas to implement to
+%   extend the flare modeling
 %
+%      * Can we take in an OI and apply the flare to that?  How would
+%      that work? Maybe we should compute the Pupil function from any
+%      OI by estimating the point spread function and then deriving
+%      the Pupil function (psf = abs(fft(pupil)).  We can't really
+%      invert because of the abs, but maybe approximate?
+%      * We should implement additional regular wavefront aberration
+%      patterns, not just random scratches
+%      * We should implement wavelength-dependent scratches. Now
+%      the impact of the scratches is the same at all wavelengths
+%      * Accept a geometric transform and apply that to if we start
+%      with a scene.
+%      
 % See also
-%   
+%   opticsDLCompute, opticsOTF (ISETCam)
 
 % Examples:
 %{
@@ -39,24 +56,34 @@ scene = sceneSet(scene, 'distance',0.05);
 sceneSampleSize = sceneGet(scene,'sample size','m');
 [oi,pupilmask, psf] = piFlareApply(scene,...
                     'psf sample spacing', sceneSampleSize, ...
-                    'numsidesaperture', 100, ...
-                    'psfsize', 512, 'dirtylevel',0.5);
+                    'numsidesaperture', 10, ...
+                    'fnumber',5, 'dirtylevel',0);
 
-ip = piOI2IP(oi,'etime',1/100);
+ip = piOI2IP(oi,'etime',1/10);
+ipWindow(ip);
+
+% defocus
+[oi,pupilmask, psf] = piFlareApply(scene,...
+                    'psf sample spacing', sceneSampleSize, ...
+                    'numsidesaperture', 10, ...
+                    'fnumber',5, 'dirtylevel',0,...
+                    'defocus term',2);
+
+ip = piOI2IP(oi,'etime',1/10);
 ipWindow(ip);
 %}
-%%
-% Calculate the PSF using the complex pupil method.  This allows us to
-% calculate the PSF with arbitrary aberrations that can be modeled as
-% optical path difference in the pupil.
+
+%% Calculate the PSF using the complex pupil method.  
+%
+% The calculation enables creating a PSF with arbitrary wavefront
+% aberrations. These are optical path differences (OPD) in the pupil.
+
 %% Parse input
 varargin = ieParamFormat(varargin);
 p = inputParser;
 
 p.addRequired('scene', @(x)isequal(class(x),'struct'));
 p.addParameter('psfsamplespacing',0.25e-6); % PSF sample spacing (m)
-p.addParameter('pupilimagewidth', 1024); % square image is used (pixels)
-p.addParameter('psfsize',0); % output psf size (pixels)
 
 % number of blades for aperture, 0 for circular aperture.
 p.addParameter('numsidesaperture',0);
@@ -66,37 +93,33 @@ p.addParameter('dirtylevel',0);       % Bigger number is more dirt.
 p.addParameter('fnumber', 5); % F-Number
 
 % some parameters for defocus
-p.addParameter('objectdistance', 1.0); % object distance in meters.
-p.addParameter('focusdistance', 1.0); % focus distance in meters.
-p.addParameter('sensoroffset', 0); % sensor offset from main lens in meters
+p.addParameter('defocusterm', 0); % Zernike defocus term
 
 p.addParameter('wavelist', 400:10:700, @isnumeric); % (nm)
 
 p.parse(scene, varargin{:});
 
 psfsamplespacing = p.Results.psfsamplespacing;
-focusDistance    = p.Results.focusdistance;
-objectDistance   = p.Results.objectdistance;
-sensorOffset     = p.Results.sensoroffset;
-pupilImageWidth  = p.Results.pupilimagewidth;
-psfOutSize       = p.Results.psfsize;
+
 numSidesAperture = p.Results.numsidesaperture;
 dirtylevel       = p.Results.dirtylevel;
 focalLength      = p.Results.focallength;
 fNumber          = p.Results.fnumber;
 
-% normalizePSF     = p.Results.normalizePSF;
+defocusTerm      = p.Results.defocusterm;
 waveList         = p.Results.wavelist;
 
 pupilDiameter   = focalLength / fNumber; % (m)
 
-%%
+%% Starting with a scene, create an initial oi
+
+% This code follows the logic in ISETCam routines 
+%    opticsDLCompute and opticsOTF
 [sceneHeight, sceneWidth, ~] = size(scene.data.photons);
-
 oi = piOICreate(scene.data.photons, 'focalLength', focalLength, 'fNumber', fNumber);
-
 oi = oiSet(oi,'photons',oiCalculateIrradiance(scene,oi));
 
+% Apply some of the oi methods to the initialized oi data
 offaxismethod = opticsGet(oi.optics,'off axis method');
 switch lower(offaxismethod)
     case {'skip','none',''}
@@ -118,65 +141,80 @@ oiHeight = oiSize(1); oiWidth = oiSize(2);
 
 oi = oiSet(oi, 'wAngular', 2*atand((oiWidth*psfsamplespacing/2)/focalLength));
 
-% Generate dirty aperture mask
+%% Generate scratch and dirty markings in the aperture mask
+
+% We now have an oi.  We use its parameters to create an wavefront
+% aberration arising from scratches.  Below here we need
+%
+%  oiWidth, oiHeight, imgSize, 
+
 if dirtylevel>0
     if oiWidth>oiHeight
         imgSize = oiWidth;
     else 
         imgSize = oiHeight;
     end
-    dirtyApertrue = RandomDirtyAperture(imgSize, dirtylevel); % crop this into scene size
+    dirtyAperture = RandomDirtyAperture(imgSize, dirtylevel); % crop this into scene size
 end
 
-for ww = 1:numel(waveList)
+% We should add different methods to change the mask, beyond dirty.  They
+% might go here.  The dirtyAperture might end up being a spectral function.
+
+% For each wavelength, apply the dirty mask
+nWave = numel(waveList);
+for ww = 1:nWave
+
+    % Wavelength in meters
     wavelength = waveList(ww) * 1e-9; % (m)
 
+    % Set up the pupil function
     pupilSampleStepX = 1 / (psfsamplespacing * oiWidth) * wavelength * focalLength;
-
-    pupilSupportX = (-0.5: 1/oiWidth: 0.5-1/oiWidth) * pupilSampleStepX * oiWidth;
-    
+    pupilSupportX = (-0.5: 1/oiWidth: 0.5-1/oiWidth) * pupilSampleStepX * oiWidth;    
     pupilSampleStepY = 1 / (psfsamplespacing * oiHeight) * wavelength * focalLength;
     pupilSupportY = (-0.5: 1/oiHeight: 0.5-1/oiHeight) * pupilSampleStepY * oiHeight;
-
     [pupilX, pupilY] = meshgrid(pupilSupportX, pupilSupportY);
 
     pupilRadius = 0.5*pupilDiameter;
 
     pupilRadialDistance = sqrt(pupilX.^2 + pupilY.^2);
-    %% wavefront aberration for defocus
-    W2_object = -( sqrt(focusDistance^2 - pupilDiameter.^2/4 ) ...
-        - sqrt( objectDistance.^2 - pupilDiameter^2/4 ) - ...
-        (focusDistance - objectDistance) );
 
-    W2_image = sensorOffset / (8*fNumber^2);
 
+    % Valid parts of the pupil
     pupilMask = pupilRadialDistance <= pupilRadius;
-
     if numSidesAperture>0
-        maskDiamter = find(pupilMask(oiWidth/2,:));
+        maskDiamter = find(pupilMask(oiHeight/2,:));
         centerPoint = [oiWidth/2+1,oiHeight/2+1];
-        % create n sides polygon
+        % create n-sided polygon
         pgon1 = nsidedpoly(numSidesAperture, 'Center', centerPoint, 'radius', floor(numel(maskDiamter)/2));
         % create a binary image with the polygon
-        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), oiWidth, oiHeight);
+        pgonmask = poly2mask(floor(pgon1.Vertices(:,1)), floor(pgon1.Vertices(:,2)), oiHeight, oiWidth);
         pupilMask = pupilMask.*pgonmask;
     end
     
+    % Apply the dirtyAperture to the pupilMask (which starts as all 1s)
     if dirtylevel>0
-        pupilMask = pupilMask .* imresize(dirtyApertrue,[oiHeight, oiWidth]);
+        pupilMask = pupilMask .* imresize(dirtyAperture,[oiHeight, oiWidth]);
     end
 
     pupilRho = pupilRadialDistance./pupilRadius;
+    % ----------------Comments From Google Flare Calculation---------------
+    % Compute the Zernike polynomial of degree 2, order 0. 
+    % Zernike polynomials form a complete, orthogonal basis over the unit disk. The 
+    % "degree 2, order 0" component represents defocus, and is defined as (in 
+    % unnormalized form):
+    %
+    %     Z = 2 * r^2 - 1.
+    %
+    % Reference:
+    % Paul Fricker (2021). Analyzing LASIK Optical Data Using Zernike Functions.
+    % https://www.mathworks.com/company/newsletters/articles/analyzing-lasik-optical-data-using-zernike-functions.html
+    % ---------------------------------------------------------------------
+    wavefront = zeros(size(pupilRho)) + defocusTerm*(2 * pupilRho .^2 - 1);
 
-    % For defocus, the OPD is defined as a parabolic phase shift that gets
-    % multiplied into the pupil mask.
-    wavefront_object = W2_object.*pupilRho.^2/wavelength;
-    wavefront_image = W2_image.*pupilRho.^2/wavelength;
-
-    Wavefront = wavefront_image + wavefront_object;
-    phase_term = exp(1i*2 * pi .*Wavefront);
+    phase_term = exp(1i*2 * pi .* wavefront);
     OPD = phase_term.*pupilMask;
 
+    % Calculate the PSF from the pupil function
     psfFnAmp = fftshift(fft2(ifftshift(OPD)));
     inten = psfFnAmp .* conj(psfFnAmp);    % unnormalized PSF.
     shiftedPsf = real(inten);
@@ -184,17 +222,30 @@ for ww = 1:numel(waveList)
     PSF = shiftedPsf./sum(shiftedPsf(:));
     PSF = PSF ./ sum(PSF(:));
 
+    % Now we know the size of PSF.  Allocate space
+    if ww == 1
+        sz = size(PSF);
+        psf_spectral = zeros(sz(1),sz(2),nWave);
+        photons_fl   = zeros(sz(1),sz(2),nWave);
+    end
+
     psf_spectral(:,:,ww) = PSF;
 
-    %% apply psf to scene
+    % Apply the psf to scene data, creating the OI data
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
 
 oi = oiSet(oi,'photons',photons_fl);
+scene_size = sceneGet(scene,'size');
+oi_size = oiGet(oi,'size');
 
-illuminance = oiCalculateIlluminance(oi);
-oi = oiSet(oi,'illuminance',illuminance);
+% crop oi to remove extra edge
+oi = oiCrop(oi, [(oi_size(2)-scene_size(2))/2,(oi_size(1)-scene_size(1))/2, ...
+    scene_size(2)-1, scene_size(1)-1]);
+
+% Compute illuminance, though not really necessary
+oi = oiSet(oi,'illuminance',oiCalculateIlluminance(oi));
 
 end
 

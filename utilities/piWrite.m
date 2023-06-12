@@ -1,53 +1,77 @@
 function workingDir = piWrite(thisR,varargin)
 % Write a PBRT scene file based on its renderRecipe
 %
+% Brief
+%   Write the scene PBRT files from the recipe (thisR). By default they are
+%   written to the local/sceneName directory. 
+%
 % Syntax
 %   workingDir = piWrite(thisR,varargin)
-%
-% The pbrt scene file and all the relevant resource files (geometry,
-% materials, spds, others) are written out in a working directory. These
-% are the files that will be mounted by the docker container and used by
-% PBRT to create the radiance, depth, mesh metadata outputs.
-%
-% There are multiple options as to whether or not to overwrite files that
-% are already present in the output directory.  The logic and conditions
-% about these overwrites is quite complex right now, and we need to
-% simplify.
-%
-% In some cases, multiple PBRT scenes use the same resources files.  If you
-% know the resources files are already there, you can set
-% overwriteresources to false.  Similarly if you do not want to overwrite
-% the pbrt scene file, set overwritepbrtfile to false.
 %
 % Input
 %   thisR: a recipe object describing the rendering parameters.
 %
 % Optional key/value parameters
-%
-%   verbose -- how chatty we are
+%   remote resources - Use the remote resources on the server (boolean,
+%     default false, can be set using
+%         setpref('docker','remoteResources',true or false)
+%   verbose -- how chatty to be in this routine.
 %
 % Return
 %    workingDir - path to the output directory mounted by the Docker
-%                 container.  This return is not necessary, however,
-%                 because it is in the recipe as: thisR.get('output dir')
+%                 container.  This return is not necessary.
+%                 The direction is set in the recipe:
+%        thisR.get('output dir')
+%
+% Description
+%
+% In the original implementation, which still runs, the pbrt scene file and
+% all the relevant resource files (geometry, materials, spds, others) are
+% written out in a working directory. During rendering, these files are
+% mounted by the docker container and used by PBRT to create the radiance,
+% depth, mesh metadata outputs. 
+% 
+% We have now implemented a second approach based on the idea that there is
+% a central, shared, rendering machine.  If the user sets the 'remote
+% resources' option to true, we assume that the necessary asset files
+% (objects, skymaps, others) are present on the remote server. Thus, there
+% is little copying. Only, the scene PBRT file and the _geometry and _material
+% files are copied over. The remote assets are in the subdirectories that
+% are mounted by the remote Docker container.
+%
+% In addition to saving time by not moving the data this approach saves
+% space. This is because multiple PBRT scenes use the same resources files.
+% Thus there is no need to have the same bunny, or sphere, present in the
+% directory for different scenes.  The asset or skymap is available to all
+% the scenes in the remote resource.
+%
+% Note: In the original, we included multiple options as to whether or not
+% to overwrite files that are already present in the output directory.  The
+% logic and conditions about these overwrites was quite complex, and we
+% have deprecated those options.  At present, we write the files all the
+% time.
+%
+% Note:  There are many helper files in this function
 %
 % TL Scien Stanford 2017
-% JNM -- Add Windows support 01/25/2019
+% DJC - remote resource
 %
 % See also
-%   piRead, piRender
+%   piRead, piWRS, piRender
 
 % Examples:
 %{
- thisR = piRecipeDefault('scene name','MacBethChecker');
- % thisR = piRecipeDefault('scene name','SimpleScene');
- % thisR = piRecipeDefault('scene name','teapot');
-
- piWrite(thisR);
- scene =  piRender(thisR,'render type','radiance');
- sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','teapotset');
+ piWRS(thisR,'remote resources',true); 
 %}
 %{
+ % Note the speed-up
+ thisR = piRecipeDefault('scene name','ChessSet');
+ piWRS(thisR,'remote resources',false);
+ piWRS(thisR,'remote resources',true);
+%}
+%{
+% Works with a lens
 thisR = piRecipeDefault('scene name','chessSet');
 lensfile = 'fisheye.87deg.6.0mm.json';
 
@@ -59,48 +83,91 @@ thisR.set('film diagonal',10);
 thisR.integrator.subtype = 'path';
 thisR.sampler.subtype = 'sobol';
 thisR.set('aperture diameter',3);
-
-piWrite(thisR);
-oi = piRender(thisR,'render type','radiance');
-oiWindow(oi);
+oi = piWRS(thisR,'remote resources',true);
 %}
 
 %% Parse inputs
 varargin = ieParamFormat(varargin);
 p = inputParser;
 
-% When varargin contains a number, the ieParamFormat() method fails.
-% It takes only a string or cell.  We should look into that.
-% varargin = ieParamFormat(varargin);
-
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
+p.addParameter('remoteresources', getpref('docker','remoteResources',false));
+p.addParameter('mainfileonly',false, @islogical);
+p.addParameter('overwriteresources', true, @islogical);
+p.addParameter('overwritematerials', true, @islogical);
+p.addParameter('overwritegeometry', true, @islogical);
+
+% Human eye writes its own, so we do not generally want to overwrite.
+p.addParameter('overwritelensfile', false, @islogical); 
+
 p.parse(thisR,varargin{:});
 
-% We need to get rid of these variables down below.  Historically, these
-% were parameters. Until we get rid of these in the subroutines, we leave
-% them here. 
-overwriteresources  = true;
-overwritepbrtfile   = true;
-overwritelensfile   = true;
-overwritematerials  = true;
-overwritegeometry   = true;
-overwritemedia      = true;
+% Most resources are on the server.  Hence, setting 'remote resources' to
+% true generally works for remote rendering.
+if p.Results.remoteresources
+    remoteResources = true;
+    overwriteresources  = false;
+else
+    remoteResources = false;
+    overwriteresources  = p.Results.overwriteresources;
+end
+% User should define whether 
 
-% creatematerials     = p.Results.creatematerials;
+
+% Why we have these two? --Zhenyi
+% BW:  Having the lensfile true broke some of my code.  So I changed it as
+% above to a parameter
+overwritelensfile   = p.Results.overwritelensfile;
+% I left this line in, but like ZHenyi I am not sure why we need this (BW)
+overwritepbrtfile   = true;
+
+overwritematerials  = p.Results.overwritematerials;
+overwritegeometry   = p.Results.overwritegeometry;
+
+if p.Results.mainfileonly
+    overwriteresources = false;
+    overwritematerials = false;
+    overwritegeometry  = false;
+end
+
 verbosity           = p.Results.verbose;
 
 exporter = thisR.get('exporter');
 
 %% Check the input and output directories
 
-% Input must exist
+% Input should exist.  Even if it doesn't, we can still render just
+% from the recipe alone.  Unless we need to copy something.
 inputDir   = thisR.get('input dir');
-if ~isempty(inputDir) && ~exist(inputDir,'dir'), warning('Could not find inputDir: %s\n',inputDir); end
+if ~exist(inputDir,'dir') && ~getpref('docker','remoteResources')
+    warning('Could not find local inputDir: %s\n',inputDir); 
+end
 
 % Make working dir if it does not already exist
 workingDir = thisR.get('output dir');
-if ~exist(workingDir,'dir'), mkdir(workingDir); end
+
+% If we are using remote resources, remove leftover /local
+% files so they don't need to be rsynced
+if remoteResources
+    % Empty the working directory and make a fresh copy.
+    if isfolder(workingDir)
+        try
+            % This produces many annoying warning messages.  We should
+            % figure out how to suppress them.
+            q = warning('query');
+            warning('off','all');
+            rmdir(workingDir, "s");
+            warning(q);
+        catch
+            % sometimes matlab  has it locked
+        end
+    end
+    mkdir(workingDir);
+% the traditional case:    
+elseif ~exist(workingDir,'dir')
+    mkdir(workingDir); 
+end
 
 % Make a geometry directory
 geometryDir = thisR.get('geometry dir');
@@ -118,8 +185,14 @@ if isequal(thisR.get('optics type'),'lens')
     % realisticEye has a lens file slot but it is empty. So we check
     % whether there is a lens file or not.
 
-    if ~isempty(thisR.get('lensfile'))
-        piWriteLens(thisR,overwritelensfile);
+    lensFile = thisR.get('lensfile');
+    if ~isempty(lensFile)
+        % We have a nominal lens file.  Check that it exists, or that we
+        % have insisted on overwriting it.
+        if ~exist(lensFile,'file') || overwritelensfile
+            % piWriteLens(thisR,overwritelensfile);
+            piWriteLens(thisR);
+        end
     end
 end
 
@@ -132,17 +205,10 @@ end
 %% Open up the main PBRT scene file.
 
 outFile = thisR.get('output file');
-fileID = fopen(outFile,'w');
+fileID = fopen(outFile,'W');
 
 %% Write header
 piWriteHeader(thisR,fileID)
-
-%% Write media
-% Media can interact with the camera
-% and can be defined before WorldBegin
-if ~isempty(thisR.media.list)
-    piWriteMedia(thisR, overwritemedia);
-end
 
 %% Write Scale and LookAt commands first
 piWriteLookAtScale(thisR,fileID);
@@ -163,23 +229,35 @@ fclose(fileID);
 
 % Even if this is the copy type scene, we parse the materials and
 % texture maps and make sure the files are copied to 'local/'.
-if ~isempty(thisR.materials.list)
+if ~isempty(thisR.materials.list) && overwritematerials
     % Make sure that the texture files are in PNG format
 %     piTextureFileFormat(thisR); % We did this in piRead, no need to do
 %     this again
 
     % Write critical files.
-    piWriteMaterials(thisR,overwritematerials);
+    piWriteMaterials(thisR, remoteResources);
 end
 
 %% Write the scene_geometry.pbrt
-if ~isequal(exporter,'Copy')
-    piWriteGeometry(thisR,overwritegeometry);
+if ~isequal(exporter,'Copy') && overwritegeometry && ~isempty(thisR.assets)
+    piWriteGeometry(thisR, remoteResources);
 end
 
 end   % End of piWrite
 
 %% ---------  Helper functions
+%
+%  piWriteCopy
+%  piWriteHeader
+%  piWriteLens
+%  piWriteFilmshape
+%  piWriteLookAtScale
+%  piWriteTransformTimes
+%  piWriteBlocks
+%  piIncludeLines
+%  piWriteMaterials
+%  piWriteGeometry
+%
 
 %% Copy the input resources to the output directory
 function piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
@@ -215,6 +293,7 @@ if overwriteresources && ~isempty(inputDir)
                     fprintf('Copying %s\n',thisFile)
                 end
                 status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
+                %status = status && system(sprintf('cp -r %s %s \n',thisFile, fullfile(outputDir,sources(i).name)));
             end
         end
     end
@@ -276,6 +355,8 @@ function piWriteLens(thisR,overwritelensfile)
 % See also
 %   navarroWrite, navarroLensCreate, setNavarroAccommodation
 
+if notDefined('overwritelensfile'),overwritelensfile = false; end
+
 % Make sure the we have the full path to the input lens file
 inputLensFile = thisR.get('lens file');
 
@@ -293,7 +374,8 @@ elseif isequal(thisR.get('human eye model'),'legrand')
 elseif isequal(thisR.get('human eye model'),'arizona')
     % Write lens file into the output directory.
     % Still tracking down why no IOR files are associated with this model.
-    arizonaWrite(thisR);
+    accommodation = thisR.get('accommodation');
+    arizonaWrite(thisR, accommodation);
 else
     % If the working copy doesn't exist, copy it.
     % If it exists but there is a force overwrite, delete and copy.
@@ -314,7 +396,7 @@ end
 
 end
 
-%% Write lens information
+%% Write Film information
 function piWriteFilmshape(thisR)
 % Write JSON file that specifies the film shape.  Used for retina
 % shape now.  Could be used for OMNI in the future.
@@ -341,7 +423,7 @@ end
 
 end
 
-%% LookAt and Scale fields
+%% Write LookAt and Scale fields
 function piWriteLookAtScale(thisR,fileID)
 
 % Optional Scale
@@ -393,7 +475,7 @@ fprintf(fileID,'\n');
 
 end
 
-%% Transform times
+%% Write Transform times
 function piWriteTransformTimes(thisR, fileID)
 % Get transform times
 startTime = thisR.get('transform times start');
@@ -446,24 +528,41 @@ for ofns = outerFields'
         continue;
     end
 
+    % Deal with camera and medium
+    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
+       if ~isempty(thisR.(ofn).medium)
+           currentMedium = [];
+           for j=1:length(thisR.media.list)
+                if strcmp(thisR.media.list(j).name,thisR.(ofn).medium)
+                    currentMedium = thisR.media.list;
+                end
+           end
+           fprintf(fileID,'MakeNamedMedium "%s" "string type" "water" "string absFile" "spds/%s_abs.spd" "string vsfFile" "spds/%s_vsf.spd"\n', ...
+               currentMedium.name,...
+               currentMedium.name,currentMedium.name);
+           fprintf(fileID,'MediumInterface "" "%s"\n',currentMedium.name);
+       end
+    end
+
     % Write header that identifies which block this is
     fprintf(fileID,'# %s \n',ofn);
 
-    % If the camera is submerged, then the medium needs to be defined.
-    if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
-       if ~isempty(thisR.(ofn).medium)
-           fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', thisR.get('output basename')));
-           fprintf(fileID,'MediumInterface "" "%s"\n',thisR.(ofn).medium);
-       end
-    end
-    
-    
     % Write out the main type and subtypes
     fprintf(fileID,'%s "%s" \n',thisR.(ofn).type,...
         thisR.(ofn).subtype);
 
     % Find and then loop through inner field names
     innerFields = fieldnames(thisR.(ofn));
+
+    % BW: May, 2023 Special case:  For humaneye, we do not want to write
+    % out the field 'focaldistance' or chromaticAberrationEnabled
+    if isequal(thisR.(ofn).subtype,'humaneye')
+        idx = strcmp(innerFields,'focaldistance');
+        if ~isempty(idx), innerFields(idx) = []; end
+        idx = strcmp(innerFields,'chromaticAberrationEnabled');
+        if ~isempty(idx), innerFields(idx) = []; end
+    end
+
     if(~isempty(innerFields))
         for ifns = innerFields'
             ifn = ifns{1};
@@ -597,8 +696,6 @@ basename = thisR.get('output basename');
 lineMaterials = find(contains(thisR.world, {'_materials.pbrt'}));
 lineGeometry  = find(contains(thisR.world, {'_geometry.pbrt'}));
 lineLights    = find(contains(thisR.world, {'_lights.pbrt'}));
-lineMedia     = find(contains(thisR.world, {'_media.pbrt'}));
-
 
 % For the Copy case, we just copy the world and Include the lights and materials.
 if isequal(thisR.exporter, 'Copy')
@@ -634,7 +731,7 @@ end
 % We think nobody except us has these lights files.  So this will never get
 % executed.
 if ~isempty(lineLights)
-    thisR.world{lineLights} = sprintf('Include "%s_lights.pbrt"\n', basename);
+    thisR.world(lineLights) = sprintf('Include "%s_lights.pbrt"\n', basename);
 end
 
 % Write out the World information.
@@ -664,18 +761,12 @@ for ii = 1:length(thisR.world)
         %         end
     end
 
-    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials.list)
+    if piContains(currLine,'WorldBegin') && isempty(lineMaterials) && ~isempty(thisR.materials)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
     end
-    
-    if piContains(currLine,'WorldBegin') && isempty(lineMedia) && ~isempty(thisR.media.list) && ...
-       (~isfield(thisR.camera,'medium') || (isfield(thisR.camera,'medium') && isempty(thisR.camera.medium)))
-        % Insert the materials file
-        fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', basename));
-    end
 
-    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets.Node)
+    if piContains(currLine,'WorldBegin') && isempty(lineGeometry) && ~isempty(thisR.assets)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_geometry.pbrt" \n', basename));
     end
@@ -689,46 +780,24 @@ end
 end
 
 %%
-function piWriteMaterials(thisR,overwritematerials)
+function piWriteMaterials(thisR, remoteResources)
 % Write both materials and textures files into the output directory
 
 % We create the materials file.  Its name is the same as the output pbrt
 % file, but it has an _materials inserted.
-if overwritematerials
     outputDir  = thisR.get('output dir');
     basename   = thisR.get('output basename');
     % [~,n] = fileparts(thisR.inputFile);
     fname_materials = sprintf('%s_materials.pbrt',basename);
     thisR.set('materials output file',fullfile(outputDir,fname_materials));
-    piMaterialWrite(thisR);
-end
+    piMaterialWrite(thisR, 'remoteresources', remoteResources);
 
-end
-
-%%
-
-function piWriteMedia(thisR,overwritemedia)
-% Write both materials and textures files into the output directory
-
-% We create the materials file.  Its name is the same as the output pbrt
-% file, but it has an _materials inserted.
-if overwritemedia
-    outputDir  = thisR.get('output dir');
-    basename   = thisR.get('output basename');
-    % [~,n] = fileparts(thisR.inputFile);
-    fname_media = sprintf('%s_media.pbrt',basename);
-    thisR.set('media output file',fullfile(outputDir,fname_media));
-    piMediaWrite(thisR);
-end
 
 end
 
 %% Write the scene_geometry file
 
-function piWriteGeometry(thisR,overwritegeometry)
+function piWriteGeometry(thisR, remoteResources)
 % Write the geometry file into the output dir
-%
-if overwritegeometry && ~isempty(thisR.assets)
-    piGeometryWrite(thisR);
-end
+piGeometryWrite(thisR, 'remoteresources', remoteResources);
 end

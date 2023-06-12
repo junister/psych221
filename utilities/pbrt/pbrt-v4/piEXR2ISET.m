@@ -144,7 +144,7 @@ for ii = 1:numel(label)
                 warning('Can not find "Pz(?)" channel in %s, ignore reading depth', inputFile);
                 continue
             end
-
+            otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
         case 'coordinates'
             % Doesn't work on many scenes
             otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');

@@ -63,16 +63,15 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %{
   % Calculate only the radiance.
   thisR = piRecipeDefault('scene name','ChessSet');
-  piWrite(thisR);
-  [scene, result] = piRender(thisR,'render type','radiance');
-  sceneWindow(scene);
+  piWRS(thisR);  
 %}
 %{
   % Calculate the (x,y,z) coordinates of every surface point in the
   % scene.  If there is no surface a zero is returned.  This should
   % probably either a Inf or a NaN when there is no surface.  We might
   % replace those with a black color or something.
-  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  thisR = piRecipeDefault('scene name', 'ChessSet'); 
+  piWrite(thisR,'remote resources',true);
   [coords, result] = piRender(thisR, 'render type','coordinates');
   ieNewGraphWin; imagesc(coords(:,:,1));
   ieNewGraphWin; imagesc(coords(:,:,2));
@@ -122,6 +121,9 @@ p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
 
+% Allow passthrough of arguments
+p.KeepUnmatched = true;
+
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
 scalePupilArea   = p.Results.scalepupilarea;  % Fix this
@@ -142,6 +144,8 @@ end
 %% Set up the rendering type.
 
 % TODO:  Perhaps we should reconsider how we specify rendertype in V4.
+% We already set render type before piWrite, rendertype param here doesnt
+% seem to have any impact. --ZL
 % After this bit of logical, renderType is never empty.
 if isempty(renderType)
     % If renderType is empty, we get the value as a metadata type.
@@ -163,11 +167,16 @@ end
 %% We have a radiance recipe and we have written the pbrt radiance file
 
 % Set up the output folder.  This folder will be mounted by the Docker
-% image if run locally.  When run remotely, we are using rsynch and
+% image if run locally.  When run remotely, we are using rsync and
 % different mount points.
 outputFolder = fileparts(thisR.outputFile);
 if(~exist(outputFolder,'dir'))
-    error('We need an absolute path for the working folder.');
+    % local doesn't always exist for this recipe
+    try
+        mkdir(outputFolder);
+    catch
+        error('We need an absolute path for the working folder.');
+    end
 end
 pbrtFile = thisR.outputFile;
 
@@ -190,7 +199,7 @@ if ispc  % Windows
     % with Linux-based Docker pbrt container
     pFile = fopen(currFile,'rt');
     tFileName = tempname;
-    tFile = fopen(tFileName,'wt');
+    tFile = fopen(tFileName,'Wt');
     while true
         thisline = fgets(pFile);
         if ~ischar(thisline); break; end  %end of file
@@ -231,7 +240,7 @@ end
 % renderDocker is a dockerWrapper object.  The parameters control which
 % machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
-[status, result] = renderDocker.render(renderCommand, outputFolder);
+[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:}, 'rendertype', [renderType{:}]);
 
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file

@@ -5,12 +5,14 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   [thisR, instanceBranchName, OBJsubtreeNew]  = piObjectInstanceCreate(thisR, assetname, varargin)
 %
 % Brief
-%   Instancing enables the system to store a single copy of the object mesh
-%   and define multiple copies (instances) that differ based on the
-%   transformations that place it in the scene. Instancing is an efficient
-%   method of copying.
+%   Instancing enables the system to store a single copy of the object
+%   mesh and render multiple copies (instances) that differ based on
+%   the transformations that place it in the scene. Instancing is an
+%   efficient method of copying.
 %
-%   Running this function can change all of the node indices.
+%   Running this function can change the node indices and potentially
+%   introduce some name changes. See the discussion at the end about
+%   'uniqueNames'
 %
 % Inputs:
 %   thisR     - scene recipe
@@ -22,6 +24,7 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   rotation  - 3x4 rotation
 %   scale     - 1x3 scale
 %   motion    - motion struct which contains animated position and rotation
+%   unique    - run uniquenames prior to exit (default:  false)
 %
 % Outputs:
 %   thisR     - scene recipe
@@ -29,10 +32,10 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %   OBJsubtreeNew - this is the subtree of the instance
 %
 % Description
-%   Instances can be used with scenes that have an 'assets' slot.  To use
-%   instances, we first prepare the recipe using the function
-%   (piObjectInstance). This code makes an instance (light weight copy) of
-%   a particular asset. 
+%   Instances can be used with scenes that have created an 'assets'
+%   slot.  To use instances, we first prepare the recipe using the
+%   function (piObjectInstanceText). This code finds the
+%   ObjectBegin/End code and makes an instance of these objects.
 % 
 %   The code is explained in the tutorial script
 %
@@ -43,6 +46,19 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 % See also
 %   piObjectInstance, t_piSceneInstances
 
+% Example
+%{
+fileName = fullfile('low-poly-taxi.pbrt');
+thisR = piRead(fileName);
+thisR.set('skymap','sky-rainbow.exr');
+
+carName = 'taxi';
+rotationMatrix = piRotationMatrix('z', -15);
+position = [-4 0 0];
+thisR = piObjectInstanceCreate(thisR, [carName,'_m_B'], ...
+    'rotation',rotationMatrix, 'position',position,'unique',true);
+piWRS(thisR,'remote resources',true);
+%}
 %% Read the parameters
 
 p = inputParser;
@@ -53,6 +69,7 @@ p.addParameter('rotation',piRotationMatrix);
 p.addParameter('scale',[1,1,1]);
 p.addParameter('motion',[], @(x)isstruct);
 p.addParameter('graftnow',1);
+p.addParameter('unique',false,@(x)(islogical(x)));
 
 p.parse(thisR, assetname, varargin{:});
 
@@ -81,7 +98,7 @@ end
 
 %% We have a valid index.  Start the operations.
 
-% Get the subtree but do not replace the
+% Get the subtree of the object instance. 
 OBJsubtree = thisR.get('asset', idx, 'subtree','false');
 
 OBJsubtree_branch = OBJsubtree.get(1);
@@ -102,7 +119,7 @@ else
     end
 end
 
-% add instance to parent object
+% Add instance to parent object - on dev-kitchen the branch name has no ID
 thisR.assets = thisR.assets.set(idx, OBJsubtree_branch);
 
 InstanceSuffix = sprintf('_I_%d',indexCount);
@@ -162,13 +179,14 @@ end
 % Returned
 instanceBranchName = OBJsubtree_branch.name;
 
-% BW Added.  Worked for SimpleScene and the test nightdrive scene.
-% Eliminates the need to make the call after the return from this routine,
-% piObjectInstanceCreate
-% This call takes a quite a long time to run for driving scene.
+% The uniqueNames call takes a quite a long time to run for driving
+% scene. Though, I (DJC?) fixed some lazy coding in the tree and this
+% runs a lot faster. Hopefully that means we can leave it in place
+% (DJC?)
+%
+% Zhenyi said he wanted it removed.  So BW turned it into an option.
+%
+if p.Results.unique, thisR.assets = thisR.assets.uniqueNames; end
 
-% I fixed some lazy coding in the tree and this runs a lot faster
-% Hopefully that means we can leave it in place
-thisR.assets = thisR.assets.uniqueNames;
 
 end

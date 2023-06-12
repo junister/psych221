@@ -75,6 +75,7 @@ arguments
     options.letterPosition = [0 0 1];  % Meters, default 'just ahead'
     options.letterRotation = [0 0 0];  % Degrees
     options.letterSize = [];
+    options.letterTreatment = '';
 
     % ASPIRATIONAL / TBD
     options.fontSize = 12;
@@ -128,9 +129,15 @@ for ii = 1:strlength(aString)
 
     % Addresses non-case-sensitive file systems
     % by using _uc to denote Uppercase letter assets
+    % use bold version if available (we only have for Uppercase though!
+    if isequal(options.letterTreatment, 'bold')
+        treatment = '-courier-bold';
+    else
+        treatment = '';
+    end
     if isstrprop(ourLetter, 'alpha') && isequal(upper(ourLetter), ourLetter)
-        ourAssetName = [lower(ourLetter) '_uc-pbrt.mat'];
-        ourAsset = [lower(ourLetter) '_uc'];
+        ourAssetName = [lower(ourLetter) '_uc' treatment '-pbrt.mat'];
+        ourAsset = [lower(ourLetter) '_uc' treatment];
     else
         % TEST TO SEE IF WE CAN DUPLICATE ASSETS
         if isequal(ourLetter,'0')
@@ -166,11 +173,11 @@ for ii = 1:strlength(aString)
     if ~isempty(options.letterMaterial)
         % we can assume our caller has already loaded the material?
         % outputR = piMaterialsInsert(outputR,'names',{options.letterMaterial});
-        ourLetterAsset.thisR = outputR.set('asset',letterObject(1),...
+        outputR.set('asset',letterObject(1),...
             'material name',options.letterMaterial);
     end
 
-    ourLetterAsset.thisR = outputR.set('asset', letterObject(1), ...
+    outputR.set('asset', letterObject(1), ...
         'rotate', options.letterRotation);
 
     % We want to scale by our characterSize compared with the desired size

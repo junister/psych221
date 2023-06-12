@@ -157,20 +157,37 @@ classdef recipe < matlab.mixin.Copyable
                     coords  = obj.get('object coordinates');
                     oSizes  = obj.get('object sizes');
                     
+                    % When there are ObjectInstances, we have multiple
+                    % objects with the same name. We remove the duplicates
+                    % before displaying in the table. 
+                    [uNames,idx] = unique(names);
+                    if ~isequal(numel(names),numel(uNames))                        
+                        names    = uNames;
+                        indices  = indices(idx);
+                        matT     = matT(idx);
+                        coords   = coords(idx,:);
+                        oSizes   = oSizes(idx,:);
+                        % unique() returns a different order. We return to
+                        % the ordering by indices
+                        [indices,ia] = sort(indices);
+                        names = names(ia); matT = matT(ia);
+                        coords = coords(ia,:); oSizes = oSizes(ia,:);
+                    end
+
                     positionT = cell(size(names));
                     sizeT = cell(size(names));
                     for ii=1:numel(names), positionT{ii} = sprintf('%.2f %.2f %.2f',coords(ii,1), coords(ii,2),coords(ii,3)); end
                     for ii=1:numel(names), sizeT{ii} = sprintf('%.2f %.2f %.2f',oSizes(ii,1), oSizes(ii,2),oSizes(ii,3)); end
-                    T = table(indices(:), matT, positionT, sizeT,'VariableNames',{'index','material','positions (m)','sizes (m)'}, 'RowNames',names);
+                    T = table(indices(:), matT, positionT, sizeT,...
+                        'VariableNames',{'index','material','positions (m)','sizes (m)'}, ...
+                        'RowNames',names);
                     
                     % Start printing
                     fprintf('\n----- Summary of recipe: %s\n\n',obj.get('name'));
                     disp(T);
                     fprintf('From [%.2f, %2f, %2f] to [%.2f, %2f, %2f] up [%.2f, %2f, %2f]\n',...
                         obj.get('from'), obj.get('to'), obj.get('up'));
-                    %                 case {'objectmaterials','objectsmaterials','assetsmaterials'}
-                    %                     % Prints out a table of just the materials
-                    %                     piAssetMaterialPrint(obj);
+
                 case {'objectpositions','objectposition','assetpositions','assetspositions'}
                     % Print out the positions
                     names = obj.get('object names')';

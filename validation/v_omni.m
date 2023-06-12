@@ -48,7 +48,7 @@ ll = 18;    % fisheye.87deg.50.0mm.json
 % Move the camera back a bit to capture more of the scene
 thisR.set('object distance',4);
 thisR.camera = piCameraCreate('omni', 'lens file',lList(ll).name);
-piWRS(thisR);
+piWRS(thisR, 'denoiseflag', true);
 
 %% END
 

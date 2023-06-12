@@ -1,6 +1,13 @@
-function retVal = getPrefs(paramName)
-%GETPARM Retrieve a current dockerWrapper parameter
+function getParam(obj)
+%getParam - Deprecated.
 %
+disp(obj)
+
+warning('getParam is Deprecated.  To see the parameters, inspect the dockerWrapper.')
+
+end
+
+%{
 if isempty(paramName)
     % Print a summary of all the params
     retVal = getpref('docker');
@@ -23,3 +30,4 @@ end
 
 end
 
+%}

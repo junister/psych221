@@ -1,5 +1,13 @@
 function [ieObject, localPaths] = piScitranGetScenes(st, projectDirectory, localDirectory, varargin)
-
+% What is this?
+% Let's comment.  Seems useful.
+% pi is for PBRT 2 ISET
+%
+% It must have been some code we used to get specific renderings and turn
+% them into ISETCam scene structs 
+%
+% See also
+%  
 
 p =inputParser;
 p.addParameter('forceDownload',false,@islogical);

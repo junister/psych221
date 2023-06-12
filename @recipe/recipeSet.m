@@ -229,8 +229,9 @@ switch param
         % For typical lenses, accommodation is 1/focaldistance.
         % 
         % For the human eye models, we need to change the whole lens model
-        % using setNavarroAccommodation or setArizonaAccommodation. There
-        % is no way to adjust the LeGrand eye.
+        % using setNavarroAccommodation or setArizonaAccommodation. 
+        % 
+        % There is no way to adjust the LeGrand eye.
         %        
         subType = thisR.get('camera subtype');
         switch subType
@@ -260,11 +261,15 @@ switch param
                         error('Unknown human eye model %s',modelName);
                 end
             otherwise
-                % For most lenses, accommodation means focal distance,
-                % which is managed by adjusting the distance from the lens
-                % to the film (sensor)
-                thisR.set('focal distance',1/val);
+                % Nothing
         end
+
+        % Accommodation is the inverse of focal distance. Even for human.
+        % For cameras, we do not usually set accommodation. Rather, we
+        % adjust the distance from the lens to the film (sensor).  We
+        % store the focal distance in the recipe (inside the camera
+        % slot) here.  
+        thisR.set('focal distance',1/val);        
 
     case {'focusdistance','focaldistance'}
         % lens.set('focus distance',m)
@@ -296,14 +301,30 @@ switch param
                 end
             case {'humaneye'}
                 % For the human eye models, the lens accommodation is
-                % created by the initialization function 
-                % (e.g., [na,txt] = navarroLensCreate(accommodation)) or by
-                % thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
-                % [az, columnDescription]  = arizonaLensCreate(1);
-                thisR.camera.retinalDistance.value = val;
-                thisR.camera.retinalDistance.type = 'float';
+                % stored in the lens file, which is written out by either
+                % the Navarro or Arizona eye functions, such as
+                %
+                %    [na,txt] = navarroLensCreate(accommodation)) or by
+                %    thisR = setNavarroAccommodation(thisR, accommodation, workingFolder) 
+                %    [az, columnDescription]  = arizonaLensCreate(1);
+                %
+                % We store the focaldistance in the camera slot.
+                % But until 05.2023 we (mistakenly) stored it in the
+                % retinalDistance slot.
+                %   thisR.camera.retinalDistance.value = val;
+                %   thisR.camera.retinalDistance.type = 'float';
+                %
+                % But setting this value does not change the
+                % accommodation file that we write out.  In the
+                % humaneye case, it should cause a write of the eye
+                % model file during piWrite.  Check whether this is
+                % happening.
+                thisR.camera.focaldistance.value = val;
+                thisR.camera.focaldistance.type = 'float';
 
-                % pbrt v4 does not allow this field
+                % pbrt v4 does not allow this field, but I am confused by
+                % this (BW).  It is used just belows in the omni case?
+                % Maybe we can't have both?
                 if isfield(thisR.camera,'focusdistance')
                     thisR.camera = rmfield(thisR.camera,'focusdistance');
                 end
@@ -429,7 +450,7 @@ switch param
         if ~exist(val,'file')
             % Sometimes we set this without the file being copied yet.
             % Let's see if this warning does us any good.
-            warning('Lens file in out dir not yet found (%s)\n',val);
+            % warning('Lens file in out dir not yet found (%s)\n',val);
         end
         thisR.camera.lensfile.value = val;
         thisR.camera.lensfile.type = 'string';
@@ -511,43 +532,15 @@ switch param
 
         thisR.camera.aperturediameter.value = val;
         thisR.camera.aperturediameter.type = 'float';
-    case 'fov'
-        % This sets a horizontal fov
-        % We should check that this is a pinhole, I think
-        % This is only used for pinholes, not realistic camera case.
-        subType = thisR.get('camera subtype');
-        if isequal(subType,'pinhole')
-            if length(val)==1
-                thisR.camera.fov.value = val;
-                thisR.camera.fov.type = 'float';
-            else
-                % camera types:  omni, humaneye, maybe others
-
-                % if two fov values are given [hor, ver], we should
-                % resize film acoordingly.  This is the current number
-                % of spatial samples for the two dimensions
-                filmRes = thisR.get('spatial samples');
-
-                % Set the field of view to the minimum of the two values
-                fov = min(val);
-
-                % horizontal resolution/ vertical resolution
-                resRatio = tand(val(1)/2)/tand(val(2)/2);
-
-                % Depending on which is the governing dimension, adjust the
-                % number of spatial samples, using the resolution ratio.
-                if fov == val(1)
-                    thisR.set('spatial samples',[max(filmRes)*resRatio, max(filmRes)]);
-                else
-                    thisR.set('spatial samples',[max(filmRes), max(filmRes)/resRatio]);
-                end
-                thisR.camera.fov.value = fov;
-                thisR.camera.fov.type = 'float';
-                disp('film ratio is changed!')
-            end
-        else
-            warning('fov not set for camera models');
-        end
+    case {'fov'}
+        % thisR.set('fov',deg)
+        % This always refers to the shorter of the two dimensions (the
+        % limiting field of view).  Not the diagonal.
+        % https://pbrt.org/fileformat-v4
+        %
+        thisR.camera.fov.value = val;
+        thisR.camera.fov.type = 'float';
+    
     case 'diffraction'
         % thisR.set('diffraction');
         %
@@ -578,11 +571,14 @@ switch param
 
         % User turned off chromatic abberations
         if isequal(val,false)
-            % Use path, not spectralpath, integrator and set nunCABand to
-            % 1.
-            % thisR.camera.chromaticAberrationEnabled.value = false;
+            % Use path, not spectralpath, integrator.
+            % Set nunCABand to 1.
             thisR.set('integrator subtype','path');
             thisR.set('integrator num ca bands',1);
+
+            % Set the enabled flag.
+            % This was deleted at some point.  Not sure why.
+            thisR.camera.chromaticAberrationEnabled.value = false;
             return;
         else
             % User sent in true or an integer number of bands which implies
@@ -591,11 +587,18 @@ switch param
             % This is the integrator that manages chromatic aberration.
             thisR.set('integrator subtype','spectralpath');
 
-            % Set the number of bands.  These are divided evenly into bands
-            % between 400 and 700 nm. There are  31 wavelength samples, so
-            % we should not have more than 30 wavelength bands
+            % Set the number of bands.  
             if islogical(val), val = 8; end  % Default number of bands
-            thisR.set('integrator num cabands',val);            
+
+            % The bands are divided evenly the 31 wavelength samples,
+            % between 400 and 700 nm. If the user sent in more than 30, we
+            % have a problem.  So ...
+            val = min(val,30);
+            thisR.set('integrator num cabands',val);
+
+            % Set the enabled flag to true.
+            thisR.camera.chromaticAberrationEnabled.type  = 'bool';
+            thisR.camera.chromaticAberrationEnabled.value = true;
         end
 
     case {'integratorsubtype','integrator'}
@@ -617,12 +620,16 @@ switch param
         % thisR.set('n bounces',val);
         % Number of surfaces a ray can bounce from
         %
-        % This can be set for some, but not all integrators.
-        % Also, sometimes the integrator slot is empty.  I am not sure what
+        % This can be set for some, but not all integrators. Also,
+        % sometimes the integrator slot is empty.  I am not sure what
         % happens then (BW).
-        
+        %
+        % I allowed spectralpath for multiple bounces.  Not sure that is
+        % OK, but will ask Zhenyi soon (BW).
         if(~strcmp(thisR.integrator.subtype,'path')) &&...
-                (~strcmp(thisR.integrator.subtype,'bdpt'))
+                ~(strcmp(thisR.integrator.subtype,'bdpt') || ...
+                strcmp(thisR.integrator.subtype,'spectralpath'))
+
             disp('Changing integrator sub type to "bdpt"');
 
             % When multiple bounces are needed, use this integrator
@@ -693,8 +700,14 @@ switch param
     case 'filmdiagonal'
         % thisR.set('film diagonal',val)
         % Default units are millimeters.
-        thisR.film.diagonal.type = 'float';
-        thisR.film.diagonal.value = val;
+        opticsType = thisR.get('camera subtype');
+        switch opticsType
+            case 'pinhole'
+                warning('Film diagonal is irrelevant for pinhole.');
+            otherwise
+                thisR.film.diagonal.type = 'float';
+                thisR.film.diagonal.value = val;
+        end
     case 'filmsize'
         % thisR.set('film size',[width,height] in mm);
         %
@@ -1057,17 +1070,22 @@ switch param
             mkdir(fullfile(thisR.get('output dir')));
         end
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
-            
+            % We keep all skymap files in this folder now.
+            skymapdir = fullfile(thisR.get('output dir'),'skymaps');
             % If it is not in the local directory, check the data/lights
             if isfile(fullfile(piDirGet('lights'), skymapFileName))
                 copyfile(fullfile(piDirGet('lights'), skymapFileName),...
-                    thisR.get('output dir'));
+                    skymapdir);
             else
                 % Not found yet, look for it on the path
                 exrFile = which(skymapFileName);
                 if ~isempty(exrFile)
                     fprintf('Using skymap:  %s\n',exrFile);
-                    copyfile(exrFile,thisR.get('output dir'));
+
+                    if ~isfolder(skymapdir)
+                        mkdir(skymapdir);
+                    end
+                    copyfile(exrFile, skymapdir);
                 else
                     % If skymapFileName exists at different location, we
                     % move it to the output folder.

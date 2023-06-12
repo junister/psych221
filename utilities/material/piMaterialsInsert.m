@@ -86,7 +86,8 @@ if ~isempty(mNames{1})
     Names = thisR.get('material', 'names');
 
     % A 1 entry in lst means the name is already present in the recipe.
-    lst = contains(mNames,Names);
+    % contains unfortunately seems to match on a 0 cell
+    lst = matches(mNames,Names);
     if sum(lst) > 0
         fprintf('Materials already in the recipe\n  %s  \n',mNames{lst});
     end

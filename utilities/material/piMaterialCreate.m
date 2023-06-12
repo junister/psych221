@@ -358,6 +358,19 @@ switch tp
         material.roughness.type = 'float';
         material.roughness.value = [];
 
+        material.uroughness.type = 'float';
+        material.uroughness.value = [];
+
+        material.vroughness.type = 'float';
+        material.vroughness.value = [];
+
+        material.remaproughness.type = 'bool';
+        material.remaproughness.value = [];
+        
+        % object's index of refraction
+        material.eta.type = 'float';
+        material.eta.value = [];
+
     case 'mix'
         material.type = 'mix';
 

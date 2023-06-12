@@ -213,7 +213,8 @@ switch ieParamFormat(cameraType)
         % piCameraCreate('humaneye',
 
         if piCamBio
-            warning('human eye camera type is for use with ISETBio')
+            % Merge of isetbio/isetcam makes this unnecessary
+            % warning('human eye camera type is for use with ISETBio')
         end
         camera.type           = 'Camera';
         camera.subtype        = 'humaneye';
@@ -241,9 +242,20 @@ switch ieParamFormat(cameraType)
         % lens and cornea, which are written out in the lens file.
 
         % The distance from the back of the lens to the retina is the
-        % retinaDistance.
+        % retinaDistance.  We initialize at a distance estimated using
+        % the script t_eyeRetinaDistance. We place an edge at 10 m
+        % from the eye and adjust the distance so that the slanted
+        % edge chromatic fringe is as expected.  Hence, the default
+        % accommodation = 0 (distance is Inf).
         camera.retinaDistance.type = 'float';
-        camera.retinaDistance.value = 16.32;
+        switch eyeModel
+            case 'navarro'
+                camera.retinaDistance.value = 16.37;
+            case 'arizona'
+                camera.retinaDistance.value = 16.55;
+            case 'legrand'
+                camera.retinaDistance.value = 16.35;
+        end
 
         % The radius of the whole eyeball is retinaRadius.
         camera.retinaRadius.type    = 'float';
@@ -267,10 +279,15 @@ switch ieParamFormat(cameraType)
         % camera.focusdistance.value = 0.2;   % Meters.  Accommodation is 5 diopters
         % camera.focusdistance.type  = 'float';
 
+        % Added May, 2023.  Relates to accommodation (1/focaldistance)
+        camera.focaldistance.type    = 'float';
+        camera.focaldistance.value   = 1e4;  %mm
+
         % Default is units of meters.  If you have something in
         % millimeters, you should use this flag
         camera.mmUnits.value = 'false';
         camera.mmUnits.type  = 'bool';
+
 
         % Not used in V4.  The chromatic aberration must be handled
         % through the spectralpath integrator, which is separate from the

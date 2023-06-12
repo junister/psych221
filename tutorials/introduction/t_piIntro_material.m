@@ -21,6 +21,7 @@ if ~piDockerExists, piDockerConfig; end
 
 sceneName = 'sphere';
 thisR = piRecipeDefault('scene name',sceneName);
+% thisR.show;
 
 % A 9K blackbody radiator.
 distLight = piLightCreate('new dist light',...
@@ -75,7 +76,7 @@ thisR.set('material', redMatte, 'reflectance value', spdRef);
 
 %% Set the material
 sphereID = piAssetSearch(thisR,'object name','Sphere');
-thisR.set('asset',sphereID,'material name',redMatte.name);
+thisR.set('asset',sphereID(1),'material name',redMatte.name);
 
 % Show that we set it
 thisR.show('materials');
