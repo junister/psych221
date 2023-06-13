@@ -11,6 +11,9 @@ function [object, results, outputHDR] = piAIdenoise(object,varargin)
 %   quiet - Do not show the waitbar
 %   useNvidia - try to use GPU denoiser if available
 %
+%   batch -- possible shell script -- TBD
+%   interleave -- use multiple channels -- TBD
+%
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons
 %           denoised is returned
@@ -58,10 +61,16 @@ p.addParameter('quiet',false,@islogical);
 p.addParameter('useNvidia',false,@islogical);
 p.addParameter('keepHDR',false); % return the EXR file
 
+p.addParameter('batch',false); 
+p.addParameter('interleave',false); 
+
 p.parse(object,varargin{:});
 
 quiet = p.Results.quiet;
 keepHDR = p.Results.keepHDR;
+
+doBatch = p.Results.batch;
+useInterleave = p.Results.interleave;
 
 %% Set up the denoiser path information and check
 
@@ -117,11 +126,15 @@ end
 newPhotons = zeros(rows, cols, chs);
 
 
-
 %% Run it
 
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvidia denoiser'); end
-for ii = 1:chs
+if useInterleave
+    channels = 1:3:chs-1;
+else
+    channels = 1:chs;
+end
+for ii = channels
     % For every channel, get the photon data, normalize it, and
     % denoise it
     img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
@@ -132,8 +145,15 @@ for ii = 1:chs
     else
         % Write it out into a temporary file
         % For the Intel Denoiser,need to duplicate the channels
-        img_sp(:,:,2) = img_sp(:,:,1);
-        img_sp(:,:,3) = img_sp(:,:,1);
+        if useInterleave
+            % experiment with using adjacent channels
+            img_sp(:,:,2) = photons(:,:,ii+1)/max2(photons(:,:,ii+1));
+            img_sp(:,:,3) = photons(:,:,ii+2)/max2(photons(:,:,ii+2));
+        else
+            img_sp(:,:,2) = img_sp(:,:,1);
+            img_sp(:,:,3) = img_sp(:,:,1);
+        end
+
         writePFM(img_sp, outputTmp);
         if ispc
             % since we have 2.0
@@ -165,6 +185,10 @@ for ii = 1:chs
     end
 
     newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
+    if useInterleave
+        newPhotons(:,:,ii+1) = DNImg(:,:,2).* max2(photons(:,:,ii+1));
+        newPhotons(:,:,ii+2) = DNImg(:,:,3).* max2(photons(:,:,ii+2));
+    end
     
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
 end
