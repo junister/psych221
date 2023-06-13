@@ -71,7 +71,10 @@ if ~p.Results.useNvidia
     elseif isunix
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
     elseif ispc
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
+        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.0.x64.windows', 'bin');
+        
+        % old version
+        %oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
     else
         warning("No denoise binary found.\n")
     end
@@ -132,11 +135,26 @@ for ii = 1:chs
         img_sp(:,:,2) = img_sp(:,:,1);
         img_sp(:,:,3) = img_sp(:,:,1);
         writePFM(img_sp, outputTmp);
-        cmd  = [oidn_pth, [filesep() 'oidnDenoise --hdr '], outputTmp,' -o ',DNImg_pth];
+        if ispc
+            % since we have 2.0
+            % Not sure whether we need to check for CUDA
+            % or we will get it automatically
+            qualityFlag = ' -q high ';
+
+            % Set CUDA for testing
+            % It picks it automatically, it turns out
+            deviceFlag = '';% -d cuda ';
+        else
+            qualityFlag = '';
+            deviceFlag = '';
+        end
+        cmd  = [oidn_pth, [filesep() 'oidnDenoise '], deviceFlag, qualityFlag, ' --hdr ',outputTmp,' -o ',DNImg_pth];
     end
 
     % Run the executable.
+    tic
     [status, results] = system(cmd);
+    toc
     if status, error(results); end
 
     % Read the denoised data and scale it back up
