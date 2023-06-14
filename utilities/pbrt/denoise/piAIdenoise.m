@@ -99,6 +99,7 @@ if ~isfolder(oidn_pth)
     error('Could not find the directory:\n%s',oidn_pth);
 end
 
+tic; % start timer for deNoise
 
 %%  Get the photon data
 
@@ -119,9 +120,11 @@ if p.Results.useNvidia
     outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.exr',randi(1000),randi(1000)));
     DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.exr',randi(1000),randi(1000)));
 elseif doBatch
+    outputTmp = {};
+    DNImg_pth = {};
     for ii = 1:chs
-        outputTmp(ii) = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
-        DNImg_pth(ii) = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
+        outputTmp{ii} = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
+        DNImg_pth{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
     end
 else
     outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
@@ -137,7 +140,7 @@ if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvid
 
 channels = 1:chs;
 
-if ~batch
+if ~doBatch
     for ii = channels
         % For every channel, get the photon data, normalize it, and
         % denoise it
@@ -147,7 +150,7 @@ if ~batch
 
         if p.Results.useNvidia
             exrwrite(img_sp, outputTmp);
-            cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
+            cmd  = fullfile(oidn_pth,  ['Denoiser --hdr -i ', outputTmp,' -o ',DNImg_pth]);
         else
             % Write it out into a temporary file
             % For the Intel Denoiser,need to duplicate the channels
@@ -155,7 +158,7 @@ if ~batch
             writePFM(img_sp, outputTmp);
 
             % construct the denoise command, can also use -d and -q if desired
-            cmd  = [oidn_pth, [filesep() 'oidnDenoise '], ' --hdr ',outputTmp,' -o ',DNImg_pth];
+            cmd  = fullfile(oidn_pth, [' oidnDenoise --hdr ',outputTmp,' -o ',DNImg_pth]);
         end
 
         % Run the executable.
@@ -176,7 +179,45 @@ if ~batch
 
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
 else % batch alternative
-    
+
+
+    for ii = channels
+        % For every channel, get the photon data, normalize it, and
+        % denoise it
+        img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
+        img_sp(:,:,2) = photons(:,:,ii)/max2(photons(:,:,ii));
+        img_sp(:,:,3) = photons(:,:,ii)/max2(photons(:,:,ii));
+
+        % Write all the temp files at once
+        % maybe do a parfor once this works!
+        writePFM(img_sp, outputTmp{ii});
+
+        % might have to be different on PC where we can't necessarily
+        % chain commands with ';' or "&&'
+        % maybe try wsl??
+        baseCmd = fullfile(oidn_pth, 'oidnDenoise --hdr ');
+        
+        if isequal(ii, 1)
+            cmd = [baseCmd, outputTmp{ii},' -o ', DNImg_pth{ii}];
+        else
+            cmd = [cmd , ' && ', baseCmd, outputTmp{ii},' -o ', DNImg_pth{ii} ];
+        end
+    end
+        %Run the full command executable once assembled
+        tic
+        [status, results] = system(cmd);
+        toc
+        if status, error(results); end
+
+        for ii = channels
+        % now read back the results
+            DNImg = readPFM(DNImg_pth{ii});
+            newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
+            delete(DNImg_pth{ii});
+            delete(outputTmp{ii});
+        end
+
+
 end
 
 
@@ -197,12 +238,19 @@ switch object.type
 end
 
 % Clean up the temporary file.
+% For batch need to loop through!
 if ~keepHDR
-    if exist(DNImg_pth,'file'), delete(DNImg_pth);
-        outputHDR = '';
+    if ~doBatch
+        if exists(DNImg_pth,'file'), delete(DNImg_pth);
+            outputHDR = '';
+        end
     end
 else
+
     outputHDR = DNImg_pth;
 end
-if exist(outputTmp,'file'), delete(outputTmp); end
+if ~doBatch
+    if exist(outputTmp,'file'), delete(outputTmp); end
+end
 
+fprintf("Denoised in: %2.3f\n", toc);
