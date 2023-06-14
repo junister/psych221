@@ -158,13 +158,13 @@ if ~doBatch
             writePFM(img_sp, outputTmp);
 
             % construct the denoise command, can also use -d and -q if desired
-            cmd  = fullfile(oidn_pth, [' oidnDenoise --hdr ',outputTmp,' -o ',DNImg_pth]);
+            cmd  = fullfile(oidn_pth, ['oidnDenoise --hdr ',outputTmp,' -o ',DNImg_pth]);
         end
 
         % Run the executable.
-        tic
+        %tic
         [status, results] = system(cmd);
-        toc
+        %toc
         if status, error(results); end
 
         % Read the denoised data and scale it back up
@@ -204,9 +204,9 @@ else % batch alternative
         end
     end
         %Run the full command executable once assembled
-        tic
+        %tic
         [status, results] = system(cmd);
-        toc
+        %toc
         if status, error(results); end
 
         for ii = channels
@@ -241,7 +241,7 @@ end
 % For batch need to loop through!
 if ~keepHDR
     if ~doBatch
-        if exists(DNImg_pth,'file'), delete(DNImg_pth);
+        if exist(DNImg_pth,'file'), delete(DNImg_pth);
             outputHDR = '';
         end
     end
