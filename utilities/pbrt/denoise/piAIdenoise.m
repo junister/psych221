@@ -61,8 +61,8 @@ p.addParameter('quiet',false,@islogical);
 p.addParameter('useNvidia',false,@islogical);
 p.addParameter('keepHDR',false); % return the EXR file
 
-p.addParameter('batch',false); 
-p.addParameter('interleave',false); 
+p.addParameter('batch',false);
+p.addParameter('interleave',false);
 
 p.parse(object,varargin{:});
 
@@ -81,7 +81,7 @@ if ~p.Results.useNvidia
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
     elseif ispc
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.0.x64.windows', 'bin');
-        
+
         % old version
         %oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
     else
@@ -128,59 +128,57 @@ else
     DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.pfm',randi(1000),randi(1000)));
 end
 
+% Empty array to store results
 newPhotons = zeros(rows, cols, chs);
 
-
-%% Run it
-
+%% Run the Denoiser binary
+% Show waitbar if desired
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvidia denoiser'); end
 
 channels = 1:chs;
-for ii = channels
-    % For every channel, get the photon data, normalize it, and
-    % denoise it
-    img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,2) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,3) = photons(:,:,ii)/max2(photons(:,:,ii));
 
-    if p.Results.useNvidia
-        exrwrite(img_sp, outputTmp);
-        cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
-    else
-        % Write it out into a temporary file
-        % For the Intel Denoiser,need to duplicate the channels
+if ~batch
+    for ii = channels
+        % For every channel, get the photon data, normalize it, and
+        % denoise it
+        img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
+        img_sp(:,:,2) = photons(:,:,ii)/max2(photons(:,:,ii));
+        img_sp(:,:,3) = photons(:,:,ii)/max2(photons(:,:,ii));
 
-        % for doBatch want to write out ALL files
-        writePFM(img_sp, outputTmp);
-        
-        % construct the denoise command, can also use -d and -q if desired
-        cmd  = [oidn_pth, [filesep() 'oidnDenoise '], ' --hdr ',outputTmp,' -o ',DNImg_pth];
+        if p.Results.useNvidia
+            exrwrite(img_sp, outputTmp);
+            cmd  = [oidn_pth, [filesep() 'Denoiser --hdr -i '], outputTmp,' -o ',DNImg_pth];
+        else
+            % Write it out into a temporary file
+            % For the Intel Denoiser,need to duplicate the channels
+            % for doBatch want to write out ALL files
+            writePFM(img_sp, outputTmp);
+
+            % construct the denoise command, can also use -d and -q if desired
+            cmd  = [oidn_pth, [filesep() 'oidnDenoise '], ' --hdr ',outputTmp,' -o ',DNImg_pth];
+        end
+
+        % Run the executable.
+        tic
+        [status, results] = system(cmd);
+        toc
+        if status, error(results); end
+
+        % Read the denoised data and scale it back up
+        if p.Results.useNvidia
+            DNImg = exrread(DNImg_pth);
+        else
+            DNImg = readPFM(DNImg_pth);
+        end
+
+        newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
     end
 
-    % Run the executable.
-    tic
-    [status, results] = system(cmd);
-    toc
-    if status, error(results); end
-
-    % Read the denoised data and scale it back up
-    if p.Results.useNvidia
-        DNImg = exrread(DNImg_pth);
-    else
-        DNImg = readPFM(DNImg_pth);
-    end
-
-    newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
-    if useInterleave % adjacent case
-        newPhotons(:,:,ii+1) = DNImg(:,:,2).* max2(photons(:,:,ii+1));
-        newPhotons(:,:,ii+2) = DNImg(:,:,3).* max2(photons(:,:,ii+2));
-        % skip case
-        newPhotons(:,:,ii+10) = DNImg(:,:,2).* max2(photons(:,:,ii+10));
-        newPhotons(:,:,ii+20) = DNImg(:,:,3).* max2(photons(:,:,ii+20));
-    end
-    
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
+else % batch alternative
+    
 end
+
 
 if p.Results.useNvidia
     exrwrite(newPhotons,DNImg_pth);
@@ -208,4 +206,3 @@ else
 end
 if exist(outputTmp,'file'), delete(outputTmp); end
 
-end
