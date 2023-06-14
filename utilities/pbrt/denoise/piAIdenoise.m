@@ -12,7 +12,7 @@ function [object, results, outputHDR] = piAIdenoise(object,varargin)
 %   useNvidia - try to use GPU denoiser if available
 %
 %   batch -- possible shell script -- TBD
-%   interleave -- use multiple channels -- TBD
+%   interleave -- use multiple channels -- So far a failure:(
 %
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons
@@ -118,6 +118,11 @@ end
 if p.Results.useNvidia
     outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.exr',randi(1000),randi(1000)));
     DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.exr',randi(1000),randi(1000)));
+elseif doBatch
+    for ii = 1:chs
+        outputTmp(ii) = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
+        DNImg_pth(ii) = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
+    end
 else
     outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
     DNImg_pth = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d.pfm',randi(1000),randi(1000)));
@@ -129,18 +134,14 @@ newPhotons = zeros(rows, cols, chs);
 %% Run it
 
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvidia denoiser'); end
-if useInterleave
-    % adjacent channels doesn't look good
-    % channels = 1:3:chs-1;
-    % so maybe groups of 10?
-    channels = 1:10;
-else
-    channels = 1:chs;
-end
+
+channels = 1:chs;
 for ii = channels
     % For every channel, get the photon data, normalize it, and
     % denoise it
     img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
+    img_sp(:,:,2) = photons(:,:,ii)/max2(photons(:,:,ii));
+    img_sp(:,:,3) = photons(:,:,ii)/max2(photons(:,:,ii));
 
     if p.Results.useNvidia
         exrwrite(img_sp, outputTmp);
@@ -148,33 +149,12 @@ for ii = channels
     else
         % Write it out into a temporary file
         % For the Intel Denoiser,need to duplicate the channels
-        if useInterleave
-            % Experiment with using adjacent channels
-            %img_sp(:,:,2) = photons(:,:,ii+1)/max2(photons(:,:,ii+1));
-            %img_sp(:,:,3) = photons(:,:,ii+2)/max2(photons(:,:,ii+2));
-            % Can also try skipping
-             img_sp(:,:,2) = photons(:,:,ii+10)/max2(photons(:,:,ii+0));
-             img_sp(:,:,3) = photons(:,:,ii+20)/max2(photons(:,:,ii+20));
-        else
-            img_sp(:,:,2) = img_sp(:,:,1);
-            img_sp(:,:,3) = img_sp(:,:,1);
-        end
 
+        % for doBatch want to write out ALL files
         writePFM(img_sp, outputTmp);
-        if ispc
-            % since we have 2.0
-            % Not sure whether we need to check for CUDA
-            % or we will get it automatically
-            qualityFlag = ' -q high ';
-
-            % Set CUDA for testing
-            % It picks it automatically, it turns out
-            deviceFlag = '';% -d cuda ';
-        else
-            qualityFlag = '';
-            deviceFlag = '';
-        end
-        cmd  = [oidn_pth, [filesep() 'oidnDenoise '], deviceFlag, qualityFlag, ' --hdr ',outputTmp,' -o ',DNImg_pth];
+        
+        % construct the denoise command, can also use -d and -q if desired
+        cmd  = [oidn_pth, [filesep() 'oidnDenoise '], ' --hdr ',outputTmp,' -o ',DNImg_pth];
     end
 
     % Run the executable.
