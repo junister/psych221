@@ -130,7 +130,10 @@ newPhotons = zeros(rows, cols, chs);
 
 if ~quiet, h = waitbar(0,'Denoising multispectral data...','Name','Intel or Nvidia denoiser'); end
 if useInterleave
-    channels = 1:3:chs-1;
+    % adjacent channels doesn't look good
+    % channels = 1:3:chs-1;
+    % so maybe groups of 10?
+    channels = 1:10;
 else
     channels = 1:chs;
 end
@@ -146,9 +149,12 @@ for ii = channels
         % Write it out into a temporary file
         % For the Intel Denoiser,need to duplicate the channels
         if useInterleave
-            % experiment with using adjacent channels
-            img_sp(:,:,2) = photons(:,:,ii+1)/max2(photons(:,:,ii+1));
-            img_sp(:,:,3) = photons(:,:,ii+2)/max2(photons(:,:,ii+2));
+            % Experiment with using adjacent channels
+            %img_sp(:,:,2) = photons(:,:,ii+1)/max2(photons(:,:,ii+1));
+            %img_sp(:,:,3) = photons(:,:,ii+2)/max2(photons(:,:,ii+2));
+            % Can also try skipping
+             img_sp(:,:,2) = photons(:,:,ii+10)/max2(photons(:,:,ii+0));
+             img_sp(:,:,3) = photons(:,:,ii+20)/max2(photons(:,:,ii+20));
         else
             img_sp(:,:,2) = img_sp(:,:,1);
             img_sp(:,:,3) = img_sp(:,:,1);
@@ -185,9 +191,12 @@ for ii = channels
     end
 
     newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
-    if useInterleave
+    if useInterleave % adjacent case
         newPhotons(:,:,ii+1) = DNImg(:,:,2).* max2(photons(:,:,ii+1));
         newPhotons(:,:,ii+2) = DNImg(:,:,3).* max2(photons(:,:,ii+2));
+        % skip case
+        newPhotons(:,:,ii+10) = DNImg(:,:,2).* max2(photons(:,:,ii+10));
+        newPhotons(:,:,ii+20) = DNImg(:,:,3).* max2(photons(:,:,ii+20));
     end
     
     if ~quiet, waitbar(ii/chs, h,sprintf('Spectral channel: %d nm \n', wave(ii))); end
