@@ -911,7 +911,10 @@ switch ieParamFormat(param)  % lower case, no spaces
                 end
                 lensFile      = thisR.get('lens file');
                 filmDiag      = thisR.get('film diagonal','mm'); 
-
+                if isempty(filmDiag)
+                    filmDiag = 5;
+                    warning('Film diag not set. Assuming %.2f film diagonal',filmDiag);
+                end
                 % We always have this be very large and thus the focal
                 % length of the lens is how we specify the field of view
                 objectDistance = 1e6; % 1 Kilometer

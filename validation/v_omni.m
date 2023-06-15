@@ -15,22 +15,28 @@ if ~piDockerExists, piDockerConfig; end
 
 %%  Scene and light
 thisR = piRecipeDefault('scene name','cornell box');
+
 lightName = 'from camera';
 ourLight = piLightCreate(lightName,...
                         'type','distant',...
-                        'cameracoordinate', true);
-recipeSet(thisR,'lights', ourLight,'add');
+                        'cameracoordinate', true, ...
+                        'specscale',50);
+thisR.set('lights', ourLight,'add');
+thisR.set('skymap','room.exr');
 
 %% No lens or omnni camera. Just a pinhole to render a scene radiance
 
 thisR.set('object distance',1);
 thisR.camera = piCameraCreate('pinhole'); 
-piWRS(thisR);
+scene = piWRS(thisR);
 
 %% Omni with a standard lens
 
 thisR.set('object distance',1);
 thisR.camera = piCameraCreate('omni','lens file','dgauss.22deg.12.5mm.json');
+
+thisR.set('film diagonal',5); % mm
+thisR.get('film distance','mm');
 piWRS(thisR);
 
 %% Omni with a fisheye lens
