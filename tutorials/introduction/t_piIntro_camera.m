@@ -81,10 +81,17 @@ fprintf('Using lens: %s\n',lensfile);
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 % Set the film so that the field of view makes sense
+thisR.set('film diagonal',3);
+
+% Need isetlens to estimate the Field of View
 thisR.get('fov')
 
 %% Write, render and denoise
 
 oi = piWRS(thisR);
+
+%% Now clean up the noise
+
+oi = piAIDenoise(oi,'batch',true);
 
 %% END
