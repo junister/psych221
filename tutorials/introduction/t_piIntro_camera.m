@@ -46,7 +46,7 @@ thisR.get('fov')
 thisR.get('film diagonal','mm')
 
 % Have a look
-thisR.set('rays per pixel', 256);
+thisR.set('rays per pixel', 32);
 thisR.set('film diagonal',5,'mm');
 thisR.set('n bounces',5);
 
@@ -64,11 +64,19 @@ thisR.set('light',idx,'delete');
 
 %% Add the skymap light
 thisR.set('skymap','room.exr');
-thisR.set('light','room_L','specscale',0.03);
+thisR.set('light','room_L','specscale',2000);
 thisR.show('objects');
+thisR.show('lights');
 
 scene = piWRS(thisR);
-sceneWindow(scene);
+sceneSet(scene,'render flag','hdr');
+
+% Notice how well we can reduce the noise.  Though it does blur a bit,
+% also. 
+tic; scene = piAIdenoise(scene,'batch',true); toc
+
+replace = true;
+sceneWindow(scene,[],replace);
 
 %% Pinhole cameras aren't everything
 % Here is how we add a lens to our camera
@@ -81,7 +89,7 @@ fprintf('Using lens: %s\n',lensfile);
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 % Set the film so that the field of view makes sense
-thisR.set('film diagonal',3);
+thisR.set('film diagonal',5);
 
 % Need isetlens to estimate the Field of View
 thisR.get('fov')
@@ -92,6 +100,8 @@ oi = piWRS(thisR);
 
 %% Now clean up the noise
 
-oi = piAIDenoise(oi,'batch',true);
+oi = piAIdenoise(oi,'batch',true);
+oiWindow(oi,[],replace);
+oiSet(oi,'render flag','hdr');
 
 %% END
