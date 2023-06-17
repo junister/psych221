@@ -1,5 +1,12 @@
 %% Illustrates how to configure Matlab prefs for different remote computers
+%
+% There is now a method in dockerWrapper called 'preset' that automates
+% this process.
+%
 
+doc dockerWrapper.preset
+
+%
 % These three slots are enough for now.
 %
 % We should be able to make this just one slot, probably the first one
