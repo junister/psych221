@@ -59,14 +59,14 @@ function thisR = piRead(fname,varargin)
 %
 %  piRead assumes that
 %
-%     * There is a block of text before WorldBegin 
+%     * There is a block of text before WorldBegin
 %     * After WorldBegin the assets are defined by PBRT commands, such
-%       as Shape and NamedMaterials. 
+%       as Shape and NamedMaterials.
 %     * Most comments (indicated by '#' in the first character) and
 %       blank lines are ignored.  But some special comment lines are
 %       interpreted
 %     * When an AttributeBegin block is encountered, the text lines
-%       that follow beginning with a '"' are included in the block. 
+%       that follow beginning with a '"' are included in the block.
 %
 %  piRead will not work with PBRT files that do not meet these criteria.
 %
@@ -114,7 +114,7 @@ infile = fname;
 %% Exist checks on the whole path.
 if exist(infile,'file')
     if ~isempty(which(infile))
-    % Force the string to be a full path
+        % Force the string to be a full path
         thisR.inputFile = which(infile);
     else
         % file is not in matlab path, but exist.
@@ -441,14 +441,15 @@ else
 end
 
 % If there's a transform, we transform the LookAt. % to change
-[~, transformBlock] = piBlockExtract(txtLines,'blockName','Transform');
-if(~isempty(transformBlock))
-    values = textscan(transformBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
-    values = cell2mat(values(2:end));
-    transform = reshape(values,[4 4]);
-    [from,to,up,flipping] = piTransform2LookAt(transform);
+if ~isempty(txtLines)
+    [~, transformBlock] = piBlockExtract(txtLines,'blockName','Transform');
+    if(~isempty(transformBlock))
+        values = textscan(transformBlock{1}, '%s [%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f]');
+        values = cell2mat(values(2:end));
+        transform = reshape(values,[4 4]);
+        [from,to,up,flipping] = piTransform2LookAt(transform);
+    end
 end
-
 % If there's a concat transform, we use it to update the current camera
 % position. % to change
 [~, concatTBlock] = piBlockExtract(txtLines,'blockName','ConcatTransform');
@@ -476,6 +477,8 @@ end
 function [s, blockLine] = piParseOptions(txtLines, blockName)
 % Parse the options for a specific block
 %
+
+blockLine = []; % make sure we return something to avoid an error.
 
 % How many lines of text?
 nline = numel(txtLines);
