@@ -141,6 +141,8 @@ parsedUntil = min(parsedUntil,numel(newWorld));
 newWorld(2:parsedUntil)=[];
 
 % Maybe this should be optional?
-trees = trees.uniqueNames;
+if ~isempty(trees)
+    trees = trees.uniqueNames;
+end
 
 end
