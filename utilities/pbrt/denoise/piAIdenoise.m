@@ -224,7 +224,7 @@ end
 if p.Results.useNvidia
     exrwrite(newPhotons,DNImg_pth);
 else
-    warning("We don't export .pfm yet");
+    % warning("We don't export .pfm yet");
 end
 if ~quiet, close(h); end
 
