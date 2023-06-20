@@ -49,6 +49,10 @@ function [oi, pupilMask, psf_spectral] = piFlareApply2(scene, varargin)
 
 % Examples:
 %{
+
+
+%}
+%{
 sceneSize = 512;
 scene = sceneCreate('point array',sceneSize, 128);
 scene = sceneSet(scene,'fov',1);
@@ -223,7 +227,7 @@ for ww = 1:nWave
 
     % Keep only the valid parts of the pupil, setting rother regions to
     % zero.
-    pupilMask = pupilRadialDistance <= pupilRadius;
+    pupilMask = (pupilRadialDistance <= pupilRadius);
     if numSidesAperture>0
         maskDiamter = find(pupilMask(oiHeight/2,:));
         centerPoint = [oiWidth/2+1,oiHeight/2+1];
