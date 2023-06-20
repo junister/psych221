@@ -598,7 +598,7 @@ classdef dockerWrapper < handle
             end
             [status, result] = system(cmd);
             if verbose > 0
-                fprintf("Started Docker (status %d): %s\n", status, cmd);
+                cprintf('*Green', "Started Docker (status %d): %s\n", status, cmd);
             end
             if status == 0
                 obj.dockerContainerID = result; % hex name for it

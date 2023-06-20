@@ -161,7 +161,7 @@ if ~obj.localRender
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
     end
     if verbose > 0
-        fprintf('Command: %s\n', containerCommand);
+        cprintf('*Blue', 'Command: %s\n', containerCommand);
     end
 
     if verbose > 1
@@ -173,7 +173,7 @@ if ~obj.localRender
         if status == 0
             fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         else
-            fprintf("Error Rendering: %s", result);
+            cprintf('*Red', "Error Rendering: %s", result);
         end
     else
         [status, result] = system(containerCommand);
@@ -221,8 +221,8 @@ end
 %% For debugging.  Will write a method to just return these before long (BW).
 
 fprintf('\n------------------\n');
-fprintf('Container command: %s\n',containerCommand);
-fprintf('PBRT command: %s\n',renderCommand);
+cprintf('Blue', 'Container command: %s\n',containerCommand);
+cprintf('Blue', 'PBRT command: %s\n',renderCommand);
 fprintf('\n------------------\n');
 
 end
