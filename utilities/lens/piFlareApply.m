@@ -167,7 +167,10 @@ for ww = 1:nWave
     % Wavelength in meters
     wavelength = waveList(ww) * 1e-9; % (m)
 
-    % Set up the pupil function
+    % Set up the pupil function.  I am not sure about the logic for
+    % this spatial support.  Could be right, but I just don't know.
+    % What plane is it in?  Pupil?  oiWidth is in the sensor plane, so
+    % maybe the spacing isn't quite right? (BW).
     pupilSampleStepX = 1 / (psfsamplespacing * oiWidth) * wavelength * focalLength;
     pupilSupportX = (-0.5: 1/oiWidth: 0.5-1/oiWidth) * pupilSampleStepX * oiWidth;    
     pupilSampleStepY = 1 / (psfsamplespacing * oiHeight) * wavelength * focalLength;
@@ -230,11 +233,30 @@ for ww = 1:nWave
     end
 
     psf_spectral(:,:,ww) = PSF;
+    %{
+     % The PSF seems pretty much like the one calculated using
+     % the wvf and wvf2oi approach.
+     ss = oiGet(oi,'spatial support','um');
+     ieNewGraphWin; mesh(ss(:,:,1),ss(:,:,2),psf_spectral(:,:,ww));
+     set(gca,'xlim',[-10 10],'ylim',[-10 10]);
+     title('piFlareApply');
+     diskSize = airyDisk(waveList(ww),fNumber,'units','um','diameter',true)    
+    %}
 
     % Apply the psf to scene data, creating the OI data
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
+
+%% The properties of the oi are not fully set.  
+
+% The photons are calculated, but the OTF is not set, and thus the PSF
+% doesn't show up correctly for oiPlot(), for example.  That is one
+% reason to use the wvf2oi() approach, particularly if we are sharing
+% the data.
+%
+% We would need to take the psf and compute the OTF.OTF values, as in
+% wvf2oi
 
 oi = oiSet(oi,'photons',photons_fl);
 scene_size = sceneGet(scene,'size');
