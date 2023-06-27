@@ -234,6 +234,7 @@ for ww = 1:nWave
 
     psf_spectral(:,:,ww) = PSF;
     %{
+     ieNewGraphWin; mesh(getMiddleMatrix(PSF,30));
      % The PSF seems pretty much like the one calculated using
      % the wvf and wvf2oi approach.
      ss = oiGet(oi,'spatial support','um');
