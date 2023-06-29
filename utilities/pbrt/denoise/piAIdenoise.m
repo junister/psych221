@@ -70,7 +70,6 @@ quiet = p.Results.quiet;
 keepHDR = p.Results.keepHDR;
 
 doBatch = p.Results.batch;
-useInterleave = p.Results.interleave;
 
 %% Set up the denoiser path information and check
 

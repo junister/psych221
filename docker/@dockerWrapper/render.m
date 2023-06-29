@@ -161,7 +161,7 @@ if ~obj.localRender
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
     end
     if verbose > 0
-        cprintf('*Blue', 'Command: %s\n', containerCommand);
+        cprintf('*Blue', 'USE Docker: %s\n', containerCommand);
     end
 
     if verbose > 1
@@ -220,10 +220,10 @@ end
 
 %% For debugging.  Will write a method to just return these before long (BW).
 
-fprintf('\n------------------\n');
-cprintf('Blue', 'Container command: %s\n',containerCommand);
-cprintf('Blue', 'PBRT command: %s\n',renderCommand);
-fprintf('\n------------------\n');
+%fprintf('\n------------------\n');
+%cprintf('Blue', 'USE Docker: %s\n',containerCommand);
+%cprintf('Blue', 'PBRT command: %s\n',renderCommand);
+%fprintf('\n------------------\n');
 
 end
 

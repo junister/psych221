@@ -205,8 +205,10 @@ end
 %% Open up the main PBRT scene file.
 
 outFile = thisR.get('output file');
-fileID = fopen(outFile,'W');
-
+[fileID, errmsg] = fopen(outFile,'W');
+if fileID == -1
+    error("Unable to open PBRT file: %s\n",errmsg);
+end
 %% Write header
 piWriteHeader(thisR,fileID)
 

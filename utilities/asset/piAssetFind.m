@@ -39,7 +39,7 @@ end
 if ~isa(assets,'tree'), error('Assets must be a tree.'); end
 
 % If the input is a node id (number), return the node
-if isscalar(val)
+if isscalar(val) && ~isstring(val)
     id = val;
     thisAsset = {assets.get(val)};
     return;
