@@ -184,11 +184,14 @@ pbrtFile = thisR.outputFile;
 
 [~,currName,~] = fileparts(pbrtFile);
 
+%{
+% Not sure we always want to do this...
 % Make sure renderings folder exists and is fresh
 if(isfolder(fullfile(outputFolder,'renderings')))
     rmdir(fullfile(outputFolder, 'renderings'), 's');
 end
 mkdir(fullfile(outputFolder,'renderings'));
+%}
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 

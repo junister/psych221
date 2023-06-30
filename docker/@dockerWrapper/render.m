@@ -64,7 +64,7 @@ else
     useContext = getpref('docker','renderContext','');
 end
 % container is Linux, so convert
-outputFolder = dockerWrapper.pathToLinux(outputFolder);
+outputFolderDocker = dockerWrapper.pathToLinux(outputFolder);
 
 denoiseCommand = ''; %default
 
@@ -82,9 +82,15 @@ end
 
 if ~obj.localRender
     % Running remotely.
+
+    % Remove previous renders
+    if isfolder(fullfile(outputFolder, 'renderings'))
+        rmdir(fullfile(outputFolder, 'renderings'));
+        mkdir(fullfile(outputFolder, 'renderings'));
+    end
     if ispc
         rSync = 'wsl rsync';
-        nativeFolder = [obj.localRoot outputFolder '/'];
+        nativeFolder = [obj.localRoot outputFolderDocker '/'];
     else
         rSync = 'rsync';
     end
@@ -100,7 +106,7 @@ if ~obj.localRender
 
     % in the case of Mac (& Linux?) outputFolder includes both
     % our iset dir and then the relative path
-    [~, sceneDir, ~] = fileparts(outputFolder);
+    [~, sceneDir, ~] = fileparts(outputFolderDocker);
     remoteScenePath = dockerWrapper.pathToLinux(fullfile(obj.remoteRoot, obj.relativeScenePath, sceneDir));
 
     %remoteScenePath = [obj.remoteRoot outputFolder];
@@ -115,9 +121,10 @@ if ~obj.localRender
     if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation
         % (DJC)
-        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, [nativeFolder,'/'], remoteScene);
+        % add deletion of extraneous files
+        putCommand = sprintf('%s %s -r -t --delete %s %s',rSync, speedup, [nativeFolder,'/'], remoteScene);
     else
-        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, nativeFolder, remoteScene);
+        putCommand = sprintf('%s %s -r -t --delete %s %s',rSync, speedup, nativeFolder, remoteScene);
     end
 
     if verbose > 0
@@ -154,10 +161,10 @@ if ~obj.localRender
 
     if ~isempty(denoiseCommand)
         % Use the optix denoiser if asked
-        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s && %s"',...
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*}  %s && %s && %s"',...
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
     else
-        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s "',...
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*}  %s && %s "',...
             useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
     end
     if verbose > 0
