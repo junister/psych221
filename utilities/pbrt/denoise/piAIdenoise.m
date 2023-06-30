@@ -79,10 +79,9 @@ if ~p.Results.useNvidia
     elseif isunix
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
     elseif ispc
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.0.x64.windows', 'bin');
+        % switch to using the version in our path, to make updates simpler
+        oidn_pth = '';
 
-        % old version
-        %oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.windows', 'bin');
     else
         warning("No denoise binary found.\n")
     end
@@ -94,7 +93,7 @@ else
     end
 end
 
-if ~isfolder(oidn_pth)
+if ~isempty(oidn_pth) && ~isfolder(oidn_pth)
     error('Could not find the directory:\n%s',oidn_pth);
 end
 
@@ -122,8 +121,10 @@ elseif doBatch
     outputTmp = {};
     DNImg_pth = {};
     for ii = 1:chs
-        outputTmp{ii} = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
-        DNImg_pth{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn_%05d%05d-%d.pfm',randi(1000),randi(1000),ii));
+        % see if we can use only the channel number
+        % would be an issue if we do multiple renders in parallel
+        outputTmp{ii} = fullfile(piRootPath,'local',sprintf('tmp_input-%d.pfm',ii));
+        DNImg_pth{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
     end
 else
     outputTmp = fullfile(piRootPath,'local',sprintf('tmp_input_%05d%05d.pfm',randi(1000),randi(1000)));
