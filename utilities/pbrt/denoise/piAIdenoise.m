@@ -11,8 +11,7 @@ function [object, results, outputHDR] = piAIdenoise(object,varargin)
 %   quiet - Do not show the waitbar
 %   useNvidia - try to use GPU denoiser if available
 %
-%   batch -- possible shell script -- TBD
-%   interleave -- use multiple channels -- So far a failure:(
+%   batch -- write & read all channels at once
 %
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons

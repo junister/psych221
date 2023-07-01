@@ -82,7 +82,7 @@ switch dataType
         output(:,:,2) = piEXR2Mat(filename, 'Ny');
         output(:,:,3) = piEXR2Mat(filename, 'Nz');
     case "albedo"
-        % to add; only support rgb for now, spectral albdeo needs to add;
+        output = piEXR2Mat(filename, 'Albedo');
     case "instanceId" % single channel
         output = piEXR2Mat(filename, 'InstanceId');
     otherwise

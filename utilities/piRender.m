@@ -276,6 +276,9 @@ if status
     return;
 end
 
+%% Put .exr-based denoising option here
+
+
 %% Convert the returned data to an ieObject
 
 % renderType is a cell array, typically with radiance and depth. But
