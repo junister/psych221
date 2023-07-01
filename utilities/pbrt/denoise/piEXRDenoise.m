@@ -1,4 +1,4 @@
-function [object, results, outputHDR] = piEXRDenoise(object,varargin)
+function [object, results, outputHDR] = piEXRDenoise(exrFileName,varargin)
 % A denoising method (AI based) that applies to multi-spectral HDR data
 % tuned for Intel's OIDN
 %
@@ -10,8 +10,6 @@ function [object, results, outputHDR] = piEXRDenoise(object,varargin)
 %
 % Optional key/value
 %   quiet - Do not show the waitbar
-%
-%   batch -- use shell script
 %
 % Returns
 %   ??
@@ -27,15 +25,6 @@ function [object, results, outputHDR] = piEXRDenoise(object,varargin)
 %
 % https://www.openimagedenoise.org/downloads.html
 %
-% We expect the directory location on a Mac to be
-%
-%   fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-%
-% Linux, we expect the oidnDenoise command to be in
-%
-%   fullfile(piRootPath, 'external', 'oidn-1.4.2.x86_64.linux', 'bin');
-%
-%
 % We have used the denoiser to clean up PBRT rendered images when we
 % only use a small number of rays.  We use it for show, not for
 % accurate simulations of scene or oi data.
@@ -44,57 +33,53 @@ function [object, results, outputHDR] = piEXRDenoise(object,varargin)
 % integrate with PBRT.  We are also considering the denoiser that is
 % part of imgtool, distributed with PBRT.
 %
-% See also
-%   sceneWindow, oiWindow
 
 %% Parse
 p = inputParser;
-p.addRequired('filename',@(x)(isfile(x)));
-p.parse(object,varargin{:});
+p.addRequired('exrfilename',@(x)(isfile(x)));
+p.addParameter('placebo',true);
+p.parse(exrFileName, varargin{:});
 
 %% Set up the denoiser path information and check
 
-if ~p.Results.useNvidia
-    if ismac
-        oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-    elseif isunix
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
-    elseif ispc
-        % switch to using the version in our path, to make updates simpler
-        oidn_pth = '';
-
-    else
-        warning("No denoise binary found.\n")
-    end
+if ismac
+    oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
+elseif isunix
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
+elseif ispc
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
+else
+    warning("No denoise binary found.\n")
 end
 
-if ~isempty(oidn_pth) && ~isfolder(oidn_pth)
-    error('Could not find the directory:\n%s',oidn_pth);
+if ~isfolder(oidn_pth)
+    warning('Could not find the directory:\n%s',oidn_pth);
+    return;
 end
 
 tic; % start timer for deNoise
 
-%%  Get the photon data
 
-%% EXCEPT NOW WE HAVE THE "RAW" EXR FILE
-switch object.type
-    case 'opticalimage'
-        wave = oiGet(object,'wave');
-        photons = oiGet(object,'photons');
-        [rows,cols,chs] = size(photons);
-    case 'scene'
-        wave = sceneGet(object,'wave');
-        photons = sceneGet(object,'photons');
-        [rows,cols,chs] = size(photons);
-    otherwise
-        error('Should never get here.  %s\n',object.type);
+%% NOW WE HAVE A "RAW" EXR FILE
+% That we need to turn into pfm files.
+% "regular" denoiser normalizes each channel, but not sure if we should?
+
+%% Get needed data from the .exr file
+% First, get channel info
+eInfo = exrinfo(exrFileName);
+eChannelInfo = eInfo.ChannelInfo;
+
+for ii = 1:numel(eChannelInfo.Properties.RowNames)
+    fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
 end
+return;
+
 
 outputTmp = {};
 DNImg_pth = {};
-for ii = 1:chs
-    % see if we can use only the channel number
-    % would be an issue if we do multiple renders in parallel
+for ii = 1:numel(eChannelInfo.Properties.RowNames)
+    % Currently use only the channel number
+    % Could be an issue if we do multiple renders in parallel
     outputTmp{ii} = fullfile(piRootPath,'local',sprintf('tmp_input-%d.pfm',ii));
     DNImg_pth{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
 end
@@ -102,11 +87,10 @@ end
 % Empty array to store results
 newPhotons = zeros(rows, cols, chs);
 
+
 %% Run the Denoiser binary
 
 channels = 1:chs;
-
-
 
 for ii = channels
     % For every channel, get the photon data, normalize it, and

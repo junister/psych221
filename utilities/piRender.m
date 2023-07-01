@@ -121,6 +121,9 @@ p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
 
+% Optional OIDN-based denoising
+p.addParameter('exrdenoise',false,@islogical);
+
 % Allow passthrough of arguments
 p.KeepUnmatched = true;
 
@@ -154,7 +157,7 @@ if isempty(renderType)
     else
         % If renderType and thisR.metadata are both empty
         % grab everything
-        renderType = {'radiance','depth, albedo, normal'};
+        renderType = {'radiance','depth', 'albedo', 'normal'};
     end
 end
 
@@ -277,7 +280,9 @@ if status
 end
 
 %% Put .exr-based denoising option here
-
+if p.Results.exrdenoise
+    piEXRDenoise(outFile);
+end
 
 %% Convert the returned data to an ieObject
 
