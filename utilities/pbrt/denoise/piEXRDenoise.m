@@ -70,7 +70,8 @@ eInfo = exrinfo(exrFileName);
 eChannelInfo = eInfo.ChannelInfo;
 
 for ii = 1:numel(eChannelInfo.Properties.RowNames)
-    fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
+    % for debugging we can check 
+    %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
 end
 return;
 
