@@ -79,9 +79,7 @@ if ~p.Results.useNvidia
     elseif isunix
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
     elseif ispc
-        % switch to using the version in our path, to make updates simpler
-        oidn_pth = '';
-
+        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
     else
         warning("No denoise binary found.\n")
     end
