@@ -11,7 +11,7 @@ function [object, results, outputHDR] = piEXRDenoise(object,varargin)
 % Optional key/value
 %   quiet - Do not show the waitbar
 %
-%   batch -- possible shell script -- TBD
+%   batch -- use shell script
 %
 % Returns
 %   object: The ISETCam object (scene or optical image) with the photons
