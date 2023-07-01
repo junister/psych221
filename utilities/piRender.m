@@ -152,9 +152,9 @@ if isempty(renderType)
     if ~isempty(thisR.metadata)
         renderType = thisR.metadata.rendertype;
     else
-        % If renderType and thisR.metadata are both empty, we assume radiance
-        % and depth.
-        renderType = {'radiance','depth'};
+        % If renderType and thisR.metadata are both empty
+        % grab everything
+        renderType = {'radiance','depth, albedo, normal'};
     end
 end
 

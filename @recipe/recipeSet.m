@@ -1586,6 +1586,15 @@ switch param
                     % depth
                     thisR.film.saveDepth.type  = 'bool';
                     thisR.film.saveDepth.value = true;
+                % Added for gbuffer in pbrt-v4
+                case 'normal'
+                    % depth
+                    thisR.film.saveNormal.type  = 'bool';
+                    thisR.film.saveNormal.value = true;
+                case 'albedo'
+                    % depth
+                    thisR.film.saveAlbedo.type  = 'bool';
+                    thisR.film.saveAlbedo.value = true;
                 case 'material'
                     thisR.film.saveMaterial.type  = 'bool';
                     thisR.film.saveMaterial.value = true;
