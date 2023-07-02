@@ -178,7 +178,7 @@ if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
 % Fix recipe to include depth if it also wants radiance
 % If we want radiance, make sure we also get depth
-if  max(ismember(thisR.metadata.rendertype,'radiance')) && ~ismember(thisR.metadata.rendertype,'depth')
+if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'depth'))
         preRender = thisR.get('rendertype');
         preRender{end+1} = 'depth';
         thisR.set('rendertype', preRender);
