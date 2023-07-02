@@ -176,6 +176,12 @@ if ~exist(geometryDir, 'dir'), mkdir(geometryDir); end
 renderDir = thisR.get('rendered dir');
 if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
+% Fix recipe to include depth if it also wants radiance
+% If we want radiance, make sure we also get depth
+if  max(ismember(thisR.metadata.rendertype,'radiance')) && ~ismember(thisR.metadata.rendertype,'depth')
+        thisR.metadata.rendertype{end+1} = 'depth';
+end
+
 %% Selectively copy data from the input to the output directory.
 piWriteCopy(thisR,overwriteresources,overwritepbrtfile, verbosity)
 

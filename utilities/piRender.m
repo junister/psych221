@@ -161,16 +161,7 @@ if isempty(renderType)
     end
 end
 
-% If we want radiance, make sure we also get depth
-if  max(ismember(renderType,'radiance')) && ~ismember(renderType,'depth')
-    % renderType{end+1} = 'depth';
-    warning("NEED to add Depth to this render\n");
-    thisR.metadata.rendertype = renderType;
-end
 
-%% Uh-oh, piWrite has already written the recipe. So if we want our
-%         added depth parameter to take effect, we need to rewrite
-%         is that okay???
 
 if isequal(renderType{1},'all') || isequal(renderType{1},'both')
     % 'both is legacy
