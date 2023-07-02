@@ -69,12 +69,37 @@ tic; % start timer for deNoise
 eInfo = exrinfo(exrFileName);
 eChannelInfo = eInfo.ChannelInfo;
 
+% Need to read in all channels. I think we can do this in exrread() if we
+% put them all in an a/v pair 
+getChannels = [];
 for ii = 1:numel(eChannelInfo.Properties.RowNames)
-    % for debugging we can check 
     %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
+    getChannels = [getChannels, convertCharsToStrings(eChannelInfo.Properties.RowNames{ii})];
 end
-return;
+eData(:, :, :, 1) = exrread(exrFileName, "Channels",getChannels);
 
+exrData = [];
+% We now have all the data in the eData array with the channel being the
+% 3rd dimension, but with no labeling
+for ii = 1:numel(eChannelInfo.Properties.RowNames)
+        
+% We  want to write out the radiance channels using their names into
+% .pfm files, AFTER tripline them!
+    if contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Radiance")
+        eData(:, :, ii, 2 ) = eData(:,:,ii,1);
+        eData(:, :, ii, 3 ) = eData(:,:,ii,1);
+        % WRITE PFM
+        
+    % Albedo is also 3 channels
+    elseif contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Albedo")
+        fprintf("Write albedo here\n");
+    % Normal should be a 3-channel output I think
+    % but is xyz
+    elseif contains( convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "N")
+        fprintf("Write Normal here\n");
+    end
+
+end
 
 outputTmp = {};
 DNImg_pth = {};
