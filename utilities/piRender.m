@@ -280,15 +280,18 @@ if status
 end
 
 %% Put .exr-based denoising option here
+denoisedFile = '';
 if p.Results.exrdenoise
-    piEXRDenoise(outFile);
+    denoisedFile = piEXRDenoise(outFile);
+else
+    denoisedFile = outFile;
 end
 
 %% Convert the returned data to an ieObject
 
 % renderType is a cell array, typically with radiance and depth. But
 % it can also be instance or material.  
-ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
+ieObject = piEXR2ISET(denoisedFile, 'recipe',thisR,...
     'label',renderType, ...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...

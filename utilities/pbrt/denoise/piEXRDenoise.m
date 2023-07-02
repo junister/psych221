@@ -1,4 +1,4 @@
-function [object, results, outputHDR] = piEXRDenoise(exrFileName,varargin)
+function outputFileName = piEXRDenoise(exrFileName,varargin)
 % A denoising method (AI based) that applies to multi-spectral HDR data
 % tuned for Intel's OIDN
 %
