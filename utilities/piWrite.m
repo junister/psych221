@@ -182,6 +182,7 @@ if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.m
         preRender = thisR.get('rendertype');
         preRender{end+1} = 'depth';
         thisR.set('rendertype', preRender);
+        warning("Your recipe is coded to ask for only radiance. As of pbrt-v4 we default to more channels, so better to remove the rendertype from your recipe.\n");
 end
 
 %% Selectively copy data from the input to the output directory.
