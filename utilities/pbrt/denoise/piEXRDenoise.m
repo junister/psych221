@@ -154,12 +154,13 @@ for ii = 1:numel(radianceChannels)
     % Now we want to write our channel to our outputFile with the correct
     % name
     outputFileName = fullfile(pp, 'denoised.exr'); % for now
+    ourChannelName = eChannelInfo.Properties.RowNames{ii};
     % !! Need to provide te correct channel name. Sigh.
     exrwrite(denoisedImage(:,:,ii),outputFileName, 'AppendToFile',true, "Channels",ourChannelName);
 
     delete(denoiseImagePath{ii});
-    delete(outputTmp{ii});
 end
 
 
 fprintf("Denoised in: %2.3f\n", toc);
+
