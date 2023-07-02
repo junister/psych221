@@ -154,10 +154,12 @@ for ii = 1:numel(label)
             otherData.materialID = piReadEXR(inputFile, 'data type','material');
 
         case 'normal'
-            % to add
+            % to add -- piReadEXR supports this now, but not sure where to
+            % store
             disp('Normal NYI')
         case 'albedo'
-            % to add; only support rgb for now, spectral albdeo needs to add;
+            % to add -- piReadEXR supports this now, but not sure where to
+            % store
             disp('albedo NYI')
         case 'instance'
             % Should the instanceID be ieObject?

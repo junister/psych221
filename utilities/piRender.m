@@ -135,6 +135,7 @@ meanIlluminance  = p.Results.meanilluminance;   % And this
 
 wave             = p.Results.wave;
 renderType       = p.Results.rendertype;
+
 if ischar(renderType), renderType = {renderType}; end
 
 %% Set up the dockerWrapper
@@ -155,11 +156,21 @@ if isempty(renderType)
     if ~isempty(thisR.metadata)
         renderType = thisR.metadata.rendertype;
     else
-        % If renderType and thisR.metadata are both empty
-        % grab everything
-        renderType = {'radiance','depth', 'albedo', 'normal'};
+        % If renderType and thisR.metadata are both empty...
+        renderType = {'radiance','depth'}; % could also ask for: 'albedo', 'normal'};
     end
 end
+
+% If we want radiance, make sure we also get depth
+if  max(ismember(renderType,'radiance')) && ~ismember(renderType,'depth')
+    % renderType{end+1} = 'depth';
+    warning("NEED to add Depth to this render\n");
+    thisR.metadata.rendertype = renderType;
+end
+
+%% Uh-oh, piWrite has already written the recipe. So if we want our
+%         added depth parameter to take effect, we need to rewrite
+%         is that okay???
 
 if isequal(renderType{1},'all') || isequal(renderType{1},'both')
     % 'both is legacy
@@ -279,9 +290,11 @@ if status
     return;
 end
 
-%% Put .exr-based denoising option here
-denoisedFile = '';
+%% EXR-based denoising option here
 if p.Results.exrdenoise
+    % NOTE the EXR denoiser has already read the file, so piEXR2iset
+    %      shouldn't have to do it all over, but fixing that would
+    %      require some heavy lifting, so let's "put it back together"
     denoisedFile = piEXRDenoise(outFile);
 else
     denoisedFile = outFile;
