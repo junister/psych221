@@ -84,18 +84,21 @@ end
 eData(:, :, :, 1) = exrread(exrFileName, "Channels",getChannels);
 
 exrData = [];
+rFileNames = [];
+radianceChannels = 1;
 % We now have all the data in the eData array with the channel being the
 % 3rd dimension, but with no labeling
 for ii = 1:numel(eChannelInfo.Properties.RowNames)
-        
 % We  want to write out the radiance channels using their names into
 % .pfm files, AFTER tripline them!
     if contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Radiance")
         eData(:, :, ii, 2 ) = eData(:,:,ii,1);
         eData(:, :, ii, 3 ) = eData(:,:,ii,1);
-        % WRITE PFM
-        rFileName = fullfile(pp, [eChannelInfo.Properties.RowNames{ii}, '.pfm']);
-        writePFM(squeeze(eData(:, :, ii, :)),rFileName); % optional scale(?)
+
+        % Write out the .pfm data as a grayscale for each radiance channel
+        rFileNames{radianceChannels} = fullfile(pp, [eChannelInfo.Properties.RowNames{ii}, '.pfm']);
+        writePFM(squeeze(eData(:, :, ii, :)),rFileNames{radianceChannels}); % optional scale(?)
+        radianceChannels = radianceChannels + 1;
     % Albedo is also 3 channels
     elseif contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Albedo")
         fprintf("Write albedo here\n");
@@ -108,68 +111,53 @@ for ii = 1:numel(eChannelInfo.Properties.RowNames)
 end
 
 outputTmp = {};
+
+%% NEED TO SET DN Path
 DNImg_pth = {};
-for ii = 1:numel(eChannelInfo.Properties.RowNames)
-    % Currently use only the channel number
-    % Could be an issue if we do multiple renders in parallel
-    outputTmp{ii} = fullfile(piRootPath,'local',sprintf('tmp_input-%d.pfm',ii));
-    DNImg_pth{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
-end
-
-% Empty array to store results
-newPhotons = zeros(rows, cols, chs);
-
 
 %% Run the Denoiser binary
 
-channels = 1:chs;
+for ii = numel(radianceChannels)
 
-for ii = channels
-    % For every channel, get the photon data, normalize it, and
-    % denoise it
-    img_sp(:,:,1) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,2) = photons(:,:,ii)/max2(photons(:,:,ii));
-    img_sp(:,:,3) = photons(:,:,ii)/max2(photons(:,:,ii));
-
-    % Write all the temp files at once
-    % maybe do a parfor once this works!
-    writePFM(img_sp, outputTmp{ii});
-
-    % might have to be different on PC where we can't necessarily
-    % chain commands with ';' or "&&'
-    % maybe try wsl??
     baseCmd = fullfile(oidn_pth, 'oidnDenoise --hdr ');
+    denoiseImagePath{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
 
     if isequal(ii, 1)
-        cmd = [baseCmd, outputTmp{ii},' -o ', DNImg_pth{ii}];
+        cmd = [baseCmd, rFileNames{ii},' -o ', DNImg_pth{ii}];
     else
-        cmd = [cmd , ' && ', baseCmd, outputTmp{ii},' -o ', DNImg_pth{ii} ];
+        cmd = [cmd , ' && ', baseCmd, rFileNames{ii},' -o ', DNImg_pth{ii} ];
     end
 end
+
 %Run the full command executable once assembled
 %tic
 [status, results] = system(cmd);
 %toc
 if status, error(results); end
 
+
+% NOW we have a lot of pfm files (one per radiance channel)
+%     We can/could read them all back in and write them to an 
+%     output .exr file, unless there is something more clever
+
 for ii = channels
+
     % now read back the results
-    DNImg = readPFM(DNImg_pth{ii});
-    newPhotons(:,:,ii) = DNImg(:,:,1).* max2(photons(:,:,ii));
-    delete(DNImg_pth{ii});
+    denoisedData = readPFM(denoiseImagePath{ii});
+
+    % In this case each PFM is a channel, that we want to re-assemble into
+    % an output .exr file (I think)
+    % This gives us data, but we don't have a labeled  channel for it
+    % at this point
+    denoisedImage(:, :, ii) = denoisedData(:, :, 1);
+
+    % Now we want to write our channel to our outputFile with the correct
+    % name
+
+    exrwrite(denoisedImage(:,:,ii),outputFileName, 'AppendToFile',true, "Channels",ourChannelName);
+
+    delete(denoiseImagePath{ii});
     delete(outputTmp{ii});
-end
-
-
-
-
-%% Set the data into the object
-%% REWRITE
-switch object.type
-    case 'scene'
-        object = sceneSet(object,'photons',newPhotons);
-    case 'opticalimage'
-        object = oiSet(object,'photons',newPhotons);
 end
 
 
