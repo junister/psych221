@@ -40,6 +40,11 @@ p.addRequired('exrfilename',@(x)(isfile(x)));
 p.addParameter('placebo',true);
 p.parse(exrFileName, varargin{:});
 
+% Generate file names for albedo and normal if we have them
+[pp, nn, ee] = fileparts(p.Results.exrfilename);
+albedoFileName = fullfile(pp, 'Albedo.pfm');
+normalFileName = fullfile(pp, 'Normal.pfm');
+
 %% Set up the denoiser path information and check
 
 if ismac
@@ -89,7 +94,8 @@ for ii = 1:numel(eChannelInfo.Properties.RowNames)
         eData(:, :, ii, 2 ) = eData(:,:,ii,1);
         eData(:, :, ii, 3 ) = eData(:,:,ii,1);
         % WRITE PFM
-        
+        rFileName = fullfile(pp, [eChannelInfo.Properties.RowNames{ii}, '.pfm']);
+        writePFM(squeeze(eData(:, :, ii, :)),rFileName); % optional scale(?)
     % Albedo is also 3 channels
     elseif contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Albedo")
         fprintf("Write albedo here\n");
