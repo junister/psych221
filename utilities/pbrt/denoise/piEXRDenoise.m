@@ -117,15 +117,15 @@ DNImg_pth = {};
 
 %% Run the Denoiser binary
 
-for ii = numel(radianceChannels)
+for ii = 1:numel(radianceChannels)
 
     baseCmd = fullfile(oidn_pth, 'oidnDenoise --hdr ');
     denoiseImagePath{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
 
     if isequal(ii, 1)
-        cmd = [baseCmd, rFileNames{ii},' -o ', DNImg_pth{ii}];
+        cmd = [baseCmd, rFileNames{ii},' -o ', denoiseImagePath{ii}];
     else
-        cmd = [cmd , ' && ', baseCmd, rFileNames{ii},' -o ', DNImg_pth{ii} ];
+        cmd = [cmd , ' && ', baseCmd, rFileNames{ii},' -o ', denoiseImagePath{ii} ];
     end
 end
 
@@ -140,7 +140,7 @@ if status, error(results); end
 %     We can/could read them all back in and write them to an 
 %     output .exr file, unless there is something more clever
 
-for ii = channels
+for ii = 1:numel(radianceChannels)
 
     % now read back the results
     denoisedData = readPFM(denoiseImagePath{ii});
@@ -153,7 +153,8 @@ for ii = channels
 
     % Now we want to write our channel to our outputFile with the correct
     % name
-
+    outputFileName = fullfile(pp, 'denoised.exr'); % for now
+    % !! Need to provide te correct channel name. Sigh.
     exrwrite(denoisedImage(:,:,ii),outputFileName, 'AppendToFile',true, "Channels",ourChannelName);
 
     delete(denoiseImagePath{ii});
