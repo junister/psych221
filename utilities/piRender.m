@@ -224,7 +224,7 @@ end
 % renderDocker is a dockerWrapper object.  The parameters control which
 % machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
-[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:}, 'rendertype', [renderType{:}]);
+[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:});
 
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file
@@ -272,7 +272,7 @@ end
 % renderType is a cell array, typically with radiance and depth. But
 % it can also be instance or material.  
 ieObject = piEXR2ISET(postProcessedFile, 'recipe',thisR,...
-    'label',renderType, ...
+    'label',thisR.metadata.rendertype, ...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...
     'scale pupil area', scalePupilArea);

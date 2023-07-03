@@ -60,6 +60,9 @@ if ~isfolder(oidn_pth)
     return;
 end
 
+% Baseline do nothing, this is helpful for profiling & debugging
+outputFileName = exrFileName;
+
 tic; % start timer for deNoise
 
 
@@ -73,56 +76,50 @@ eInfo = exrinfo(exrFileName);
 eChannelInfo = eInfo.ChannelInfo;
 
 % Need to read in all channels. I think we can do this in exrread() if we
-% put them all in an a/v pair 
+% put them all in an a/v pair
 radianceChannels = [];
-albedoChannel = [];
+albedoChannels = [];
 normalChannels = [];
+rgbChannels = [];
+depthChannels = [];
 
-for ii = 1:numel(eChannelInfo.Properties.RowNames)
+for ii = 1:numel(eChannelInfo.Properties.RowNames) % what about Depth and RGB!
     %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
     channelName = convertCharsToStrings(eChannelInfo.Properties.RowNames{ii});
     if contains(channelName,'Radiance')
         radianceChannels = [radianceChannels, channelName];
     elseif contains(channelName, 'Albedo')
-        albedoChannel = channelName;
-    elseif contains(channelName, ['Nx', 'Ny', 'Nz'])
+        albedoChannels = [albedoChannels channelName]; % Blue, Green, Red
+    elseif ismember(channelName, ["Nx", "Ny", "Nz"])
         normalChannels = [normalChannels, channelName];
+    elseif ismember(channelName, ["R", "G", "B"])
+        rgbChannels = [rgbChannels, channelName]; % Blue, Green, Red
+    elseif ismember(channelName, ["Px", "Py", "Pz"])
+        depthChannels = [depthChannels, channelName]; % Px, Py, Pz
     end
 end
-        
+
 % Read radiance, normal and albedo data
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
-albedoData(:, :, :, 1) = exrread(exrFileName, "Channels",albedoChannel);
+albedoData(:, :, :, 1) = exrread(exrFileName, "Channels",albedoChannels);
 normalData(:, :, :, 1) = exrread(exrFileName, "Channels",normalChannels);
 
-
-
-radianceData = [];
-rFileNames = [];
-radianceChannels = 1;
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling
 for ii = 1:numel(radianceChannels)
-% We  want to write out the radiance channels using their names into
-% .pfm files, AFTER tripline them!
-    if contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Radiance")
-        radianceData(:, :, ii, 2 ) = radianceData(:,:,ii,1);
-        radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
+    % We  want to write out the radiance channels using their names into
+    % .pfm files, AFTER tripline them!
+    radianceData(:, :, ii, 2 ) = radianceData(:,:,ii,1);
+    radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
+    rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".pfm"));
 
-        % Write out the .pfm data as a grayscale for each radiance channel
-        rFileNames{radianceChannels} = fullfile(pp, [radianceChannels(ii), '.pfm']);
-        writePFM(squeeze(eData(:, :, ii, :)),rFileNames{radianceChannels}); % optional scale(?)
-        radianceChannels = radianceChannels + 1;
-    % Albedo is also 3 channels
-    elseif contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Albedo")
-        fprintf("Write albedo here\n");
-    % Normal should be a 3-channel output I think
-    % but is xyz
-    elseif contains( convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "N")
-        fprintf("Write Normal here\n");
-    end
-
+    % Write out the .pfm data as a grayscale for each radiance channel
+    writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
 end
+
+% Albedo is also 3 channels
+
+%% Now write albedo and Normal if they exist
 
 outputTmp = {};
 
@@ -131,28 +128,36 @@ DNImg_pth = {};
 
 %% Run the Denoiser binary
 
+denoiseFlags = " -v 0 -hdr "; % we need hdr for our scenes, -v 0 might help it run faster
 for ii = 1:numel(radianceChannels)
 
-    baseCmd = fullfile(oidn_pth, 'oidnDenoise --hdr ');
-    denoiseImagePath{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
+    baseCmd = fullfile(oidn_pth, "oidnDenoise");
+
+    % what if we try to write over our input file?
+    %denoiseImagePath{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
+    denoiseImagePath{ii} = rFileNames{ii};
 
     if isequal(ii, 1)
-        cmd = [baseCmd, rFileNames{ii},' -o ', denoiseImagePath{ii}];
+        cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
     else
-        cmd = [cmd , ' && ', baseCmd, rFileNames{ii},' -o ', denoiseImagePath{ii} ];
+        cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
     end
 end
 
 %Run the full command executable once assembled
-%tic
+tic
 [status, results] = system(cmd);
-%toc
+toc
+
 if status, error(results); end
 
 
 % NOW we have a lot of pfm files (one per radiance channel)
-%     We can/could read them all back in and write them to an 
+%     We can/could read them all back in and write them to an
 %     output .exr file, unless there is something more clever
+
+return
+% Cut things off here for now, as we only have it working this far
 
 for ii = 1:numel(radianceChannels)
 
