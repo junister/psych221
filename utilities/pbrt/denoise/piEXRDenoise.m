@@ -3,16 +3,14 @@ function outputFileName = piEXRDenoise(exrFileName,varargin)
 % tuned for Intel's OIDN
 %
 % Synopsis
-%   TBD = piAIdenoise(<exr file>)
+%   <output exr file> = piAIdenoise(<input exr file>)
 %
 % Inputs
 %   <exr  file>:
 %
-% Optional key/value
-%   quiet - Do not show the waitbar
 %
 % Returns
-%   ??
+%   <denoised exr file>
 %
 % Description
 %
@@ -76,27 +74,43 @@ eChannelInfo = eInfo.ChannelInfo;
 
 % Need to read in all channels. I think we can do this in exrread() if we
 % put them all in an a/v pair 
-getChannels = [];
+radianceChannels = [];
+albedoChannel = [];
+normalChannels = [];
+
 for ii = 1:numel(eChannelInfo.Properties.RowNames)
     %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
-    getChannels = [getChannels, convertCharsToStrings(eChannelInfo.Properties.RowNames{ii})];
+    channelName = convertCharsToStrings(eChannelInfo.Properties.RowNames{ii});
+    if contains(channelName,'Radiance')
+        radianceChannels = [radianceChannels, channelName];
+    elseif contains(channelName, 'Albedo')
+        albedoChannel = channelName;
+    elseif contains(channelName, ['Nx', 'Ny', 'Nz'])
+        normalChannels = [normalChannels, channelName];
+    end
 end
-eData(:, :, :, 1) = exrread(exrFileName, "Channels",getChannels);
+        
+% Read radiance, normal and albedo data
+radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
+albedoData(:, :, :, 1) = exrread(exrFileName, "Channels",albedoChannel);
+normalData(:, :, :, 1) = exrread(exrFileName, "Channels",normalChannels);
 
-exrData = [];
+
+
+radianceData = [];
 rFileNames = [];
 radianceChannels = 1;
-% We now have all the data in the eData array with the channel being the
+% We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling
-for ii = 1:numel(eChannelInfo.Properties.RowNames)
+for ii = 1:numel(radianceChannels)
 % We  want to write out the radiance channels using their names into
 % .pfm files, AFTER tripline them!
     if contains(convertCharsToStrings(eChannelInfo.Properties.RowNames{ii}), "Radiance")
-        eData(:, :, ii, 2 ) = eData(:,:,ii,1);
-        eData(:, :, ii, 3 ) = eData(:,:,ii,1);
+        radianceData(:, :, ii, 2 ) = radianceData(:,:,ii,1);
+        radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
 
         % Write out the .pfm data as a grayscale for each radiance channel
-        rFileNames{radianceChannels} = fullfile(pp, [eChannelInfo.Properties.RowNames{ii}, '.pfm']);
+        rFileNames{radianceChannels} = fullfile(pp, [radianceChannels(ii), '.pfm']);
         writePFM(squeeze(eData(:, :, ii, :)),rFileNames{radianceChannels}); % optional scale(?)
         radianceChannels = radianceChannels + 1;
     % Albedo is also 3 channels

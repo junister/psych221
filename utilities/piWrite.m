@@ -176,13 +176,22 @@ if ~exist(geometryDir, 'dir'), mkdir(geometryDir); end
 renderDir = thisR.get('rendered dir');
 if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
-% Fix recipe to include depth if it also wants radiance
-% If we want radiance, make sure we also get depth
+% Fix recipe to include depth, albedo, and normal if it also wants radiance
 if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'depth'))
         preRender = thisR.get('rendertype');
         preRender{end+1} = 'depth';
         thisR.set('rendertype', preRender);
         warning("Your recipe is coded to ask for only radiance. As of pbrt-v4 we default to more channels, so better to remove the rendertype from your recipe.\n");
+end
+if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'albedo'))
+        preRender = thisR.get('rendertype');
+        preRender{end+1} = 'albedo';
+        thisR.set('rendertype', preRender);
+end
+if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'normal'))
+        preRender = thisR.get('rendertype');
+        preRender{end+1} = 'normal';
+        thisR.set('rendertype', preRender);
 end
 
 %% Selectively copy data from the input to the output directory.

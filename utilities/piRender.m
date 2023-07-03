@@ -145,30 +145,6 @@ if ~isempty(ourDocker),   renderDocker = ourDocker;
 else, renderDocker = dockerWrapper();
 end
 
-%% Set up the rendering type.
-
-% TODO:  Perhaps we should reconsider how we specify rendertype in V4.
-% We already set render type before piWrite, rendertype param here doesnt
-% seem to have any impact. --ZL
-% After this bit of logical, renderType is never empty.
-if isempty(renderType)
-    % If renderType is empty, we get the value as a metadata type.
-    if ~isempty(thisR.metadata)
-        renderType = thisR.metadata.rendertype;
-    else
-        % If renderType and thisR.metadata are both empty...
-        renderType = {'radiance','depth'}; % could also ask for: 'albedo', 'normal'};
-    end
-end
-
-
-
-if isequal(renderType{1},'all') || isequal(renderType{1},'both')
-    % 'both is legacy
-    % 'all' is an alias for this.  Not sure we should do it this way.
-    renderType = {'radiance','depth'};
-end
-
 %% We have a radiance recipe and we have written the pbrt radiance file
 
 % Set up the output folder.  This folder will be mounted by the Docker
@@ -253,9 +229,9 @@ preRender = tic;
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file
 if renderDocker.verbosity > 0
-    fprintf('\nOutput file:  %s\n',outF);
+    fprintf('Output file:  %s\n',outF);
 elseif renderDocker.verbosity > 1
-    fprintf('\nPBRT result info:  %s\n',result);
+    fprintf('PBRT result info:  %s\n',result);
 end
 
 elapsedTime = toc(preRender);
@@ -286,16 +262,16 @@ if p.Results.exrdenoise
     % NOTE the EXR denoiser has already read the file, so piEXR2iset
     %      shouldn't have to do it all over, but fixing that would
     %      require some heavy lifting, so let's "put it back together"
-    denoisedFile = piEXRDenoise(outFile);
+    postProcessedFile = piEXRDenoise(outFile);
 else
-    denoisedFile = outFile;
+    postProcessedFile = outFile;
 end
 
 %% Convert the returned data to an ieObject
 
 % renderType is a cell array, typically with radiance and depth. But
 % it can also be instance or material.  
-ieObject = piEXR2ISET(denoisedFile, 'recipe',thisR,...
+ieObject = piEXR2ISET(postProcessedFile, 'recipe',thisR,...
     'label',renderType, ...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...
