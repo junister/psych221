@@ -262,16 +262,14 @@ if p.Results.exrdenoise
     % NOTE the EXR denoiser has already read the file, so piEXR2iset
     %      shouldn't have to do it all over, but fixing that would
     %      require some heavy lifting, so let's "put it back together"
-    postProcessedFile = piEXRDenoise(outFile);
-else
-    postProcessedFile = outFile;
+    piEXRDenoise(outFile);
 end
 
 %% Convert the returned data to an ieObject
 
 % renderType is a cell array, typically with radiance and depth. But
 % it can also be instance or material.  
-ieObject = piEXR2ISET(postProcessedFile, 'recipe',thisR,...
+ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
     'label',thisR.metadata.rendertype, ...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...

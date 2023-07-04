@@ -1,4 +1,4 @@
-function outputFileName = piEXRDenoise(exrFileName,varargin)
+function status = piEXRDenoise(exrFileName,varargin)
 % A denoising method (AI based) that applies to multi-spectral HDR data
 % tuned for Intel's OIDN
 %
@@ -32,6 +32,9 @@ function outputFileName = piEXRDenoise(exrFileName,varargin)
 % part of imgtool, distributed with PBRT.
 %
 
+% Set to no error
+status = 0;
+
 %% Parse
 p = inputParser;
 p.addRequired('exrfilename',@(x)(isfile(x)));
@@ -52,22 +55,19 @@ elseif isunix
 elseif ispc
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
 else
-    warning("No denoise binary found.\n")
+    warning("No denoise binary found.\n");
+    status = -1;
 end
 
 if ~isfolder(oidn_pth)
     warning('Could not find the directory:\n%s',oidn_pth);
+    status = -2;
     return;
 end
 
 baseCmd = fullfile(oidn_pth, "oidnDenoise");
 
-
-% Baseline do nothing, this is helpful for profiling & debugging
-outputFileName = exrFileName;
-
 tic; % start timer for deNoise
-
 
 %% NOW WE HAVE A "RAW" EXR FILE
 % That we need to turn into pfm files.
@@ -201,8 +201,10 @@ end
         completeChannels = [completeChannels normalChannels];
     end
 
-    exrwrite(completeImage, outputFileName, "Channels",completeChannels);
+    % Put the newly de-noised image back:
+    exrwrite(completeImage, exrFileName, "Channels",completeChannels);
   
 
 fprintf("Denoised in: %2.3f\n", toc);
+return 
 
