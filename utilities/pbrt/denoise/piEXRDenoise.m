@@ -101,8 +101,20 @@ end
 
 % Read radiance, normal and albedo data
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
-albedoData(:, :, :, 1) = exrread(exrFileName, "Channels",albedoChannels);
-normalData(:, :, :, 1) = exrread(exrFileName, "Channels",normalChannels);
+if ~isempty(albedoChannels)
+    albedoData = exrread(exrFileName, "Channels",albedoChannels);
+    writePFM(albedoData, albedoFileName);
+    albedoFlag = [' -alb ' albedoFileName];
+else
+    albedoFlag = '';
+end
+if ~isempty(normalChannels) 
+    normalData = exrread(exrFileName, "Channels",normalChannels);
+    writePFM(normalData,normalFileName);
+    normalFlag = [ ' -nrm ' normalFileName];
+else
+    normalFlag = '';
+end
 
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling
@@ -117,7 +129,6 @@ for ii = 1:numel(radianceChannels)
     writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
 end
 
-% Albedo is also 3 channels
 
 %% Now write albedo and Normal if they exist
 
@@ -128,28 +139,32 @@ DNImg_pth = {};
 
 %% Run the Denoiser binary
 
-denoiseFlags = " -v 0 -hdr "; % we need hdr for our scenes, -v 0 might help it run faster
+denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, " -hdr "); % we need hdr for our scenes, -v 0 might help it run faster
 for ii = 1:numel(radianceChannels)
 
     baseCmd = fullfile(oidn_pth, "oidnDenoise");
-
-    % what if we try to write over our input file?
-    %denoiseImagePath{ii} = fullfile(piRootPath,'local',sprintf('tmp_dn-%d.pfm',ii));
     denoiseImagePath{ii} = rFileNames{ii};
 
-    if isequal(ii, 1)
-        cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    else
-        cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
-    end
+    % With Albedo and Normal, the batch command gets too long
+    %if isequal(ii, 1)
+    %    cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+    %else
+    %    cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
+    %end
+
+    cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+    tic
+    [status, results] = system(cmd);
+    toc
+    if status, error(results); end
 end
 
+% IF BATCHING
 %Run the full command executable once assembled
-tic
-[status, results] = system(cmd);
-toc
-
-if status, error(results); end
+%tic
+%[status, results] = system(cmd);
+%toc
+%if status, error(results); end
 
 
 % NOW we have a lot of pfm files (one per radiance channel)
