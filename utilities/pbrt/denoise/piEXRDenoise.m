@@ -115,6 +115,9 @@ if ~isempty(normalChannels)
 else
     normalFlag = '';
 end
+if ~isempty(depthChannels) 
+    depthData = exrread(exrFileName, "Channels",depthChannels);
+end
 
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling
@@ -171,9 +174,6 @@ end
 %     We can/could read them all back in and write them to an
 %     output .exr file, unless there is something more clever
 
-return
-% Cut things off here for now, as we only have it working this far
-
 for ii = 1:numel(radianceChannels)
 
     % now read back the results
@@ -185,16 +185,27 @@ for ii = 1:numel(radianceChannels)
     % at this point
     denoisedImage(:, :, ii) = denoisedData(:, :, 1);
 
-    % Now we want to write our channel to our outputFile with the correct
-    % name
-    outputFileName = fullfile(pp, 'denoised.exr'); % for now
-    ourChannelName = eChannelInfo.Properties.RowNames{ii};
-    % !! Need to provide te correct channel name. Sigh.
-    exrwrite(denoisedImage(:,:,ii),outputFileName, 'AppendToFile',true, "Channels",ourChannelName);
-
-    delete(denoiseImagePath{ii});
 end
 
+    outputFileName = exrFileName;
+    completeImage = denoisedImage; % start with radiance channels
+    completeChannels = radianceChannels;
+    if ~isempty(albedoChannels)
+        completeImage(:, :, end+1:end+3) = albedoData;
+        completeChannels = [completeChannels albedoChannels];
+    end
+    if ~isempty(depthChannels)
+        numDepth = numel(depthChannels);
+        completeImage(:, :, end+1:end+numDepth) = depthData;
+        completeChannels = [completeChannels depthChannels];
+    end
+    if ~isempty(normalChannels)
+        completeImage(:, :, end+1:end+3) = normalData;
+        completeChannels = [completeChannels normalChannels];
+    end
+
+    exrwrite(completeImage, outputFileName, "Channels",completeChannels);
+   
 
 fprintf("Denoised in: %2.3f\n", toc);
 
