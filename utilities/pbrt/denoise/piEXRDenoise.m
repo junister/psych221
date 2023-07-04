@@ -60,6 +60,9 @@ if ~isfolder(oidn_pth)
     return;
 end
 
+baseCmd = fullfile(oidn_pth, "oidnDenoise");
+
+
 % Baseline do nothing, this is helpful for profiling & debugging
 outputFileName = exrFileName;
 
@@ -103,15 +106,18 @@ end
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
 if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
+    % Denoise the albedo
     writePFM(albedoData, albedoFileName);
-    albedoFlag = [' -alb ' albedoFileName];
+    [status, result] = system(strcat(baseCmd, " --hdr ", albedoFileName, " -o ",albedoFileName ));
+    albedoFlag = [' --clean_aux --alb ' albedoFileName];
 else
     albedoFlag = '';
 end
 if ~isempty(normalChannels) 
     normalData = exrread(exrFileName, "Channels",normalChannels);
     writePFM(normalData,normalFileName);
-    normalFlag = [ ' -nrm ' normalFileName];
+    [status, result] = system(strcat(baseCmd, " --hdr ", normalFileName, " -o ",normalFileName ));
+    normalFlag = [ ' --nrm ' normalFileName];
 else
     normalFlag = '';
 end
@@ -133,19 +139,12 @@ for ii = 1:numel(radianceChannels)
 end
 
 
-%% Now write albedo and Normal if they exist
-
-outputTmp = {};
-
-%% NEED TO SET DN Path
-DNImg_pth = {};
 
 %% Run the Denoiser binary
 
 denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, " -hdr "); % we need hdr for our scenes, -v 0 might help it run faster
 for ii = 1:numel(radianceChannels)
 
-    baseCmd = fullfile(oidn_pth, "oidnDenoise");
     denoiseImagePath{ii} = rFileNames{ii};
 
     % With Albedo and Normal, the batch command gets too long
@@ -156,9 +155,7 @@ for ii = 1:numel(radianceChannels)
     %end
 
     cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    tic
     [status, results] = system(cmd);
-    toc
     if status, error(results); end
 end
 
@@ -205,7 +202,7 @@ end
     end
 
     exrwrite(completeImage, outputFileName, "Channels",completeChannels);
-   
+  
 
 fprintf("Denoised in: %2.3f\n", toc);
 
