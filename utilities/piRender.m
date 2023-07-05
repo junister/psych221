@@ -39,6 +39,12 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
 %
+%  denoise    - Apply denoising, default 'none'
+%               also: 'exr_radiance', 'exr_albedo', 'exr_all' (includes
+%               normal)
+%               ** These assume the recipe asks for them and the camera
+%               type supports them.
+%
 % wave      -   Adjust the wavelength sampling of the returned ieObject
 %
 % Output:
@@ -121,8 +127,8 @@ p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
 
-% Optional OIDN-based denoising
-p.addParameter('exrdenoise',false,@islogical);
+% Optional denoising -- OIDN-based for now
+p.addParameter('do_denoise','none',@ischar);
 
 % Allow passthrough of arguments
 p.KeepUnmatched = true;
@@ -258,11 +264,8 @@ if status
 end
 
 %% EXR-based denoising option here
-if p.Results.exrdenoise
-    % NOTE the EXR denoiser has already read the file, so piEXR2iset
-    %      shouldn't have to do it all over, but fixing that would
-    %      require some heavy lifting, so let's "put it back together"
-    piEXRDenoise(outFile);
+if ~isequal(p.Results.do_denoise, 'none')
+    piEXRDenoise(outFile,'channels', p.Results.do_denoise);
 end
 
 %% Convert the returned data to an ieObject

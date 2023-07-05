@@ -8,6 +8,8 @@ function status = piEXRDenoise(exrFileName,varargin)
 % Inputs
 %   <exr  file>:
 %
+%   'channels': 'exr_radiance', 'exr_albedo', 'exr_all'
+%
 %
 % Returns
 %   <denoised exr file>
@@ -39,6 +41,7 @@ status = 0;
 p = inputParser;
 p.addRequired('exrfilename',@(x)(isfile(x)));
 p.addParameter('placebo',true);
+p.addParameter('channels','');
 p.parse(exrFileName, varargin{:});
 
 % Generate file names for albedo and normal if we have them
@@ -46,6 +49,18 @@ p.parse(exrFileName, varargin{:});
 albedoFileName = fullfile(pp, 'Albedo.pfm');
 normalFileName = fullfile(pp, 'Normal.pfm');
 
+% Decide whether to use additional data for denoising. There is improvement
+% in detail but the process takes longer
+if ismember(p.Results.channels, ['exr_albedo', 'exr_all'])
+    useAlbedo = true;
+else
+    useAlbedo = false;
+end
+if ismember(p.Results.channels, ['exr_all'])
+    useNormal = true;
+else
+    useNormal = false;
+end
 %% Set up the denoiser path information and check
 
 if ismac
@@ -89,7 +104,7 @@ depthChannels = [];
 for ii = 1:numel(eChannelInfo.Properties.RowNames) % what about Depth and RGB!
     %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
     channelName = convertCharsToStrings(eChannelInfo.Properties.RowNames{ii});
-    if contains(channelName,'Radiance')
+    if contains(channelName,'Radiance') % we always want radiance channels
         radianceChannels = [radianceChannels, channelName];
     elseif contains(channelName, 'Albedo')
         albedoChannels = [albedoChannels channelName]; % Blue, Green, Red
@@ -106,22 +121,29 @@ end
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
 if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
-    % Denoise the albedo
-    writePFM(albedoData, albedoFileName);
-    [status, result] = system(strcat(baseCmd, " --hdr ", albedoFileName, " -o ",albedoFileName ));
-    albedoFlag = [' --clean_aux --alb ' albedoFileName];
+    if useAlbedo % Denoise the albedo
+        writePFM(albedoData, albedoFileName);
+        [status, result] = system(strcat(baseCmd, " --hdr ", albedoFileName, " -o ",albedoFileName ));
+        albedoFlag = [' --clean_aux --alb ' albedoFileName];
+    else
+        albedoFlag = '';
+    end
 else
     albedoFlag = '';
 end
-if ~isempty(normalChannels) 
+if ~isempty(normalChannels)
     normalData = exrread(exrFileName, "Channels",normalChannels);
-    writePFM(normalData,normalFileName);
-    [status, result] = system(strcat(baseCmd, " --hdr ", normalFileName, " -o ",normalFileName ));
-    normalFlag = [ ' --nrm ' normalFileName];
+    if useNormal
+        writePFM(normalData,normalFileName);
+        [status, result] = system(strcat(baseCmd, " --hdr ", normalFileName, " -o ",normalFileName ));
+        normalFlag = [ ' --nrm ' normalFileName];
+    else
+        normalFlag = '';
+    end
 else
     normalFlag = '';
 end
-if ~isempty(depthChannels) 
+if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
 
@@ -184,27 +206,27 @@ for ii = 1:numel(radianceChannels)
 
 end
 
-    outputFileName = exrFileName;
-    completeImage = denoisedImage; % start with radiance channels
-    completeChannels = radianceChannels;
-    if ~isempty(albedoChannels)
-        completeImage(:, :, end+1:end+3) = albedoData;
-        completeChannels = [completeChannels albedoChannels];
-    end
-    if ~isempty(depthChannels)
-        numDepth = numel(depthChannels);
-        completeImage(:, :, end+1:end+numDepth) = depthData;
-        completeChannels = [completeChannels depthChannels];
-    end
-    if ~isempty(normalChannels)
-        completeImage(:, :, end+1:end+3) = normalData;
-        completeChannels = [completeChannels normalChannels];
-    end
+outputFileName = exrFileName;
+completeImage = denoisedImage; % start with radiance channels
+completeChannels = radianceChannels;
+if ~isempty(albedoChannels)
+    completeImage(:, :, end+1:end+3) = albedoData;
+    completeChannels = [completeChannels albedoChannels];
+end
+if ~isempty(depthChannels)
+    numDepth = numel(depthChannels);
+    completeImage(:, :, end+1:end+numDepth) = depthData;
+    completeChannels = [completeChannels depthChannels];
+end
+if ~isempty(normalChannels)
+    completeImage(:, :, end+1:end+3) = normalData;
+    completeChannels = [completeChannels normalChannels];
+end
 
-    % Put the newly de-noised image back:
-    exrwrite(completeImage, exrFileName, "Channels",completeChannels);
-  
+% Put the newly de-noised image back:
+exrwrite(completeImage, exrFileName, "Channels",completeChannels);
+
 
 fprintf("Denoised in: %2.3f\n", toc);
-return 
+return
 

@@ -189,9 +189,6 @@ else % batch alternative
         % maybe do a parfor once this works!
         writePFM(img_sp, outputTmp{ii});
 
-        % might have to be different on PC where we can't necessarily
-        % chain commands with ';' or "&&'
-        % maybe try wsl??
         baseCmd = fullfile(oidn_pth, 'oidnDenoise --hdr ');
         
         if isequal(ii, 1)
