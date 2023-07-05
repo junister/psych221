@@ -78,6 +78,9 @@ otherData.materialID = [];
 otherData.coordinates = [];
 otherData.instanceID = [];
 
+normalImage = [];
+albedoImage = [];
+
 % we assume we can work through a cell array, but don't always get one
 if ~iscell(label), label = {label}; end
 
@@ -154,13 +157,9 @@ for ii = 1:numel(label)
             otherData.materialID = piReadEXR(inputFile, 'data type','material');
 
         case 'normal'
-            % to add -- piReadEXR supports this now, but not sure where to
-            % store
-            disp('Normal NYI')
+            normalImage = piReadEXR(inputFile, 'data type','albedo');
         case 'albedo'
-            % to add -- piReadEXR supports this now, but not sure where to
-            % store
-            disp('albedo NYI')
+            albedoImage = piReadEXR(inputFile, 'data type','normal');
         case 'instance'
             % Should the instanceID be ieObject?
             otherData = piReadEXR(inputFile, 'data type','instanceId');
@@ -327,6 +326,13 @@ end
 
 if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
+    % Not sure where we want to put these
+    if ~isempty(normalImage)
+        ieObject.normalImage = normalImage;
+    end
+    if ~isempty(albedoImage)
+        ieObject.albedoImage = albedoImage;
+    end
 end
 
 ieObject.metadata = otherData;
