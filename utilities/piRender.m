@@ -120,9 +120,6 @@ p.addParameter('wave', 400:10:700, @isnumeric);
 
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 
-% If this is not set, we use thisR.what is in the recipe
-p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
-
 % If you would to render on your local machine, set this to true.  And
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
@@ -140,9 +137,6 @@ meanLuminance    = p.Results.meanluminance;   % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
 
 wave             = p.Results.wave;
-renderType       = p.Results.rendertype;
-
-if ischar(renderType), renderType = {renderType}; end
 
 %% Set up the dockerWrapper
 
@@ -170,15 +164,6 @@ pbrtFile = thisR.outputFile;
 %% Build the docker command
 
 [~,currName,~] = fileparts(pbrtFile);
-
-%{
-% Not sure we always want to do this...
-% Make sure renderings folder exists and is fresh
-if(isfolder(fullfile(outputFolder,'renderings')))
-    rmdir(fullfile(outputFolder, 'renderings'), 's');
-end
-mkdir(fullfile(outputFolder,'renderings'));
-%}
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
