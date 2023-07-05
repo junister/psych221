@@ -1,4 +1,4 @@
-function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
+function [oi, pupilFunction, psf_spectral, pupilSupportX, pupilSupportY] = piFlareApply(scene, varargin)
 % Add lens flare to a scene/optical image.
 %
 % Synopsis:
@@ -140,7 +140,14 @@ oi = oiPad(oi,padSize,sDist);
 oiSize = oiGet(oi,'size');
 oiHeight = oiSize(1); oiWidth = oiSize(2);
 
+%{
+% Zhenyi's original angular width doesn't match the scene.  
 oi = oiSet(oi, 'wAngular', 2*atand((oiWidth*psfsamplespacing/2)/focalLength));
+%}
+oi = oiSet(oi, 'wAngular', sceneGet(scene,'wangular')*1.25);
+% Now it matches the standard computation.  But it does not solve the
+% problem.
+% oiGet(oi,'wangular','deg')
 
 %% Generate scratch and dirty markings in the aperture mask
 
@@ -216,10 +223,13 @@ for ww = 1:nWave
     wavefront = zeros(size(pupilRho)) + defocusTerm*(2 * pupilRho .^2 - 1);
 
     phase_term = exp(1i*2 * pi .* wavefront);
-    OPD = phase_term.*pupilMask;
+
+    % This is the pupil function.  We should compare with the wvf
+    % calculation.
+    pupilFunction = phase_term.*pupilMask;
 
     % Calculate the PSF from the pupil function
-    psfFnAmp = fftshift(fft2(ifftshift(OPD)));
+    psfFnAmp = fftshift(fft2(ifftshift(pupilFunction)));
     inten = psfFnAmp .* conj(psfFnAmp);    % unnormalized PSF.
     shiftedPsf = real(inten);
 
