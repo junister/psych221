@@ -63,15 +63,14 @@ else
 end
 %% Set up the denoiser path information and check
 
+oidn_Binary = 'oidnDenoise';
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 elseif isunix
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
 elseif ispc
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
-else
-    warning("No denoise binary found.\n");
-    status = -1;
+    %oidn_Binary = 'oidnDenoise.exe';
 end
 
 if ~isfolder(oidn_pth)
@@ -80,7 +79,11 @@ if ~isfolder(oidn_pth)
     return;
 end
 
-baseCmd = fullfile(oidn_pth, "oidnDenoise");
+% Add to path to shorten the batch command, otherwise it is too
+% long to execute as a single system() call.
+originalFolder = cd(oidn_pth);
+baseCmd = oidn_Binary;
+%baseCmd = fullfile(oidn_pth, "oidnDenoise");
 
 tic; % start timer for deNoise
 
@@ -170,23 +173,24 @@ for ii = 1:numel(radianceChannels)
     denoiseImagePath{ii} = rFileNames{ii};
 
     % With Albedo and Normal, the batch command gets too long
-    %if isequal(ii, 1)
-    %    cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    %else
-    %    cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
-    %end
+    % maybe we can fix it with cwd or addpath()?
+    if isequal(ii, 1)
+        cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+    else
+        cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
+    end
 
-    cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    [status, results] = system(cmd);
-    if status, error(results); end
+    %cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+    %[status, results] = system(cmd);
+    %if status, error(results); end
 end
 
 % IF BATCHING
 %Run the full command executable once assembled
-%tic
-%[status, results] = system(cmd);
-%toc
-%if status, error(results); end
+tic
+[status, results] = system(cmd);
+toc
+if status, error(results); end
 
 
 % NOW we have a lot of pfm files (one per radiance channel)
@@ -226,6 +230,9 @@ end
 % Put the newly de-noised image back:
 exrwrite(completeImage, exrFileName, "Channels",completeChannels);
 
+% If we crash, user is stuck in the wrong place until we add a 
+% try/catch block
+cd(originalFolder);
 
 fprintf("Denoised in: %2.3f\n", toc);
 return
