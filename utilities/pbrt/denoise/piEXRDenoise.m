@@ -9,7 +9,7 @@ function status = piEXRDenoise(exrFileName,varargin)
 %   <exr  file>:
 %
 %   'channels': 'exr_radiance', 'exr_albedo', 'exr_all'
-%
+%   'filter': 'RT' (Default) | 'RTLightmap' (not clear whether this helps)
 %
 % Returns
 %   <denoised exr file>
@@ -42,6 +42,7 @@ p = inputParser;
 p.addRequired('exrfilename',@(x)(isfile(x)));
 p.addParameter('placebo',true);
 p.addParameter('channels','');
+p.addParameter('filter','RT'); % RTLightmap is also an option
 p.parse(exrFileName, varargin{:});
 
 % Generate file names for albedo and normal if we have them
@@ -61,6 +62,14 @@ if ismember(p.Results.channels, ['exr_all'])
 else
     useNormal = false;
 end
+
+% only set filter flag if needed, to keep the command short
+if ~isequal(p.Results.filter, 'RT')
+    filterFlag = [' -f ' p.Results.filter ' '];
+else
+    filterFlag = '';
+end
+
 %% Set up the denoiser path information and check
 
 oidn_Binary = 'oidnDenoise';
@@ -104,6 +113,9 @@ normalChannels = [];
 rgbChannels = [];
 depthChannels = [];
 
+% set command flags
+commandFlags = [filterFlag ' --hdr '];
+
 for ii = 1:numel(eChannelInfo.Properties.RowNames) % what about Depth and RGB!
     %fprintf("Channel: %s\n", eChannelInfo.Properties.RowNames{ii});
     channelName = convertCharsToStrings(eChannelInfo.Properties.RowNames{ii});
@@ -126,7 +138,7 @@ if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
     if useAlbedo % Denoise the albedo
         writePFM(albedoData, albedoFileName);
-        [status, result] = system(strcat(baseCmd, " --hdr ", albedoFileName, " -o ",albedoFileName ));
+        [status, result] = system(strcat(baseCmd, commandFlags, " ", albedoFileName, " -o ",albedoFileName ));
         albedoFlag = [' --clean_aux --alb ' albedoFileName];
     else
         albedoFlag = '';
@@ -138,7 +150,7 @@ if ~isempty(normalChannels)
     normalData = exrread(exrFileName, "Channels",normalChannels);
     if useNormal
         writePFM(normalData,normalFileName);
-        [status, result] = system(strcat(baseCmd, " --hdr ", normalFileName, " -o ",normalFileName ));
+        [status, result] = system(strcat(baseCmd, commandFlags, " ", normalFileName, " -o ",normalFileName ));
         normalFlag = [ ' --nrm ' normalFileName];
     else
         normalFlag = '';
@@ -167,7 +179,7 @@ end
 
 %% Run the Denoiser binary
 
-denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, " -hdr "); % we need hdr for our scenes, -v 0 might help it run faster
+denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, commandFlags, " "); % we need hdr for our scenes, -v 0 might help it run faster
 for ii = 1:numel(radianceChannels)
 
     denoiseImagePath{ii} = rFileNames{ii};
