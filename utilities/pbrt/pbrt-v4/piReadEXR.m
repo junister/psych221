@@ -82,11 +82,14 @@ switch dataType
         output(:,:,2) = piEXR2Mat(filename, 'Ny');
         output(:,:,3) = piEXR2Mat(filename, 'Nz');
     case "albedo"
-        output = piEXR2Mat(filename, 'Albedo');
+        % albedo contains three "sub-channels" that are B, G, R in order
+        output(:,:,1) = piEXR2Mat(filename, 'Albedo.R');
+        output(:,:,2) = piEXR2Mat(filename, 'Albedo.G');
+        output(:,:,3) = piEXR2Mat(filename, 'Albedo.B');
     case "instanceId" % single channel
         output = piEXR2Mat(filename, 'InstanceId');
     otherwise
-        error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
+        error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal", "albedo"');
 end
 
 

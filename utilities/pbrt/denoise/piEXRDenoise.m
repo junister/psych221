@@ -57,7 +57,7 @@ if ismember(p.Results.channels, ['exr_albedo', 'exr_all'])
 else
     useAlbedo = false;
 end
-if ismember(p.Results.channels, ['exr_all'])
+if ismember(p.Results.channels, 'exr_all')
     useNormal = true;
 else
     useNormal = false;
@@ -79,20 +79,25 @@ elseif isunix
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
 elseif ispc
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
-    %oidn_Binary = 'oidnDenoise.exe';
 end
 
 if ~isfolder(oidn_pth)
     warning('Could not find the directory:\n%s',oidn_pth);
     status = -2;
     return;
+else
+    % Add to path to shorten the batch command, otherwise it is too
+    % long to execute as a single system() call.
+    
+    % DEFINITELY HACKY, but adding the binary to the path doesn't seem to
+    % work. Maybe add /local to the path for all the output files instead?
+
+    originalFolder = cd(oidn_pth);
+    baseCmd = oidn_Binary;
+    % non-batch version -- about 20-25% slower
+    %baseCmd = fullfile(oidn_pth, oidn_Binary);
 end
 
-% Add to path to shorten the batch command, otherwise it is too
-% long to execute as a single system() call.
-originalFolder = cd(oidn_pth);
-baseCmd = oidn_Binary;
-%baseCmd = fullfile(oidn_pth, "oidnDenoise");
 
 tic; % start timer for deNoise
 
@@ -197,12 +202,13 @@ for ii = 1:numel(radianceChannels)
     %if status, error(results); end
 end
 
-% IF BATCHING
+% BATCH version:
 %Run the full command executable once assembled
-tic
 [status, results] = system(cmd);
-toc
-if status, error(results); end
+if status
+    cd(originalFolder);
+    error(results);
+end
 
 
 % NOW we have a lot of pfm files (one per radiance channel)
@@ -240,12 +246,17 @@ if ~isempty(normalChannels)
 end
 
 % Put the newly de-noised image back:
-exrwrite(completeImage, exrFileName, "Channels",completeChannels);
+try
+    exrwrite(completeImage, exrFileName, "Channels",completeChannels);
+catch
+    cd(originalFolder);
+    error('exrwrite failed');
+end
 
-% If we crash, user is stuck in the wrong place until we add a 
+% If using batch and we crash, user is stuck in the wrong place until we add a
 % try/catch block
 cd(originalFolder);
 
 fprintf("Denoised in: %2.3f\n", toc);
-return
+
 
