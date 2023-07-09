@@ -1,7 +1,12 @@
 function status = piEXRDenoise(exrFileName,varargin)
-% A denoising method (AI based) that applies to multi-spectral HDR data
-% tuned for Intel's OIDN
+% A denoising method (AI based and specific to Ray Traced images)
+% that applies to multi-spectral HDR data tuned for Intel's OIDN
 %
+% NOTE: Intel's denoiser binary only accepts 3-channel images, so we need
+%       to pull our typical 31 channel images apart, then replicate each
+%       channel to make it a pseudo grayscale, and denoise each in turn.
+%       This is very expensive, but we haven't found a better approach yet.
+
 % Synopsis
 %   <output exr file> = piAIdenoise(<input exr file>)
 %
@@ -9,10 +14,15 @@ function status = piEXRDenoise(exrFileName,varargin)
 %   <exr  file>:
 %
 %   'channels': 'exr_radiance', 'exr_albedo', 'exr_all'
-%   'filter': 'RT' (Default) | 'RTLightmap' (not clear whether this helps)
+%   'filter': 'RT' (Default) | 'RTLightmap' (for denoising lightmaps?)
 %
+% Output:
+%    Denoised version of <exr file> in the same location
+%    Other known channels are re-written intact
+%    
 % Returns
-%   <denoised exr file>
+%   status -- 0 if successful, otherwise - <error code>
+%
 %
 % Description
 %
@@ -40,13 +50,12 @@ status = 0;
 %% Parse
 p = inputParser;
 p.addRequired('exrfilename',@(x)(isfile(x)));
-p.addParameter('placebo',true);
 p.addParameter('channels','');
 p.addParameter('filter','RT'); % RTLightmap is also an option
 p.parse(exrFileName, varargin{:});
 
 % Generate file names for albedo and normal if we have them
-[pp, nn, ee] = fileparts(p.Results.exrfilename);
+[pp, ~, ~] = fileparts(p.Results.exrfilename);
 albedoFileName = fullfile(pp, 'Albedo.pfm');
 normalFileName = fullfile(pp, 'Normal.pfm');
 
@@ -64,8 +73,8 @@ else
 end
 
 % only set filter flag if needed, to keep the command short
-if ~isequal(p.Results.filter, 'RT')
-    filterFlag = [' -f ' p.Results.filter ' '];
+if ~isequal(p.Results.filter, 'RT') % RT is the default
+    filterFlag = [' -f ' p.Results.filter ' ']; 
 else
     filterFlag = '';
 end
@@ -73,6 +82,9 @@ end
 %% Set up the denoiser path information and check
 
 oidn_Binary = 'oidnDenoise';
+
+% Someone should unzip the 2.0 mac & linux binaries I stuck in the repo and
+% test them
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 elseif isunix
@@ -103,7 +115,7 @@ tic; % start timer for deNoise
 
 %% NOW WE HAVE A "RAW" EXR FILE
 % That we need to turn into pfm files.
-% "regular" denoiser normalizes each channel, but not sure if we should?
+% piAIDenoise normalizes each channel, but not sure if we should?
 
 %% Get needed data from the .exr file
 % First, get channel info
@@ -143,6 +155,10 @@ if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
     if useAlbedo % Denoise the albedo
         writePFM(albedoData, albedoFileName);
+
+        % First we denoise the albedo channels, to improve our results
+        % We only do this once per image, as it is the same for all
+        % of our radiance iterations
         [status, result] = system(strcat(baseCmd, commandFlags, " ", albedoFileName, " -o ",albedoFileName ));
         albedoFlag = [' --clean_aux --alb ' albedoFileName];
     else
@@ -153,6 +169,8 @@ else
 end
 if ~isempty(normalChannels)
     normalData = exrread(exrFileName, "Channels",normalChannels);
+
+    % Normal doesn't seem particularly useful, but here for completeness
     if useNormal
         writePFM(normalData,normalFileName);
         [status, result] = system(strcat(baseCmd, commandFlags, " ", normalFileName, " -o ",normalFileName ));
@@ -160,16 +178,19 @@ if ~isempty(normalChannels)
     else
         normalFlag = '';
     end
+
 else
     normalFlag = '';
 end
+
+% We only read the depth channels so that we can write them back out intact
 if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
 
 % We now have all the data in the radianceData array with the channel being the
-% 3rd dimension, but with no labeling
-for ii = 1:numel(radianceChannels)
+% 3rd dimension, but with no labeling of the channels
+for ii = 1:numel(radianceChannels) 
     % We  want to write out the radiance channels using their names into
     % .pfm files, AFTER tripline them!
     radianceData(:, :, ii, 2 ) = radianceData(:,:,ii,1);
@@ -180,23 +201,22 @@ for ii = 1:numel(radianceChannels)
     writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
 end
 
-
-
 %% Run the Denoiser binary
 
 denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, commandFlags, " "); % we need hdr for our scenes, -v 0 might help it run faster
+
+% Iterate through our radiance channels
 for ii = 1:numel(radianceChannels)
 
     denoiseImagePath{ii} = rFileNames{ii};
 
-    % With Albedo and Normal, the batch command gets too long
-    % maybe we can fix it with cwd or addpath()?
     if isequal(ii, 1)
         cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
     else
         cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
     end
 
+    % IF we want to avoid using cd()
     %cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
     %[status, results] = system(cmd);
     %if status, error(results); end
