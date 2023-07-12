@@ -1,4 +1,4 @@
-function [oi, pupilFunction, psf_spectral, pupilSupportX, pupilSupportY] = piFlareApply(scene, varargin)
+function [oi, pupilFunction, psf_spectral, psfSupport] = piFlareApply(scene, varargin)
 % Add lens flare to a scene/optical image.
 %
 % Synopsis:
@@ -116,6 +116,7 @@ pupilDiameter   = focalLength / fNumber; % (m)
 
 % This code follows the logic in ISETCam routines 
 %    opticsDLCompute and opticsOTF
+%
 [sceneHeight, sceneWidth, ~] = size(scene.data.photons);
 oi = piOICreate(scene.data.photons, 'focalLength', focalLength, 'fNumber', fNumber);
 oi = oiSet(oi,'photons',oiCalculateIrradiance(scene,oi));
@@ -151,7 +152,7 @@ oi = oiSet(oi, 'wAngular', sceneGet(scene,'wangular')*1.25);
 
 %% Generate scratch and dirty markings in the aperture mask
 
-% We now have an oi.  We use its parameters to create an wavefront
+% We now have an oi.  We use its parameters to create a wavefront
 % aberration arising from scratches.  Below here we need
 %
 %  oiWidth, oiHeight, imgSize, 
@@ -162,11 +163,9 @@ if dirtylevel>0
     else 
         imgSize = oiHeight;
     end
+    % wvfAperture is now a new function based on this RandomDirtyAperture
     dirtyAperture = RandomDirtyAperture(imgSize, dirtylevel); % crop this into scene size
 end
-
-% We should add different methods to change the mask, beyond dirty.  They
-% might go here.  The dirtyAperture might end up being a spectral function.
 
 % For each wavelength, apply the dirty mask
 nWave = numel(waveList);
@@ -220,13 +219,15 @@ for ww = 1:nWave
     % Paul Fricker (2021). Analyzing LASIK Optical Data Using Zernike Functions.
     % https://www.mathworks.com/company/newsletters/articles/analyzing-lasik-optical-data-using-zernike-functions.html
     % ---------------------------------------------------------------------
+    
+    % Default defocusTerm is 0
     wavefront = zeros(size(pupilRho)) + defocusTerm*(2 * pupilRho .^2 - 1);
 
     phase_term = exp(1i*2 * pi .* wavefront);
 
     % This is the pupil function.  We should compare with the wvf
     % calculation.
-    pupilFunction = phase_term.*pupilMask;
+    pupilFunction = phase_term .* pupilMask;
 
     % Calculate the PSF from the pupil function
     psfFnAmp = fftshift(fft2(ifftshift(pupilFunction)));
@@ -259,6 +260,8 @@ for ww = 1:nWave
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
+
+psfSupport = oiGet(oi,'spatial support','um');
 
 %% The properties of the oi are not fully set.  
 
