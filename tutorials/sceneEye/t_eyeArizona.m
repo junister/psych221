@@ -11,11 +11,6 @@
 
 %% Initialize paths and such
 
-if piCamBio
-    % True means ISETCam. False means ISETBio.  
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
