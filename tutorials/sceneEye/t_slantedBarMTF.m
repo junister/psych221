@@ -14,25 +14,70 @@
 %
 % TL ISETBIO Team, 2017
 
-%% Check ISETBIO and initialize
+%% Initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Render a fast image of the slanted bar first
 
-thisSE = sceneEye('slantedbar');
-thisSE.set('fov',3);                % About 3 deg on a side
+thisSE = sceneEye('slantedEdge','eye model','arizona');
+thisSE.set('to',[0 0 0]);
+
+% Illuminate with a blue light
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[0.5 0.5 1]);
+thisSE.set('light',thisLight, 'add');
+thisSE.set('light',thisLight.name,'specscale',0.5);
+thisSE.set('fov',2);
+
+thisSE.set('rays per pixel',256);   % Pretty quick, but not high quality
 thisSE.set('spatial samples',512);  % Number of OI sample points
-oi = thisSE.render;
-oiWindow(oi);
+thisSE.set('object distance',20);   % Units are meters, I think (BW).
+
+thisSE.set('use pinhole',true);
+thisSE.summary;
+
+dockerWrapper.reset;
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','slantedBar-pinhole');
+
+%%  Put the object at the 
+thisSE.set('use pinhole',false);
+thisSE.set('object distance',0.5);   % Units are meters, I think (BW).
+
+% I tried a series of object distances and accommodation values by
+% hand. (BW).  Puzzling and in need of more fixing for calibration.
+%{
+
+  These were all for the arizona eye model
+  We should make a new script and do it again for the navarro eye
+
+  With an object distance of 1, accommodation value of
+    1 was a bit blurry
+    2 was more blurry
+    0.5 was pretty sharp.
+
+  
+  With an object distance of 10, accommodation value of
+    0.5 was quite blurry
+    1 was more blurry
+    0.25 was sharper
+    0.2  was a bit sharper
+
+  With an object distance of 0.5
+    0.2 was weird and blue all of a sudden
+    0.5 was sharper and still blue
+    1   was sharp
+    2   was blurry again
+%}
+thisSE.set('accommodation',1);     % Units are diopters (1/m)
+thisSE.piWRS('docker wrapper',thisDocker,'name','slantedBar-eye');
 
 %% Increase the  number of ray samples to get rid of graphics noise
 
+% Needs work and calibration.  See above.  Also, this is old code.
+
+%{
 thisSE.set('rays per pixel',128);
 oi = thisSE.render;
 oiWindow(oi);
@@ -60,6 +105,7 @@ oiWindow(oi);
 thisSE.set('focal distance',5); % Set the focus off the plane
 oi = thisSE.render;               % Render
 oiWindow(oi);
+%}
 
 %%
 % The slanted bar scene consists of a square plane (1x1 m) that is

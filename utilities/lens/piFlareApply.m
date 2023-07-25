@@ -1,4 +1,4 @@
-function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
+function [oi, pupilFunction, psf_spectral, psfSupport] = piFlareApply(scene, varargin)
 % Add lens flare to a scene/optical image.
 %
 % Synopsis:
@@ -6,10 +6,11 @@ function [oi, pupilMask, psf_spectral] = piFlareApply(scene, varargin)
 %
 % Brief description:
 %   Apply a 'scattering flare' PSF to a scene and generate an optical
-%   image. 
-%
-%   The scattering flare is implemented based on the paper "How to
+%   image. The scattering flare is implemented based on the paper "How to
 %   Train Neural Networks for Flare Removal" by Wu et al.
+%
+%   This is dust, scratches and aperture flare.  We are reimplementing
+%   using the wavefront toolbox, but this was the original implementation.
 %
 % Inputs:
 %   scene: An ISET scene structure.
@@ -115,6 +116,7 @@ pupilDiameter   = focalLength / fNumber; % (m)
 
 % This code follows the logic in ISETCam routines 
 %    opticsDLCompute and opticsOTF
+%
 [sceneHeight, sceneWidth, ~] = size(scene.data.photons);
 oi = piOICreate(scene.data.photons, 'focalLength', focalLength, 'fNumber', fNumber);
 oi = oiSet(oi,'photons',oiCalculateIrradiance(scene,oi));
@@ -139,11 +141,18 @@ oi = oiPad(oi,padSize,sDist);
 oiSize = oiGet(oi,'size');
 oiHeight = oiSize(1); oiWidth = oiSize(2);
 
+%{
+% Zhenyi's original angular width doesn't match the scene.  
 oi = oiSet(oi, 'wAngular', 2*atand((oiWidth*psfsamplespacing/2)/focalLength));
+%}
+oi = oiSet(oi, 'wAngular', sceneGet(scene,'wangular')*1.25);
+% Now it matches the standard computation.  But it does not solve the
+% problem.
+% oiGet(oi,'wangular','deg')
 
 %% Generate scratch and dirty markings in the aperture mask
 
-% We now have an oi.  We use its parameters to create an wavefront
+% We now have an oi.  We use its parameters to create a wavefront
 % aberration arising from scratches.  Below here we need
 %
 %  oiWidth, oiHeight, imgSize, 
@@ -154,11 +163,9 @@ if dirtylevel>0
     else 
         imgSize = oiHeight;
     end
+    % wvfAperture is now a new function based on this RandomDirtyAperture
     dirtyAperture = RandomDirtyAperture(imgSize, dirtylevel); % crop this into scene size
 end
-
-% We should add different methods to change the mask, beyond dirty.  They
-% might go here.  The dirtyAperture might end up being a spectral function.
 
 % For each wavelength, apply the dirty mask
 nWave = numel(waveList);
@@ -212,13 +219,18 @@ for ww = 1:nWave
     % Paul Fricker (2021). Analyzing LASIK Optical Data Using Zernike Functions.
     % https://www.mathworks.com/company/newsletters/articles/analyzing-lasik-optical-data-using-zernike-functions.html
     % ---------------------------------------------------------------------
+    
+    % Default defocusTerm is 0
     wavefront = zeros(size(pupilRho)) + defocusTerm*(2 * pupilRho .^2 - 1);
 
     phase_term = exp(1i*2 * pi .* wavefront);
-    OPD = phase_term.*pupilMask;
+
+    % This is the pupil function.  We should compare with the wvf
+    % calculation.
+    pupilFunction = phase_term .* pupilMask;
 
     % Calculate the PSF from the pupil function
-    psfFnAmp = fftshift(fft2(ifftshift(OPD)));
+    psfFnAmp = fftshift(fft2(ifftshift(pupilFunction)));
     inten = psfFnAmp .* conj(psfFnAmp);    % unnormalized PSF.
     shiftedPsf = real(inten);
 
@@ -248,6 +260,8 @@ for ww = 1:nWave
     photons_fl(:,:,ww) = ImageConvFrequencyDomain(oi.data.photons(:,:,ww), psf_spectral(:,:,ww), 2 );
 
 end
+
+psfSupport = oiGet(oi,'spatial support','um');
 
 %% The properties of the oi are not fully set.  
 
