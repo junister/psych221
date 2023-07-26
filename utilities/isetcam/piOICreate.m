@@ -6,7 +6,7 @@ function oi = piOICreate(photons,varargin)
 % Brief description
 %    In some cases we have multispectral photon data and we just want to
 %    initialize an optical image for some other purpose.  This is used by
-%    ISET3d when reading in rendered and in piFlareApply. 
+%    ISET3d when reading in PBRT rendered data and in piFlareApply. 
 %
 % Required
 %    photons - row x col x nwave data, computed by PBRT usually
@@ -52,7 +52,7 @@ end
 
 p.parse(photons,varargin{:});
 
-%%  In this case, we don't always have ISET properly initialized.  
+%%  We don't always have ISET properly initialized.  
 %
 % So we handle the main issue here
 global vcSESSION

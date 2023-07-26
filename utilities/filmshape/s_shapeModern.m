@@ -1,10 +1,10 @@
 % s_shapeModern
 %
 % In the newest version  of Human Eye in PBRT v4 (TG), we have the
-% ability to give PBRT an arbitrary lookuptable to represent positions
-% on the surface. This is supposed to reproduce the results from the
-% legacy code that maps a position on the film to a position on a
-% spherical surface.
+% ability to give PBRT an arbitrary lookup table to represent
+% positions on the surface. This is supposed to reproduce the results
+% from the legacy code that maps a position on the film to a position
+% on a spherical surface.
 %
 % This script illustrates how we made a bumpy retina and rendered
 % using the sceneEye with that.  Various quality of life things left
