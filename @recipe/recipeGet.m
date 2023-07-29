@@ -305,8 +305,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         val = val/norm(val);
     case {'rendertype','filmrendertype'}
         % A cell array of the radiance and other metadata types
-        val = thisR.metadata.rendertype;
-
+        if ~isempty(thisR.metadata)
+            val = thisR.metadata.rendertype;
+        else
+            val = [];
+        end
         % Camera fields
     case {'camera'}
         % The whole struct

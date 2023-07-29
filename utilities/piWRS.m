@@ -86,6 +86,11 @@ elseif ischar(renderType),  renderType = {renderType};     % Turn a string to ce
 elseif iscell(renderType)        % Good to go  
 end
 
+% Fix empty rendertypes to be the default:
+if isempty(renderType)
+    renderType = [{'radiance'},{'depth'},{'albedo'}];
+end
+
 if ~isempty(p.Results.dockerwrapper)
     thisD = p.Results.dockerwrapper;
 else

@@ -16,8 +16,6 @@ Film "gbuffer"
   "integer yresolution" [320] 
   "integer xresolution" [320] 
   "float diagonal" [10.000000] 
-  "bool saveRadiance" true 
-  "bool saveRadianceAsBasis" false 
 
 # integrator 
 Integrator "path" 

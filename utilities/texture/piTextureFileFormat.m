@@ -68,7 +68,7 @@ for ii = 1:numel(textureList)
             fprintf('Texture: %s is converted \n',textureList{ii}.filename.value);
 
         else
-            warning('Texture: %s is missing',textureList{ii}.filename.value);
+            fprintf("Texture: %s is not available locally.\n",textureList{ii}.filename.value);
         end
     end
 
