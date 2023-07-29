@@ -13,12 +13,11 @@ function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %      make equiarea
 %      make sky - Makes an exr skymap with name sky-
 %      convert
-%      denoise - We have another denoiser, though this one should work
-%                some day! 
-%      denoise-optix - GPU denoiser
+%      denoise - We have other denoisers, haven't tested this one
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
+%   outfile:  Full path to the output file (if needed)
 %   msparms:  make sky parameters.  Select from: {albedo, elevation,
 %                    outfile, turbidity, resolution} 
 %
@@ -28,14 +27,16 @@ function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %   dockercmd - The docker command
 %
 % See also
-%   piAIdenose, tev (executable viewer for the exr files)
+%   piAIDenoise, tev (executable viewer for the exr files)
+%   piEXRDenoise
 
 %{
 % Other imgtool commands
 %
 % imgtool convert
 % imgtool makesky
-% imgtool denoise-optix noisy.exr --outfile denoised.exr
+% imgtool bloom
+% imgtool average
 % imgtool makeequiarea old.exr --outfile new.exr
 %
 %}
@@ -66,7 +67,7 @@ varargin = ieParamFormat(varargin);
 
 p = inputParser;
 
-validCommands = {'makesky','makeequiarea','convert','denoise','denoise-optix','help'};
+validCommands = {'makesky','makeequiarea','convert','denoise','help'};
 p.addRequired('command',@(x)(ismember(x,validCommands)));
 p.addParameter('infile','',@(x)(exist(x,'file')));
 p.addParameter('outfile','',@ischar);
@@ -181,6 +182,12 @@ switch command
 
         % I tried running on a rendered file, but got an error that it
         % could not find the Pz channel.  To ask - (BW).
+        % Brian -- It needs Pz (z depth) so the rendered file needs to have
+        % it
+        % HOWEVER
+        % I just tried and get missing dzdx and dzdy, which I've never seen
+        % maybe those are only generated for RGB images? - (DJC)
+        
         basecmd = [runDocker ' --workdir=%s --volume="%s":"%s" %s %s'];
         cmd = sprintf('imgtool denoise %s --outfile denoise-%s', ...
             dockerWrapper.pathToLinux(fname), dockerWrapper.pathToLinux(fname));
