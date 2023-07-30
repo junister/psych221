@@ -177,7 +177,12 @@ renderDir = thisR.get('rendered dir');
 if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
 % Fix recipe to include depth, albedo, and normal if it also wants radiance
-if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'depth'))
+if isempty(thisR.metadata)
+        preRender = thisR.get('rendertype');
+        preRender{end+1} = 'radiance';
+        thisR.set('rendertype', preRender);
+end
+if max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'depth'))
         preRender = thisR.get('rendertype');
         preRender{end+1} = 'depth';
         thisR.set('rendertype', preRender);
