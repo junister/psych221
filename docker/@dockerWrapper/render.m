@@ -85,8 +85,8 @@ if ~obj.localRender
 
     % Remove previous renders
     if isfolder(fullfile(outputFolder, 'renderings'))
-        rmdir(fullfile(outputFolder, 'renderings'));
-        mkdir(fullfile(outputFolder, 'renderings'));
+        rmdir(fullfile(outputFolder, 'renderings'),'s');
+        mkdir(fullfile(outputFolder, 'renderings'),'s');
     end
     if ispc
         rSync = 'wsl rsync';
