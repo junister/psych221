@@ -43,7 +43,7 @@ for ii = 1:numel(textureList)
         thisImgPath = which(texSlotName);
     end
 
-    if isempty(find(strcmp(ext, {'.png','.PNG','.exr'}),1))
+    if isempty(find(strcmp(ext, {'.png','.PNG','.exr','.jpg'}),1))
         if exist(thisImgPath, 'file')
             outputFile = fullfile(path,[name,'.png']);
             outputPath = fullfile(inputDir, outputFile);
@@ -131,14 +131,18 @@ for ii = 1:numel(matKeys)
     if exist(thisImgPath, 'file') && ~isempty(normalImgPath)
 
         [path, name, ext] = fileparts(dockerWrapper.pathToLinux(normalImgPath));
-        if strcmp(ext, '.exr') || strcmp(ext, '.png')
+        if strcmp(ext, '.exr') || strcmp(ext, '.png') || strcmp(ext, '.jpg')
             % do nothing with exr
             continue;
         end
 
         thisImg = imread(thisImgPath);
 
+<<<<<<< Updated upstream
         %         outputFile = fullfile(path,[sceneName,'_',name,'.png']);
+=======
+        % outputFile = fullfile(path,[sceneName,'_',name,'.png']);
+>>>>>>> Stashed changes
         outputFile = fullfile(path,[name,'.png']);
         outputPath = fullfile(inputDir, outputFile);
 
