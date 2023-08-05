@@ -38,8 +38,7 @@ assetTreeName = 'mccCB';
 %% Write and render
 piWrite(thisR);
 % Render 
-[scene, result] = piRender(thisR, 'render type', 'radiance');
-
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 sceneSet(scene, 'gamma', 0.5);
 
@@ -49,7 +48,7 @@ sceneSet(scene, 'gamma', 0.5);
 %% Write and render
 piWrite(thisR);
 % Render 
-[scene, result] = piRender(thisR, 'render type', 'radiance');
+[scene, result] = piRender(thisR);
 
 sceneWindow(scene);
 sceneSet(scene, 'gamma', 0.5);
@@ -60,7 +59,7 @@ sceneSet(scene, 'gamma', 0.5);
 %% Write and render
 piWrite(thisR);
 % Render 
-[scene, result] = piRender(thisR, 'render type', 'radiance');
+[scene, result] = piRender(thisR);
 
 sceneWindow(scene);
 sceneSet(scene, 'gamma', 0.5);

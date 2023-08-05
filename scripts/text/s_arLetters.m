@@ -145,7 +145,6 @@ thisSE.recipe.show('objects');
 % 
 % Add those in to make some point about stereo.
 from = thisSE.get('from');
-thisSE.set('render type',{'radiance'}); 
 
 %%
 thisSE.set('from',from - [0.06 0.0 0]);
@@ -186,11 +185,9 @@ thisSE.piWRS;
 
 %% This takes longer than the pinhole rendering, 
 thisSE.set('from',from - [0.06,0,0]);
-oi = thisSE.render('render type','radiance');
 oiWindow(oi);
 
 thisSE.set('from',from + [0.06,0,0]);
-oi = thisSE.render('render type','radiance');
 oiWindow(oi);
 
 save(fullfile(thisDir,'oiLetters'),'oi');
