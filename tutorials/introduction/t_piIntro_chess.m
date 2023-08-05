@@ -61,9 +61,6 @@ pointLight = piLightCreate('point',...
 % Then add it to our scene
 thisR.set('light',pointLight,'add');
 
-% For now only radiance. Because we can.
-thisR.set('render type',{'radiance'});
-
 piWRS(thisR,'name','Point light');
 
 %% Add a skymap

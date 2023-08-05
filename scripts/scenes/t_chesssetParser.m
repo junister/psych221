@@ -15,7 +15,7 @@ thisR.set('rays per pixel',nRaysPerPixel);
 thisR.set('nbounces',5); 
 
 piWrite(thisR);
-[scene, result] = piRender(thisR, 'render type', 'radiance', 'scale illuminance', false);
+[scene, result] = piRender(thisR, 'scale illuminance', false);
 
 %%
 sceneWindow(scene);

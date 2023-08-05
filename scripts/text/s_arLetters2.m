@@ -132,7 +132,6 @@ thisR = piRecipeDefault('scene name','contemporary-bathroom');
 thisR.set('n bounces',5);
 thisR.set('rays per pixel',512);
 thisR.set('film resolution',resolution);
-thisR.set('render type',{'radiance','depth'});
 
 thisR.set('film resolution',[384 256]);
 to = thisR.get('to');

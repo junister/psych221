@@ -14,7 +14,6 @@ if ~piDockerExists, piDockerConfig; end
 % Return it as a recipe
 % (used to use textured plane, but it's not in v4)
 thisR = piRecipeDefault('scene name', 'cornell_box');
-thisR.set('render type',{'radiance','depth'});
 
 % add a light so we can see
 pointLight = piLightCreate('point','type','point','cameracoordinate', true);
@@ -26,7 +25,7 @@ piMaterialsInsert(thisR,'names','slantededge');
 piAssetTranslate(thisR,ourAsset,[.15 .11 0]);
 thisR.set('asset',ourAsset,'material name','slantededge');
 
-piWRS(thisR,'name','pinhole','render type',{'radiance','depth'});
+piWRS(thisR,'name','pinhole');
 
 
 %% Attach a camera with a lens

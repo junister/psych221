@@ -189,7 +189,6 @@ else
         % I'll let Brian take it from here
         thisSE = sceneEye();
         thisSE.recipe = thisR;
-        thisSE.recipe.set('render type', {'radiance','depth'});
 
         %%  Render
         scene = thisSE.render();

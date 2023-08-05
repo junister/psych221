@@ -138,11 +138,7 @@ for ii = 1:numel(matKeys)
 
         thisImg = imread(thisImgPath);
 
-<<<<<<< Updated upstream
-        %         outputFile = fullfile(path,[sceneName,'_',name,'.png']);
-=======
         % outputFile = fullfile(path,[sceneName,'_',name,'.png']);
->>>>>>> Stashed changes
         outputFile = fullfile(path,[name,'.png']);
         outputPath = fullfile(inputDir, outputFile);
 

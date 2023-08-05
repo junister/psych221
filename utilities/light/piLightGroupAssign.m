@@ -29,7 +29,7 @@ thisR = piLightGroupAssign(thisR, 'shape','circle',...
                                   'type', 'spot',...
                                   'coneangle', 5);
 piWrite(thisR);
-[scene, ~] = piRender(thisR, 'render type', 'radiance');
+[scene, ~] = piRender(thisR);
 sceneWindow(scene);
 %}
 %{
@@ -42,7 +42,7 @@ thisR = piLightGroupAssign(thisR, 'shape','circle',...
                                   'coneangle', 5,...
                                   'spd', 'tungsten');
 piWrite(thisR);
-[scene, ~] = piRender(thisR, 'render type', 'radiance');
+[scene, ~] = piRender(thisR);
 sceneWindow(scene);
 %}
 

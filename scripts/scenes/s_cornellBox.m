@@ -31,7 +31,7 @@ thisR.set('asset', assetName, 'obj2light', areaLight);
 %% Render
 %{
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 sceneWindow(scene);
 sceneSet(scene, 'render flag', 'hdr');
 %}
@@ -89,6 +89,6 @@ thisR.set('material', 'add', bunnyMat);
 thisR.set('asset', bunnyAsset.name, 'material name', bunnyMat.name);
 %% Render
 piWrite(thisR);
-[scene, res] = piRender(thisR, 'render type', 'radiance');
+[scene, res] = piRender(thisR);
 sceneWindow(scene);
 sceneSet(scene, 'render flag', 'hdr');

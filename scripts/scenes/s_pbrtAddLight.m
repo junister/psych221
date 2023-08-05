@@ -11,7 +11,7 @@ thisR = piRecipeDefault('scene name',fname);
 
 %%
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 
 %%
@@ -21,7 +21,7 @@ thisR.get('fov')
 thisR.set('fov',60);
 
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 %}
 
@@ -44,7 +44,7 @@ thisR.world{end+1} = 'WorldEnd';
 
 %%
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 
 

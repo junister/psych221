@@ -54,7 +54,7 @@ tic
 piWrite(thisR);
 toc
 % Render 
-[oi, result] = piRender(thisR, 'render type', 'radiance');
+[oi, result] = piRender(thisR);
 oiName = 'CBLens';
 oi = oiSet(oi, 'name', oiName);
 oiWindow(oi);
