@@ -1,9 +1,36 @@
 function [medium, properties] = piWaterMediumCreate(name, varargin)
-
 % [medium, properties] = piWaterMediumCreate(name, varargin)
+%
+% Create a seawater medium.
+% Creates a PBRT homogenous medium which uses biological models to create
+% properties of natural waters.
+%
+% water is a description of a PBRT object that desribes a homogeneous
+% medium.  The waterProp are the parameters that define the seawater
+% properties, including absorption, scattering, and so forth.
 %
 % Creates a PBRT homogenous medium which uses biological models to create
 % properties of natural waters.
+%
+% HB created a full representation model of scattering that has a number of
+% different parameters.
+%
+% vsf is volume scattering function. Outer product of the scattering
+% function and the phaseFunction.  For pbrt you only specify the scattering
+% function and a single scalar that specifies the phaseFunction.
+%
+% phaseFunction 
+%
+% PBRT allows specification only of the parameters scattering, and
+% absorption spectra.  We return all the properties in 'properties' but we
+% compress all the variables into what PBRT can deal with in 'medium'.
+%
+% Some day, we may expand. 
+%
+% Maybe we should put 'properties' into the 'metadata' slot of the scene.
+%
+% We should implement sceneSet/Get on the 'medium' properties that PBRT can
+% use.
 %
 % Henryk Blasinski, 2023
 

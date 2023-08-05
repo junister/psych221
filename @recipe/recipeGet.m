@@ -1250,6 +1250,21 @@ switch ieParamFormat(param)  % lower case, no spaces
     case {'mediaoutputfile'}
         % Unclear why this is still here.  Probably deprecated.
         val = thisR.media.outputfile;
+    case {'media','medium'}
+        % Full medium (e.g., under water) data structure
+        val = thisR.media;
+    case {'mediaabsorption'}
+        % val = thisR.get('media absorption','seawater');
+        name = varargin{1};
+        val.wave = thisR.media.list(name).sigma_a.value(1:2:end);
+        val.absorption = thisR.media.list(name).sigma_a.value(2:2:end);
+        
+    case {'mediascattering'}
+        % val = thisR.get('media scattering','seawater');
+        name = varargin{1};
+        val.wave = thisR.media.list(name).sigma_s.value(1:2:end);
+        val.scatter = thisR.media.list(name).sigma_s.value(2:2:end);
+        
 
         % Getting ready for textures
     case{'texture', 'textures'}
