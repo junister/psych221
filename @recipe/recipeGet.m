@@ -1757,21 +1757,16 @@ switch ieParamFormat(param)  % lower case, no spaces
         % assets in the subtree. (BW, Sept 2021).
 
         if ischar(varargin{1})
-            % Changed from 'Find' to 'Search' Aug 2023 (BW).
-            id = piAssetSearch(thisR,'object',varargin{1});
-            thisAsset = piAssetFind(thisR.assets,'id',id);
-
+            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
             % If only one asset matches, turn it from cell to struct.
         else
-            % Seems like we think it is a number in this case.
-            %
             % Not sure when we send in varargin as an array.  Example?
             % (BW)
             if numel(varargin{1}) > 1,  id = varargin{1}(1);
             else,                       id = varargin{1};
             end
             [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
-        end
+        end        
         if isempty(id)
             error('Could not find asset %s\n',varargin{1});
         end
