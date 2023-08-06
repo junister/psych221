@@ -1247,6 +1247,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % Unclear why this is still here.  Probably deprecated.
         val = thisR.materials.outputfile;
         
+        % Media related (e.g underwater, see HB's script t_mediumExample)
     case {'mediaoutputfile'}
         % Unclear why this is still here.  Probably deprecated.
         val = thisR.media.outputfile;
@@ -1257,14 +1258,12 @@ switch ieParamFormat(param)  % lower case, no spaces
         % val = thisR.get('media absorption','seawater');
         name = varargin{1};
         val.wave = thisR.media.list(name).sigma_a.value(1:2:end);
-        val.absorption = thisR.media.list(name).sigma_a.value(2:2:end);
-        
+        val.absorption = thisR.media.list(name).sigma_a.value(2:2:end);        
     case {'mediascattering'}
         % val = thisR.get('media scattering','seawater');
         name = varargin{1};
         val.wave = thisR.media.list(name).sigma_s.value(1:2:end);
-        val.scatter = thisR.media.list(name).sigma_s.value(2:2:end);
-        
+        val.scatter = thisR.media.list(name).sigma_s.value(2:2:end);        
 
         % Getting ready for textures
     case{'texture', 'textures'}
@@ -1758,9 +1757,14 @@ switch ieParamFormat(param)  % lower case, no spaces
         % assets in the subtree. (BW, Sept 2021).
 
         if ischar(varargin{1})
-            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+            % Changed from 'Find' to 'Search' Aug 2023 (BW).
+            id = piAssetSearch(thisR,'object',varargin{1});
+            thisAsset = piAssetFind(thisR.assets,'id',id);
+
             % If only one asset matches, turn it from cell to struct.
         else
+            % Seems like we think it is a number in this case.
+            %
             % Not sure when we send in varargin as an array.  Example?
             % (BW)
             if numel(varargin{1}) > 1,  id = varargin{1}(1);

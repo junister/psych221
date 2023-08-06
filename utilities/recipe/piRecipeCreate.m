@@ -110,7 +110,7 @@ piWRS(thisR);
 
 %%
 switch ieParamFormat(rName)
-    case 'macbethchecker'
+    case {'macbethchecker','macbethchart'}
         thisR = piRecipeDefault('scene name',rName);
         thisR = piLightDelete(thisR, 'all');
 

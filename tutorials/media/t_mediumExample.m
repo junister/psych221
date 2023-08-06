@@ -8,9 +8,7 @@ ieInit
 piDockerConfig();
 
 %% Create a scene with a Macbeth Chart.
-% macbeth = piCreateMacbethChart();
-
-macbeth = piRecipeCreate('macbethchecker');
+macbeth = piRecipeCreate('macbeth checker');
 
 macbeth.set('pixel samples', 128);
 
