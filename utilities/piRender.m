@@ -132,8 +132,8 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
-scalePupilArea   = p.Results.scalepupilarea;  % Fix this
-meanLuminance    = p.Results.meanluminance;   % And this
+scalePupilArea   = p.Results.scalepupilarea;    % Fix this
+meanLuminance    = p.Results.meanluminance;     % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
 
 wave             = p.Results.wave;
