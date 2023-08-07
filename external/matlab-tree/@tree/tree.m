@@ -391,32 +391,33 @@ classdef tree
             end
         end
         
-        % Assign unique names to a node or all nodes
+        %% Assign unique names to a node or all nodes
         function [obj, names] = uniqueNames(obj, id)
             % Names are made unique by creating them as
             %
-            %   XXXID_STRING
+            %   XXXXXXID_STRING (%06dID)
             %
-            % where XXX is the node id (an integer).  We are considering if
-            % we need XXXXID to allow for more nodes.
+            % where XXXXXX is the node id (an integer).
             %
-            % If id is provided, the function assign unique names to that
-            % node. Otherwise unique names are assigned to all nodes in the
-            % tree. 
+            % If id is provided, the function assigns a unique name to just
+            % that node. Otherwise unique names are assigned to all nodes
+            % in the tree.
             
             % Update all nodes
             obj.mapFullName2Idx     = containers.Map;
             obj.mapShortName2Idx    = containers.Map;
             obj.mapLgtFullName2Idx  = containers.Map;
             obj.mapLgtShortName2Idx = containers.Map;
+            
+            stripNames = obj.stripID([],'');
+            names = cell(1, numel(stripNames));
+            if obj.nnodes > 999999
+                warning('Number of nodes: %d exceeds 999999', obj.nnodes);
+            end
+
             if ~exist('id','var') || isempty(id)
                 % Some nodes already have an ID.  So we strip the ID from
                 % all the nodes.
-                stripNames = obj.stripID([],'');
-                names = cell(1, numel(stripNames));
-                if obj.nnodes > 999999
-                    warning('Number of nodes: %d exceeds 999999', obj.nnodes);
-                end
                 
                 % We will assign a unique ID to each node, which make them
                 % unique. But first, if two nodes are part of a single object and
@@ -445,20 +446,32 @@ classdef tree
                 end
                 return;
             end
-            
-            if ~obj.hasID(id)
+            %{
+            % We do not have a good way to address a single slot.  This may
+            % be inefficient to always do them all.  But that's where we
+            % are right now until we fix this bit of code *(BW).
+            elseif ~obj.hasID(id)
+
                 if isstruct(obj.Node{id})
                     obj.Node{id}.name = sprintf('%06dID_%s', id, obj.Node{id}.name);
-                    names = obj.Node{id}.name;
+                    thisName = obj.Node{id}.name;
                 else
                     obj.Node{id} = sprintf('%06dID_%s', id, obj.Node{id});
-                    names = obj.Node{id};
+                    thisName = obj.Node{id};
+                end
+                obj.mapFullName2Idx(thisName) = id;
+                obj.mapShortName2Idx(stripNames{id}) = id;
+
+                if isequal(obj.Node{id}.type, 'light')
+                    obj.mapLgtFullName2Idx(thisName) = id;
+                    obj.mapLgtShortName2Idx(thisName) = id;
                 end
             end
+            %}
         
         end
         
-        % Test if this is the root node.  Should be a static method.
+        %% Test if this is the root node.  Should be a static method.
         function val = isRoot(obj, id)
             if obj.getparent(id) == 0
                 val = true;

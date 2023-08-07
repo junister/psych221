@@ -35,14 +35,11 @@ rgb = sceneGet(macbethScene,'srgb');
 figure; 
 imshow(rgb);
 %}
-%%
-% HB created a full representation model of scattering that has a number of
-% different
-%
-% Create a seawater medium.
-% water is a description of a PBRT object that desribes a homogeneous
-% medium.  The waterProp are the parameters that define the seawater
-% properties, including absorption, scattering, and so forth.
+%% Create sea water medium
+
+% The struct 'water' is a description of a PBRT object that desribes a
+% homogeneous medium.  The waterProp are the parameters that define the
+% seawater properties, including absorption, scattering, and so forth.
 %
 % vsf is volume scattering function. Outer product of the scattering
 % function and the phaseFunction.  For pbrt you only specify the scattering

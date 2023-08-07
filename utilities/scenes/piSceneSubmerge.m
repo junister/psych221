@@ -1,13 +1,25 @@
-function [ submerged]  = piSceneSubmerge(scene, medium, varargin)
-
-% [submerged] = piSceneSubmerge(scene, medium, varargin)
+function [ submerged]  = piSceneSubmerge(thisR, medium, varargin)
+% Add participating media to a recipe
 %
-% Take the recipe scene and immerse in the medium. The medium occupies
-% a homogenous region in space (a cube), centered at the origin.
-% The size and the cube offset can be adjusted.
+% Synopsis
+%   [submerged] = piSceneSubmerge(thisR, medium, varargin)
+%
+% Brief 
+%   Take the recipe and immerse it in the medium. The medium occupies a
+%   homogenous region in space (a cube), centered at the origin. The size
+%   and the cube offset can be adjusted. 
+%
+% Inputs
+%   thisR
+%   medium - definition of the medium
+%
+% Optional key/val
+%   sizeX, sizeY, sizeZ
+%   offsetX, offsetY, offsetZ
 %
 % Henryk Blasinski, 2023
 
+%%
 p = inputParser;
 p.addOptional('sizeX',1,@isnumeric);
 p.addOptional('sizeY',1,@isnumeric);
@@ -21,7 +33,7 @@ inputs = p.Results;
 
 %%
 
-submerged = copy(scene);
+submerged = copy(thisR);
 submerged.set('integrator','volpath');
 
 dx = inputs.sizeX/2;
@@ -87,6 +99,8 @@ water.position = [inputs.offsetX; inputs.offsetY; inputs.offsetZ];
 waterID = piAssetAdd(submerged, 1, water);
 
 waterMaterial = piMaterialCreate('WaterInterface','type','interface');
+
+% This step loses the container maps
 submerged.set('material','add',waterMaterial);
 
 waterCube = piAssetCreate('type','object');
