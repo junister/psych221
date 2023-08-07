@@ -85,7 +85,7 @@ loadrecipe = p.Results.loadrecipe;
 % assignment in the case
 switch ieParamFormat(sceneDir)
 
-    case 'macbethchecker'
+    case {'macbethchecker','macbethchart'}
         sceneDir = 'MacBethChecker';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';

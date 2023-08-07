@@ -51,10 +51,18 @@ end
 
 %% Check if the parent node exists
 
-if ~isempty(thisR.assets.get(parentInfo))
+if parentInfo == 0
+    % Replace the root
     [thisR.assets, id] = thisR.assets.addnode(parentInfo, node);
-    % Format the new node name.
-    [thisR.assets, ~] = thisR.assets.uniqueNames(id);
+elseif ~isempty(thisR.assets.get(parentInfo))
+    [thisR.assets, id] = thisR.assets.addnode(parentInfo, node);
+    
+    % Format the new node name.  Removed the call with (id) Aug 2023 (BW)
+    % because it is not working correctly.  This may slow things down.  If
+    % so, we need to get into the tree.uniqueNames code and fix it.
+    %
+    % [thisR.assets, ~] = thisR.assets.uniqueNames(id);
+    [thisR.assets, ~] = thisR.assets.uniqueNames;
 else
     warning('Parent node: %d does not exist, returning.', parentInfo);
 end

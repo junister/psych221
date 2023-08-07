@@ -70,6 +70,7 @@ p.addParameter('gamma',[],@isnumeric);
 p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
+p.addParameter('meanluminance',-1,@isscalar);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -78,6 +79,7 @@ p.parse(thisR,varargin{:});
 
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
+% meanLuminance = p.Results.meanluminance;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
@@ -126,9 +128,9 @@ piWrite(thisR, 'remoteResources', thisD.remoteResources);
 [~,username] = system('whoami');
 
 if strncmp(username,'zhenyi',6)
-    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', thisD);
+    [obj, results] = piRenderZhenyi(thisR, 'ourdocker', thisD);
 else
-    [obj,results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
+    [obj, results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
 end
 
 if isempty(obj),  error('Render failed.'); end
@@ -140,9 +142,8 @@ switch obj.type
             sceneWindow(obj);
             if ~isempty(g), sceneSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
-                if piCamBio, sceneSet(obj,'render flag',renderFlag); 
-                else,  warning('No hdr setting for ISETBio windows.');
-                end
+                % Removed test for ISETBio. Aug 2023.
+                sceneSet(obj,'render flag',renderFlag);                 
             end
         end
     case 'opticalimage'
@@ -151,9 +152,8 @@ switch obj.type
             oiWindow(obj); 
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
-                if piCamBio, oiSet(obj,'render flag',renderFlag); 
-                else, warning('No hdr setting for ISETBio windows.');
-                end
+                % Removed test for ISETBio. Aug 2023
+                oiSet(obj,'render flag',renderFlag);                 
             end
         end
         % Store the recipe camera on the oi.  Not sure why, but it

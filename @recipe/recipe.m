@@ -62,6 +62,16 @@ classdef recipe < matlab.mixin.Copyable
     methods
         % Constructor
         function obj = recipe(varargin)
+            
+            obj.materials.list = containers.Map;
+            obj.materials.order = {};
+            obj.materials.lib = [];
+            
+            obj.media.list = containers.Map;
+            obj.media.order = {};
+            obj.media.lib = [];
+            
+            obj.assets = tree();
             % Who knows what we will do in the future.
         end
 

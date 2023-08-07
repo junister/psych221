@@ -1,13 +1,11 @@
 function [macbethRecipe] = piCreateMacbethChart(varargin)
-% Would be best to integrate other existing MCC routines
-%
-% TODO: Create some examples to show how to call this function.
-%
 % [macbethRecipe] = piCreateMacbethChart(varargin)
 %
 % Create an iset3d scene with a 6x4 Macbeth chart target.
 % The target is flat, centered at the origin and aligned with 
 % the xy plane, the camera is placed 10m away from the chart.
+% The light source is placed in the same location, and points in the 
+% same direction as the camera
 %
 % Input params (all optional)
 %    width - the dimension of one Macbeth chart element along the x axis
@@ -16,13 +14,15 @@ function [macbethRecipe] = piCreateMacbethChart(varargin)
 %    (in meters, default 1)
 %    depth - the dimension of one Macbeth chart element along the z axis
 %    (in meters, default 1)
+%    defaultLight - a booleand indicating whether or not to include the
+%    light source (default true)
+%    lightIntensity - a light intensity scaling parameter (default 1)
 %
 % Output
 %    macbethRecipe - an iset3d scene recipe
 %
 % Henryk Blasinski, 2020
 %
-
 % Examples:
 %{
 thisR = piCreateMacbethChart;
@@ -35,6 +35,7 @@ p.addOptional('width',1);
 p.addOptional('height',1);
 p.addOptional('depth',1);
 p.addOptional('defaultLight',true);
+p.addOptional('lightIntensity',1,@isnumeric);
 p.parse(varargin{:});
 inputs = p.Results;
 
@@ -46,21 +47,21 @@ macbethRecipe.recipeSet('camera',camera);
 macbethRecipe.set('fov',45);
 
 macbethRecipe.film.type = 'Film';
-macbethRecipe.film.subtype = 'image';
+macbethRecipe.film.subtype = 'gbuffer';
 macbethRecipe.set('film resolution',[640 480]);
 
-macbethRecipe.set('from',[0 0 10]);
-macbethRecipe.set('to',[0 0 0]);
+cameraFrom = [0 0 10];
+cameraTo = [0 0 0];
+
+macbethRecipe.set('from',cameraFrom);
+macbethRecipe.set('to',cameraTo);
 macbethRecipe.set('up',[0 1 0]);
 
-macbethRecipe.sampler.type = 'Sampler';
-macbethRecipe.sampler.subtype = 'halton';
-macbethRecipe.set('pixel samples',128);
+macbethRecipe.set('samplersubtype','halton');
+macbethRecipe.set('pixel samples',16);
 
-macbethRecipe.integrator.type = 'Integrator';
-macbethRecipe.integrator.subtype = 'directlighting';
-
-macbethRecipe.set('chromatic aberration',true);
+macbethRecipe.set('integrator','volpath');
+macbethRecipe.set('rendertype',{'radiance'});
 
 macbethRecipe.exporter = 'PARSE';
 
@@ -77,7 +78,7 @@ P = [ dx -dy  dz;
      -dx -dy  dz;
      -dx -dy -dz;
      -dx  dy -dz;
-     -dx  dy  dz;];
+     -dx  dy  dz;]';
 
 % Faces of a cube
 indices = [4 0 3 
@@ -92,13 +93,10 @@ indices = [4 0 3
            7 2 6 
            0 5 1 
            0 4 5]'; 
-   
-cubeShape.meshshape = 'trianglemesh';
-cubeShape.integerindices = ['[', sprintf('%i ',indices), ']'];
-cubeShape.pointp = ['[' sprintf('%.3f ',P') ']'];
 
-macbethRecipe.assets = tree();
-macbethRecipe.assets.set(1,'root');
+cubeShape = piAssetCreate('type','trianglemesh');       
+cubeShape.integerindices = indices(:)'; 
+cubeShape.point3p = P(:);
 
 macbethChart = piAssetCreate('type','branch');
 macbethChart.name = 'MacbethChart';
@@ -108,14 +106,11 @@ macbethChart.size.w = inputs.depth;
 macbethChart.size.pmin = [-dx; -dy; -dz];
 macbethChart.size.pmax = [dx; dy; dz];
 
-[macbethRecipe.assets, macbethChartID] = macbethRecipe.assets.addnode(1,macbethChart);
-
+rootNodeID = piAssetAdd(macbethRecipe, 0, macbethChart);
 
 wave = 400:10:700;
 macbethSpectra = ieReadSpectra(which('macbethChart.mat'),wave);
 
-
-macbethRecipe.materials.list = {};
 for x=1:6
     for y=1:4
         
@@ -132,50 +127,47 @@ for x=1:6
         macbethCubeBranch.size.w = inputs.depth;
         macbethCubeBranch.size.pmin = [-dx; -dy; -dz];
         macbethCubeBranch.size.pmax = [dx; dy; dz];
-        macbethCubeBranch.translation = [xOffset; yOffset; 0];
-        [macbethRecipe.assets, cubeBranchID] = macbethRecipe.assets.addnode(macbethChartID,macbethCubeBranch);
+        macbethCubeBranch.translation = {[xOffset; yOffset; 0]};
+        cubeNodeID = piAssetAdd(macbethRecipe, rootNodeID, macbethCubeBranch);
         
         macbethCube = piAssetCreate('type','object');
         macbethCube.name = sprintf('Cube_%02i',cubeID);
         macbethCube.type = 'object';
-        macbethCube.material.namedmaterial = sprintf('Cube_%02i_material',cubeID);
-        macbethCube.shape = cubeShape;
-        macbethCube.mediumInterface = [];        
-        macbethRecipe.assets = macbethRecipe.assets.addnode(cubeBranchID,macbethCube);
-
-        
-        data = [wave(:), macbethSpectra(:,cubeID)]';
+        macbethCube.material{1}.namedmaterial = sprintf('Cube_%02i_material',cubeID);
+        macbethCube.shape{1} = cubeShape;
+        macbethCube.mediumInterface = []; 
+        piAssetAdd(macbethRecipe, cubeNodeID, macbethCube);
         
         currentMaterial = piMaterialCreate(sprintf('Cube_%02i_material',cubeID),...
-            'type','matte','kd',data(:)');
+            'type','diffuse','reflectance',piSPDCreate(wave, macbethSpectra(:,cubeID)));
         
-        macbethRecipe.materials.list = cat(1, macbethRecipe.materials.list, currentMaterial);
-         
+        macbethRecipe.set('material','add',currentMaterial);
+                 
     end
 end
 
 if inputs.defaultLight
 
-    infiniteLight = piLightCreate('infiniteLight',...
-        'type','infinite');
-    mabethRecipe.set('light','add',infiniteLight);
-    macbethRecipe.set('from',[0 100 1]);
-    macbethRecipe.set('to',[0 0 0]);    
+    wave = 300:5:800;
+    spd = ones(numel(wave),1);
+    
+    val.value = piSPDCreate(wave, spd);
+    val.type  = 'spectrum';
+    
+    light = piLightCreate('light','type','distant');
+    light = piLightSet(light,'from',cameraFrom);
+    light = piLightSet(light,'to',cameraTo);
+    light = piLightSet(light,'spd',val);
+    light = piLightSet(light,'cameracoordinate',0);
+    light = piLightSet(light,'specscale',inputs.lightIntensity);
+    macbethRecipe.set('light',light,'add');
+   
 end
-
-macbethRecipe.materials.txtLines = {};
 
 outputName = 'MacbethChart';
 
 macbethRecipe.set('outputfile',fullfile(piRootPath,'local','MacbethChart',sprintf('%s.pbrt',outputName)));
-
-world{1} = 'WorldBegin';
-world{2} = sprintf('Include "%s_materials.pbrt"',outputName);
-world{3} = sprintf('Include "%s_geometry.pbrt"',outputName);
-world{4} = sprintf('Include "%s_lights.pbrt"',outputName);
-world{5} = 'WorldEnd';
-
-macbethRecipe.world = world;
+macbethRecipe.world = {'WorldBegin'};
 
 
 end
