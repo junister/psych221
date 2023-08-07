@@ -9,6 +9,7 @@ piDockerConfig();
 
 %% Create a scene with a Macbeth Chart.
 macbeth = piRecipeCreate('macbeth checker');
+macbeth.show('objects');
 
 macbeth.set('pixel samples', 128);
 
@@ -24,6 +25,8 @@ dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
 %}
 
 macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', true, 'meanluminance', -1);
+macbeth.show('objects');
+
 %{
 sceneWindow(macbethScene);
 %}
@@ -61,10 +64,13 @@ imshow(rgb);
 % plus or minus 50/2 away from center in units of meters!  Excellent! 
 % It returns a modified recipe that has the 'media' slot built in the
 % format that piWrite knows what to do with it.
-underwaterMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
+uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
 % underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
 
-uwMacbethScene = piWRS(underwaterMacbeth,'meanluminance', -1);
+% This breaks after the piSceneSubmerge.  Not sure why.
+uwMacbeth.show('objects');
+
+uwMacbethScene = piWRS(uwMacbeth,'meanluminance', -1);
 %{
 sceneWindow(uwMacbethScene);
 %}
@@ -78,11 +84,11 @@ figure; imshow(rgb);
 % The depth of the water we are seeing through
 depths = logspace(0,1.5,3);
 for zz = 1:numel(depths)
-    underwaterMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', depths(zz));
+    uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', depths(zz));
 
-    idx = piAssetSearch(underwaterMacbeth,'object name','Water');
-    sz = underwaterMacbeth.get('asset',idx,'size');
-    uwMacbethScene    = piWRS(underwaterMacbeth, 'meanluminance', -1, 'name',sprintf('Depth %.1f',sz(3)));
+    idx = piAssetSearch(uwMacbeth,'object name','Water');
+    sz = uwMacbeth.get('asset',idx,'size');
+    uwMacbethScene    = piWRS(uwMacbeth, 'meanluminance', -1, 'name',sprintf('Depth %.1f',sz(3)));
 
 end
 
