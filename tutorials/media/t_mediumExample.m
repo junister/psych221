@@ -24,7 +24,9 @@ dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
 %}
 
 macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', true, 'meanluminance', -1);
-
+%{
+sceneWindow(macbethScene);
+%}
 %{
 rgb = sceneGet(macbethScene,'srgb');
 figure; 
@@ -59,10 +61,13 @@ imshow(rgb);
 % plus or minus 50/2 away from center in units of meters!  Excellent! 
 % It returns a modified recipe that has the 'media' slot built in the
 % format that piWrite knows what to do with it.
-underwaterMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 50);
-underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
+underwaterMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
+% underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
 
-uwMacbethScene = piWRS(underwaterMacbeth,'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
+uwMacbethScene = piWRS(underwaterMacbeth,'meanluminance', -1);
+%{
+sceneWindow(uwMacbethScene);
+%}
 %{
 rgb = sceneGet(uwMacbethScene,'srgb');
 figure; imshow(rgb);
@@ -77,9 +82,7 @@ for zz = 1:numel(depths)
 
     idx = piAssetSearch(underwaterMacbeth,'object name','Water');
     sz = underwaterMacbeth.get('asset',idx,'size');
-    underwaterMacbeth = sceneSet(underwaterMacbeth,'name',sprintf('Depth %.1f',sz(3)));
-
-    uwMacbethScene    = piWRS(underwaterMacbeth, 'meanluminance', -1);
+    uwMacbethScene    = piWRS(underwaterMacbeth, 'meanluminance', -1, 'name',sprintf('Depth %.1f',sz(3)));
 
 end
 
@@ -88,6 +91,11 @@ end
 thisR = piRecipeCreate('Chess Set');
 chessSet = piWRS(thisR);
 
+%%
+thisR = piRecipeCreate('Chess Set');
 [water, waterProp] = piWaterMediumCreate('seawater');
-thisR = piSceneSubmerge(thisR, water, 'sizeX', 10, 'sizeY', 1, 'sizeZ', 1);
-uwChessSet = piWRS(thisR);
+
+sz = [1 1 1];
+thisR = piSceneSubmerge(thisR, water, 'sizeX', sz(1), 'sizeY', sz(2), 'sizeZ', sz(3));
+uwChessSet = piWRS(thisR,'name',sprintf('Size %.1f-%.1f-%.1f',sz),'meanluminance',-1);
+
