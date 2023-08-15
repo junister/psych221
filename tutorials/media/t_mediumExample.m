@@ -49,6 +49,7 @@ imshow(rgb);
 %
 % PBRT allows specification only of the parameters scattering, scattering 
 [water, waterProp] = piWaterMediumCreate('seawater');
+disp(waterProp);
 
 %{
    uwMacbeth = sceneSet(uwMacbeth,'medium property',val);
@@ -64,11 +65,6 @@ imshow(rgb);
 uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
 % underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
 
-% This breaks after the piSceneSubmerge.  Not sure why.  But the assets
-% tree has a lot of empty containers.  So something goes wrong in
-% piSceneSubmerge.
-% macbeth.assets
-% uwMacbeth.assets
 uwMacbeth.show('objects');
 
 uwMacbethScene = piWRS(uwMacbeth,'meanluminance', -1);

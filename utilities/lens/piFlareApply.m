@@ -149,7 +149,8 @@ oi = oiSet(oi, 'wAngular', sceneGet(scene,'wangular')*1.25);
 % Now it matches the standard computation.  But it does not solve the
 % problem.
 % oiGet(oi,'wangular','deg')
-
+psfsamplespacing = oiGet(oi,'sample spacing','m');
+psfsamplespacing = psfsamplespacing(1);
 %% Generate scratch and dirty markings in the aperture mask
 
 % We now have an oi.  We use its parameters to create a wavefront
