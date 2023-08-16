@@ -53,17 +53,17 @@ switch dataType
         try
             XDepthMap = piEXR2Mat(filename, 'Px');
         catch
-            XDepthMap = [0];
+            XDepthMap = 0;
         end
         try
             YDepthMap = piEXR2Mat(filename, 'Py');
         catch
-            YDepthMap = [0];
+            YDepthMap = 0;
         end
         try
             ZDepthMap = piEXR2Mat(filename, 'Pz');
         catch
-            ZDepthMap = [0];
+            ZDepthMap = 0;
         end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"

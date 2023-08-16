@@ -52,13 +52,33 @@ disp(waterProp)
 % It returns a modified recipe that has the 'media' slot built in the
 % format that piWrite knows what to do with.
 thisR = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
-uwMacbethScene = piWRS(thisR,'meanluminance', -1);
+piWRS(thisR,'meanluminance', -1);
 % sceneWindow(uwMacbethScene);
 
 %% Let's change the scattering parameter
+val = thisR.get('media scattering','seawater');
+val.scatter = val.scatter*10;   % If it is a single number, just scale by that number.
 
-scatter = 1;   % If it is a single number, just scale by that number.
-thisR.set('medium','seawater',scatter)
+% thisR.media.list('seawater')
+
+thisR.set('medium','seawater','scatter',val);
+val = thisR.get('media scattering','seawater');
+val.scatter
+
+piWRS(thisR,'meanluminance', -1);
+
+%% Let's change the absorption parameter
+val = thisR.get('media absorption','seawater');
+val.absorption = fliplr(val.absorption);   % If it is a single number, just scale by that number.
+
+% thisR.media.list('seawater')
+
+thisR.set('medium','seawater','absorption',val);
+val = thisR.get('media absorption','seawater');
+% val.absorption
+
+piWRS(thisR,'meanluminance', -1);
+
 
 %%  Try the chess set
 %{

@@ -794,41 +794,30 @@ switch param
         thisR.filter = thisR.set('filter',val.filter);
 
     case {'medium','media'}
-        % thisR.set(param = 'media',val = mediaName, varargin{1} = action-param, varargin{2} = value)
+        % thisR.set(param,val,varargin{1},varargin{2})
         %
-        % Calling convention, 
+        % Calling convention
+        %
         %  param = media or medium, which is why you are here
-        %  val     mediaName, 
-        %  varargin{1} action or maybe a parameter
-        %  varargin{2} parameter if needed 
+        %  val     medium name or medium struct, or one of several key
+        %  words
+        %  varargin{1} action ('add','replace','delete'), or
+        %              a parameter ('scatter')
+        %              a medium
+        %  varargin{2} parameter 
         %
-        % thisR.set('media', mediaName, 'add');
-        % thisR.set('media', mediumName, 'delete');
-        % thisR.set('media', mediumName, 'replace');
-        % thisR.set('media', 'all', 'delete');
+        % thisR.set('media', 'add', newMedium);
+        % thisR.set('media', 'delete', mediumName);
+        % thisR.set('media', 'replace', mediumName, newMedium);
         %
         % thisR.set('media', mediumName, 'scatter',val)
-        % thisR.set('light', lghtName, 'absorption',val);
         % Others to come
-
-        % The media name can be a string or a whole medium struct
-        if isstruct(val)
-            % They sent in a struct
-            if isfield(val,'name')
-                % It has a name slot.
-                medName = val.name;
-            else
-                error('Bad media struct.');
-            end
-        elseif ischar(val)
-            medName = val;
-        end
-        thisMed = thisR.medium.list(medName);
 
         % It is either a special command (add, delete, replace) or
         % the material name
         switch val
             case {'add'}
+                % There must be a new medium to add
                 newMed = varargin{1};
 
                 if isstruct(newMed) && isfield(newMed,'medium')
@@ -864,19 +853,32 @@ switch param
                 thisR.media.order{idx} = varargin{2}.name;
                 return;
             otherwise
-                % Probably the material name.
-                medName = val;
-                thisMed = thisR.media.list(val);
+                % Should be the medium name.                
+                thisMedium = thisR.media.list(val);
+
+                % We adjust the parameter of the medium.  All this
+                % could go into
+                %   mediumSet(thisMedium,param,val);
+                %   mediumSet(thisMedium,varargin{1},varargin{2});
+                switch ieParamFormat(varargin{1})
+                    case 'scatter'
+                        % Set scatter to varargin{2}
+                        tmp = [varargin{2}.wave;varargin{2}.scatter];
+                        thisMedium.sigma_s.value = tmp(:)';
+                        thisR.set('media','replace',val,thisMedium);
+                    case 'absorption'
+                        % Set absorption to varargin{2}
+                        tmp = [varargin{2}.wave;varargin{2}.absorption];
+                        thisMedium.sigma_a.value = tmp(:)';
+                        thisR.set('media','replace',val,thisMedium);                    
+                    case 'scale'
+                    case 'Le'
+                    case 'preset'
+                    otherwise
+                        disp('Unknown.')
+                end        
         end
 
-
-         % At this point we have the medium.
-        if numel(varargin{1}) == 1
-            % A material struct was sent in as the only argument.  We
-            % should check it, make sure its name is unique, and then set
-            % it.
-            thisR.media.list(medName) = varargin{1};
-        end
         
         % Materials should be built up here.
     case {'materials', 'material'}
