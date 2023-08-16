@@ -22,13 +22,12 @@ if ~piDockerExists, piDockerConfig; end
 
 % Scale the sphere to 1 meter size.  This should be the default sphere, 1
 % meter size at location 0,0,0 (BW)
-% {
 thisR = piRecipeDefault('scene name','sphere');
 idx   = piAssetSearch(thisR,'object','Sphere');
 thisR.set('asset',idx,'scale',2/380);
+
 % Put the camera 3 meters away
 thisR.set('from',[0 0 3]);
-%}
 
 % Remove all the lights
 thisR.set('light', 'all', 'delete');
