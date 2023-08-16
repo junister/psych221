@@ -794,62 +794,81 @@ switch param
         thisR.filter = thisR.set('filter',val.filter);
 
     case {'medium','media'}
-        
-        % Get index and material struct from the material list
-        % Search by name or index
+        % thisR.set(param = 'media',val = mediaName, varargin{1} = action-param, varargin{2} = value)
+        %
+        % Calling convention, 
+        %  param = media or medium, which is why you are here
+        %  val     mediaName, 
+        %  varargin{1} action or maybe a parameter
+        %  varargin{2} parameter if needed 
+        %
+        % thisR.set('media', mediaName, 'add');
+        % thisR.set('media', mediumName, 'delete');
+        % thisR.set('media', mediumName, 'replace');
+        % thisR.set('media', 'all', 'delete');
+        %
+        % thisR.set('media', mediumName, 'scatter',val)
+        % thisR.set('light', lghtName, 'absorption',val);
+        % Others to come
+
+        % The media name can be a string or a whole medium struct
         if isstruct(val)
             % They sent in a struct
-            if isfield(val,'name'), medName = val.name;
+            if isfield(val,'name')
                 % It has a name slot.
-                thisMed = thisR.medium.list(medName);
+                medName = val.name;
             else
-                error('Bad struct.');
+                error('Bad media struct.');
             end
         elseif ischar(val)
-            % It is either a special command (add, delete, replace) or
-            % the material name
-            switch val
-                case {'add'}
-                    newMed = varargin{1};
-                    
-                    if isstruct(newMed) && isfield(newMed,'medium')
-                        thisName = newMed.media.name;
-                        thisR.media.list(thisName) = newMed.material;
-                        thisR.media.order{end + 1} = thisName;
-                    else
-                        % Not part of newMat.material, just a material
-                        thisR.media.list(newMed.name) = newMed;
-                        thisR.media.order{end + 1} = newMed.name;
-                    end
-                    return;
-                case {'delete', 'remove'}
-                    % With the container/key method, we use the 'remove'
-                    % function to delete the material from the list and
-                    % from the order.  This requires using the name of the
-                    % material, not just its numeric value.  So, we get the
-                    % name.
-                    if isnumeric(varargin{1})
-                        names = keys(thisR.media.list);
-                        thisName = names(varargin{1});
-                    else
-                        thisName = varargin{1};
-                    end
-                    remove(thisR.media.list, thisName);
-                    [~,idx] = ismember(thisName,thisR.media.order);
-                    thisR.media.order(idx) = [];
-                    return;
-                case {'replace'}
-                    % thisR.set('materials',matName,'replace',newMaterial)
-                    thisR.media.list(varargin{1}) = varargin{2};
-                    [~,idx] = ismember(varargin{1},thisR.media.order);
-                    thisR.media.order{idx} = varargin{2}.name;
-                    return;
-                otherwise
-                    % Probably the material name.
-                    medName = val;
-                    thisMed = thisR.media.list(val);
-            end
+            medName = val;
         end
+        thisMed = thisR.medium.list(medName);
+
+        % It is either a special command (add, delete, replace) or
+        % the material name
+        switch val
+            case {'add'}
+                newMed = varargin{1};
+
+                if isstruct(newMed) && isfield(newMed,'medium')
+                    thisName = newMed.media.name;
+                    thisR.media.list(thisName) = newMed.material;
+                    thisR.media.order{end + 1} = thisName;
+                else
+                    % Not part of newMat.material, just a material
+                    thisR.media.list(newMed.name) = newMed;
+                    thisR.media.order{end + 1} = newMed.name;
+                end
+                return;
+            case {'delete', 'remove'}
+                % With the container/key method, we use the 'remove'
+                % function to delete the material from the list and
+                % from the order.  This requires using the name of the
+                % material, not just its numeric value.  So, we get the
+                % name.
+                if isnumeric(varargin{1})
+                    names = keys(thisR.media.list);
+                    thisName = names(varargin{1});
+                else
+                    thisName = varargin{1};
+                end
+                remove(thisR.media.list, thisName);
+                [~,idx] = ismember(thisName,thisR.media.order);
+                thisR.media.order(idx) = [];
+                return;
+            case {'replace'}
+                % thisR.set('materials',matName,'replace',newMaterial)
+                thisR.media.list(varargin{1}) = varargin{2};
+                [~,idx] = ismember(varargin{1},thisR.media.order);
+                thisR.media.order{idx} = varargin{2}.name;
+                return;
+            otherwise
+                % Probably the material name.
+                medName = val;
+                thisMed = thisR.media.list(val);
+        end
+
 
          % At this point we have the medium.
         if numel(varargin{1}) == 1
@@ -1134,8 +1153,12 @@ switch param
         out = envLight;
         
     case {'light', 'lights'}
-        % Calling convention, val is lightName, varargin{1} is the
-        % parameter(or action), and varargin{2} is the value, if needed.
+        % Calling convention
+        %
+        %   param is 'light', which is why you are here
+        %   val is lightName
+        %   varargin{1} is the parameter(or action)
+        %   varargin{2} is the value, if needed.
         %
         % Examples - After making light consistent with assets:
         %
