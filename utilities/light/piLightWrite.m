@@ -252,10 +252,10 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, spdTxt);
             end
 
-            % mapname
-            [~, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
-            if ~isempty(mapnameTxt)
-                lghtDef = strcat(lghtDef, mapnameTxt);
+            % filename -- used to be mapname
+            [~, filenameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
+            if ~isempty(filenameTxt)
+                lghtDef = strcat(lghtDef, filenameTxt);
             end
 
             % fov
