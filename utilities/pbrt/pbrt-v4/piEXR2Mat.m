@@ -19,7 +19,7 @@ function data = piEXR2Mat(inputFile, channelname)
 %
 
 % tic
-if exist('isMATLABReleaseOlderThan','builtin') && ~isMATLABReleaseOlderThan('R2022b')
+if exist('isMATLABReleaseOlderThan') > 0 && ~isMATLABReleaseOlderThan('R2022b')
     % Use Matlab builtin exrread from the image toolbox 
 
     % Matlab included exrread() in 2022b.  We included exread() in
@@ -45,7 +45,7 @@ if exist('isMATLABReleaseOlderThan','builtin') && ~isMATLABReleaseOlderThan('R20
         %}
     end
 
-    data = exrread(inputFile, Channels == channels);
+    data = exrread(inputFile, Channels = channels);
     return;
 
 elseif isfile(fullfile(isetRootPath,'imgproc','openexr','exrread.m'))
