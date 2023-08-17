@@ -12,29 +12,10 @@ macbeth = piRecipeCreate('macbeth checker');
 macbeth.show('objects');
 
 macbeth.set('pixel samples', 128);
-
-% Define rendering parameters 
-%{
-dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
-    'localRender',false,...
-    'gpuRendering',false,...
-    'remoteMachine','mux.stanford.edu',...
-    'remoteUser','henryk',...
-    'remoteRoot','/home/henryk',...
-    'remoteImage','digitalprodev/pbrt-v4-cpu');
-%}
-
-macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', true, 'meanluminance', -1);
+macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
 macbeth.show('objects');
+sceneShowImage(macbethScene);
 
-%{
-sceneWindow(macbethScene);
-%}
-%{
-rgb = sceneGet(macbethScene,'srgb');
-figure; 
-imshow(rgb);
-%}
 %% Create sea water medium
 
 % The struct 'water' is a description of a PBRT object that desribes a
