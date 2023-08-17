@@ -16,8 +16,7 @@ thisR.sampler.pixelsamples.value = 64;
 %{
     piLightGet(thisR);
 %}
-piLightDelete(thisR, 'all');
-
+thisR.set('lights','all','delete');
 
 distantLight = piLightCreate('distantLight', ...
     'type','distant',...

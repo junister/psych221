@@ -77,7 +77,7 @@ thisTime = '16:30';  % The time of day of the sky
 %% Add a light to the merged scene
 
 % Delete any lights that happened to be there
-sceneR = piLightDelete(sceneR, 'all');
+sceneR.set('lights','all','delete');
 
 rotation(:,1) = [0 0 0 1]';
 rotation(:,2) = [45 0 1 0]';

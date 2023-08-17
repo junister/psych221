@@ -185,7 +185,7 @@ for ii = 1:numel(thisR.lights)
             end
 
             % mapname
-            [~, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+            [~, mapnameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
             if ~isempty(mapnameTxt)
                 lghtDef = strcat(lghtDef, mapnameTxt);
             end
@@ -196,6 +196,19 @@ for ii = 1:numel(thisR.lights)
             end
 
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
+
+            % We keep the goniometric maps in the root directory for now
+            fname = thisLight.filename.value;
+            if ~exist(fullfile(thisR.get('output dir'),fname),'file')
+                % Look for it in the skymaps directory
+                gonioFile = fullfile(piDirGet('skymaps'),fname);                
+                fprintf('Copying goniometric light file from skymaps directory. %s\n',gonioFile);
+                if exist(gonioFile,'file')
+                    copyfile(gonioFile,thisR.get('output dir'));
+                else
+                    warning('Could not find the goniometric light file %s\n',fname)
+                end
+            end
 
         case 'infinite'
             % First check if there is any rotation, translation or

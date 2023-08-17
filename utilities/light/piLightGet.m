@@ -141,15 +141,18 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "point3 from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
-        case 'mapname' % in v4 this changes to filename
+        case 'filename' 
+            % for goniometric in v4 this changed to filename from mapname
+            % Below, mapname is for skymaps
+            txt = sprintf(' "string filename" "%s"', val);
+        case 'mapname' 
             % DJC Use skymaps only where they belong
-            % We don't always have skymaps folder, so we should allow a
-            % full path here.
             if ~contains(val,'skymaps/')
                 prefix = 'skymaps/';
             else
                 prefix = '';
             end
+            % in v4 this changed to filename from mapname
             txt = sprintf(' "string filename" "%s%s"', prefix, val);
         case 'fov'
             txt = sprintf(' "float fov" [%.4f]', val);

@@ -69,7 +69,7 @@ function thisR = piLightAdd(thisR, varargin)
   ieInit;
   thisR = piRecipeDefault;
   lightSources = piLightGet(thisR);
-  thisR = piLightDelete(thisR, 1);
+  thisR = thisR.set('lights',1,'delete');
   thisR = piLightAdd(thisR, 'type', 'point');
   thisR = piLightAdd(thisR, 'type', 'point', 'camera coordinate', true);
 %}

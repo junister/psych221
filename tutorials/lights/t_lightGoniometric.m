@@ -1,12 +1,9 @@
-%% 
+%% Illustrate creating a goniometric light
 %
+% TODO:  Create exr files with localized patches so we understand the
+% geometry. 
 %
 % LightSource "goniometric" "spectrum I" "spds/lights/equalenergy.spd"  "string filename" "pngExample.exr" "float scale" [1.00000]
-
-% History:
-%   10/28/20  dhb  Explicitly show how to compute and look at depth map and
-%                  illumination map. The header comments said it did the
-%                  latter two, and now it does.
 
 %% init
 ieInit;
@@ -16,36 +13,46 @@ if ~piDockerExists, piDockerConfig; end
 %
 % The MCC image is the default recipe.  We do not write it out yet because
 % we are going to change the parameters
-thisR = piRecipeDefault;
+thisR = piRecipeCreate('macbethchecker');
 
 %% Change the light
 %
 % There is a default point light.  We delete that.
-thisR = piLightDelete(thisR, 'all');
+thisR = thisR.set('lights','all','delete');
 
-% Add an equal energy distant light for uniform lighting
+%% Example of a Goniometric light
+
 spectrumScale = 1;
 lightSpectrum = 'equalEnergy';
-newDistant = piLightCreate('new distant',...
+% gonioMap = 'clouds-sky.exr';   % Include the extension
+gonioMap = 'sky-blue-sun.exr';   % Include the extension
+
+newGoniometric = piLightCreate('gonio',...
+                           'type', 'goniometric',...
+                           'specscale float', spectrumScale,...
+                           'spd spectrum', lightSpectrum,...
+                           'filename', gonioMap);
+thisR.set('light', newGoniometric, 'add');
+
+spectrumScale = 0.1;
+lightSpectrum = 'equalEnergy';
+newDistant = piLightCreate('distant',...
                            'type', 'distant',...
                            'specscale float', spectrumScale,...
                            'spd spectrum', lightSpectrum,...
                            'cameracoordinate', true);
 thisR.set('light', newDistant, 'add');
-%% Set an output file
-%
-% This is pretty high resolution given the nature of the target.
-thisR.set('integrator subtype','path');
-thisR.set('rays per pixel', 16);
-thisR.set('fov', 30);
-thisR.set('filmresolution', [640, 360]*2);
 
-%% Render and display.
-%
-% By default we get the radiance map and the depth map. The depth map is
-% distance from camera to each point along the line of sight.  See
-% t_piIntro_macbeth_zmap for how to compute a zmap.
-thisR.set('render type', {'radiance', 'depth'});
-scene = piWRS(thisR);
+thisR.show('lights');
+
+%% Render and display both lights
+
+piWRS(thisR,'render flag','hdr');
+
+%% Remove the goniometric light
+
+thisR.set('light','gonio_L','delete');
+thisR.show('lights');
+piWRS(thisR,'render flag','rgb');
 
 %% END

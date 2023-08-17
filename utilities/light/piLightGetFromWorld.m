@@ -22,7 +22,7 @@ function lightSources = piLightGetFromWorld(thisR, varargin)
 %{
   thisR = piRecipeDefault;
   lightSources = piLightGet(thisR);
-  thisR = piLightDelete(thisR, 1);
+  thisR.set('lights','all','delete');
   thisR = piLightAdd(thisR, 'type', 'point');
   thisR = piLightAdd(thisR, 'type', 'point', 'camera coordinate', true);
   piLightGet(thisR);

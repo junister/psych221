@@ -171,8 +171,8 @@ switch ieParamFormat(lght.type)
         %}
         % The goniometric image showing the light distribution in
         % different directions.
-        lght.mapname.type = 'string';
-        lght.mapname.value = '';
+        lght.filename.type = 'string';
+        lght.filename.value = '';
 
         % Not sure about this or how piWrite should handle it (BW).
         lght.spd.type = 'rgb';

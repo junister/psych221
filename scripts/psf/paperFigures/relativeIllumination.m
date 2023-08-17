@@ -25,7 +25,7 @@ thisDocker = 'vistalab/pbrt-v3-spectral:raytransfer-ellipse';
 % by light falloff
 light =  piLightCreate('distant','type','distant')
 
- thisR     = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 thisR.set('light', 'add', light);
 
 

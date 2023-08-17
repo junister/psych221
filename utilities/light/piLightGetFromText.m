@@ -20,12 +20,6 @@ function [lightSources, lightTextRanges] = piLightGetFromText(intext, varargin)
 
 % Examples
 %{
-  thisR = piRecipeDefault;
-  lightSources = piLightGet(thisR);
-  thisR = piLightDelete(thisR, 1);
-  thisR = piLightAdd(thisR, 'type', 'point');
-  thisR = piLightAdd(thisR, 'type', 'point', 'camera coordinate', true);
-  piLightGet(thisR);
 %}
 
 %% Parse inputs
