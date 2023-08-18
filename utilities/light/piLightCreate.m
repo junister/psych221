@@ -230,8 +230,8 @@ switch ieParamFormat(lght.type)
         lght.fov.type = 'float';
         lght.fov.value = [];
 
-        lght.mapname.type = 'string';
-        lght.mapname.value = '';
+        lght.filename.type = 'string';
+        lght.filename.value = '';
 
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
