@@ -246,13 +246,7 @@ for ii = 1:numel(thisR.lights)
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
-            % spectrum
-            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
-            if ~isempty(spdTxt)
-                lghtDef = strcat(lghtDef, spdTxt);
-            end
-
-            % filename -- used to be mapname
+            % filename -- used to be mapname -- this is our projected image
             [~, filenameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
             if ~isempty(filenameTxt)
                 lghtDef = strcat(lghtDef, filenameTxt);

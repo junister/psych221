@@ -233,6 +233,15 @@ switch ieParamFormat(lght.type)
         lght.filename.type = 'string';
         lght.filename.value = '';
 
+        % Experimenting by trying to see what other options we have...
+        lght.cameracoordinate = true;
+
+        lght.from.type = 'point';
+        lght.from.value = [0 0 0];
+
+        lght.scale.type = 'scale';
+        lght.scale.value = {};
+
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
 

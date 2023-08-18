@@ -15,25 +15,26 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the file
-
 thisR = piRecipeDefault('scene name','checkerboard');
 
 % Put the camera 3 meters away
-thisR.set('from',[0 0 3]);
+thisR.set('from',[0 0 -3]);
 
 
 % Remove all the lights
 thisR.set('light', 'all', 'delete');
+
 
 %% Add one projection light
 
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
 % edges
-projectionLight = piLightCreate('ProjectedLight',...
+projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
-    'fov',20,...
-    'filename', 'rainbow.jpg'); % seems to want a path?
+    'scale',1000,...
+    'fov',90,...
+    'filename string', 'skymaps/rainbow.exr');
 
 thisR.set('light', projectionLight, 'add');
 
