@@ -258,6 +258,13 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, fovTxt);
             end
 
+            %% See what other properties we can use
+            % spectrum
+            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
+            if ~isempty(spdTxt)
+                lghtDef = strcat(lghtDef, spdTxt);
+            end
+
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case {'spot', 'spotlight'}
