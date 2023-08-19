@@ -18,7 +18,7 @@ thisR.set('nbounces',5);
 
 % Should we delete all the lights and start clean?
 
-piLightDelete(thisR,'all');
+thisR.set('lights','all','delete');
 
 distantLight = piLightCreate('distantLight', ...
     'type','spot',...
@@ -78,7 +78,7 @@ sceneSet(scene,'gamma',0.3);
 
 %{
 lightsource = piLightGet(thisR);
-piLightDelete(thisR, 'all');   % This fails!!! Fix it.
+thisR.set('lights','all','delete');
 
 % When the light sources were all removed, this throws an error.
 thisR = piLightAdd(thisR, 'type', 'area', 'lightspectrum', 'D65');

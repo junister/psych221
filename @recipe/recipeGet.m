@@ -1658,7 +1658,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                     % without appending the _L and if that fails we do
                     % append.
                     try
-                        thisLight = thisR.get('asset', varargin{1});
+                        idx = piAssetSearch(thisR,'light name',varargin{1});
+                        thisLight = thisR.get('asset', idx);
+                        assert(isequal(thisLight.type,'light'));
                     catch
                         varargin{1} = piLightNameFormat(varargin{1});
                     end

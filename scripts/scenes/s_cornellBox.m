@@ -17,7 +17,7 @@ thisR.set('nbounces',2);
     thisR.assets.show
 %}
 % Delete all lights.
-piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 areaLight = piLightCreate('type', 'area');
 lightName = 'Tungsten';

@@ -2,13 +2,9 @@ function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
 % Description
-%    This is a warning.  piLightGet is not the same as other typical
-%    set/get functions.  It does not return the parameters, as say
-%    thisR.get('light',idx,param) would.  Rather it takes in the light
-%    struct and returns text that can be printed into the PBRT rendering
-%    file.  We should talk over the name of this function and we should see
-%    if we can have both of these functions. Maybe this function should be
-%    piLightGetText() to distinguish it from a conventional get? (BW)
+%   piLightGet takes in a light struct and returns a value (first) and
+%   the text that can be printed in the PBRT rendering file (usually
+%   the geometry file).
 %
 % Synopsis
 %    [val, txt] = piLightGet(lght, param, varargin)
@@ -21,7 +17,7 @@ function [val, txt] = piLightGet(lght, param, varargin)
 %   pbrttext - flag of whether parse text for light
 %
 % Returns:
-%   val - returned value specified by the param
+%   val - returns the value specified by the param
 %   txt - The light text for pbrt files.  Convenient for piWrite.
 %
 % ZLY, SCIEN, 2020
@@ -73,7 +69,7 @@ p.parse(lght, param, varargin{:});
 
 pbrtText = p.Results.pbrttext;
 
-%%
+%% How we return just the values
 val = [];
 
 if isfield(lght, pName)
@@ -94,6 +90,9 @@ else
     warning('Parameter: %s does not exist in light type: %s',...
         param, lght.type);
 end
+
+% If the user didn't ask for text, we are done.
+if nargout == 1, return; end
 
 %% compose pbrt text
 txt = '';
@@ -141,15 +140,23 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "point3 from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
-        case {'mapname', 'filename'} % in v4 this changes to filename
+        case 'mapname'
+        case 'filename' 
+            % Both the goniometric, projection, and skymaps have a
+            % filename. 
+            % 
+            % Point, distant, infant, area, spot do not.
+            %
+            % We for goniometric in v4 this changed to filename from mapname
+            % Below, mapname is for skymaps
+            txt = sprintf(' "string filename" "%s"', val);
+
             % DJC Use skymaps only where they belong
-            % We don't always have skymaps folder, so we should allow a
-            % full path here.
-            if ~contains(val,'skymaps/')
-                prefix = 'skymaps/';
-            else
-                prefix = '';
+            if ~contains(val,'skymaps/'), prefix = 'skymaps/';
+            else,                         prefix = '';
             end
+
+            % in v4 this changed to filename from mapname
             txt = sprintf(' "string filename" "%s%s"', prefix, val);
         case 'fov'
             txt = sprintf(' "float fov" [%.4f]', val);

@@ -43,7 +43,7 @@ thisR = piRead(fname);
 %}
 
 % Delete current lights
-thisR = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 thisR = piLightAdd(thisR,...
     'type','point',...

@@ -28,7 +28,7 @@ if ~piDockerExists, piDockerConfig; end
 thisR = piRecipeDefault;
 
 %% Delete all the lights
-thisR = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 %% Add one equal energy light
 
@@ -43,7 +43,7 @@ thisR.set('light','add',spotLight);
 thisR.get('print lights');
 
 %% Test new delete light function
-thisR = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 %%  Now add two different lights
 

@@ -1,7 +1,9 @@
-% This tutorial shows how to create a simple scene,
-% a medium, and how to render the scene submerged in that medium. 
+% Experiment with the scattering parameter for the medium
 %
-% Henryk Blasinski, 2023
+%
+%
+% See also
+%   t_mediumExample
 
 %%
 ieInit
@@ -12,10 +14,17 @@ macbeth = piRecipeCreate('macbeth checker');
 macbeth.show('objects');
 
 macbeth.set('pixel samples', 128);
-macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
+macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', true, 'meanluminance', -1);
 macbeth.show('objects');
-sceneShowImage(macbethScene);
 
+%{
+sceneWindow(macbethScene);
+%}
+%{
+rgb = sceneGet(macbethScene,'srgb');
+figure; 
+imshow(rgb);
+%}
 %% Create sea water medium
 
 % The struct 'water' is a description of a PBRT object that desribes a
@@ -30,7 +39,7 @@ sceneShowImage(macbethScene);
 %
 % PBRT allows specification only of the parameters scattering, scattering 
 [water, waterProp] = piWaterMediumCreate('seawater');
-disp(waterProp);
+disp(waterProp)
 
 %{
    uwMacbeth = sceneSet(uwMacbeth,'medium property',val);
@@ -38,40 +47,41 @@ disp(waterProp);
    medium = mediumSet(medium,'property',val);
    mediumGet()....
 %}
-% Submerge the scene in the medium.   
-% The size defines the volume of water.  It is centered at 0,0 and extends
-% plus or minus 50/2 away from center in units of meters!  Excellent! 
+
+% Submerge the scene in the medium.
 % It returns a modified recipe that has the 'media' slot built in the
-% format that piWrite knows what to do with it.
-uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
-% underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
+% format that piWrite knows what to do with.
+thisR = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
+piWRS(thisR,'meanluminance', -1);
+% sceneWindow(uwMacbethScene);
 
-uwMacbeth.show('objects');
+%% Let's change the scattering parameter
+val = thisR.get('media scattering','seawater');
+val.scatter = val.scatter*10;   % If it is a single number, just scale by that number.
 
-uwMacbethScene = piWRS(uwMacbeth,'meanluminance', -1);
-%{
-sceneWindow(uwMacbethScene);
-%}
-%{
-rgb = sceneGet(uwMacbethScene,'srgb');
-figure; imshow(rgb);
-%}
+% thisR.media.list('seawater')
 
-%% Let's change a medium parameter - On BW's computer this is OK
+thisR.set('medium','seawater','scatter',val);
+val = thisR.get('media scattering','seawater');
+val.scatter
 
-% The depth of the water we are seeing through
-depths = logspace(0,1.5,3);
-for zz = 1:numel(depths)
-    uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', depths(zz));
+piWRS(thisR,'meanluminance', -1);
 
-    idx = piAssetSearch(uwMacbeth,'object name','Water');
-    sz = uwMacbeth.get('asset',idx,'size');
-    uwMacbethScene    = piWRS(uwMacbeth, 'meanluminance', -1, 'name',sprintf('Depth %.1f',sz(3)));
+%% Let's change the absorption parameter
+val = thisR.get('media absorption','seawater');
+val.absorption = fliplr(val.absorption);   % If it is a single number, just scale by that number.
 
-end
+% thisR.media.list('seawater')
+
+thisR.set('medium','seawater','absorption',val);
+val = thisR.get('media absorption','seawater');
+% val.absorption
+
+piWRS(thisR,'meanluminance', -1);
+
 
 %%  Try the chess set
-
+%{
 thisR = piRecipeCreate('Chess Set');
 chessSet = piWRS(thisR);
 
@@ -82,4 +92,4 @@ thisR = piRecipeCreate('Chess Set');
 sz = [1 1 1];
 thisR = piSceneSubmerge(thisR, water, 'sizeX', sz(1), 'sizeY', sz(2), 'sizeZ', sz(3));
 uwChessSet = piWRS(thisR,'name',sprintf('Size %.1f-%.1f-%.1f',sz),'meanluminance',-1);
-
+%}

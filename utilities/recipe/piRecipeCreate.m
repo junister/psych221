@@ -112,7 +112,7 @@ piWRS(thisR);
 switch ieParamFormat(rName)
     case {'macbethchecker','macbethchart'}
         thisR = piRecipeDefault('scene name',rName);
-        thisR = piLightDelete(thisR, 'all');
+        thisR = thisR.set('lights','all','delete');
 
         % Add an equal energy distant light for uniform lighting
         spectrumScale = 1;
@@ -139,7 +139,7 @@ switch ieParamFormat(rName)
 
         thisR.set('rays per pixel',128);
         thisR.set('nbounces',5);
-        piLightDelete(thisR,'all');
+        thisR.set('lights','all','delete');
         distantLight = piLightCreate('distantLight', ...
             'type','spot',...
             'cameracoordinate', true);

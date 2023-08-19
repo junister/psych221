@@ -185,7 +185,7 @@ for ii = 1:numel(thisR.lights)
             end
 
             % mapname
-            [~, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+            [~, mapnameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
             if ~isempty(mapnameTxt)
                 lghtDef = strcat(lghtDef, mapnameTxt);
             end
@@ -197,6 +197,21 @@ for ii = 1:numel(thisR.lights)
 
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
+            % We keep the goniometric maps in the root directory for now
+            fname = thisLight.filename.value;
+            if ~isfile(fullfile(thisR.get('output dir'),'skymaps',fname))
+                % Look for it in the skymaps directory
+                gonioFile = fullfile(piDirGet('skymaps'),fname);                
+                if isfile(gonioFile)
+                    gonioDir = fullfile(thisR.get('output dir'),'skymaps');
+                    if ~isfolder(gonioDir), mkdir(gonioDir); end
+                    copyfile(gonioFile,gonioDir);
+                    fprintf('Copying goniometric light file from skymaps directory. %s\n',gonioFile);
+                else
+                    warning('Could not find the goniometric light file %s\n',fname)
+                end
+            end
+
         case 'infinite'
             % First check if there is any rotation, translation or
             % concatransformation
@@ -206,22 +221,25 @@ for ii = 1:numel(thisR.lights)
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
-            if isempty(thisLight.mapname.value)
+            if isempty(thisLight.filename.value)
                 % spectrum
                 [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
                 if ~isempty(spdTxt)
                     lghtDef = strcat(lghtDef, spdTxt);
                 end
             else
-                % mapname
-                [mapName, mapnameTxt] = piLightGet(thisLight, 'mapname val', 'pbrt text', true);
+                % V4 uses filename.  (We used to use mapname.)
+                [mapName, mapnameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
                 if ~isempty(mapnameTxt)
                     lghtDef = strcat(lghtDef, mapnameTxt);
 
                     if ~exist(fullfile(thisR.get('output dir'),'skymaps',mapName),'file')
-                        mapFile = which(mapName);
-                        if ~isempty(mapFile)
-                            copyfile(mapFile,thisR.get('output dir'));
+                        % mapFile = which(mapName);
+                        mapFile = fullfile(piDirGet('skymaps'),mapName);
+                        if isfile(mapFile)
+                            skymapDir = [thisR.get('output dir'),filesep,'skymaps'];
+                            if ~isfolder(skymapDir), mkdir(skymapDir); end
+                            copyfile(mapFile,skymapDir);
                         end
                     end
                 end

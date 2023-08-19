@@ -77,7 +77,7 @@ sceneR = piRecipeMerge(sceneR, objectR);
 skyname = 'probe_16-30_latlongmap.exr';
 
 % Delete any lights that happened to be there
-sceneR = piLightDelete(sceneR, 'all');
+thisR.set('lights','all','delete');
 
 rotation(:,1) = [0 0 0 1]';
 rotation(:,2) = [45 0 1 0]';

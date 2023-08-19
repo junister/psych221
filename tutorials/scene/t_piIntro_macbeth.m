@@ -43,7 +43,7 @@ thisR = piRecipeDefault;
 %% Change the light
 %
 % There is a default point light.  We delete that.
-thisR = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 % Add an equal energy distant light for uniform lighting
 spectrumScale = 1;

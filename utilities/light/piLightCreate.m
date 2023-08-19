@@ -58,7 +58,8 @@ function lght = piLightCreate(lightName, varargin)
 
 validLights = {'distant','goniometric','infinite','point','area','projection','spot'};
 
-if isequal(ieParamFormat(lightName),'listavailabletypes')
+if isequal(ieParamFormat(lightName),'listavailabletypes') || ...
+        isequal(ieParamFormat(lightName),'list')
     lght = validLights;
     fprintf('\n\nValid light types\n-------------\n')
     for ii=1:numel(lght)
@@ -171,21 +172,22 @@ switch ieParamFormat(lght.type)
         %}
         % The goniometric image showing the light distribution in
         % different directions.
-        lght.mapname.type = 'string';
-        lght.mapname.value = '';
+        lght.filename.type = 'string';
+        lght.filename.value = '';
 
         % Not sure about this or how piWrite should handle it (BW).
         lght.spd.type = 'rgb';
         lght.spd.value = [1 1 1];
 
-    case 'infinite'
-        % Is this the same as environmental?
+    case {'infinite','skymap','environment'}
+        % Gets called from thisR.set('skymap',filename,'add');
+        % See the code there for rotations and translations.
         lght.nsamples.type = 'integer';
         lght.nsamples.value = [];
 
         % V4 for infinite lights
-        lght.mapname.type = 'string';
-        lght.mapname.value = '';
+        lght.filename.type = 'string';
+        lght.filename.value = '';
         
         %{
         % Potentially has rotation, transformation or concatransformaiton
@@ -234,10 +236,15 @@ switch ieParamFormat(lght.type)
         lght.filename.value = '';
 
         % Experimenting by trying to see what other options we have...
+        % Might be usable or at least coordinated with from and to.
+        % So we need to figure out which to use.
         lght.cameracoordinate = true;
 
         lght.from.type = 'point';
         lght.from.value = [0 0 0];
+
+        lght.to.type = 'point';
+        lght.to.value = [0 0 0];
 
         lght.scale.type = 'scale';
         lght.scale.value = {};

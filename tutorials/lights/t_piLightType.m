@@ -22,12 +22,12 @@ if ~piDockerExists, piDockerConfig; end
 
 % Scale the sphere to 1 meter size.  This should be the default sphere, 1
 % meter size at location 0,0,0 (BW)
-% {
 thisR = piRecipeDefault('scene name','sphere');
-thisR.set('asset','001_Sphere_O','scale',2/380);
+idx   = piAssetSearch(thisR,'object','Sphere');
+thisR.set('asset',idx,'scale',2/380);
+
 % Put the camera 3 meters away
 thisR.set('from',[0 0 3]);
-%}
 
 % Remove all the lights
 thisR.set('light', 'all', 'delete');
@@ -51,11 +51,19 @@ thisR.show('lights');
 
 %% Render depth and radiance
 
-thisR.set('render type',{'radiance','depth'});
-
 piWRS(thisR,'name','EE spot');
 
 %%  Narrow the cone angle of the spot light a lot
+thisR.set('light', 'spotWhite', 'coneangle', 10);
+
+piWRS(thisR,'name','EE spot angle 10');
+
+%% conedeltaangle
+
+% Make this work.
+% https://www.pbrt.org/fileformat-v3#lights
+% thisR.get('light','spotWhite','coneangledelta')
+
 thisR.set('light', 'spotWhite', 'coneangle', 10);
 
 piWRS(thisR,'name','EE spot angle 10');
