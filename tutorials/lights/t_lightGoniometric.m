@@ -13,7 +13,7 @@ if ~piDockerExists, piDockerConfig; end
 %
 % The MCC image is the default recipe.  We do not write it out yet because
 % we are going to change the parameters
-thisR = piRecipeCreate('macbethchecker');
+thisR = piRecipeCreate('chessset');
 
 %% Change the light
 %
@@ -22,11 +22,12 @@ thisR = thisR.set('lights','all','delete');
 
 %% Example of a Goniometric light
 
-spectrumScale = 1;
-lightSpectrum = 'equalEnergy';
+spectrumScale = 1000;
 % gonioMap = 'clouds-sky.exr';   % Include the extension
-gonioMap = 'sky-blue-sun.exr';   % Include the extension
+% gonioMap = 'sky-blue-sun.exr';   % Include the extension
+gonioMap = 'shadedGrayCircle.png'; 
 
+lightSpectrum = 'equalEnergy';
 newGoniometric = piLightCreate('gonio',...
                            'type', 'goniometric',...
                            'specscale float', spectrumScale,...
@@ -34,6 +35,7 @@ newGoniometric = piLightCreate('gonio',...
                            'filename', gonioMap);
 thisR.set('light', newGoniometric, 'add');
 
+%%
 spectrumScale = 0.1;
 lightSpectrum = 'equalEnergy';
 newDistant = piLightCreate('distant',...
@@ -43,7 +45,11 @@ newDistant = piLightCreate('distant',...
                            'cameracoordinate', true);
 thisR.set('light', newDistant, 'add');
 
+%% A skymap for good measure
+thisR.set('skymap','room.exr');
+
 thisR.show('lights');
+% thisR.set('lights','room_L','delete');
 
 %% Render and display both lights
 

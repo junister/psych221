@@ -1135,7 +1135,7 @@ switch param
         lName = f; % in case we want to get fancy later
         envLight = piLightCreate(lName, ...
             'type', 'infinite',...
-            'mapname', skymapFileName);
+            'filename', skymapFileName);
         thisR.set('lights', envLight, 'add');
 
         if ~isempty(varargin) && isequal(varargin{1},'rotation val')

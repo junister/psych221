@@ -186,8 +186,8 @@ switch ieParamFormat(lght.type)
         lght.nsamples.value = [];
 
         % V4 for infinite lights
-        lght.mapname.type = 'string';
-        lght.mapname.value = '';
+        lght.filename.type = 'string';
+        lght.filename.value = '';
         
         %{
         % Potentially has rotation, transformation or concatransformaiton

@@ -140,6 +140,7 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "point3 from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
+        case 'mapname'
         case 'filename' 
             % Both the goniometric, projection, and skymaps have a
             % filename. 
