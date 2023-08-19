@@ -110,7 +110,7 @@ else, coneDeltaAngle = 5; end
 if isfield(lightSource, 'spectrumscale'), spectrumScale = lightSource.spectrumscale;
 else, spectrumScale = 1; end
 
-if isfield(lightSource, 'mapname'), mapname = lightSource.mapname;
+if isfield(lightSource, 'filename'), mapname = lightSource.filename;
 else, mapname = ''; end
 
 % This is a marker for the position where we define the light source
@@ -262,8 +262,8 @@ switch type
             lightSources{1}.lightspectrum = lightSpectrum;
             lightSources{1}.line{pos} = sprintf('LightSource "infinite" "%s L" %s "integer nsamples" [%d]', spectrumType, lightSpectrum, nsamples);
         else
-            lightSources{1}.mapname = mapname;
-            lightSources{1}.line{pos} = sprintf('LightSource "infinite" "string mapname" "%s" "integer nsamples" [%d]', mapname, nsamples);
+            lightSources{1}.filename = mapname;  % Changed to filename from mapname 8/19/23
+            lightSources{1}.line{pos} = sprintf('LightSource "infinite" "string filename" "%s" "integer nsamples" [%d]', mapname, nsamples);
         end
     case 'area'
         lightSources{1}.type = 'area';

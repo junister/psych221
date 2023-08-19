@@ -1,5 +1,11 @@
 function piMaterialWrite(thisR, varargin)
 % Write the contents of the _material file
+%
+% In addition to writing the material file, we should make sure the texture
+% files are present in the output directory. As of 8/19/23, BW can't see
+% where this is done any more!  Still checking.  We do this for lights, but
+% apparently not for textures?  Weird.
+%
 % Synopsis:
 %   piMaterialWrite(thisR)
 %
@@ -30,8 +36,6 @@ p.parse(thisR, varargin{:});
 
 %% Create txtLines for texture struct array
 
-% Texture txt lines creation are moved into piTextureText function.
-
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     
     % textureKeys = thisR.textures.order;
@@ -61,6 +65,7 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
             nn=nn+1;
         end
     end
+
     % ZLY: if special texture cases exist, append them to the end
     if numel(TextureTex) > 0
         textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
@@ -70,7 +75,8 @@ else
 end
 
 
-%% Create txtLines for the material struct array
+%% Create text lines for the material struct array
+
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
     matTypeList = cell(1, thisR.materials.list.Count);

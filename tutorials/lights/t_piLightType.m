@@ -18,18 +18,21 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Read the file
 
-% thisR = piRecipeDefault('scene name','checkerboard');
+thisR = piRecipeCreate('checkerboard');
+thisR.set('object distance',5);
 
 % Scale the sphere to 1 meter size.  This should be the default sphere, 1
 % meter size at location 0,0,0 (BW)
+%{
 thisR = piRecipeDefault('scene name','sphere');
 idx   = piAssetSearch(thisR,'object','Sphere');
 thisR.set('asset',idx,'scale',2/380);
 
 % Put the camera 3 meters away
 thisR.set('from',[0 0 3]);
+%}
 
-% Remove all the lights
+%% Remove all the lights
 thisR.set('light', 'all', 'delete');
 
 %% Add one equal energy light
@@ -54,25 +57,16 @@ thisR.show('lights');
 piWRS(thisR,'name','EE spot');
 
 %%  Narrow the cone angle of the spot light a lot
-thisR.set('light', 'spotWhite', 'coneangle', 10);
+thisR.set('light', 'spotWhite', 'coneangle', 15);
 
-piWRS(thisR,'name','EE spot angle 10');
+piWRS(thisR,'name','EE spot angle 15');
 
-%% conedeltaangle
+%% cone delta angle sets how the spot light falls off
 
-% Make this work.
-% https://www.pbrt.org/fileformat-v3#lights
-% thisR.get('light','spotWhite','coneangledelta')
+thisR.set('light', 'spotWhite', 'coneangle', 15);
+thisR.set('light', 'spotWhite', 'conedeltaangle', 15);
 
-thisR.set('light', 'spotWhite', 'coneangle', 10);
-
-piWRS(thisR,'name','EE spot angle 10');
-
-%%  Change the light and render again
-
-thisR.set('light', 'spotWhite', 'coneangle', 25);
-
-piWRS(thisR,'name','EE spot angle 25')
+piWRS(thisR,'name','EE spot angle 15/delta 15')
 
 %%  Change the light and render again
 
@@ -107,11 +101,13 @@ spotYellow = piLightCreate('spotYellow',...
     'coneangle',45,...
     'cameracoordinate', true);
 
+% Move away so we can see the edge of the checker
+thisR.set('object distance',10);
 
 % Infinite means the light is on the whole sphere with a particular SPD.
 roomLight = piLightCreate('room',...
     'type','infinite',...
-    'mapname', 'room.exr');
+    'filename', 'room.exr');
 
 thisR.set('light', spotBlue, 'add');
 thisR.set('light','spotBlue','from',thisR.get('from') + [3 0 0]);
@@ -129,17 +125,17 @@ piWRS(thisR,'name',sprintf('EE infinite'))
 
 %% Rotate the skymap
 
-% We should make a set
-%
-%   thisR.set('light','room','rotate',{[xxx],[xxx]});
-%
-% And we should explain what the heck the xxx values are.
-thisR.set('light', roomLight.name, 'rotation', [0 0 1]);
-thisR.set('light', roomLight.name, 'rotation', [-90 45 0]);
+% This one keeps the room upright and just swings the view around
+thisR.set('light', roomLight.name, 'rotation', [-90 0 0]);
+
+% Not sure about this parameter. 
 % roomLight = piLightSet(roomLight, 'rotation val', {[0 0 1 0], [-90 45 0 0]});
-thisR.set('light', 'room', 'replace', roomLight);
+% thisR.set('light', 'room', 'replace', roomLight);
 
 piWRS(thisR,'name','Rotated skymap');
+
+%%
+thisR.show('lights');
 
 %% END
 

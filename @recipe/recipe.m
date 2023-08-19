@@ -220,7 +220,7 @@ classdef recipe < matlab.mixin.Copyable
                     nLights = numel(lNames);
                     for ii=1:nLights
                         if isequal(obj.get('light',lNames{ii},'type'),'infinite')
-                            mapname = obj.get('light',lNames{ii},'mapname');
+                            mapname = obj.get('light',lNames{ii},'filename');
                             if ~isempty(mapname)
                                 mapname = fullfile(obj.get('outputdir'),mapname);
                                 img = exrread(mapname);

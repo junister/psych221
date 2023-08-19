@@ -1,4 +1,9 @@
 %% update assets in flywheel to v4
+%
+%  Deprecated.
+%
+
+%%
 ieInit
 st = scitran('stanfordlabs');
 

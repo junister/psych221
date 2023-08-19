@@ -1,4 +1,7 @@
 %%
+% OUT OF DATE
+%
+
 ieWebGet('browse')
 
 %%
@@ -29,7 +32,7 @@ sceneWindow(scene);
 
 % piLightProperties('infinite')
 
-newLight = piLightCreate('outside','type','infinite','mapname','room.exr');
+newLight = piLightCreate('outside','type','infinite','filename','room.exr');
 % newLight = piLightCreate('inside','type','spot','cameracoordinate',true,'spd',[1 0 0]);
 
 thisR.set('light',newLight,'add');

@@ -1093,21 +1093,20 @@ switch param
         if ~isfile(fullfile(thisR.get('output dir'),skymapFileName))
             % We keep all skymap files in this folder now.
             skymapdir = fullfile(thisR.get('output dir'),'skymaps');
-            % If it is not in the local directory, check the data/lights
-            if isfile(fullfile(piDirGet('lights'), skymapFileName))
-                copyfile(fullfile(piDirGet('lights'), skymapFileName),...
+            % If it is not in the local directory, check the data/skymaps
+            if isfile(fullfile(piDirGet('skymaps'), skymapFileName))
+                if ~isfolder(skymapdir), mkdir(skymapdir); end
+                copyfile(fullfile(piDirGet('skymaps'), skymapFileName),...
                     skymapdir);
             else
-                % Not found yet, look for it on the path
+                % Not found yet, look for it anywhere on the path
                 exrFile = which(skymapFileName);
                 if ~isempty(exrFile)
-                    fprintf('Using skymap:  %s\n',exrFile);
-
-                    if ~isfolder(skymapdir)
-                        mkdir(skymapdir);
-                    end
+                    fprintf('Using skymap file: %s\n',exrFile);
+                    if ~isfolder(skymapdir), mkdir(skymapdir); end
                     copyfile(exrFile, skymapdir);
                 else
+                    % BW is confused by this. But moving on.
                     % If skymapFileName exists at different location, we
                     % move it to the output folder.
                     if exist(skymapFileName,"file")
@@ -1248,23 +1247,27 @@ switch param
                 lghtAsset = thisR.get('light', lghtName);
                 lght = lghtAsset.lght{1};
                 
-                % This might not be elegant enough..? (ZLY)
-                % If it has no from field, then the transformation will
-                % be applied to the branch node (for infinite and area light).
+                % If the light (asset) has no from field, then the
+                % transformation will be applied to the branch node.  This
+                % applies to  the skymap (infinite, environment) and area
+                % light. 
                 if ~isfield(lght, 'from')
                     thisR.set('asset', lghtName, 'rotate', val);
                     return;
                 end
                 
-                % Else it has from field, treat it differently.
-                % [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
-                
+                % It has a 'from' field so we apply a real rotation.  The
+                % parameters specify the amount of the rotation and the
+                % order of w.r.t X,Y,Z
                 if numel(varargin) == 2
+                    % The 2nd varargin is the rotation in deg of X,Y,Z
                     xRot = varargin{2}(1);
                     yRot = varargin{2}(2);
                     zRot = varargin{2}(3);
                 end
                 if numel(varargin) == 3
+                    % The 3rd varargin specifies the order of the rotations
+                    % of X, Y, and Z. Default is below.
                     order = varargin{3};
                 else
                     order = ['x', 'y', 'z'];

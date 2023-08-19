@@ -141,6 +141,8 @@ if pbrtText && ~isempty(val) &&...
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'mapname'
+            % We think we replaced calls to mapname with filename
+            warning('No mapname gets should be left.')
         case 'filename' 
             % Both the goniometric, projection, and skymaps have a
             % filename. 

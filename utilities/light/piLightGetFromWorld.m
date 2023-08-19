@@ -156,8 +156,8 @@ for ii = 1:nLights
             end
         else
             % Two parameters acceptable by infinite light
-            mapname = find(piContains(thisLineStr, 'string mapname'));
-            if mapname, lightSources{ii}.mapname = thisLineStr{mapname+1};
+            mapname = find(piContains(thisLineStr, 'string filename'));
+            if mapname, lightSources{ii}.filename = thisLineStr{mapname+1};
             end
             
             int = find(piContains(thisLineStr, 'integer nsamples'));
