@@ -1,6 +1,8 @@
 function lght = piLightRotate(lght, varargin)
 % Rotate the direction of a light source
 %
+% SOMETHING IS WRONG HERE. DOC DOESN"T MATCH CODE
+%
 % Synopsis
 %   thisR = piLightRotate(thisR, idx,varargin)
 %
