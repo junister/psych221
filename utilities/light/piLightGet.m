@@ -176,6 +176,8 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'shape'
             txt = piShape2Text(val);
+        case 'power'
+            txt = sprintf(' "float power" [%.4f]', val);
         case 'translation'
             txt = {}; % Change to cells
             % val can be a cell array

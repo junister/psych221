@@ -276,6 +276,18 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, fovTxt);
             end
 
+            % power
+            [~, powerTxt] = piLightGet(thisLight, 'power val', 'pbrt text', true);
+            if ~isempty(powerTxt)
+                lghtDef = strcat(lghtDef, powerTxt);
+            end
+
+            % scale
+            [~, scaleTxt] = piLightGet(thisLight, 'scale val', 'pbrt text', true);
+            if ~isempty(scaleTxt)
+                lghtDef = strcat(lghtDef, scaleTxt);
+            end
+
             %% See what other properties we can use
             % spectrum
             [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);

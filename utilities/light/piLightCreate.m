@@ -232,6 +232,9 @@ switch ieParamFormat(lght.type)
         lght.fov.type = 'float';
         lght.fov.value = [];
 
+        lght.power.type = 'float';
+        lght.power.value = [];
+
         lght.filename.type = 'string';
         lght.filename.value = '';
 
@@ -239,12 +242,6 @@ switch ieParamFormat(lght.type)
         % Might be usable or at least coordinated with from and to.
         % So we need to figure out which to use.
         lght.cameracoordinate = true;
-
-        lght.from.type = 'point';
-        lght.from.value = [0 0 0];
-
-        lght.to.type = 'point';
-        lght.to.value = [0 0 0];
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
