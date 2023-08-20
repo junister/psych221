@@ -241,6 +241,9 @@ switch ieParamFormat(lght.type)
         lght.scale.type = 'scale';
         lght.scale.value = {};
 
+        % Assume we want camera orientation by default
+        lght.cameracoordinate = true;
+
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
 
