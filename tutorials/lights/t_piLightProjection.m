@@ -17,9 +17,7 @@ if ~piDockerExists, piDockerConfig; end
 %% Read the file
 thisR = piRecipeDefault('scene name','checkerboard');
 
-% Put the camera 3 meters away
-thisR.set('from',[0 0 -13]);
-
+% By default camera is [0 0 10], looking at [0 0 0].
 
 % Remove all the lights
 thisR.set('light', 'all', 'delete');
@@ -37,7 +35,12 @@ projectionLight = piLightCreate('ProjectedLight', ...
     'power', 100, ...
     'filename string', 'skymaps/rainbow.exr');
 
+piLightTranslate(projectionLight, 'zshift', -5);
+
 thisR.set('light', projectionLight, 'add');
+
+% Does translate happen before or after add?
+piLightTranslate(projectionLight, 'zshift', -5);
 
 % Check the light list
 thisR.show('lights');

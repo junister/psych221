@@ -238,11 +238,6 @@ switch ieParamFormat(lght.type)
         lght.filename.type = 'string';
         lght.filename.value = '';
 
-        % Experimenting by trying to see what other options we have...
-        % Might be usable or at least coordinated with from and to.
-        % So we need to figure out which to use.
-        lght.cameracoordinate = true;
-
         lght.scale.type = 'scale';
         lght.scale.value = {};
 
