@@ -217,9 +217,10 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'scale'
             % Or here.
+            % in pbrt-v4 scale appears to only take 1 parameter
             if ~iscell(val), val = {val}; end % BW
             for ii=1:numel(val)
-                txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
+                txt{end + 1} = sprintf('"float scale" %.3f', val{ii}(1));
             end
         case 'specscale'
 %             if ~iscell(val), val = {val};end

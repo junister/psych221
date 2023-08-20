@@ -36,24 +36,26 @@ projectionLight = piLightCreate('ProjectedLight', ...
     'filename string', 'skymaps/rainbow.exr');
 
 %piLightTranslate(projectionLight, 'zshift', -5);
-for ii = 0:90:360
-    piLightRotate(projectionLight, 'yrot', ii);
     thisR.set('light', projectionLight, 'add');
-end
+
 
 % Does translate happen before or after add?
 %piLightTranslate(projectionLight, 'zshift', -5);
 
-% Check the light list
-thisR.show('lights');
+
 
 %% Render depth and radiance
 
 thisR.set('render type',{'radiance','depth'});
 thisR.set('name','ProjectionLight');
 
-%pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
+pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
 
+for ii = 0:3
+    piAssetRotate(thisR, pLight, [0 0 90]);
+    % Check the light list
+    thisR.show('lights');
     piWRS(thisR);
+end
 
 
