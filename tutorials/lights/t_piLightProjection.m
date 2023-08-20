@@ -52,7 +52,10 @@ thisR.set('name','ProjectionLight');
 pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
 
 for ii = 0:3
-    piAssetRotate(thisR, pLight, [0 0 90]);
+    % Not working yet
+    thisR.set('asset', pLight, 'rotation val', [0  0 90]);
+    
+    %piAssetRotate(thisR, pLight, [0 0 90]);
     % Check the light list
     thisR.show('lights');
     piWRS(thisR);
