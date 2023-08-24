@@ -28,9 +28,11 @@ thisR.set('light', 'all', 'delete');
 % The cone angle describes how far the spotlight spreads
 % The cone delta angle describes how rapidly the light falls off at the
 % edges
+
+% scale appears to be how much to scale the image, not the light
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
-    'scale',[1000 1000 1000],...
+    'scale',[2 2 2],...
     'fov',90,...
     'power', 100000000, ...
     'filename string', 'skymaps/rainbow.exr');
@@ -53,8 +55,8 @@ pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
 
 for ii = 0:3
     % Not working yet
-    thisR.set('asset', pLight, 'rotation val', [0  0 90]);
-    
+    %thisR.set('asset', pLight, 'rotation val', [0  0 90]);
+
     %piAssetRotate(thisR, pLight, [0 0 90]);
     % Check the light list
     thisR.show('lights');
