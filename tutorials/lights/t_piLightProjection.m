@@ -33,8 +33,9 @@ thisR.set('light', 'all', 'delete');
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
     'scale',[2 2 2],...
-    'fov',90,...
-    'power', 100000000, ...
+    'fov',45, ...
+    'power', 10000, ...
+    'cameracoordinate', 1, ...
     'filename string', 'skymaps/rainbow.exr');
 
 %piLightTranslate(projectionLight, 'zshift', -5);
@@ -53,13 +54,14 @@ thisR.set('name','ProjectionLight');
 
 pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
 
-for ii = 0:3
-    % Not working yet
-    thisR.set('asset', pLight, 'rotation', [30  60 90]);
-
+for ii = 1 % 0:3 in case we want to try options
+    % Not sure if this is working
+    %thisR.set('asset', pLight, 'rotation', [ii * 30, ii * 60, ii * 90]);
     %piAssetRotate(thisR, pLight, [0 0 90]);
-    % Check the light list
-    thisR.show('lights');
+
+    % try to move the light to a nominal headlamp
+    % but our tranform matrix doesn't seem to get written out
+    piAssetTranslate(thisR, pLight, [2 -.5 2]);
     piWRS(thisR);
 end
 
