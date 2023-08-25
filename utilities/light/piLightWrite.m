@@ -175,6 +175,11 @@ for ii = 1:numel(thisR.lights)
 
 
         case 'goniometric'
+            % First check if there is any rotation, translation or
+            % concatransformation
+            transTxt = piLightGenerateTransformText(thisLight);
+            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
+
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
@@ -261,6 +266,11 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'projection'
+            % First check if there is any rotation, translation or
+            % concatransformation
+            transTxt = piLightGenerateTransformText(thisLight);
+            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
+
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
