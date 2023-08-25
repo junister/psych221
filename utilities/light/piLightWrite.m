@@ -175,6 +175,12 @@ for ii = 1:numel(thisR.lights)
 
 
         case 'goniometric'
+
+            % Whether coordinate at camera pos
+            if thisLight.cameracoordinate
+                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
+            end
+
             % First check if there is any rotation, translation or
             % concatransformation
             transTxt = piLightGenerateTransformText(thisLight);
@@ -266,6 +272,12 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'projection'
+
+            % Whether coordinate at camera pos
+            if thisLight.cameracoordinate
+                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
+            end
+
             % First check if there is any rotation, translation or
             % concatransformation
             transTxt = piLightGenerateTransformText(thisLight);
