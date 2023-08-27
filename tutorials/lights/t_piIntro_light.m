@@ -101,8 +101,6 @@ thisR.get('light print');
 % scale of the scene to use this sensibly.
 piCameraTranslate(thisR,'z shift',1); 
 
-thisR.set('render type',{'radiance'});
-
 piWRS(thisR,'name','Equal energy (spot)');
 
 %%  Narrow the cone angle of the spot light a lot

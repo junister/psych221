@@ -45,17 +45,10 @@ lightSourceText = cell(1, numel(thisR.lights));
 
 %% Check all applicable parameters for every light
 for ii = 1:numel(thisR.lights)
-    % Why do I need this again?  3rd time today. BW
-    % if ~iscell(thisR.lights), thisR.lights = {thisR.lights}; end
 
     thisLight = thisR.lights{ii};
-    
-    % Sometimes this parameter is empty.  So we set it to 1.
-    spectrumScale = piLightGet(thisLight, 'specscale val');
-    if isempty(spectrumScale), spectrumScale = 1; end
-    % scaleTxt = sprintf('"float scale" %f',spectrumScale);    
 
-    %% Write out lightspectrum to the file if the data is from file
+    %% Write out lightspectrum if the data is from file
     specVal = piLightGet(thisLight, 'spd val');
     if ~isempty(specVal)
         if ischar(specVal)
@@ -96,33 +89,39 @@ for ii = 1:numel(thisR.lights)
     end
 
     %% Construct a lightsource structure
+
+    % These are the elements common to all of the different light types.
+    
+    % Force the line to be a cell array
+    lightSourceText{ii}.line{1} = '# Light definition';
+
+    % All but the infinite light can use the camera coordinate system.
+    %{
+    if isfield(thisLight,'cameracoordinate')
+        if thisLight.cameracoordinate
+            lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
+        end
+    end
+    %}
+
+    % Construct the light definition line
+    [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
+
     % Different types of lights that we know how to add.
     type = piLightGet(thisLight, 'type');
 
-    % We would use attributeBegin/attributeEnd for all cases
-    lightSourceText{ii}.line{1} = 'AttributeBegin';
+    % spectrum
+    if ~isequal(type,'infinite') && isfield(thisLight,'spd')
+        [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
+        if ~isempty(spdTxt)
+            lghtDef = strcat(lghtDef, spdTxt);
+        end
+    end
 
-
+    % In the code below, when we set the parameter to 'pbrt text' we get
+    % the string we need for the PBRT file as the second returned argument.
     switch type
         case 'point'
-            % Whether coordinate at camera pos
-            if thisLight.cameracoordinate
-                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end
-
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
-
-            % Construct the light definition line
-            [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
-
-            % spectrum
-            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
-            if ~isempty(spdTxt)
-                lghtDef = strcat(lghtDef, spdTxt);
-            end
 
             % From
             [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
@@ -143,12 +142,7 @@ for ii = 1:numel(thisR.lights)
                 lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
             end
 
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
-
-            % Construct the light definition line
+           % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
             [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
             lghtDef = strcat(lghtDef, spdTxt);
@@ -175,16 +169,10 @@ for ii = 1:numel(thisR.lights)
 
 
         case 'goniometric'
-
             % Whether coordinate at camera pos
             if thisLight.cameracoordinate
                 lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
             end
-
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
 
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -199,7 +187,10 @@ for ii = 1:numel(thisR.lights)
             [~, mapnameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
             if ~isempty(mapnameTxt)
                 lghtDef = strcat(lghtDef, mapnameTxt);
+            else
+                error('Goniometric lights need a filename.');
             end
+
             % scale
             [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
             if ~isempty(specscaleTxt)
@@ -224,21 +215,17 @@ for ii = 1:numel(thisR.lights)
             end
 
         case 'infinite'
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
 
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
             if isempty(thisLight.filename.value)
-                % spectrum
+                % No skymap.  So assign a uniform spectrum
                 [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
                 if ~isempty(spdTxt)
                     lghtDef = strcat(lghtDef, spdTxt);
                 end
-            else
+            else                
                 % V4 uses filename.  (We used to use mapname.)
                 [mapName, mapnameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
                 if ~isempty(mapnameTxt)
@@ -272,16 +259,10 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'projection'
-
             % Whether coordinate at camera pos
             if thisLight.cameracoordinate
                 lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end
-
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
+            end           
 
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -317,11 +298,6 @@ for ii = 1:numel(thisR.lights)
             if thisLight.cameracoordinate
                 lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
             end
-
-            % First check if there is any rotation, translation or
-            % concatransformation
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
 
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -364,26 +340,7 @@ for ii = 1:numel(thisR.lights)
             
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
-
         case 'area'
-            %
-            % First check if there is any rotation, translation or
-            % concatransformation
-            % Also, area lights can have a shape.
-            %
-            transTxt = piLightGenerateTransformText(thisLight);
-            lightSourceText{ii}.line = [lightSourceText{ii}.line transTxt];
-
-            % Construct the light definition line
-            [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
-
-            % spectrum
-            [~, spdTxt] = piLightGet(thisLight, 'spd val', 'pbrt text', true);
-            if ~isempty(spdTxt)
-                lghtDef = strcat(lghtDef, spdTxt);
-            end
-            % lghtDef = sprintf('AreaLightSource "diffuse" "%s L" %s', spectrumType, lightSpectrum);
-
             % lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
             %
             % if thisLight.ReverseOrientation.value==true
@@ -402,7 +359,7 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, specscaleTxt);
             end
 
-                        % scale
+            % spread
             [~, spreadTxt] = piLightGet(thisLight, 'spread val', 'pbrt text', true);
             if ~isempty(spreadTxt)
                 lghtDef = strcat(lghtDef, spreadTxt);
@@ -414,11 +371,6 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, twosidedTxt);
             end
 
-            % lghtDef = sprintf("%s %s",lghtDef, scaleTxt);
-            %
-            % This is what it used to be
-            % lightSourceText{ii}.line = [lightSourceText{ii}.line sprintf("%s %s",lghtDef, scaleTxt) shpTxt ];
-            %
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
             % Attach shape            
@@ -437,11 +389,10 @@ for ii = 1:numel(thisR.lights)
                 lightSourceText{ii}.line = [lightSourceText{ii}.line shpTxt];
             end
     end
-    lightSourceText{ii}.line{end+1} = 'AttributeEnd';
+
+    % lightSourceText{ii}.line{end+1} = 'AttributeEnd';
 
 end
-
-
 
 if writefile
     %% Write to scene_lights.pbrt file
@@ -459,4 +410,5 @@ if writefile
     end
     fclose(fid);
 end
+
 end

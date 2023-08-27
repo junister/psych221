@@ -275,7 +275,7 @@ end
 
 %% Write the scene_geometry.pbrt
 if ~isequal(exporter,'Copy') && overwritegeometry && ~isempty(thisR.assets)
-    piWriteGeometry(thisR, remoteResources);
+    piGeometryWrite(thisR, 'remoteresources', remoteResources);
 end
 
 end   % End of piWrite
@@ -291,7 +291,7 @@ end   % End of piWrite
 %  piWriteBlocks
 %  piIncludeLines
 %  piWriteMaterials
-%  piWriteGeometry
+%  piGeometryWrite
 %
 
 %% Copy the input resources to the output directory
@@ -851,7 +851,7 @@ end
 
 %% Write the scene_geometry file
 
-function piWriteGeometry(thisR, remoteResources)
-% Write the geometry file into the output dir
-piGeometryWrite(thisR, 'remoteresources', remoteResources);
-end
+% function piWriteGeometry(thisR, remoteResources)
+% % Write the geometry file into the output dir
+% piGeometryWrite(thisR, 'remoteresources', remoteResources);
+% end
