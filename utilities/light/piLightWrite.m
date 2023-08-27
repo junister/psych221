@@ -92,19 +92,18 @@ for ii = 1:numel(thisR.lights)
 
     % These are the elements common to all of the different light types.
     
-    % We use attributeBegin/attributeEnd for all cases
-    lightSourceText{ii}.line{1} = 'AttributeBegin';
+    % Force the line to be a cell array
+    lightSourceText{ii}.line{1} = '# Light definition';
 
     % All but the infinite light can use the camera coordinate system.
+    %{
     if isfield(thisLight,'cameracoordinate')
-        if isequal(piLightGet(thisLight, 'type'),'infinite')
-            warning('infinite light');
-        end
         if thisLight.cameracoordinate
-            lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
+            lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
         end
     end
-    
+    %}
+
     % Construct the light definition line
     [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
@@ -391,7 +390,7 @@ for ii = 1:numel(thisR.lights)
             end
     end
 
-    lightSourceText{ii}.line{end+1} = 'AttributeEnd';
+    % lightSourceText{ii}.line{end+1} = 'AttributeEnd';
 
 end
 
