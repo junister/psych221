@@ -244,6 +244,8 @@ switch ieParamFormat(lght.type)
         % Assume we want camera orientation by default
         lght.cameracoordinate = true;
 
+        lght = rmfield(lght,'spd');
+        
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
 
