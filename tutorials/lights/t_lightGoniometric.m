@@ -20,7 +20,7 @@ thisR = piRecipeCreate('chessset');
 % There is a default point light.  We delete that.
 thisR = thisR.set('lights','all','delete');
 
-spectrumScale = 1000;
+spectrumScale = 10;
 % gonioMap = 'clouds-sky.exr';   % Include the extension
 % gonioMap = 'sky-blue-sun.exr';   % Include the extension
 gonioMap = 'shadedGrayCircle.png'; 
