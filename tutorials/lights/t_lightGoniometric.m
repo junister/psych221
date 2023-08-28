@@ -15,12 +15,10 @@ if ~piDockerExists, piDockerConfig; end
 % we are going to change the parameters
 thisR = piRecipeCreate('chessset');
 
-%% Change the light
-%
+%% Example of a Goniometric light
+
 % There is a default point light.  We delete that.
 thisR = thisR.set('lights','all','delete');
-
-%% Example of a Goniometric light
 
 spectrumScale = 1000;
 % gonioMap = 'clouds-sky.exr';   % Include the extension
@@ -32,10 +30,14 @@ newGoniometric = piLightCreate('gonio',...
                            'type', 'goniometric',...
                            'specscale float', spectrumScale,...
                            'spd spectrum', lightSpectrum,...
+                           'cameracoordinate', true, ...
                            'filename', gonioMap);
 thisR.set('light', newGoniometric, 'add');
 
-%%
+% Not working - unclear why.
+piWRS(thisR,'name','only gonio light');
+
+%% Add a distant light
 spectrumScale = 0.1;
 lightSpectrum = 'equalEnergy';
 newDistant = piLightCreate('distant',...
@@ -45,7 +47,6 @@ newDistant = piLightCreate('distant',...
                            'cameracoordinate', true);
 thisR.set('light', newDistant, 'add');
 
-%% A skymap for good measure
 thisR.set('skymap','room.exr');
 
 thisR.show('lights');

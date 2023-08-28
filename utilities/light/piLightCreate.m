@@ -42,6 +42,9 @@ function lght = piLightCreate(lightName, varargin)
 %   https://polyhaven.com/hdris
 %
 
+% TODO
+%  cameracoordinate is set in many places.  Not sure whether that is a
+%  good idea.
 
 % Examples
 %{
@@ -114,6 +117,8 @@ lght.spd.value = [1 1 1];
 % Each light type has a different set of parameters.
 switch ieParamFormat(lght.type)
     case 'distant'
+
+        % Should this be here?  I think not (BW).
         lght.cameracoordinate = true;
 
         lght.from.type = 'point3';
@@ -170,6 +175,10 @@ switch ieParamFormat(lght.type)
             "string filename" "myLightDiagram.exr"  # Provide the path to the goniometric diagram
         AttributeEnd
         %}
+
+        % Unclear about this, both here and throughout.
+        lght.cameracoordinate = true;
+
         % The goniometric image showing the light distribution in
         % different directions.
         lght.filename.type = 'string';
@@ -178,6 +187,7 @@ switch ieParamFormat(lght.type)
         % Not sure about this or how piWrite should handle it (BW).
         lght.spd.type = 'rgb';
         lght.spd.value = [1 1 1];
+
 
     case {'infinite','skymap','environment'}
         % Gets called from thisR.set('skymap',filename,'add');
