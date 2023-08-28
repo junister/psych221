@@ -23,7 +23,7 @@ thisR = thisR.set('lights','all','delete');
 spectrumScale = 1000;
 % gonioMap = 'clouds-sky.exr';   % Include the extension
 % gonioMap = 'sky-blue-sun.exr';   % Include the extension
-gonioMap = 'room-gray.exr'; 
+gonioMap = 'gonio-room.exr'; 
 
 lightSpectrum = 'equalEnergy';
 newGoniometric = piLightCreate('gonio',...
@@ -39,7 +39,7 @@ piWRS(thisR,'render flag','hdr','name','gonio');
 
 %% Add a skymap
 
-thisR.set('skymap','room.exr');
+thisR.set('skymap','sky-room.exr');
 
 thisR.show('lights');
 % thisR.set('lights','room_L','delete');
@@ -66,5 +66,57 @@ thisR.set('light', newGoniometric, 'add');
 
 piWRS(thisR,'render flag','hdr','name','distant, skymap, gonio');
 
+%% Trying different goniometric
+
+thisR = piRecipeDefault('scene name','bunny');
+
+thisR.set('skymap','room.exr');
+bunnyIDX = piAssetSearch(thisR,'object','Bunny');
+thisR.set('asset',bunnyIDX,'scale',4);
+thisR.set('nbounces',3);
+
+piMaterialsInsert(thisR,'names','glossy-red');
+thisR.set('asset',bunnyIDX,'material name','glossy-red');
+
+thisR = thisR.set('lights','all','delete');
+
+spectrumScale = 1;
+% gonioMap = 'gonio-brightsky.exr'; % Include the extension
+% gonioMap = 'sky-blue-sun.exr';
+% gonioMap = 'gonio-room.exr';
+% gonioMap = 'gonio-thicklines.png';
+gonioMap = 'gonio-ringsrays-64.exr';
+
+%{
+scene = sceneCreate('rings rays',64,512);
+rgb = sceneGet(scene,'rgb');
+imtool(rgb)
+exrwrite(rgb,'gonio-ringsrays-64.exr');
+%}
+
+lightSpectrum = 'equalEnergy';
+newGoniometric = piLightCreate('gonio',...
+                           'type', 'goniometric',...
+                           'specscale float', spectrumScale,...
+                           'spd spectrum', lightSpectrum,...
+                           'cameracoordinate', true, ...
+                           'filename', gonioMap);
+thisR.set('light', newGoniometric, 'add');
+
+piWRS(thisR,'mean luminance',-1,'name','only gonio','render flag','rgb');
+
+%%
+piWRS(thisR,'name','gonio sky','render flag','hdr');
+
+originalTo = thisR.get('to');
+originalDist = thisR.get('object distance');
+thisR.set('skymap','sky-room.exr');
+
+%%
+
+thisR.set('to',originalTo + [0 -.15 0]);
+thisR.set('object distance',originalDist*1.25);
+
+piWRS(thisR,'name','gonio sky','render flag','hdr');
 
 %% END
