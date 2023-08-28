@@ -35,9 +35,24 @@ newGoniometric = piLightCreate('gonio',...
 thisR.set('light', newGoniometric, 'add');
 
 % Not working - unclear why.
-piWRS(thisR,'name','only gonio light');
+piWRS(thisR,'render flag','hdr','name','gonio');
 
-%% Add a distant light
+%% Add a skymap
+
+thisR.set('skymap','room.exr');
+
+thisR.show('lights');
+% thisR.set('lights','room_L','delete');
+
+piWRS(thisR,'render flag','hdr','name','gonoi and skymap');
+
+%% Remove the goniometric light
+
+thisR.set('light','gonio_L','delete');
+thisR.show('lights');
+
+%% Add a distant light and put back the gonio light
+
 spectrumScale = 0.1;
 lightSpectrum = 'equalEnergy';
 newDistant = piLightCreate('distant',...
@@ -47,19 +62,9 @@ newDistant = piLightCreate('distant',...
                            'cameracoordinate', true);
 thisR.set('light', newDistant, 'add');
 
-thisR.set('skymap','room.exr');
+thisR.set('light', newGoniometric, 'add');
 
-thisR.show('lights');
-% thisR.set('lights','room_L','delete');
+piWRS(thisR,'render flag','hdr','name','distant, skymap, gonio');
 
-%% Render and display both lights
-
-piWRS(thisR,'render flag','hdr');
-
-%% Remove the goniometric light
-
-thisR.set('light','gonio_L','delete');
-thisR.show('lights');
-piWRS(thisR,'render flag','rgb');
 
 %% END
