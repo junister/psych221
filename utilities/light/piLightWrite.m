@@ -167,10 +167,6 @@ for ii = 1:numel(thisR.lights)
 
 
         case 'goniometric'
-            % Whether coordinate at camera pos
-            if thisLight.cameracoordinate
-                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end
 
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
