@@ -252,6 +252,9 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
     case 'sphere'
         thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'branch name','Camera');
+        thisR.set('node',idx,'delete');
+        thisR.set('rendertype',{'radiance','depth'});
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('new distant',...

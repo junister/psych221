@@ -371,7 +371,14 @@ end
 
 %% Geometry transforms
 function piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing)
-% Zhenyi: export Transform matrix instead of translation/rotation/scale
+% Prints the ConcatTransform matrix into the geometry file.
+%
+% We never write out scale/translate/rotate.  Only this matrix.
+%
+% If the transform is simply the identity, we do not bother writing it out.
+% I am unsure whether that will create problems somewhere. (BW).
+
+identityTransform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 pointerT = 1; pointerR = 1; pointerS = 1;
 translation = zeros(3,1);
@@ -393,15 +400,24 @@ end
 tMatrix = piTransformCompose(translation, rotation, scale);
 tMatrix = reshape(tMatrix,[1,16]);
 
-transformType = 'ConcatTransform';
+% This is not correct.  I left it here because I want to eliminate writing
+% out the ideneity.  But I haven't figured out the correct way. (BW).
+% if tMatrix(:) ~= identityTransform(:)
 
-% This takes a lot of time, let's break it up to see why
-printString = sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
-    transformType, tMatrix(:));
-fullLine = [spacing indentSpacing printString '\n'];
-fprintf(fid, fullLine);
+    transformType = 'ConcatTransform';
+
+    % A 4x4 affine transformation used is in graphics to combine rotation and
+    % translation.  The identity transform does nothing.  So it is not worth
+    % writing out.  BW trying to save time/space this way
+    % This takes a lot of time, let's break it up to see why
+    printString = sprintf('%s [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]',...
+        transformType, tMatrix(:));
+    fullLine = [spacing indentSpacing printString '\n'];
+    fprintf(fid, fullLine);
+% end
 
 end
+
 
 %%
 function ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing,thisR)

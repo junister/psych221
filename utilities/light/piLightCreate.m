@@ -212,6 +212,9 @@ switch ieParamFormat(lght.type)
 
         lght.from.type = 'point';
         lght.from.value = [0 0 0];
+
+        % Can we have a from but no too?  That may be overriden or work out
+        % in the case of the camera coordinate command, but not otherwise.
         
         %{
         % Potentially has rotation, transformation or concatransformaiton
