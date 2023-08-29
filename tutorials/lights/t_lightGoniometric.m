@@ -53,7 +53,7 @@ thisR.show('lights');
 
 %% Add a distant light and put back the gonio light
 
-spectrumScale = 0.1;
+spectrumScale = 1;
 lightSpectrum = 'equalEnergy';
 newDistant = piLightCreate('distant',...
                            'type', 'distant',...
@@ -61,10 +61,9 @@ newDistant = piLightCreate('distant',...
                            'spd spectrum', lightSpectrum,...
                            'cameracoordinate', true);
 thisR.set('light', newDistant, 'add');
-
 thisR.set('light', newGoniometric, 'add');
 
-piWRS(thisR,'render flag','hdr','name','distant, skymap, gonio');
+piWRS(thisR,'mean luminance',-1,'render flag','hdr','name','distant, skymap, gonio');
 
 %% Trying different goniometric
 
@@ -106,7 +105,7 @@ thisR.set('light', newGoniometric, 'add');
 piWRS(thisR,'mean luminance',-1,'name','only gonio','render flag','rgb');
 
 %%
-piWRS(thisR,'name','gonio sky','render flag','hdr');
+piWRS(thisR,'mean luminance',-1,'name','gonio sky','render flag','hdr');
 
 originalTo = thisR.get('to');
 originalDist = thisR.get('object distance');
@@ -117,6 +116,6 @@ thisR.set('skymap','sky-room.exr');
 thisR.set('to',originalTo + [0 -.15 0]);
 thisR.set('object distance',originalDist*1.25);
 
-piWRS(thisR,'name','gonio sky','render flag','hdr');
+piWRS(thisR,'mean luminance',-1,'name','gonio sky','render flag','hdr');
 
 %% END
