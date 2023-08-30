@@ -15,10 +15,15 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the file
-thisR = piRecipeDefault('scene name','checkerboard');
+%thisR = piRecipeDefault('scene name','checkerboard');
+thisR = piRecipeDefault('scene name','flatSurface');
+thisR.show('lights');
 
 % By default in checkerboard, camera is [0 0 10], looking at [0 0 0].
 %thisR.lookAt.from = [0 0 5];
+
+% for flat surface
+thisR.lookAt.from = [3 5 0];
 
 % show original
 piWRS(thisR,'mean luminance',-1);
@@ -40,7 +45,7 @@ thisR.set('light', 'all', 'delete');
 imageMap = 'skymaps/gonio-thicklines.png';
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
-    'fov', 180, ...
+    'fov', 40, ...
     'power', 5, ...
     'cameracoordinate', 1, ...
     'filename string', imageMap);
