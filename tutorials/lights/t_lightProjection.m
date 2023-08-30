@@ -42,6 +42,13 @@ thisR.set('light', 'all', 'delete');
 % mean luminance of 100 cd/m2.
 %
 
+%% Projection Light
+% filename is the "slide" being projected
+% I think the ideal is a floating point exr from 0-1 in RGB
+% but png works, but I think scales the power from 1 to 255
+%
+% fov is the field of view covered by the slide
+% power is total power of the projection lamp
 imageMap = 'skymaps/gonio-thicklines.png';
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
