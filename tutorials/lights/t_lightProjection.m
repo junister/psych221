@@ -49,20 +49,33 @@ thisR.set('light', 'all', 'delete');
 %
 % fov is the field of view covered by the slide
 % power is total power of the projection lamp
+
+% We haven't figured how to set position and translation
+
 imageMap = 'skymaps/gonio-thicklines.png';
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
     'fov', 40, ...
-    'power', 5, ...
+    'scale', 10, ...
+    'power', 0, ...  % pbrt checks for < 0, but not sure why
     'cameracoordinate', 1, ...
     'filename string', imageMap);
 
-%{
-img = exrread('headlamp_cropped_flattened_ruler.exr');
-ieNewGraphWin; imagesc(img); axis image
-%}
+% On the surface scale & power do "the same thing" but they
+% definitely don't in the pbrt code.
 
+% Example outputs:
+% scale 10, power 20, ml 254
+% 10, 10, 127
+% 20, 10, 254
+% 20, -1,   5.9
+% 10, -1,   3
+% 10,  1,  12.7
+% 10,  0,   3
+
+% Light transforms aren't currently working
 %piLightTranslate(projectionLight, 'zshift', -5);
+
 thisR.set('light', projectionLight, 'add');
 thisR.show('lights');
 
