@@ -65,13 +65,14 @@ projectionLight = piLightCreate('ProjectedLight', ...
 % definitely don't in the pbrt code.
 
 % Example outputs:
-% scale 10, power 20, ml 254
-% 10, 10, 127
-% 20, 10, 254
-% 20, -1,   5.9
-% 10, -1,   3
-% 10,  1,  12.7
-% 10,  0,   3
+% scale power meanluminance 
+%  10,   20,   254
+%  10,   10,   127
+%  20,   10,   254
+%  20,   -1,     5.9
+%  10,   -1,     3
+%  10,    1,    12.7
+%  10,    0,     3
 
 % Light transforms aren't currently working
 %piLightTranslate(projectionLight, 'zshift', -5);
