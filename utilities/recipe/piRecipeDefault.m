@@ -423,6 +423,9 @@ if isempty(thisR.get('camera'))
     thisR.set('camera',piCameraCreate('pinhole'));
 end
 
+% Set the render type to the default radiance and depth
+thisR.set('render type',{'radiance','depth'});
+
 %% If requested, write the files now
 
 % Usually, however, we edit the recipe before writing and rendering.

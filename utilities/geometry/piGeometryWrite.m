@@ -401,7 +401,7 @@ tMatrix = piTransformCompose(translation, rotation, scale);
 tMatrix = reshape(tMatrix,[1,16]);
 
 % This is not correct.  I left it here because I want to eliminate writing
-% out the ideneity.  But I haven't figured out the correct way. (BW).
+% out the identity.  But I haven't figured out the correct way. (BW).
 % if tMatrix(:) ~= identityTransform(:)
 
     transformType = 'ConcatTransform';

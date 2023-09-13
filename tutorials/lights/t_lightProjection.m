@@ -17,6 +17,9 @@ if ~piDockerExists, piDockerConfig; end
 %% Read the file
 %thisR = piRecipeDefault('scene name','checkerboard');
 thisR = piRecipeDefault('scene name','flatSurface');
+
+thisR.set('name','ProjectionLight');  % Name of the recipe
+
 thisR.show('lights');
 
 % By default in checkerboard, camera is [0 0 10], looking at [0 0 0].
@@ -25,13 +28,10 @@ thisR.show('lights');
 % for flat surface
 thisR.lookAt.from = [3 5 0];
 
-% show original
+%% show original
 piWRS(thisR,'mean luminance',-1);
 
 %% Add one projection light
-
-% Remove all the lights
-thisR.set('light', 'all', 'delete');
 
 % scale appears to be how much to scale the image intensity. We haven't
 % seen a difference yet between scale and power fov seems to be working
@@ -42,8 +42,8 @@ thisR.set('light', 'all', 'delete');
 % mean luminance of 100 cd/m2.
 %
 
-%% Projection Light
 % filename is the "slide" being projected
+
 % I think the ideal is a floating point exr from 0-1 in RGB
 % but png works, but I think scales the power from 1 to 255
 %
@@ -77,19 +77,53 @@ projectionLight = piLightCreate('ProjectedLight', ...
 % Light transforms aren't currently working
 %piLightTranslate(projectionLight, 'zshift', -5);
 
+% Remove all the lights
+thisR.set('light', 'all', 'delete');
+
+% Add this light
 thisR.set('light', projectionLight, 'add');
-thisR.show('lights');
 
 % Does translate happen before or after add?
 %
 % piLightTranslate(projectionLight, 'zshift', -5);
 
-%% Render depth and radiance
-
-thisR.set('name','ProjectionLight');
-
 pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
 
+thisR.show('lights');
+
+%%
+piWRS(thisR,'mean luminance',-1);
+
+%%
+thisR.set('asset',pLight,'translate',[1 1 0]);
+thisR.show('lights');
+
+piWrite(thisR);
+
+%% Rotate the light
+
+thisR.set('asset',pLight,'rotation',[0 -30 30]);
+piWRS(thisR,'mean luminance',-1);
+
+% thisR.set('render type',{'radiance','depth'});
+% scene = piRender(thisR);
+% sceneWindow(scene);
+
+
+
+%%
+thisR.set('asset',pLight,'world position',[0 0 0]);
+thisR.get('light',pLight,'world position')
+thisR.show('lights')
+
+%%
+cube = piAssetSearch(thisR,'objectname', 'Cube');
+thisR.set('asset',cube,'rotation',[10 10 10]);
+piWrite(thisR);
+scene = piRender(thisR);
+sceneWindow(scene);
+%%
+%{
 for ii = 1 % 0:3 in case we want to try options
     % Not sure if this is working
     %thisR.set('asset', pLight, 'rotation', [ii * 30, ii * 60, ii * 90]);
@@ -100,5 +134,6 @@ for ii = 1 % 0:3 in case we want to try options
     %piAssetTranslate(thisR, pLight, [2 -0.5 2]);
     piWRS(thisR,'mean luminance',-1);
 end
+%}
 
 

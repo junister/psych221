@@ -1701,10 +1701,15 @@ switch ieParamFormat(param)  % lower case, no spaces
                             id = piAssetSearch(thisR,'light name',thisLight.name);
                             val = thisR.assets.nodetoroot(id);
                         case 'worldposition'
+                            % The logic here is not accounting for
+                            % translations after specifying camera
+                            % coordinate as true.  We also may not have the
+                            % different types of lights properly accounted
+                            % for. (BW/DJC).
+                            
                             % thisR.get('light',idx,'world position')
                             if isfield(thisLgtStruct,'cameracoordinate') && thisLgtStruct.cameracoordinate
-                                % The position may be at the camera, so we need
-                                % this special case.
+                                % The position may be at the camera.
                                 val = thisR.get('from');
                             elseif isfield(thisLgtStruct,'from')
                                 val = thisLgtStruct.from.value;
@@ -1714,7 +1719,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                                 % Area light will need a different approach
                                 val = thisR.get('asset', thisLight.name, 'world position');
                             else
-                                val = Inf;
+                                % Projection and goniometric should work
+                                % this way.
+                                val = thisR.get('asset', thisLight.name, 'world position');
                             end
                         case {'rotate','rotation'}
                             % Pull out the three rotation parameters
@@ -1728,6 +1735,11 @@ switch ieParamFormat(param)  % lower case, no spaces
                         case {'shape'}
                             % For an area light, there will be a shape
                             val = thisLight.lght{1}.shape;
+                        case {'cameracoordinate'}
+                            % A logical as to whether we initialize at the
+                            % camera coordinate
+                            val = thisLight.lght{1}.cameracoordinate;
+                            
                         otherwise
                             % Most light properties use this method
                             val = piLightGet(thisLgtStruct, varargin{2});

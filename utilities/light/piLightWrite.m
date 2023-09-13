@@ -96,11 +96,9 @@ for ii = 1:numel(thisR.lights)
     lightSourceText{ii}.line{1} = '# Light definition';
 
     % All but the infinite light can use the camera coordinate system.   
-    if isfield(thisLight,'cameracoordinate')
-        if thisLight.cameracoordinate
-            lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
-        end
-    end    
+    if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
+        lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
+    end
 
     % Construct the light definition line
     [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -135,10 +133,6 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'distant'
-            % Whether coordinate at camera pos
-            if thisLight.cameracoordinate
-                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end
 
            % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -253,11 +247,6 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case 'projection'
-            % Whether coordinate at camera pos
-            if thisLight.cameracoordinate
-                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end           
-
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 
@@ -288,11 +277,6 @@ for ii = 1:numel(thisR.lights)
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
         case {'spot', 'spotlight'}
-            % Whether coordinate at camera pos
-            if thisLight.cameracoordinate
-                lightSourceText{ii}.line{end + 1} = 'CoordSysTransform "camera"';
-            end
-
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
 

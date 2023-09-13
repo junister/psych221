@@ -53,8 +53,17 @@ for ii =1:numel(lightNames)
             isequal(thisLight.type,'infinite') %
         position(ii,:) = Inf;
     else
-        % point, spot and area have a position
-        position(ii,:) = thisR.get('light',thisLight.name,'world position');
+        % point, spot, area, projection, and goniometric have a position We
+        % have not yet fixed the recipeGet case when we get for a 'light',
+        % but we think it may work when we treat the lights as an asset.
+        % This is not yet known. We should fix this in recipeGet('lights' ...)
+        position(ii,:) = thisR.get('asset',thisLight.name,'world position');
+        
+        % And then account for the camera coordinate logical.
+        if thisLight.cameracoordinate
+            from = thisR.get('from');
+            position(ii,:) = position(ii,:) + from;
+        end
     end
 
     % We have mapnames in some cases (e.g., default chess set light)
