@@ -146,7 +146,7 @@ switch ieParamFormat(rName)
         thisR.set('light',distantLight,'add');
 
         % By default, the fov is setted as horizontal and vertical
-        fov = [25 25];
+        fov = 25;
         thisR.set('fov',fov);
 
         % Increase the spatial resolution a bit
