@@ -295,7 +295,9 @@ switch ieParamFormat(sceneDir)
     case {'testplane'}
         sceneDir  = 'testplane';
         sceneFile = 'testplane-converted.pbrt';
-        exporter = 'Copy';
+        % This scene has a bug.  See also piRecipeCreate
+        % It has to do with Textures.
+        exporter = 'PARSE';
     case {'stepfunction'}
         sceneDir = 'stepfunction';
         sceneFile = [sceneDir, '.pbrt'];

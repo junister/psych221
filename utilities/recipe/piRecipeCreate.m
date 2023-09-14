@@ -270,6 +270,8 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
     case 'testplane'
         thisR = piRecipeDefault('scene name',rName);
+        % Adjust the texture.
+        warning('There is a bug with the textures for the testplane scene.')
     otherwise
         error('Unknown recipe name %s\n',rName);
 end
