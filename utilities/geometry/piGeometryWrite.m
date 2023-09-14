@@ -491,12 +491,14 @@ end
 tMatrix = piTransformCompose(translation, rotation, scale);
 tMatrix = reshape(tMatrix,[1,16]);
 
-% This is not correct.  I left it here because I want to eliminate writing
-% out the identity.  But I haven't figured out the correct way. (BW).
+% Eliminating the identity this way is not correct.  I left it here
+% because I want to eliminate writing out the identity.  But I haven't
+% figured out the correct way. (BW).
 %
-% When I run with t_piIntro_chessSet the positions are not correct
+% When I run with t_piIntro_chessSet the positions are not correct.
+% Or at least, they are different when I do not write out the
+% identity.
 %
-
 % if tMatrix(:) ~= identityTransform(:)
 
     transformType = 'ConcatTransform';
