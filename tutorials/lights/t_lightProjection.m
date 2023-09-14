@@ -94,26 +94,28 @@ thisR.show('lights');
 %%
 piWRS(thisR,'mean luminance',-1);
 
-%%
-thisR.set('asset',pLight,'translate',[1 1 0]);
-thisR.show('lights');
-
-piWrite(thisR);
-
 %% Rotate the light
 
-thisR.set('asset',pLight,'rotation',[0 -30 30]);
+thisR.set('asset',pLight,'rotation',[0 0 30]);
 piWRS(thisR,'mean luminance',-1);
 
 % thisR.set('render type',{'radiance','depth'});
 % scene = piRender(thisR);
 % sceneWindow(scene);
 
+%%
+thisR.set('asset',pLight,'translate',[1 1 0]);
+thisR.show('lights');
 
+piWRS(thisR);
 
 %%
 thisR.set('asset',pLight,'world position',[0 0 0]);
+
+% Account for camera coordinate setting when we get the world position
 thisR.get('light',pLight,'world position')
+
+% We do account for it correctly with the show command
 thisR.show('lights')
 
 %%

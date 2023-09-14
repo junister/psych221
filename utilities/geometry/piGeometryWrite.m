@@ -24,8 +24,8 @@ function  piGeometryWrite(thisR,varargin)
 %
 
 %% Main logic is in this routine.
-%  The routine relies on multiple helpers, below.
 
+%  The routine relies on multiple helpers, below.
 p = inputParser;
 
 varargin = ieParamFormat(varargin);
@@ -57,22 +57,34 @@ fprintf(fid_obj,'# Exported by piGeometryWrite %s \n  \n',string(datetime));
 % Traverse the asset tree beginning at the root
 rootID = 1;
 
+% TODO:  We shouldn't need thisR and thisR.outputFile and Filepath in
+% the arguments to recursiveWriteXXXX
+%
+
 % Write object and light definitions in the main geometry
 % and any needed child geometry files
 if ~isempty(obj)
+
+    % This code seems to do nothing unless we are processing
+    % instances. If there are no instances, nothing gets written.  If
+    % there are instances, we seem to write out some information about
+    % the branch defining the geometry for this instance.
     recursiveWriteNode(fid_obj, obj, rootID, Filepath, thisR.outputFile, thisR);
 
-    % Write tree structure in main geometry file
+    % Write the geometry from the tree structure in the geometry file
+    % for all of the assets, including objects and lights.
     lvl = 0;
     writeGeometryFlag = 0;
     recursiveWriteAttributes(fid_obj, obj, rootID, lvl, thisR.outputFile, writeGeometryFlag, thisR, 'remoteresources', remoteResources);
 else
-    % if no assets were found
+    % if the tree object is empty, copy the world slot into the geometry
+    % file.
     for ii = numel(thisR.world)
         fprintf(fid_obj, thisR.world{ii});
     end
 end
 
+% Close it up and leave.
 fclose(fid_obj);
 
 end
@@ -81,6 +93,23 @@ end
 
 %% Recursively write nodes
 function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath, thisR)
+% Manages the special case of instances.
+%
+% The main work writing out the geometry file is done by
+% recursiveWriteAttributes (below).  This one is specialized for
+% writing out nodes that are instances of a main node written out by
+% recursiveWriteAttributes.
+%
+% fid - Open file pointer for the geometry file
+% obj - A tree structure that contains the scene information,
+%       including objects and lights and the geometry branches for
+%       those assets
+% nodeID   - The node in the tree (an integer)
+% rootPath - 
+% outFilePath - Shouldn't this be irrelevant given that we have the
+%               fid?
+% thisR  - The recipe for rendering the scene
+%
 % Define each object in geometry.pbrt file. This section writes out
 % (1) Material for every object
 % (2) path to each child geometry file
@@ -93,7 +122,7 @@ function recursiveWriteNode(fid, obj, nodeID, rootPath, outFilePath, thisR)
 %   (3) If the child is a 'branch' node, put it in a list which will be
 %       recursively checked in the next level of our traverse.
 
-%% Get children of our current Node (thisNode)
+%% Get children of the current Node (thisNode)
 children = obj.getchildren(nodeID);
 
 %% Loop through all children of our current node (thisNode)
@@ -102,22 +131,31 @@ children = obj.getchildren(nodeID);
 % Create a list for next level recursion
 nodeList = [];
 
+% Build up the nodeList.  We pass that in to the loop below calling
+% recursiveWriteNode
 for ii = 1:numel(children)
 
     % set our current node to each of the child nodes
     thisNode = obj.get(children(ii));
 
-    % If a branch, put id in the nodeList
+    % The nodes can be a branch, object, light, marker, or instance
+    %
+    
     if isequal(thisNode.type, 'branch')
+        % If a branch, put id in the nodeList
 
         % It would be much better to pre-allocate if possible.  For speed
         % with scenes and many assets. Ask Zhenyi Liu how he wants to
         % handle this (BW)
-        nodeList = [nodeList children(ii)];
+        nodeList = [nodeList children(ii)]; %#ok<AGROW> 
 
         % do not write object instance repeatedly
         if isfield(thisNode,'isObjectInstance')
-            if thisNode.isObjectInstance ==1
+            % Typically, this field does not exist.  So we do not
+            % execute the code below.  But some branches refer to an
+            % instance and we specifically write out the transforms
+            % separately for this instance.            
+            if thisNode.isObjectInstance == 1
                 indentSpacing = '    ';
                 fprintf(fid, 'ObjectBegin "%s"\n', thisNode.name(10:end-2));
                 if ~isempty(thisNode.motion)
@@ -183,8 +221,7 @@ for ii = 1:numel(children)
     end
 end
 
-% Now what we've build up a list of branch nodes that we need to
-% process, pick one and recurse through it
+% We've built up a list of branch nodes. Loop through them.
 for ii = 1:numel(nodeList)
     recursiveWriteNode(fid, obj, nodeList(ii), rootPath, outFilePath);
 end
@@ -192,15 +229,44 @@ end
 end
 
 %% Recursive write for attributes?
-
 function recursiveWriteAttributes(fid, obj, thisNode, lvl, outFilePath, writeGeometryFlag, thisR, varargin)
-% Write attribute sections. The logic is:
+% Print out information in the geometry file about the nodes
+%
+% Information for branches, objects, and lights are managed
+% separately.
+%
+% Inputs
+%  fid - File pointer to the geometry file for writing
+%  obj - The tree of nodes representing the scene
+%  thisNode - The node we are working on
+%  lvl - Level of the tree hierarchy.  We use this to set the indentation 
+%  outFilePath - Can be determined from thisR, so not necessary
+%  writeGeometryFlag - Sometimes, it seems, we get here but do not want
+%                     to write.  Not sure why.
+%  thisR - The recipe
+% 
+% Optional key/val
+%  remoteresources
+%
+% Outputs
+%   N/A
+%
+% This runs recursively.
+%
 %   1) Get the children of the current node
 %   2) For each child, write out information accordingly
+%
+% See also
+%   recursiveWriteNodes
+%
+
+% TODO:  We are not sure why we have the varargin here.
+% The remote resources does not seem to be used in here
 %
 
 %% Get children of this node
 children = obj.getchildren(thisNode);
+
 %% Loop through children at this level
 
 % Generate spacing to make the tree structure more beautiful
@@ -219,31 +285,45 @@ for ii = 1:numel(children)
         end
     end
 
-    thisNodeChildId = obj.getchildren(children(ii));
-    if ~isempty(thisNodeChildId)
-        thisNodeChild = obj.get(thisNodeChildId);
-        if strcmp(thisNodeChild.type, 'light') &&...
-                strcmp(thisNodeChild.lght{1}.type,'area')
-        end
-    end
     referenceObjectExist = [];
     if isfield(thisNode,'referenceObject') && ~isempty(thisNode.referenceObject)
         referenceObjectExist = piAssetFind(obj,'name',strcat(thisNode.referenceObject,'_B'));
     end
 
     fprintf(fid, [spacing, 'AttributeBegin\n']);
+    
     if isequal(thisNode.type, 'branch')
-        % get the name after stripping ID for this Node
+        % Get the name after stripping ID for this Node
         while numel(thisNode.name) >= 10 &&...
                 isequal(thisNode.name(7:8), 'ID')
             thisNode.name = thisNode.name(10:end);
         end
+        
         % Write the object's dimensions
         fprintf(fid, [spacing, indentSpacing,...
             sprintf('#MeshName: "%s" #Dimension:[%.4f %.4f %.4f]',thisNode.name,...
             thisNode.size.l,...
             thisNode.size.w,...
             thisNode.size.h), '\n']);
+
+        % Needs neatening.  At least get the CoordSys thing after the
+        % attributeBegin.
+        thisNodeChildId = obj.getchildren(children(ii));
+        if ~isempty(thisNodeChildId)
+            % If there are children, it's a branch.
+            thisNodeChild = obj.get(thisNodeChildId);
+
+            % If it is a branch with a light below it, check about the
+            % coordinate system.
+            if strcmp(thisNodeChild.type, 'light') && ...
+                    strcmp(thisNodeChild.lght{1}.type,'area')
+                % This is nuts and should go away
+            elseif strcmp(thisNodeChild.type, 'light') && ...
+                    isfield(thisNodeChild.lght{1},'cameracoordinate') && ...
+                    thisNodeChild.lght{1}.cameracoordinate
+                fprintf(fid, [spacing, indentSpacing, 'CoordSysTransform "camera" \n']);
+            end
+        end
 
         % If a motion exists in the current object, prepare to write it out by
         % having an additional line below.  For now, this is not
@@ -255,13 +335,22 @@ for ii = 1:numel(children)
         end
 
         % Transformation section
+        
+        % If this branch has a single child that is a light, then we
+        % should figure out if the light has cameracoordinate true.
+        % If it does, we should write that into the file prior to to
+        % the concat transform in 
+        %s
         if ~isempty(thisNode.rotation)
             % Zheng: I think it is always this case, but maybe it is rarely
             % the case below. Have no clue.
             % If this way, we would write the translation, rotation and
-            % scale line by line based on the order of thisNode.transorder
+            % scale line by line based on the order of
+            % thisNode.transorder.
             piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
         else
+            % We think we never get here
+            warning('Surprised to be here.');
             thisNode.concattransform(13:15) = thisNode.translation(:);
             fprintf(fid, strcat(spacing, indentSpacing,...
                 sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', thisNode.concattransform(:)), '\n'));
@@ -349,6 +438,9 @@ for ii = 1:numel(children)
         tmpR = recipe;
         tmpR.outputFile = outFilePath;
         tmpR.lights = thisNode.lght;
+
+        % The cameracoordinate should not be here.  It should be in
+        % the branch node just above the light.
         lightText = piLightWrite(tmpR, 'writefile', false);
 
         for jj = 1:numel(lightText)
@@ -361,7 +453,6 @@ for ii = 1:numel(children)
         % Hopefully we never get here.
         warning('Unknown node type %s\n',thisNode.type);
     end
-
 
     fprintf(fid, [spacing, 'AttributeEnd\n']);
 end

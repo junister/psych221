@@ -95,10 +95,13 @@ for ii = 1:numel(thisR.lights)
     % Force the line to be a cell array
     lightSourceText{ii}.line{1} = '# Light definition';
 
-    % All but the infinite light can use the camera coordinate system.   
-    if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
-        lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
-    end
+    % All but the infinite light can use the camera coordinate system.
+    % We used to append this condition here, but now we put the code
+    % inside of piGeometryWrite ->  recursiveWriteAttributes
+    %
+    %     if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
+    %         lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
+    %     end
 
     % Construct the light definition line
     [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
