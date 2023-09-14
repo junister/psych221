@@ -529,8 +529,8 @@ for nMat = 1:numel(thisNode.material)
     end
 
     try
-        fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
-            material.namedmaterial, '"', '\n'));
+        str = sprintf('%s%s NamedMaterial "%s" ',spacing,indentSpacing,material.namedmaterial);
+        fprintf(fid, '%s\n',str); % strcat(spacing, indentSpacing, "NamedMaterial ", '"', material.namedmaterial, '"', '\n'));
     catch
         % we should never be here
         warning('Material write issue.')
