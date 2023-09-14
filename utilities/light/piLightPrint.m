@@ -60,7 +60,7 @@ for ii =1:numel(lightNames)
         position(ii,:) = thisR.get('asset',thisLight.name,'world position');
         
         % And then account for the camera coordinate logical.
-        if thisLight.cameracoordinate
+        if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
             from = thisR.get('from');
             position(ii,:) = position(ii,:) + from;
         end

@@ -348,15 +348,15 @@ for ii = 1:numel(children)
             % scale line by line based on the order of
             % thisNode.transorder.
             piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
-        else
-            % We think we never get here
-            warning('Surprised to be here.');
-            thisNode.concattransform(13:15) = thisNode.translation(:);
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', thisNode.concattransform(:)), '\n'));
-            % Scale
-            fprintf(fid, strcat(spacing, indentSpacing,...
-                sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
+            %         else
+            %             % We think we never get here
+            %             warning('Surprised to be here.');
+            %             thisNode.concattransform(13:15) = thisNode.translation(:);
+            %             fprintf(fid, strcat(spacing, indentSpacing,...
+            %                 sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', thisNode.concattransform(:)), '\n'));
+            %             % Scale
+            %             fprintf(fid, strcat(spacing, indentSpacing,...
+            %                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         end
 
         % Motion section
@@ -426,7 +426,7 @@ for ii = 1:numel(children)
             %[p,n,e ] = fileparts(thisNode.shape{1}.filename);
             %thisNode.shape{1}.filename = fullfile(p, [n e]);
             ObjectWrite(fid, thisNode, rootPath, spacing, indentSpacing, thisR);
-            fprintf(fid,'\n');
+            % fprintf(fid,'\n');
         else
             % use reference object
             fprintf(fid, strcat(spacing, indentSpacing, ...
@@ -493,7 +493,7 @@ tMatrix = reshape(tMatrix,[1,16]);
 
 % This is not correct.  I left it here because I want to eliminate writing
 % out the identity.  But I haven't figured out the correct way. (BW).
-% if tMatrix(:) ~= identityTransform(:)
+if tMatrix(:) ~= identityTransform(:)
 
     transformType = 'ConcatTransform';
 
@@ -505,7 +505,7 @@ tMatrix = reshape(tMatrix,[1,16]);
         transformType, tMatrix(:));
     fullLine = [spacing indentSpacing printString '\n'];
     fprintf(fid, fullLine);
-% end
+end
 
 end
 
@@ -528,15 +528,8 @@ for nMat = 1:numel(thisNode.material)
     else,                         material = thisNode.material;
     end
 
-    try
-        fprintf(fid, strcat(spacing, indentSpacing, "NamedMaterial ", '"',...
-            material.namedmaterial, '"', '\n'));
-    catch
-        % we should never be here
-        warning('Material write issue.')
-        materialTxt = piMaterialText(material, thisR);
-        fprintf(fid, strcat(materialTxt, '\n'));
-    end
+    str = sprintf('%s%s "NamedMaterial %s"',spacing, indentSpacing,material.namedmaterial);
+    fprintf(fid, '%s\n',str);
 
     % Deal with possibility of a cell array for the shape.  This logic
     % seems off to me (BW, 4/4/2023)
@@ -604,18 +597,13 @@ for nMat = 1:numel(thisNode.material)
                 end
             end
 
-            % Write out the PBRT text line for this shape
+            % Write out the PBRT text line for this shape (edited)
             if isequal(fileext, '.ply')
-                fprintf(fid, strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
+                str = sprintf('%s%s %s',shapeText);
+                fprintf(fid, '%s\n',str); % strcat(spacing, indentSpacing, sprintf('%s\n',shapeText)));
             else
-                % 4/4/2023 - Removed code and used pbrtName
-                %
-                %                 if iscell(thisNode.shape)
-                %                     fname = thisNode.shape{1}.filename;
-                %                 else
-                %                     fname = thisNode.shape.filename;
-                %                 end
-                fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "%s"', pbrtName)),'\n');
+                str = sprintf('%s%s Include "%s"',spacing, indentSpacing, pbrtName);
+                fprintf(fid, '%s\n',str);
             end
         else
             % There is no shape file name, but there is a shape
@@ -627,16 +615,7 @@ for nMat = 1:numel(thisNode.material)
             % We use an identifier for the file name based on the
             % shape itself. Whenever we have the same points, we have
             % the same name.
-            %
-
-            %{
-            % Changed April 3rd, 2023
-            % In the past, we used the node name for the file.  That
-            % was not unique, and changed every time we ran the code.
-            name = thisNode.name;  % Maybe we choose a better name.  No ID.
-            tmp = split(name,'_');
-            name = [tmp{end-2},tmp{end-1},tmp{end}];
-            %}
+            %            
 
             isNode = false;
             name = piShapeNameCreate(thisShape,isNode, thisR.get('input basename'));
@@ -648,56 +627,26 @@ for nMat = 1:numel(thisNode.material)
             fclose(geometryFile);
 
             % Include the file in the scene_geometry.pbrt file
-            fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
+            str = sprintf('%s%s Include "geometry/%s.pbrt"',spacing,indentSpacing,name);
+            fprintf(fid, '%s\n',str); % strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
 
         end
-        fprintf(fid,'\n');  % Enjoy a carriage return.
+        % fprintf(fid,'\n');  % Enjoy a carriage return.
     else
-        % thisShape is empty. 
-        % On 4/4/2023 this worked for ChessSet, SimpleScene, and the
-        % fixed up 'kitchen' scene with AttributeBegin/End.  Also with
-        % Macbeth Check via piRecipeCreate.  So a decent set of tests.
+        % thisShape is empty. Do nothing.
+        %
+        % On 4/4/2023 this code deletion for ChessSet, SimpleScene,
+        % and the fixed up 'kitchen' scene with AttributeBegin/End.
+        % Also with Macbeth Check via piRecipeCreate.  So a decent set
+        % of tests.
         % 
         % We get this awkward situation in our Auto @recipes. That might
         % indicate an issue with the recipe creation, but for now we need
-        % to let it through in order to render them
-        %fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);
-        
-        %{
-        % For some Included .pbrt files we don't get a shape
-        % since it is in the file. So  we need to write out
-        % the include statement instead
-        % If it does not have ply file, do this
-        % There is a shape slot we also open the geometry file.
-        name = thisNode.name;
-        % HACK! to test if getting rid of instancing helps-- DJC
-        instanceHack = false;
-        if instanceHack
-            if isequal(regexp(name,'\d\d\d_\d\d\d_\d\d\d_'), 1)
-                name = name(13:end);
-            end
-            if isequal(min(regexp(name,'\d\d\d_\d\d\d_')), 1)
-                name = name(9:end);
-            end
-            if isequal(min(regexp(name,'\d\d\d_')), 1)
-                name = name(5:end);
-            end
-            % interferes with B* assets
-            %name = strrep(name,'_B','');
-
-            % Super-weenie HACK!
-            % For starters not all materials are 0:!
-            % So fails on others
-            name = strrep(name,'_O','_mat0');
-
-            fprintf(fid, strcat(spacing, indentSpacing, ...
-                sprintf('Shape "plymesh" "string filename" "geometry/%s.ply"', name)),'\n');
-        else
-            % Currently running code!
-            fprintf(fid, strcat(spacing, indentSpacing, sprintf('Include "geometry/%s.pbrt"', name)),'\n');
-        end
-        fprintf(fid,'\n');
-        %}
+        % to let it through in order to render them.
+        %
+        % BW deleted the commented out code that used to be here 09/14/2023.
+        %
+        % fprintf('Note: processed empty shape for material %d in %s\n',nMat,thisNode.name);               
     end
 end
 
