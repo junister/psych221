@@ -93,15 +93,7 @@ for ii = 1:numel(thisR.lights)
     % These are the elements common to all of the different light types.
     
     % Force the line to be a cell array
-    lightSourceText{ii}.line{1} = '# Light definition';
-
-    % All but the infinite light can use the camera coordinate system.
-    % We used to append this condition here, but now we put the code
-    % inside of piGeometryWrite ->  recursiveWriteAttributes
-    %
-    %     if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
-    %         lightSourceText{ii}.line{1} = 'CoordSysTransform "camera"';
-    %     end
+    lightSourceText{ii}.line = {'# Light'};
 
     % Construct the light definition line
     [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
@@ -377,6 +369,8 @@ end
 
 if writefile
     %% Write to scene_lights.pbrt file
+    warning('Writing to scene_lights.  Not sure we ever get here.')
+
     [workingDir, n] = fileparts(thisR.outputFile);
     fname_lights = fullfile(workingDir, sprintf('%s_lights.pbrt', n));
 

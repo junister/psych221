@@ -55,7 +55,7 @@ validRecipes = {'macbethchecker','chessset',...
     'cornell_box','cornellboxreference',...
     'simplescene','arealight','bunny','car','checkerboard', ...
     'lettersatdepth','materialball','materialball_cloth',...
-    'sphere','slantededge','stepfunction','testplane','teapotset'};
+    'sphere','slantededge','testplane','teapotset'};
 
 varargin = ieParamFormat(varargin);
 
@@ -81,26 +81,25 @@ end
 %% 
 %{
   rList = thisR.list;
-   1 {'ChessSet'               } - OK
+    {'ChessSet'               } - OK
     {'CornellBoxReference'    } - Requires HDR because light is bright
     {'MacBethChecker'         } - Needs a light
     {'SimpleScene'            } - Renders
-   5 {'arealight'             } - Broken
+    {'arealight'              } - Broken
     {'bunny'                  } - Needs a light
     {'car'                    } - Needs a light
     {'checkerboard'           } - OK
     {'coordinate'             } - Needs a light
-   10 {'cornell_box'            }- Needs a light
+    {'cornell_box'            } - Needs a light
     {'flatSurface'            } - OK but boring.
-    {'flatSurfaceWhiteTexture'} Not sure about the texture
+    {'flatSurfaceWhiteTexture'} - Not sure about the texture
     {'lettersAtDepth'         } - OK
     {'materialball'           } - OK
-   15 {'materialball_cloth'     } - OK
+    {'materialball_cloth'     } - OK
     {'slantedEdge'            } - Needs a light
     {'sphere'                 } - Needs a light
-    {'stepfunction'           } - OK
     {'teapot'                 } - Many problems
-    20 {'teapotset'             } - Bad file name
+    {'teapotset'              } - Bad file name
     {'testplane'              } - Bad FBX
 
 thisR = piRecipeDefault('scene name',rList{4});
@@ -270,6 +269,8 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
     case 'testplane'
         thisR = piRecipeDefault('scene name',rName);
+        % Adjust the texture.
+        warning('There is a bug with the textures for the testplane scene.')
     otherwise
         error('Unknown recipe name %s\n',rName);
 end
