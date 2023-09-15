@@ -92,8 +92,8 @@ thisR.set('light', projectionLight_Right, 'add');
 
 % piLightTranslate(projectionLight, 'zshift', -5);
 
-pLight_Left = piAssetSearch(thisR,'lightname', 'projectedLight_Left');
-pLight_Right = piAssetSearch(thisR,'lightname', 'projectedLight_Right');
+pLight_Left = piAssetSearch(thisR,'light name', 'Left_Light');
+pLight_Right = piAssetSearch(thisR,'light name', 'Right_Light');
 
 thisR.show('lights');
 
@@ -115,7 +115,8 @@ thisR.show('lights');
 
 piWRS(thisR);
 
-%%
+%% Things that don't work:)
+%{
 thisR.set('asset',pLight,'world position',[0 0 0]);
 
 % Account for camera coordinate setting when we get the world position
@@ -123,7 +124,7 @@ thisR.get('light',pLight,'world position')
 
 % We do account for it correctly with the show command
 thisR.show('lights')
-
+%}
 %%
 cube = piAssetSearch(thisR,'objectname', 'Cube');
 thisR.set('asset',cube,'rotation',[10 10 10]);
