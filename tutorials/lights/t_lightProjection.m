@@ -52,7 +52,9 @@ piWRS(thisR,'mean luminance',-1);
 
 % We haven't figured how to set position and translation
 
-imageMap = 'skymaps/gonio-thicklines.png';
+imageMap = 'skymaps/sky-blue-sun.exr';
+
+% imageMap = 'skymaps/gonio-thicklines.png';
 projectionLight = piLightCreate('ProjectedLight', ...
     'type','projection',...
     'fov', 40, ...

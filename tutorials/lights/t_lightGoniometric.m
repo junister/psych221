@@ -13,19 +13,22 @@ if ~piDockerExists, piDockerConfig; end
 %
 % The MCC image is the default recipe.  We do not write it out yet because
 % we are going to change the parameters
-thisR = piRecipeCreate('chessset');
+thisR = piRecipeCreate('macbeth checker');
 
 %% Example of a Goniometric light
 
 % There is a default point light.  We delete that.
 thisR = thisR.set('lights','all','delete');
 
+% This is always gray scale
 spectrumScale = 1000;
 % gonioMap = 'clouds-sky.exr';   % Include the extension
-% gonioMap = 'sky-blue-sun.exr';   % Include the extension
-gonioMap = 'gonio-room.exr'; 
+gonioMap = 'sky-blue-sun.exr';   % Include the extension
+% gonioMap = 'gonio-room.exr'; 
 
 lightSpectrum = 'equalEnergy';
+% lightSpectrum = 'D65';
+
 newGoniometric = piLightCreate('gonio',...
                            'type', 'goniometric',...
                            'specscale float', spectrumScale,...
@@ -46,10 +49,25 @@ thisR.show('lights');
 
 piWRS(thisR,'render flag','hdr','name','gonoi and skymap');
 
+%% Can we move the gonio light position?
+
+thisR.set('light',newGoniometric.name,'translate',[-1 -1 0]);
+thisR.show('lights');
+% Create a viewer for the goniometric image
+%{
+img = exrread(newGoniometric.filename.value);
+imtool(img);
+%}
+piWRS(thisR,'render flag','hdr','name','gonoi shifted');
+
 %% Remove the goniometric light
 
-thisR.set('light','gonio_L','delete');
+thisR.set('light',newGoniometric.name,'delete');
+thisR.set('light',newGoniometric, 'add');
+thisR.set('light',newGoniometric.name,'translate',[0 1 0]);
+
 thisR.show('lights');
+piWRS(thisR,'render flag','hdr','name','gonoi shifted');
 
 %% Add a distant light and put back the gonio light
 
