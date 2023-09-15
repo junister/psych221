@@ -31,7 +31,7 @@ thisR.lookAt.from = [3 5 0];
 %% show original
 piWRS(thisR,'mean luminance',-1);
 
-%% Add one projection light
+%% Add projection lights
 
 % scale appears to be how much to scale the image intensity. We haven't
 % seen a difference yet between scale and power fov seems to be working
@@ -50,10 +50,15 @@ piWRS(thisR,'mean luminance',-1);
 % fov is the field of view covered by the slide
 % power is total power of the projection lamp
 
-% We haven't figured how to set position and translation
-
 imageMap = 'skymaps/gonio-thicklines.png';
-projectionLight = piLightCreate('ProjectedLight', ...
+projectionLight_Left = piLightCreate('Left_Light', ...
+    'type','projection',...
+    'fov', 40, ...
+    'scale', 10, ...
+    'power', 0, ...  % pbrt checks for < 0, but not sure why
+    'cameracoordinate', 1, ...
+    'filename string', imageMap);
+projectionLight_Right = piLightCreate('Right_Light', ...
     'type','projection',...
     'fov', 40, ...
     'scale', 10, ...
@@ -80,14 +85,15 @@ projectionLight = piLightCreate('ProjectedLight', ...
 % Remove all the lights
 thisR.set('light', 'all', 'delete');
 
-% Add this light
-thisR.set('light', projectionLight, 'add');
+% Add the projection lights
+thisR.set('light', projectionLight_Left, 'add');
+thisR.set('light', projectionLight_Right, 'add');
 
-% Does translate happen before or after add?
-%
+
 % piLightTranslate(projectionLight, 'zshift', -5);
 
-pLight = piAssetSearch(thisR,'lightname', 'projectedLight');
+pLight_Left = piAssetSearch(thisR,'lightname', 'projectedLight_Left');
+pLight_Right = piAssetSearch(thisR,'lightname', 'projectedLight_Right');
 
 thisR.show('lights');
 
@@ -96,7 +102,7 @@ piWRS(thisR,'mean luminance',-1);
 
 %% Rotate the light
 
-thisR.set('asset',pLight,'rotation',[0 0 30]);
+thisR.set('asset',pLight_Left,'rotation',[0 0 30]);
 piWRS(thisR,'mean luminance',-1);
 
 % thisR.set('render type',{'radiance','depth'});
@@ -104,7 +110,7 @@ piWRS(thisR,'mean luminance',-1);
 % sceneWindow(scene);
 
 %%
-thisR.set('asset',pLight,'translate',[1 1 0]);
+thisR.set('asset',pLight_Right,'translate',[1 1 0]);
 thisR.show('lights');
 
 piWRS(thisR);
