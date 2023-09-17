@@ -48,9 +48,18 @@ sceneShowImage(macbethScene);
 
 %% Create sea water medium
 
+% Define rendering parameters 
 
+dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
+    'localRender',false,...
+    'gpuRendering',false,...
+    'remoteMachine','mux.stanford.edu',...
+    'remoteUser','henryk',...
+    'remoteRoot','/home/henryk',...
+    'remoteImage','digitalprodev/pbrt-v4-cpu',...
+    'relativeScenePath','/iset3d/');
 
-macbethScene = piWRS(macbeth, 'meanluminance', -1);
+macbethScene = piWRS(macbeth, 'ourDocker', dw, 'meanluminance', -1);
 
 %%
 % HB created a full representation model of scattering that has a number of
@@ -96,6 +105,12 @@ rgb = sceneGet(uwMacbethScene,'srgb');
 figure; imshow(rgb);
 %}
 
+underwaterMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 50);
+underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbeth','UnderwaterMacbeth.pbrt'));
+underwaterMacbeth = sceneSet(underwaterMacbeth,'name', 'baselineWater');
+
+piWRS(underwaterMacbeth, 'ourDocker', dw, 'meanluminance', -1);
+
 %% Let's change a medium parameter - On BW's computer this is OK
 
 % The depth of the water we are seeing through
@@ -103,10 +118,13 @@ depths = logspace(0,1.5,3);
 for zz = 1:numel(depths)
     uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', depths(zz));
 
-    idx = piAssetSearch(uwMacbeth,'object name','Water');
-    sz = uwMacbeth.get('asset',idx,'size');
-    uwMacbethScene    = piWRS(uwMacbeth, 'meanluminance', -1, 'name',sprintf('Depth %.1f',sz(3)));
 
+    idx = piAssetSearch(underwaterMacbeth,'object name','Water');
+    sz = underwaterMacbeth.get('asset',idx,'size');
+    underwaterMacbeth = sceneSet(underwaterMacbeth,'name',sprintf('Depth %.1f',sz(3)));
+
+    uwMacbethScene    = piWRS(underwaterMacbeth, 'ourDocker', dw, 'meanluminance', -1);
+    
 end
 
 %%  Try the chess set

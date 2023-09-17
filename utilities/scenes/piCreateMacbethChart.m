@@ -61,7 +61,6 @@ macbethRecipe.set('samplersubtype','halton');
 macbethRecipe.set('pixel samples',16);
 
 macbethRecipe.set('integrator','volpath');
-macbethRecipe.set('rendertype',{'radiance'});
 
 macbethRecipe.exporter = 'PARSE';
 
