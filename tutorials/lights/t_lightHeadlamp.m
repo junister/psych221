@@ -64,14 +64,19 @@ pLight_Left = piAssetSearch(thisR,'light name', 'headlightLight');
 thisR.show('lights');
 
 %%
-piWRS(thisR,'mean luminance',-1);
-
+thisR.set('render type',{'radiance','depth','albedo'});
+if ~ismac %code to add denoising for benchmarking
+    piWrite(thisR);
+    scene = piRender(thisR,'mean luminance',-1, 'do_denoise','exr_albedo');
+    sceneWindow(scene)
+else
+    piWRS(thisR);
+end
 %% Rotate the light
 
 %thisR.set('asset',pLight_Left,'rotation',[0 0 30]);
 %piWRS(thisR,'mean luminance',-1);
 
-% thisR.set('render type',{'radiance','depth'});
 % scene = piRender(thisR);
 % sceneWindow(scene);
 
