@@ -12,8 +12,8 @@ function [status,result,dockercmd] = piDockerImgtool(command,varargin)
 %      help
 %      make equiarea
 %      make sky - Makes an exr skymap with name sky-
-%      convert
-%      denoise - We have other denoisers, haven't tested this one
+%      convert  - Conversion between various file types
+%      denoise  - We have other denoisers, haven't tested this one
 %
 % Optional key/val pairs
 %   infile:   Full path to the input file
