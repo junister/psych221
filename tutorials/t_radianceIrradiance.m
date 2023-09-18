@@ -21,13 +21,21 @@ if ~piDockerExists, piDockerConfig; end
 %% Create recipe
 
 thisR = piRecipeCreate('sphere');
-thisR.set('skymap','room.exr');
+thisR.show('lights');
+
+thisR.set('lights','all','delete');
+thisLight = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
+thisR.set('lights',thisLight,'add');
+thisR.show('lights');
+
+% thisR.set('skymap','room.exr');
 
 % A low resolution rendering for speed
 thisR.set('film resolution',[200 150]);
 thisR.set('rays per pixel',48);
 thisR.set('nbounces',5); 
 thisR.set('fov',45);
+piWRS(thisR,'name','diffuse','render flag','hdr');
 
 %% Understanding the environment light
 
@@ -44,6 +52,15 @@ piMaterialsInsert(thisR,'name',mirrorName);
 % Assigning mirror to sphere
 assetSphere = piAssetSearch(thisR,'object name','Sphere');
 thisR.set('asset', assetSphere, 'material name', mirrorName);
+
+%%
+% add a skymap
+fileName = 'room.exr';
+thisR.set('skymap',fileName);
+
+piWRS(thisR,'name','mirror','render flag','hdr');
+
+%%
 
 % Change the camera coordinate to better see the environmental light's
 % effect

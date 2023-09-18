@@ -28,6 +28,18 @@ thisR.lookAt.to = [3 50 0];
 %% show original
 piWRS(thisR,'mean luminance',-1);
 
+%% Change the flat surface to a mirror
+
+mirrorName = 'mirror';
+piMaterialsInsert(thisR,'name',mirrorName);
+
+% Assigning mirror to sphere
+cube = piAssetSearch(thisR,'object name','Cube');
+thisR.set('asset', cube, 'material name', mirrorName);
+
+%% show with a mirror
+piWRS(thisR,'mean luminance',-1);
+
 %% Add Headlamp
 
 % scale appears to be how much to scale the image intensity. We haven't
@@ -62,6 +74,10 @@ pLight_Left = piAssetSearch(thisR,'light name', 'headlightLight');
 %thisR.set('asset',pLight_Left,'translation',[0 0 150]);
 
 thisR.show('lights');
+
+%%
+piWRS(thisR,'mean luminance',-1);
+
 
 %%
 piWRS(thisR,'mean luminance',-1);
