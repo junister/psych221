@@ -80,7 +80,12 @@ switch srchtype
         for ii=1:numel(oNames)
             if contains(oNames{ii},param,'IgnoreCase',ignoreCase)
                 % This should be the Node index
-                val(end+1) = str2double(oNames{ii}(1:6)); 
+                % Some seem to only have 4 digits?
+                foundIndex = str2double(oNames{ii}(1:6));
+                if isequaln(foundIndex, NaN)
+                    foundIndex = str2double(oNames{ii}(1:4));
+                end    
+                val(end+1) = foundIndex; 
             end
         end
     case {'lightname','lightnames','light'}

@@ -37,9 +37,10 @@ thisR.set('rays per pixel',128);
 thisR.set('nbounces',3); 
 thisR.set('fov',45);
 
-% try moving the subject really close
+% try moving the subject really close or ...
 assetSphere = piAssetSearch(thisR,'object name','Sphere');
-piAssetTranslate(thisR,assetSphere,[0 0 -200]);
+piAssetTranslate(thisR,assetSphere,[100 0 00]);
+piAssetScale(thisR,assetSphere,[.5 .5 .5]);
 
 piWRS(thisR,'name','diffuse','mean luminance', -1); % works
 
@@ -64,6 +65,14 @@ fileName = 'room.exr';
 %thisR.set('skymap',fileName); % works
 
 piWRS(thisR,'name', 'reflective', 'mean luminance',-1);
+
+%% Try adding a second sphere
+sphere2 = piAssetLoad('sphere');
+assetSphere2 = piAssetSearch(sphere2.thisR,'object name','Sphere');
+piAssetTranslate(sphere2.thisR,assetSphere2,[-100 0 00]);
+piAssetScale(sphere2.thisR,assetSphere2,[.5 .5 .5]);
+
+thisR = piRecipeMerge(thisR,sphere2.thisR, 'node name',sphere2.mergeNode,'object instance', false);
 
 %% Try aiming a light straight at us
 % spot & point & area don't seem to work
