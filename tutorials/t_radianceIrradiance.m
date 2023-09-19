@@ -15,6 +15,8 @@ if ~piDockerExists, piDockerConfig; end
 
 thisR = piRecipeCreate('Sphere');
 %thisR = piRecipeCreate('flatsurface');
+thisR.lookAt.to = [0 0 0]; % probably doesn't change anything...
+
 thisR.show('lights');
 
 thisR.set('lights','all','delete');
@@ -33,7 +35,7 @@ thisR.show('lights');
 %thisR.set('skymap','room.exr');
 
 thisR.set('film resolution',[300 200]);
-thisR.set('rays per pixel',128);
+thisR.set('rays per pixel',512);
 thisR.set('nbounces',3); 
 thisR.set('fov',45);
 
@@ -54,7 +56,7 @@ piMaterialsInsert(thisR,'name','chrome'); % fail
 piMaterialsInsert(thisR,'name','glossy-red'); % works
 
 % To use one of those materials into the recipe: 
-useMaterial = 'chrome';
+useMaterial = 'mirror';
 
 % Assigning new surface to sphere
 thisR.set('asset', assetSphere, 'material name', useMaterial);
@@ -78,20 +80,18 @@ piWRS(thisR,'name','second sphere', 'mean luminance', -1);
 
 %% Try aiming a light straight at us
 % spot & point & area don't seem to work
-reverseLight = piLightCreate('reverse',...
-                        'type','point',...
-                        'spd','equalEnergy',...
-                        'specscale', 100, ...
-                        'cameracoordinate', true);
-%{
-                        'coneangle', 60,...
-                        'conedeltaangle', 10, ...
-%}
+% try a headlamp
+reverseHeadLight = headlamp('preset','level beam', 'name','reverse'); 
+reverseLight = reverseHeadLight.getLight(); % get actual light
 
 thisR.set('lights',reverseLight,'add');
 
 rLight = piAssetSearch(thisR,'light name','reverse');
-thisR.set('asset',rLight,'translate',[0 0 30]);
+thisR.set('asset',rLight,'translate',[0 0 160]);
+
+% Note: We can see te effect of the headlamp on the spheres if we leave it
+% pointed in the direction of the camera. But if we rotate it 180, we don't
+% see any evidence of it. ...
 thisR.set('asset',rLight,'rotate',[0 180 0]);
 
 % With sphere

@@ -16,7 +16,7 @@ function material = piMaterialCreate(name, varargin)
 %     the available material types.
 %
 %     The PBRT default properties of any material type can be found on PBRT
-%     website: web('https://pbrt.org/fileformat-v3.html#materials')
+%     website: web('https://pbrt.org/fileformat-v4')
 %
 %   Other key/val pairs depend on the material.  To see the properties of
 %   any specific material use
