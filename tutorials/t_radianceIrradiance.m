@@ -32,8 +32,8 @@ thisR.show('lights');
 
 %thisR.set('skymap','room.exr');
 
-thisR.set('film resolution',[400 300]);
-thisR.set('rays per pixel',512);
+thisR.set('film resolution',[300 200]);
+thisR.set('rays per pixel',128);
 thisR.set('nbounces',3); 
 thisR.set('fov',45);
 
@@ -53,7 +53,7 @@ piMaterialsInsert(thisR,'name','chrome'); % fail
 piMaterialsInsert(thisR,'name','glossy-red'); % works
 
 % To use one of those materials into the recipe: 
-useMaterial = 'glossy-red';
+useMaterial = 'chrome';
 
 % Assigning new surface to sphere
 thisR.set('asset', assetSphere, 'material name', useMaterial);
@@ -66,22 +66,26 @@ fileName = 'room.exr';
 piWRS(thisR,'name', 'reflective', 'mean luminance',-1);
 
 %% Try aiming a light straight at us
-% spot & point don't seem to work, try area
+% spot & point & area don't seem to work
 reverseLight = piLightCreate('reverse',...
-                        'type','area',...
+                        'type','point',...
                         'spd','equalEnergy',...
                         'specscale', 100, ...
+                        'cameracoordinate', true);
+%{
                         'coneangle', 60,...
                         'conedeltaangle', 10, ...
-                        'cameracoordinate', true);
+%}
+
 thisR.set('lights',reverseLight,'add');
 
 rLight = piAssetSearch(thisR,'light name','reverse');
 thisR.set('asset',rLight,'translate',[0 0 30]);
 thisR.set('asset',rLight,'rotate',[0 180 0]);
 
+% With sphere
+piWRS(thisR,'name','reverse light', 'mean luminance', -1);
+
 % Try without the sphere
 thisR.set('asset', assetSphere, 'delete');
-
-
-piWRS(thisR,'name','reverse light', 'mean luminance', -1);
+piWRS(thisR,'name','no sphere', 'mean luminance', -1);
