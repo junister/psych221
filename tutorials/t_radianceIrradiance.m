@@ -28,8 +28,8 @@ thisR.show('lights');
 
 % A low resolution rendering for speed
 thisR.set('film resolution',[200 150]);
-thisR.set('rays per pixel',48);
-thisR.set('nbounces',5); 
+thisR.set('rays per pixel',256);
+thisR.set('nbounces',10); 
 thisR.set('fov',45);
 piWRS(thisR,'name','diffuse');
 
@@ -43,9 +43,12 @@ thisR.set('asset', assetSphere, 'material name', mirrorName);
 
 %%
 % add a skymap as a test
-%fileName = 'room.exr';
+fileName = 'room.exr';
 %thisR.set('skymap',fileName);
 
-piWRS(thisR,'name','mirror','render flag','hdr');
+piWrite(thisR);
+%piWRS(thisR,'name','mirror','render flag','hdr');
+scene = piRender(thisR);
+sceneWindow(scene);
 
 
