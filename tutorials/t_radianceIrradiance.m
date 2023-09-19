@@ -19,8 +19,13 @@ thisR.show('lights');
 
 thisR.set('lights','all','delete');
 
-thisLight = piLightCreate('spot light', 'type','spot','rgb spd',[100 100 100]);
-thisLight.cameracoordinate = true; % not set by default
+thisLight = piLightCreate('spot',...
+                        'type','spot',...
+                        'spd','equalEnergy',...
+                        'specscale', 100, ...
+                        'coneangle', 15,...
+                        'conedeltaangle', 10, ...
+                        'cameracoordinate', true);
 
 thisR.set('lights',thisLight,'add');
 thisR.show('lights');
@@ -34,7 +39,7 @@ thisR.set('fov',45);
 
 % try moving the subject really close
 assetSphere = piAssetSearch(thisR,'object name','Sphere');
-piAssetTranslate(thisR,assetSphere,[0 0 -298]);
+piAssetTranslate(thisR,assetSphere,[0 0 -200]);
 
 piWRS(thisR,'name','diffuse','mean luminance', -1); % works
 
@@ -58,9 +63,21 @@ thisR.set('asset', assetSphere, 'material name', useMaterial);
 fileName = 'room.exr';
 %thisR.set('skymap',fileName); % works
 
-piWrite(thisR);
-%piWRS(thisR,'name','mirror','render flag','hdr');
-scene = piRender(thisR, 'mean luminance',-1);
-sceneWindow(scene);
+piWRS(thisR,'name', 'reflective', 'mean luminance',-1);
+
+%% Try aiming a light straight at us
+reverseLight = piLightCreate('reverse',...
+                        'type','spot',...
+                        'spd','equalEnergy',...
+                        'specscale', 100, ...
+                        'coneangle', 15,...
+                        'conedeltaangle', 10, ...
+                        'cameracoordinate', true);
+thisR.set('lights',reverseLight,'add');
+
+rLight = piAssetSearch(thisR,'light name','reverse');
+thisR.set('asset',rLight,'translate',[0 0 30]);
+thisR.set('asset',rLight,'rotate',[0 180 0]);
 
 
+piWRS(thisR,'name','reverse light', 'mean luminance', -1);
