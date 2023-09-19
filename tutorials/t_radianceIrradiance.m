@@ -66,9 +66,9 @@ fileName = 'room.exr';
 piWRS(thisR,'name', 'reflective', 'mean luminance',-1);
 
 %% Try aiming a light straight at us
-% spot doesn't seem to work, try point
+% spot & point don't seem to work, try area
 reverseLight = piLightCreate('reverse',...
-                        'type','point',...
+                        'type','area',...
                         'spd','equalEnergy',...
                         'specscale', 100, ...
                         'coneangle', 60,...
@@ -79,6 +79,9 @@ thisR.set('lights',reverseLight,'add');
 rLight = piAssetSearch(thisR,'light name','reverse');
 thisR.set('asset',rLight,'translate',[0 0 30]);
 thisR.set('asset',rLight,'rotate',[0 180 0]);
+
+% Try without the sphere
+thisR.set('asset', assetSphere, 'delete');
 
 
 piWRS(thisR,'name','reverse light', 'mean luminance', -1);
