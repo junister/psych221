@@ -74,6 +74,8 @@ piAssetScale(sphere2.thisR,assetSphere2,[.5 .5 .5]);
 
 thisR = piRecipeMerge(thisR,sphere2.thisR, 'node name',sphere2.mergeNode,'object instance', false);
 
+piWRS(thisR,'name','second sphere', 'mean luminance', -1);
+
 %% Try aiming a light straight at us
 % spot & point & area don't seem to work
 reverseLight = piLightCreate('reverse',...
@@ -95,6 +97,13 @@ thisR.set('asset',rLight,'rotate',[0 180 0]);
 % With sphere
 piWRS(thisR,'name','reverse light', 'mean luminance', -1);
 
+% Make both spheres reflective
+sphereIndices = piAssetSearch(thisR,'object name','sphere');
+for ii = 1:numel(sphereIndices)
+    thisR.set('asset', sphereIndices(ii), 'material name', useMaterial);
+end
+piWRS(thisR,'name','two reflective spheres', 'mean luminance', -1);
+
 % Try without the sphere
 thisR.set('asset', assetSphere, 'delete');
-piWRS(thisR,'name','no sphere', 'mean luminance', -1);
+piWRS(thisR,'name','no primary sphere', 'mean luminance', -1);
