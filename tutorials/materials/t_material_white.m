@@ -48,8 +48,10 @@ newMaterials = {'diffuse-white','wood-medium-knots','wood-mahogany',...
 piMaterialsInsert(thisR,'name',newMaterials);
 
 thisR.set('asset',smallBoxID,'material name','wood-medium-knots');
-thisR.set('asset',largeBoxID,'material name','wood-mahogany');
-thisR.set('asset',boxID,'material name','macbethchart');
+%thisR.set('asset',largeBoxID,'material name','wood-mahogany');
+thisR.set('asset',largeBoxID,'material name','mirror');
+%this doesn't work...
+%thisR.set('asset',boxID,'material name','macbethchart');
 thisR.set('asset',greenWallID,'material name','wood-medium-knots');
 thisR.set('asset',redWallID','material name','marble-beige');
 piWRS(thisR);
