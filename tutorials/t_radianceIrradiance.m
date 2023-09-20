@@ -65,6 +65,14 @@ thisR.set('asset', assetSphere, 'material name', useMaterial);
 % add a skymap as a test
 fileName = 'room.exr';
 %thisR.set('skymap',fileName); % works
+%{ 
+% here is a light that sort of works
+AttributeBegin
+  AreaLightSource "diffuse" "blackbody L" [ 6500 ] "float power" [ 100 ]
+  Translate 0 10 0
+  Shape "sphere" "float radius" [ .25 ]
+AttributeEnd
+%}
 
 piWRS(thisR,'name', 'reflective', 'mean luminance',-1);
 
