@@ -208,6 +208,7 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
         idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
+        
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);
         idx = piAssetSearch(thisR,'object name','Cube');
@@ -251,16 +252,27 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
     case 'sphere'
         thisR = piRecipeDefault('scene name',rName);
-        idx = piAssetSearch(thisR,'branch name','Camera');
-        thisR.set('node',idx,'delete');
-        thisR.set('rendertype',{'radiance','depth'});
+
+        % Should we change to Unit sphere and a specific distance?
+        sphere = piAssetSearch(thisR,'object name','Sphere');
+        sz = thisR.get('asset',sphere,'size');
+        thisR.set('asset',sphere,'scale',1./sz);        
+
+        % Look at the sphere
+        thisR.set('to',thisR.get('asset',sphere,'world position'));
+        thisR.set('from',[0 0 -2]);
+
+        % Get rid of the unused camera
+        camera = piAssetSearch(thisR,'branch name','Camera');
+        thisR.set('node',camera,'delete');
+
+        % Set the light spectrum
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('new distant',...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
+            'spd spectrum', lightSpectrum);
         thisR.set('light', lgt, 'add');
     case 'stepfunction'
         thisR = piRecipeDefault('scene name',rName);

@@ -20,13 +20,18 @@ function lght = piLightCreate(lightName, varargin)
 %        piLightProperties(lightTypes{3})
 %
 %    Look here for the PBRT website information about lights.
+%    https://pbrt.org/fileformat-v4#lights
 %
 % Description:
 %   In addition to creating a light struct, various light properties can be
 %   specified in key/val pairs.
 %
 %   The 'spd spectrum' property reads a file from ISETCam/data/lights
-%   that defines a light spectrum.  For example, Tungsten or D50.
+%   that defines a light spectrum.  In the lght struct this is stored
+%   in the spd slot.
+%
+%    spd.type='spectrum';
+%    spd.value='Tungsten', or D50 or ...
 %
 % Returns
 %   lght   - light struct
@@ -88,7 +93,7 @@ p.addParameter('type','point',@(x)(ismember(x,validLights)));
 p.KeepUnmatched = true;
 p.parse(lightName, varargin{:});
 
-%% Construct light struct
+%% Construct the appropriate light struct for each type
 
 % Some of the fields are present in all the lights
 lght.type = p.Results.type;
@@ -106,8 +111,7 @@ end
 %   specscale
 %   spd
 
-% PBRT allows wavelength by wavelength adjustment - we will enable that
-% someday.
+% All lights start out with these two slots
 lght.specscale.type = 'float';
 lght.specscale.value = 1;
 
@@ -117,30 +121,14 @@ lght.spd.value = [1 1 1];
 % Each light type has a different set of parameters.
 switch ieParamFormat(lght.type)
     case 'distant'
-
-        % Should this be here?  I think not (BW).
-        % lght.cameracoordinate = true;
+        % The distant light is far away and this indicates only its
+        % direction.
 
         lght.from.type = 'point3';
         lght.from.value = [0 0 0];
 
         lght.to.type = 'point3';
         lght.to.value = [0 0 1];
-
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
-
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
 
     case 'goniometric'
         %%  We need a file name for goniometric light.
@@ -176,7 +164,7 @@ switch ieParamFormat(lght.type)
         AttributeEnd
         %}
 
-        % Unclear about this, both here and throughout.
+        % When this is set, the light is placed at the camera.
         lght.cameracoordinate = true;
 
         % The goniometric image showing the light distribution in
@@ -184,13 +172,10 @@ switch ieParamFormat(lght.type)
         lght.filename.type = 'string';
         lght.filename.value = '';
 
-        % Not sure about this or how piWrite should handle it (BW).
-        lght.spd.type = 'rgb';
-        lght.spd.value = [1 1 1];
-
 
     case {'infinite','skymap','environment'}
         % Gets called from thisR.set('skymap',filename,'add');
+
         % See the code there for rotations and translations.
         lght.nsamples.type = 'integer';
         lght.nsamples.value = [];
@@ -198,21 +183,6 @@ switch ieParamFormat(lght.type)
         % V4 for infinite lights
         lght.filename.type = 'string';
         lght.filename.value = '';
-        
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = [];
-
-        lght.scale.type = 'float';
-        lght.scale.value = [];
-        %}
         
     case 'point'
         % Initializes a light at the origin.
@@ -225,23 +195,11 @@ switch ieParamFormat(lght.type)
 
         % Can we have a from but no too?  That may be overriden or work out
         % in the case of the camera coordinate command, but not otherwise.
-        
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
-
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
 
     case 'projection'
+        % Assume we want camera orientation by default
+        lght.cameracoordinate = true;
+
         lght.fov.type = 'float';
         lght.fov.value = [];
 
@@ -254,8 +212,7 @@ switch ieParamFormat(lght.type)
         lght.scale.type = 'scale';
         lght.scale.value = {};
 
-        % Assume we want camera orientation by default
-        lght.cameracoordinate = true;
+
         
     case {'spot', 'spotlight'}
         lght.cameracoordinate = true;
@@ -272,21 +229,6 @@ switch ieParamFormat(lght.type)
         lght.conedeltaangle.type = 'float';
         lght.conedeltaangle.value = [];
         
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
-
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
-
     case {'area', 'arealight'}
         % These are the default parameters for an area light, that are
         % based on the Blender export in arealight.pbrt.
@@ -302,27 +244,22 @@ switch ieParamFormat(lght.type)
         lght.spread.type = 'float';
         lght.spread.value = [];
 
-        lght.specscale.type = 'float';
-        lght.specscale.value = 100;
-
-        lght.spd.type = 'rgb';
-        lght.spd.value = [1 1 1];
-
-        % We need a piShapeCreate() method
+        % We need a piShapeCreate() method.  This is a basic
+        % rectangular shape we use for the area light.
         rectShape = struct('meshshape','trianglemesh', ...
-        'filename','', ...
-        'integerindices', [0 1 2 3 4 5], ...
-        'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
-        'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
-        'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
-        'height', '',...
-        'radius','',...
-        'zmin','',...
-        'zmax','',...
-        'p1','',...
-        'p2','',...
-        'phimax','',...
-        'alpha','');
+            'filename','', ...
+            'integerindices', [0 1 2 3 4 5], ...
+            'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
+            'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
+            'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
+            'height', '',...
+            'radius','',...
+            'zmin','',...
+            'zmax','',...
+            'p1','',...
+            'p2','',...
+            'phimax','',...
+            'alpha','');
         lght.shape{1} = rectShape;
 
         lght.spread.type = 'float';
@@ -376,8 +313,8 @@ for ii=1:2:numel(varargin)
         keyName = ieParamFormat(keyTypeName{1});
     end
 
-    % Now we run the lightSet.  We see whether this light structure has a
-    % slot that matches the keyName.
+    % For these parameters, we run the lightSet.  We see whether this
+    % light structure has a slot that matches the keyName.
     if isfield(lght, keyName)
         % If the slot exists, we set it and we are good.
         lght = piLightSet(lght, sprintf('%s value', keyName),...
