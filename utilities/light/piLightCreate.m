@@ -7,9 +7,15 @@ function lght = piLightCreate(lightName, varargin)
 % Inputs:
 %   lightName   - name of the light
 %
-% Optional key/val pairs
-%   type   - light type. Default is point light.  The light specific
-%    properties depend on the light type. 
+% Optional key/val pairs (Not the usual ieParamFormat.  Beware!)
+%
+%   type   - light type. Default is point light.  There are light specific
+%            properties depend on the light type. 
+%
+%   cameracoordinate - Applies to point, spot, area lights. Default is
+%         true 
+%   shape
+%   radius
 % 
 %  To see the light types use
 %
@@ -61,7 +67,9 @@ function lght = piLightCreate(lightName, varargin)
 %{
  lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
 %}
-
+%{
+ lgt = piLightCreate('areaTest', 'type','area','shape','sphere','radius',30);
+%}
 %% Check if the person just wants the light types
 
 validLights = {'distant','goniometric','infinite','point','area','projection','spot'};
@@ -90,6 +98,13 @@ p = inputParser;
 p.addRequired('lightName', @ischar);
 
 p.addParameter('type','point',@(x)(ismember(x,validLights)));
+
+% We are unsure about the proper default
+p.addParameter('cameracoordinate',true,@islogical);
+
+p.addParameter('shape',[],@(x)(isstruct(x) || ischar(x))); % For area light
+p.addParameter('radius',30,@isnumeric);
+
 p.KeepUnmatched = true;
 p.parse(lightName, varargin{:});
 
@@ -165,7 +180,7 @@ switch ieParamFormat(lght.type)
         %}
 
         % When this is set, the light is placed at the camera.
-        lght.cameracoordinate = true;
+        lght.cameracoordinate = p.Results.cameracoordinate;
 
         % The goniometric image showing the light distribution in
         % different directions.
@@ -188,7 +203,7 @@ switch ieParamFormat(lght.type)
         % Initializes a light at the origin.
         % Point sources emit in all directions, and have no 'to'.
         %
-        lght.cameracoordinate = true;
+        lght.cameracoordinate = p.Results.cameracoordinate;
 
         lght.from.type = 'point';
         lght.from.value = [0 0 0];
@@ -198,7 +213,7 @@ switch ieParamFormat(lght.type)
 
     case 'projection'
         % Assume we want camera orientation by default
-        lght.cameracoordinate = true;
+        lght.cameracoordinate = p.Results.cameracoordinate;
 
         lght.fov.type = 'float';
         lght.fov.value = [];
@@ -211,17 +226,17 @@ switch ieParamFormat(lght.type)
 
         lght.scale.type = 'scale';
         lght.scale.value = {};
-
-
         
     case {'spot', 'spotlight'}
-        lght.cameracoordinate = true;
+        lght.cameracoordinate = p.Results.cameracoordinate;
 
-        lght.from.type = 'point3';
-        lght.from.value = [0 0 0];
+        if ~lght.cameracoordinate
+            lght.from.type = 'point3';
+            lght.from.value = [0 0 0];
 
-        lght.to.type = 'point3';
-        lght.to.value = [0 0 1];
+            lght.to.type = 'point3';
+            lght.to.value = [0 0 1];
+        end
 
         lght.coneangle.type = 'float';
         lght.coneangle.value = [];
@@ -244,23 +259,27 @@ switch ieParamFormat(lght.type)
         lght.spread.type = 'float';
         lght.spread.value = [];
 
-        % We need a piShapeCreate() method.  This is a basic
+        % We need a piShapeCreate() method.  The default is a basic
         % rectangular shape we use for the area light.
-        rectShape = struct('meshshape','trianglemesh', ...
-            'filename','', ...
-            'integerindices', [0 1 2 3 4 5], ...
-            'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
-            'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
-            'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
-            'height', '',...
-            'radius','',...
-            'zmin','',...
-            'zmax','',...
-            'p1','',...
-            'p2','',...
-            'phimax','',...
-            'alpha','');
-        lght.shape{1} = rectShape;
+        if isempty(p.Results.shape)
+            thisShape = struct('meshshape','trianglemesh', ...
+                'filename','', ...
+                'integerindices', [0 1 2 3 4 5], ...
+                'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
+                'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
+                'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
+                'height', '',...
+                'radius','',...
+                'zmin','',...
+                'zmax','',...
+                'p1','',...
+                'p2','',...
+                'phimax','',...
+                'alpha','');
+        else
+            thisShape = p.Results.shape;
+        end
+        lght.shape{1} = thisShape;
 
         lght.spread.type = 'float';
         lght.spread.value = 30;
@@ -296,8 +315,9 @@ for ii=1:2:numel(varargin)
     thisKey = varargin{ii};
     thisVal = varargin{ii + 1};
 
-    if isequal(thisKey, 'type')
-        % Skip since we've taken care of light type above.
+    if isequal(thisKey, 'type') || isequal(thisKey,'shape') || isequal(thisKey,'radius')
+        % Skip since we've taken care of 
+        % type, shape, and radius above.
         continue;
     end
 

@@ -31,7 +31,8 @@ thisR.set('lights',thisLight,'add');
 %thisR.show('lights');
 
 % Optionally add a skymap so everything is nicely lit
-thisR.set('skymap','room.exr');
+% thisR.set('skymap','room.exr');
+% thisR.set('lights','room_L','specscale',1e-3);
 
 thisR.set('film resolution',[300 200]);
 thisR.set('rays per pixel',512);
@@ -40,13 +41,13 @@ thisR.set('fov',45);
 
 % Move our sphere off to the side & scale it to allow for a second one
 assetSphere = piAssetSearch(thisR,'object name','Sphere');
-piAssetTranslate(thisR,assetSphere,[100 0 00]);
-piAssetScale(thisR,assetSphere,[.5 .5 .5]);
+% piAssetTranslate(thisR,assetSphere,[100 0 00]);
+% piAssetScale(thisR,assetSphere,[.5 .5 .5]);
 
 % Baseline -- single diffuse sphere
 piWRS(thisR,'name','diffuse','mean luminance', -1); % works
 
-% Now try to get a reflective material working
+%% Now try to get a reflective material working
 piMaterialsInsert(thisR,'name','mirror'); % fail
 piMaterialsInsert(thisR,'name','glass'); % fail
 piMaterialsInsert(thisR,'name','glass-f5'); % fail
@@ -57,9 +58,12 @@ piMaterialsInsert(thisR,'name','glossy-red'); % works
 
 % To use one of those materials into the recipe: 
 useMaterial = 'mirror';
+useMaterial = 'glossy-red';
+useMaterial = 'rough-metal';
 
 % Assigning new surface to sphere
 thisR.set('asset', assetSphere, 'material name', useMaterial);
+piWRS(thisR,'name',useMaterial,'mean luminance', -1); % works
 
 %% Optionally add a skymap as a test
 % since it seems to light everything

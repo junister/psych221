@@ -23,19 +23,12 @@ sceneName = 'sphere';
 thisR = piRecipeCreate(sceneName);
 % thisR.show;
 
-% A 9K blackbody radiator.
-distLight = piLightCreate('new dist light',...
-                            'type', 'distant',...
-                            'spd', 9000);
-thisR.set('light', distLight, 'add');
-
 % Low resolution, but multiple bounces for the glass and mirror at the
 % end.
 thisR.set('film resolution',[200 150]*2);
 thisR.set('rays per pixel',64);
 thisR.set('fov',45);
 thisR.set('nbounces',5);
-thisR.set('film render type',{'radiance','depth'});
 
 piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 
@@ -83,6 +76,9 @@ piWRS(thisR,'name',sprintf('Red %s',sceneName),'render flag','rgb');
 
 % Add an environmental light
 thisR.set('light', 'all', 'delete');
+spotLight = piLightCreate('spot1','type','spot');
+thisR.set('lights',spotLight,'add');
+
 thisR.set('skymap', 'room.exr');
 
 scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName),'render flag','hdr');

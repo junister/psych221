@@ -135,6 +135,8 @@ for ii = 1:numel(thisR.lights)
             lghtDef = strcat(lghtDef, spdTxt);
             % lghtDef = sprintf('LightSource "distant" "%s L" %s', spectrumType, lightSpectrum);
 
+            % Throughout, we should understand what cameracoordinate
+            % does to the from and to.
             % From
             [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
             if ~isempty(fromTxt)
@@ -146,6 +148,7 @@ for ii = 1:numel(thisR.lights)
             if ~isempty(toTxt)
                 lghtDef = strcat(lghtDef, toTxt);
             end
+
             % scale
             [~, specscaleTxt] = piLightGet(thisLight, 'specscale val', 'pbrt text', true);
             if ~isempty(specscaleTxt)
@@ -281,16 +284,22 @@ for ii = 1:numel(thisR.lights)
                 lghtDef = strcat(lghtDef, spdTxt);
             end
 
-            % From
-            [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
-            if ~isempty(fromTxt)
-                lghtDef = strcat(lghtDef, fromTxt);
-            end
+            % If the spot light is in camera coordinate, we assume the
+            % from is the camera location.  Perhaps the to is where
+            % the camera is looking?  Lord help us.
+            cameracoordinate = piLightGet(thisLight,'cameracoordinate');
+            if ~cameracoordinate
+                % From
+                [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
+                if ~isempty(fromTxt)
+                    lghtDef = strcat(lghtDef, fromTxt);
+                end
 
-            % To
-            [~, toTxt] = piLightGet(thisLight, 'to val', 'pbrt text', true);
-            if ~isempty(toTxt)
-                lghtDef = strcat(lghtDef, toTxt);
+                % To
+                [~, toTxt] = piLightGet(thisLight, 'to val', 'pbrt text', true);
+                if ~isempty(toTxt)
+                    lghtDef = strcat(lghtDef, toTxt);
+                end
             end
 
             % Cone angle
@@ -346,13 +355,14 @@ for ii = 1:numel(thisR.lights)
 
             lightSourceText{ii}.line = [lightSourceText{ii}.line lghtDef];
 
-            % Attach shape            
+            % Specify the shape            
             for nshape = 1:numel(thisLight.shape) % allow multiple shape
                 if ~iscell(thisLight.shape)
                     dummylight.shape = thisLight.shape;
                 else
                     dummylight.shape = thisLight.shape{nshape};
                 end
+
                 if isfield(dummylight.shape,'value')
                     [~, shpTxt] = piLightGet(dummylight, 'shape val', 'pbrt text', true);
                 else

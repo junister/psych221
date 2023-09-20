@@ -439,8 +439,6 @@ for ii = 1:numel(children)
         tmpR.outputFile = outFilePath;
         tmpR.lights = thisNode.lght;
 
-        % The cameracoordinate should not be here.  It should be in
-        % the branch node just above the light.
         lightText = piLightWrite(tmpR, 'writefile', false);
 
         for jj = 1:numel(lightText)

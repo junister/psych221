@@ -127,7 +127,7 @@ piWRS(thisR,'name',sprintf('EE spot %d',coneAngle));
 %% Rotate the direction of the spot light
 
 % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
-thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -5 degree around y axis
+thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -15 degree around y axis
 piWRS(thisR,'name',sprintf('Rotate EE spot'));
 
 %%  Change the light to a point light source 
@@ -181,8 +181,9 @@ piWRS(thisR,'name','Yellow and Blue points');
 distLight = piLightCreate('new_dist_L',...
     'type', 'distant', ...
     'spd', [0.3 0.5 1],...
-    'specscale float', 1,...
-    'cameracoordinate', true);
+    'specscale float', 1);
+distLight.from.value = thisR.get('from');
+distLight.to.value   = thisR.get('to');
 
 thisR.set('light', 'all', 'delete');
 thisR.set('light',distLight,'add');
@@ -190,6 +191,12 @@ thisR.set('light',distLight,'add');
 thisR.get('lights print');
 
 piWRS(thisR,'name','Blue (distant)');
+
+%% With the skymap, but intensity scaled
+
+thisR.set('skymap',fileName);
+thisR.set('light','room_L','specscale',0.3);
+piWRS(thisR,'name','Dark Environment');
 
 %% Add an environment (skymap) light
 
