@@ -119,7 +119,7 @@ switch ieParamFormat(lght.type)
     case 'distant'
 
         % Should this be here?  I think not (BW).
-        lght.cameracoordinate = true;
+        % lght.cameracoordinate = true;
 
         lght.from.type = 'point3';
         lght.from.value = [0 0 0];
