@@ -20,14 +20,13 @@ if ~piDockerExists, piDockerConfig; end
 %% Read pbrt file, set the rendering parameters, and show it.
 
 sceneName = 'sphere';
-thisR = piRecipeDefault('scene name',sceneName);
+thisR = piRecipeCreate(sceneName);
 % thisR.show;
 
 % A 9K blackbody radiator.
 distLight = piLightCreate('new dist light',...
                             'type', 'distant',...
-                            'spd', 9000,...
-                            'cameracoordinate', true);
+                            'spd', 9000);
 thisR.set('light', distLight, 'add');
 
 % Low resolution, but multiple bounces for the glass and mirror at the
@@ -38,10 +37,6 @@ thisR.set('fov',45);
 thisR.set('nbounces',5);
 thisR.set('film render type',{'radiance','depth'});
 
-% Debugging
-% piWrite(thisR);
-% [scene, results] = piRender(thisR);
-% Render
 piWRS(thisR,'name',sprintf('Uber %s',sceneName));
 
 %% The material library
@@ -82,12 +77,8 @@ thisR.set('asset',sphereID(1),'material name',redMatte.name);
 thisR.show('materials');
 
 % Let's have a look
+piWRS(thisR,'name',sprintf('Red %s',sceneName),'render flag','rgb');
 
-scene = piWRS(thisR,'name',sprintf('Red %s',sceneName));
-
-if piCamBio, sceneSet(scene,'render flag','hdr');
-else,        sceneSet(scene,'gamma',0.6);
-end
 %%  Now Put the sphere in an environment
 
 % Make the sphere a little smaller
@@ -97,11 +88,8 @@ thisR.set('asset',sphereID,'scale',[0.5 0.5 0.5]);
 thisR.set('light', 'all', 'delete');
 thisR.set('skymap', 'room.exr');
 
-scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName));
+scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName),'render flag','hdr');
 
-if piCamBio, sceneSet(scene,'render flag','hdr');
-else,        sceneSet(scene,'gamma',0.6);
-end
 %% Make the sphere glass
 
 piMaterialsInsert(thisR,'names',{'glass'});

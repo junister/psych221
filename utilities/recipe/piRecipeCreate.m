@@ -251,16 +251,27 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
     case 'sphere'
         thisR = piRecipeDefault('scene name',rName);
+
+        % Should we change to Unit sphere and a specific distance?
+        idx = piAssetSearch(thisR,'object name','Sphere');
+        sz = thisR.get('asset',idx,'size');
+        thisR.set('asset',idx,'scale',1./sz);        
+
+        % Look at the sphere
+        thisR.set('to',thisR.get('asset',idx,'world position'));
+        thisR.set('from',[0 0 -3]);
+
+        % Get rid of the unused camera
         idx = piAssetSearch(thisR,'branch name','Camera');
         thisR.set('node',idx,'delete');
-        thisR.set('rendertype',{'radiance','depth'});
+
+        % Set the light spectrum
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('new distant',...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
+            'spd spectrum', lightSpectrum);
         thisR.set('light', lgt, 'add');
     case 'stepfunction'
         thisR = piRecipeDefault('scene name',rName);
