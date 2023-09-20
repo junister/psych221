@@ -184,21 +184,6 @@ switch ieParamFormat(lght.type)
         lght.filename.type = 'string';
         lght.filename.value = '';
         
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = [];
-
-        lght.scale.type = 'float';
-        lght.scale.value = [];
-        %}
-        
     case 'point'
         % Initializes a light at the origin.
         % Point sources emit in all directions, and have no 'to'.
@@ -210,21 +195,6 @@ switch ieParamFormat(lght.type)
 
         % Can we have a from but no too?  That may be overriden or work out
         % in the case of the camera coordinate command, but not otherwise.
-        
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
-
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
 
     case 'projection'
         % Assume we want camera orientation by default
@@ -259,21 +229,6 @@ switch ieParamFormat(lght.type)
         lght.conedeltaangle.type = 'float';
         lght.conedeltaangle.value = [];
         
-        %{
-        % Potentially has rotation, transformation or concatransformaiton
-        lght.rotation.type = 'rotation';
-        lght.rotation.value = {};
-
-        lght.translation.type = 'translation';
-        lght.translation.value = {};
-
-        lght.ctform.type = 'ctform';
-        lght.ctform.value = {};
-
-        lght.scale.type = 'scale';
-        lght.scale.value = {};
-        %}
-
     case {'area', 'arealight'}
         % These are the default parameters for an area light, that are
         % based on the Blender export in arealight.pbrt.
@@ -289,27 +244,22 @@ switch ieParamFormat(lght.type)
         lght.spread.type = 'float';
         lght.spread.value = [];
 
-        lght.specscale.type = 'float';
-        lght.specscale.value = 100;
-
-        lght.spd.type = 'rgb';
-        lght.spd.value = [1 1 1];
-
-        % We need a piShapeCreate() method
+        % We need a piShapeCreate() method.  This is a basic
+        % rectangular shape we use for the area light.
         rectShape = struct('meshshape','trianglemesh', ...
-        'filename','', ...
-        'integerindices', [0 1 2 3 4 5], ...
-        'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
-        'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
-        'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
-        'height', '',...
-        'radius','',...
-        'zmin','',...
-        'zmax','',...
-        'p1','',...
-        'p2','',...
-        'phimax','',...
-        'alpha','');
+            'filename','', ...
+            'integerindices', [0 1 2 3 4 5], ...
+            'point3p',[-1 -1 0 -1 1 0 1 1 0 -1 -1 0 1 1 0 1 -1 0], ...
+            'point2uv',[0 0 0 1 1 1 0 0 1 1 1 0], ...
+            'normaln',[0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1], ...
+            'height', '',...
+            'radius','',...
+            'zmin','',...
+            'zmax','',...
+            'p1','',...
+            'p2','',...
+            'phimax','',...
+            'alpha','');
         lght.shape{1} = rectShape;
 
         lght.spread.type = 'float';

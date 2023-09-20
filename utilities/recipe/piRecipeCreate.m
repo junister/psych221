@@ -208,6 +208,7 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
         idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
+        
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);
         idx = piAssetSearch(thisR,'object name','Cube');
@@ -253,17 +254,17 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
 
         % Should we change to Unit sphere and a specific distance?
-        idx = piAssetSearch(thisR,'object name','Sphere');
-        sz = thisR.get('asset',idx,'size');
-        thisR.set('asset',idx,'scale',1./sz);        
+        sphere = piAssetSearch(thisR,'object name','Sphere');
+        sz = thisR.get('asset',sphere,'size');
+        thisR.set('asset',sphere,'scale',1./sz);        
 
         % Look at the sphere
-        thisR.set('to',thisR.get('asset',idx,'world position'));
-        thisR.set('from',[0 0 -3]);
+        thisR.set('to',thisR.get('asset',sphere,'world position'));
+        thisR.set('from',[0 0 -2]);
 
         % Get rid of the unused camera
-        idx = piAssetSearch(thisR,'branch name','Camera');
-        thisR.set('node',idx,'delete');
+        camera = piAssetSearch(thisR,'branch name','Camera');
+        thisR.set('node',camera,'delete');
 
         % Set the light spectrum
         spectrumScale = 1;

@@ -81,9 +81,6 @@ piWRS(thisR,'name',sprintf('Red %s',sceneName),'render flag','rgb');
 
 %%  Now Put the sphere in an environment
 
-% Make the sphere a little smaller
-thisR.set('asset',sphereID,'scale',[0.5 0.5 0.5]);
-
 % Add an environmental light
 thisR.set('light', 'all', 'delete');
 thisR.set('skymap', 'room.exr');
