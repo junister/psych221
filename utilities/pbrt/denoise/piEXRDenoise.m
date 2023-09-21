@@ -150,7 +150,8 @@ for ii = 1:numel(eChannelInfo.Properties.RowNames) % what about Depth and RGB!
     end
 end
 
-% Read radiance, normal and albedo data
+% Read radiance, normal and albedo data both so we can restore them
+% to our output file, and in case we want to use them in the denoiser
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
 if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
@@ -191,9 +192,11 @@ if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
 
-% test for combining files
+% Setup for glomming input channels
 if glom
-    rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
+    padColumns = 100; % arbitrary for now
+    rZeros = zeros([size(radianceData,1), padColumns,3]);
+    %rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
     glommedData = rZeros;
     glommedDataFile = fullfile(pp, strcat('glommedData', ".pfm"));
 end
@@ -267,13 +270,12 @@ end
 
 if glom
     denoisedData = readPFM(glommedDataFile);
+    frameCols = size(radianceData,2);
     for ii = 1:numel(radianceChannels)
         % need to calculate the columns needed
-        % we have 0s, then image, then 0s, etc
-        % so frame number + 1 essentially
-        frameCols = size(radianceData,2);
-        startCol = (ii + 1) * frameCols + 1;
-        endCol = (ii + 2) * frameCols;
+        % we have padColumn 0s, then image, then padColumn 0s, etc
+        startCol = padColumns + (ii - 1) * (frameCols + padColumns) + 1;
+        endCol = startCol +  (frameCols - 1);
         denoisedImage(:, :, ii) = denoisedData(:, startCol:endCol, 1);
     end
 else
