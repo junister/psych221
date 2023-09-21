@@ -100,7 +100,7 @@ p.addRequired('lightName', @ischar);
 p.addParameter('type','point',@(x)(ismember(x,validLights)));
 
 % We are unsure about the proper default
-p.addParameter('cameracoordinate',true,@islogical);
+p.addParameter('cameracoordinate',true);
 
 p.addParameter('shape',[],@(x)(isstruct(x) || ischar(x))); % For area light
 p.addParameter('radius',30,@isnumeric);
