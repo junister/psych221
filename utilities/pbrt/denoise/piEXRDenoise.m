@@ -153,12 +153,13 @@ end
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
 if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
-    if useAlbedo % Denoise the albedo
+    if useAlbedo 
+        % Denoise the albedo for cleaner luminance processing
         writePFM(albedoData, albedoFileName);
 
         % First we denoise the albedo channels, to improve our results
         % We only do this once per image, as it is the same for all
-        % of our radiance iterations
+        % of our radiance iterations, so it doesn't add much time
         [status, result] = system(strcat(baseCmd, commandFlags, " ", albedoFileName, " -o ",albedoFileName ));
         albedoFlag = [' --clean_aux --alb ' albedoFileName];
     else
@@ -184,6 +185,7 @@ else
 end
 
 % We only read the depth channels so that we can write them back out intact
+% Currently they are not used by the de-noiser 
 if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
@@ -192,24 +194,33 @@ end
 % 3rd dimension, but with no labeling of the channels
 for ii = 1:numel(radianceChannels) 
     % We  want to write out the radiance channels using their names into
-    % .pfm files, AFTER tripline them!
+    % .pfm files. But first we have to replicate each of our hyperspectral
+    % channels into a 3-channel version for OIDN to work
     radianceData(:, :, ii, 2 ) = radianceData(:,:,ii,1);
     radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
     rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".pfm"));
 
-    % Write out the .pfm data as a grayscale for each radiance channel
+    % Write out the resulting .pfm data as a grayscale for each radiance channel
     writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
+    
+    % default binary denoiser doesn't support .exr, but could be worth
+    % an experiment if we can re-compile or find one that does
+    %rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".exr"));
+    %exrwrite(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
 end
 
 %% Run the Denoiser binary
 
 denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, commandFlags, " "); % we need hdr for our scenes, -v 0 might help it run faster
 
-% Iterate through our radiance channels
+%% Build denoise command by iterating through our radiance channels
 for ii = 1:numel(radianceChannels)
 
     denoiseImagePath{ii} = rFileNames{ii};
 
+    % Create a single command to denoise all of our .pfm files
+    % in one call to the System
+    % We denoise in place. Not sure if that is faster or slower?
     if isequal(ii, 1)
         cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
     else
