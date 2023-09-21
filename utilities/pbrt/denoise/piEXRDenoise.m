@@ -19,7 +19,7 @@ function status = piEXRDenoise(exrFileName,varargin)
 % Output:
 %    Denoised version of <exr file> in the same location
 %    Other known channels are re-written intact
-%    
+%
 % Returns
 %   status -- 0 if successful, otherwise - <error code>
 %
@@ -52,7 +52,10 @@ p = inputParser;
 p.addRequired('exrfilename',@(x)(isfile(x)));
 p.addParameter('channels','');
 p.addParameter('filter','RT'); % RTLightmap is also an option
+p.addParameter('glom',true); % use one large file
 p.parse(exrFileName, varargin{:});
+
+glom = p.Results.glom;
 
 % Generate file names for albedo and normal if we have them
 [pp, ~, ~] = fileparts(p.Results.exrfilename);
@@ -61,12 +64,12 @@ normalFileName = fullfile(pp, 'Normal.pfm');
 
 % Decide whether to use additional data for denoising. There is improvement
 % in detail but the process takes longer
-if ismember(p.Results.channels, ['exr_albedo', 'exr_all'])
+if all([ismember(p.Results.channels, ['exr_albedo', 'exr_all']), ~glom])
     useAlbedo = true;
 else
     useAlbedo = false;
 end
-if ismember(p.Results.channels, 'exr_all')
+if all([ismember(p.Results.channels, 'exr_all'), ~glom])
     useNormal = true;
 else
     useNormal = false;
@@ -74,7 +77,7 @@ end
 
 % only set filter flag if needed, to keep the command short
 if ~isequal(p.Results.filter, 'RT') % RT is the default
-    filterFlag = [' -f ' p.Results.filter ' ']; 
+    filterFlag = [' -f ' p.Results.filter ' '];
 else
     filterFlag = '';
 end
@@ -100,7 +103,7 @@ if ~isfolder(oidn_pth)
 else
     % Add to path to shorten the batch command, otherwise it is too
     % long to execute as a single system() call.
-    
+
     % DEFINITELY HACKY, but adding the binary to the path doesn't seem to
     % work. Maybe add /local to the path for all the output files instead?
 
@@ -109,9 +112,6 @@ else
     % non-batch version -- about 20-25% slower
     %baseCmd = fullfile(oidn_pth, oidn_Binary);
 end
-
-
-tic; % start timer for deNoise
 
 %% NOW WE HAVE A "RAW" EXR FILE
 % That we need to turn into pfm files.
@@ -153,7 +153,7 @@ end
 radianceData(:, :, :, 1) = exrread(exrFileName, "Channels",radianceChannels);
 if ~isempty(albedoChannels)
     albedoData = exrread(exrFileName, "Channels",albedoChannels);
-    if useAlbedo 
+    if useAlbedo
         % Denoise the albedo for cleaner luminance processing
         writePFM(albedoData, albedoFileName);
 
@@ -185,18 +185,19 @@ else
 end
 
 % We only read the depth channels so that we can write them back out intact
-% Currently they are not used by the de-noiser 
+% Currently they are not used by the de-noiser
 if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
 
 % test for combining files
 rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
-bigData = rZeros;
+glommedData = rZeros;
+glommedDataFile = fullfile(pp, strcat('glommedData', ".pfm"));
 
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling of the channels
-for ii = 1:numel(radianceChannels) 
+for ii = 1:numel(radianceChannels)
     % We  want to write out the radiance channels using their names into
     % .pfm files. But first we have to replicate each of our hyperspectral
     % channels into a 3-channel version for OIDN to work
@@ -204,16 +205,12 @@ for ii = 1:numel(radianceChannels)
     radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
     rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".pfm"));
 
-    %% Test building one large file!
-
-    % Create a blank frame for padding
-
-    bigDataFile = fullfile(pp, strcat('bigData', ".pfm"));
-    bigData = [bigData squeeze(radianceData(:,:,ii,:)) rZeros];
-
-    % Write out the resulting .pfm data as a grayscale for each radiance channel
-    writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
-    
+    if glom
+        glommedData = [glommedData squeeze(radianceData(:,:,ii,:)) rZeros];
+    else
+        % Write out the resulting .pfm data as a grayscale for each radiance channel
+        writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
+    end
     % default binary denoiser doesn't support .exr, but could be worth
     % an experiment if we can re-compile or find one that does
     %rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".exr"));
@@ -221,37 +218,37 @@ for ii = 1:numel(radianceChannels)
 end
 
 % More on big data test
-writePFM(bigData,bigDataFile);
+if glom
+    writePFM(glommedData,glommedDataFile);
+end
 
 %% Run the Denoiser binary
 
 denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, commandFlags, " "); % we need hdr for our scenes, -v 0 might help it run faster
 
-bigDataCommand = strcat(baseCmd, denoiseFlags, bigDataFile," -o ", bigDataFile);
-tic
-system(bigDataCommand);
-toc
-
 %% Build denoise command by iterating through our radiance channels
-for ii = 1:numel(radianceChannels)
+if glom
+    cmd = strcat(baseCmd, denoiseFlags, glommedDataFile," -o ", glommedDataFile);
+else
+    for ii = 1:numel(radianceChannels)
 
-    denoiseImagePath{ii} = rFileNames{ii};
+        denoiseImagePath{ii} = rFileNames{ii};
 
-    % Create a single command to denoise all of our .pfm files
-    % in one call to the System
-    % We denoise in place. Not sure if that is faster or slower?
-    if isequal(ii, 1)
-        cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    else
-        cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
+        % Create a single command to denoise all of our .pfm files
+        % in one call to the System
+        % We denoise in place. Not sure if that is faster or slower?
+        if isequal(ii, 1)
+            cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+        else
+            cmd = strcat(cmd , " && ", baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii} );
+        end
+
+        % IF we want to avoid using cd()
+        %cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
+        %[status, results] = system(cmd);
+        %if status, error(results); end
     end
-
-    % IF we want to avoid using cd()
-    %cmd = strcat(baseCmd, denoiseFlags, rFileNames{ii}," -o ", denoiseImagePath{ii});
-    %[status, results] = system(cmd);
-    %if status, error(results); end
 end
-
 % BATCH version:
 %Run the full command executable once assembled
 [status, results] = system(cmd);
