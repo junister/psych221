@@ -27,7 +27,6 @@ if ~piDockerExists, piDockerConfig; end
 %% Read the chess set recipe
 
 thisR = piRecipeCreate('chess set');
-thisR.set('render type',{'radiance','depth'});
 
 %% Set the render quality
 
@@ -181,99 +180,4 @@ xlabel('Wavelength (nm)')
 ylabel('Relative radiance');
 
 %% END
-
-%{
-
-%%  Edit the material list, adding White.
-
-thisR.set('skymap','sky-blue-sun.exr');
-
-thisR.show('materials');
-thisR = piMaterialsInsert(thisR,'names','diffuse-white');
-
-%{
-% Useful.
-nMaterials = thisR.get('n materials');
-matNames   = thisR.get('material','names');
-%}
-
-%%  Replace the materials
-
-oNames = thisR.get('object names');
-for ii=1:numel(oNames)
-    % The replace and other material commands need to be changed to match
-    % the ordering in more modern methods
-    thisR.set('asset',oNames{ii},'material name','diffuse-white');
-end
-
-% Confirm they materials have all been changed.
-thisR.show('objects');
-
-%% Render
-sceneW = piWRS(thisR,'render flag','hdr','name','reflectance');
-
-%% Divide the original photons by the diffuse white photons
-
-photons  = sceneGet(scene,'photons');    % Original
-photonsW = sceneGet(sceneW,'photons');   % White surfaces
-
-ref = photons ./ photonsW;               % Reflectance of original
-
-% Create the reflectance scene.
-% The specular component is not eliminated.
-sceneR = sceneSet(scene,'photons',ref);
-nWave  = sceneGet(sceneR,'n wave');
-sceneR = sceneSet(sceneR,'illuminant photons',ones(nWave,1));
-sceneR = sceneSet(sceneR,'name','Reflectance');
-sceneWindow(sceneR);
-%}
-%% END
-
-% We could try this with a point light next.
-%{
-%% Add a bright point light near the front where the camera is
-
-thisR.get('light print');
-thisR.set('light','all','delete');
-
-% First create the light
-pointLight = piLightCreate('point',...
-    'type','point',...
-    'cameracoordinate', true);
-
-% Then add it to our scene
-thisR.set('light',pointLight,'add');
-
-% For now only radiance. Because we can.
-thisR.set('render type',{'radiance'});
-
-piWRS(thisR,'name','Point light');
-
-%% Add a skymap
-
-[~, skyMap] = thisR.set('skymap','room.exr');
-
-thisR.get('light print');
-
-piWRS(thisR, 'name', 'Point light and skymap');
-
-%% Rotate the skymap
-
-thisR.set('light',skyMap.name,'rotate',[30 0 0]);
-
-piWRS(thisR, 'name','Rotated skymap');
-
-%% World orientation
-thisR.set('light', skyMap.name, 'world orientation', [30 0 30]);
-thisR.get('light', skyMap.name, 'world orientation')
-
-piWRS(thisR, 'name','No rotation skymap');
-%}
-%% END
-
-
-thisR.camera = piCameraCreate('omni','lensFile','dgauss.22deg.12.5mm.json');
-thisR.set('film resolution',[1024 1024]);
-piWRS(thisR);
-
 
