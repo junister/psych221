@@ -46,6 +46,7 @@ function status = piEXRDenoise(exrFileName,varargin)
 
 % Set to no error
 status = 0;
+tic; % start timer
 
 %% Parse
 p = inputParser;
@@ -191,9 +192,11 @@ if ~isempty(depthChannels)
 end
 
 % test for combining files
-rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
-glommedData = rZeros;
-glommedDataFile = fullfile(pp, strcat('glommedData', ".pfm"));
+if glom
+    rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
+    glommedData = rZeros;
+    glommedDataFile = fullfile(pp, strcat('glommedData', ".pfm"));
+end
 
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling of the channels
@@ -249,7 +252,7 @@ else
         %if status, error(results); end
     end
 end
-% BATCH version:
+
 %Run the full command executable once assembled
 [status, results] = system(cmd);
 if status
@@ -262,20 +265,32 @@ end
 %     We can/could read them all back in and write them to an
 %     output .exr file, unless there is something more clever
 
-for ii = 1:numel(radianceChannels)
+if glom
+    denoisedData = readPFM(glommedDataFile);
+    for ii = 1:numel(radianceChannels)
+        % need to calculate the columns needed
+        % we have 0s, then image, then 0s, etc
+        % so frame number + 1 essentially
+        frameCols = size(radianceData,2);
+        startCol = (ii + 1) * frameCols + 1;
+        endCol = (ii + 2) * frameCols;
+        denoisedImage(:, :, ii) = denoisedData(:, startCol:endCol, 1);
+    end
+else
+    for ii = 1:numel(radianceChannels)
 
-    % now read back the results
-    denoisedData = readPFM(denoiseImagePath{ii});
+        % now read back the results
+        denoisedData = readPFM(denoiseImagePath{ii});
 
-    % In this case each PFM is a channel, that we want to re-assemble into
-    % an output .exr file (I think)
-    % This gives us data, but we don't have a labeled  channel for it
-    % at this point
-    denoisedImage(:, :, ii) = denoisedData(:, :, 1);
+        % In this case each PFM is a channel, that we want to re-assemble into
+        % an output .exr file (I think)
+        % This gives us data, but we don't have a labeled  channel for it
+        % at this point
+        denoisedImage(:, :, ii) = denoisedData(:, :, 1);
 
+    end
 end
 
-outputFileName = exrFileName;
 completeImage = denoisedImage; % start with radiance channels
 completeChannels = radianceChannels;
 if ~isempty(albedoChannels)
