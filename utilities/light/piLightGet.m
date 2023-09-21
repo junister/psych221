@@ -170,9 +170,9 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "float conedeltaangle" [%.4f]', val);
         case 'twosided'
             if val
-                txt = sprintf(' "bool twosided" "%s"', 'true');
+                txt = sprintf(' "bool twosided" %s', 'true');
             else
-                txt = sprintf(' "bool twosided" "%s"', 'false');
+                txt = sprintf(' "bool twosided" %s', 'false');
             end
         case 'shape'
             txt = piShape2Text(val);

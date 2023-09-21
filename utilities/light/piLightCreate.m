@@ -101,6 +101,8 @@ p.addParameter('type','point',@(x)(ismember(x,validLights)));
 
 % We are unsure about the proper default
 p.addParameter('cameracoordinate',true,@islogical);
+p.addParameter('from',[0 0 0],@isvector);
+p.addParameter('to',[0 0 1],@isvector);
 
 p.addParameter('shape',[],@(x)(isstruct(x) || ischar(x))); % For area light
 p.addParameter('radius',30,@isnumeric);
@@ -140,10 +142,10 @@ switch ieParamFormat(lght.type)
         % direction.
 
         lght.from.type = 'point3';
-        lght.from.value = [0 0 0];
+        lght.from.value = p.Results.from;
 
         lght.to.type = 'point3';
-        lght.to.value = [0 0 1];
+        lght.to.value = p.Results.to;
 
     case 'goniometric'
         %%  We need a file name for goniometric light.
@@ -202,14 +204,12 @@ switch ieParamFormat(lght.type)
     case 'point'
         % Initializes a light at the origin.
         % Point sources emit in all directions, and have no 'to'.
-        %
+
+        % This probably overrides the from.  Not sure.
         lght.cameracoordinate = p.Results.cameracoordinate;
-
+        
         lght.from.type = 'point';
-        lght.from.value = [0 0 0];
-
-        % Can we have a from but no too?  That may be overriden or work out
-        % in the case of the camera coordinate command, but not otherwise.
+        lght.from.value = p.Results.from;
 
     case 'projection'
         % Assume we want camera orientation by default
@@ -232,10 +232,10 @@ switch ieParamFormat(lght.type)
 
         if ~lght.cameracoordinate
             lght.from.type = 'point3';
-            lght.from.value = [0 0 0];
+            lght.from.value = p.Results.from;
 
             lght.to.type = 'point3';
-            lght.to.value = [0 0 1];
+            lght.to.value = p.Results.to;
         end
 
         lght.coneangle.type = 'float';
@@ -308,21 +308,22 @@ end
 %   piLightCreate(lightName, 'type','spot','float coneangle',10)
 %
 % We parse the parameter values, such as 'rgb spd', so that we can
-% set the struct entries properly.  We do this by
+% set the struct entries properly.
 %
+
+% These are the key/val arguments to skip
+skip = {'type','shape','radius'};
 
 for ii=1:2:numel(varargin)
     thisKey = varargin{ii};
     thisVal = varargin{ii + 1};
 
-    if isequal(thisKey, 'type') || isequal(thisKey,'shape') || isequal(thisKey,'radius')
-        % Skip since we've taken care of 
-        % type, shape, and radius above.
+    if ismember(thisKey,skip)
         continue;
     end
 
-    % This is the new key value we are stting.  Generally, it is the part
-    % before the 'underscore'
+    % This is a new key value we are setting.  Generally, it is the
+    % part before the 'underscore'
     keyTypeName = strsplit(thisKey, '_');
 
     % But if  the first parameter is 'TYPE_NAME', we need the second value.

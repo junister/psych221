@@ -1159,7 +1159,7 @@ switch param
         %   param is 'light', which is why you are here
         %   val is lightName
         %   varargin{1} is the parameter(or action)
-        %   varargin{2} is the value, if needed.
+        %   varargin{2...} are additional values, if needed.
         %
         % Examples - After making light consistent with assets:
         %
@@ -1168,7 +1168,7 @@ switch param
         % thisR.set('light', lightName, 'delete');
         % thisR.set('light', 'all', 'delete');
         % thisR.set('light', lightName, 'rotate', [XROT, YROT, ZROT], ORDER)
-        % thisR.set('light', lghtName, 'translate', [XSFT, YSFT, ZSFT], FROMTO);
+        % thisR.set('light', lghtName,  'translate', [XSFT, YSFT, ZSFT], FROMTO);
         % thisR.set('light', lightname, 'specscale', val);
         % thisR.set('light','AreaLight','spread val',20);
         %
@@ -1280,29 +1280,31 @@ switch param
                 thisR.set('asset', lghtName, 'lght', lght);
                 return;
             case {'translate', 'translation'}
-                % thisR.set('light', lghtName, 'translate', [XSFT, YSFT, ZSFT], FROMTO)
-                % See piLightRotate
-                % [lgtIdx, lght] = piLightFind(thisR.lights, 'name', varargin{1});
+                % thisR.set('light', lghtName, 'translate', [xShift, yShift, zShift], FROMTO)
+                % See piLightTranslate
+                %
                 lghtAsset = thisR.get('light', lghtName);
                 lght = lghtAsset.lght{1};
                 
                 % If it has no from field, then the transformation will
-                % be applied to the branch node (for infinite and area light).
+                % be applied to the branch node (for infinite and area
+                % light). An area light has no from field, for
+                % example. 
                 if ~isfield(lght, 'from')
+                    % No 'from' field.  So translate with the branch.
                     thisR.set('asset', lghtName, 'translate', varargin{2});
                     return;
                 end
                 
+                % This light has a 'from' field.  Here is the shift.
                 if numel(varargin) == 2
                     xSft = varargin{2}(1);
                     ySft = varargin{2}(2);
-                    zSft = varargin{2}(3);
-                    
+                    zSft = varargin{2}(3);                    
                 end
-                if numel(varargin) == 3
-                    fromto = varargin{3};
-                else
-                    fromto = 'both';
+
+                if numel(varargin) == 3, fromto = varargin{3};
+                else,                    fromto = 'both';
                 end
                 up = thisR.get('up');
                 
@@ -1315,7 +1317,8 @@ switch param
                         lght = piLightSet(lght, 'to val', thisR.get('to'));
                     end
                 end
-                lght = piLightTranslate(lght, 'xshift', xSft,...
+                lght = piLightTranslate(lght, ...
+                    'xshift', xSft,...
                     'yshift', ySft,...
                     'zshift', zSft,...
                     'fromto', fromto,...

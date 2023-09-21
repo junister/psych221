@@ -9,42 +9,62 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Create a proper default for piLightCreate
-fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
-thisR    = piRead(fileName);
+thisR = piRecipeCreate('arealight');
+thisR.show('lights');
+piWRS(thisR,'render flag','hdr','name','original arealight');
 
-thisR.set('light','AreaLightRectangle_L','delete');
-thisR.set('light','AreaLightRectangle.001_L','delete');
-thisR.set('light','AreaLightRectangle.002_L','delete');
-thisR.set('light','AreaLightRectangle.003_L','delete');
-
-thisR.set('lights','all','delete');
+%%
+%{
+% These are the original lights
+ thisR.set('light','AreaLightRectangle_L','delete');
+ thisR.set('light','AreaLightRectangle.001_L','delete');
+ thisR.set('light','AreaLightRectangle.002_L','delete');
+ thisR.set('light','AreaLightRectangle.003_L','delete');
+%}
 
 %%  Put in a white light of our own.
 
+thisR.set('lights','all','delete');
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
 thisR.set('asset',wLight.name,'world rotation',[-90 0 0]);
-piWRS(thisR,'render flag','hdr');
+piWRS(thisR,'render flag','hdr','name','single white light');
 
-%% Load the Macbeth scene. It has no default light.
+%% Load the Macbeth scene. 
 
-thisR =  piRecipeDefault('scene name','MacBethChecker');
+thisR =  piRecipeCreate('MacBethChecker');
+piWRS(thisR,'render flag','rgb','name','original MCC');
 
+%% Clear the initial light and put in a new area light
+
+thisR.set('lights','all','delete');
+
+% Move away so we can see the light shape.
+thisR.set('object distance',6);
+
+% The default area light.  Hopefully it is pointing in the proper
+% direction!  That depends on the shape
 wLight    = piLightCreate('white','type','area');
 thisR.set('light',wLight,'add');
-thisR.set('light',wLight.name,'world rotation',[-90 0 0]);
-thisR.set('light',wLight.name,'translate',[0 4 0]);
 
-piWRS(thisR,'render flag','rgb');
+% Can we rotate the light to illuminate by different amounts?
+thisR.set('light',wLight.name,'world rotation',[-110 0 0]);
+thisR.set('light',wLight.name,'translate',[0 1.5 -0.5]);
+thisR.get('light',wLight.name,'world position')
 
-%%  When you reduce the spread, the total amount of light stays the same
-
-% So local regions actually get brighter.  But the fall off at the
+% When you reduce the spread, the total amount of light stays the same
+% Local regions actually get brighter.  But the fall off at the
 % edges is higher.
-thisR.set('light',wLight.name,'spread',15);
+thisR.set('light',wLight.name,'spread',45);
 piWRS(thisR,'render flag','rgb');
 
-% piLightCreate('list available types')
+%%
+thisR.set('light',wLight.name,'twosided',true);
+piWRS(thisR,'render flag','rgb');
+
+%%
+thisR.set('skymap','room.exr');
+piWRS(thisR,'render flag','rgb');
 
 %% Add a top down area light
 
@@ -89,12 +109,7 @@ newLight = piLightCreate(lightName,...
                         'cameracoordinate', true);
 thisR.set('light', newLight, 'add');
 
-% When we position a light, it is treated as an asset.
-% Perhaps we should duplicate the world position and other sets in the
-% 'light' subcategory.  Or at least catch it in the 'light' case and
-% send it to the 'asset' case.  Something more thoughtful.
-thisR.set('asset',lightName,'world position',[3.4544  0  0.15036]);
-piAssetGeometry(thisR);
+% piAssetGeometry(thisR);
 
 piWRS(thisR,'gamma',0.7);
 
