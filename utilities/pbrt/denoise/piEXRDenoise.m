@@ -190,6 +190,10 @@ if ~isempty(depthChannels)
     depthData = exrread(exrFileName, "Channels",depthChannels);
 end
 
+% test for combining files
+rZeros = zeros([size(radianceData,1), size(radianceData,2),3]);
+bigData = rZeros;
+
 % We now have all the data in the radianceData array with the channel being the
 % 3rd dimension, but with no labeling of the channels
 for ii = 1:numel(radianceChannels) 
@@ -200,6 +204,13 @@ for ii = 1:numel(radianceChannels)
     radianceData(:, :, ii, 3 ) = radianceData(:,:,ii,1);
     rFileNames{ii} = fullfile(pp, strcat(radianceChannels(ii), ".pfm"));
 
+    %% Test building one large file!
+
+    % Create a blank frame for padding
+
+    bigDataFile = fullfile(pp, strcat('bigData', ".pfm"));
+    bigData = [bigData squeeze(radianceData(:,:,ii,:)) rZeros];
+
     % Write out the resulting .pfm data as a grayscale for each radiance channel
     writePFM(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
     
@@ -209,9 +220,17 @@ for ii = 1:numel(radianceChannels)
     %exrwrite(squeeze(radianceData(:, :, ii, :)),rFileNames{ii}); % optional scale(?)
 end
 
+% More on big data test
+writePFM(bigData,bigDataFile);
+
 %% Run the Denoiser binary
 
 denoiseFlags = strcat(" -v 0 ", albedoFlag, normalFlag, commandFlags, " "); % we need hdr for our scenes, -v 0 might help it run faster
+
+bigDataCommand = strcat(baseCmd, denoiseFlags, bigDataFile," -o ", bigDataFile);
+tic
+system(bigDataCommand);
+toc
 
 %% Build denoise command by iterating through our radiance channels
 for ii = 1:numel(radianceChannels)
