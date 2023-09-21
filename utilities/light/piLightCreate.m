@@ -100,7 +100,7 @@ p.addRequired('lightName', @ischar);
 p.addParameter('type','point',@(x)(ismember(x,validLights)));
 
 % We are unsure about the proper default
-p.addParameter('cameracoordinate',true,@islogical);
+p.addParameter('cameracoordinate',true);
 p.addParameter('from',[0 0 0],@isvector);
 p.addParameter('to',[0 0 1],@isvector);
 
