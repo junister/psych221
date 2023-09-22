@@ -83,9 +83,16 @@ thisR.set('skymap', 'room.exr');
 
 scene = piWRS(thisR,'name',sprintf('Red in environment %s',sceneName),'render flag','hdr');
 
+%% White sphere
+
+thisR.set('asset', sphereID, 'material name', 'white');
+thisR.show('materials');
+
+piWRS(thisR, 'name', 'Sphere is white diffuse');
+
 %% Make the sphere glass
 
-piMaterialsInsert(thisR,'names',{'glass'});
+piMaterialsInsert(thisR,'names','glass');
 thisR.set('asset', sphereID, 'material name', 'glass');
 thisR.show('materials')
 

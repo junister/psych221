@@ -48,22 +48,20 @@ assetSphere = piAssetSearch(thisR,'object name','Sphere');
 piWRS(thisR,'name','diffuse','mean luminance', -1); % works
 
 %% Now try to get a reflective material working
-piMaterialsInsert(thisR,'name','mirror'); % fail
-piMaterialsInsert(thisR,'name','glass'); % fail
-piMaterialsInsert(thisR,'name','glass-f5'); % fail
-piMaterialsInsert(thisR,'name','metal-ag'); % fail
-piMaterialsInsert(thisR,'name','rough-metal'); % fail
-piMaterialsInsert(thisR,'name','chrome'); % fail
-piMaterialsInsert(thisR,'name','glossy-red'); % works
 
-% To use one of those materials into the recipe: 
-useMaterial = 'mirror';
-useMaterial = 'glossy-red';
-useMaterial = 'rough-metal';
+% useMaterial = 'mirror';    % fails
+useMaterial = 'glossy-red';  % This one works.
 
-% Assigning new surface to sphere
+% useMaterial = 'metal-ag';
+% useMaterial = 'chrome';
+% useMaterial = 'glass';
+
+% Insert material and assign it to the sphere
+piMaterialsInsert(thisR,'name',useMaterial);  
 thisR.set('asset', assetSphere, 'material name', useMaterial);
-piWRS(thisR,'name',useMaterial,'mean luminance', -1); % works
+
+% Render
+piWRS(thisR,'name',useMaterial,'mean luminance', -1); 
 
 %% Optionally add a skymap as a test
 % since it seems to light everything

@@ -19,16 +19,8 @@ function lightSourceText = piLightWrite(thisR, varargin)
 %   N/A
 %
 % See also
-%  piLightGet
+%  piWrite
 
-% Examples:
-%{
- thisR = piRecipeDefault;
- piLightGet(thisR);
- piWrite(thisR);
- scene = piRender(thisR);
- sceneWindow(scene);
-%}
 
 %% parse inputs
 varargin = ieParamFormat(varargin);
