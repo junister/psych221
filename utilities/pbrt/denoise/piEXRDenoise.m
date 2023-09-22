@@ -108,7 +108,11 @@ else
     % DEFINITELY HACKY, but adding the binary to the path doesn't seem to
     % work. Maybe add /local to the path for all the output files instead?
 
-    originalFolder = cd(oidn_pth);
+    if ~glom % then we need to have shorter binary paths
+        originalFolder = cd(oidn_pth);
+    else
+        originalFolder = pwd();
+    end
     baseCmd = fullfile(oidn_pth, oidn_Binary);
     % non-batch version -- about 20-25% slower
     %baseCmd = fullfile(oidn_pth, oidn_Binary);
