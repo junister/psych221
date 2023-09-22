@@ -311,6 +311,7 @@ end
 
 % Put the newly de-noised image back:
 try
+    delete(exrFileName); % we seem to need to delete this first on linux
     exrwrite(completeImage, exrFileName, "Channels",completeChannels);
 catch
     cd(originalFolder);
