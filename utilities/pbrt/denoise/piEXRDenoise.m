@@ -92,7 +92,7 @@ oidn_Binary = 'oidnDenoise';
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 elseif isunix
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.linux', 'bin');
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x86_64.linux', 'bin');
 elseif ispc
     oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
 end
@@ -109,7 +109,7 @@ else
     % work. Maybe add /local to the path for all the output files instead?
 
     originalFolder = cd(oidn_pth);
-    baseCmd = oidn_Binary;
+    baseCmd = fullfile(oidn_pth, oidn_Binary);
     % non-batch version -- about 20-25% slower
     %baseCmd = fullfile(oidn_pth, oidn_Binary);
 end
