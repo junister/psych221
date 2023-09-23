@@ -23,7 +23,9 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
-thisR = piRecipeCreate('flatSurfaceWhiteTexture');
+
+% Fix piRecipeCreate for this object.  (BW, 9/22/2023).
+thisR = piRecipeDefault('scene name','flatSurfaceWhiteTexture');
 
 %% Add a light and render
 
