@@ -455,10 +455,11 @@ switch param
         thisR.camera.lensfile.value = val;
         thisR.camera.lensfile.type = 'string';
 
-    case {'lensradius'}
-        % lens.set('lens radius',val (mm))
+    case {'pinholeradius','lensradius'}
+        % thisR.set('pinhole radius',val (mm))
         %
-        % Should only be set for perspective cameras
+        % Should only be set for perspective cameras.  Controls the
+        % size of the pinhole.  Introduces some blur if > 0.
         %
         if isequal(thisR.camera.subtype,'perspective')
             thisR.camera.lensradius.value = val;
