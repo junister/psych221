@@ -1,8 +1,41 @@
 %% Store small recipes as mat-files in the data/assets directory
 %
-% We save these small assets and test chart recipes in data/assets.
-% We insert these assets as test objects in other scenes
-% We save recipes for bigger scenes in the data/scenes directories.
+% We save certain small assets and specific test chart recipes in
+% data/assets. 
+%
+% The goal is to simplify inserting these objeccts into arbitrary scenes
+% easily. We save more complex scenes in the data/scenes directories.
+%
+% This script is used to produce the assets, which have
+%   * a recipe  (thisAsset.thisR)
+%   * a node where the recipe is merged into the root of the larger scene
+%      (thisAsset.mergeNode)
+%
+% In the asset recipe is
+%  the 'from' is [0,0,0]
+%  the 'to'   is [0 0 1];
+%
+% An asset has one object (asset) and no light.  To check the appearance of
+% the asset, you can run this code:
+%
+% To visualize an asset
+%{
+  thisA = piAssetLoad('Bunny');
+  thisR = thisA.thisR;
+  lgt = piLightCreate('point','type','point');  
+  thisR.set('light',lgt,'add');
+  thisR.set('light',lgt.name,'specscale',20);
+  piWRS(thisR,'render flag','rgb');
+%}
+%
+%  To merge an asset into an existing scene, use code like this
+% {
+   mccR = piRecipeCreate('macbeth checker');
+   thisA = piAssetLoad('Bunny');
+   mccR = piRecipeMerge(mccR,thisA.thisR,'nodename',thisA.mergeNode);
+%}
+% 
+% To check the appearance
 %
 % See also
 %   s_scenesRecipe

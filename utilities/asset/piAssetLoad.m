@@ -49,6 +49,11 @@ if ismember(ieParamFormat(fname),{'list','help'})
     return;
 end
 
+% Check the extension, make sure it is mat
+[p,n,e] = fileparts(fname);
+if isempty(e), e = '.mat'; end
+fname = fullfile(p,[n,e]);
+
 varargin = ieParamFormat(varargin);
 p = inputParser;
 p.addRequired('fname',@(x)(exist(x,'file')));
@@ -61,10 +66,7 @@ assetType = p.Results.assettype;
 
 %% We need a mat-file, preferably from the data/assets directory
 
-% Check the extension, make sure it is mat
-[p,n,e] = fileparts(fname);
-if isempty(e), e = '.mat'; end
-fname = fullfile(p,[n,e]);
+
 
 if isempty(p)
     % If the user specified a name, but not a path, look in the data/assets
@@ -129,9 +131,10 @@ end
 
 %% Adjust the input slot in the recipe for the local user
 
-%{
-% One theory is we just empty the outputfile.  This is an asset that will
-% be inserted into another recipe.
+% { 
+% One theory is we just empty the outputfile (see below).  This is an
+% asset that will be inserted into another recipe. Another theory is we set
+% it so that we could run piWRS(asset.thisR)
 [thePath,n,e] = fileparts(asset.thisR.get('output file'));
 
 % Find the last element of the path
@@ -143,6 +146,8 @@ outFile=fullfile(piRootPath,'local',theDir,[n,e]);
 
 asset.thisR.set('output file',outFile);
 %}
-asset.thisR.set('output file','');
+
+% If you comment above, then uncomment this
+% asset.thisR.set('output file','');
 
 end

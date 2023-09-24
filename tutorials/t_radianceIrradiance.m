@@ -1,17 +1,19 @@
 % t_radianceIrradiance - Method for determining Irradiance from
 %                        measured radiance off the surface
 %
+% We want to put metal spheres into the scene.
+%    
 % See also
 %   t_materials.m, tls_materials.mlx, t_assets, t_piIntro*,
 %   piMaterialCreate.m
 %
 
-
 %% Initialize
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Create recipe
+%% Create recipe of the sphere with a spot light
+
 thisR = piRecipeCreate('Sphere');
 %thisR = piRecipeCreate('flatsurface');
 
@@ -44,8 +46,85 @@ assetSphere = piAssetSearch(thisR,'object name','Sphere');
 % piAssetTranslate(thisR,assetSphere,[100 0 00]);
 % piAssetScale(thisR,assetSphere,[.5 .5 .5]);
 
-% Baseline -- single diffuse sphere
+%% Baseline -- single diffuse sphere
 piWRS(thisR,'name','diffuse','mean luminance', -1); % works
+
+%% Put the MCC behind the sphere.
+
+% Then when we turn the sphere into glass, we should be able to see the MCC
+
+% This is just a texture map of the MCC, not the full graphics model.
+bunny   = piAssetLoad('bunny');
+mergedR = piRecipeMerge(thisR,bunny.thisR,'node name',bunny.mergeNode,'object instance', false);
+
+%%
+%{
+bunnyID = piAssetSearch(mergedR,'object name','Bunny');
+lgt = piLightCreate('point','type','point');
+bunny.thisR.set('lights',lgt,'add');
+piWRS(bunny.thisR);
+%}
+
+% piAssetGeometry(bunny.thisR);
+
+%%
+
+% Scale the macbeth to make it thin enough and position behind the sphere
+bunnyID = piAssetSearch(mergedR,'object name','Bunny');
+thisR.set('assets',bunnyID,'scale',[15 15 15]);
+mergedR.get('assets',bunnyID,'world position');
+mergedR.set('assets',bunnyID,'world position',[0 -2 3]);
+mergedR.get('assets',bunnyID,'world position')
+mergedR.get('assets',bunnyID,'size')
+
+sphereID = piAssetSearch(mergedR,'object name','Sphere');
+mergedR.set('assets',sphereID,'scale',[.2 .2 .2]);
+
+thisR.show('objects');
+
+%%
+piWRS(mergedR,'name','sphere-bunny');
+
+% thisR.set('skymap','room.exr');
+% piWRS(mergedR,'name','sphere-macbeth');
+
+% useMaterial = 'metal-ag';
+% useMaterial = 'chrome';
+% useMaterial = 'glass';
+% useMaterial = 'glossy-red';  % This one works.
+% 
+% % Insert material and assign it to the sphere
+% piMaterialsInsert(mergedR,'name',useMaterial);  
+% mergedR.set('asset', sphereID, 'material name', useMaterial);
+% piWRS(mergedR,'name','sphere-macbeth');
+
+useMaterial = 'metal-ag';
+piMaterialsInsert(mergedR,'name',useMaterial);  
+thisR.set('asset', sphereID, 'material name', useMaterial);
+piWRS(mergedR,'name','sphere-macbeth');
+
+mergedR.set('asset',sphereID,'translate',[0.5 0 0]);
+piWRS(mergedR,'name','sphere-macbeth');
+
+mergedR.set('skymap','room.exr');
+piWRS(mergedR,'name','sphere-macbeth');
+
+mergedR   = piMaterialsInsert(mergedR,'names','checkerboard');
+mergedR.set('asset',bunnyID,'material name','checkerboard');
+piWRS(mergedR,'name','sphere-macbeth');
+
+
+
+% thisR.set('outputfile',something good);
+%
+% piWRS(macbeth.thisR);
+lensname = 'dgauss.22deg.12.5mm.json';
+lensname = 'wide.77deg.4.38mm.json';
+c = piCameraCreate('omni','lens file',lensname);
+mergedR.set('camera',c);
+mergedR.set('film diagonal',10,'mm');
+
+piWRS(mergedR,'name','sphere-macbeth');
 
 %% Now try to get a reflective material working
 

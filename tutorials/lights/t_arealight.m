@@ -1,4 +1,4 @@
- %% Explore light creation with new area light parameters
+%% Explore light creation with new area light parameters
 %
 % The area lights were implemented by Zhenyi to help us accurately simulate
 % the headlights in night time driving scenes.
