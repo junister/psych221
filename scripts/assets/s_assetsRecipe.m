@@ -60,30 +60,60 @@ thisR.set('from',[0 0 0]);
 thisR.set('to',  [0 0 1]);
 
 % There is just one object.
-oNames = thisR.get('object names no id');
+bunnyID = piAssetSearch(thisR,'object name','Bunny');
+% oNames  = thisR.get('object names no id');
 
 % The default Bunny has two geometry branch nodes with the same name.  We
 % delete one of them.
-id = thisR.get('asset parent id',oNames{1});
-thisR.set('asset',3,'delete');
+% parentid = thisR.get('asset parent id',oNames{1});
+parentid = thisR.get('asset parent id',bunnyID);
 
-% Place the bunny at [0,0,1]
-thisR.set('asset', oNames{1}, 'world position', [0 0 1]);
+% This changes the bunnyID
+thisR.set('asset',parentid,'delete');
+
+% So find it again
+bunnyID = piAssetSearch(thisR,'object name','Bunny');
+
+% Position and size
+thisR.set('asset', bunnyID, 'world position', [0 0 1]);
+thisR.set('asset', bunnyID,'scale',5);
+
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 mergeNode = 'Bunny_B';
 save(oFile,'mergeNode','-append');
 
-thisR.show('materials');
+thisR.show('objects');
 
+%{
+lgt = piLightCreate('point','type','point');
+thisR.set('light',lgt,'add');
+piWRS(thisR);
+%}
 %% A head - maybe we should scale this to a smaller size
 
 thisR = piRecipeDefault('scene name','head');
 thisR.set('lights','all','delete');
-% Head has a world position of 000
+
 n = thisR.get('asset names');
+thisR.set('asset',n{3},'name','head_O');
 thisR.set('asset',n{2},'name','head_B');
 
+% Head has a world position of 001
+headID = piAssetSearch(thisR,'object name','head');
+% thisR.set('asset',headID,'world position',[0 0 0]);
+% thisR.set('asset',headID,'rotate',[0 180 0]);
+thisR.set('asset',headID,'world position',[0 0 1]);
+
+thisR.set('from',[0 0 5]);
+thisR.set('to',[0 0 1]);
+
+%{
+lgt = piLightCreate('point','type','point');
+thisR.set('light',lgt,'add');
+piWRS(thisR);
+%}
 oFile = thisR.save(fullfile(assetDir,'head.mat'));
+
 mergeNode = 'head_B';
 save(oFile,'mergeNode','-append');
 thisR.show('materials');
