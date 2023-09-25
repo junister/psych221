@@ -1,4 +1,4 @@
-%% Store small recipes as mat-files in the data/assets directory
+%% Store small asset recipes as mat-files in the data/assets directory
 %
 % We save certain small assets and specific test chart recipes in
 % data/assets. 
@@ -22,21 +22,23 @@
 %{
   thisA = piAssetLoad('Bunny');
   thisR = thisA.thisR;
-  lgt = piLightCreate('point','type','point');  
+  lgt = piLightCreate('point','type','point'); 
+  thisR.set('object distance',0.5);
   thisR.set('light',lgt,'add');
-  thisR.set('light',lgt.name,'specscale',20);
   piWRS(thisR,'render flag','rgb');
 %}
 %
 %  To merge an asset into an existing scene, use code like this
-% {
+%{
    mccR = piRecipeCreate('macbeth checker');
    thisA = piAssetLoad('Bunny');
-   mccR = piRecipeMerge(mccR,thisA.thisR,'nodename',thisA.mergeNode);
+   mccR = piRecipeMerge(mccR,thisA.thisR);
+   bunny = piAssetSearch(mccR,'object name','Bunny');
+   mccR.set('asset',bunny,'world position',[0 0 -1]);
+   mccR.set('asset',bunny,'scale',6);
+   piWRS(mccR,'render flag','rgb');
 %}
 % 
-% To check the appearance
-%
 % See also
 %   s_scenesRecipe
 %
@@ -48,20 +50,24 @@ if ~piDockerExists, piDockerConfig; end
 
 assetDir = piDirGet('assets');
 
-%% A few more scenes as assets
+%% The Stanford bunny
+
 sceneName = 'bunny';
 thisR = piRecipeDefault('scene name', sceneName);
 
+% Camera at origin.  Look at 0,0,1.
 thisR.set('from',[0 0 0]);
-thisR.set('to',[0 0 1]);
+thisR.set('to',  [0 0 1]);
 
+% There is just one object.
 oNames = thisR.get('object names no id');
 
-% The bunny has two geometry branch nodes with the same name.  we have to
+% The default Bunny has two geometry branch nodes with the same name.  We
 % delete one of them.
 id = thisR.get('asset parent id',oNames{1});
 thisR.set('asset',3,'delete');
 
+% Place the bunny at [0,0,1]
 thisR.set('asset', oNames{1}, 'world position', [0 0 1]);
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 mergeNode = 'Bunny_B';
