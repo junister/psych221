@@ -23,19 +23,20 @@
   thisA = piAssetLoad('Bunny');
   thisR = thisA.thisR;
   lgt = piLightCreate('point','type','point'); 
-  thisR.set('object distance',0.5);
+  thisR.set('object distance',1);
   thisR.set('light',lgt,'add');
   piWRS(thisR,'render flag','rgb');
 %}
 %
-%  To merge an asset into an existing scene, use code like this
+% To merge an asset into an existing scene, use code like this
+% Fix the code below for the ordering of translate and scale. 
 %{
    mccR = piRecipeCreate('macbeth checker');
    thisA = piAssetLoad('Bunny');
    mccR = piRecipeMerge(mccR,thisA.thisR);
    bunny = piAssetSearch(mccR,'object name','Bunny');
-   mccR.set('asset',bunny,'world position',[0 0 -1]);
-   mccR.set('asset',bunny,'scale',6);
+   mccR.set('asset',bunny,'world position',[0 0 -2]);
+   mccR.set('asset',bunny,'scale',4);
    piWRS(mccR,'render flag','rgb');
 %}
 % 
