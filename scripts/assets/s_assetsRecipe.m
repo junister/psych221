@@ -159,14 +159,15 @@ thisR.show('materials');
 % Camera at 000 to 001 sphere at 001
 %
 sceneName = 'sphere';
-thisR = piRecipeDefault('scene name', sceneName);
-thisR.set('asset','Camera_B','delete');
-thisR.set('asset',2,'delete');
-piAssetSet(thisR, 'Sphere_B','translate',[0 0 1]);
-thisR.set('from',[0 0 0]);
-thisR.set('to',[0 0 1]);
+thisR = piRecipeCreate(sceneName);
+thisR.set('lights','all','delete');
 mergeNode = 'Sphere_B';
-thisR.show('textures');   % The filename should be textures/mumble.png
+
+%{
+lgt = piLightCreate('point','type','point');
+thisR.set('light',lgt,'add');
+piWRS(thisR);
+%}
 
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');
@@ -187,6 +188,12 @@ thisR.show('textures');   % The filename should be textures/mumble.png
 
 % EIA Chart
 [thisR, mergeNode] = piChartCreate('EIA');
+
+%{
+lgt = piLightCreate('point','type','point');
+thisR.set('light',lgt,'add');
+piWRS(thisR);
+%}
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
 thisR.show('textures');

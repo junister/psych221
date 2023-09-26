@@ -209,6 +209,10 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
         idx = piAssetSearch(thisR,'object name','Cube');
         thisR.set('to',thisR.get('asset',idx,'world position'));
+        thisR.set('asset',idx,'scale',1/600);
+        thisR.set('from',[0 0 1]);
+        thisR.set('to',[0 0 0]);
+        thisR.set('asset',idx,'world position',thisR.get('to'));
         
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);
