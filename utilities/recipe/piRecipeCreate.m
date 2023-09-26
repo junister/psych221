@@ -51,7 +51,7 @@ function thisR = piRecipeCreate(rName,varargin)
 
 %% Input parsing
 
-validRecipes = {'macbethchecker','chessset',...
+validRecipes = {'macbethchecker','chessset','head',...
     'cornell_box','cornellboxreference',...
     'simplescene','arealight','bunny','car','checkerboard', ...
     'lettersatdepth','materialball','materialball_cloth',...
@@ -83,6 +83,7 @@ end
   rList = thisR.list;
     {'ChessSet'               } - OK
     {'CornellBoxReference'    } - Requires HDR because light is bright
+    {'head'                   } - Working on it
     {'MacBethChecker'         } - Needs a light
     {'SimpleScene'            } - Renders
     {'arealight'              } - Broken
@@ -160,21 +161,50 @@ switch ieParamFormat(rName)
     case 'arealight'
         thisR = piRecipeDefault('scene name',rName);
     case 'bunny'
+        % The bottom of the bunny is at 0,0,0
+        % We see it from the side.
         thisR = piRecipeDefault('scene name',rName);
-        bIDX = piAssetSearch(thisR,'object name','bunny');
-        bPos = thisR.get('asset',bIDX,'world position');
-        thisR.set('to',bPos);
-        thisR.set('object distance',0.5);
+        bunnyID = piAssetSearch(thisR,'object name','bunny');
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+        thisR.set('up',[0 1 0]);
+        thisR.set('asset',bunnyID,'scale',2);  % I don't think the size is right.
+        thisR.set('asset',bunnyID,'world position',[0 0 1]);        
+        thisR.show('objects');
 
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
-        lgt = piLightCreate('new distant',...
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
+            'spd spectrum', lightSpectrum);
         thisR.set('light', lgt, 'add');
-        warning('Single, isolated bunny.  Might use piAssetInsert')
+    case 'head'
+        % The face is positioned towards the camera.
+        % The 'to' is the upper right of the head, it seems.s
+        thisR = piRecipeDefault('scene name','head');
+        thisR.set('lights','all','delete');
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+        thisR.set('up',[0 1 0]);
+        thisR.set('node',2,'name','head_B');
+        thisR.set('node',3,'name','head_O');        
+        id = piAssetSearch(thisR,'object name','head');
+        thisR.set('asset',id,'world position',[0 0 1]);
+        thisR.set('asset',id,'rotate',[0 180 0]);
+        thisR.set('asset',id,'scale',0.5);
+
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum);
+        thisR.set('light', lgt, 'add');
+        % piWRS(thisR);
+
     case 'car'
         % The materials do not look right.  Rendering needs help.
         thisR = piRecipeDefault('scene name',rName);

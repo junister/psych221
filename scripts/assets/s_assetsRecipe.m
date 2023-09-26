@@ -11,9 +11,11 @@
 %   * a node where the recipe is merged into the root of the larger scene
 %      (thisAsset.mergeNode)
 %
-% In the asset recipe is
-%  the 'from' is [0,0,0]
-%  the 'to'   is [0 0 1];
+% In the asset recipe is the
+%
+%  'from' is [0,0,0]
+%  'to'   is [0 0 1];
+%  'up'   is [0 1 0];
 %
 % An asset has one object (asset) and no light.  To check the appearance of
 % the asset, you can run this code:
@@ -54,36 +56,20 @@ assetDir = piDirGet('assets');
 %% The Stanford bunny
 
 sceneName = 'bunny';
-thisR = piRecipeDefault('scene name', sceneName);
+thisR = piRecipeCreate(sceneName);
+% piWRS(thisR);
 
-% Camera at origin.  Look at 0,0,1.
-thisR.set('from',[0 0 0]);
-thisR.set('to',  [0 0 1]);
+thisR.set('lights','all','delete');
+thisR.set('node',2,'delete');
+thisR.show;
+thisR.show('objects');
 
 % There is just one object.
 bunnyID = piAssetSearch(thisR,'object name','Bunny');
-% oNames  = thisR.get('object names no id');
-
-% The default Bunny has two geometry branch nodes with the same name.  We
-% delete one of them.
-% parentid = thisR.get('asset parent id',oNames{1});
-parentid = thisR.get('asset parent id',bunnyID);
-
-% This changes the bunnyID
-thisR.set('asset',parentid,'delete');
-
-% So find it again
-bunnyID = piAssetSearch(thisR,'object name','Bunny');
-
-% Position and size
-thisR.set('asset', bunnyID, 'world position', [0 0 1]);
-thisR.set('asset', bunnyID,'scale',5);
 
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 mergeNode = 'Bunny_B';
 save(oFile,'mergeNode','-append');
-
-thisR.show('objects');
 
 %{
 lgt = piLightCreate('point','type','point');
@@ -92,32 +78,13 @@ piWRS(thisR);
 %}
 %% A head - maybe we should scale this to a smaller size
 
-thisR = piRecipeDefault('scene name','head');
+thisR = piRecipeCreate('head');
 thisR.set('lights','all','delete');
-
-n = thisR.get('asset names');
-thisR.set('asset',n{3},'name','head_O');
-thisR.set('asset',n{2},'name','head_B');
-
-% Head has a world position of 001
-headID = piAssetSearch(thisR,'object name','head');
-% thisR.set('asset',headID,'world position',[0 0 0]);
-% thisR.set('asset',headID,'rotate',[0 180 0]);
-thisR.set('asset',headID,'world position',[0 0 1]);
-
-thisR.set('from',[0 0 5]);
-thisR.set('to',[0 0 1]);
-
-%{
-lgt = piLightCreate('point','type','point');
-thisR.set('light',lgt,'add');
-piWRS(thisR);
-%}
 oFile = thisR.save(fullfile(assetDir,'head.mat'));
 
 mergeNode = 'head_B';
 save(oFile,'mergeNode','-append');
-thisR.show('materials');
+% thisR.show('materials');
 
 %%  Coordinate axes at 000
 
@@ -130,26 +97,14 @@ geometryNode = piAssetCreate('type','branch');
 geometryNode.name = 'mergeNode_B';
 thisR.set('asset','root_B','add',geometryNode);
 
-% Merge the branches above the object. Then attach each object to the
-% merge node.
-% 
-%{
-% No longer runs (BW).  Commenting out
-for oo=1:numel(oNames)
-    thisR.set('asset',oNames{oo},'merge branches');
-    % I do not think this line should be here.  This is managed inside
-    % of the merge branches set, above. (BW).  Even so, I left it for
-    % now.
-    thisR.set('asset',strrep(oNames{oo},'_O','_B'),'parent',geometryNode.name);
-end
-%}
-
 % Move the axes by adjusting the mergeNode_B.
 thisR.set('asset','mergeNode_B','translate',[0 0 1]);
 
 % piWRS(thisR);
 mergeNode = geometryNode.name;
-thisR.show('textures');   % The filename should be textures/mumble.png
+% thisR.show('textures');   % The filename should be textures/mumble.png
+% piAssetShow(thisR);
+
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');
 thisR.show('materials');
@@ -162,12 +117,7 @@ sceneName = 'sphere';
 thisR = piRecipeCreate(sceneName);
 thisR.set('lights','all','delete');
 mergeNode = 'Sphere_B';
-
-%{
-lgt = piLightCreate('point','type','point');
-thisR.set('light',lgt,'add');
-piWRS(thisR);
-%}
+% piAssetShow(thisR);
 
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
 save(oFile,'mergeNode','-append');
@@ -179,59 +129,53 @@ save(oFile,'mergeNode','-append');
 %   piRecipeMerge(thisR,chartR,'node name',mergeNode);
 %
 
-%{
-thisR.show('textures'); 
-names = thisR.get('texture','names');
-thisR.set('texture',names{1},'filename','textures/monochromeFace.png');
-thisR.show('textures');   % The filename should be textures/mumble.png
-%}
-
 % EIA Chart
 [thisR, mergeNode] = piChartCreate('EIA');
-
-%{
-lgt = piLightCreate('point','type','point');
-thisR.set('object distance',3);
-thisR.set('light',lgt,'add');
-piWRS(thisR);
-%}
+% piAssetShow(thisR,'object distance',3);
 oFile = thisR.save(fullfile(assetDir,'EIA.mat'));
 save(oFile,'mergeNode','-append');
-thisR.show('textures');
-%{
- lgt = piLightCreate('point light 1');
- thisR.set('light',lgt,'add');
- piWRS(thisR);
-%}
 
-% Ringsrays
+%% Ringsrays
 [thisR, mergeNode]= piChartCreate('ringsrays');
+% piAssetShow(thisR,'object distance',3);
+
 oFile = thisR.save(fullfile(assetDir,'ringsrays.mat'));
 save(oFile,'mergeNode','-append');
 
-% Slanted bar
+%% Slanted bar
 [thisR, mergeNode] = piChartCreate('slanted bar');
+% piAssetShow(thisR,'object distance',3);
+
 oFile = thisR.save(fullfile(assetDir,'slantedbar.mat'));
 save(oFile,'mergeNode','-append');
 
-% Grid lines
+%% Grid lines
 [thisR, mergeNode] = piChartCreate('grid lines');
+% piAssetShow(thisR,'object distance',3);
+
 oFile = thisR.save(fullfile(assetDir,'gridlines.mat'));
 save(oFile,'mergeNode','-append');
 
-% face
+%% face
 [thisR, mergeNode] = piChartCreate('face');
+% piAssetShow(thisR,'object distance',3);
+
 oFile = thisR.save(fullfile(assetDir,'face.mat'));
 save(oFile,'mergeNode','-append');
 
-% Macbeth
+%% Macbeth not sure why this is not working just now
 [thisR, mergeNode] = piChartCreate('macbeth');
+% piAssetShow(thisR,'object distance',3);
+
 oFile = thisR.save(fullfile(assetDir,'macbeth.mat'));
 save(oFile,'mergeNode','-append');
 
-% point array
+%% point array
 [thisR, mergeNode] = piChartCreate('pointarray_512_64');
 oFile = thisR.save(fullfile(assetDir,'pointarray512.mat'));
 save(oFile,'mergeNode','-append');
 
 %% END
+
+
+

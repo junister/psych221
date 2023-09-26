@@ -138,9 +138,6 @@ switch ieParamFormat(chartName)
         textureName = sprintf('macbeth-%d',uniqueKey);
         imgFile = 'macbeth.png';
         
-        % Make the surface shape match the MCC shape
-        piAssetSet(chartR, geometryNode.name, 'scale',wscale.*[1 4/6 1]);
-
     case 'face'
         textureName = sprintf('face-%d',uniqueKey);
         imgFile = 'monochromeFace.png';
@@ -183,6 +180,13 @@ chartR.set('asset',oName,'material name',surfaceMaterial.name);
 parent = chartR.get('asset parent id',oName); 
 gName = sprintf('%s_B',textureName);
 chartR.set('asset',parent,'name',gName);
+
+switch oName(1:7)
+    case 'macbeth'
+        % Adjust aspect ratio x,y,z
+        chartR.set('asset',cubeID,'scale',[1 0.67 1]);
+    otherwise
+end
 
 %% Copy the texture file to the output dir
 

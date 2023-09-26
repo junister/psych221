@@ -1431,6 +1431,7 @@ switch param
             case {'rotate', 'rotation'}
                 % Figures out the rotation from the angles in val and sets
                 % the rotation matrix
+                % val 
                 out = piAssetRotate(thisR, assetName, val);
             case {'rotationmatrix'}
                 % Just set the rotation matrix
