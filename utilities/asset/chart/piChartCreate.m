@@ -50,36 +50,36 @@ piWRS(thisChart);
 
 % This can get simpler once we get piWrite/piRead working with ZLY
 
-chartR = piRecipeDefault('scene name','flatsurface');
+chartR = piRecipeCreate('flatsurface');
 % piWRS(chartR);
 
-chartR.set('asset','Camera_B','delete');
-chartR.set('lights','all','delete');
-
-cubeID = piAssetSearch(chartR,'object name','Cube');
-
-% Delete all the branch nodes.  Nothing but root and the object.
-id = chartR.get('asset',cubeID,'path to root');
-fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-for ii=3:numel(id)
-    chartR.set('asset',id(ii),'delete');
-end
-cubeID = piAssetSearch(chartR,'object name','Cube');
-
-% chartR.show;
-
-% Aim the camera at the object and bring it closer.
-chartR.set('from',[0,0,0]);
-chartR.set('to',  [0,0,1]);
-chartR.set('up',  [0,1,0]);
-
-% We place the surface assuming the camera is at 0,0,0 and pointed in the
-% positive direction.  So we put the object 1 meter away from the camera.
-chartR.set('asset',cubeID,'world position',[0 0 1]);
-
-% We scale the surface size to be 1,1,0.1 meter.
-sz = chartR.get('asset',cubeID,'size');
-chartR.set('asset',cubeID,'scale', (1 ./ sz).*[1 1 0.1]);
+% chartR.set('asset','Camera_B','delete');
+% chartR.set('lights','all','delete');
+% 
+% cubeID = piAssetSearch(chartR,'object name','Cube');
+% 
+% % Delete all the branch nodes.  Nothing but root and the object.
+% id = chartR.get('asset',cubeID,'path to root');
+% fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+% for ii=3:numel(id)
+%     chartR.set('asset',id(ii),'delete');
+% end
+% cubeID = piAssetSearch(chartR,'object name','Cube');
+% 
+% % chartR.show;
+% 
+% % Aim the camera at the object and bring it closer.
+% chartR.set('from',[0,0,0]);
+% chartR.set('to',  [0,0,1]);
+% chartR.set('up',  [0,1,0]);
+% 
+% % We place the surface assuming the camera is at 0,0,0 and pointed in the
+% % positive direction.  So we put the object 1 meter away from the camera.
+% chartR.set('asset',cubeID,'world position',[0 0 1]);
+% 
+% % We scale the surface size to be 1,1,0.1 meter.
+% sz = chartR.get('asset',cubeID,'size');
+% chartR.set('asset',cubeID,'scale', (1 ./ sz).*[1 1 0.1]);
 
 % chartR.show('objects');
 
@@ -173,6 +173,7 @@ chartR.set('material', surfaceMaterial.name, 'reflectance val', textureName);
 % chartR.show('objects');
 
 %% Name the object and geometry node
+cubeID = piAssetSearch(chartR,'object name','Cube');
 oName = sprintf('%s_O',textureName);
 chartR.set('asset',cubeID,'name',oName);
 

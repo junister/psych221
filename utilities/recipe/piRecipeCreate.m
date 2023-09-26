@@ -206,13 +206,36 @@ switch ieParamFormat(rName)
         thisR.set('to',thisR.get('asset',idx,'world position'));
         warning('Not visible in HDR mode.')
     case 'flatsurface'
+        % Some issues here.  Check piChartCreate for how to adjust.
         thisR = piRecipeDefault('scene name',rName);
-        idx = piAssetSearch(thisR,'object name','Cube');
-        thisR.set('to',thisR.get('asset',idx,'world position'));
-        thisR.set('asset',idx,'scale',1/600);
-        thisR.set('from',[0 0 1]);
-        thisR.set('to',[0 0 0]);
-        thisR.set('asset',idx,'world position',thisR.get('to'));
+        % piWRS(thisR);
+
+        thisR.set('asset','Camera_B','delete');
+        thisR.set('lights','all','delete');
+        cubeID = piAssetSearch(thisR,'object name','Cube');
+
+        % Delete all the branch nodes.  Nothing but root and the object.
+        id = thisR.get('asset',cubeID,'path to root');
+        fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+        for ii=3:numel(id)
+            thisR.set('asset',id(ii),'delete');
+        end
+        cubeID = piAssetSearch(thisR,'object name','Cube');
+
+        % thisR.show;
+
+        % Aim the camera at the object and bring it closer.
+        thisR.set('from',[0,0,0]);
+        thisR.set('to',  [0,0,1]);
+        thisR.set('up',  [0,1,0]);
+
+        % We place the surface assuming the camera is at 0,0,0 and pointed in the
+        % positive direction.  So we put the object 1 meter away from the camera.
+        thisR.set('asset',cubeID,'world position',[0 0 1]);
+
+        % We scale the surface size to be 1,1,0.1 meter.
+        sz = thisR.get('asset',cubeID,'size');
+        thisR.set('asset',cubeID,'scale', (1 ./ sz).*[1 1 0.1]);
         
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);

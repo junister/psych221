@@ -191,6 +191,7 @@ thisR.show('textures');   % The filename should be textures/mumble.png
 
 %{
 lgt = piLightCreate('point','type','point');
+thisR.set('object distance',3);
 thisR.set('light',lgt,'add');
 piWRS(thisR);
 %}
