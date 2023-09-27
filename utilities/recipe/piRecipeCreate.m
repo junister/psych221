@@ -224,17 +224,24 @@ switch ieParamFormat(rName)
         thisR = piRecipeDefault('scene name',rName);
     case 'coordinate'
         thisR = piRecipeDefault('scene name',rName);
+
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
-        lgt = piLightCreate('new distant',...
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
-        thisR.set('light', lgt, 'add');
+            'spd spectrum', lightSpectrum);
+        thisR.set('lights',lgt,'add');
+
+        % thisR.set('from',[0 0 0]);
+        % thisR.set('to',[0 0 1]);
+        % thisR.set('up',[0 1 0]);
+
         idx = piAssetSearch(thisR,'object name','origin');
         thisR.set('to',thisR.get('asset',idx,'world position'));
         warning('Not visible in HDR mode.')
+
     case 'flatsurface'
         % Some issues here.  Check piChartCreate for how to adjust.
         thisR = piRecipeDefault('scene name',rName);
