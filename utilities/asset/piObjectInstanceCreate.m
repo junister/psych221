@@ -20,7 +20,7 @@ function [thisR, instanceBranchName, OBJsubtreeNew] = piObjectInstanceCreate(thi
 %               integer index or an asset (object) name
 %
 % Optional key/val
-%   position  - 1x3 position (World position)?
+%   position  - 1x3 position (translation re: original, should rename)
 %   rotation  - 3x4 rotation
 %   scale     - 1x3 scale
 %   motion    - motion struct which contains animated position and rotation

@@ -1907,12 +1907,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                             theShape = thisAsset.shape;
                         end
 
-                        % Not sure how an object has no shape, but I have
-                        % seen it in bathroom-contemporary. Sometimes we
-                        % have the points and sometimes only a pointer to a
-                        % PLY file.
                         val = zeros(1,3);
                         if isempty(theShape)
+                            % Sometimes we have the points and
+                            % sometimes only a pointer to a PLY file.
+                            % Sometimes the shape is a string?  Like
+                            % 'Sphere'?
                             warning('Object %d has no shape.',id);
                         elseif ~isempty(theShape.point3p)
                             pts = theShape.point3p;
@@ -1923,20 +1923,22 @@ switch ieParamFormat(param)  % lower case, no spaces
                             % Read a shape file.  The shape file needs to
                             % be in the output directory. (BW).
                             [~,~,ext] = fileparts(theShape.filename);
-                            if isequal(ext,'.ply')
-                                plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
-                                if exist(plyFile,'file')
-                                    tmp = pcread(plyFile);
-                                    val(1) = tmp.XLimits(2) - tmp.XLimits(1);
-                                    val(2) = tmp.YLimits(2) - tmp.YLimits(1);
-                                    val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
-                                else
-                                    % warning('Size: No shape file in output dir.')
-                                end
+                            if isequal(ext,'.ply')                                
+                                msh = readSurfaceMesh(theShape.filename); 
+                                val = range(msh.Vertices);
+                                % I do not understand how the scale is
+                                % working yet.  I think we need to
+                                % scale.  But t_assetsCopy is better
+                                % without it. Confused (BW).  It might
+                                % be this is millimeters for many
+                                % objects.
+                                val = val.*thisScale;
                             elseif isequal(ext,'.pbrt')
-                                % disp('PBRT size not yet implemented.')
+                                fprintf('%s - size from PBRT not yet implemented.\n',theShape.filename)
+                                % We have some cases, like for chess set.
                             end
                         end
+                        % I suppose?
                     else
                         warning('Only objects have a size');
                     end
