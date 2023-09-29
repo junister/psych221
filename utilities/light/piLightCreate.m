@@ -4,6 +4,14 @@ function lght = piLightCreate(lightName, varargin)
 % Synopsis:
 %   lght = piLightCreate(lightName,varargin)
 %
+% Brief
+%   Create a light struct.  The various types of lights have different
+%   slots in their struct.  All lights have the slots 
+%      name - Required
+%      type - Default:  'point'
+%      spd  - Default: 'rgb'
+%      specscale - Default: [1,1,1].
+%
 % Inputs:
 %   lightName   - name of the light
 %
@@ -11,41 +19,53 @@ function lght = piLightCreate(lightName, varargin)
 %
 %   type   - light type. Default is point light.  There are light specific
 %            properties depend on the light type. 
-%
-%   cameracoordinate - Applies to point, spot, area lights. Default is
-%         true 
-%   shape
-%   radius
+%   from   - Distant, point, and spot lights have a 'from' and 'to'
+%   to     - Distant, point, and spot lights have a 'from' and 'to'
+%   cameracoordinate - Place the light at the camera 'from'.  Applies
+%                      to point, spot, area lights. When applicable,
+%                      Default is true  
+%   shape  - Shape of the area light.  This can be a geometric file or
+%            a string, such as 'sphere'
+%   radius - Radius of the area light sphere (m)
 % 
 %  To see the light types use
 %
 %      lightTypes = piLightCreate('list available types');
 %
-%  To see the settable properties for each light type use
+%  To see the settable properties we have implemented for each light
+%  type use 
 %
-%        piLightProperties(lightTypes{3})
+%        piLightProperties(lightTypes{1})
 %
-%    Look here for the PBRT website information about lights.
+%  Look here for the PBRT website information about lights.
 %    https://pbrt.org/fileformat-v4#lights
 %
 % Description:
-%   In addition to creating a light struct, various light properties can be
-%   specified in key/val pairs.
+%   This function creates an ISET3d light struct.  The value of the
+%   slots in the struct can be specified when the function is called
+%   by key/val pairs. In adition, you can use key/val pairs in the
+%   calling function via piLightSet.
 %
 %   The 'spd spectrum' property reads a file from ISETCam/data/lights
 %   that defines a light spectrum.  In the lght struct this is stored
 %   in the spd slot.
 %
-%    spd.type='spectrum';
-%    spd.value='Tungsten', or D50 or ...
+%    spd.type = 'spectrum';
+%    spd.value= 'Tungsten', or D50 or ...
 %
 % Returns
 %   lght   - light struct
 %
+% Examples
+%   lightTypes = piLightCreate('list available types');
+%
+%   lgt = piLightCreate('point light 1')
+%   lgt = piLightCreate('point light 1','type','point','spd spectrum','Tungsten');
 %   lgt = piLightCreate('blueSpot', 'type','spot','spd',[9000]);
 %   lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
-%   lgt = piLightCreate('point light 1')
 %   lgt = piLightCreate('whiteLight','type','area');
+%   lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
+%   lgt = piLightCreate('areaTest', 'type','area','shape','sphere','radius',30);
 %
 % See also
 %   piLightSet, piLightGet, piLightProperties, 
@@ -53,23 +73,6 @@ function lght = piLightCreate(lightName, varargin)
 %   https://polyhaven.com/hdris
 %
 
-% TODO
-%  cameracoordinate is set in many places.  Not sure whether that is a
-%  good idea.
-
-% Examples
-%{
-  lightTypes =piLightCreate('list available types');
-%}
-%{
- lgt = piLightCreate('point light 1')
-%}
-%{
- lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
-%}
-%{
- lgt = piLightCreate('areaTest', 'type','area','shape','sphere','radius',30);
-%}
 %% Check if the person just wants the light types
 
 validLights = {'distant','goniometric','infinite','point','area','projection','spot'};
@@ -116,17 +119,13 @@ p.parse(lightName, varargin{:});
 lght.type = p.Results.type;
 
 lght.name = p.Results.lightName;
-% We want the name to end with _L.  So if it does not, we append the _L
+
+% We want light names to end with _L.  So if it does not, we append
+% the _L
 if ~isequal(lght.name((end-1):end),'_L')
     % warning('Appending _L to light name')
     lght.name = [lght.name,'_L'];
 end
-
-% All lights have these slots
-%   name
-%   type
-%   specscale
-%   spd
 
 % All lights start out with these two slots
 lght.specscale.type = 'float';
@@ -322,26 +321,27 @@ for ii=1:2:numel(varargin)
         continue;
     end
 
-    % This is a new key value we are setting.  Generally, it is the
-    % part before the 'underscore'
+    % This is a new key value we are setting.  Generally, we are
+    % setting the property that is before any 'underscore'
     keyTypeName = strsplit(thisKey, '_');
 
-    % But if  the first parameter is 'TYPE_NAME', we need the second value.
-    %
+    % Sometimes the first part of 'TYPE_NAME' is the key, and other
+    % times the second part.  For example, rgb spd, versus spd
+    % spectrum.
     if piLightISParamType(keyTypeName{1})
+        % Permissible.  Get the second.
         keyName = ieParamFormat(keyTypeName{2});
     else
         keyName = ieParamFormat(keyTypeName{1});
     end
 
-    % For these parameters, we run the lightSet.  We see whether this
-    % light structure has a slot that matches the keyName.
+    % If the light has a slot with the keyName, we run piLightSet.
     if isfield(lght, keyName)
-        % If the slot exists, we set it and we are good.
+        % If the field exists, we set it.
         lght = piLightSet(lght, sprintf('%s value', keyName),...
                               thisVal);
     else
-        % If the slot does not exist, we tell the user, but do not
+        % If the field does not exist, we tell the user, but do not
         % throw an error.
         warning('Parameter %s does not exist in light %s',...
                     keyName, lght.type)
