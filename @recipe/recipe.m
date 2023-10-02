@@ -204,7 +204,10 @@ classdef recipe < matlab.mixin.Copyable
                     T = table(sizeT,'VariableNames',{'sizes (m)'}, 'RowNames',names);
                     disp(T);
                 case {'instances'}
-                    disp('NYI');
+                    % Show the objects and the corresponding
+                    % instances.
+                    names = obj.get('object names')';
+
                 case 'materials'
                     % Prints a table
                     piMaterialPrint(obj);

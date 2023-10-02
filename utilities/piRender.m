@@ -276,6 +276,8 @@ if isstruct(ieObject)
             if ~isequal(curWave(:),wave(:))
                 ieObject = sceneSet(ieObject, 'wave', wave);
             end
+            dist = thisR.get('object distance','m');
+            ieObject = sceneSet(ieObject,'distance',dist);
 
         case 'opticalimage'
             % names = strsplit(fileparts(thisR.inputFile),'/');

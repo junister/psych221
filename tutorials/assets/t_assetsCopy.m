@@ -35,6 +35,10 @@
 % See also
 %   t_piSceneInstances
 
+%% Init
+
+ieInit;
+if ~piDockerExists, piDockerConfig; end
 %%
 
 % Maybe we should have an instance flag?
@@ -47,13 +51,15 @@ piObjectInstance(thisR);
 %
 % Maybe this should be thisR.get('asset',idx,'top branch')
 sphereID = piAssetSearch(thisR,'object name','Sphere');
+thisR.set('asset',sphereID,'scale',0.5);
+
 p2Root = thisR.get('asset',sphereID,'pathtoroot');
 idx = p2Root(end);
 
 % Create copies at a position is relative to the position of the original
 % object 
 for ii=1:3
-    thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0 0.0]);
+    thisR = piObjectInstanceCreate(thisR, idx, 'position',ii*[-0.3 0.1 0.0]);
 end
 
 % We need to adjust the names of the nodes after inserting.  Not sure why
@@ -62,34 +68,36 @@ end
 % instance.  Once at the end is enough.
 thisR.assets = thisR.assets.uniqueNames;
 
-%%  Show it
+%%  Show the multiple spheres
 
-piWRS(thisR);
+piWRS(thisR,'name','Multiple spheres');  %%  Multiple copies of spheres
+
 %%
-
 thisR = piRecipeCreate('chessset');
 thisR.set('fov',40);
 piObjectInstance(thisR);
 
-% piWRS(thisR,'name','original');
+piWRS(thisR,'name','original');
 
 %% Turn this into an instance recipe
 
+% This is the ruler
 id1 = 312;
 id2 = 308;
 
 % Delete the ruler
 thisR.set('asset',id1,'delete');
 thisR.set('asset',id2,'delete');
-piWRS(thisR,'name','original');
+piWRS(thisR,'name','deleted ruler');
 
-%%
+%% Copy the ruler
 thisR = piRecipeCreate('chessset');
 thisR.set('fov',40);
 piObjectInstance(thisR);
 
 id1 = 312;
 id2 = 308;
+
 % Find the object
 %
 % Maybe this should be thisR.get('asset',idx,'top branch')
@@ -103,8 +111,8 @@ wp = thisR.get('asset',id1,'world position');
 % Create copies at a position is relative to the position of the original
 % object.  I am confused about the size units.
 for ii=1:6
-    thisR = piObjectInstanceCreate(thisR, id1end, 'position',ii*[0 sz(2) 0.0]/10);
-    thisR = piObjectInstanceCreate(thisR, id2end, 'position',ii*[0 sz(2) 0.0]/10);
+    thisR = piObjectInstanceCreate(thisR, id1end, 'position',ii*[0 sz(2) 0.0]/8);
+    thisR = piObjectInstanceCreate(thisR, id2end, 'position',ii*[0 sz(2) 0.0]/8);
 end
 
 % We need to adjust the names of the nodes after inserting.  Not sure why
@@ -113,8 +121,8 @@ end
 % instance.  Once at the end is enough.
 thisR.assets = thisR.assets.uniqueNames;
 
-%%  Show it
+%%  Show the multiple copies
 
-piWRS(thisR,'name','copies');
+piWRS(thisR,'name','ruler copies');
 
 %%

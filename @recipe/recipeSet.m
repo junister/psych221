@@ -190,6 +190,9 @@ switch param
 
         % Scene parameters
     case {'fromtodistance','objectdistance'}
+        % thisR.set('object distance');
+        % TODO:  thisR.set('object distance','m');
+        %
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.
@@ -1172,7 +1175,8 @@ switch param
         % thisR.set('light', lghtName,  'translate', [XSFT, YSFT, ZSFT], FROMTO);
         % thisR.set('light', lightname, 'specscale', val);
         % thisR.set('light','AreaLight','spread val',20);
-        %
+        % thisR.set('light','AreaLight','spd',[0.5 0.3 1]);
+        
         % TODO:  We need to add additional cases for the area light
 
         if isnumeric(val)
