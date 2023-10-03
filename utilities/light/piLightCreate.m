@@ -8,9 +8,9 @@ function lght = piLightCreate(lightName, varargin)
 %   Create a light struct.  The various types of lights have different
 %   slots in their struct.  All lights have the slots 
 %      name - Required
-%      type - Default:  'point'
-%      spd  - Default: 'rgb'
-%      specscale - Default: [1,1,1].
+%      type - One of the light types.  Default:  'point'
+%      spd  - rgb or spectrum.  Default: 'rgb'
+%      specscale - How to scale RGB values.  Default: [1,1,1].
 %
 % Inputs:
 %   lightName   - name of the light
@@ -20,7 +20,8 @@ function lght = piLightCreate(lightName, varargin)
 %   type   - light type. Default is point light.  There are light specific
 %            properties depend on the light type. 
 %   from   - Distant, point, and spot lights have a 'from' and 'to'
-%   to     - Distant, point, and spot lights have a 'from' and 'to'
+%   to       Area lights have a shape. Goniometric and projection
+%            lights have?
 %   cameracoordinate - Place the light at the camera 'from'.  Applies
 %                      to point, spot, area lights. When applicable,
 %                      Default is true  
@@ -104,14 +105,26 @@ p.addParameter('type','point',@(x)(ismember(x,validLights)));
 
 % We are unsure about the proper default
 p.addParameter('cameracoordinate',true);
-p.addParameter('from',[0 0 0],@isvector);
-p.addParameter('to',[0 0 1],@isvector);
+p.addParameter('from',[],@isvector);
+p.addParameter('to',[],@isvector);
 
 p.addParameter('shape',[],@(x)(isstruct(x) || ischar(x))); % For area light
 p.addParameter('radius',30,@isnumeric);
 
 p.KeepUnmatched = true;
 p.parse(lightName, varargin{:});
+
+cameraCoordinate = p.Results.cameracoordinate;
+from = p.Results.from;
+to   = p.Results.to;
+% If the user sent in 'from' or 'to', cameracoordinate must be false.
+% Perhaps if we have a 'from' we should require a 'to'.  But for now
+% we just make sure the light is pointing in the z-direction.
+if ~isempty(from) || ~isempty(to)
+    cameraCoordinate = false;
+    if isempty(to),   to = from + [0 0 1]; end
+    if isempty(from), from = to - [0 0 1]; end
+end
 
 %% Construct the appropriate light struct for each type
 
@@ -141,10 +154,10 @@ switch ieParamFormat(lght.type)
         % direction.
 
         lght.from.type = 'point3';
-        lght.from.value = p.Results.from;
+        lght.from.value = from;
 
         lght.to.type = 'point3';
-        lght.to.value = p.Results.to;
+        lght.to.value = to;
 
     case 'goniometric'
         %%  We need a file name for goniometric light.
@@ -181,7 +194,7 @@ switch ieParamFormat(lght.type)
         %}
 
         % When this is set, the light is placed at the camera.
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
 
         % The goniometric image showing the light distribution in
         % different directions.
@@ -205,14 +218,14 @@ switch ieParamFormat(lght.type)
         % Point sources emit in all directions, and have no 'to'.
 
         % This probably overrides the from.  Not sure.
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
         
         lght.from.type = 'point';
-        lght.from.value = p.Results.from;
+        lght.from.value = from;
 
     case 'projection'
         % Assume we want camera orientation by default
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
 
         lght.fov.type = 'float';
         lght.fov.value = [];
@@ -227,14 +240,14 @@ switch ieParamFormat(lght.type)
         lght.scale.value = {};
         
     case {'spot', 'spotlight'}
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
 
         if ~lght.cameracoordinate
             lght.from.type = 'point3';
-            lght.from.value = p.Results.from;
+            lght.from.value = from;
 
             lght.to.type = 'point3';
-            lght.to.value = p.Results.to;
+            lght.to.value = to;
         end
 
         lght.coneangle.type = 'float';

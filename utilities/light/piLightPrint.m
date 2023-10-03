@@ -49,20 +49,18 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
-    if isequal(thisLight.type,'distant') || ...
-            isequal(thisLight.type,'infinite') %
+    if isequal(thisLight.type,'distant') || isequal(thisLight.type,'infinite') 
+        % These lights are infinitely far away.
         position(ii,:) = Inf;
     else
-        % point, spot, area, projection, and goniometric have a position We
-        % have not yet fixed the recipeGet case when we get for a 'light',
-        % but we think it may work when we treat the lights as an asset.
-        % This is not yet known. We should fix this in recipeGet('lights' ...)
-        position(ii,:) = thisR.get('asset',thisLight.name,'world position');
-        
-        % And then account for the camera coordinate logical.
+        % Is the camera coordinate logical set to true? Then the light
+        % is at the camera.
         if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
-            from = thisR.get('from');
-            position(ii,:) = position(ii,:) + from;
+            position(ii,:) = thisR.get('from');  % The camera
+        else
+            % point, spot, area, projection, and goniometric have a
+            % from field.
+            position(ii,:) = thisR.get('lights',thisLight.name,'from');
         end
     end
 

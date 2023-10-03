@@ -1172,12 +1172,12 @@ switch param
         % thisR.set('light', lightName, 'delete');
         % thisR.set('light', 'all', 'delete');
         % thisR.set('light', lightName, 'rotate', [XROT, YROT, ZROT], ORDER)
-        % thisR.set('light', lghtName,  'translate', [XSFT, YSFT, ZSFT], FROMTO);
+        % thisR.set('light', lightName, 'translate', [XSFT, YSFT, ZSFT], FROMTO);
         % thisR.set('light', lightname, 'specscale', val);
-        % thisR.set('light','AreaLight','spread val',20);
-        % thisR.set('light','AreaLight','spd',[0.5 0.3 1]);
+        % thisR.set('light', lightName, 'spread val',20);
+        % thisR.set('light', lightName, 'spd',[0.5 0.3 1]);
         
-        % TODO:  We need to add additional cases for the area light
+        % TODO:  We need additional cases for the area light
 
         if isnumeric(val)
             thisLight = thisR.get('light', val);

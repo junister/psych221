@@ -1599,7 +1599,9 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('lights',idx,property)
         % thisR.get('light',idx,'shape')
         % [idx,names] = thisR.get('lights');
-        %
+        % thisR.get('lights',lightName','from') - NOT WORKING. to
+        % also.
+        
         if isempty(varargin)
             % thisR.get('lights')
             %

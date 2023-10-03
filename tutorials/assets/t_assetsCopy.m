@@ -95,6 +95,7 @@ thisR = piRecipeCreate('chessset');
 thisR.set('fov',40);
 piObjectInstance(thisR);
 
+% The ruler elements
 id1 = 312;
 id2 = 308;
 
@@ -105,6 +106,7 @@ p2Root = thisR.get('asset',id1,'pathtoroot');
 id1end = p2Root(end);
 p2Root = thisR.get('asset',id2,'pathtoroot');
 id2end = p2Root(end);
+
 sz = thisR.get('asset',id1,'size');   % Might be millimeters?
 wp = thisR.get('asset',id1,'world position');
 

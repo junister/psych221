@@ -135,7 +135,7 @@ piWRS(thisR,'name',sprintf('Rotate EE spot'));
 thisR.set('light', 'all', 'delete');
 
 % Create a point light at the camera position
-% The spd spectrum points to a file that is saved in
+% The 'spd spectrum' string is a mat-file saved in
 % ISETCam/data/lights
 yellowPoint = piLightCreate('yellow_point_L',...
     'type', 'point', ...
