@@ -194,6 +194,8 @@ piWRS(thisR,'name','Blue (distant)');
 
 %% With the skymap, but intensity scaled
 
+fileName = fullfile(piDirGet('skymaps'),'room.exr');
+
 thisR.set('skymap',fileName);
 thisR.set('light','room_L','specscale',0.3);
 piWRS(thisR,'name','Dark Environment');
@@ -202,7 +204,6 @@ piWRS(thisR,'name','Dark Environment');
 
 thisR.set('light', 'all', 'delete');
 
-fileName = fullfile(piDirGet('skymaps'),'room.exr');
 thisR.set('skymap',fileName);
 tmp = thisR.get('lights','names');
 skyName = tmp{1};

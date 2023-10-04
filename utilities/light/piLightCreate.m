@@ -150,8 +150,10 @@ lght.spd.value = [1 1 1];
 % Each light type has a different set of parameters.
 switch ieParamFormat(lght.type)
     case 'distant'
-        % The distant light is far away and this indicates only its
-        % direction.
+        % The "distant" light source represents a directional light source "at
+        % infinity"; in other words, it illuminates the scene with light
+        % arriving from a single direction. The direction is specified
+        % with this from and to.
 
         lght.from.type = 'point3';
         lght.from.value = from;
@@ -160,10 +162,16 @@ switch ieParamFormat(lght.type)
         lght.to.value = to;
 
     case 'goniometric'
-        %%  We need a file name for goniometric light.
+        %%  We need a file name for goniometric lights in data/lights
+        %
+        % See t_lightGoniometric
 
         % From the book
         %{
+        % The "goniometric" light represents a point light source with
+        % directionally-varying emission, where the emission
+        % distribution is represented by an image.   
+        %
         % The goniometric light source approximation is widely used to
         % model area light sources in the field of illumination
         % engineering. The rule of thumb there is that once a
@@ -205,6 +213,12 @@ switch ieParamFormat(lght.type)
     case {'infinite','skymap','environment'}
         % Gets called from thisR.set('skymap',filename,'add');
 
+        % The "infinite" light is probably best labeled a skymap.  It
+        % represents an infinitely far away light source that
+        % potentially casts illumination from all directions.  The
+        % amount of light from different directions is specified by a
+        % file.
+
         % See the code there for rotations and translations.
         lght.nsamples.type = 'integer';
         lght.nsamples.value = [];
@@ -215,7 +229,11 @@ switch ieParamFormat(lght.type)
         
     case 'point'
         % Initializes a light at the origin.
-        % Point sources emit in all directions, and have no 'to'.
+        % "point" defines a simple point light that casts the same
+        % amount of illumination in all directions. It takes two
+        % parameters:  
+        %
+        % Point sources emit in all directions, and has no 'to'.
 
         % This probably overrides the from.  Not sure.
         lght.cameracoordinate = cameraCoordinate;
@@ -224,7 +242,16 @@ switch ieParamFormat(lght.type)
         lght.from.value = from;
 
     case 'projection'
-        % Assume we want camera orientation by default
+        % See t_lightProjection
+        %
+        % The "projection" light acts like a slide projector; the given image is
+        % used to define a 2D emission distribution that is projected with a
+        % center of projection at the light's position. Directions outside the
+        % frustum of light projection receive no emitted illumination. It is
+        % positioned using the world from light transformation matrix.
+
+        % Assumes we want camera orientation by default
+
         lght.cameracoordinate = cameraCoordinate;
 
         lght.fov.type = 'float';

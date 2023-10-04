@@ -222,10 +222,30 @@ switch ieParamFormat(rName)
         thisR.set('light', lgt, 'add');
         warning('Car scene needs work.')
     case 'checkerboard'
+        % 1m x 1m at 0 0 1 with from at 0 0 0.  Zero thickness.
         thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'object name','Checkerboard');
+        thisR.set('asset',idx,'world position',[0 0 1]);
+        sz = thisR.get('asset',idx,'size');
+        thisR.set('asset',idx,'scale',[1/sz(1),1/sz(2),1]);
+
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+
+        % Equal energy infinite light.
+        thisR.set('lights','all','delete');
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('infinite',...
+            'type', 'infinite',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum);                
+        thisR.set('lights',lgt,'add');
+        piWRS(thisR);
+
     case 'coordinate'
         thisR = piRecipeDefault('scene name',rName);
-
+         
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
         lgt = piLightCreate('distant',...
