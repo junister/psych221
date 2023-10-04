@@ -19,7 +19,8 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   asset     -  Same as material (Default true)
 %   copyfiles -  Not sure, TBD
 %   node name -  Top node of the asset to merge to the root of the main
-%                scene. Default is the node with id = 2. 
+%                scene. Default is the node with id = 2. This may not
+%                be working correctly now .... only id=2 works?
 %   object instance - Add object as an object instance, then we 
 %                can reuse(instance) it by function piObjectInstanceCreate.
 %                (help needed in explaining this).
