@@ -1490,86 +1490,91 @@ switch ieParamFormat(param)  % lower case, no spaces
             val(ii,:) = thisR.get('asset',idx(ii),'size');
         end       
 
-        % -------Instances
+        % -------Instances and references
     case {'instance','instances'}
-        % idx   = thisR.get('instances');   % Return idx of instances
-        % param = thisR.get('instance',id,'param')
+        % idx = thisR.get('instances'); % Return idx of all instances
         %
-        % How can we have an instance without a reference object?
-        % What is the extraNode slot?
-        if isempty(varargin)
-            % Return all the indices of the branch indices
-            n = thisR.get('n nodes');
-            val = zeros(1,n);
-            for ii=1:n
-                if isequal(thisR.get('asset',ii,'type'),'branch')
-                    b = thisR.get('asset',ii);
-                    if b.isObjectInstance
-                        val(ii) = 1; 
-                    end
+        % Branch nodes that have a non-empty referenceObject are the
+        % copies (instances).  The reference object is named in the
+        % slot, and it can be found using 
+        %  thisR.get('reference objects');
+        assert(isempty(varargin))
+
+        % idx = thisR.get('instances');  % All instances.
+        % Return all the indices of the branch indices
+        n = thisR.get('n nodes');
+        val = zeros(1,n);
+        for ii=1:n
+            % Instances are branch nodes, not object nodes.
+            if isequal(thisR.get('asset',ii,'type'),'branch')
+                b = thisR.get('asset',ii);
+                % There is a reference object, so this branch is
+                % an instance. We return its index.
+                if ~isempty(b.referenceObject)
+                    val(ii) = 1;
                 end
             end
-            val = find(val);
-            return;
         end
-
-        % We have an asset index or name and possibly a parameter
-        if ischar(varargin{1})
-            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
-            % If only one asset matches, turn it from cell to struct.
-        else
-            % Not sure when we send in varargin as an array.  Example?
-            % (BW)
-            if numel(varargin{1}) > 1,  id = varargin{1}(1);
-            else,                       id = varargin{1};
-            end
-            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
-        end
-        if isempty(id)
-            error('Could not find asset %s\n',varargin{1});
-        end
-        if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        val = find(val);
         
-        % We are not getting the _I_ into the name.  Maybe we do not
-        % need to because we have the isObjectInstance field? (BW)
-        % assert(contains(thisAsset.name,'_I_'));
-
-        % Enable various parameters - todo!!!!
-        try
-            val = thisAsset.(varargin{2});
-        catch
-            disp('Unknown parameter')
-            val = fieldnames(thisAsset);
-            disp(val)
-        end
+        % % User sent a name or an index 
+        % if ischar(varargin{1})
+        %     [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+        %     % If only one asset matches, turn it from cell to struct.
+        % else
+        %     % This implies that we have a number.            
+        %     if numel(varargin{1}) > 1,  id = varargin{1}(1);
+        %     else,                       id = varargin{1};
+        %     end
+        %     [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
+        % end
+        % if isempty(id)
+        %     error('Could not find asset %s\n',varargin{1});
+        % end
+        % if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        % 
+        % % We are not getting the _I_ into the name.  Maybe we do not
+        % % need to because we have the isObjectInstance field? (BW)
+        % % assert(contains(thisAsset.name,'_I_'));
+        % 
+        % % Enable various parameters - todo!!!!
+        % try
+        %     val = thisAsset.(varargin{2});
+        % catch
+        %     disp('Unknown parameter')
+        %     val = fieldnames(thisAsset);
+        %     disp(val)
+        % end
         
         % These are the other form, without a parameter
-    case {'instanceid','instanceids'}
-        % See above.  We are having a problem identifying by the name
-        % (with the _I_).  I am identifying by the isObjectInstance
-        % field for now.
+    case {'instanceid','instanceids'}        
         val = thisR.get('instances');
-        %{
-        val = [];
-        if isempty(thisR.assets), return; end
-        nnodes = thisR.assets.nnodes;
-        for ii=1:nnodes
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode,'type') && isequal(thisNode.type,'branch')
-                if contains(thisNode.name,'_I_') && ~contains(thisNode.name,'uc')
-                    val = [val,ii]; %#ok<AGROW>
-                end
-            end
-        end
-        %}
     case {'instancenames'}
         % thisR.get('instance names')
-        % Returns names without the IDs.
-        % Instances are a subset of the branch nodes.
+        % Returns names, stripping the IDs.
         if isempty(thisR.assets), return; end        
+
         idx   = thisR.get('instances');
-        names = thisR.get('asset names');  % No ID in the name
+        names = thisR.get('node names');  % No ID in the name
         val = names(idx(:));
+    case {'referenceobjects'}
+        % thisR.get('reference objects')
+        %
+        % A branch node that has isObjectInstance set to true is used
+        % as an instance. The object at the leaf node defines the object.
+        assert(isempty(varargin));
+        n = thisR.get('n nodes');
+        val = zeros(1,n);
+        for ii=1:n
+            % Instances are branch nodes, not object nodes.
+            if isequal(thisR.get('asset',ii,'type'),'branch')
+                b = thisR.get('asset',ii);
+                % This is the flag indicated we are at a branch node
+                % that contains an object instance.                
+                if b.isObjectInstance, val(ii) = 1; end
+            end
+        end
+        val = find(val);
 
         % ---------  Lights
     case {'lightsimplenames'}

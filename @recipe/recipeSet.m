@@ -1188,6 +1188,7 @@ switch param
             lghtName = piLightNameFormat(lghtName);
         elseif isstruct(val) || iscell(val) % A light struct or a cell array
             newLight = val;
+            lghtName = newLight.name;
         else
             error('Unknown light parameter!');
         end
