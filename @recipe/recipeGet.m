@@ -1508,9 +1508,9 @@ switch ieParamFormat(param)  % lower case, no spaces
             % Instances are branch nodes, not object nodes.
             if isequal(thisR.get('asset',ii,'type'),'branch')
                 b = thisR.get('asset',ii);
-                % There is a reference object, so this branch is
-                % an instance. We return its index.
-                if isfield(b,'referenceObject') && ~isempty(b.referenceObject)
+                % There is a non-mepty reference object, and the name
+                % contains _I_.  So this is an instance.
+                if isfield(b,'referenceObject') && ~isempty(b.referenceObject) && contains(b.name,'_I_')
                     val(ii) = 1;
                 end
             end
