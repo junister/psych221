@@ -1510,7 +1510,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 b = thisR.get('asset',ii);
                 % There is a reference object, so this branch is
                 % an instance. We return its index.
-                if ~isempty(b.referenceObject)
+                if isfield(b,'referenceObject') && ~isempty(b.referenceObject)
                     val(ii) = 1;
                 end
             end

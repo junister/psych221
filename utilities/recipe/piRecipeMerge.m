@@ -18,9 +18,8 @@ function sceneR = piRecipeMerge(sceneR, objectRs, varargin)
 %   texture   -  Same as material (Default true)
 %   asset     -  Same as material (Default true)
 %   copyfiles -  Not sure, TBD
-%   node name -  Top node of the asset to merge to the root of the main
-%                scene. Default is the node with id = 2. This may not
-%                be working correctly now .... only id=2 works?
+%   mergenode -  Index of the node of the asset whose children will merge into the
+%                recipe. Default is the root node (1).
 %   object instance - Add object as an object instance, then we 
 %                can reuse(instance) it by function piObjectInstanceCreate.
 %                (help needed in explaining this).
@@ -50,6 +49,7 @@ p.addParameter('texture', true);
 p.addParameter('asset', true);
 p.addParameter('objectinstance', false); 
 p.addParameter('copyfiles', 1 , @islogical);
+p.addParameter('mergenode', 1 , @islogical);
 
 p.parse(sceneR, objectRs, varargin{:});
 
@@ -59,6 +59,7 @@ textureFlag    = p.Results.texture;
 assetFlag      = p.Results.asset;
 objectInstance = p.Results.objectinstance;
 copyFiles      = p.Results.copyfiles;
+mergenode      = p.Results.mergenode;
 copyTextureFlag = 1;
 %%  The objects can be a cell or a recipe
 
@@ -78,9 +79,9 @@ for ii = 1:length(recipelist)
             % Main scene has no assets.  Use the loaded asset.
             sceneR.assets = thisR.assets;
         else
-            % These are the assets below the root node of the assets
-            % recipe.
-            children = thisR.assets.getchildren(1);
+            % These are the assets below the mergenode.  By default,
+            % the merge node is the root node (1).            
+            children = thisR.assets.getchildren(mergenode);
             % Get the subtree starting just below the root node
 
             % Graft the assets in this subtree into the main scene.  We

@@ -120,6 +120,7 @@ classdef recipe < matlab.mixin.Copyable
             %   materials
             %   lights
             %   textures
+            %   instances
 
             if isempty(varargin), showType = 'window';
             else,                 showType = varargin{1};
@@ -206,8 +207,15 @@ classdef recipe < matlab.mixin.Copyable
                 case {'instances'}
                     % Show the objects and the corresponding
                     % instances.
-                    names = obj.get('object names')';
-
+                    ids = obj.get('instances')';
+                    sizeT = cell(size(ids));
+                    names = cell(numel(ids),1);
+                    for ii=1:numel(ids)
+                        names{ii} = obj.get('node',ids(ii),'name'); 
+                        % names{ii} = names{ii}(10:end); 
+                    end
+                    T = table(sizeT,'VariableNames',{'sizes (m)'}, 'RowNames',names);
+                    disp(T);
                 case 'materials'
                     % Prints a table
                     piMaterialPrint(obj);

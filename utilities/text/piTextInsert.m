@@ -87,7 +87,7 @@ for ii = 1:strlength(aString)
     % theAsset.thisR.show;
 
     % Try merging before we do anything else
-    aRecipe = piRecipeMerge(aRecipe, theAsset.thisR, 'node name', theAsset.mergeNode);
+    aRecipe = piRecipeMerge(aRecipe, theAsset.thisR);
     
 end
 
