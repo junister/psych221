@@ -127,8 +127,10 @@ for ii = 1:numel(thisR.lights)
             lghtDef = strcat(lghtDef, spdTxt);
             % lghtDef = sprintf('LightSource "distant" "%s L" %s', spectrumType, lightSpectrum);
 
-            % Throughout, we should understand what cameracoordinate
-            % does to the from and to.
+            % We should understand what cameracoordinate does to the
+            % from and to when we have a distant light.  The code here
+            % assumes that 'from' and 'to' exists.
+
             % From
             [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
             if ~isempty(fromTxt)

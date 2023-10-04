@@ -56,15 +56,24 @@ for ii =1:numel(lightNames)
         % Is the camera coordinate logical set to true? Then the light
         % is at the camera.
         if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
-            position(ii,:) = thisR.get('from');  % The camera
+            position(ii,:) = thisR.get('from');  % The camera position
         else
-            % point, spot, area, projection, and goniometric have a
-            % from field.
-            position(ii,:) = thisR.get('lights',thisLight.name,'from');
+            % Different lights specify positions in different ways.
+            switch thisLight.type
+                case {'point','spot','projection','goniometric'}
+                    position(ii,:) = thisR.get('lights',thisLight.name,'from');
+                case {'area'}
+                    position(ii,:) = thisR.get('assets',thisLight.name,'world position');
+                case {'infinite','skymap','environment'}
+                    position(ii,:) = [Inf,Inf,Inf];
+                otherwise
+                    error('Unknown light type %s.',thisLight.type);
+            end
         end
     end
 
-    % We have mapnames in some cases (e.g., default chess set light)
+    % We have mapnames stored in spd or filenames in different cases
+    % (e.g., default chess set light) 
     if ~isfield(thisLight,'filename') || isempty(thisLight.filename.value)
         spdT{ii} = num2str(thisLight.spd.value);
     else

@@ -154,12 +154,19 @@ switch ieParamFormat(lght.type)
         % infinity"; in other words, it illuminates the scene with light
         % arriving from a single direction. The direction is specified
         % with this from and to.
+        %
+        % I am unsure whether we can specify the 'from' and 'to' using
+        % the cameraCoordinate
 
+        %        if ~cameraCoordinate
         lght.from.type = 'point3';
         lght.from.value = from;
 
         lght.to.type = 'point3';
         lght.to.value = to;
+        %       else
+        %          lght.cameracoordinate = cameraCoordinate;
+        %     end
 
     case 'goniometric'
         %%  We need a file name for goniometric lights in data/lights
@@ -287,6 +294,15 @@ switch ieParamFormat(lght.type)
         % These are the default parameters for an area light, that are
         % based on the Blender export in arealight.pbrt.
 
+        % From the Book
+        % Area lights have geometry associated with them; the shape and size
+        % of the emitting shapes have a substantial effect on the resulting
+        % emitted radiance distribution. After an AreaLightSource directive,
+        % all subsequent shapes emit light from their surfaces according to
+        % the distribution defined by the given area light implementation.
+        % Note that area lights can currently only be used with triangle,
+        % bilinear patch, sphere, cylinder, and disk shapes;
+        
         lght.type = 'area';
 
         lght.twosided.type = 'bool';
