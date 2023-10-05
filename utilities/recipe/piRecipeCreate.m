@@ -241,7 +241,7 @@ switch ieParamFormat(rName)
             'specscale float', spectrumScale,...
             'spd spectrum', lightSpectrum);                
         thisR.set('lights',lgt,'add');
-        piWRS(thisR);
+        % piWRS(thisR);
 
     case 'coordinate'
         thisR = piRecipeDefault('scene name',rName);
