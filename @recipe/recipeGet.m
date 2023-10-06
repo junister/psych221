@@ -1650,14 +1650,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     assert(isequal(thisLight.type,'light'));
                     val = thisLight;
                 elseif isstruct(varargin{1})
-                    % ZLY: I think it should not be here?
-                    % The user sent in the material.  We hope.
-                    % We should have a slot in material that identifies itself as a
-                    % material.  Maybe a test like "material.type ismember valid
-                    % materials."
-                    %
-                    % Added on July 29 2022.  No warning issued by August
-                    % 11.
+                    % Ready to delete, any time now.
                     warning("We should not be in this code segment.");
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
