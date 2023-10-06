@@ -1636,8 +1636,15 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = thisR.assets.mapLgtShortName2Idx.keys;
             case {'namesid','namesidx'}
                 % thisR.get('lights','names id');
-                % All the light names, without the ID
+                % All the light names, with the ID
                 val = thisR.assets.mapLgtFullName2Idx.keys;
+            case {'id','ids'}
+                % The node ids of the lights
+                fullNames = thisR.assets.mapLgtFullName2Idx.keys;
+                val = zeros(size(fullNames));
+                for ii=1:numel(fullNames)
+                    val(ii) = str2double(fullNames{ii}(1:6));
+                end
             otherwise
                 % If we are here, varargin{1} is a light name or id.
                 % There may be a varargin{2} for the light property to

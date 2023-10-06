@@ -33,13 +33,15 @@ end
 
 %% Initialize
 lightNames = thisR.get('light', 'names');
-rows = cell(nLights,1);
+lightIDs = thisR.get('light','ids');
+
+rows  = cell(nLights,1);
 names = rows;
 types = rows;
-spdT = rows;
+spdT  = rows;
 
 positionT = rows;
-position = zeros(nLights,3);
+position  = zeros(nLights,3);
 
 %% Get data
 fprintf('\nLights\n');
@@ -85,7 +87,7 @@ end
 
 for ii=1:numel(names), positionT{ii} = num2str(position(ii,:)); end
 
-T = table(categorical(names), categorical(types),positionT,spdT,'VariableNames',{'name','type','position','spd/rgb'}, 'RowNames',rows);
+T = table(lightIDs(:),categorical(names), categorical(types),positionT,spdT,'VariableNames',{'node id','name','type','position','spd/rgb'}, 'RowNames',rows);
 
 disp(T);
 fprintf('-------------------------------\n');
