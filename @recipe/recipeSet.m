@@ -1201,14 +1201,29 @@ switch param
             case 'add'
                 % thisR.set('light', newLight, 'add')
                 if isstruct(newLight)
-                    % Check if light name has '_L' in the end
+                    % Make sure light name has '_L' in the end
                     newLight.name = piLightNameFormat(newLight.name);
+
+                    % Make sure the light name is unique.
+                    currentLightNames = thisR.get('lights','names');
+                    if contains(currentLightNames,newLight.name)
+                        disp('Adjusting duplicate light name');
+                        tmp = newLight.name(1:end-2);
+                        newLight.name = sprintf('%s-%03d_L',tmp,randi(100));
+                    end
+
+                    % Create an asset of type light
                     newLightAsset = piAssetCreate('type', 'light');
                     newLightAsset.name = newLight.name;
                     newLightAsset.lght{1} = newLight;
+
+                    % Insert a branch for the light geometry under the
+                    % root.
                     defaultBranch = piAssetCreate('type', 'branch');
                     defaultBranch.name = [newLight.name(1:end-1), 'B'];
                     thisR.set('asset', 1, 'add', defaultBranch);
+
+                    % Put the light under the geometry branch.
                     thisR.set('asset', defaultBranch.name, 'add', newLightAsset);
                 elseif iscell(newLight)
                     for ii=1:numel(newLight)
@@ -1374,8 +1389,8 @@ switch param
         % multiple assets. (BW, Sept 2021).
 
         % Given the calling convention, val is assetName and
-        % varargin{1} is the param, and varargin{2} is the value, if
-        % needed.
+        % varargin{1} is the param, and varargin{2} is the param
+        % value, if needed.
         if isnumeric(val)
             % Person sent in an id, so we get the name here
             [id,thisAsset] = piAssetFind(thisR,'id',val);
@@ -1383,6 +1398,7 @@ switch param
             else, assetName = thisAsset{1}.name;
             end
         else
+            % Person send in a name, so we get the id here
             assetName = val;
             id = thisR.get('asset', assetName, 'id');
         end
