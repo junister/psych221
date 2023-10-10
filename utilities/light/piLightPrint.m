@@ -33,7 +33,8 @@ end
 
 %% Initialize
 lightNames = thisR.get('light', 'names');
-lightIDs = thisR.get('light','ids');
+lightIDs   = thisR.get('light','ids');
+specscale  = ones(nLights,1);
 
 rows  = cell(nLights,1);
 names = rows;
@@ -51,6 +52,9 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
+    if isfield(thisLight,'specscale')
+        specscale(ii) = thisLight.specscale.value;
+    end
     if isequal(thisLight.type,'distant') || isequal(thisLight.type,'infinite') 
         % These lights are infinitely far away.
         position(ii,:) = Inf;
@@ -87,7 +91,7 @@ end
 
 for ii=1:numel(names), positionT{ii} = num2str(position(ii,:)); end
 
-T = table(lightIDs(:),categorical(names), categorical(types),positionT,spdT,'VariableNames',{'node id','name','type','position','spd/rgb'}, 'RowNames',rows);
+T = table(lightIDs(:),categorical(names), categorical(types),positionT,spdT,specscale(:),'VariableNames',{'node id','name','type','position','spd/rgb','specscale'}, 'RowNames',rows);
 
 disp(T);
 fprintf('-------------------------------\n');

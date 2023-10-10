@@ -21,6 +21,7 @@ if ~piDockerExists, piDockerConfig; end
 %% 
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
+thisR.set('render type',{'radiance','depth'});
 thisR.get('print lights')
 
 % The no number is the blue one

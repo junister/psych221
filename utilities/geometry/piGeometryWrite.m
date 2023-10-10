@@ -497,8 +497,13 @@ tMatrix = reshape(tMatrix,[1,16]);
 % Or at least, they are different when I do not write out the
 % identity.
 %
-% if tMatrix(:) ~= identityTransform(:)
-
+if tMatrix(:) == identityTransform(:)
+    % Do not bother writing out identity transforms?
+    %
+    % If a complex scene fails and this message has appeared, tell BW.
+    disp('piGeometryWrite: skipping identity transform.')
+    return;
+else
     transformType = 'ConcatTransform';
 
     % A 4x4 affine transformation used is in graphics to combine rotation and
@@ -509,7 +514,7 @@ tMatrix = reshape(tMatrix,[1,16]);
         transformType, tMatrix(:));
     fullLine = [spacing indentSpacing printString '\n'];
     fprintf(fid, fullLine);
-% end
+end
 
 end
 
