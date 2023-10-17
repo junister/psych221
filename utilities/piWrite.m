@@ -162,25 +162,29 @@ if remoteResources
             warning('off','all');
 
             % we want to leave instanced but delete everything else,
-            % so this gets a bit annoying
+            % so we need to step through the directory
             contents = dir(workingDir);
             for ii = 1:numel(contents)
                 fName = fullfile(workingDir, contents(ii).name);
+
+                % skip . and ..
                 if contents(ii).isdir && strncmp(contents(ii).name,'.',1)
                     continue;
                 elseif isequal(contents(ii).name, 'instanced') % don't delete
-                elseif contents(ii).isdir
+                elseif contents(ii).isdir % delete other folders
                     rmdir(fName, 's');
-                else
+                else % delete other files
                     delete(fName);
                 end
             end
         catch
             % sometimes matlab  has it locked
         end
+    else
+        % create it if needed
+        mkdir(workingDir);
     end
-    mkdir(workingDir);
-    % the traditional case:
+    % the traditional case without remote resources:
 elseif ~exist(workingDir,'dir')
     mkdir(workingDir);
 end
@@ -832,10 +836,6 @@ for ii = 1:length(thisR.world)
 
 end
 
-end
-
-%% Write out any instanced files
-function piWriteInstanced(thisR)
 end
 
 %%

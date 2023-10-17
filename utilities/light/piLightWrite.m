@@ -182,6 +182,7 @@ for ii = 1:numel(thisR.lights)
 
             % First check to see if we have an instanced version
             if isfile(fullfile(thisR.get('output dir'), 'instanced', fname))
+                % we haven't verified that this works for gonio lights yet
                 gonioFile = fullfile(thisR.get('output dir'), 'instanced', fname);
             elseif ~isfile(fullfile(thisR.get('output dir'),'skymaps',fname))
                 % Look for it in the skymaps directory
@@ -243,11 +244,6 @@ for ii = 1:numel(thisR.lights)
         case 'projection'
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
-
-            % First check to see if we have an instanced version
-            %if isfile(fullfile(thisR.get('output dir'), 'instanced', fname))
-            %    gonioFile = fullfile(thisR.get('output dir'), 'instanced', fname);
-            %end
 
             % filename -- used to be mapname -- this is our projected image
             [~, filenameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);
