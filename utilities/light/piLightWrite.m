@@ -179,7 +179,11 @@ for ii = 1:numel(thisR.lights)
 
             % We keep the goniometric maps in the root directory for now
             fname = thisLight.filename.value;
-            if ~isfile(fullfile(thisR.get('output dir'),'skymaps',fname))
+
+            % First check to see if we have an instanced version
+            if isfile(fullfile(thisR.get('output dir'), 'instanced', fname))
+                gonioFile = fullfile(thisR.get('output dir'), 'instanced', fname);
+            elseif ~isfile(fullfile(thisR.get('output dir'),'skymaps',fname))
                 % Look for it in the skymaps directory
                 gonioFile = fullfile(piDirGet('skymaps'),fname);                
                 if isfile(gonioFile)
@@ -239,6 +243,11 @@ for ii = 1:numel(thisR.lights)
         case 'projection'
             % Construct the light definition line
             [~, lghtDef] = piLightGet(thisLight, 'type', 'pbrt text', true);
+
+            % First check to see if we have an instanced version
+            %if isfile(fullfile(thisR.get('output dir'), 'instanced', fname))
+            %    gonioFile = fullfile(thisR.get('output dir'), 'instanced', fname);
+            %end
 
             % filename -- used to be mapname -- this is our projected image
             [~, filenameTxt] = piLightGet(thisLight, 'filename val', 'pbrt text', true);

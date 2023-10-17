@@ -154,7 +154,10 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "string filename" "%s"', val);
 
             % DJC Use skymaps only where they belong
-            if ~contains(val,'skymaps/'), prefix = 'skymaps/';
+            % but allow for instanced files
+            if contains(val,'instanced/')
+                prefix = '';
+            elseif ~contains(val,'skymaps/'), prefix = 'skymaps/';
             else,                         prefix = '';
             end
 
