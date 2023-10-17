@@ -230,7 +230,7 @@ switch ieParamFormat(param)  % lower case, no spaces
         % This file location defines the working directory that docker
         % mounts to run.
         val = thisR.outputFile;
-    case {'outputdir','workingdirectory','dockerdirectory'}
+    case {'outputdir','workingdirectory','dockerdirectory','outputfolder'}
         val = fileparts(thisR.get('output file'));
     case {'outputbasename'}
         name = thisR.outputFile;
