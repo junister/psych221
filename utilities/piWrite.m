@@ -3,7 +3,7 @@ function workingDir = piWrite(thisR,varargin)
 %
 % Brief
 %   Write the scene PBRT files from the recipe (thisR). By default they are
-%   written to the local/sceneName directory. 
+%   written to the local/sceneName directory.
 %
 % Syntax
 %   workingDir = piWrite(thisR,varargin)
@@ -29,8 +29,8 @@ function workingDir = piWrite(thisR,varargin)
 % all the relevant resource files (geometry, materials, spds, others) are
 % written out in a working directory. During rendering, these files are
 % mounted by the docker container and used by PBRT to create the radiance,
-% depth, mesh metadata outputs. 
-% 
+% depth, mesh metadata outputs.
+%
 % We have now implemented a second approach based on the idea that there is
 % a central, shared, rendering machine.  If the user sets the 'remote
 % resources' option to true, we assume that the necessary asset files
@@ -99,7 +99,7 @@ p.addParameter('overwritematerials', true, @islogical);
 p.addParameter('overwritegeometry', true, @islogical);
 
 % Human eye writes its own, so we do not generally want to overwrite.
-p.addParameter('overwritelensfile', false, @islogical); 
+p.addParameter('overwritelensfile', false, @islogical);
 
 p.parse(thisR,varargin{:});
 
@@ -112,7 +112,7 @@ else
     remoteResources = false;
     overwriteresources  = p.Results.overwriteresources;
 end
-% User should define whether 
+% User should define whether
 
 
 % Why we have these two? --Zhenyi
@@ -143,7 +143,7 @@ exporter = thisR.get('exporter');
 inputDir   = thisR.get('input dir');
 
 if ~exist(inputDir,'dir') && ~getpref('docker','remoteResources')
-    warning('Could not find local inputDir: %s\n',inputDir); 
+    warning('Could not find local inputDir: %s\n',inputDir);
 end
 
 
@@ -160,16 +160,33 @@ if remoteResources
             % figure out how to suppress them.
             q = warning('query');
             warning('off','all');
-            rmdir(workingDir, "s");
-            warning(q);
+
+            % we want to leave instanced but delete everything else,
+            % so we need to step through the directory
+            contents = dir(workingDir);
+            for ii = 1:numel(contents)
+                fName = fullfile(workingDir, contents(ii).name);
+
+                % skip . and ..
+                if contents(ii).isdir && strncmp(contents(ii).name,'.',1)
+                    continue;
+                elseif isequal(contents(ii).name, 'instanced') % don't delete
+                elseif contents(ii).isdir % delete other folders
+                    rmdir(fName, 's');
+                else % delete other files
+                    delete(fName);
+                end
+            end
         catch
             % sometimes matlab  has it locked
         end
+    else
+        % create it if needed
+        mkdir(workingDir);
     end
-    mkdir(workingDir);
-% the traditional case:    
+    % the traditional case without remote resources:
 elseif ~exist(workingDir,'dir')
-    mkdir(workingDir); 
+    mkdir(workingDir);
 end
 
 % Make a geometry directory
@@ -181,25 +198,25 @@ if ~exist(renderDir,'dir'), mkdir(renderDir); end
 
 % Fix recipe to include depth, albedo, and normal if it also wants radiance
 if isempty(thisR.metadata) || isempty(thisR.metadata.rendertype)
-        preRender = thisR.get('rendertype');
-        preRender{end+1} = 'radiance';
-        thisR.set('rendertype', preRender);
+    preRender = thisR.get('rendertype');
+    preRender{end+1} = 'radiance';
+    thisR.set('rendertype', preRender);
 end
 if max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'depth'))
-        preRender = thisR.get('rendertype');
-        preRender{end+1} = 'depth';
-        thisR.set('rendertype', preRender);
-        warning("Your recipe is coded to ask for only radiance. As of pbrt-v4 we default to more channels, so better to remove the rendertype from your recipe.\n");
+    preRender = thisR.get('rendertype');
+    preRender{end+1} = 'depth';
+    thisR.set('rendertype', preRender);
+    warning("Your recipe is coded to ask for only radiance. As of pbrt-v4 we default to more channels, so better to remove the rendertype from your recipe.\n");
 end
 if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'albedo'))
-        preRender = thisR.get('rendertype');
-        preRender{end+1} = 'albedo';
-        thisR.set('rendertype', preRender);
+    preRender = thisR.get('rendertype');
+    preRender{end+1} = 'albedo';
+    thisR.set('rendertype', preRender);
 end
 if  max(ismember(thisR.metadata.rendertype,'radiance')) && min(~ismember(thisR.metadata.rendertype,'normal'))
-        preRender = thisR.get('rendertype');
-        preRender{end+1} = 'normal';
-        thisR.set('rendertype', preRender);
+    preRender = thisR.get('rendertype');
+    preRender{end+1} = 'normal';
+    thisR.set('rendertype', preRender);
 end
 
 %% Selectively copy data from the input to the output directory.
@@ -266,8 +283,8 @@ fclose(fileID);
 % texture maps and make sure the files are copied to 'local/'.
 if ~isempty(thisR.materials.list) && overwritematerials
     % Make sure that the texture files are in PNG format
-%     piTextureFileFormat(thisR); % We did this in piRead, no need to do
-%     this again
+    %     piTextureFileFormat(thisR); % We did this in piRead, no need to do
+    %     this again
 
     % Write critical files.
     piWriteMaterials(thisR, remoteResources);
@@ -306,33 +323,39 @@ outputDir  = thisR.get('output dir');
 
 % We check for the overwrite here and we make sure there is also an input
 % directory to copy from.
-if overwriteresources && ~isempty(inputDir)
-
+%if overwriteresources && ~isempty(inputDir)
+if ~isempty(inputDir)
     sources = dir(inputDir);
     status  = true;
     for i = 1:length(sources)
         if startsWith(sources(i).name(1),'.')
             % Skip dot-files
             continue;
-        elseif sources(i).isdir && (strcmpi(sources(i).name,'spds') || strcmpi(sources(i).name,'textures'))
+            % We always copy certain resource files to local, although
+            % some aren't used if remoteResources is being used
+        elseif sources(i).isdir && strcmpi(sources(i).name,'instanced')
             % Copy the spds and textures directory files.
             status = status && copyfile(fullfile(sources(i).folder, sources(i).name), fullfile(outputDir,sources(i).name));
-        else
-            % Selectively copy the files in the scene root folder
-            [~, ~, extension] = fileparts(sources(i).name);
-            % ChessSet needs input geometry because we can not parse it
-            % yet. --zhenyi
-            if ~(piContains(extension,'zip') || piContains(extension,'json'))
-                thisFile = fullfile(sources(i).folder, sources(i).name);
-                if verbosity > 1
-                    fprintf('Copying %s\n',thisFile)
+        elseif overwriteresources
+            if sources(i).isdir && (strcmpi(sources(i).name,'spds') || strcmpi(sources(i).name,'textures') || strcmpi(sources(i).name,'instanced'))
+                % Copy the spds and textures directory files.
+                status = status && copyfile(fullfile(sources(i).folder, sources(i).name), fullfile(outputDir,sources(i).name));
+            else
+                % Selectively copy the files in the scene root folder
+                [~, ~, extension] = fileparts(sources(i).name);
+                % ChessSet needs input geometry because we can not parse it
+                % yet. --zhenyi
+                if ~(piContains(extension,'zip') || piContains(extension,'json'))
+                    thisFile = fullfile(sources(i).folder, sources(i).name);
+                    if verbosity > 1
+                        fprintf('Copying %s\n',thisFile)
+                    end
+                    status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
+                    %status = status && system(sprintf('cp -r %s %s \n',thisFile, fullfile(outputDir,sources(i).name)));
                 end
-                status = status && copyfile(thisFile, fullfile(outputDir,sources(i).name));
-                %status = status && system(sprintf('cp -r %s %s \n',thisFile, fullfile(outputDir,sources(i).name)));
             end
         end
     end
-
     if(~status)
         error('Failed to copy input directory to docker working directory.');
     else
@@ -421,7 +444,7 @@ else
     if ~exist(outputLensFile,'file')
         copyfile(inputLensFile,outputLensFile);
     elseif isequal(inputLensFile,outputLensFile)
-        warning('input and output lens files are the same (%s).',inputLensFile);        
+        warning('input and output lens files are the same (%s).',inputLensFile);
     elseif overwritelensfile
         % It must exist.  So if we are supposed overwrite
         delete(outputLensFile);
@@ -468,11 +491,11 @@ function piWriteLookAtScale(thisR,fileID)
 % Scale inside the WorldBegin' write section
 %
 %
-   theScale = thisR.get('scale');
-   if(~isempty(theScale))
-      fprintf(fileID,'Scale %0.2f %0.2f %0.2f \n', [theScale(1) theScale(2) theScale(3)]);
-      fprintf(fileID,'\n');
-   end
+theScale = thisR.get('scale');
+if(~isempty(theScale))
+    fprintf(fileID,'Scale %0.2f %0.2f %0.2f \n', [theScale(1) theScale(2) theScale(3)]);
+    fprintf(fileID,'\n');
+end
 %
 
 % Optional Motion Blur
@@ -568,13 +591,13 @@ for ofns = outerFields'
 
     % If the camera is submerged, then the medium needs to be defined.
     if strcmp(ofn,'camera') && isfield(thisR.(ofn),'medium')
-       if ~isempty(thisR.(ofn).medium)
-           fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', thisR.get('output basename')));
-           fprintf(fileID,'MediumInterface "" "%s"\n',thisR.(ofn).medium);
-       end
+        if ~isempty(thisR.(ofn).medium)
+            fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', thisR.get('output basename')));
+            fprintf(fileID,'MediumInterface "" "%s"\n',thisR.(ofn).medium);
+        end
     end
-    
-    
+
+
     % Write out the main type and subtypes
     fprintf(fileID,'%s "%s" \n',thisR.(ofn).type,...
         thisR.(ofn).subtype);
@@ -795,9 +818,9 @@ for ii = 1:length(thisR.world)
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_materials.pbrt" \n', basename));
     end
-    
+
     if piContains(currLine,'WorldBegin') && isempty(lineMedia) && ~isempty(thisR.media.list) && ...
-       (~isfield(thisR.camera,'medium') || (isfield(thisR.camera,'medium') && isempty(thisR.camera.medium)))
+            (~isfield(thisR.camera,'medium') || (isfield(thisR.camera,'medium') && isempty(thisR.camera.medium)))
         % Insert the materials file
         fprintf(fileID,'%s \n',sprintf('Include "%s_media.pbrt" \n', basename));
     end
@@ -821,12 +844,12 @@ function piWriteMaterials(thisR, remoteResources)
 
 % We create the materials file.  Its name is the same as the output pbrt
 % file, but it has an _materials inserted.
-    outputDir  = thisR.get('output dir');
-    basename   = thisR.get('output basename');
-    % [~,n] = fileparts(thisR.inputFile);
-    fname_materials = sprintf('%s_materials.pbrt',basename);
-    thisR.set('materials output file',fullfile(outputDir,fname_materials));
-    piMaterialWrite(thisR, 'remoteresources', remoteResources);
+outputDir  = thisR.get('output dir');
+basename   = thisR.get('output basename');
+% [~,n] = fileparts(thisR.inputFile);
+fname_materials = sprintf('%s_materials.pbrt',basename);
+thisR.set('materials output file',fullfile(outputDir,fname_materials));
+piMaterialWrite(thisR, 'remoteresources', remoteResources);
 
 
 end
