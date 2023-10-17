@@ -192,11 +192,6 @@ thisR.get('lights print');
 
 piWRS(thisR,'name','Blue (distant)');
 
-%% With the skymap, but intensity scaled
-
-thisR.set('skymap',fileName);
-thisR.set('light','room_L','specscale',0.3);
-piWRS(thisR,'name','Dark Environment');
 
 %% Add an environment (skymap) light
 
@@ -207,6 +202,12 @@ thisR.set('skymap',fileName);
 tmp = thisR.get('lights','names');
 skyName = tmp{1};
 piWRS(thisR,'name','Environment original');
+
+%% With the skymap, but intensity scaled
+
+thisR.set('skymap',fileName);
+thisR.set('light','room_L','specscale',0.3);
+piWRS(thisR,'name','Dark Environment');
 
 %%  Now rotate the skymap around the z dimension.  
 
