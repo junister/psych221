@@ -47,7 +47,8 @@ piWRS(thisR,'mean luminance',-1);
 % well, changing how widely the projection spread.
 %
 
-headlight = headlamp('preset','level beam','name', 'headlightLight');
+headlight = headlamp('preset','level beam','name', 'headlightLight',...
+    'recipe', thisR);
 headlightLight = headlight.getLight;
 
 % On the surface scale & power do "the same thing" but they
