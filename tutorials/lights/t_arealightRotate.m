@@ -1,15 +1,4 @@
-%% Explore light creation with new area light parameters
-%
-% The area lights were implemented by Zhenyi to help us accurately simulate
-% the headlights in night time driving scenes.
-%
-% The definitions of the shape of the area light are in the
-% arealight_geometry.pbrt file.  Looking at the text there should give
-% us some ideas about how to create more area lights with different
-% properties.
-%
-% This script should explore setting the SPD of the lights and perhaps
-% making different shapes and intensities.
+%% Explore area light parameters
 %
 % See also
 %   s_arealight
@@ -44,13 +33,23 @@ scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 
 %% Plot the luminance across a line
 
-roiLocs = [1 74];
+roiLocs = [1 100];
 sz = sceneGet(scene,'size');
 scenePlot(scene,'luminance hline',roiLocs);
 ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
-%% The green light is bright.  Let's reduce its intensity.
-gScale = thisR.get('light','Area_Yellow_L','specscale');
+%%
+% t = thisR.get('light','Area_Yellow_L','rotate')
+
+thisR.set('light','Area_Yellow_L','rotate',[-20 -30 -10]);
+scene = piWRS(thisR,'render flag','rgb','mean luminance',-1);
+thisR.set('asset','Plane_O','delete');
+%%
+% x and y are reversed between world position and the light position
+wp = thisR.get('light','Area_Yellow_L','world position')
+thisR.set('light','Area_Yellow_L','translate',[-5 0 0]);
+scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
+
 
 %% The intensity seems to be scaling with the square of the value
 % So to reduce it by a factor of 2, we scale by sqrt(2)
