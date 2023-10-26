@@ -21,6 +21,7 @@ if ~piDockerExists, piDockerConfig; end
 %% 
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
+thisR.simplify;
 
 thisR.set('render type',{'radiance','depth'});
 thisR.show('lights');
@@ -43,15 +44,6 @@ thisR.set('light','AreaLightRectangle.003_L','name','Area_Yellow_L');
 thisR.show('lights');
 
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
-
-%% Check that simplify renders the same way
-%
-% It does not yet (Oct 26, 2023).
-%
-%{
-thisR.simplify;
-scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
-%}
 
 %% Plot the luminance across a line
 
@@ -119,7 +111,7 @@ thisR.set('asset', 'Area_Blue_L', 'rotate', [0, 0, -30]); % -5 degree around y a
 
 piWRS(thisR,'render flag','hdr');
 
-%% Change the SPD of the lights to halogen
+%% Change the SPD of the lights to potential headlamps
 
 lList = {'LED_3845','LED_4613','halogen_2913','CFL_5780'};
 
@@ -141,6 +133,10 @@ for ii=1:numel(lList)
     else, hold on; plot(wave,ledSPD);
     end
 end
+
+%% Show the chromaticities of the lights
+%
+% We should get the chromaticities from regions in the scene, too.
 
 for ii=1:numel(lList)
     [ledSPD,wave] = ieReadSpectra(lList{ii});

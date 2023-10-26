@@ -4,6 +4,12 @@ function [tMatrix,identityTest] = piTransformConcat(thisNode)
 %%
 if ~isequal(thisNode.type,'branch')
     error('Not a branch node.')
+elseif isfield(thisNode,'referenceObject') && ~isempty(thisNode.referenceObject)
+    % Preserve branch nodes that represent an object instance
+    disp('Instance.')
+    tMatrix = [];
+    identityTest = false;
+    return;
 end
 
 %%
