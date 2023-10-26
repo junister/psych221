@@ -44,9 +44,14 @@ thisR.show('lights');
 
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 
-%%
+%% Check that simplify renders the same way
+%
+% It does not yet (Oct 26, 2023).
+%
+%{
 thisR.simplify;
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
+%}
 
 %% Plot the luminance across a line
 
@@ -68,15 +73,15 @@ thisR.set('light','Area_Yellow_L','specscale',gScale/sqrt(2));
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 uData2 = scenePlot(scene,'luminance hline',roiLocs);
 
-%%
-ieNewGraphWin;
-plot(uData1.pos,uData1.data./uData2.data);
-
 %% Can we scale it back?
 
 thisR.set('light','Area_Yellow_L','specscale',gScale);
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 uData1 = scenePlot(scene,'luminance hline',roiLocs);
+
+%%
+ieNewGraphWin;
+plot(uData1.pos,uData1.data./uData2.data);
 
 %%
 roiLocs = [1 74];
