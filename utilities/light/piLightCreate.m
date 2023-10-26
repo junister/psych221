@@ -302,7 +302,11 @@ switch ieParamFormat(lght.type)
         % the distribution defined by the given area light implementation.
         % Note that area lights can currently only be used with triangle,
         % bilinear patch, sphere, cylinder, and disk shapes;
-        
+        % AttributeBegin
+        %   AreaLightSource "diffuse" "blackbody L" [ 6500 ] "float power" [ 100 ]
+        %   Translate 0 10 0
+        %   Shape "sphere" "float radius" [ .25 ]
+        % AttributeEnd
         lght.type = 'area';
 
         lght.twosided.type = 'bool';

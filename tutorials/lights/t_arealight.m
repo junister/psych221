@@ -21,8 +21,10 @@ if ~piDockerExists, piDockerConfig; end
 %% 
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
+
 thisR.set('render type',{'radiance','depth'});
-thisR.get('print lights')
+thisR.show('lights');
+thisR.show('objects');
 
 % The no number is the blue one
 % The 002 light is the green one.
@@ -40,6 +42,10 @@ thisR.set('light','AreaLightRectangle.002_L','name','Area_Green_L');
 thisR.set('light','AreaLightRectangle.003_L','name','Area_Yellow_L');
 thisR.show('lights');
 
+scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
+
+%%
+thisR.simplify;
 scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 
 %% Plot the luminance across a line
