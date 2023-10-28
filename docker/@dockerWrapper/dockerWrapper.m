@@ -1,7 +1,6 @@
 classdef dockerWrapper < handle
     %DOCKERWRAPPER A class to manage ISET3d-v4 rendering
     %
-
     % This class manages how we run PBRT and other tools in Linux docker
     % containers in ISET3d (version 4). At present, we manage these cases:
     %
@@ -213,9 +212,9 @@ classdef dockerWrapper < handle
             %
             % We typically want 'default' to be the docker context
             % for everything except rendering
-            aDocker.defaultContext = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
-            aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
-            aDocker.localImageName   =  getpref('docker','localImage','');
+            aDocker.defaultContext   = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
+            aDocker.gpuRendering     = getpref('docker', 'gpuRendering', true);
+            aDocker.localImageName   = getpref('docker','localImage','');
 
             aDocker.whichGPU = getpref('docker','whichGPU',0); % -1 is use any
 
