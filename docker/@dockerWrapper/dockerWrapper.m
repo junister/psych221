@@ -73,16 +73,21 @@ classdef dockerWrapper < handle
     %
     % Additional NOTES
     %
+    % * Use dockerWrapper.presets to set up a configuration on, say,
+    %   'remote mux', 'remote orange' or other options.  See the header
+    %   of cokerWrapper.preset for current options 
+    %   (doc dockerWrapper.preset)
+    %
     % * Use dockerWrapper.setPrefs and dockerWrapper.getPrefs to
-    % interact with the Matlab prefs that determine the defaults.  The
-    % defaults are used when creating a new dockerWrapper.
+    %   interact with the Matlab prefs that determine the defaults.  The
+    %   defaults are used when creating a new dockerWrapper.
     %
     % * It is possible to create a dockerWrapper and then manually change
-    % the parameters.  We recently made the dockerWrapper variables
-    % public, not private.
+    %   the parameters.  We recently made the dockerWrapper variables
+    %   public, not private.
     %
     % * To shut down stranded local containers, on the command line
-    % run:
+    %   run:
     %
     %    docker container prune
     %
