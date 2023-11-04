@@ -351,7 +351,7 @@ classdef dockerWrapper < handle
         getPrefs(varargin);
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
-
+        
         %% Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';

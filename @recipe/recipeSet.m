@@ -1244,11 +1244,22 @@ switch param
                 return;
             case 'replace'
                 % thisR.set('light', lightName, 'replace', newLight);
+                % 
+                % Confused about this.
                 thisLgtAsset = thisR.get('light', lghtName);
-                val.name = piLightNameFormat(val.name);
-                thisLgtAsset.lght{1} = val;
-                thisLgtAsset.name = val.name;
-                thisR.set('asset', lghtName, thisLgtAsset);
+                % Sometimes newLight is the light asset with the
+                % subfield lght.  Sometimes it is just the subfield
+                % lght.
+                if ~isfield(val,'lght')
+                    thisLgtAsset.lght{1} = val;
+                    % Make sure the name has the _L
+                    thisLgtAsset.lght{1}.name = piLightNameFormat(val.name);
+                else
+                    % Assign but make sure the ID (names) are OK.
+                    thisR.set('asset', lghtName, val);
+                    thisR.assets.uniqueNames;
+                end
+
                 return;
             case {'worldrotation', 'worldrotate'}
                 thisR.set('asset', lghtName, 'world rotation', val);
@@ -1260,6 +1271,30 @@ switch param
                 return;
             case {'worldorientation'}
                 thisR.set('asset', lghtName, 'world orientation', val);
+                return;
+            case {'shapescale'}
+                % thisR.set('light',name,'shape scale',1 or 3 vector)
+                %
+                % For area lights.  We should be testing.
+                %             
+                thisLight = thisR.get('light',lghtName);
+                theShape = thisLight.lght{1}.shape{1};
+                if numel(val) == 1
+                    val(2) = val(1); val(3)= val(1);
+                end
+
+                if ~isempty(theShape.point3p)
+                    pts = theShape.point3p;
+                    pts(1:3:end) = pts(1:3:end)*val(1);
+                    pts(2:3:end) = pts(2:3:end)*val(2);
+                    pts(3:3:end) = pts(3:3:end)*val(3);
+                    theShape.point3p = pts;
+                    thisLight.lght{1}.shape{1} = theShape;
+                    thisR.set('light',lghtName,'replace',thisLight);
+                elseif ~isempty(theShape.filename)
+                    % Not implemented yet
+                    error('We should add a branch that scales.');
+                end
                 return;
             case {'rotate', 'rotation'}
                 % Rotate the direction, angle in degrees

@@ -1604,17 +1604,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('lights',idx,property)
         % thisR.get('light',idx,'shape')
         % [idx,names] = thisR.get('lights');
-        % thisR.get('lights',lightName','from') - NOT WORKING. to
+        % thisR.get('lights',lightName,'from') - NOT WORKING. to
         % also.
         
         if isempty(varargin)
             % thisR.get('lights')
-            %
-            % This was returning the names (no id) of the lights.
-            % BW changed it to return a vector of node indices to the
-            % lights.
-            %
-            % To discuss with Zhenyi and Zheng.
             names = thisR.assets.mapLgtFullName2Idx.keys;
             if isempty(names), disp('No lights.'); return;
             else
@@ -1626,6 +1620,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                 return;
             end
         end
+
 
         % Parameters from a single light.  varargin{1} may be an index
         % to the light asset.

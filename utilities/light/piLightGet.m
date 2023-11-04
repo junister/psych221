@@ -1,6 +1,15 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
+% TODO:  This routine should be called piLightText.  We also need a
+%   collection of routines that get the parameters from a light
+%   structure, say piLightGet/Set/Plot.
+%
+%   The routine appears in a lot of places, but I am quite suspicious
+%   of most uses.  For example in piLightAddToWorld and
+%   piLightGetFromText.  It seems necessary in piLightWrite.  But
+%   s_flatSurface?
+%
 % Description
 %   piLightGet takes in a light struct and returns a value (first) and
 %   the text that can be printed in the PBRT rendering file (usually
