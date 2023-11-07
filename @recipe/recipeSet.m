@@ -1276,26 +1276,11 @@ switch param
                 % thisR.set('light',name,'shape scale',1 or 3 vector)
                 %
                 % For area lights.  We should be testing.
-                %             
-                thisLight = thisR.get('light',lghtName);
-                theShape = thisLight.lght{1}.shape{1};
-                if numel(val) == 1
-                    val(2) = val(1); val(3)= val(1);
-                end
-
-                if ~isempty(theShape.point3p)
-                    pts = theShape.point3p;
-                    pts(1:3:end) = pts(1:3:end)*val(1);
-                    pts(2:3:end) = pts(2:3:end)*val(2);
-                    pts(3:3:end) = pts(3:3:end)*val(3);
-                    theShape.point3p = pts;
-                    thisLight.lght{1}.shape{1} = theShape;
-                    thisR.set('light',lghtName,'replace',thisLight);
-                elseif ~isempty(theShape.filename)
-                    % Not implemented yet
-                    error('We should add a branch that scales.');
-                end
+                %
+                id = thisR.get('node',lghtName,'id');
+                thisR.set('node',id,'scale',val);
                 return;
+                
             case {'rotate', 'rotation'}
                 % Rotate the direction, angle in degrees
                 % thisR.set('light', lghtName, 'rotate', [XROT, YROT, ZROT], ORDER)
