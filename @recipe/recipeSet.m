@@ -1275,7 +1275,8 @@ switch param
             case {'shapescale'}
                 % thisR.set('light',name,'shape scale',1 or 3 vector)
                 %
-                % For area lights.  We should be testing.
+                % Find the node and add a scale to the branch node
+                % above the light.
                 %
                 id = thisR.get('node',lghtName,'id');
                 thisR.set('node',id,'scale',val);
@@ -1283,6 +1284,7 @@ switch param
                 
             case {'rotate', 'rotation'}
                 % Rotate the direction, angle in degrees
+                % We should use the same approach as for shapescale.
                 % thisR.set('light', lghtName, 'rotate', [XROT, YROT, ZROT], ORDER)
                 % See piLightRotate
                 lghtAsset = thisR.get('light', lghtName);
@@ -1375,10 +1377,10 @@ switch param
         % At this point we have the light.
         if numel(varargin{1}) == 1
             % thisR.set('light', lghtName, lightStruct);
+            %
             % A light struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
-            % it.
-            % thisR.lights{lgtIdx} = varargin{1};
+            % it. We are not checking enough.            
             thisR.set('light', lghtName, 'replace', varargin{1});
         else
             % thisR.set('light', lightName, param, val)
