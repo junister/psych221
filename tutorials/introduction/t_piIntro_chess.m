@@ -50,7 +50,7 @@ scenePlot(scene,'depth map');
 
 %% Add a bright point light near the front where the camera is
 
-thisR.get('light print');
+% thisR.show('lights');
 thisR.set('light','all','delete');
 
 % First create the light
