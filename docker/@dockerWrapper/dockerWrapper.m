@@ -489,7 +489,11 @@ classdef dockerWrapper < handle
 
         %% Start PBRT
         function ourContainer = startPBRT(obj, processorType)
-            % Start the docker container remotely
+            % Start the PBRT docker container.  Called when rendering,
+            % say by piWRS() or piRender().
+            %
+            % See also
+            %
 
             verbose = obj.verbosity;
             if isequal(processorType, 'GPU')
@@ -597,18 +601,16 @@ classdef dockerWrapper < handle
             % doesn't have a timeout flag, but it'd be good if we could
             % find a way to validate context & server that errors out
             % more gracefully. TBD
-            if verbose > 0
-                fprintf('Starting Docker with: %s\n', cmd);
-            end
             [status, result] = system(cmd);
-            if verbose > 0
-                cprintf('*Green', "STARTED Docker (status %d): %s\n", status, cmd);
-            end
-            if status == 0
-                obj.dockerContainerID = result; % hex name for it
-                return;
+
+            if status ~= 0
+                warning("Failed to start Docker container: %s", result);
             else
-                warning("Failed to start Docker container with message: %s", result);
+                obj.dockerContainerID = result; % hex name for it
+                if verbose > 0
+                    cprintf('*Green', "STARTED Docker successfully\n");
+                    cprintf('black','CMD: %s',cmd);
+                end
             end
         end
 

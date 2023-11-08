@@ -32,6 +32,10 @@ if nLights == 0
 end
 
 %% Initialize
+
+% For the car scene in objectInstance there is a difference in the
+% count of assets.mapLgtShort and assets.mapLgtFull ... That is a
+% problem in building this table.
 lightNames = thisR.get('light', 'names');
 lightIDs   = thisR.get('light','ids');
 specscale  = ones(nLights,1);
