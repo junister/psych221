@@ -15,7 +15,7 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %% Read the file
-%thisR = piRecipeDefault('scene name','checkerboard');
+%thisR = piRecipeCreate('checkerboard');
 thisR = piRecipeDefault('scene name','flatSurface');
 
 thisR.set('name','ProjectionLight');  % Name of the recipe
@@ -50,17 +50,17 @@ piWRS(thisR,'mean luminance',-1);
 % fov is the field of view covered by the slide
 % power is total power of the projection lamp
 
-imageMap = 'skymaps/gonio-thicklines.png';
+imageMap = 'skymaps/headlamp_highbeam.exr'; % cheat, should use all white
 projectionLight_Left = piLightCreate('Left_Light', ...
     'type','projection',...
-    'fov', 40, ...
+    'fov', 80, ...
     'scale', 10, ...
     'power', 0, ...  % pbrt checks for < 0, but not sure why
     'cameracoordinate', 1, ...
     'filename string', imageMap);
 projectionLight_Right = piLightCreate('Right_Light', ...
     'type','projection',...
-    'fov', 40, ...
+    'fov', 80, ...
     'scale', 10, ...
     'power', 0, ...  % pbrt checks for < 0, but not sure why
     'cameracoordinate', 1, ...
@@ -70,7 +70,7 @@ projectionLight_Right = piLightCreate('Right_Light', ...
 % definitely don't in the pbrt code.
 
 % Example outputs:
-% scale power meanluminance 
+% scale power meanluminance
 %  10,   20,   254
 %  10,   10,   127
 %  20,   10,   254
@@ -115,7 +115,45 @@ thisR.show('lights');
 
 piWRS(thisR);
 
-%% Things that don't work:)
+%% Now try a mirrored sphere
+
+% Can we make an empty scene?
+thisR = piRecipeCreate('flat surface');
+
+% Remove all the lights
+thisR.set('light', 'all', 'delete');
+
+% remove the flat surface
+surface = piAssetSearch(thisR,'object name','Cube_O');
+piAssetDelete(thisR, surface);
+
+thisR.lookAt.from = [0 0 0];
+thisR.lookAt.to = [0 0 100];
+thisR.lookAt.up = [0 1 0];
+
+% Add the projection lights
+thisR.set('light', projectionLight_Left, 'add');
+thisR.set('light', projectionLight_Right, 'add');
+
+sphere = piAssetLoad('sphere');
+assetSphere = piAssetSearch(sphere.thisR,'object name','Sphere');
+
+piAssetTranslate(sphere.thisR,assetSphere,[0 0 50]);
+
+% Default sphere is huge, scale it to use in scene
+piAssetScale(sphere.thisR,assetSphere,[.002 .002 .002]);
+
+% Mirror should give us most accurate light reading
+piMaterialsInsert(sphere.thisR,'name','mirror');
+piMaterialsInsert(sphere.thisR,'name','glossy-white');
+
+sphere.thisR.set('asset', assetSphere, 'material name', 'mirror');
+
+thisR = piRecipeMerge(thisR,sphere.thisR, 'node name',sphere.mergeNode,'object instance', false);
+piWRS(thisR, 'mean luminance', -1);
+
+
+%% Things that don't work or are alternates:)
 %{
 thisR.set('asset',pLight,'world position',[0 0 0]);
 
@@ -125,12 +163,14 @@ thisR.get('light',pLight,'world position')
 % We do account for it correctly with the show command
 thisR.show('lights')
 %}
-%%
+%% if using cube
+%{
 cube = piAssetSearch(thisR,'objectname', 'Cube');
 thisR.set('asset',cube,'rotation',[10 10 10]);
 piWrite(thisR);
 scene = piRender(thisR);
 sceneWindow(scene);
+%}
 %%
 %{
 for ii = 1 % 0:3 in case we want to try options

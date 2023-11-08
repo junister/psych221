@@ -161,9 +161,11 @@ if pbrtText && ~isempty(val) &&...
             % Below, mapname is for skymaps
             txt = sprintf(' "string filename" "%s"', val);
 
-            % DJC Use skymaps only where they belong
-            if ~contains(val,'skymaps/'), prefix = 'skymaps/';
-            else,                         prefix = '';
+            % Use skymaps only where they belong
+            % or in the instanced folder
+            if contains(val,'instanced/'),    prefix = '';
+            elseif ~contains(val,'skymaps/'), prefix = 'skymaps/';
+            else,                             prefix = '';
             end
 
             % in v4 this changed to filename from mapname

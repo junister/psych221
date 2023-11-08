@@ -92,9 +92,9 @@ oidn_Binary = 'oidnDenoise';
 if ismac
     oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
 elseif isunix
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x86_64.linux', 'bin');
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.1.0.x86_64.linux', 'bin');
 elseif ispc
-    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
+    oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.1.0.x64.windows', 'bin');
 end
 
 if ~isfolder(oidn_pth)
