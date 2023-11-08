@@ -23,7 +23,7 @@ function [status, result] = render(obj, renderCommand, outputFolder, varargin)
 
 p = inputParser();
 
-addParameter(p, 'denoiseflag', false, @boolean);
+addParameter(p, 'denoiseflag', false, @islogical);
 addParameter(p, 'rendertype',[]);
 
 % Okay to get params we don't understand

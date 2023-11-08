@@ -1,6 +1,15 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
+% TODO:  This routine should be called piLightText.  We also need a
+%   collection of routines that get the parameters from a light
+%   structure, say piLightGet/Set/Plot.
+%
+%   The routine appears in a lot of places, but I am quite suspicious
+%   of most uses.  For example in piLightAddToWorld and
+%   piLightGetFromText.  It seems necessary in piLightWrite.  But
+%   s_flatSurface?
+%
 % Description
 %   piLightGet takes in a light struct and returns a value (first) and
 %   the text that can be printed in the PBRT rendering file (usually
@@ -84,17 +93,18 @@ if isfield(lght, pName)
     elseif isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val')
         val = lght.(pName).value;
     end
-elseif strcmpi(lght.type, 'infinite')
-    % do nothing
 else
-    warning('Parameter: %s does not exist in light type: %s',...
+    % We used to set a warning, but now we just print this.  Perhaps
+    % we should do better at checking.
+    fprintf('Parameter "%s" not present for light type "%s"\n',...
         param, lght.type);
+    val = NaN;
 end
 
 % If the user didn't ask for text, we are done.
 if nargout == 1, return; end
 
-%% compose pbrt text
+%% compose PBRT text that defines the light.
 txt = '';
 if pbrtText && ~isempty(val) &&...
         (isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val') || isequal(pName, 'type')) ||...
@@ -107,19 +117,17 @@ if pbrtText && ~isempty(val) &&...
                 txt = sprintf('AreaLightSource "diffuse"');
             end
         case 'spd'
-            spectrumScale = lght.specscale.value;
+            if ~isempty(lght.specscale.value), spectrumScale = lght.specscale.value;
+            else, spectrumScale = 1;
+            end
             
-            % Maybe fix specscale earlier and more gnerally.
-            if isempty(spectrumScale), spectrumScale = 1; end
-            spectrumScale = 1; % tmp, we scale spd with a seperate paramter.
             if ischar(lght.spd.value)
                 [~, ~, ext] = fileparts(lght.spd.value);
                 if ~isequal(ext, '.spd')
-                    % If the extension is not .spd, it indicates the
-                    % spectrum is written out from isetcam, which is
-                    % supposed to be in spds/lights. Otherwise, the spd
-                    % file exists from the input folder already, it should
-                    % be copied in the target directory.
+                    % If the extension is not .spd, the spectrum is an
+                    % isetcam mat file. Otherwise, the spd file exists
+                    % from the input folder already, it should be
+                    % copied in the target directory.
                     
                     % use 'scale' to scale the radiance.
                     lightSpectrum = sprintf('"spds/lights/%s.spd"', ieParamFormat(lght.spd.value));
@@ -225,7 +233,6 @@ if pbrtText && ~isempty(val) &&...
                 txt{end + 1} = sprintf('"float scale" %.3f', val{ii}(1));
             end
         case 'specscale'
-%             if ~iscell(val), val = {val};end
             txt = sprintf(' "float scale" [%.5f]',val);
             
         case 'spread'

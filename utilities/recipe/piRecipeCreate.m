@@ -51,9 +51,10 @@ function thisR = piRecipeCreate(rName,varargin)
 
 %% Input parsing
 
-validRecipes = {'macbethchecker','chessset',...
+validRecipes = {'macbethchart','chessset','head',...
     'cornell_box','cornellboxreference',...
     'simplescene','arealight','bunny','car','checkerboard', ...
+    'flatsurface', ...
     'lettersatdepth','materialball','materialball_cloth',...
     'sphere','slantededge','testplane','teapotset'};
 
@@ -83,6 +84,7 @@ end
   rList = thisR.list;
     {'ChessSet'               } - OK
     {'CornellBoxReference'    } - Requires HDR because light is bright
+    {'head'                   } - Working on it
     {'MacBethChecker'         } - Needs a light
     {'SimpleScene'            } - Renders
     {'arealight'              } - Broken
@@ -160,21 +162,50 @@ switch ieParamFormat(rName)
     case 'arealight'
         thisR = piRecipeDefault('scene name',rName);
     case 'bunny'
+        % The bottom of the bunny is at 0,0,0
+        % We see it from the side.
         thisR = piRecipeDefault('scene name',rName);
-        bIDX = piAssetSearch(thisR,'object name','bunny');
-        bPos = thisR.get('asset',bIDX,'world position');
-        thisR.set('to',bPos);
-        thisR.set('object distance',0.5);
+        bunnyID = piAssetSearch(thisR,'object name','bunny');
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+        thisR.set('up',[0 1 0]);
+        thisR.set('asset',bunnyID,'scale',2);  % I don't think the size is right.
+        thisR.set('asset',bunnyID,'world position',[0 0 1]);        
+        thisR.show('objects');
 
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
-        lgt = piLightCreate('new distant',...
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
+            'spd spectrum', lightSpectrum);
         thisR.set('light', lgt, 'add');
-        warning('Single, isolated bunny.  Might use piAssetInsert')
+    case 'head'
+        % The face is positioned towards the camera.
+        % The 'to' is the upper right of the head, it seems.s
+        thisR = piRecipeDefault('scene name','head');
+        thisR.set('lights','all','delete');
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+        thisR.set('up',[0 1 0]);
+        thisR.set('node',2,'name','head_B');
+        thisR.set('node',3,'name','head_O');        
+        id = piAssetSearch(thisR,'object name','head');
+        thisR.set('asset',id,'world position',[0 0 1]);
+        thisR.set('asset',id,'rotate',[0 180 0]);
+        thisR.set('asset',id,'scale',0.5);
+
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
+            'type', 'distant',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum);
+        thisR.set('light', lgt, 'add');
+        % piWRS(thisR);
+
     case 'car'
         % The materials do not look right.  Rendering needs help.
         thisR = piRecipeDefault('scene name',rName);
@@ -191,24 +222,78 @@ switch ieParamFormat(rName)
         thisR.set('light', lgt, 'add');
         warning('Car scene needs work.')
     case 'checkerboard'
+        % 1m x 1m at 0 0 1 with from at 0 0 0.  Zero thickness.
         thisR = piRecipeDefault('scene name',rName);
-    case 'coordinate'
-        thisR = piRecipeDefault('scene name',rName);
+        idx = piAssetSearch(thisR,'object name','Checkerboard');
+        thisR.set('asset',idx,'world position',[0 0 1]);
+        sz = thisR.get('asset',idx,'size');
+        thisR.set('asset',idx,'scale',[1/sz(1),1/sz(2),1]);
+
+        thisR.set('from',[0 0 0]);
+        thisR.set('to',[0 0 1]);
+
+        % Equal energy infinite light.
+        thisR.set('lights','all','delete');
         spectrumScale = 1;
         lightSpectrum = 'equalEnergy';
-        lgt = piLightCreate('new distant',...
+        lgt = piLightCreate('infinite',...
+            'type', 'infinite',...
+            'specscale float', spectrumScale,...
+            'spd spectrum', lightSpectrum);                
+        thisR.set('lights',lgt,'add');
+        % piWRS(thisR);
+
+    case 'coordinate'
+        thisR = piRecipeDefault('scene name',rName);
+         
+        spectrumScale = 1;
+        lightSpectrum = 'equalEnergy';
+        lgt = piLightCreate('distant',...
+            'from',[0 0 -5],...
             'type', 'distant',...
             'specscale float', spectrumScale,...
-            'spd spectrum', lightSpectrum,...
-            'cameracoordinate', true);
-        thisR.set('light', lgt, 'add');
+            'spd spectrum', lightSpectrum);
+        thisR.set('lights',lgt,'add');
+
+        % thisR.set('from',[0 0 0]);
+        % thisR.set('to',[0 0 1]);
+        % thisR.set('up',[0 1 0]);
+
         idx = piAssetSearch(thisR,'object name','origin');
         thisR.set('to',thisR.get('asset',idx,'world position'));
         warning('Not visible in HDR mode.')
+
     case 'flatsurface'
+        % Some issues here.  Check piChartCreate for how to adjust.
         thisR = piRecipeDefault('scene name',rName);
-        idx = piAssetSearch(thisR,'object name','Cube');
-        thisR.set('to',thisR.get('asset',idx,'world position'));
+        % piWRS(thisR);
+
+        thisR.set('asset','Camera_B','delete');
+        thisR.set('lights','all','delete');
+        cubeID = piAssetSearch(thisR,'object name','Cube');
+
+        % Delete all the branch nodes.  Nothing but root and the object.
+        id = thisR.get('asset',cubeID,'path to root');
+        fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+        for ii=3:numel(id)
+            thisR.set('asset',id(ii),'delete');
+        end
+        cubeID = piAssetSearch(thisR,'object name','Cube');
+
+        % thisR.show;
+
+        % Aim the camera at the object and bring it closer.
+        thisR.set('from',[0,0,0]);
+        thisR.set('to',  [0,0,1]);
+        thisR.set('up',  [0,1,0]);
+
+        % We place the surface assuming the camera is at 0,0,0 and pointed in the
+        % positive direction.  So we put the object 1 meter away from the camera.
+        thisR.set('asset',cubeID,'world position',[0 0 1]);
+
+        % We scale the surface size to be 1,1,0.1 meter.
+        sz = thisR.get('asset',cubeID,'size');
+        thisR.set('asset',cubeID,'scale', (1 ./ sz).*[1 1 0.1]);
         
     case 'flatsurfacewhitetexture'
         thisR = piRecipeDefault('scene name',rName);

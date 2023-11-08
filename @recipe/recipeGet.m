@@ -1490,86 +1490,91 @@ switch ieParamFormat(param)  % lower case, no spaces
             val(ii,:) = thisR.get('asset',idx(ii),'size');
         end       
 
-        % -------Instances
+        % -------Instances and references
     case {'instance','instances'}
-        % idx   = thisR.get('instances');   % Return idx of instances
-        % param = thisR.get('instance',id,'param')
+        % idx = thisR.get('instances'); % Return idx of all instances
         %
-        % How can we have an instance without a reference object?
-        % What is the extraNode slot?
-        if isempty(varargin)
-            % Return all the indices of the branch indices
-            n = thisR.get('n nodes');
-            val = zeros(1,n);
-            for ii=1:n
-                if isequal(thisR.get('asset',ii,'type'),'branch')
-                    b = thisR.get('asset',ii);
-                    if b.isObjectInstance
-                        val(ii) = 1; 
-                    end
+        % Branch nodes that have a non-empty referenceObject are the
+        % copies (instances).  The reference object is named in the
+        % slot, and it can be found using 
+        %  thisR.get('reference objects');
+        assert(isempty(varargin))
+
+        % idx = thisR.get('instances');  % All instances.
+        % Return all the indices of the branch indices
+        n = thisR.get('n nodes');
+        val = zeros(1,n);
+        for ii=1:n
+            % Instances are branch nodes, not object nodes.
+            if isequal(thisR.get('asset',ii,'type'),'branch')
+                b = thisR.get('asset',ii);
+                % There is a non-mepty reference object, and the name
+                % contains _I_.  So this is an instance.
+                if isfield(b,'referenceObject') && ~isempty(b.referenceObject) && contains(b.name,'_I_')
+                    val(ii) = 1;
                 end
             end
-            val = find(val);
-            return;
         end
-
-        % We have an asset index or name and possibly a parameter
-        if ischar(varargin{1})
-            [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
-            % If only one asset matches, turn it from cell to struct.
-        else
-            % Not sure when we send in varargin as an array.  Example?
-            % (BW)
-            if numel(varargin{1}) > 1,  id = varargin{1}(1);
-            else,                       id = varargin{1};
-            end
-            [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
-        end
-        if isempty(id)
-            error('Could not find asset %s\n',varargin{1});
-        end
-        if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        val = find(val);
         
-        % We are not getting the _I_ into the name.  Maybe we do not
-        % need to because we have the isObjectInstance field? (BW)
-        % assert(contains(thisAsset.name,'_I_'));
-
-        % Enable various parameters - todo!!!!
-        try
-            val = thisAsset.(varargin{2});
-        catch
-            disp('Unknown parameter')
-            val = fieldnames(thisAsset);
-            disp(val)
-        end
+        % % User sent a name or an index 
+        % if ischar(varargin{1})
+        %     [id,thisAsset] = piAssetFind(thisR.assets,'name',varargin{1});
+        %     % If only one asset matches, turn it from cell to struct.
+        % else
+        %     % This implies that we have a number.            
+        %     if numel(varargin{1}) > 1,  id = varargin{1}(1);
+        %     else,                       id = varargin{1};
+        %     end
+        %     [~, thisAsset] = piAssetFind(thisR.assets,'id', id);
+        % end
+        % if isempty(id)
+        %     error('Could not find asset %s\n',varargin{1});
+        % end
+        % if iscell(thisAsset), thisAsset = thisAsset{1}; end
+        % 
+        % % We are not getting the _I_ into the name.  Maybe we do not
+        % % need to because we have the isObjectInstance field? (BW)
+        % % assert(contains(thisAsset.name,'_I_'));
+        % 
+        % % Enable various parameters - todo!!!!
+        % try
+        %     val = thisAsset.(varargin{2});
+        % catch
+        %     disp('Unknown parameter')
+        %     val = fieldnames(thisAsset);
+        %     disp(val)
+        % end
         
         % These are the other form, without a parameter
-    case {'instanceid','instanceids'}
-        % See above.  We are having a problem identifying by the name
-        % (with the _I_).  I am identifying by the isObjectInstance
-        % field for now.
+    case {'instanceid','instanceids'}        
         val = thisR.get('instances');
-        %{
-        val = [];
-        if isempty(thisR.assets), return; end
-        nnodes = thisR.assets.nnodes;
-        for ii=1:nnodes
-            thisNode = thisR.assets.Node{ii};
-            if isfield(thisNode,'type') && isequal(thisNode.type,'branch')
-                if contains(thisNode.name,'_I_') && ~contains(thisNode.name,'uc')
-                    val = [val,ii]; %#ok<AGROW>
-                end
-            end
-        end
-        %}
     case {'instancenames'}
         % thisR.get('instance names')
-        % Returns names without the IDs.
-        % Instances are a subset of the branch nodes.
+        % Returns names, stripping the IDs.
         if isempty(thisR.assets), return; end        
+
         idx   = thisR.get('instances');
-        names = thisR.get('asset names');  % No ID in the name
+        names = thisR.get('node names');  % No ID in the name
         val = names(idx(:));
+    case {'referenceobjects'}
+        % thisR.get('reference objects')
+        %
+        % A branch node that has isObjectInstance set to true is used
+        % as an instance. The object at the leaf node defines the object.
+        assert(isempty(varargin));
+        n = thisR.get('n nodes');
+        val = zeros(1,n);
+        for ii=1:n
+            % Instances are branch nodes, not object nodes.
+            if isequal(thisR.get('asset',ii,'type'),'branch')
+                b = thisR.get('asset',ii);
+                % This is the flag indicated we are at a branch node
+                % that contains an object instance.                
+                if b.isObjectInstance, val(ii) = 1; end
+            end
+        end
+        val = find(val);
 
         % ---------  Lights
     case {'lightsimplenames'}
@@ -1599,15 +1604,11 @@ switch ieParamFormat(param)  % lower case, no spaces
         % thisR.get('lights',idx,property)
         % thisR.get('light',idx,'shape')
         % [idx,names] = thisR.get('lights');
-        %
+        % thisR.get('lights',lightName,'from') - NOT WORKING. to
+        % also.
+        
         if isempty(varargin)
             % thisR.get('lights')
-            %
-            % This was returning the names (no id) of the lights.
-            % BW changed it to return a vector of node indices to the
-            % lights.
-            %
-            % To discuss with Zhenyi and Zheng.
             names = thisR.assets.mapLgtFullName2Idx.keys;
             if isempty(names), disp('No lights.'); return;
             else
@@ -1620,17 +1621,29 @@ switch ieParamFormat(param)  % lower case, no spaces
             end
         end
 
+
         % Parameters from a single light.  varargin{1} may be an index
         % to the light asset.
+        % the mapLgtFullXXX and mapLgtShortXXX keys are not always the
+        % same size.  This has to do with some simplification that
+        % Zheng and Zhenyi implemented.  Ask them.
         switch ieParamFormat(varargin{1})
             case {'names','namesnoid'}
                 % thisR.get('lights','names')
                 % All the light names (full)
-                val = thisR.assets.mapLgtShortName2Idx.keys;
+                val = thisR.assets.mapLgtFullName2Idx.keys;
+                for ii=1:numel(val), val{ii} = val{ii}(10:end); end
             case {'namesid','namesidx'}
                 % thisR.get('lights','names id');
-                % All the light names, without the ID
+                % All the light names, with the ID
                 val = thisR.assets.mapLgtFullName2Idx.keys;
+            case {'id','ids'}
+                % The node ids of the lights
+                fullNames = thisR.assets.mapLgtFullName2Idx.keys;
+                val = zeros(size(fullNames));
+                for ii=1:numel(fullNames)
+                    val(ii) = str2double(fullNames{ii}(1:6));
+                end
             otherwise
                 % If we are here, varargin{1} is a light name or id.
                 % There may be a varargin{2} for the light property to
@@ -1643,14 +1656,7 @@ switch ieParamFormat(param)  % lower case, no spaces
                     assert(isequal(thisLight.type,'light'));
                     val = thisLight;
                 elseif isstruct(varargin{1})
-                    % ZLY: I think it should not be here?
-                    % The user sent in the material.  We hope.
-                    % We should have a slot in material that identifies itself as a
-                    % material.  Maybe a test like "material.type ismember valid
-                    % materials."
-                    %
-                    % Added on July 29 2022.  No warning issued by August
-                    % 11.
+                    % Ready to delete, any time now.
                     warning("We should not be in this code segment.");
                     thisLight = varargin{1};
                 elseif ischar(varargin{1})
@@ -1907,12 +1913,12 @@ switch ieParamFormat(param)  % lower case, no spaces
                             theShape = thisAsset.shape;
                         end
 
-                        % Not sure how an object has no shape, but I have
-                        % seen it in bathroom-contemporary. Sometimes we
-                        % have the points and sometimes only a pointer to a
-                        % PLY file.
                         val = zeros(1,3);
                         if isempty(theShape)
+                            % Sometimes we have the points and
+                            % sometimes only a pointer to a PLY file.
+                            % Sometimes the shape is a string?  Like
+                            % 'Sphere'?
                             warning('Object %d has no shape.',id);
                         elseif ~isempty(theShape.point3p)
                             pts = theShape.point3p;
@@ -1923,20 +1929,22 @@ switch ieParamFormat(param)  % lower case, no spaces
                             % Read a shape file.  The shape file needs to
                             % be in the output directory. (BW).
                             [~,~,ext] = fileparts(theShape.filename);
-                            if isequal(ext,'.ply')
-                                plyFile = fullfile(thisR.get('outputdir'),theShape.filename);
-                                if exist(plyFile,'file')
-                                    tmp = pcread(plyFile);
-                                    val(1) = tmp.XLimits(2) - tmp.XLimits(1);
-                                    val(2) = tmp.YLimits(2) - tmp.YLimits(1);
-                                    val(3) = tmp.ZLimits(2) - tmp.ZLimits(1);
-                                else
-                                    % warning('Size: No shape file in output dir.')
-                                end
+                            if isequal(ext,'.ply')                                
+                                msh = readSurfaceMesh(theShape.filename); 
+                                val = range(msh.Vertices);
+                                % I do not understand how the scale is
+                                % working yet.  I think we need to
+                                % scale.  But t_assetsCopy is better
+                                % without it. Confused (BW).  It might
+                                % be this is millimeters for many
+                                % objects.
+                                val = val.*thisScale;
                             elseif isequal(ext,'.pbrt')
-                                % disp('PBRT size not yet implemented.')
+                                fprintf('%s - size from PBRT not yet implemented.\n',theShape.filename)
+                                % We have some cases, like for chess set.
                             end
                         end
+                        % I suppose?
                     else
                         warning('Only objects have a size');
                     end

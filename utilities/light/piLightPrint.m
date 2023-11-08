@@ -32,14 +32,21 @@ if nLights == 0
 end
 
 %% Initialize
+
+% For the car scene in objectInstance there is a difference in the
+% count of assets.mapLgtShort and assets.mapLgtFull ... That is a
+% problem in building this table.
 lightNames = thisR.get('light', 'names');
-rows = cell(nLights,1);
+lightIDs   = thisR.get('light','ids');
+specscale  = ones(nLights,1);
+
+rows  = cell(nLights,1);
 names = rows;
 types = rows;
-spdT = rows;
+spdT  = rows;
 
 positionT = rows;
-position = zeros(nLights,3);
+position  = zeros(nLights,3);
 
 %% Get data
 fprintf('\nLights\n');
@@ -49,24 +56,34 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
-    if isequal(thisLight.type,'distant') || ...
-            isequal(thisLight.type,'infinite') %
+    if isfield(thisLight,'specscale') && ~isempty(thisLight.specscale.value)
+        specscale(ii) = thisLight.specscale.value;
+    end
+    if isequal(thisLight.type,'distant') || isequal(thisLight.type,'infinite') 
+        % These lights are infinitely far away.
         position(ii,:) = Inf;
     else
-        % point, spot, area, projection, and goniometric have a position We
-        % have not yet fixed the recipeGet case when we get for a 'light',
-        % but we think it may work when we treat the lights as an asset.
-        % This is not yet known. We should fix this in recipeGet('lights' ...)
-        position(ii,:) = thisR.get('asset',thisLight.name,'world position');
-        
-        % And then account for the camera coordinate logical.
+        % Is the camera coordinate logical set to true? Then the light
+        % is at the camera.
         if isfield(thisLight,'cameracoordinate') && thisLight.cameracoordinate
-            from = thisR.get('from');
-            position(ii,:) = position(ii,:) + from;
+            position(ii,:) = thisR.get('from');  % The camera position
+        else
+            % Different lights specify positions in different ways.
+            switch thisLight.type
+                case {'point','spot','projection','goniometric'}
+                    position(ii,:) = thisR.get('lights',thisLight.name,'from');
+                case {'area'}
+                    position(ii,:) = thisR.get('assets',thisLight.name,'world position');
+                case {'infinite','skymap','environment'}
+                    position(ii,:) = [Inf,Inf,Inf];
+                otherwise
+                    error('Unknown light type %s.',thisLight.type);
+            end
         end
     end
 
-    % We have mapnames in some cases (e.g., default chess set light)
+    % We have mapnames stored in spd or filenames in different cases
+    % (e.g., default chess set light) 
     if ~isfield(thisLight,'filename') || isempty(thisLight.filename.value)
         spdT{ii} = num2str(thisLight.spd.value);
     else
@@ -78,7 +95,7 @@ end
 
 for ii=1:numel(names), positionT{ii} = num2str(position(ii,:)); end
 
-T = table(categorical(names), categorical(types),positionT,spdT,'VariableNames',{'name','type','position','spd/rgb'}, 'RowNames',rows);
+T = table(lightIDs(:),categorical(names), categorical(types),positionT,spdT,specscale(:),'VariableNames',{'node id','name','type','position','spd/rgb','specscale'}, 'RowNames',rows);
 
 disp(T);
 fprintf('-------------------------------\n');

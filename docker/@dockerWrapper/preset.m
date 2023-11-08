@@ -111,9 +111,14 @@ switch presetName
         thisD.localRender = false;
         thisD.remoteResources = true;
 
-        % find our current user name -- seems like Matlab doesn't have a
-        % function?
-        userName = char(java.lang.System.getProperty('user.name'));
+        % If the user set a remote user name, use it.
+        userName = getpref('docker','remoteUser','');
+        if isempty(userName)
+            % Came up empty.  Try the local user name
+            userName = char(java.lang.System.getProperty('user.name'));
+            disp('Assuming remote user name matches local user name.')
+        end
+
         % pick the correct context
         switch presetName
             case {'remotemux', 'remotemux-alt'}
@@ -122,7 +127,7 @@ switch presetName
                 thisD.remoteRoot = ['/home/' userName];
             case {'remoteorange', 'remoteorange-alt'}
                 thisD.renderContext =  'remote-orange';
-                thisD.remoteMachine = 'orange.stanford.edu';
+                thisD.remoteMachine = 'orange.stanford.edu';                
                 thisD.remoteRoot = ['/home/' userName];
         end
 

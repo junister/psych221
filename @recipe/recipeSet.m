@@ -190,6 +190,9 @@ switch param
 
         % Scene parameters
     case {'fromtodistance','objectdistance'}
+        % thisR.set('object distance');
+        % TODO:  thisR.set('object distance','m');
+        %
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.
@@ -1169,11 +1172,12 @@ switch param
         % thisR.set('light', lightName, 'delete');
         % thisR.set('light', 'all', 'delete');
         % thisR.set('light', lightName, 'rotate', [XROT, YROT, ZROT], ORDER)
-        % thisR.set('light', lghtName,  'translate', [XSFT, YSFT, ZSFT], FROMTO);
+        % thisR.set('light', lightName, 'translate', [XSFT, YSFT, ZSFT], FROMTO);
         % thisR.set('light', lightname, 'specscale', val);
-        % thisR.set('light','AreaLight','spread val',20);
-        %
-        % TODO:  We need to add additional cases for the area light
+        % thisR.set('light', lightName, 'spread val',20);
+        % thisR.set('light', lightName, 'spd',[0.5 0.3 1]);
+        
+        % TODO:  We need additional cases for the area light
 
         if isnumeric(val)
             thisLight = thisR.get('light', val);
@@ -1184,6 +1188,7 @@ switch param
             lghtName = piLightNameFormat(lghtName);
         elseif isstruct(val) || iscell(val) % A light struct or a cell array
             newLight = val;
+            lghtName = newLight.name;
         else
             error('Unknown light parameter!');
         end
@@ -1196,14 +1201,29 @@ switch param
             case 'add'
                 % thisR.set('light', newLight, 'add')
                 if isstruct(newLight)
-                    % Check if light name has '_L' in the end
+                    % Make sure light name has '_L' in the end
                     newLight.name = piLightNameFormat(newLight.name);
+
+                    % Make sure the light name is unique.
+                    currentLightNames = thisR.get('lights','names');
+                    if contains(currentLightNames,newLight.name)
+                        disp('Adjusting duplicate light name');
+                        tmp = newLight.name(1:end-2);
+                        newLight.name = sprintf('%s-%03d_L',tmp,randi(100));
+                    end
+
+                    % Create an asset of type light
                     newLightAsset = piAssetCreate('type', 'light');
                     newLightAsset.name = newLight.name;
                     newLightAsset.lght{1} = newLight;
+
+                    % Insert a branch for the light geometry under the
+                    % root.
                     defaultBranch = piAssetCreate('type', 'branch');
                     defaultBranch.name = [newLight.name(1:end-1), 'B'];
                     thisR.set('asset', 1, 'add', defaultBranch);
+
+                    % Put the light under the geometry branch.
                     thisR.set('asset', defaultBranch.name, 'add', newLightAsset);
                 elseif iscell(newLight)
                     for ii=1:numel(newLight)
@@ -1224,11 +1244,22 @@ switch param
                 return;
             case 'replace'
                 % thisR.set('light', lightName, 'replace', newLight);
+                % 
+                % Confused about this.
                 thisLgtAsset = thisR.get('light', lghtName);
-                val.name = piLightNameFormat(val.name);
-                thisLgtAsset.lght{1} = val;
-                thisLgtAsset.name = val.name;
-                thisR.set('asset', lghtName, thisLgtAsset);
+                % Sometimes newLight is the light asset with the
+                % subfield lght.  Sometimes it is just the subfield
+                % lght.
+                if ~isfield(val,'lght')
+                    thisLgtAsset.lght{1} = val;
+                    % Make sure the name has the _L
+                    thisLgtAsset.lght{1}.name = piLightNameFormat(val.name);
+                else
+                    % Assign but make sure the ID (names) are OK.
+                    thisR.set('asset', lghtName, val);
+                    thisR.assets.uniqueNames;
+                end
+
                 return;
             case {'worldrotation', 'worldrotate'}
                 thisR.set('asset', lghtName, 'world rotation', val);
@@ -1241,8 +1272,19 @@ switch param
             case {'worldorientation'}
                 thisR.set('asset', lghtName, 'world orientation', val);
                 return;
+            case {'shapescale'}
+                % thisR.set('light',name,'shape scale',1 or 3 vector)
+                %
+                % Find the node and add a scale to the branch node
+                % above the light.
+                %
+                id = thisR.get('node',lghtName,'id');
+                thisR.set('node',id,'scale',val);
+                return;
+                
             case {'rotate', 'rotation'}
                 % Rotate the direction, angle in degrees
+                % We should use the same approach as for shapescale.
                 % thisR.set('light', lghtName, 'rotate', [XROT, YROT, ZROT], ORDER)
                 % See piLightRotate
                 lghtAsset = thisR.get('light', lghtName);
@@ -1335,10 +1377,10 @@ switch param
         % At this point we have the light.
         if numel(varargin{1}) == 1
             % thisR.set('light', lghtName, lightStruct);
+            %
             % A light struct was sent in as the only argument.  We
             % should check it, make sure its name is unique, and then set
-            % it.
-            % thisR.lights{lgtIdx} = varargin{1};
+            % it. We are not checking enough.            
             thisR.set('light', lghtName, 'replace', varargin{1});
         else
             % thisR.set('light', lightName, param, val)
@@ -1369,8 +1411,8 @@ switch param
         % multiple assets. (BW, Sept 2021).
 
         % Given the calling convention, val is assetName and
-        % varargin{1} is the param, and varargin{2} is the value, if
-        % needed.
+        % varargin{1} is the param, and varargin{2} is the param
+        % value, if needed.
         if isnumeric(val)
             % Person sent in an id, so we get the name here
             [id,thisAsset] = piAssetFind(thisR,'id',val);
@@ -1378,6 +1420,7 @@ switch param
             else, assetName = thisAsset{1}.name;
             end
         else
+            % Person send in a name, so we get the id here
             assetName = val;
             id = thisR.get('asset', assetName, 'id');
         end
@@ -1431,6 +1474,7 @@ switch param
             case {'rotate', 'rotation'}
                 % Figures out the rotation from the angles in val and sets
                 % the rotation matrix
+                % val 
                 out = piAssetRotate(thisR, assetName, val);
             case {'rotationmatrix'}
                 % Just set the rotation matrix

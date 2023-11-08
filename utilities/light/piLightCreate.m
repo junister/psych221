@@ -4,6 +4,14 @@ function lght = piLightCreate(lightName, varargin)
 % Synopsis:
 %   lght = piLightCreate(lightName,varargin)
 %
+% Brief
+%   Create a light struct.  The various types of lights have different
+%   slots in their struct.  All lights have the slots 
+%      name - Required
+%      type - One of the light types.  Default:  'point'
+%      spd  - rgb or spectrum.  Default: 'rgb'
+%      specscale - How to scale RGB values.  Default: [1,1,1].
+%
 % Inputs:
 %   lightName   - name of the light
 %
@@ -11,41 +19,54 @@ function lght = piLightCreate(lightName, varargin)
 %
 %   type   - light type. Default is point light.  There are light specific
 %            properties depend on the light type. 
-%
-%   cameracoordinate - Applies to point, spot, area lights. Default is
-%         true 
-%   shape
-%   radius
+%   from   - Distant, point, and spot lights have a 'from' and 'to'
+%   to       Area lights have a shape. Goniometric and projection
+%            lights have?
+%   cameracoordinate - Place the light at the camera 'from'.  Applies
+%                      to point, spot, area lights. When applicable,
+%                      Default is true  
+%   shape  - Shape of the area light.  This can be a geometric file or
+%            a string, such as 'sphere'
+%   radius - Radius of the area light sphere (m)
 % 
 %  To see the light types use
 %
 %      lightTypes = piLightCreate('list available types');
 %
-%  To see the settable properties for each light type use
+%  To see the settable properties we have implemented for each light
+%  type use 
 %
-%        piLightProperties(lightTypes{3})
+%        piLightProperties(lightTypes{1})
 %
-%    Look here for the PBRT website information about lights.
+%  Look here for the PBRT website information about lights.
 %    https://pbrt.org/fileformat-v4#lights
 %
 % Description:
-%   In addition to creating a light struct, various light properties can be
-%   specified in key/val pairs.
+%   This function creates an ISET3d light struct.  The value of the
+%   slots in the struct can be specified when the function is called
+%   by key/val pairs. In adition, you can use key/val pairs in the
+%   calling function via piLightSet.
 %
 %   The 'spd spectrum' property reads a file from ISETCam/data/lights
 %   that defines a light spectrum.  In the lght struct this is stored
 %   in the spd slot.
 %
-%    spd.type='spectrum';
-%    spd.value='Tungsten', or D50 or ...
+%    spd.type = 'spectrum';
+%    spd.value= 'Tungsten', or D50 or ...
 %
 % Returns
 %   lght   - light struct
 %
+% Examples
+%   lightTypes = piLightCreate('list available types');
+%
+%   lgt = piLightCreate('point light 1')
+%   lgt = piLightCreate('point light 1','type','point','spd spectrum','Tungsten');
 %   lgt = piLightCreate('blueSpot', 'type','spot','spd',[9000]);
 %   lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
-%   lgt = piLightCreate('point light 1')
 %   lgt = piLightCreate('whiteLight','type','area');
+%   lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
+%   lgt = piLightCreate('areaTest', 'type','area','shape','sphere','radius',30);
 %
 % See also
 %   piLightSet, piLightGet, piLightProperties, 
@@ -53,23 +74,6 @@ function lght = piLightCreate(lightName, varargin)
 %   https://polyhaven.com/hdris
 %
 
-% TODO
-%  cameracoordinate is set in many places.  Not sure whether that is a
-%  good idea.
-
-% Examples
-%{
-  lightTypes =piLightCreate('list available types');
-%}
-%{
- lgt = piLightCreate('point light 1')
-%}
-%{
- lgt = piLightCreate('spot light 1', 'type','spot','rgb spd',[1 1 1])
-%}
-%{
- lgt = piLightCreate('areaTest', 'type','area','shape','sphere','radius',30);
-%}
 %% Check if the person just wants the light types
 
 validLights = {'distant','goniometric','infinite','point','area','projection','spot'};
@@ -101,8 +105,8 @@ p.addParameter('type','point',@(x)(ismember(x,validLights)));
 
 % We are unsure about the proper default
 p.addParameter('cameracoordinate',true);
-p.addParameter('from',[0 0 0],@isvector);
-p.addParameter('to',[0 0 1],@isvector);
+p.addParameter('from',[],@isvector);
+p.addParameter('to',[],@isvector);
 
 p.addParameter('shape',[],@(x)(isstruct(x) || ischar(x))); % For area light
 p.addParameter('radius',30,@isnumeric);
@@ -110,23 +114,31 @@ p.addParameter('radius',30,@isnumeric);
 p.KeepUnmatched = true;
 p.parse(lightName, varargin{:});
 
+cameraCoordinate = p.Results.cameracoordinate;
+from = p.Results.from;
+to   = p.Results.to;
+% If the user sent in 'from' or 'to', cameracoordinate must be false.
+% Perhaps if we have a 'from' we should require a 'to'.  But for now
+% we just make sure the light is pointing in the z-direction.
+if ~isempty(from) || ~isempty(to)
+    cameraCoordinate = false;
+    if isempty(to),   to = from + [0 0 1]; end
+    if isempty(from), from = to - [0 0 1]; end
+end
+
 %% Construct the appropriate light struct for each type
 
 % Some of the fields are present in all the lights
 lght.type = p.Results.type;
 
 lght.name = p.Results.lightName;
-% We want the name to end with _L.  So if it does not, we append the _L
+
+% We want light names to end with _L.  So if it does not, we append
+% the _L
 if ~isequal(lght.name((end-1):end),'_L')
     % warning('Appending _L to light name')
     lght.name = [lght.name,'_L'];
 end
-
-% All lights have these slots
-%   name
-%   type
-%   specscale
-%   spd
 
 % All lights start out with these two slots
 lght.specscale.type = 'float';
@@ -138,20 +150,35 @@ lght.spd.value = [1 1 1];
 % Each light type has a different set of parameters.
 switch ieParamFormat(lght.type)
     case 'distant'
-        % The distant light is far away and this indicates only its
-        % direction.
+        % The "distant" light source represents a directional light source "at
+        % infinity"; in other words, it illuminates the scene with light
+        % arriving from a single direction. The direction is specified
+        % with this from and to.
+        %
+        % I am unsure whether we can specify the 'from' and 'to' using
+        % the cameraCoordinate
 
+        %        if ~cameraCoordinate
         lght.from.type = 'point3';
-        lght.from.value = p.Results.from;
+        lght.from.value = from;
 
         lght.to.type = 'point3';
-        lght.to.value = p.Results.to;
+        lght.to.value = to;
+        %       else
+        %          lght.cameracoordinate = cameraCoordinate;
+        %     end
 
     case 'goniometric'
-        %%  We need a file name for goniometric light.
+        %%  We need a file name for goniometric lights in data/lights
+        %
+        % See t_lightGoniometric
 
         % From the book
         %{
+        % The "goniometric" light represents a point light source with
+        % directionally-varying emission, where the emission
+        % distribution is represented by an image.   
+        %
         % The goniometric light source approximation is widely used to
         % model area light sources in the field of illumination
         % engineering. The rule of thumb there is that once a
@@ -182,7 +209,7 @@ switch ieParamFormat(lght.type)
         %}
 
         % When this is set, the light is placed at the camera.
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
 
         % The goniometric image showing the light distribution in
         % different directions.
@@ -192,6 +219,12 @@ switch ieParamFormat(lght.type)
 
     case {'infinite','skymap','environment'}
         % Gets called from thisR.set('skymap',filename,'add');
+
+        % The "infinite" light is probably best labeled a skymap.  It
+        % represents an infinitely far away light source that
+        % potentially casts illumination from all directions.  The
+        % amount of light from different directions is specified by a
+        % file.
 
         % See the code there for rotations and translations.
         lght.nsamples.type = 'integer';
@@ -203,17 +236,30 @@ switch ieParamFormat(lght.type)
         
     case 'point'
         % Initializes a light at the origin.
-        % Point sources emit in all directions, and have no 'to'.
+        % "point" defines a simple point light that casts the same
+        % amount of illumination in all directions. It takes two
+        % parameters:  
+        %
+        % Point sources emit in all directions, and has no 'to'.
 
         % This probably overrides the from.  Not sure.
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
         
         lght.from.type = 'point';
-        lght.from.value = p.Results.from;
+        lght.from.value = from;
 
     case 'projection'
-        % Assume we want camera orientation by default
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        % See t_lightProjection
+        %
+        % The "projection" light acts like a slide projector; the given image is
+        % used to define a 2D emission distribution that is projected with a
+        % center of projection at the light's position. Directions outside the
+        % frustum of light projection receive no emitted illumination. It is
+        % positioned using the world from light transformation matrix.
+
+        % Assumes we want camera orientation by default
+
+        lght.cameracoordinate = cameraCoordinate;
 
         lght.fov.type = 'float';
         lght.fov.value = [];
@@ -228,14 +274,14 @@ switch ieParamFormat(lght.type)
         lght.scale.value = {};
         
     case {'spot', 'spotlight'}
-        lght.cameracoordinate = p.Results.cameracoordinate;
+        lght.cameracoordinate = cameraCoordinate;
 
         if ~lght.cameracoordinate
             lght.from.type = 'point3';
-            lght.from.value = p.Results.from;
+            lght.from.value = from;
 
             lght.to.type = 'point3';
-            lght.to.value = p.Results.to;
+            lght.to.value = to;
         end
 
         lght.coneangle.type = 'float';
@@ -248,6 +294,19 @@ switch ieParamFormat(lght.type)
         % These are the default parameters for an area light, that are
         % based on the Blender export in arealight.pbrt.
 
+        % From the Book
+        % Area lights have geometry associated with them; the shape and size
+        % of the emitting shapes have a substantial effect on the resulting
+        % emitted radiance distribution. After an AreaLightSource directive,
+        % all subsequent shapes emit light from their surfaces according to
+        % the distribution defined by the given area light implementation.
+        % Note that area lights can currently only be used with triangle,
+        % bilinear patch, sphere, cylinder, and disk shapes;
+        % AttributeBegin
+        %   AreaLightSource "diffuse" "blackbody L" [ 6500 ] "float power" [ 100 ]
+        %   Translate 0 10 0
+        %   Shape "sphere" "float radius" [ .25 ]
+        % AttributeEnd
         lght.type = 'area';
 
         lght.twosided.type = 'bool';
@@ -322,26 +381,27 @@ for ii=1:2:numel(varargin)
         continue;
     end
 
-    % This is a new key value we are setting.  Generally, it is the
-    % part before the 'underscore'
+    % This is a new key value we are setting.  Generally, we are
+    % setting the property that is before any 'underscore'
     keyTypeName = strsplit(thisKey, '_');
 
-    % But if  the first parameter is 'TYPE_NAME', we need the second value.
-    %
+    % Sometimes the first part of 'TYPE_NAME' is the key, and other
+    % times the second part.  For example, rgb spd, versus spd
+    % spectrum.
     if piLightISParamType(keyTypeName{1})
+        % Permissible.  Get the second.
         keyName = ieParamFormat(keyTypeName{2});
     else
         keyName = ieParamFormat(keyTypeName{1});
     end
 
-    % For these parameters, we run the lightSet.  We see whether this
-    % light structure has a slot that matches the keyName.
+    % If the light has a slot with the keyName, we run piLightSet.
     if isfield(lght, keyName)
-        % If the slot exists, we set it and we are good.
+        % If the field exists, we set it.
         lght = piLightSet(lght, sprintf('%s value', keyName),...
                               thisVal);
     else
-        % If the slot does not exist, we tell the user, but do not
+        % If the field does not exist, we tell the user, but do not
         % throw an error.
         warning('Parameter %s does not exist in light %s',...
                     keyName, lght.type)

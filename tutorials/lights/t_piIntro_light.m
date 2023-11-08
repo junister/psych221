@@ -135,7 +135,7 @@ piWRS(thisR,'name',sprintf('Rotate EE spot'));
 thisR.set('light', 'all', 'delete');
 
 % Create a point light at the camera position
-% The spd spectrum points to a file that is saved in
+% The 'spd spectrum' string is a mat-file saved in
 % ISETCam/data/lights
 yellowPoint = piLightCreate('yellow_point_L',...
     'type', 'point', ...
@@ -192,22 +192,22 @@ thisR.get('lights print');
 
 piWRS(thisR,'name','Blue (distant)');
 
+%% With the skymap, but intensity scaled
+
+fileName = fullfile(piDirGet('skymaps'),'room.exr');
+
+thisR.set('skymap',fileName);
+thisR.set('light','room_L','specscale',0.3);
+piWRS(thisR,'name','Dark Environment');
 
 %% Add an environment (skymap) light
 
 thisR.set('light', 'all', 'delete');
 
-fileName = fullfile(piDirGet('skymaps'),'room.exr');
 thisR.set('skymap',fileName);
 tmp = thisR.get('lights','names');
 skyName = tmp{1};
 piWRS(thisR,'name','Environment original');
-
-%% With the skymap, but intensity scaled
-
-thisR.set('skymap',fileName);
-thisR.set('light','room_L','specscale',0.3);
-piWRS(thisR,'name','Dark Environment');
 
 %%  Now rotate the skymap around the z dimension.  
 

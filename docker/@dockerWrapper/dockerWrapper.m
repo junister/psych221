@@ -1,7 +1,6 @@
 classdef dockerWrapper < handle
     %DOCKERWRAPPER A class to manage ISET3d-v4 rendering
     %
-
     % This class manages how we run PBRT and other tools in Linux docker
     % containers in ISET3d (version 4). At present, we manage these cases:
     %
@@ -74,16 +73,21 @@ classdef dockerWrapper < handle
     %
     % Additional NOTES
     %
+    % * Use dockerWrapper.presets to set up a configuration on, say,
+    %   'remote mux', 'remote orange' or other options.  See the header
+    %   of cokerWrapper.preset for current options 
+    %   (doc dockerWrapper.preset)
+    %
     % * Use dockerWrapper.setPrefs and dockerWrapper.getPrefs to
-    % interact with the Matlab prefs that determine the defaults.  The
-    % defaults are used when creating a new dockerWrapper.
+    %   interact with the Matlab prefs that determine the defaults.  The
+    %   defaults are used when creating a new dockerWrapper.
     %
     % * It is possible to create a dockerWrapper and then manually change
-    % the parameters.  We recently made the dockerWrapper variables
-    % public, not private.
+    %   the parameters.  We recently made the dockerWrapper variables
+    %   public, not private.
     %
     % * To shut down stranded local containers, on the command line
-    % run:
+    %   run:
     %
     %    docker container prune
     %
@@ -213,9 +217,9 @@ classdef dockerWrapper < handle
             %
             % We typically want 'default' to be the docker context
             % for everything except rendering
-            aDocker.defaultContext = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
-            aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
-            aDocker.localImageName   =  getpref('docker','localImage','');
+            aDocker.defaultContext   = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
+            aDocker.gpuRendering     = getpref('docker', 'gpuRendering', true);
+            aDocker.localImageName   = getpref('docker','localImage','');
 
             aDocker.whichGPU = getpref('docker','whichGPU',0); % -1 is use any
 
@@ -347,7 +351,7 @@ classdef dockerWrapper < handle
         getPrefs(varargin);
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
-
+        
         %% Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
@@ -485,7 +489,11 @@ classdef dockerWrapper < handle
 
         %% Start PBRT
         function ourContainer = startPBRT(obj, processorType)
-            % Start the docker container remotely
+            % Start the PBRT docker container.  Called when rendering,
+            % say by piWRS() or piRender().
+            %
+            % See also
+            %
 
             verbose = obj.verbosity;
             if isequal(processorType, 'GPU')
@@ -593,31 +601,30 @@ classdef dockerWrapper < handle
             % doesn't have a timeout flag, but it'd be good if we could
             % find a way to validate context & server that errors out
             % more gracefully. TBD
-            if verbose > 0
-                fprintf('Starting Docker with: %s\n', cmd);
-            end
             [status, result] = system(cmd);
-            if verbose > 0
-                cprintf('*Green', "STARTED Docker (status %d): %s\n", status, cmd);
-            end
-            if status == 0
-                obj.dockerContainerID = result; % hex name for it
-                return;
+
+            if status ~= 0
+                warning("Failed to start Docker container: %s", result);
             else
-                warning("Failed to start Docker container with message: %s", result);
+                obj.dockerContainerID = result; % hex name for it
+                if verbose > 0
+                    cprintf('*Green', "STARTED Docker successfully\n");
+                    cprintf('black','CMD: %s',cmd);
+                end
             end
         end
 
         function thisContext = getRenderContext(obj,serverName)
             % Gets the context, and if necessary creates it
             %
-            % First make a dockerWrapper
-            %  thisD = dockerWrapper;
+            % Called by getRenderer
             %
-            % Then you can get or create a render context
+            % The serverName is obj.remoteMachine by default.
+            %
+            %  thisD = dockerWrapper;
             %  thisD.getRenderContext('mux')    % 
             %  thisD.getRenderContext('orange') % remote-orange
-            %  thisD.getRenderContext();   % Uses a default name
+            %  thisD.getRenderContext();        % Uses a default name
             %  (remote-servername) read from the 
             %
             % A Docker context is a way of specifying a Docker environment
@@ -640,15 +647,15 @@ classdef dockerWrapper < handle
                       --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
             %}
 
-            % We assume Get or set-up the rendering context for the docker
-            % container
-            if ~exist('serverName','var')
-                serverName = obj.remoteMachine;
+            % Not sure when it is every set to something other than
+            % this.
+            if ~exist('serverName','var'), serverName = obj.remoteMachine;
+            else, fprintf('getRenderContext: Using %s as the serverName\n',serverName);
             end
 
-            % The user can define an alternative context.  At Stanford,
-            % remote-orange is a common alternative. This is usually
-            % defined at dockerWrapper initialization via the
+            % The user can define an alternative context.  At
+            % Stanford, remote-orange is a common alternative. This is
+            % usually defined at dockerWrapper initialization via the
             % getpref(). It can also be set programmatically.
             thisContext = obj.renderContext;
             if isempty(thisContext)
@@ -847,8 +854,8 @@ classdef dockerWrapper < handle
         %% 
         function getRenderer(thisD)
             %GETRENDERER uses the Matlab prefs in 'docker' to determine the
-            %  docker image we use to render. It is set in thisD.remoteImage
-            %  renderer
+            %  docker image to use for rendering. It is set in
+            %  thisD.remoteImage renderer.
             %
             % Description
             %  The dockerWrapper is initialized with the user's preferences
@@ -925,8 +932,7 @@ classdef dockerWrapper < handle
                 end
 
                 % We allow one remote render context
-                % if the user specifies one, make sure it exists
-                % otherwise create one
+                % We make the context for the current remote machine
                 thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.remoteMachine));
 
                 if isempty(thisD.remoteImage)

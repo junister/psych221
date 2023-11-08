@@ -1,4 +1,9 @@
 %% init
+
+%%
+%% BROKEN
+%%
+
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -19,7 +24,7 @@ thisR.set('nbounces',2);
 % Delete all lights.
 thisR.set('lights','all','delete');
 
-areaLight = piLightCreate('type', 'area');
+areaLight = piLightCreate('area1','type', 'area');
 lightName = 'Tungsten';
 areaLight = piLightSet(areaLight, [], 'lightspectrum', lightName);
 areaLight = piLightSet(areaLight, [], 'spectrum scale', 1);

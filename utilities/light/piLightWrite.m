@@ -49,8 +49,13 @@ for ii = 1:numel(thisR.lights)
                 % User has a local file that will be copied
             else
                 % Read the mat file.  Should have a mat extension.
-                % This is the wavelength hardcoded in PBRT
-                wavelength = 365:5:705;
+                % This is the wavelength hardcoded in PBRT V3
+                %
+                % wavelength = 365:5:705;
+                %
+                % In Version 4 the wavelength sampling changed
+                % (BW,ZhengLyu)
+                wavelength = 400:10:710;
                 if isequal(ext,'.mat') || isempty(ext)
                     data = ieReadSpectra(specVal, wavelength, 0);
                 else
@@ -127,8 +132,10 @@ for ii = 1:numel(thisR.lights)
             lghtDef = strcat(lghtDef, spdTxt);
             % lghtDef = sprintf('LightSource "distant" "%s L" %s', spectrumType, lightSpectrum);
 
-            % Throughout, we should understand what cameracoordinate
-            % does to the from and to.
+            % We should understand what cameracoordinate does to the
+            % from and to when we have a distant light.  The code here
+            % assumes that 'from' and 'to' exists.
+
             % From
             [~, fromTxt] = piLightGet(thisLight, 'from val', 'pbrt text', true);
             if ~isempty(fromTxt)

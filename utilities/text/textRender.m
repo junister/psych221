@@ -164,7 +164,7 @@ for ii = 1:strlength(aString)
     ourLetterAsset = piAssetLoad(ourAssetName,'asset type','character'); 
 
     % Try merging before we do anything else
-    outputR = piRecipeMerge(outputR, ourLetterAsset.thisR, 'node name', ourLetterAsset.mergeNode);
+    outputR = piRecipeMerge(outputR, ourLetterAsset.thisR);
 
     % The letter we need to place
     letterObject = piAssetSearch(outputR,'object name',['_' ourAsset '_O']);
