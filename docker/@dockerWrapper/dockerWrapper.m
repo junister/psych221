@@ -615,13 +615,14 @@ classdef dockerWrapper < handle
         function thisContext = getRenderContext(obj,serverName)
             % Gets the context, and if necessary creates it
             %
-            % First make a dockerWrapper
-            %  thisD = dockerWrapper;
+            % Called by getRenderer
             %
-            % Then you can get or create a render context
+            % The serverName is obj.remoteMachine by default.
+            %
+            %  thisD = dockerWrapper;
             %  thisD.getRenderContext('mux')    % 
             %  thisD.getRenderContext('orange') % remote-orange
-            %  thisD.getRenderContext();   % Uses a default name
+            %  thisD.getRenderContext();        % Uses a default name
             %  (remote-servername) read from the 
             %
             % A Docker context is a way of specifying a Docker environment
@@ -644,15 +645,15 @@ classdef dockerWrapper < handle
                       --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
             %}
 
-            % We assume Get or set-up the rendering context for the docker
-            % container
-            if ~exist('serverName','var')
-                serverName = obj.remoteMachine;
+            % Not sure when it is every set to something other than
+            % this.
+            if ~exist('serverName','var'), serverName = obj.remoteMachine;
+            else, fprintf('getRenderContext: Using %s as the serverName\n',serverName);
             end
 
-            % The user can define an alternative context.  At Stanford,
-            % remote-orange is a common alternative. This is usually
-            % defined at dockerWrapper initialization via the
+            % The user can define an alternative context.  At
+            % Stanford, remote-orange is a common alternative. This is
+            % usually defined at dockerWrapper initialization via the
             % getpref(). It can also be set programmatically.
             thisContext = obj.renderContext;
             if isempty(thisContext)
@@ -851,8 +852,8 @@ classdef dockerWrapper < handle
         %% 
         function getRenderer(thisD)
             %GETRENDERER uses the Matlab prefs in 'docker' to determine the
-            %  docker image we use to render. It is set in thisD.remoteImage
-            %  renderer
+            %  docker image to use for rendering. It is set in
+            %  thisD.remoteImage renderer.
             %
             % Description
             %  The dockerWrapper is initialized with the user's preferences
@@ -929,8 +930,7 @@ classdef dockerWrapper < handle
                 end
 
                 % We allow one remote render context
-                % if the user specifies one, make sure it exists
-                % otherwise create one
+                % We make the context for the current remote machine
                 thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.remoteMachine));
 
                 if isempty(thisD.remoteImage)
