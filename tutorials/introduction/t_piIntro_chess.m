@@ -50,7 +50,7 @@ scenePlot(scene,'depth map');
 
 %% Add a bright point light near the front where the camera is
 
-% thisR.show('lights');
+thisR.show('lights');
 thisR.set('light','all','delete');
 
 % First create the light
@@ -67,7 +67,7 @@ piWRS(thisR,'name','Point light');
 
 [~, skyMap] = thisR.set('skymap','room.exr');
 
-thisR.get('light print');
+thisR.show('lights');
 
 piWRS(thisR, 'name', 'Point light and skymap');
 

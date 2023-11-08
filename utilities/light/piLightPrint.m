@@ -52,7 +52,7 @@ for ii =1:numel(lightNames)
     rows{ii, :} = num2str(ii);
     names{ii,:} = lightNames{ii};
     types{ii,:} = thisLight.type;
-    if isfield(thisLight,'specscale')
+    if isfield(thisLight,'specscale') && ~isempty(thisLight.specscale.value)
         specscale(ii) = thisLight.specscale.value;
     end
     if isequal(thisLight.type,'distant') || isequal(thisLight.type,'infinite') 
