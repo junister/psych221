@@ -608,7 +608,7 @@ classdef dockerWrapper < handle
             else
                 obj.dockerContainerID = result; % hex name for it
                 if verbose > 0
-                    cprintf('*Green', "STARTED Docker successfully\n");
+                    cprintf('*black', "STARTED Docker successfully\n");
                     cprintf('black','CMD: %s',cmd);
                 end
             end
