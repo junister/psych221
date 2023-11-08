@@ -501,7 +501,7 @@ if tMatrix(:) == identityTransform(:)
     % Do not bother writing out identity transforms?
     %
     % If a complex scene fails and this message has appeared, tell BW.
-    disp('piGeometryWrite: skipping identity transform.')
+    % disp('piGeometryWrite: skipping identity transform.')
     return;
 else
     transformType = 'ConcatTransform';

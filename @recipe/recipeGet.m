@@ -1624,11 +1624,15 @@ switch ieParamFormat(param)  % lower case, no spaces
 
         % Parameters from a single light.  varargin{1} may be an index
         % to the light asset.
+        % the mapLgtFullXXX and mapLgtShortXXX keys are not always the
+        % same size.  This has to do with some simplification that
+        % Zheng and Zhenyi implemented.  Ask them.
         switch ieParamFormat(varargin{1})
             case {'names','namesnoid'}
                 % thisR.get('lights','names')
                 % All the light names (full)
-                val = thisR.assets.mapLgtShortName2Idx.keys;
+                val = thisR.assets.mapLgtFullName2Idx.keys;
+                for ii=1:numel(val), val{ii} = val{ii}(10:end); end
             case {'namesid','namesidx'}
                 % thisR.get('lights','names id');
                 % All the light names, with the ID
