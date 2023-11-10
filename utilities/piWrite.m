@@ -93,6 +93,7 @@ p = inputParser;
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
 p.addParameter('remoteresources', getpref('docker','remoteResources',false));
+p.addParameter('pushresources', getpref('docker','pushResources',false));
 p.addParameter('mainfileonly',false, @islogical);
 p.addParameter('overwriteresources', true, @islogical);
 p.addParameter('overwritematerials', true, @islogical);
@@ -112,6 +113,12 @@ else
     remoteResources = false;
     overwriteresources  = p.Results.overwriteresources;
 end
+if p.Results.pushresources
+    pushResources = true;
+else
+    pushResources = false;
+end
+
 % User should define whether
 
 
@@ -152,7 +159,8 @@ workingDir = thisR.get('output dir');
 
 % If we are using remote resources, remove leftover /local
 % files so they don't need to be rsynced
-if remoteResources
+% Unless we have been told to deliberately push our resources
+if remoteResources && ~pushResources
     % Empty the working directory and make a fresh copy.
     if isfolder(workingDir)
         try
