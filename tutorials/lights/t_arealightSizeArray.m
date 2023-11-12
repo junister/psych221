@@ -33,19 +33,22 @@ thisR.show('lights');
 thisR.set('light','area1','rotate',[0 180 0]);
 
 % The light is very big so it illuminates the whole surface
-piWRS(thisR);
+thisR.set('name','Velscope Light');
+piWRS(thisR, 'name', thisR.name);
 
 %% Reduce the size and the spread
 
 thisR.set('light','area1','spread',10);
 thisR.set('light','area1','shape scale',0.005);   % Five millimeters
 
-piWRS(thisR);
+thisR.set('name','narrow Velscope');
+piWRS(thisR, 'name', thisR.name);
 
 %% Return the size
 
 thisR.set('light','area1','shape scale',100);
-piWRS(thisR);
+thisR.set('name','shape scale 100');
+piWRS(thisR,  'name', thisR.name);
 
 %% Create an array with different positions 
 
@@ -91,14 +94,18 @@ end
 thisR.set('skymap','room.exr');
     thisR.set('light','room_L','rotate',[0 180 0]);    % Don't ask
 
-piWRS(thisR);
+thisR.set('name','3 lights plus room');
+piWRS(thisR, 'name', thisR.name);
 
 %% Move the cube closer to the camera
 
 thisR.set('asset',cubeID,'translate',[0 0 -0.5]);
-piWRS(thisR);
+thisR.set('name','cube closer by .5m');
+piWRS(thisR,  'name', thisR.name);
+
 thisR.set('asset',cubeID,'translate',[0 0 -0.25]);
-piWRS(thisR);
+thisR.set('name','cube closer by another .25m');
+piWRS(thisR,  'name', thisR.name);
 
 %% Start again but illustrate changing the size of the light
 
@@ -121,19 +128,23 @@ thisR.show('lights');
 % Rotate the light so it is pointing at the surface
 
 % The light is very big so it illuminates the whole surface
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
+    'name','large light');
 
 %% Change its size by half a couple of times
 
 % Notice that in addition to seeing the light (because of its narrow
 % spread), the luminance level changes
 thisR.set('light',area{1},'shape scale',0.1);
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
+    'name','light size * .10');
 
 thisR.set('light',area{1},'shape scale',0.3);
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
+    'name','light size by another * .3');
 
 thisR.set('light',area{1},'shape scale',0.3);
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
+    'name', 'light size by another * .3');
 
 %%
