@@ -3,6 +3,8 @@
 %   Use Projected Light Headlamps
 %   Also try to evaluate radiance over the FOV
 %
+%   Set scene parameters to 'match' lab test
+%
 %   D. Cardinal, Stanford University, September, 2023
 %
 % See also
@@ -11,7 +13,6 @@
 %  t_piIntro_lights
 
 %% Initialize ISET and Docker
-% We start up ISET and check that the user is configured for docker
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -26,32 +27,35 @@ thisR.show('lights');
 thisR.lookAt.from = [3 290 0];
 thisR.lookAt.to = [3 50 0];
 
+% Headlights have a much wider horizontal field
+thisR.film.xresolution.value = 640;
+thisR.film.yresolution.value = 320;
+
 %% show original
-piWRS(thisR,'mean luminance',-1);
+%piWRS(thisR,'mean luminance',-1);
 
-%% Change the flat surface to a glossy or mirror
+%% Change the flat surface to a 'white' or 'gray'
 
-mirrorName = 'glossy-white';
-piMaterialsInsert(thisR,'name',mirrorName);
+%targetMaterial = 'glossy-white';
+%targetMaterial = 'diffuse-gray';
+targetMaterial = 'diffuse-white';
+piMaterialsInsert(thisR,'name',targetMaterial);
 
-% Assigning mirror to sphere
+% Assigning material to our target
 cube = piAssetSearch(thisR,'object name','Cube');
-thisR.set('asset', cube, 'material name', mirrorName);
+thisR.set('asset', cube, 'material name', targetMaterial);
 
-%% show with a mirror
+%% show with our target
 piWRS(thisR,'mean luminance',-1);
 
 %% Add Headlamp
 
-% scale appears to be how much to scale the image intensity. We haven't
-% seen a difference yet between scale and power fov seems to be working
-% well, changing how widely the projection spread.
-%
-
+% Use level beam, basically horizon cutoff
 headlight = headlamp('preset','level beam','name', 'headlightLight',...
     'recipe', thisR);
 headlightLight = headlight.getLight;
 
+%% NOTE:
 % On the surface scale & power do "the same thing" but they
 % definitely don't in the pbrt code.
 
@@ -86,16 +90,4 @@ if ~ismac %code to add denoising for benchmarking
 else
     piWRS(thisR);
 end
-%% Rotate the light
 
-%thisR.set('asset',pLight_Left,'rotation',[0 0 30]);
-%piWRS(thisR,'mean luminance',-1);
-
-% scene = piRender(thisR);
-% sceneWindow(scene);
-
-%%
-%thisR.set('asset',pLight_Right,'translate',[1 1 0]);
-%thisR.show('lights');
-
-%piWRS(thisR);
