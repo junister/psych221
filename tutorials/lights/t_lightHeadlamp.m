@@ -29,7 +29,7 @@ thisR.lookAt.to = [3 50 0];
 %% show original
 piWRS(thisR,'mean luminance',-1);
 
-%% Change the flat surface to a mirror
+%% Change the flat surface to a glossy or mirror
 
 mirrorName = 'glossy-white';
 piMaterialsInsert(thisR,'name',mirrorName);
