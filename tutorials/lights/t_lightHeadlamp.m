@@ -31,7 +31,7 @@ piWRS(thisR,'mean luminance',-1);
 
 %% Change the flat surface to a mirror
 
-mirrorName = 'mirror';
+mirrorName = 'glossy-white';
 piMaterialsInsert(thisR,'name',mirrorName);
 
 % Assigning mirror to sphere
