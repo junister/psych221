@@ -1,10 +1,7 @@
 %% Explore light creation with new area light parameters
 %
-% The area lights were implemented by Zhenyi to accurately simulate the
-% headlights in night time driving scenes.
-%
-% The shape of the area light is specified in the arealight_geometry.pbrt
-% file. It is a flat area.
+% The shape of the area light is specified as a trianglemesh in
+% the recipe.  It is a flat surface in this example.
 %
 % This script explores setting the SPD of the lights and rotating the
 % direction of the light.
