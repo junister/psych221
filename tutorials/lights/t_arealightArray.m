@@ -52,7 +52,7 @@ end
 % Add an ambient light so we can see the surface where this light does
 % NOT shine.
 thisR.set('skymap','room.exr');
-    thisR.set('light','room_L','rotate',[0 180 0]);    % Don't ask
+thisR.set('light','room_L','rotate',[0 180 0]);    % Don't ask
 
 piWRS(thisR);
 
@@ -64,13 +64,44 @@ piWRS(thisR);
 
 %% Create a ring of light sources
 
-% Make the lights.  They will be in a circle around the camera.
+% Delete the triangular array and skymap
+thisR.set('lights','all','delete');
+
+% Add back the ambient light so we can see the surface where this
+% light does NOT shine.
+thisR.set('skymap','room.exr');
+thisR.set('light','room_L','rotate',[0 180 0]);    % Don't ask
+
+% Make ring of lights.  They will be in a circle around the camera.
 % The camera is pointed in this direction.
 direction = thisR.get('fromto');
-[pts, radius] = piRotateFrom(thisR, direction, ...
+radius = 0.035; % Meters
+nLights = 8;
+
+% Creates a set of positions around the camera in the from-to
+% direction.
+pos = piRotateFrom(thisR, direction, ...
     'n samples',nLights+1, ...
-    'radius',velscopeRadius,...
+    'radius',radius,...
     'show',false);
 
+for ii=1:nLights
+    area{ii} = piLightCreate(sprintf('area-%d',ii),...
+        'type','area',...
+        'spd spectrum','D65.mat', ...
+        'spread',5, ...
+        'specscale',100);
+    thisR.set('light',area{ii},'add');
+    thisR.set('light',area{ii},'translate',pos(:,ii));
+    thisR.set('light',area{ii},'shape scale',0.005);   % 5 mm size
+    thisR.set('light',area{ii},'rotate',[0 180 0]);    % Don't ask
+end
+thisR.show('lights');
 
-%%
+scene = piWRS(thisR,'name','ring light');
+
+%%  Sweep out some distances by moving the surface
+
+% TODO
+
+%% END
