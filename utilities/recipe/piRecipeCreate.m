@@ -9,11 +9,14 @@ function thisR = piRecipeCreate(rName,varargin)
 %   camera to be rendered.  This routine adjusts the recipe so that it can
 %   be rendered with piWRS immediately.
 %
-%   To see the valid recipe list use piRecipe
+%   To see the valid recipe list use piRecipeCreate('help').  You can
+%   also get a valid list from any recipe (thisR) using the command
+%
+%          thisR.list
 %
 % Input
 %   rName - Recipe name from the cell array returned by 
-%          validNames = piRecipeCreate('help');
+%             validNames = piRecipeCreate('help');
 %
 % Key/Val pairs
 %

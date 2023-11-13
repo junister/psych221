@@ -16,10 +16,9 @@ if ~piDockerExists, piDockerConfig; end
 
 %% Simple flat surface for the scene
 
+% The recipe has no light
 thisR = piRecipeCreate('flat surface');
 thisR.set('rays per pixel',128);
-% Remove the other lights
-thisR.set('lights','all','delete');
 
 %% Make an area light
 
@@ -34,19 +33,19 @@ thisR.show('lights');
 thisR.set('light','area1','rotate',[0 180 0]);
 
 % The light is very big so it illuminates the whole surface
-piWRS(thisR);
+piWRS(thisR,'name','big light');
 
-%% Reduce the size and the spread
+%% Reduce the size of the light and its spread
 
 thisR.set('light','area1','spread',10);
 thisR.set('light','area1','shape scale',0.005);   % Five millimeters
 
-piWRS(thisR);
+piWRS(thisR,'name','small light');
 
 %% Return the size
 
 thisR.set('light','area1','shape scale',100);
-piWRS(thisR);
+piWRS(thisR,'name','restore size');
 
 %% Create an array with different positions 
 
@@ -54,15 +53,12 @@ piWRS(thisR);
 thisR = piRecipeCreate('flat surface');
 thisR.set('rays per pixel',128);
 
-% Remove the other lights
-thisR.set('lights','all','delete');
-
 % The flat surface object is called Cube.  It is 1m in size.  I shrink it
 % so we can also see the environment light, later.
 cubeID = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset',cubeID,'scale',0.25);   
 
-% Add some surface textures
+% Add some surface textures.  For now make the surface white.
 piMaterialsInsert(thisR,'names',{'mirror','diffuse-white','marble-beige','wood-mahogany'});
 thisR.set('asset',cubeID,'material name', 'diffuse-white');
 
@@ -100,54 +96,50 @@ piWRS(thisR);
 thisR.set('asset',cubeID,'translate',[0 0 -0.5]);
 piWRS(thisR);
 
-%% Start again but illustrate changing the size of the light
+%% Change the light size and compensate by scaling the SPD
 
+% Start fresh with a small Cube
 ieInit;
+clear area;
 
 % Start fresh with the scene.  Not necessary, but ...
 thisR = piRecipeCreate('flat surface');
 thisR.set('rays per pixel',128);
-cubeID = piAssetSearch(thisR,'object name','Cube');
-thisR.set('asset',cubeID,'scale',0.25);   
-
-% Remove the other lights
-thisR.set('lights','all','delete');
-
-clear area;
+specScale = 50;
 
 area{1} = piLightCreate('area1',...
     'type','area',...
     'spd spectrum','D65', ...
-    'specscale',50);
-
+    'specscale',specScale);
 thisR.set('lights',area{1},'add');
 thisR.set('light','area1','spread',5);  % Narrow spread so the size will be easier to see
 thisR.set('light','area1','rotate',[0 180 0]);
 thisR.show('lights');
 
-thisR.set('skymap','room.exr');
-
-% Rotate the light so it is pointing at the surface
-
-% The light is very big so it illuminates the whole surface
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
-
-% Change its size by a couple of times
-
-% Notice that in addition to seeing the light (because of its narrow
-% spread), the luminance level changes
+% We cannot use the shape scale parameter as part of the create
+% because it is a method, not a parameter.  That could be changed by
+% adding it to piLightCreate for the area light.
 thisR.set('light',area{1},'shape scale',0.1);
-thisR.set('light',area{1},'specscale',1/(0.1)^2);
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+
+% Reduce the light's size a couple of times.  We change the SPD
+% scaling and Shape scaling together.
+scene = piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+fprintf('Mean (max) luminance: %.4g (%.4g)\n',...
+    sceneGet(scene,'mean luminance'), ...
+    sceneGet(scene,'max luminance'));
 
 thisR.set('light',area{1},'shape scale',0.3);
-thisR.set('light',area{1},'specscale',1/(0.1*0.3)^2);
-
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+thisR.set('light',area{1},'specscale',specScale/(0.3)^2);
+scene = piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+fprintf('Mean (max) luminance: %.4g (%.4g)\n',...
+    sceneGet(scene,'mean luminance'), ...
+    sceneGet(scene,'max luminance'));
 
 thisR.set('light',area{1},'shape scale',0.3);
-thisR.set('light',area{1},'specscale',1/(0.1*0.3*0.3)^2);
+thisR.set('light',area{1},'specscale',specScale/(0.3*0.3)^2);
 
-piWRS(thisR,'mean luminance',-1,'render flag','rgb');
-
+scene = piWRS(thisR,'mean luminance',-1,'render flag','rgb');
+fprintf('Mean (max) luminance: %.4g (%.4g)\n',...
+    sceneGet(scene,'mean luminance'), ...
+    sceneGet(scene,'max luminance'));
 %%
