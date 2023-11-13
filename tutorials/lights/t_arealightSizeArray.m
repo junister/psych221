@@ -6,8 +6,6 @@
 %  * Combine a couple of area lights into an array
 %  * Move the camera so that it looks at the area light array
 %
-%
-
 
 %%
 ieInit;
@@ -36,18 +34,18 @@ thisR.set('light','area1','rotate',[0 180 0]);
 thisR.set('name','Velscope Light');
 piWRS(thisR, 'name', thisR.name);
 
-%% Reduce the size and the spread
+%% Reduce the size and spread of our area light
 
 thisR.set('light','area1','spread',10);
 thisR.set('light','area1','shape scale',0.005);   % Five millimeters
 
-thisR.set('name','narrow Velscope');
+thisR.set('name','narrow, small Velscope');
 piWRS(thisR, 'name', thisR.name);
 
-%% Return the size
+%% Return the light to a larger size
 
 thisR.set('light','area1','shape scale',100);
-thisR.set('name','shape scale 100');
+thisR.set('name','restore shape');
 piWRS(thisR,  'name', thisR.name);
 
 %% Create an array with different positions 
@@ -63,7 +61,7 @@ thisR.set('lights','all','delete');
 cubeID = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset',cubeID,'scale',0.25);   
 
-% Add some surface textures
+% Add some surface textures and make the cube white
 piMaterialsInsert(thisR,'names',{'mirror','diffuse-white','marble-beige','wood-mahogany'});
 thisR.set('asset',cubeID,'material name', 'diffuse-white');
 
@@ -114,7 +112,6 @@ thisR = piRecipeCreate('flat surface');
 
 % Remove the other lights
 thisR.set('lights','all','delete');
-
 clear area;
 
 area{1} = piLightCreate('area1',...
@@ -122,16 +119,15 @@ area{1} = piLightCreate('area1',...
     'spd spectrum','D65');
 thisR.set('lights',area{1},'add');
 thisR.set('light','area1','spread',5);  % Narrow spread so the size will be easier to see
+% Rotate the light so it is pointing at the surface
 thisR.set('light','area1','rotate',[0 180 0]);
 thisR.show('lights');
-
-% Rotate the light so it is pointing at the surface
 
 % The light is very big so it illuminates the whole surface
 piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
     'name','large light');
 
-%% Change its size by half a couple of times
+%% Change the light's size by half a couple of times
 
 % Notice that in addition to seeing the light (because of its narrow
 % spread), the luminance level changes
@@ -146,5 +142,3 @@ piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
 thisR.set('light',area{1},'shape scale',0.3);
 piWRS(thisR,'mean luminance',-1,'render flag','rgb', ...
     'name', 'light size by another * .3');
-
-%%
