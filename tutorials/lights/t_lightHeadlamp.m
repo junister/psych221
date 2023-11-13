@@ -51,9 +51,13 @@ piWRS(thisR,'mean luminance',-1);
 %% Add Headlamp
 
 % Use level beam, basically horizon cutoff
-headlight = headlamp('preset','level beam','name', 'headlightLight',...
+usePreset = 'level beam';
+% Or experiment with Area light
+%usePreset = 'area';
+
+headlight = headlamp('preset',usePreset,'name', 'headlightLight',...
     'recipe', thisR);
-headlightLight = headlight.getLight;
+headlightLight = headlight.getLight(usePreset);
 
 %% NOTE:
 % On the surface scale & power do "the same thing" but they
