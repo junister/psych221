@@ -94,7 +94,7 @@ water.size.h = inputs.sizeY;
 water.size.w = inputs.sizeZ;
 water.size.pmin = [-dx; -dy; -dz];
 water.size.pmax = [dx; dy; dz];
-water.position = [inputs.offsetX; inputs.offsetY; inputs.offsetZ];
+water.translation = {[inputs.offsetX; inputs.offsetY; inputs.offsetZ]};
 
 waterID = piAssetAdd(submerged, 1, water);
 
