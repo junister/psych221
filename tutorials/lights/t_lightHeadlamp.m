@@ -1,9 +1,8 @@
 %% t_lightHeadlamp
 %
 %   Use Projected Light Headlamps
+%   (with option to try Area light version)
 %   Also try to evaluate radiance over the FOV
-%
-%   Set scene parameters to 'match' lab test
 %
 %   D. Cardinal, Stanford University, September, 2023
 %
@@ -17,15 +16,15 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
+% Use the flat surface as a simple test "wall"
 thisR = piRecipeDefault('scene name','flatSurface');
-
 thisR.set('name','Headlamp');  % Name of the recipe
 
 thisR.show('lights');
 
 % for flat surface
-thisR.lookAt.from = [3 290 0];
-thisR.lookAt.to = [3 50 0];
+thisR.lookAt.from = [0 290 0];
+thisR.lookAt.to = [0 50 0];
 
 % Headlights have a much wider horizontal field
 thisR.film.xresolution.value = 640;
@@ -53,7 +52,7 @@ piWRS(thisR,'mean luminance',-1);
 % Use level beam, basically horizon cutoff
 usePreset = 'level beam';
 % Or experiment with Area light
-%usePreset = 'area';
+usePreset = 'area';
 
 headlight = headlamp('preset',usePreset,'name', 'headlightLight',...
     'recipe', thisR);
@@ -77,11 +76,11 @@ headlightLight = headlight.getLight(usePreset);
 thisR.set('light', 'all', 'delete');
 
 % Add the Headlamp(s)
-thisR.set('light', headlightLight, 'add');
+thisR.set('lights', headlightLight, 'add');
 
-pLight_Left = piAssetSearch(thisR,'light name', 'headlightLight');
-%pLight_Right = piAssetSearch(thisR,'light name', 'Right_Light');
-%thisR.set('asset',pLight_Left,'translation',[0 0 150]);
+pLight_Left = piAssetSearch(thisR,'light name', headlightLight.name);
+thisR.set('asset',pLight_Left,'translation', ...
+    thisR.lookAt.from); % move to camera for now
 
 thisR.show('lights');
 
