@@ -11,24 +11,30 @@
 %  t_lightGonimetric
 %  t_piIntro_lights
 
+% TIP: Use fclose('all') if you get weird piWrite errors
+
 %% Initialize ISET and Docker
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
 % Use the flat surface as a simple test "wall"
-thisR = piRecipeDefault('scene name','flatSurface');
+% When we call ...Create it is generated without lights
+thisR = piRecipeCreate('flatSurface');
 thisR.set('name','Headlamp');  % Name of the recipe
 
-thisR.show('lights');
+%thisR.show('lights');
 
 % for flat surface
-thisR.lookAt.from = [0 290 0];
-thisR.lookAt.to = [0 50 0];
+%thisR.lookAt.from = [0 290 0];
+%thisR.lookAt.to = [0 50 0];
 
 % Headlights have a much wider horizontal field
 thisR.film.xresolution.value = 640;
 thisR.film.yresolution.value = 320;
+
+thisR.camera.fov.type = 'float';
+thisR.camera.fov.value = 30.0;
 
 %% show original
 %piWRS(thisR,'mean luminance',-1);
@@ -44,8 +50,8 @@ piMaterialsInsert(thisR,'name',targetMaterial);
 cube = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset', cube, 'material name', targetMaterial);
 
-%% show with our target
-piWRS(thisR,'mean luminance',-1);
+% Move it farther away
+thisR.set('asset', cube, 'translate', [0 0 5]);
 
 %% Add Headlamp
 
@@ -80,7 +86,10 @@ thisR.set('lights', headlightLight, 'add');
 
 pLight_Left = piAssetSearch(thisR,'light name', headlightLight.name);
 thisR.set('asset',pLight_Left,'translation', ...
-    thisR.lookAt.from); % move to camera for now
+    thisR.lookAt.from + [0 .05 0]); % move to camera for now
+
+% try two-sided for debugging
+%thisR.set('asset',pLight_Left,'twosided',true);
 
 thisR.show('lights');
 
