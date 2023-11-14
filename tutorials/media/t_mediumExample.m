@@ -1,5 +1,5 @@
 % This tutorial shows how to create a simple scene,
-% a medium, and how to render the scene submerged in that medium. 
+% a medium, and how to render the scene submerged in that medium.
 %
 % Henryk Blasinski, 2023
 
@@ -32,7 +32,7 @@ make sure that the terminal command "docker context list"
     shows a remote-mux context
 %}
       
-      ieInit
+ieInit();
 piDockerConfig();
 
 %% Create a scene with a Macbeth Chart.
@@ -48,7 +48,7 @@ sceneShowImage(macbethScene);
 
 %% Create sea water medium
 
-% Define rendering parameters 
+% Define rendering parameters
 %{
 dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
     'localRender',true,...
@@ -61,11 +61,34 @@ dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
     'remoteResources',false);
 %}
 
-dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-cpu',...
-    'localRender',true,...
-    'gpuRendering',false,...
-    'remoteImage','digitalprodev/pbrt-v4-cpu',...
-    'remoteResources',false);
+%% Here is the code to set Docker up to run on a local GPU
+%  My laptop doesn't have an Nvidia GPU, so I can't completely
+%  test it, so let me know if it works!
+
+try
+    ourGPU = gpuDevice();
+    if ourGPU.ComputeCapability >= 5.3 % minimum for PBRT on GPU
+        [status,result] = system('docker pull digitalprodev/pbrt-v4-gpu-ampere-mux');    
+        dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu-ampere-mux',...
+            'localRender',true,...
+            'gpuRendering',true,...
+            'remoteResources',false);
+        haveGPU = true;
+    else
+        haveGPU = false;
+    end
+catch
+    % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
+end
+% Here is the previous local CPU code that should run if needed
+if ~haveGPU
+    [status,result] = system('docker pull digitalprodev/pbrt-v4-cpu');
+    dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-cpu',...
+        'localRender',true,...
+        'gpuRendering',false,...
+        'remoteImage','digitalprodev/pbrt-v4-cpu',...
+        'remoteResources',false);
+end
 
 macbethScene = piWRS(macbeth, 'dockerwrapper', dw, 'meanluminance', -1);
 
@@ -82,9 +105,9 @@ macbethScene = piWRS(macbeth, 'dockerwrapper', dw, 'meanluminance', -1);
 % function and the phaseFunction.  For pbrt you only specify the scattering
 % function and a single scalar that specifies the phaseFunction.
 %
-% phaseFunction 
+% phaseFunction
 %
-% PBRT allows specification only of the parameters scattering, scattering 
+% PBRT allows specification only of the parameters scattering, scattering
 [water, waterProp] = piWaterMediumCreate('seawater');
 disp(waterProp);
 
@@ -94,9 +117,9 @@ disp(waterProp);
    medium = mediumSet(medium,'property',val);
    mediumGet()....
 %}
-% Submerge the scene in the medium.   
+% Submerge the scene in the medium.
 % The size defines the volume of water.  It is centered at 0,0 and extends
-% plus or minus 50/2 away from center in units of meters!  Excellent! 
+% plus or minus 50/2 away from center in units of meters!  Excellent!
 % It returns a modified recipe that has the 'media' slot built in the
 % format that piWrite knows what to do with it.
 uwMacbeth = piSceneSubmerge(macbeth, water, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
