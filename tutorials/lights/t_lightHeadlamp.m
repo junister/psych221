@@ -33,8 +33,9 @@ thisR.set('name','Headlamp');  % Name of the recipe
 thisR.film.xresolution.value = 640;
 thisR.film.yresolution.value = 320;
 
+%thisR.camera.
 thisR.camera.fov.type = 'float';
-thisR.camera.fov.value = 30.0;
+thisR.camera.fov.value = 45.0;
 
 %% show original
 %piWRS(thisR,'mean luminance',-1);
@@ -42,16 +43,20 @@ thisR.camera.fov.value = 30.0;
 %% Change the flat surface to a 'white' or 'gray'
 
 %targetMaterial = 'glossy-white';
-%targetMaterial = 'diffuse-gray';
-targetMaterial = 'diffuse-white';
+targetMaterial = 'diffuse-gray';
+%targetMaterial = 'diffuse-white';
 piMaterialsInsert(thisR,'name',targetMaterial);
 
 % Assigning material to our target
 cube = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset', cube, 'material name', targetMaterial);
 
+% In FlatSurface x is L/R, Y if near/far, Z is down/up
+% This is _NOT_ the same as in our auto scenes, unfortunately
+
 % Move it farther away
 thisR.set('asset', cube, 'translation', [0 0 5]);
+thisR.set('asset', cube, 'scale', [8 1 4]);
 
 %% Add Headlamp
 
