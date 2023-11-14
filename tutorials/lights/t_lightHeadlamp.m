@@ -51,7 +51,7 @@ cube = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset', cube, 'material name', targetMaterial);
 
 % Move it farther away
-thisR.set('asset', cube, 'translate', [0 0 5]);
+thisR.set('asset', cube, 'translation', [0 0 5]);
 
 %% Add Headlamp
 
