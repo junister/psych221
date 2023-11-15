@@ -9,6 +9,8 @@
 
 %% Start fresh with a small Cube
 ieInit;
+if ~piDockerExists, piDockerConfig; end
+
 clear area;
 
 %% Start fresh with the scene.  Not necessary, but ...
