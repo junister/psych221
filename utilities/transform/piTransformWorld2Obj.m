@@ -1,19 +1,16 @@
-function [rotM, transM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
+function [rotM, translateM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
 % Find rotation and translation from world axis to object axis
 %
 % Synopsis
-%   [rotM, transM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
+%   [rotM, translateM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
 %
-% The translation and rotations are represented with respect to homogeneous
-% coordinates. Represented in matrix (4 x 4), with each row represents one
-% dimension.
+% Brief description
+%  The translation and rotations are represented with respect to homogeneous
+%  coordinates. Represented in matrix (4 x 4), with each row represents one
+%  dimension.
 %
-% I am not sure the scale is calculated correctly.  But maybe.  We multiply
-% any scale branches together.  This is OK as long as the scale is always
-% expressed in the object coordinate frame.
-%
-% Zheng should add in some more comments about how he is handling rotation
-% and translation matrices here.
+%  We multiply any scale branches together.  This is OK as long as the
+%  scale is always expressed in the object coordinate frame.
 %
 % Input
 %    thisR
@@ -32,7 +29,7 @@ function [rotM, transM, scaleM] = piTransformWorld2Obj(thisR, nodeToRoot)
 
 %%
 rotM   = eye(4);
-transM = eye(4);
+translateM = eye(4);
 scaleM = ones(1,3);   % Scale factors
 
 for ii=numel(nodeToRoot):-1:1
@@ -45,15 +42,25 @@ for ii=numel(nodeToRoot):-1:1
             switch thisAsset.transorder(tt)
                 case 'T'
                     thisTrans = thisAsset.translation{pointerT};
+
+                    % This was here for a long time.  But we think
+                    % thisTrans is unchanged through this calculation.
+                    %  So we are deleting and just adding the
+                    %  translation.
+                    %{
                     curTransM =  piTransformTranslation(rotM(:, 1),...
                         rotM(:, 2),...
                         rotM(:, 3), thisTrans);
-                    
-                    % How did this line get here?
-                    % transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
-                    %
-                    
-                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4) .* scaleM';
+                    transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4);
+                    %}
+
+                    % Add the translation to the fourth column
+                    translateM(1:3, 4) = translateM(1:3, 4) + thisTrans(:);
+
+                    % At one point, we combined the scale with the
+                    % translation.  Then Zhenyi and I took that out.
+                    % We are looking into it.  11/15/2023.
+                    % transM(1:3, 4) = transM(1:3, 4) + curTransM(1:3, 4) .* scaleM';
                     pointerT = pointerT + 1;
                     
                 case 'R'
