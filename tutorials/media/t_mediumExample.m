@@ -76,12 +76,13 @@ try
             'remoteResources',false);
         haveGPU = true;
     else
+        fprintf('GPU Compute is: %d\n',ourGPU.computeCapability);
         haveGPU = false;
     end
 catch
-    % GPU acceleration with Parallel Computing Toolbox is not supported on macOS.
+    haveGPU = false;
 end
-% Here is the previous local CPU code that should run if needed
+
 if ~haveGPU
     [status,result] = system('docker pull digitalprodev/pbrt-v4-cpu');
     dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-cpu',...
