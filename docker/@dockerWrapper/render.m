@@ -235,14 +235,18 @@ end
 end
 
 function getLinks = getSymLinks()
-geoCommand =  'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
-texCommand =  'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
-spdCommand =  'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds';
-lgtCommand =  'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
-skyCommand =  'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
-lensCommand = 'cp -n -r lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens';
+cpCommand = 'cp -n -r 2>/dev/null ';
+
+geoCommand =  [cpCommand 'geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry'];
+texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
+spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
+lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
+skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
+lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+
 getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
     geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
+
 end
 
 
