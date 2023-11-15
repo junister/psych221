@@ -1929,8 +1929,13 @@ switch ieParamFormat(param)  % lower case, no spaces
                             % Read a shape file.  The shape file needs to
                             % be in the output directory. (BW).
                             [~,~,ext] = fileparts(theShape.filename);
-                            if isequal(ext,'.ply')                                
-                                msh = readSurfaceMesh(theShape.filename); 
+                            if isequal(ext,'.ply')
+                                fname = fullfile(thisR.get('inputdir'),theShape.filename);
+                                if ~exist(fname,'file')
+                                    warning('Can not find the ply file %s\n',fname);
+                                    return;
+                                end
+                                msh = readSurfaceMesh(fname); 
                                 val = range(msh.Vertices);
                                 % I do not understand how the scale is
                                 % working yet.  I think we need to
