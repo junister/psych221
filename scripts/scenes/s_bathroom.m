@@ -17,9 +17,18 @@ thisR = piRecipeDefault('scene name','contemporary-bathroom');
 thisR.set('n bounces',5);
 thisR.set('rays per pixel',512);
 thisR.set('film resolution',resolution);
-thisR.set('render type',{'radiance','depth'});
 
 %% This renders the scene
+
+%{
+ % Positions are not right yet
+ to = thisR.get('to') - [0 0 0];
+ % delta = [0.15 0 0];
+ % for ii=1:numel('Lorem'), pos(ii,:) = to + ii*delta; end
+ % pos(end,:) = pos(end,:) + delta/2;  % Move the 'm' a bit
+ thisR = charactersRender(thisR, 'Lorem','letterSize',[1 1 1],...
+'letterRotation',[0,15,15],'letterPosition',[0 0 0],'letterMaterial','wood-light-large-grain');
+%}
 
 scene = piWRS(thisR);
 

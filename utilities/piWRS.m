@@ -21,7 +21,8 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %           ... others).  If it is a char, then we convert it to a cell.
 %   'show' -  Call a window to show the object and insert it in
 %             the vcSESSION database (Default: true);
-%   'our docker' - Specify the docker wrapper we will pass to piRender
+%   'docker wrapper' - Specify the docker wrapper we will pass to
+%                      piRender ('our docker') is an equivalent.
 %
 %   'name'  - Set the Scene or OI name
 %   'gamma'      - Set the display gamma for the window
@@ -33,6 +34,12 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %             the recipe unchanged).  A value of N reduces the resolution
 %             by a factor of N.  Bounces and number of rays are reduced,
 %             too.
+%    'remote resources' - Applies to cases when the remote device has all
+%             of the graphics resources needed (textures, meshes) and the
+%             main PBRT file will be able to reference them without copying
+%             from the local computer.  (Better comment needed)
+%    'denoise' - Run the piAIdenoise prior to returning
+%
 %
 % Returns
 %   obj     - a scene or oi
@@ -55,23 +62,41 @@ p.addRequired('thisR',@(x)(isa(x,'recipe')));
 % You can over-ride the render type with this argument
 p.addParameter('rendertype','',@(x)(ischar(x) || iscell(x)));
 
-p.addParameter('ourdocker','');
+% p.addParameter('ourdocker','');
+p.addParameter('dockerwrapper','');
 p.addParameter('name','',@ischar);
 p.addParameter('show',true,@islogical);
 p.addParameter('gamma',[],@isnumeric);
+p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
+p.addParameter('meanluminance',-1,@isscalar);
+
+% allow parameter passthrough
+p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
-ourDocker  = p.Results.ourdocker;
+
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
+% meanLuminance = p.Results.meanluminance;
 
 % Determine whether we over-ride or not
 renderType = p.Results.rendertype;
 if isempty(renderType),     renderType = thisR.get('render type'); % Use the recipe render type
 elseif ischar(renderType),  renderType = {renderType};     % Turn a string to cell
 elseif iscell(renderType)        % Good to go  
+end
+
+% Fix empty rendertypes to be the default:
+if isempty(renderType)
+    renderType = [{'radiance'},{'depth'},{'albedo'}];
+end
+
+if ~isempty(p.Results.dockerwrapper)
+    thisD = p.Results.dockerwrapper;
+else
+    thisD = dockerWrapper();
 end
 
 name = p.Results.name;
@@ -96,35 +121,43 @@ oldRenderType = thisR.get('render type');
 % But the user may have given us a new render type
 thisR.set('render type',renderType);
 
-piWrite(thisR);
+% Write the local/pbrt directory being aware about whether the resources
+% are expected to be present remotely.
+piWrite(thisR, 'remoteResources', thisD.remoteResources);
 
-[~,username] = system('whoami');
-
-if strncmp(username,'zhenyi',6)
-    [obj,results] = piRenderZhenyi(thisR, 'ourdocker', ourDocker);
-else
-    [obj,results, thisD] = piRender(thisR, 'ourdocker', ourDocker);
-end
+[obj, results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
 
 if isempty(obj),  error('Render failed.'); end
 
 switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
-        if show, sceneWindow(obj);
+        if show
+            sceneWindow(obj);
             if ~isempty(g), sceneSet(obj,'gamma',g); end
-            if ~isempty(renderFlag), sceneSet(obj,'render flag',renderFlag); end
+            if ~isempty(renderFlag) 
+                % Removed test for ISETBio. Aug 2023.
+                sceneSet(obj,'render flag',renderFlag);                 
+            end
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
-        if show, oiWindow(obj); 
+        if show
+            oiWindow(obj); 
             if ~isempty(g), oiSet(obj,'gamma',g); end
-            if ~isempty(renderFlag), oiSet(obj,'render flag',renderFlag); end
+            if ~isempty(renderFlag) 
+                % Removed test for ISETBio. Aug 2023
+                oiSet(obj,'render flag',renderFlag);                 
+            end
         end
         % Store the recipe camera on the oi.  Not sure why, but it
         % seems like a good idea.  I considered the film, too, but
         % that doesn't have much extra.
         obj.camera = thisR.get('camera');
+end
+
+if p.Results.denoise
+    obj = piAIdenoise(obj);
 end
 
 %% Put parameters back.

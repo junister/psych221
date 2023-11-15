@@ -16,7 +16,6 @@ thisR = piRecipeDefault('scene name','bistro');
 % Equivalent:  thisR = piRecipeDefault('scene name','bistro,'file','bistro_vespa');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
-thisR.set('render type',{'radiance','depth'});
 
 scene = piWRS(thisR);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;
@@ -25,7 +24,6 @@ ieReplaceObject(piAIdenoise(scene)); sceneWindow;
 thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
-thisR.set('render type',{'radiance','depth'});
 
 scene = piWRS(thisR);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;
@@ -34,7 +32,6 @@ ieReplaceObject(piAIdenoise(scene)); sceneWindow;
 thisR = piRecipeDefault('scene name','bistro','file','bistro_cafe.pbrt');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
-thisR.set('render type',{'radiance','depth'});
 
 scene = piWRS(thisR);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;

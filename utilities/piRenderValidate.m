@@ -49,9 +49,9 @@ missingLights = [];
 lgtList = thisR.lights;
 for ii = 1:numel(lgtList)
     curLight = lgtList{ii};
-    % Infinite lights needs an image map
-    if isfield(curLight, 'mapname') && ~isempty(curLight.mapname.value)
-        fpath = fullfile(thisR.get('output dir'), curLight.mapname.value);
+    % Infinite lights needs an image map (changed to filename 8/19/23
+    if isfield(curLight, 'filename') && ~isempty(curLight.filename.value)
+        fpath = fullfile(thisR.get('output dir'), curLight.filename.value);
         lightList{end + 1} = fpath;
         if exist(fpath, 'file')
         else
@@ -93,8 +93,8 @@ for ii = 1:numel(ids)
     elseif isequal(curNode.type, 'light')
         for jj = 1:numel(curNode.lght)
             curLight = curNode.lght{jj};
-            if isfield(curLight, 'mapname') && ~isempty(curLight.mapname.value)
-                fpath = fullfile(thisR.get('output dir'), curLight.mapname.value);
+            if isfield(curLight, 'filename') && ~isempty(curLight.filename.value)
+                fpath = fullfile(thisR.get('output dir'), curLight.filename.value);
                 lightList{end + 1} = fpath;
                 if exist(fpath, 'file')
                 else

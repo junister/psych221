@@ -1,15 +1,17 @@
-%% Gets a skymap from Flywheel; also uses special scene materials
+%% Render a car
 %
-% This script shows how to create a simple scene using assets that are
-% stored in the Flywheel stanfordlabs site.  To run this script you must
-% have permission (a key) to login and download assets from Flywheel.
+% Fairly complex.
 %
-% This technique is used at a much larger scale in creating complex driving
-% scenes.
+% It used to illustrate using Flywheel. BUt no more.
+%
+% This technique was used at a much larger scale in creating complex
+% driving scenes.
+%
+% NOT WORKING NOW BECAUSE OF MISSING .ply FILES.  WE SHOULD DEBUG.
 %
 % Dependencies:
 %
-%    ISET3d, (ISETCam or ISETBio), ISETAuto(zhenyi branch), JSONio, SCITRAN
+%    ISET3d, ISETCam, ISETAuto(zhenyi branch)
 %
 % Check that you have the updated docker image by running
 %
@@ -46,14 +48,15 @@ sceneR.set('to',[0 0.5 0]);
 sceneR.set('up',[0 1 0]);
 
 % scale and rotate planar checkerboard
-sceneR.set('assets','0002ID_Checkerboard_B','scale',[10 10 1]);
-sceneR.set('asset','Checkerboard_B','world rotation',[90 30 0]);
+idx = piAssetSearch(thisR,'object name','Checkerboard');
+sceneR.set('asset',idx,'scale',[10 10 1]);
+sceneR.set('asset',idx,'world rotation',[90 30 0]);
 
 %% Read in the car model and reformat it 
 
 % The scene starts in data/V3 and it is reformatted into
 % local/formatted/car.
-car_fname = fullfile(piRootPath, 'data','V3','car','car.pbrt');
+car_fname = fullfile(piRootPath, 'data','scenes','car','car.pbrt');
 car_formatted_fname = fullfile(piRootPath,'local','formatted','car','car.pbrt');
 
 if ~exist(car_formatted_fname,'file')
@@ -74,36 +77,26 @@ sceneR = piRecipeMerge(sceneR, objectR);
 % piAssetGeometry(sceneR);
 
 %% Add a light to the merged scene
-skyname = 'probe_16-30_latlongmap.exr';
 
 % Delete any lights that happened to be there
-sceneR = piLightDelete(sceneR, 'all');
+sceneR.set('lights','all','delete');
 
-rotation(:,1) = [0 0 0 1]';
-rotation(:,2) = [45 0 1 0]';
-rotation(:,3) = [-90 1 0 0]';
+skyname = 'glacier_latlong.exr';
+sceneR.set('skymap',skyname);
 
-skymap = piLightCreate('new skymap', ...
-    'type', 'infinite',...
-    'string mapname', skyname,...
-    'rotation',rotation);
-
-sceneR.set('light', 'add', skymap);
-disp('*** Skymap added');
 %% This adds predefined sceneauto materials to the assets in this scene
+
+sceneR.show('lights');
 
 % print material
 sceneR.show('materials');
 
-% assign material
+% assign material (Requires isetauto)
 iaAutoMaterialGroupAssign(sceneR); 
  
 % check again after material assign
-sceneR.show('materials');
+sceneR.show('objects');
 
-% show corresponding material name for each asset
-% piAssetMaterialPrint(sceneR);
-sceneR.show('assets materials');
 
 %% Set the car body to a new color.
 
@@ -118,12 +111,15 @@ sceneR.set('asset','AudiSportsCar01_B','world rotation',[0 -15 0]);
 sceneR.set('asset','AudiSportsCar01_B','world rotation',[0 -30 0]);
 
 %% Write out the pbrt scene file, based on scene.
-piWrite(sceneR);   % We get a warning.  Ignore
+
+scene = piWRS(sceneR);
+
+% piWrite(sceneR);   % We get a warning.  Ignore
 
 %% Render.
 
 % Maybe we should speed this up by only returning radiance.
-[scene, result] = piRender(sceneR,'render type','radiance');
+% [scene, result] = piRender(sceneR,'render type','radiance');
 
 %  Show the scene in a window
 

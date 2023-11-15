@@ -1,4 +1,9 @@
 %% update assets in flywheel to v4
+%
+%  Deprecated.
+%
+
+%%
 ieInit
 st = scitran('stanfordlabs');
 
@@ -134,7 +139,6 @@ for aa = 3:numel(assetType)
         thisR.version = 4;
         
         thisR.set('fov',38);
-        thisR.set('film render type',{'radiance'});
         thisR.set('pixelsamples',16);
         thisR.integrator.subtype = 'path';
         thisR.set('film resolution',[800, 500]);

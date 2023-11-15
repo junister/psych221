@@ -1,22 +1,17 @@
 %% Create a sensor for dual pixel autofocus experiments (DPAF).
 %
-%  In ISETCam scripts we create the sensor
+% This is more recently updated in t_cameraDPAF and extended in
+% t_cameraLightField.
 %
-% This script is failing in V4.  It fails with the omni camera and
-% microlens.
-%
-%{
-See the file LICENSE.txt for the conditions of the license.
-
-[1m[31mWarning[0m: Specified aperture radius 0.0025000002 is greater than maximum possible 0.00051150005.  Clamping it.
-
-terminate called after throwing an instance of 'nlohmann::detail::type_error'
-
-  what():  [json.exception.type_error.302] type must be number, but is array
-%}
+% Questions to answer:  
+% 
+%   * Why does the image look square in the sensorWindow?  What function
+%   did I write (BW)?
+%   * Should we eliminate this and only use the t_camera tutorials
+%   below?
 %
 % See also
-%  s_sensorDPAF (ISETCam)
+%  t_cameraDPAF, t_cameraLightField
 
 %% Initialize a scene and oi
 ieInit;
@@ -32,12 +27,11 @@ thisR = piRecipeDefault('scene name','chessSet');
 
 uLensName = 'microlens.json';
 iLensName = 'dgauss.22deg.3.0mm.json';
-% iLensName = 'dgauss.22deg.50.0mm.json';
-
 uLensHeight = 0.0028;        % 2.8 um - each covers two pixels
 nMicrolens = [64 64]*4;     % Did a lot of work at 40,40 * 8
 
-[combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensHeight,nMicrolens);
+[combinedLensFile, info] = piMicrolensInsert(uLens,iLens,'n microlens',nMicrolens);
+% [combinedLensFile, uLens, iLens] = lensCombine(uLensName,iLensName,uLensHeight,nMicrolens);
 
 thisR.camera = piCameraCreate('omni','lensFile',combinedLensFile);
 
@@ -58,13 +52,7 @@ filmwidth  = nMicrolens(2)*uLens.get('diameter','mm');       % mm
 filmheight = nMicrolens(1)*uLens.get('diameter','mm');       % mm
 filmresolution = [filmheight, filmwidth]/pixelSize;
 
-dRange = thisR.get('depth range');
-
-thisR.set('focus distance',dRange(2));
-
-%{
 thisR.set('focus distance',0.6);
-%}
 
 % This is the size of the film/sensor in millimeters
 thisR.set('film diagonal',sqrt(filmwidth^2 + filmheight^2));
@@ -78,35 +66,11 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',32);
 
-thisR.get('depth range') % This calls the docker container to get the depth
-
-% piWRS(thisR);
+% oi = piWRS(thisR);
 
 %% Make a dual pixel sensor that has rectangular pixels
 %
-
-% Turn this into a function like sensorCreate('dual pixel');
-
-sensor = sensorCreate;
-sz = sensorGet(sensor,'pixel size');
-
-% We make the height
-sensor = sensorSet(sensor,'pixel width',sz(2)/2);
-
-% Add more columns
-rowcol = sensorGet(sensor,'size');
-sensor = sensorSet(sensor,'size',[rowcol(1)*2, rowcol(2)*4]);
-
-% Set the CFA pattern accounting for the dual pixel architecture
-sensor = sensorSet(sensor,'pattern',[2 2 1 1; 3 3 2 2]);
-
-%% Render
-
-piWrite(thisR);
-[oi, result] = piRender(thisR,'render type','radiance');
-
-% oiWindow(oi);
-%% Compute the sensor data
+sensor = sensorCreate('dual pixel',[], oi, nMicrolens);
 
 % Notice that we get the spatial structure of the image right, even though
 % the pixels are rectangular.
@@ -154,8 +118,6 @@ sensorWindow(sensorBoth);
 ipBoth = ipCreate;
 ipBoth = ipCompute(ipBoth,sensorBoth);
 ipWindow(ipBoth);
-
-
 
 %%
 ip = ipCreate;

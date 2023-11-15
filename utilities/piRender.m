@@ -39,6 +39,12 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               2 Legacy -- for compatibility
 %               3 Verbose -- includes pbrt output, at least on Windows
 %
+%  denoise    - Apply denoising, default 'none'
+%               also: 'exr_radiance', 'exr_albedo', 'exr_all' (includes
+%               normal)
+%               ** These assume the recipe asks for them and the camera
+%               type supports them.
+%
 % wave      -   Adjust the wavelength sampling of the returned ieObject
 %
 % Output:
@@ -63,16 +69,15 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %{
   % Calculate only the radiance.
   thisR = piRecipeDefault('scene name','ChessSet');
-  piWrite(thisR);
-  [scene, result] = piRender(thisR,'render type','radiance');
-  sceneWindow(scene);
+  piWRS(thisR);  
 %}
 %{
   % Calculate the (x,y,z) coordinates of every surface point in the
   % scene.  If there is no surface a zero is returned.  This should
   % probably either a Inf or a NaN when there is no surface.  We might
   % replace those with a black color or something.
-  thisR = piRecipeDefault('scene name', 'ChessSet'); piWrite(thisR);
+  thisR = piRecipeDefault('scene name', 'ChessSet'); 
+  piWrite(thisR,'remote resources',true);
   [coords, result] = piRender(thisR, 'render type','coordinates');
   ieNewGraphWin; imagesc(coords(:,:,1));
   ieNewGraphWin; imagesc(coords(:,:,2));
@@ -115,22 +120,23 @@ p.addParameter('wave', 400:10:700, @isnumeric);
 
 p.addParameter('verbose', getpref('docker','verbosity',1), @isnumeric);
 
-% If this is not set, we use thisR.what is in the recipe
-p.addParameter('rendertype', [],@(x)(iscell(x) || ischar(x)));
-
 % If you would to render on your local machine, set this to true.  And
 % make sure that 'ourdocker' is set to the container you want to run.
 p.addParameter('localrender',false,@islogical);
 
+% Optional denoising -- OIDN-based for now
+p.addParameter('do_denoise','none',@ischar);
+
+% Allow passthrough of arguments
+p.KeepUnmatched = true;
+
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
-scalePupilArea   = p.Results.scalepupilarea;  % Fix this
-meanLuminance    = p.Results.meanluminance;   % And this
+scalePupilArea   = p.Results.scalepupilarea;    % Fix this
+meanLuminance    = p.Results.meanluminance;     % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
 
 wave             = p.Results.wave;
-renderType       = p.Results.rendertype;
-if ischar(renderType), renderType = {renderType}; end
 
 %% Set up the dockerWrapper
 
@@ -139,47 +145,25 @@ if ~isempty(ourDocker),   renderDocker = ourDocker;
 else, renderDocker = dockerWrapper();
 end
 
-%% Set up the rendering type.
-
-% TODO:  Perhaps we should reconsider how we specify rendertype in V4.
-% After this bit of logical, renderType is never empty.
-if isempty(renderType)
-    % If renderType is empty, we get the value as a metadata type.
-    if ~isempty(thisR.metadata)
-        renderType = thisR.metadata.rendertype;
-    else
-        % If renderType and thisR.metadata are both empty, we assume radiance
-        % and depth.
-        renderType = {'radiance','depth'};
-    end
-end
-
-if isequal(renderType{1},'all') || isequal(renderType{1},'both')
-    % 'both is legacy
-    % 'all' is an alias for this.  Not sure we should do it this way.
-    renderType = {'radiance','depth'};
-end
-
 %% We have a radiance recipe and we have written the pbrt radiance file
 
 % Set up the output folder.  This folder will be mounted by the Docker
-% image if run locally.  When run remotely, we are using rsynch and
+% image if run locally.  When run remotely, we are using rsync and
 % different mount points.
 outputFolder = fileparts(thisR.outputFile);
 if(~exist(outputFolder,'dir'))
-    error('We need an absolute path for the working folder.');
+    % local doesn't always exist for this recipe
+    try
+        mkdir(outputFolder);
+    catch
+        error('We need an absolute path for the working folder.');
+    end
 end
 pbrtFile = thisR.outputFile;
 
 %% Build the docker command
 
 [~,currName,~] = fileparts(pbrtFile);
-
-% Make sure renderings folder exists and is fresh
-if(isfolder(fullfile(outputFolder,'renderings')))
-    rmdir(fullfile(outputFolder, 'renderings'), 's');
-end
-mkdir(fullfile(outputFolder,'renderings'));
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
 
@@ -190,12 +174,15 @@ if ispc  % Windows
     % with Linux-based Docker pbrt container
     pFile = fopen(currFile,'rt');
     tFileName = tempname;
-    tFile = fopen(tFileName,'wt');
+    tFile = fopen(tFileName,'Wt');
     while true
         thisline = fgets(pFile);
         if ~ischar(thisline); break; end  %end of file
-        if contains(thisline, "C:\") || contains(thisline, "B:\")
+        % pc definitely needs some path massaging. Not sure about Mac/Linux
+        if ispc && (contains(thisline, "C:\") || contains(thisline, "B:\"))
             thisline = strrep(thisline, piRootPath, '');
+            % in some cases local has a trailing slash
+            thisline = strrep(thisline, ['\local\' currName '\'], '');
             thisline = strrep(thisline, '\local', '');
             thisline = strrep(thisline, '\', '/');
         end
@@ -228,14 +215,14 @@ end
 % renderDocker is a dockerWrapper object.  The parameters control which
 % machine and with what parameters the docker image/containter is invoked.
 preRender = tic;
-[status, result] = renderDocker.render(renderCommand, outputFolder);
+[status, result] = renderDocker.render(renderCommand, outputFolder, varargin{:});
 
 % Lots of output when verbosity is 2.
 % Append the renderCommand and output file
 if renderDocker.verbosity > 0
-    fprintf('\nOutput file:  %s\n',outF);
+    fprintf('Output file:  %s\n',outF);
 elseif renderDocker.verbosity > 1
-    fprintf('\nPBRT result info:  %s\n',result);
+    fprintf('PBRT result info:  %s\n',result);
 end
 
 elapsedTime = toc(preRender);
@@ -261,12 +248,17 @@ if status
     return;
 end
 
+%% EXR-based denoising option here
+if ~isequal(p.Results.do_denoise, 'none')
+    piEXRDenoise(outFile,'channels', p.Results.do_denoise);
+end
+
 %% Convert the returned data to an ieObject
 
 % renderType is a cell array, typically with radiance and depth. But
 % it can also be instance or material.  
 ieObject = piEXR2ISET(outFile, 'recipe',thisR,...
-    'label',renderType, ...
+    'label',thisR.metadata.rendertype, ...
     'mean luminance',    meanLuminance, ...
     'mean illuminance',  meanIlluminance, ...
     'scale pupil area', scalePupilArea);
@@ -284,6 +276,8 @@ if isstruct(ieObject)
             if ~isequal(curWave(:),wave(:))
                 ieObject = sceneSet(ieObject, 'wave', wave);
             end
+            dist = thisR.get('object distance','m');
+            ieObject = sceneSet(ieObject,'distance',dist);
 
         case 'opticalimage'
             % names = strsplit(fileparts(thisR.inputFile),'/');

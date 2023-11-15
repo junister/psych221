@@ -20,14 +20,15 @@ function [id, thisAsset] = piAssetFind(assets, param, val)
 %{
  thisR = piRecipeDefault('scene name','simple scene');
 
- [~, theAsset] = piAssetFind(thisR,13);   % Returns asset for id 13.
- piAssetFind(thisR,theAsset.name);        % Returns the same asset
+ [~, theAsset] = piAssetFind(thisR,'',13);   % Returns asset for id 13.
+ piAssetFind(thisR,'',theAsset{1}.name)        % Returns the same asset
 
  id = piAssetFind(thisR.assets, 'name', 'root');
  [id, theAsset]  = piAssetFind(thisR, 'name', 'Camera_B');
  [id, theAsset]  = piAssetFind(thisR, 'id', 13);
  theAsset{1}
- id = piAssetFind(thisR.assets, 'scale', [1 1 1]);
+ [~,theAsset] = piAssetFind(thisR.assets, '', 15);
+ theAsset{1}
 %}
 
 %%  In the past, we allowed a recipe
@@ -39,7 +40,7 @@ end
 if ~isa(assets,'tree'), error('Assets must be a tree.'); end
 
 % If the input is a node id (number), return the node
-if isscalar(val)
+if isscalar(val) && ~isstring(val)
     id = val;
     thisAsset = {assets.get(val)};
     return;

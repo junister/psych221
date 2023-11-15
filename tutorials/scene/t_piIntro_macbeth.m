@@ -43,7 +43,7 @@ thisR = piRecipeDefault;
 %% Change the light
 %
 % There is a default point light.  We delete that.
-thisR = piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
 % Add an equal energy distant light for uniform lighting
 spectrumScale = 1;
@@ -67,7 +67,6 @@ thisR.set('filmresolution', [640, 360]*2);
 % By default we get the radiance map and the depth map. The depth map is
 % distance from camera to each point along the line of sight.  See
 % t_piIntro_macbeth_zmap for how to compute a zmap.
-thisR.set('render type', {'radiance', 'depth'});
 scene = piWRS(thisR);
 
 %% END

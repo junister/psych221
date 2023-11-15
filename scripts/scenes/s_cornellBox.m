@@ -1,4 +1,9 @@
 %% init
+
+%%
+%% BROKEN
+%%
+
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -17,9 +22,9 @@ thisR.set('nbounces',2);
     thisR.assets.show
 %}
 % Delete all lights.
-piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
 
-areaLight = piLightCreate('type', 'area');
+areaLight = piLightCreate('area1','type', 'area');
 lightName = 'Tungsten';
 areaLight = piLightSet(areaLight, [], 'lightspectrum', lightName);
 areaLight = piLightSet(areaLight, [], 'spectrum scale', 1);
@@ -31,7 +36,7 @@ thisR.set('asset', assetName, 'obj2light', areaLight);
 %% Render
 %{
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR);
 sceneWindow(scene);
 sceneSet(scene, 'render flag', 'hdr');
 %}
@@ -89,6 +94,6 @@ thisR.set('material', 'add', bunnyMat);
 thisR.set('asset', bunnyAsset.name, 'material name', bunnyMat.name);
 %% Render
 piWrite(thisR);
-[scene, res] = piRender(thisR, 'render type', 'radiance');
+[scene, res] = piRender(thisR);
 sceneWindow(scene);
 sceneSet(scene, 'render flag', 'hdr');

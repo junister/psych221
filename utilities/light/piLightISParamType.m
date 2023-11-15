@@ -1,11 +1,14 @@
 function val = piLightISParamType(str)
-%%
+%   Check if a string is light property type
+% 
 % Synopsis:
 %   val = piLightIsParamType(str)
 %
 % Brief description:
-%   Check if a string is light property type
-%
+%    The light struct slots can have string names like 'rgb spd'. This
+%    function validates whether the string is one of the permissible
+%    types that is part of such a pair.
+%  
 % Inputs:
 %   str - a string
 %

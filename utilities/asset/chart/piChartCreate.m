@@ -50,63 +50,65 @@ piWRS(thisChart);
 
 % This can get simpler once we get piWrite/piRead working with ZLY
 
-chartR = piRecipeDefault('scene name','flatsurface');
-chartR.set('asset','Camera_B','delete');
-chartR.set('lights','all','delete');
+chartR = piRecipeCreate('flatsurface');
+% piWRS(chartR);
+
+% chartR.set('asset','Camera_B','delete');
+% chartR.set('lights','all','delete');
+% 
+% cubeID = piAssetSearch(chartR,'object name','Cube');
+% 
+% % Delete all the branch nodes.  Nothing but root and the object.
+% id = chartR.get('asset',cubeID,'path to root');
+% fprintf('Geometry nodes:  %d\n',numel(id) - 1);
+% for ii=3:numel(id)
+%     chartR.set('asset',id(ii),'delete');
+% end
+% cubeID = piAssetSearch(chartR,'object name','Cube');
+% 
+% % chartR.show;
+% 
+% % Aim the camera at the object and bring it closer.
+% chartR.set('from',[0,0,0]);
+% chartR.set('to',  [0,0,1]);
+% chartR.set('up',  [0,1,0]);
+% 
+% % We place the surface assuming the camera is at 0,0,0 and pointed in the
+% % positive direction.  So we put the object 1 meter away from the camera.
+% chartR.set('asset',cubeID,'world position',[0 0 1]);
+% 
+% % We scale the surface size to be 1,1,0.1 meter.
+% sz = chartR.get('asset',cubeID,'size');
+% chartR.set('asset',cubeID,'scale', (1 ./ sz).*[1 1 0.1]);
+
+% chartR.show('objects');
 
 %{
 % Add a light.
-distantLight = piLightCreate('distant','type','distant',...
-    'spd', [6000 0.001], ...
-    'cameracoordinate', true);
-chartR.set('light',distantLight,'add');
+point = piLightCreate('point','type','point');
+chartR.set('light',point,'add');
+chartR.set('object distance',3);
+piWRS(chartR);
 %}
 
-% Aim the camera at the object and bring it closer.
-chartR.set('from',[0,0,0]);
-chartR.set('to',  [0,0,1]);
-chartR.set('up',  [0,1,0]);
-
-% Find the position of the Cube
-surfaceName = piAssetSearch(chartR,'object name','Cube');
-
-% We place the surface assuming the camera is at 0,0,0 and pointed in the
-% positive direction.  So we put the object 1 meter away from the camera.
-chartR.set('asset',surfaceName,'world position',[0 0 1]);
-
-% We scale the surface size to be 1,1,1 meter.
-sz = chartR.get('asset',surfaceName,'size');
-chartR.set('asset',surfaceName,'scale', (1 ./ sz));
-
-% The flat surface comes in with a bunch of branch nodes.
-% We get rid of them, simplifying the tree 
-wpos    = chartR.get('asset',surfaceName,'world position');
-wscale  = chartR.get('asset',surfaceName,'world scale');
-wrotate = chartR.get('asset',surfaceName,'world rotation angle');
-
-% How many geometry nodes (branches) are between the object to the root?
-% All the nodes up the path are geometry nodes.  Object nodes are always
-% leafs.  We find the geometry nodes and we will delete them.
-id = chartR.get('asset',surfaceName,'path to root');
-fprintf('Geometry nodes:  %d\n',numel(id) - 1);
-
-% Delete all the branch nodes.  Nothing but root and the object.
-for ii=2:numel(id)
-    chartR.set('asset',id(ii),'delete');
-end
+%{
+% Create a simpler node?
+wpos    = chartR.get('asset',cubeID,'world position');
+wscale  = chartR.get('asset',cubeID,'world scale');
+wrotate = chartR.get('asset',cubeID,'world rotation angle');
 
 % Insert a controlled branch node.
 geometryNode = piAssetCreate('type','branch');
 geometryNode.name = '001_Cube_B';
 chartR.set('asset','root_B','add',geometryNode);
-surfaceName = piAssetSearch(chartR,'object name','Cube');
-chartR.set('asset',surfaceName,'parent',geometryNode.name);
+chartR.set('asset',cubeID,'parent',geometryNode.name);
 
 % Now set the parameters in the one geometry node.
 piAssetSet(chartR, geometryNode.name, 'translate',wpos);
 piAssetSet(chartR, geometryNode.name, 'scale',wscale);
 rotMatrix = [wrotate; fliplr(eye(3))];
 piAssetSet(chartR, geometryNode.name, 'rotation', rotMatrix);
+%}
 
 %%  Add the chart you want
 
@@ -136,9 +138,6 @@ switch ieParamFormat(chartName)
         textureName = sprintf('macbeth-%d',uniqueKey);
         imgFile = 'macbeth.png';
         
-        % Make the surface shape match the MCC shape
-        piAssetSet(chartR, geometryNode.name, 'scale',wscale.*[1 4/6 1]);
-
     case 'face'
         textureName = sprintf('face-%d',uniqueKey);
         imgFile = 'monochromeFace.png';
@@ -161,7 +160,7 @@ chartR.set('material','add',surfaceMaterial);
 chartTexture = piTextureCreate(textureName,...
     'format', 'spectrum',...
     'type', 'imagemap',...
-    'filename', imgFile);
+    'filename', fullfile('textures',imgFile));
 chartR.set('texture', 'add', chartTexture);
 
 % Specify the texture as part of the material
@@ -171,8 +170,9 @@ chartR.set('material', surfaceMaterial.name, 'reflectance val', textureName);
 % chartR.show('objects');
 
 %% Name the object and geometry node
+cubeID = piAssetSearch(chartR,'object name','Cube');
 oName = sprintf('%s_O',textureName);
-chartR.set('asset',surfaceName,'name',oName);
+chartR.set('asset',cubeID,'name',oName);
 
 % Specify the chart as having this material
 chartR.set('asset',oName,'material name',surfaceMaterial.name);
@@ -180,6 +180,13 @@ chartR.set('asset',oName,'material name',surfaceMaterial.name);
 parent = chartR.get('asset parent id',oName); 
 gName = sprintf('%s_B',textureName);
 chartR.set('asset',parent,'name',gName);
+
+switch oName(1:7)
+    case 'macbeth'
+        % Adjust aspect ratio x,y,z
+        chartR.set('asset',cubeID,'scale',[1 0.67 1]);
+    otherwise
+end
 
 %% Copy the texture file to the output dir
 

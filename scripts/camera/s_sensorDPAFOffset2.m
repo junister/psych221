@@ -85,8 +85,6 @@ thisR.set('aperture diameter',10);
 % Adjust for quality
 thisR.set('rays per pixel',512);
 
-thisR.set('render type',{'radiance'});
-
 %% Experiments with the mlZ and mlXY
 
 % For some offset, we match the chief ray angle as we extend out. When

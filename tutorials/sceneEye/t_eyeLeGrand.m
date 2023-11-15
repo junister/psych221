@@ -39,7 +39,7 @@ toC = [ 0.1458     0.0100     1.6667];
 
 % This is rendered using a pinhole so the rendering is fast.  It has
 % infinite depth of field (no focal distance).
-thisSE = sceneEye('letters at depth','human eye','legrand');
+thisSE = sceneEye('letters at depth','eye model','legrand');
 % thisSE.summary;
 
 % Position the eye off to the side so we can see the 3D easily
@@ -54,9 +54,9 @@ thisSE.set('to',toB);
 thisSE.set('rays per pixel',32);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);  
+thisSE.set('film resolution',384);  
 
-% Have a quick check with the pinhole
+%% Have a quick check with the pinhole
 thisSE.set('use pinhole',true);
 
 % thisSE.get('object distance')   % Default is 2.1674
@@ -67,49 +67,41 @@ thisSE.set('use pinhole',true);
 % Given the distance from the scene, this FOV captures everything we want
 thisSE.set('fov',15);             % Degrees
 
-% Render the scene
-scene = thisSE.render('render type','radiance');
+thisSE.set('render type',{'radiance','depth'});
 
-sceneWindow(scene);
-
+% Summarize
 thisSE.summary;
 
+%% Render the pinhole
+thisDocker = dockerWrapper;
+thisSE.piWRS('docker wrapper',thisDocker,'name','legrand-pinhole');
+
 % You can see the depth map if you like
+%   scene = ieGetObject('scene');
 %   scenePlot(scene,'depth map');
 
 %% Now use the optics model with chromatic aberration
 
-% Turn off the pinhole.  The model eye (by default) is the Navarro model.
+% Turn off the pinhole. There is no way to adjust the LeGrand eye
+% accommodation.  We can for Arizona and Navarro.
 thisSE.set('use pinhole',false);
 
-% We turn on chromatic aberration.  That slows down the calculation, but
-% makes it more accurate and interesting.  We oftens use only 8 spectral
-% bands for speed and to get a rought sense. You can use up to 31.  It is
-% slow, but that's what we do here because we are only rendering once. When
-% the GPU work is completed, this will be fast!
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
 
-% Find the distance to the object
-oDist = thisSE.get('object distance');
-
-% This is the distance to the B and we set our accommodation to that.
-thisSE.set('focal distance',oDist);  
-
 % Reduce the rendering noise by using more rays. 
-thisSE.set('rays per pixel',768);      
+thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',512);     
-
-% This takes longer than the pinhole rendering, so we do not bother with
-% the depth.
-oi = thisSE.render('render type','radiance');
-
-% Have a look.  Lots of things you can plot in this window.
-oiWindow(oi);
+thisSE.set('film resolution',384);     
 
 % Summarize
 thisSE.summary;
+
+% Render
+thisSE.piWRS('docker wrapper',dockerWrapper.humanEyeDocker,'name','legrand');
 
 %% END

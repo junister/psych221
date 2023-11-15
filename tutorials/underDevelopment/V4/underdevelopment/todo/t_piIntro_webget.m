@@ -167,7 +167,7 @@ thisR.set('light','delete','all');
 
 ambientLight = piLightCreate('ambient',...
     'type','infinite',...
-    'mapname','room.exr');
+    'filename','room.exr');
 thisR.set('light','add',ambientLight);
 
 %}

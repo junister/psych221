@@ -1,5 +1,5 @@
 function  setPrefs(varargin)
-% Set the Matlab prefs (getpref('docker')) variables.
+% Set a Matlab pref (getpref('docker')) variables.
 %
 % Syntax
 %    dockerWrapper.setPrefs(varargin)
@@ -8,6 +8,11 @@ function  setPrefs(varargin)
 %  Interface to Matlab setpref(), getpref().  The Matlab prefs are
 %  persistent across Matlab sessions.  When these parameters are changed,
 %  dockerWrapper.reset() is called.
+%
+% If you call this with no arguments, nothing happens.  The general
+% call should be 
+%
+%    dockerWrapper.setPrefs('remoteImage','YOUR IMAGE HERE');
 %
 % Inputs
 %   N/A
@@ -37,13 +42,17 @@ function  setPrefs(varargin)
 %                     dockerWrapper code.
 %
 % Return
-%   Changes the Matlab prefs
+%   No return.  Changes the Matlab prefs.  To see the new prefs use
+%
+%      dockerWrapper.getPrefs
 %
 % Notes
 %   developed to replace dockerWrapper.setParams
 %
 % See also
 %   dockerWrapper.getPrefs;  
+
+%% Parse
 
 p = inputParser;
 p.addParameter('verbosity','',@isnumeric);
@@ -57,6 +66,9 @@ p.addParameter('remoteImageTag','',@ischar);
 p.addParameter('remoteRoot','',@ischar);
 p.addParameter('remoteRender','',@islogical);  % Inverted form of localRender
 
+% for using shared resources
+p.addParameter('remoteResources','',@islogical);
+
 p.addParameter('renderContext','',@ischar);
 
 p.addParameter('localRoot','',@ischar);
@@ -65,7 +77,7 @@ p.addParameter('localImageTag','',@ischar);
 p.addParameter('localVolumePath','',@ischar);
 p.parse(varargin{:});
 
-
+%%
 % Interface
 if ~isempty(p.Results.verbosity)
     setpref('docker','verbosity', p.Results.verbosity);
@@ -104,6 +116,9 @@ end
 if ~isempty(p.Results.remoteMachine)
     setpref('docker', 'remoteMachine', p.Results.remoteMachine);
 end
+if ~isempty(p.Results.remoteResources)
+    setpref('docker', 'remoteResources', p.Results.remoteResources);
+end
 
 % Local rendering parameters
 if ~isempty(p.Results.localRoot)
@@ -122,7 +137,7 @@ if ~isempty(p.Results.localRender)
     % logical variables, default's to false.
     setpref('docker', 'localRender', p.Results.localRender);
     if p.Results.localRender
-        if getpref('docker','gpuRendering')
+        if getpref('docker','gpuRendering','')
             disp('Set for local GPU rendering.')
         else
             disp('Set for local CPU rendering.');

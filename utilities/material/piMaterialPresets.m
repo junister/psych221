@@ -1,4 +1,4 @@
-function newMat = piMaterialPresets(keyword,materialName)
+function newMat = piMaterialPresets(keyword,materialName, options)
 % Create materials that are tuned for appearance (preset)
 %
 % Brief
@@ -63,7 +63,7 @@ function newMat = piMaterialPresets(keyword,materialName)
   newMat = piMaterialPresets('glass','glass-demo');
 %}
 %{
-  newMat = piMaterialPresets('wood-floor-merbau','woodfloor');
+  newMat = piMaterialPresets('wood-medium-knots','woodfloor');
   newMat.material.name
 %}
 %{
@@ -76,8 +76,11 @@ function newMat = piMaterialPresets(keyword,materialName)
 %}
 %% Parameters
 
-if ~exist('keyword','var'), error('keyword is required.'); end
-if ~exist('materialName','var'), materialName = keyword; end
+arguments
+    keyword;
+    materialName = keyword;
+    options.show = true; % whether to show the help dialog
+end
 
 %% Depending on the key word, go for it.
 switch ieParamFormat(keyword)
@@ -125,6 +128,17 @@ switch ieParamFormat(keyword)
 
         fprintf('\n');
         newMat = presetList;
+
+        if options.show
+            % Now show it in a dialog box that can stay up in a screen window
+            % mats = piMaterialPresets('list');
+            h = helpdlg(presetList);
+
+            % I can change the font size, but the window clips the text.  So we
+            % would need to change the window size, too.  Maybe another time.
+            str = findall(h,'Type','Text');
+            str.FontSize = 10;
+        end
 
         % ------------ DIFFUSE
     case 'diffuselist'
@@ -275,42 +289,43 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'asphalt-001.png');
+            'filename', 'textures/asphalt-001.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
     case 'asphalt-crack'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'asphalt-002.png');
+            'filename', 'textures/asphalt-002.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
-        % =============      Woods
-        %{'wood-floor-merbau',wood-medium-knots','wood-light-large-grain','wood-mahogany'}
-    case 'woodlist'
-        newMat = {'wood-floor-merbau','wood-medium-knots','wood-light-large-grain','wood-mahogany'};
 
-    case 'wood-floor-merbau'
-        newMat = polligon_materialCreate(materialName,...
-            'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
+        % --------       Woods
+        %{wood-medium-knots','wood-light-large-grain','wood-mahogany'}
+    case 'woodlist'
+        newMat = {'wood-medium-knots','wood-light-large-grain','wood-mahogany'};
+
+        %     case 'wood-floor-merbau'
+        %         newMat = polligon_materialCreate(materialName,...
+        %             'WoodFlooringMerbauBrickBondNatural001_COL_3K.png','coateddiffuse');
 
     case 'wood-medium-knots'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'woodgrain001.png');
+            'filename', 'textures/woodgrain001.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
     case 'wood-light-large-grain'        % Wood grain (light, large grain)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'woodgrain002.exr');
+            'filename', 'textures/woodgrain002.exr');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
     case 'wood-mahogany'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'mahoganyDark.exr');
+            'filename', 'textures/mahoganyDark.exr');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % ---------  Marble
@@ -321,7 +336,7 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'marbleBeige.exr');
+            'filename', 'textures/marbleBeige.exr');
         newMat.material = piMaterialCreate(materialName,'type','coateddiffuse','reflectance val',materialName);
 
         % Stored, but too much hassle to make work with jpg instead of
@@ -339,21 +354,21 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'brickwall001.png');
+            'filename', 'textures/brickwall001.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
     case 'brickwall002'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'brickwall002.png');
+            'filename', 'textures/brickwall002.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
     case 'brickwall003'
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'brickwall003.png');
+            'filename', 'textures/brickwall003.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % ---------  Fabrics
@@ -391,7 +406,7 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'ringsrays.png');
+            'filename', 'textures/ringsrays.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % Macbeth chart
@@ -399,7 +414,7 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'macbeth.png');
+            'filename', 'textures/macbeth.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % Slanted edge
@@ -407,7 +422,7 @@ switch ieParamFormat(keyword)
         newMat.texture = piTextureCreate(materialName,...
             'format', 'spectrum',...
             'type', 'imagemap',...
-            'filename', 'slantedbar.png');
+            'filename', 'textures/slantedbar.png');
         newMat.material = piMaterialCreate(materialName,'type','diffuse','reflectance val',materialName);
 
         % Colored dots

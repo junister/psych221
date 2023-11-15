@@ -61,7 +61,7 @@ p.parse(thisR, assetInfo, translation, varargin{:})
 %% If assetInfo is a node name, find the id
 if ischar(assetInfo)
     assetName = assetInfo;
-    assetInfo = piAssetFind(thisR.assets, 'name', assetInfo);
+    assetInfo = piAssetFind(thisR.assets, 'name', assetName);
     if isempty(assetInfo)
         warning('Could not find an asset named: %s', assetName);
         return;

@@ -58,9 +58,7 @@ thisR.get('material print');
 
 %% Write thisR to *_material.pbrt
 
-piWrite(thisR);
-scene = piRender(thisR);
-sceneWindow(scene);
+piWRS(thisR);
 
 %% Label the pixels by mesh of origin and material
 

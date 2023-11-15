@@ -3,79 +3,81 @@
 % We recommend you go through t_eyeIntro.m before running
 % this tutorial.
 %
-% This tutorial renders a retinal image of "slanted bar." We can then use
-% this slanted bar to estimate the modulation transfer function of the
+% This tutorial renders a retinal image of "slanted edge." We can then use
+% this slanted edge to estimate the modulation transfer function of the
 % optical system.
 %
 % We also show how the color fringing along the edge of the bar due to
 % chromatic aberration. 
 %
-% Depends on: pbrt2ISET, ISETBIO, Docker, ISET
+% Depends on: 
+%   pbrt2ISET, ISETBIO, Docker, ISET
 %
 % TL ISETBIO Team, 2017
 
 %% Check ISETBIO and initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
-%% Set up the slanted bar scene
+%% Set up the slanted edge scene
 
-thisSE = sceneEye('slantedbar');
+thisSE = sceneEye('slanted edge');
 
 thisSE.set('rays per pixel',32);
-from = [0 0 -500];
+thisSE.set('render type',{'radiance','depth'});
+
+from = [0 0 -100];
 thisSE.set('from',from);
+thisSE.get('lookat')
+
 thisSE.set('use pinhole',true);
-scene = thisSE.render;
-sceneWindow(scene);
 
+humanDocker = dockerWrapper;
+scene = thisSE.piWRS('docker wrapper',humanDocker,'name','pinhole');
 
-%%
+% piAssetGeometry(thisSE.recipe);
+
+%% Not working yet.  Sigh.  
+% 
+% Runs, but units are not set right.  Too blurry.
+% Maybe accommodation.
+
 thisSE.set('use optics',true);
 
 thisSE.set('fov',1);                % About 3 deg on a side
 thisSE.set('spatial samples',256);  % Number of OI sample points
 thisSE.set('rays per pixel',256);
-thisSE.set('focal distance',thisSE.get('object distance','m'));
+thisSE.set('accommodation',1/thisSE.get('object distance','m'));  
 thisSE.set('lens density',0);       % Yellow is harder to see.
 
 thisSE.set('diffraction',true);
 thisSE.set('pupil diameter',4);
+thisSE.set('film diagonal',10);
 
-oi = thisSE.render('render type','radiance');
+humanDocker = dockerWrapper.humanEyeDocker;
+oi = thisSE.piWRS('docker wrapper',humanDocker,'name','navarro');
+
 oi = oiSet(oi,'name','4mm-diffractionOn');
 oiWindow(oi);
 oiPlot(oi,'illuminance hline',[128 128]);
-set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
 
 %% Diffraction should not matter
+
 thisSE.set('diffraction',false);
-oi = thisSE.render('render type','radiance');
-oi = oiSet(oi,'name','4mm-diffractionOff');
-oiWindow(oi);
+thisSE.set('rays per pixel',512);
+thisSE.set('pupil diameter',1);
 
+oi = thisSE.piWRS('docker wrapper',humanDocker,'name','navarro');
 oiPlot(oi,'illuminance hline',[128 128]);
-set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
 title('4 mm off')
-
 
 %% Diffraction should matter
 
-thisSE.set('rays per pixel',1024);
-thisSE.set('pupil diameter',1);
-
 thisSE.set('diffraction',true);
-oi = thisSE.render('render type','radiance');
-oi = oiSet(oi,'name','1mm-diffractionOn');
-oiWindow(oi);
+oi = thisSE.piWRS('docker wrapper',humanDocker,'name','navarro-diffraction');
 
 oiPlot(oi,'illuminance hline',[128 128]);
-set(gca,'xlim',[-30 30],'xtick',(-30:10:30));
 title('1 mm on')
 %% Diffraction should matter.
 

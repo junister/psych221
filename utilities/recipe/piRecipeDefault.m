@@ -6,17 +6,19 @@ function thisR = piRecipeDefault(varargin)
 %
 % Description:
 %  piRecipeDefault reads in PBRT scene text files in the data/V3
-%  repository.  It is also capable of using ieWebGet to retrieve pbrt
-%  scenes, from the web and install them locally.
+%  repository.  It can also call ieWebGet to retrieve pbrt scenes,
+%  from the web and install them locally.
+%
+%  Some of these scenes are missing lights and will not render, or
+%  they will render in an awkward view.  I created piRecipeCreate() as
+%  a wrapper that calls this function and then adds the necessary
+%  lights and viewpoints for a reasonable piWRS() render.
 %
 % Inputs
-%   N/A  - Default returns the MCC scene
+%   N/A  - Default returns the Macbeth Checker scene 
 %
 % Optional key/val pairs
 %   scene name - Specify a PBRT scene name based on the directory.
-%      (e.g., MacBethChecker (default), SimpleScene, slantedBar,
-%          chessSet, teapot, numbers at depth. materialball,
-%          materialball_cloth)
 %   file  - The name of a file in the scene directory.  This is used
 %   because some PBRT have multiple files from different points of
 %   view.  We always have a default, but if you want one of the other
@@ -34,49 +36,32 @@ function thisR = piRecipeDefault(varargin)
 
 % Examples:
 %{
- thisR = recipe;
- thisR.list;
+ recipe.list;
 %}
 %{
-   thisR = piRecipeDefault; piWRS(thisR);
+ thisR = piRecipeCreate('macbeth checker');  %Adds a light
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','SimpleScene');
-   piWRS(thisR);
+ thisR = piRecipeDefault('scene name','SimpleScene');
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','checkerboard');
-   piWrite(thisR);
-   scene = piRender(thisR);
-   scene = piRender(thisR,'render type','illuminant');
-   sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','checkerboard');
+ piWRS(thisR);
 %}
 %{
-   % #ETTBSkip - Zheng should look at and make fix the issue with the light.
-   thisR = piRecipeDefault('scene name','slantedBar');
-   piWrite(thisR);
-   scene = piRender(thisR,'render type','radiance');
-   scene = sceneSet(scene,'mean luminance',100);
-   sceneWindow(scene);
+ thisR = piRecipeCreate('slanted edge');  % Adds a light
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','chessSet');
-   piWrite(thisR);
-   scene = piRender(thisR, 'render type', 'both');
-   sceneWindow(scene);
-%}
-
-%{
-   thisR = piRecipeDefault('scene name','teapot');
-   piWrite(thisR);
-   scene = piRender(thisR);
-   sceneWindow(scene);
+ thisR = piRecipeDefault('scene name','chessSet');
+ piWRS(thisR);
 %}
 %{
-   thisR = piRecipeDefault('scene name','MacBeth Checker CusLight');
-   piWrite(thisR);
-   [scene, results] = piRender(thisR);
-   sceneWindow(scene);
+ % An error about materials not being defined.  DEBUG this!
+ thisR = piRecipeDefault('scene name','teapot');
+ piWRS(thisR);
 %}
 
 %%  Figure out the scene and whether you want to write it out
@@ -100,23 +85,30 @@ loadrecipe = p.Results.loadrecipe;
 % assignment in the case
 switch ieParamFormat(sceneDir)
 
-    case 'macbethchecker'
+    case {'macbethchecker','macbethchart'}
         sceneDir = 'MacBethChecker';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-    case 'macbethcheckerbox'
-        sceneDir = 'MacBethCheckerBox';
+        %     case 'macbethcheckerbox'
+        %         sceneDir = 'MacBethCheckerBox';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
+        %     case 'macbethcheckercus'
+        %         sceneDir = 'MacBethCheckerCus';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
+        %     case 'macbethcheckercuslight'
+        %         sceneDir = 'MacBethCheckerCusLight';
+        %         sceneFile = ['MacBethCheckerCus','.pbrt'];
+        %         exporter = 'PARSE';
+        %     case {'macbethcheckercb', 'mcccb'}
+        %         sceneDir = 'mccCB';
+        %         sceneFile = [sceneDir,'.pbrt'];
+        %         exporter = 'PARSE';
+    case {'flashcards'}
+        sceneDir = 'flashCards';
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
-    case 'macbethcheckercus'
-        sceneDir = 'MacBethCheckerCus';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'PARSE';
-    case {'macbethcheckercb', 'mcccb'}
-        sceneDir = 'mccCB';
-        sceneFile = [sceneDir,'.pbrt'];
-        exporter = 'PARSE';
-
     case 'whiteboard'
         sceneDir = 'WhiteBoard';
         sceneFile = [sceneDir,'.pbrt'];
@@ -205,10 +197,6 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'SimpleSceneLight';
         sceneFile = 'SimpleScene.pbrt';
         exporter = 'PARSE';
-    case 'macbethcheckercuslight'
-        sceneDir = 'MacBethCheckerCusLight';
-        sceneFile = ['MacBethCheckerCus','.pbrt'];
-        exporter = 'PARSE';
     case 'bunny'
         sceneDir = 'bunny';
         sceneFile = ['bunny','.pbrt'];
@@ -258,11 +246,6 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'snellenAtDepth';
         sceneFile = ['snellen','.pbrt'];
         exporter = 'Copy';
-    case 'numbersatdepth'
-        sceneDir = 'NumbersAtDepth';
-        sceneFile = ['numbersAtDepth','.pbrt'];
-        % mmUnits = true;
-        exporter = 'Copy';
     case 'lettersatdepth'
         sceneDir = 'lettersAtDepth';
         sceneFile = [sceneDir,'.pbrt'];
@@ -272,27 +255,33 @@ switch ieParamFormat(sceneDir)
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
-        exporter = 'PARSE';  % Working towards PARSE
+        % exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
     case 'kitchen'
         sceneDir = 'kitchen';
         sceneFile = 'kitchen.pbrt';
         % exporter = 'Copy';
-        exporter = 'PARSE';
+        exporter = 'PARSE';  % Worked in dev-resources on March 27, 2023
     case {'landscape'}
         sceneDir = 'landscape';
         if isempty(sceneFile)
             sceneFile = 'view-0.pbrt';
         end
-        exporter = 'Copy';
+        % exporter = 'Copy';
+        exporter = 'PARSE';
     case {'bistro'}
         % Downloaded from the computer, cardinal, put in data/scenes/web
         % Other versions of this scene are
         %    bistro_boulangerie.pbrt and 'bistro_cafe.pbrt'
+        %
+        % April 12, 2023.  Failing with dev-kitchen piRead branch with PARSE. 
+        % Also getting a non-square error on sky.exr even with Copy.
+        warning('Bistro not yet working.');
         sceneDir = 'bistro';
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
         end
-        exporter = 'PARSE';
+        exporter = 'Copy';
    case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];
@@ -304,13 +293,11 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'Blender';   % Blender
     case {'testplane'}
-        sceneDir = 'testplane';
-        sceneFile = [sceneDir, '.fbx'];
-        exporter = 'Copy';
-    case {'stepfunction'}
-        sceneDir = 'stepfunction';
-        sceneFile = [sceneDir, '.pbrt'];
-        exporter = 'Copy';
+        sceneDir  = 'testplane';
+        sceneFile = 'testplane-converted.pbrt';
+        % This scene has a bug.  See also piRecipeCreate
+        % It has to do with Textures.
+        exporter = 'PARSE';    
     case 'arealight'
         sceneDir = 'arealight';
         sceneFile = [sceneDir, '.pbrt'];
@@ -378,8 +365,6 @@ switch ieParamFormat(sceneDir)
         exporter = 'Copy';
         
         % End V3 to deprecate or update
-
-
         
     otherwise
         error('Can not identify the scene, %s\n',sceneDir);
@@ -424,6 +409,7 @@ thisR.set('exporter',exporter);
 [~,n,e] = fileparts(fname);
 outFile = fullfile(piRootPath,'local',sceneDir,[n,e]);
 thisR.set('outputfile',outFile);
+thisR.set('name',sceneDir);
 
 % Set defaults for very low resolution (for testing)
 thisR.integrator.subtype = 'path';
@@ -434,6 +420,9 @@ thisR.set('filmresolution', [320, 320]);
 if isempty(thisR.get('camera'))
     thisR.set('camera',piCameraCreate('pinhole'));
 end
+
+% Set the render type to the default radiance and depth
+thisR.set('render type',{'radiance','depth'});
 
 %% If requested, write the files now
 

@@ -110,7 +110,7 @@ for d=1:numel(depths)
     
     
     
-    thisR     = piLightDelete(thisR, 'all');
+    thisR.set('lights','all','delete');
     lightGrid = piLightDiskGridCreate('depth',depth_m,'center', [0 0],'grid',grid,'spacing',gridspacing_m,'diskradius',radius_mm/1000);
     piAddLights(thisR,lightGrid)
     

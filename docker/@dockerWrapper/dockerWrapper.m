@@ -73,16 +73,21 @@ classdef dockerWrapper < handle
     %
     % Additional NOTES
     %
+    % * Use dockerWrapper.presets to set up a configuration on, say,
+    %   'remote mux', 'remote orange' or other options.  See the header
+    %   of cokerWrapper.preset for current options 
+    %   (doc dockerWrapper.preset)
+    %
     % * Use dockerWrapper.setPrefs and dockerWrapper.getPrefs to
-    % interact with the Matlab prefs that determine the defaults.  The
-    % defaults are used when creating a new dockerWrapper.
+    %   interact with the Matlab prefs that determine the defaults.  The
+    %   defaults are used when creating a new dockerWrapper.
     %
     % * It is possible to create a dockerWrapper and then manually change
-    % the parameters.  We recently made the dockerWrapper variables
-    % public, not private.
+    %   the parameters.  We recently made the dockerWrapper variables
+    %   public, not private.
     %
     % * To shut down stranded local containers, on the command line
-    % run:
+    %   run:
     %
     %    docker container prune
     %
@@ -174,10 +179,13 @@ classdef dockerWrapper < handle
         % typically also an option incase something is broken
         remoteImageTag;  % Seems to apply to both GPU and CPU?
 
+        % flag for whether we have resources in the local file system
+        remoteResources = getpref('docker','remoteResources',true);
+        
         % A render context is important for the case where we want to
         % access multiple servers over time (say beluga & mux, or mux &
-        % gray, etc). Contexts are created via docker on the local system,
-        % and if needed one is created by default
+        % orange, etc). Contexts are created via docker on the local
+        % system, and if needed one is created by default
         renderContext;
         defaultContext;   % docker context used for everything else
         localImageName;
@@ -209,9 +217,9 @@ classdef dockerWrapper < handle
             %
             % We typically want 'default' to be the docker context
             % for everything except rendering
-            aDocker.defaultContext = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
-            aDocker.gpuRendering = getpref('docker', 'gpuRendering', true);
-            aDocker.localImageName   =  getpref('docker','localImage','');
+            aDocker.defaultContext   = dockerWrapper.setContext(getpref('docker','defaultContext', 'default'));
+            aDocker.gpuRendering     = getpref('docker', 'gpuRendering', true);
+            aDocker.localImageName   = getpref('docker','localImage','');
 
             aDocker.whichGPU = getpref('docker','whichGPU',0); % -1 is use any
 
@@ -237,6 +245,8 @@ classdef dockerWrapper < handle
             % our local scene path and then convert to linux if we're on
             % Windows
             aDocker.relativeScenePath = dockerWrapper.pathToLinux(piDirGet('server local'));
+
+            aDocker.remoteResources = getpref('docker','remoteResources', true);
 
             aDocker.localRender = getpref('docker','localRender',false);
             aDocker.localImageTag = 'latest';
@@ -275,48 +285,56 @@ classdef dockerWrapper < handle
             % prefs (under iset3d).  We should probably check if there
             % is a 'docker' prefs and do something about that.
 
-            disp('Saving prefs to "docker"');
+            % Not sure about these:
+            %   Not setting 'defaultContext'
+            %   Not setting relativeScenePath
+
+            disp('Saving prefs to Matlab prefs "docker"');
             setpref('docker','localRender',obj.localRender);
 
             setpref('docker','remoteMachine',obj.remoteMachine);
             setpref('docker','remoteRoot',obj.remoteRoot);
             setpref('docker','remoteUser',obj.remoteUser);
+            setpref('docker','remoteImage',obj.remoteImage);
+            setpref('docker','remoteCPUImage',obj.remoteCPUImage);
             setpref('docker','remoteImageTag',obj.remoteImageTag);
+            setpref('docker','remoteResources',obj.remoteResources);
+            setpref('docker','renderContext',obj.renderContext);
 
             setpref('docker','gpuRendering',obj.gpuRendering);
             setpref('docker','whichGPU',obj.whichGPU);
 
+            setpref('docker','localImageName',obj.localImageName);
             setpref('docker','localImageTag',obj.localImageTag);
             setpref('docker','localRoot',obj.localRoot);
+            setpref('docker','localVolumePath',obj.localVolumePath);
 
             setpref('docker','verbosity',obj.verbosity);
 
         end
 
-        function prefread(obj)
-            % Read the current dockerWrapper settings in the Matlab
-            % prefs (under iset3d).  We should probably check if there
-            % is a 'docker' prefs and do something about that.
+        function prefload(obj)
+            % Load the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d) into the dockerWrapper values.
 
-            disp('Reading prefs from "docker"');
-            obj.localRender = getpref('docker','localRender',0);
-
-            obj.remoteMachine = getpref('docker','remoteMachine','');
-            obj.remoteRoot    = getpref('docker','remoteRoot','');
-            obj.remoteUser    = getpref('docker','remoteUser','');
-            obj.remoteImageTag= getpref('docker','remoteImageTag','latest');
-
-            obj.gpuRendering = getpref('docker','gpuRendering',1);
-            obj.whichGPU     = getpref('docker','whichGPU',0);
-
-            obj.localImageTag = getpref('docker','localImageTag','latest');
-
-            obj.verbosity = getpref('docker','verbosity',1);
+            disp('Loading and setting prefs from Matlab prefs "docker"');
+            obj.init;
 
         end
+
+        function params = prefread(~)
+            % Read the current dockerWrapper settings in the Matlab
+            % prefs (under iset3d) and return them as a struct.             
+
+            disp('Reading and returning prefs from Matlab prefs "docker"');
+            params = getpref('docker');
+              
+        end
+
     end
 
-
+        %% Validates rendering context and creates one if none is available
+        
     methods (Static=true)
         %% Static functions
         %
@@ -328,14 +346,19 @@ classdef dockerWrapper < handle
         % Methods defined in this file, static or not, do not need to be
         % listed here.
 
+        thisDWrapper = humanEyeDocker();
         setPrefs(varargin);
         getPrefs(varargin);
         dockerImage = localImage();
         [dockerExists, status, result] = exists();  % Like piDockerExists
-
+        
         %% Default servers
         function useServer = vistalabDefaultServer()
             useServer = 'muxreconrt.stanford.edu';
+        end
+        % WSL sometimes has DNS issues, so we can also use the IP
+        function useServer = vistalabDefaultServerIP()
+            useServer =  '171.64.204.112';
         end
 
         %% This is used for wsl commands under Windows, which need
@@ -347,7 +370,7 @@ classdef dockerWrapper < handle
                 localRoot = getpref('docker','localRoot',''); % Linux/Mac default
             end
         end
-        
+
         %% reset - Resets the running Docker containers
         function reset()
             % Calls the method 'cleanup' and sets several parameters
@@ -388,7 +411,7 @@ classdef dockerWrapper < handle
             if status == 0
                 sprintf('Removed container %s\n',containerName);
             else
-                disp("Failed to cleanup.\n System message:\n %s", result);
+                fprintf("Failed to cleanup.\n System message:\n %s", result);
             end
         end
 
@@ -466,7 +489,11 @@ classdef dockerWrapper < handle
 
         %% Start PBRT
         function ourContainer = startPBRT(obj, processorType)
-            % Start the docker container remotely
+            % Start the PBRT docker container.  Called when rendering,
+            % say by piWRS() or piRender().
+            %
+            % See also
+            %
 
             verbose = obj.verbosity;
             if isequal(processorType, 'GPU')
@@ -529,8 +556,19 @@ classdef dockerWrapper < handle
 
             containerLocalPath = dockerWrapper.pathToLinux(obj.relativeScenePath);
 
-            volumeMap = sprintf("-v %s:%s", hostLocalPath, containerLocalPath);
+            % We mount both the working directory and the ISETResource
+            % (Hard-Coded so far) Directory now
+
+            isetResourceFolder = '/acorn/data/iset/Resources';
+            volumeMap = sprintf("-v %s:%s -v %s:%s ", ...
+                hostLocalPath, containerLocalPath, ...
+                isetResourceFolder, '/ISETResources');
             placeholderCommand = 'bash';
+
+            % Start adding functionality for shared ISET Resources on
+            % server. A little tricky since we typically aren't on the
+            % server to know what the path is
+            %ISETResourceMap = sprintf("-v %s:%s", <serverResourcePath>, <containerResourcePath);
 
             % We use the default context for local docker containers
             if obj.localRender
@@ -564,17 +602,97 @@ classdef dockerWrapper < handle
             % find a way to validate context & server that errors out
             % more gracefully. TBD
             [status, result] = system(cmd);
-            if verbose > 0
-                fprintf("Started Docker (status %d): %s\n", status, cmd);
-            end
-            if status == 0
-                obj.dockerContainerID = result; % hex name for it
-                return;
+
+            if status ~= 0
+                warning("Failed to start Docker container: %s", result);
             else
-                warning("Failed to start Docker container with message: %s", result);
+                obj.dockerContainerID = result; % hex name for it
+                if verbose > 0
+                    cprintf('*black', "STARTED Docker successfully\n");
+                    cprintf('black','CMD: %s',cmd);
+                end
             end
         end
 
+        function thisContext = getRenderContext(obj,serverName)
+            % Gets the context, and if necessary creates it
+            %
+            % Called by getRenderer
+            %
+            % The serverName is obj.remoteMachine by default.
+            %
+            %  thisD = dockerWrapper;
+            %  thisD.getRenderContext('mux')    % 
+            %  thisD.getRenderContext('orange') % remote-orange
+            %  thisD.getRenderContext();        % Uses a default name
+            %  (remote-servername) read from the 
+            %
+            % A Docker context is a way of specifying a Docker environment
+            % and the resources it can access. It allows you to switch
+            % between different Docker environments, such as local and
+            % remote environments, and manage the resources available to
+            % them.
+            %
+            % See also
+            %  getRenderer
+
+            %{
+             % Online manual
+             https://docs.docker.com/engine/reference/commandline/context_create/
+
+             Usage:  docker context create [OPTIONS] CONTEXT       
+             Example:
+             $ docker context create my-context 
+                      --description "some description" 
+                      --docker "host=tcp://myserver:2376,ca=~/ca-file,cert=~/cert-file,key=~/key-file"
+            %}
+
+            % Not sure when it is every set to something other than
+            % this.
+            if ~exist('serverName','var'), serverName = obj.remoteMachine;
+            else, fprintf('getRenderContext: Using %s as the serverName\n',serverName);
+            end
+
+            % The user can define an alternative context.  At
+            % Stanford, remote-orange is a common alternative. This is
+            % usually defined at dockerWrapper initialization via the
+            % getpref(). It can also be set programmatically.
+            thisContext = obj.renderContext;
+            if isempty(thisContext)
+                % Default naming convention
+                thisContext = sprintf('remote-%s',serverName);
+            end
+
+            % These are the existing contexts
+            [status, contexts] = system(sprintf('docker context list'));
+            if status ~= 0
+                warning('Unable to list docker contexts. %d',status);
+            end
+
+            if ~contains(contexts,thisContext)
+                % If we do not have this context, we try to create it.
+                if isempty(obj.remoteUser), rUser = getUserName(obj);
+                else,                       rUser = obj.remoteUser;
+                end
+
+                % Create the command string
+                contextString = sprintf(' --docker host=ssh://%s@%s',...
+                    rUser, serverName);
+                createContext = sprintf('docker context create %s %s',...
+                    contextString, thisContext);
+
+                % Call the system command
+                [status, contexts] = system(createContext);
+
+                % Check the returns
+                if status ~= 0 || numel(contexts) == 0
+                    warning("Failed to create context: %s -- Might already exist.\n",thisContext);
+                    disp(contexts)
+                else
+                    fprintf("Created docker context %s \n",thisContext);
+                end
+            end
+        end
 
         %% The container name for different types of docker runs.  
         function containerName = getContainer(obj,containerType)
@@ -621,11 +739,15 @@ classdef dockerWrapper < handle
                     else
                         cFlag = '';
                     end
-
+                    
+                    % this check can take close to a second on a remote
+                    % connection. Don't know if it is really worth doing?
+                    %{
                     [~, result] = system(sprintf("docker %s ps | grep %s", cFlag, obj.staticVar('get','PBRT-CPU', '')));
                     if strlength(result) == 0
                         obj.staticVar('set','PBRT-CPU', obj.startPBRT('CPU'));
                     end
+                    %}
                     containerName = obj.staticVar('get', 'PBRT-CPU', '');
                 otherwise
                     warning("No container found");
@@ -635,9 +757,11 @@ classdef dockerWrapper < handle
 
         %% Get the name of the docker image.
         function useDockerImage = getPBRTImage(obj, processorType)
-            % Returns the name of the docker image, both for the case of
-            % local and remote execution.
+            % Returns the name of the PBRT docker image, both for the case
+            % of local and remote execution.
             %
+            % See also
+            %   startPBRT, dockerWrapper initialization
 
             if ~obj.localRender && obj.gpuRendering
                 % We are running remotely and want GPU, we try to figure out which
@@ -690,6 +814,9 @@ classdef dockerWrapper < handle
                                     useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                                 case {'geforcertx3090', 'nvidiageforcertx3090'}
                                     useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
+                                    % NVIDIA GeForce RTX 3090 Ti in Orange
+                                case {'nvidiageforcertx3090ti'}
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-ti';
                                 case {'geforcertx2080', 'nvidiageforcertx2080', ...
                                         'geforcertx2080ti', 'nvidiageforcertx2080ti'}
                                     useDockerImage = 'digitalprodev/pbrt-v4-gpu-volta-mux';
@@ -724,19 +851,24 @@ classdef dockerWrapper < handle
         % implemented someplace, need to find the code!
         %end
 
-        %% Inserted from getRenderer.  thisD is a dockerWrapper (obj)
+        %% 
         function getRenderer(thisD)
-            %GETRENDERER uses the 'docker' parameters to insert the
-            %renderer
+            %GETRENDERER uses the Matlab prefs in 'docker' to determine the
+            %  docker image to use for rendering. It is set in
+            %  thisD.remoteImage renderer.
             %
             % Description
-            %  The initial dockerWrapper is filled in with the user's
-            %  preferences from (getpref('docker')).  This method builds on
-            %  those to set a few additional parameters that are
-            %  site-specific.
+            %  The dockerWrapper is initialized with the user's preferences
+            %  from (getpref('docker')).  This method reads the current
+            %  environment and makes sure to set key (remote) parameters
+            %  that are site-specific. The parameters set here are
+            %
+            %    remoteRoot
+            %    remoteMachine
+            %    remoteImage
             %
             %  You can adjust the default parameters, which are stored
-            %  in the Matlab prefs under 'docker' using the method
+            %  in the Matlab prefs under 'docker'. using the method
             %
             %       dockerWrapper.setPrefs(varargin)
             %
@@ -755,7 +887,8 @@ classdef dockerWrapper < handle
             % Current GPU Options at vistalab:
             %
             %   muxreconrt:
-            %     GPU 0: Nvidia 3070 -- -ampere -- (Broken)
+            %     GPU 0: Nvidia 3070 -- -ampere --
+            %     dockerWrapper.setPref('whichGPU',0);
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
             %     GPU 2: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 2);
             %
@@ -793,14 +926,14 @@ classdef dockerWrapper < handle
                     % If the remoteMachine was not set in prefs, we get the
                     % default. The user may have multiple opportunities
                     % for this.  For now we default to the
-                    % vistalabDefaultServer.
+                    % vistalabDefaultServer, which is
+                    % muxreconrt.stanford.edu
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
                 % We allow one remote render context
-                % if the user specifies one, make sure it exists
-                % otherwise create one
-                thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.vistalabDefaultServer));
+                % We make the context for the current remote machine
+                thisD.staticVar('set','renderContext', getRenderContext(thisD, thisD.remoteMachine));
 
                 if isempty(thisD.remoteImage)
                     % If we know the remote machine, but not the remote
@@ -813,7 +946,8 @@ classdef dockerWrapper < handle
                     % microlens code.  It was empty and defaulted to
                     % 'shared' one below.
 
-                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer)
+                    if isequal(thisD.remoteMachine, thisD.vistalabDefaultServer) || ...
+                        isequal(thisD.remoteMachine, thisD.vistalabDefaultServerIP)
                         switch thisD.whichGPU
                             case {0, -1}
                                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
@@ -864,59 +998,6 @@ classdef dockerWrapper < handle
             % Set it because we have it now!
             obj.remoteUser = userName;
 
-        end
-
-        % validates rendering context if remote rendering
-        % will try to create one if none is available
-        function useContext = getRenderContext(obj, serverName)
-            if isempty(obj.renderContext)
-                ourContext = 'remote-mux';
-            else
-                ourContext = obj.renderContext;
-            end
-            % Get or set-up the rendering context for the docker container
-            %
-            % A docker context ('docker context create ...') is a set of
-            % parameters we define to address the remote docker container
-            % from our local computer.
-            %
-            if ~exist('serverName','var'), serverName = obj.remoteMachine; end
-
-            switch serverName
-                case obj.vistalabDefaultServer()
-                    % Check that the Docker context exists.
-                    checkContext = sprintf('docker context list');
-                    [status, result] = system(checkContext);
-
-                    if status ~= 0 || ~contains(result,ourContext)
-                        % If we do not have it, create it
-                        % e.g. ssh://<username>@<server>
-                        % use the pref for remote username,
-                        % otherwise assume it is the same as our local user
-                        if isempty(obj.remoteUser)
-                            rUser = getUserName(obj);
-                        else
-                            rUser = obj.remoteUser;
-                        end
-
-                        contextString = sprintf(' --docker host=ssh://%s@%s',...
-                            rUser, obj.vistalabDefaultServer);
-                        createContext = sprintf('docker context create %s %s',...
-                            contextString, ourContext);
-
-                        [status, result] = system(createContext);
-                        if status ~= 0 || numel(result) == 0
-                            warning("Failed to create context: %s -- Might already exist.\n",ourContext);
-                            disp(result)
-                        else
-                            fprintf("Created docker context %s for Vistalab server\n",ourContext);
-                        end
-                    end
-                    useContext = 'remote-mux';
-                otherwise
-                    % User is on their own to make sure they have a valid
-                    % context
-            end
         end
 
     end

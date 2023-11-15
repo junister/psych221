@@ -1,4 +1,7 @@
 %%
+% OUT OF DATE
+%
+
 ieWebGet('browse')
 
 %%
@@ -11,7 +14,7 @@ thisR = piRecipeDefault('scene name',fname);
 
 %%
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 
 %%
@@ -21,7 +24,7 @@ thisR.get('fov')
 thisR.set('fov',60);
 
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 %}
 
@@ -29,7 +32,7 @@ sceneWindow(scene);
 
 % piLightProperties('infinite')
 
-newLight = piLightCreate('outside','type','infinite','mapname','room.exr');
+newLight = piLightCreate('outside','type','infinite','filename','room.exr');
 % newLight = piLightCreate('inside','type','spot','cameracoordinate',true,'spd',[1 0 0]);
 
 thisR.set('light',newLight,'add');
@@ -44,7 +47,7 @@ thisR.world{end+1} = 'WorldEnd';
 
 %%
 piWrite(thisR);
-[scene, result] = piRender(thisR,'render type','radiance');
+[scene, result] = piRender(thisR);
 sceneWindow(scene);
 
 

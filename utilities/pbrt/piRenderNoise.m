@@ -92,7 +92,8 @@ else
         case 'cornellboxreference'
             %% Read recipe
             %% Remove current existing lights
-            piLightDelete(thisR, 'all');
+            thisR.set('lights','all','delete');
+
             %% Turn the object to area light
 
             areaLight = piLightCreate('lamp', 'type', 'area');

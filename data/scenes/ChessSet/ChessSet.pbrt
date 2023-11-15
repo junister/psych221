@@ -1,29 +1,28 @@
-Transform [ 1 0 1.9470718e-7 0 -0 1 0 0 -1.9470718e-7 -0 1 0 -9.7353585e-8 -0.06999999 0.49999997 1  ]
-Camera "perspective"
-    "float fov" [ 30 ]
-Sampler "halton"
-    "integer pixelsamples" [ 32 ]
-Film "rgb"
-    "integer yresolution" [ 800 ]
-    "integer xresolution" [ 800 ]
-Integrator "path"
-    "integer maxdepth" [ 5 ]
+# PBRT file created with piWrite on 2023/3/12 16:12:28.61 
+# PBRT version = 4 
 
+LookAt 0.000000 0.070000 -0.500000 0.000000 0.070000 0.500000 0.000000 1.000000 0.000000 
 
+# camera 
+Camera "perspective" 
+  "float fov" [30.000000] 
 
-WorldBegin
+# sampler 
+Sampler "halton" 
+  "integer pixelsamples" [32] 
 
-# Default Material
-Material "coateddiffuse"
-    "rgb reflectance" [ 0.09360644 0.10974494 0.12801072 ]
-Include "ChessSet_materials.pbrt"
-Include "ChessSet_geometry.pbrt"
-# Add an environment light
-AttributeBegin
-    Rotate -120 1 0 0
-    Rotate 150 0 0 1
-    LightSource "infinite" "string filename" "lightmap_v4.exr"
-AttributeEnd
+# film 
+Film "gbuffer" 
+  "integer yresolution" [320] 
+  "integer xresolution" [320] 
+  "float diagonal" [10.000000] 
 
+# integrator 
+Integrator "path" 
+  "integer maxdepth" [5] 
 
-
+WorldBegin 
+Include "ChessSet_materials.pbrt" 
+ 
+Include "ChessSet_geometry.pbrt" 
+ 

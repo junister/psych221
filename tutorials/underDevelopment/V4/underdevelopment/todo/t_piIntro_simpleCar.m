@@ -1,5 +1,7 @@
 %% Gets a skymap from Flywheel; also uses special scene materials
 %
+% DEPRECATED
+%
 % This script shows how to create a simple scene using assets that are
 % stored in the Flywheel stanfordlabs site.  To run this script you must
 % have permission (a key) to login and download assets from Flywheel.
@@ -82,7 +84,7 @@ rotation(:,3) = [-90 1 0 0]';
 
 skymap = piLightCreate('new skymap', ...
     'type', 'infinite',...
-    'string mapname', skyname,...
+    'filename', skyname,...
     'rotation',rotation);
 
 sceneR.set('light', 'add', skymap);

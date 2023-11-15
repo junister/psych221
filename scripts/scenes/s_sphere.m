@@ -5,7 +5,7 @@ ieInit;
 if ~piDockerExists, piDockerConfig; end
 
 %%
-thisR = piRecipeDefault('scene name','sphere','write', true);
+thisR = piRecipeDefault('scene name','sphere'); % ?? ,'write', true);
 
 %% Set parameters for recipe
 thisR.camera.fov.value = 50;
@@ -16,8 +16,7 @@ thisR.sampler.pixelsamples.value = 64;
 %{
     piLightGet(thisR);
 %}
-piLightDelete(thisR, 'all');
-
+thisR.set('lights','all','delete');
 
 distantLight = piLightCreate('distantLight', ...
     'type','distant',...

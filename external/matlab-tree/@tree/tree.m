@@ -29,10 +29,10 @@ classdef tree
         Parent = [ 0 ]; %#ok<NBRAK>
         
         % ZLY: four maps that helps quick inquiry of idx based on name
-        mapFullName2Idx;
-        mapShortName2Idx;
-        mapLgtFullName2Idx;
-        mapLgtShortName2Idx;
+        mapFullName2Idx = containers.Map;
+        mapShortName2Idx = containers.Map;
+        mapLgtFullName2Idx = containers.Map;
+        mapLgtShortName2Idx = containers.Map;
     end
     
     methods
@@ -239,12 +239,12 @@ classdef tree
             % then all the nodes.
             
             % Replace the names in this tree.
-            if ~exist('replace','var'), replace = false; end
-            if ~exist('id','var') || isempty(id)
+            if isempty(replace), replace = false; end
+            if isempty(id)
                 % All of the nodes
                 newNames = cell(1, obj.nnodes);
                 for ii=1:obj.nnodes
-                    newNames{ii} = obj.stripID(ii);
+                    newNames{ii} = obj.stripID(ii, '');
                 end
                 
                 % We have the new names and user said replace them all
@@ -391,36 +391,42 @@ classdef tree
             end
         end
         
-        % Assign unique names to a node or all nodes
+        %% Assign unique names to a node or all nodes
         function [obj, names] = uniqueNames(obj, id)
             % Names are made unique by creating them as
             %
-            %   XXXID_STRING
+            %   XXXXXXID_STRING (%06dID)
             %
-            % where XXX is the node id (an integer).  We are considering if
-            % we need XXXXID to allow for more nodes.
+            % where XXXXXX is the node id (an integer).
             %
-            % If id is provided, the function assign unique names to that
-            % node. Otherwise unique names are assigned to all nodes in the
-            % tree. 
+            % If id is provided, the function assigns a unique name to just
+            % that node. Otherwise unique names are assigned to all nodes
+            % in the tree.
             
             % Update all nodes
-            obj.mapFullName2Idx = containers.Map;
-            obj.mapShortName2Idx = containers.Map;
-            obj.mapLgtFullName2Idx = containers.Map;
+            obj.mapFullName2Idx     = containers.Map;
+            obj.mapShortName2Idx    = containers.Map;
+            obj.mapLgtFullName2Idx  = containers.Map;
             obj.mapLgtShortName2Idx = containers.Map;
+            
+            stripNames = obj.stripID([],'');
+            names = cell(1, numel(stripNames));
+            if obj.nnodes > 999999
+                warning('Number of nodes: %d exceeds 999999', obj.nnodes);
+            end
+
             if ~exist('id','var') || isempty(id)
-                % Some nodes may already have an ID.  So we strip the ID
-                % from all the nodes.
-                stripNames = obj.stripID;
-                names = cell(1, numel(stripNames));
-                if obj.nnodes > 999999
-                    warning('Number of nodes: %d exceeds 999999', obj.nnodes);
-                end
+                % Some nodes already have an ID.  So we strip the ID from
+                % all the nodes.
                 
-                % Then we do the renaming.  We are considering if we need
-                % to use %04ID to allow 10,000 nodes for the driving
-                % scenes.
+                % We will assign a unique ID to each node, which make them
+                % unique. But first, if two nodes are part of a single object and
+                % thus have the but have the same name, we add an
+                % additional index to its name. That way one object (e.g.,
+                % colorChecker) with multiple components (the patches) can
+                % identify the different patches as distinct objects.
+                % We used to do this in parseGeometryText.  But that code
+                % was incomprehensible.
                 for ii=1:obj.nnodes
                     if isstruct(obj.Node{ii})
                         obj.Node{ii}.name = sprintf('%06dID_%s', ii, stripNames{ii});
@@ -440,20 +446,32 @@ classdef tree
                 end
                 return;
             end
-            
-            if ~obj.hasID(id)
+            %{
+            % We do not have a good way to address a single slot.  This may
+            % be inefficient to always do them all.  But that's where we
+            % are right now until we fix this bit of code *(BW).
+            elseif ~obj.hasID(id)
+
                 if isstruct(obj.Node{id})
                     obj.Node{id}.name = sprintf('%06dID_%s', id, obj.Node{id}.name);
-                    names = obj.Node{id}.name;
+                    thisName = obj.Node{id}.name;
                 else
                     obj.Node{id} = sprintf('%06dID_%s', id, obj.Node{id});
-                    names = obj.Node{id};
+                    thisName = obj.Node{id};
+                end
+                obj.mapFullName2Idx(thisName) = id;
+                obj.mapShortName2Idx(stripNames{id}) = id;
+
+                if isequal(obj.Node{id}.type, 'light')
+                    obj.mapLgtFullName2Idx(thisName) = id;
+                    obj.mapLgtShortName2Idx(thisName) = id;
                 end
             end
+            %}
         
         end
         
-        % Test if this is the root node.  Should be a static method.
+        %% Test if this is the root node.  Should be a static method.
         function val = isRoot(obj, id)
             if obj.getparent(id) == 0
                 val = true;

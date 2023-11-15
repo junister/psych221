@@ -33,13 +33,13 @@ thisR = piRecipeDefault('scene name','checkerboard');
 %% Check the light list that came with the scene
 
 % To summarize the lights use this
-thisR.get('light print');
+lNames = thisR.get('light print');
 
 % We can get a specific light by its name
-thisR.get('light', 'distant_light_L')
+thisR.get('light', lNames{1})
 
 % Or we can get the light from its index (number) in this list.
-idx = piAssetSearch(thisR,'light name','distant_light');
+idx = piAssetSearch(thisR,'light name',lNames{1});
 thisR.get('light', idx)
 
 %% Remove all the lights
@@ -101,8 +101,6 @@ thisR.get('light print');
 % scale of the scene to use this sensibly.
 piCameraTranslate(thisR,'z shift',1); 
 
-thisR.set('render type',{'radiance'});
-
 piWRS(thisR,'name','Equal energy (spot)');
 
 %%  Narrow the cone angle of the spot light a lot
@@ -129,7 +127,7 @@ piWRS(thisR,'name',sprintf('EE spot %d',coneAngle));
 %% Rotate the direction of the spot light
 
 % thisR.set('light', 'rotate', lghtName, [XROT, YROT, ZROT], ORDER)
-thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -5 degree around y axis
+thisR.set('light', 'new_spot_light_L', 'rotate', [0, -15, 0]); % -15 degree around y axis
 piWRS(thisR,'name',sprintf('Rotate EE spot'));
 
 %%  Change the light to a point light source 
@@ -137,7 +135,7 @@ piWRS(thisR,'name',sprintf('Rotate EE spot'));
 thisR.set('light', 'all', 'delete');
 
 % Create a point light at the camera position
-% The spd spectrum points to a file that is saved in
+% The 'spd spectrum' string is a mat-file saved in
 % ISETCam/data/lights
 yellowPoint = piLightCreate('yellow_point_L',...
     'type', 'point', ...
@@ -183,8 +181,9 @@ piWRS(thisR,'name','Yellow and Blue points');
 distLight = piLightCreate('new_dist_L',...
     'type', 'distant', ...
     'spd', [0.3 0.5 1],...
-    'specscale float', 1,...
-    'cameracoordinate', true);
+    'specscale float', 1);
+distLight.from.value = thisR.get('from');
+distLight.to.value   = thisR.get('to');
 
 thisR.set('light', 'all', 'delete');
 thisR.set('light',distLight,'add');
@@ -193,11 +192,18 @@ thisR.get('lights print');
 
 piWRS(thisR,'name','Blue (distant)');
 
+%% With the skymap, but intensity scaled
+
+fileName = fullfile(piDirGet('skymaps'),'room.exr');
+
+thisR.set('skymap',fileName);
+thisR.set('light','room_L','specscale',0.3);
+piWRS(thisR,'name','Dark Environment');
+
 %% Add an environment (skymap) light
 
 thisR.set('light', 'all', 'delete');
 
-fileName = 'room.exr';
 thisR.set('skymap',fileName);
 tmp = thisR.get('lights','names');
 skyName = tmp{1};

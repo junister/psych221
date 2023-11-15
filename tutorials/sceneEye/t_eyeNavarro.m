@@ -21,10 +21,6 @@
 
 %% Check ISETBIO and initialize
 
-if piCamBio
-    fprintf('%s: requires ISETBio, not ISETCam\n',mfilename); 
-    return;
-end
 ieInit;
 if ~piDockerExists, piDockerConfig; end
 
@@ -41,50 +37,49 @@ toC = [ 0.1458     0.0100     1.6667];
 % infinite depth of field (no focal distance).
 thisSE = sceneEye('letters at depth');
 
+% First render with pinhole
+thisSE.set('use pinhole',true);
+
 thisSE.set('render type',{'radiance','depth'});
 
 % Position the eye off to the side so we can see the 3D easily
 from = [0.25,0.3,-0.2];
 thisSE.set('from',from);
 
-% Look at the position with the 'B'.  The values for each of the letters
-% are included above.
+% Look at the position with the 'B'.
 thisSE.set('to',toB);
 
-% Have a quick check with the pinhole
-thisSE.set('use pinhole',true);
+% Set its distance
+thisSE.set('object distance',1);  % meters
 
-% Given the distance from the scene, this FOV captures everything we want
-thisSE.set('fov',30);             % Degrees
+thisSE.set('to',toA); distA = thisSE.get('object distance');
+thisSE.set('to',toB); distB = thisSE.get('object distance');
+thisSE.set('to',toC); distC = thisSE.get('object distance');
+thisSE.set('to',toB);
+
+thisSE.set('film diagonal',5);
+thisSE.set('fov',10);
 
 % Render the scene
+thisSE.set('render type', {'radiance','depth'});
 
-% For now, this is the only docker wrapper that should work for the
-% human eye model.
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
+%% Render as a scene with the GPU docker wrapper
 
-thisSE.recipe.set('render type', {'radiance'});
-
-%%
-scene = thisSE.render('docker wrapper',thisDWrapper);
-
-sceneWindow(scene);   
-
-thisSE.summary;
+thisDocker = dockerWrapper;
+scene = thisSE.piWRS('docker wrapper',thisDocker,'name','pinhole');
 
 % You can see the depth map if you like
 %   scenePlot(scene,'depth map');
 
 %% Now use the optics model with chromatic aberration
 
-% Turn off the pinhole.  The model eye (by default) is the Navarro model.
+% Use the model eye
 thisSE.set('use optics',true);
 
+thisSE.set('pupil diameter',3);
+
 % True by default anyway
-thisSE.set('mmUnits', false);
+% thisSE.set('mmUnits', false);
 
 % We turn on chromatic aberration.  That slows down the calculation, but
 % makes it more accurate and interesting.  We often use only 8 spectral
@@ -92,72 +87,55 @@ thisSE.set('mmUnits', false);
 % slow, but that's what we do here because we are only rendering once. When
 % the GPU work is completed, this will be fast!
 
-%{
-% Needs to work with spectral path integrator.
-% Zhenyi will make that work in V4.
+% This sets the chromaticAberrationEnabled flag and the integrator to
+% spectral path.
+% Now works in V4 - May 28, 2023 (ZL)
 nSpectralBands = 8;
 thisSE.set('chromatic aberration',nSpectralBands);
-%}
-
-% Distance in meters to objects to govern accommodation.
-thisSE.set('to',toA); distA = thisSE.get('object distance');
-thisSE.set('to',toB); distB = thisSE.get('object distance');
-thisSE.set('to',toC); distC = thisSE.get('object distance');
-thisSE.set('to',toB);
-
-% This is the distance we set our accommodation to that. Try distC + 0.5
-% and then distA.  At a resolution of 512, I can see the difference.  I
-% don't really understand the units here, though.  (BW).
-%
-% thisSE.set('accommodation',1/(distC + 0.5));  
-
-thisSE.set('object distance',distC);  
 
 % We can reduce the rendering noise by using more rays. This takes a while.
 thisSE.set('rays per pixel',256);      
 
 % Increase the spatial resolution by adding more spatial samples.
-thisSE.set('spatial samples',256);     
+thisSE.set('spatial samples',384);     
 
 % Ray bounces
 thisSE.set('n bounces',3);
 
+% We want the scene to be around 5-10 deg so we do not need a lot of
+% samples to resolve the blur.
+thisSE.set('fov',7);             % Degrees
+
+thisSE.get('sample spacing')
 %% This takes longer than the pinhole rendering
 
-dockerWrapper.reset();
-thisDWrapper = dockerWrapper;
-thisDWrapper.remoteCPUImage = 'digitalprodev/pbrt-v4-cpu:humanEye';
-thisDWrapper.remoteImageTag = 'humanEye';
-thisDWrapper.gpuRendering = 0;
-thisSE.recipe.set('render type', {'radiance','depth'});
-
-%{
-% A lot of debugging to clean up iset3d-v4 this way.
- piWrite(thisSE.recipe);
- [oi, result] = piRender(thisSE.recipe,'ourdocker',thisDWrapper);
-%}
-
-% Runs on the CPU on mux for humaneye case.
-oi = thisSE.render('docker wrapper',thisDWrapper);
-
-% thisSE.get('lens file')
-
-%% Have a look.  Lots of things you can plot in this window.
-oiWindow(oi);
+% Focus on the A
+thisSE.set('accommodation',1/distA);  
 
 % Summarize
 thisSE.summary;
 
+% Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
+
+%{
+oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow(oi);
+%}
+
 %% Set accommodation to a different distance.
 
+% Focus on the C
 thisSE.set('accommodation',1/distC);  
 
-% This changes the distance to the camera.
-% thisSE.set('object distance',distA);  
-
-[oi, result] = thisSE.render('docker wrapper',thisDWrapper);
-oiWindow(oi);
+% Default renderer for sceneEye is humanEyeDocker, so try just the
+% default.  Should also work.
 thisSE.summary;
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-C');
 
-
+%{
+oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow(oi);
+%}
 %% END

@@ -47,7 +47,7 @@ thisR.set('film resolution',filmresolution);
 
 %% Render scene
 piWrite(thisR);
-[oiTemp,result] = piRender(thisR,'render type','radiance');
+[oiTemp,result] = piRender(thisR);
 
 %% Make Relative illumination plot
 if useSubplot == false

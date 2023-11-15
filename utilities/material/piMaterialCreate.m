@@ -16,7 +16,7 @@ function material = piMaterialCreate(name, varargin)
 %     the available material types.
 %
 %     The PBRT default properties of any material type can be found on PBRT
-%     website: web('https://pbrt.org/fileformat-v3.html#materials')
+%     website: web('https://pbrt.org/fileformat-v4')
 %
 %   Other key/val pairs depend on the material.  To see the properties of
 %   any specific material use
@@ -58,20 +58,8 @@ function material = piMaterialCreate(name, varargin)
 validmaterials = ...
     {'diffuse','coateddiffuse','coatedconductor','conductor',...
     'diffusetransmission','dielectric','thindielectric','hair', ...
-    'measured','subsurface','mix'};
-%{
-% need to check type, not name...
-if isequal(ieParamFormat(type),'listavailabletypes')
-    material = validmaterials;
-        %{
-        % V3 materials.  Now deprecated, sigh.
-        {'matte','uber','plastic','metal','mirror','glass', ...
-       'translucent','hair','kdsubsurface','disney','fourier', ...
-       'mix','substrate','subsurface'};
-        %}
-    return;
-end
-%}
+    'measured','subsurface','mix','interface'};
+
 %% Replace the space in parameters.
 
 % For example, 'rgb kd' won't pass parse with the space, but we need the
@@ -370,6 +358,19 @@ switch tp
         material.roughness.type = 'float';
         material.roughness.value = [];
 
+        material.uroughness.type = 'float';
+        material.uroughness.value = [];
+
+        material.vroughness.type = 'float';
+        material.vroughness.value = [];
+
+        material.remaproughness.type = 'bool';
+        material.remaproughness.value = [];
+        
+        % object's index of refraction
+        material.eta.type = 'float';
+        material.eta.value = [];
+
     case 'mix'
         material.type = 'mix';
 
@@ -380,6 +381,10 @@ switch tp
 
         material.amount.type = 'float';
         material.amount.value = [];
+        
+    case 'interface'
+        material.type = 'interface';
+        
     otherwise
         warning('Material type: %s does not exist', tp)
         return;

@@ -85,7 +85,7 @@ switch thisAsset.type
         end
     case 'light'
         switch param
-            case {'name'}
+            case {'name','names'}
                 val = thisAsset.name;
             case {'type'}
                 val = thisAsset.type;
@@ -97,8 +97,11 @@ switch thisAsset.type
         end
     case 'branch'
         switch param
-            case {'name'}
+            case {'name','names'}
                 val = thisAsset.name;
+            case {'namenoid'}
+                % Should be a better way.
+                val = thisAsset.name(10:end);
             case {'type'}
                 val = thisAsset.type;
             case {'size'}

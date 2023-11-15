@@ -1,4 +1,4 @@
-function [status, result] = render(obj, renderCommand, outputFolder)
+function [status, result] = render(obj, renderCommand, outputFolder, varargin)
 % Render radiance and depth using the dockerWrapper method
 %
 % Synopsis
@@ -14,14 +14,25 @@ function [status, result] = render(obj, renderCommand, outputFolder)
 %  result - Stdout text returned here
 %
 % Notes:
-%   (Author?) Currently we have an issue where GPU rendering ignores
+%   DJC: Currently we have an issue where GPU rendering ignores
 %   objects that have ActiveTranforms. Maybe scan for those & set
 %   container back to CPU (perhaps ideally a beefy, remote, CPU).
 %
 % See also
 %  piRender, sceneEye.render
-%
-% See debugging note at end.
+
+p = inputParser();
+
+addParameter(p, 'denoiseflag', false, @islogical);
+addParameter(p, 'rendertype',[]);
+
+% Okay to get params we don't understand
+p.KeepUnmatched = true;
+
+p.parse(varargin{:});
+
+denoiseFlag = p.Results.denoiseflag;
+renderType  = p.Results.rendertype;
 
 %% Build up the render command
 
@@ -31,7 +42,9 @@ verbose = obj.verbosity; % 0, 1, 2
 % Determine the container
 if obj.gpuRendering
     useContainer = obj.getContainer('PBRT-GPU');
-    renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
+    if ~strcmp(renderType,'instance')
+        renderCommand = strrep(renderCommand, 'pbrt ', 'pbrt --gpu ');
+    end
 else
     useContainer = obj.getContainer('PBRT-CPU');
 end
@@ -51,14 +64,33 @@ else
     useContext = getpref('docker','renderContext','');
 end
 % container is Linux, so convert
-outputFolder = dockerWrapper.pathToLinux(outputFolder);
+outputFolderDocker = dockerWrapper.pathToLinux(outputFolder);
 
-% sync data over
+denoiseCommand = ''; %default
+
+% As a "fail-safe" way to populate that volume and the recipes
+% we copy any correctly placed resources into the shared resource
+% folders and delete the per-recipe sub-folders that were synced
+% over so that we can replace them with symbolic links to the shared
+% versions.
+if obj.remoteResources
+    symLinkCommand = ['&&' getSymLinks()];
+else
+    symLinkCommand = ''; %Use whatever we have locally
+end
+
+
 if ~obj.localRender
     % Running remotely.
+
+    % Remove previous renders
+    if isfolder(fullfile(outputFolder, 'renderings'))
+        rmdir(fullfile(outputFolder, 'renderings'),'s');
+        mkdir(fullfile(outputFolder, 'renderings'),'s');
+    end
     if ispc
         rSync = 'wsl rsync';
-        nativeFolder = [obj.localRoot outputFolder '/'];
+        nativeFolder = [obj.localRoot outputFolderDocker '/'];
     else
         rSync = 'rsync';
     end
@@ -74,7 +106,7 @@ if ~obj.localRender
 
     % in the case of Mac (& Linux?) outputFolder includes both
     % our iset dir and then the relative path
-    [~, sceneDir, ~] = fileparts(outputFolder);
+    [~, sceneDir, ~] = fileparts(outputFolderDocker);
     remoteScenePath = dockerWrapper.pathToLinux(fullfile(obj.remoteRoot, obj.relativeScenePath, sceneDir));
 
     %remoteScenePath = [obj.remoteRoot outputFolder];
@@ -89,9 +121,10 @@ if ~obj.localRender
     if ismac || isunix
         % We needed the extra slash for the mac.  But still investigation
         % (DJC)
-        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, [nativeFolder,'/'], remoteScene);
+        % add deletion of extraneous files
+        putCommand = sprintf('%s %s -r -t --delete %s %s',rSync, speedup, [nativeFolder,'/'], remoteScene);
     else
-        putCommand = sprintf('%s %s -r -t %s %s',rSync, speedup, nativeFolder, remoteScene);
+        putCommand = sprintf('%s %s -r -t --delete %s %s',rSync, speedup, nativeFolder, remoteScene);
     end
 
     if verbose > 0
@@ -103,18 +136,39 @@ if ~obj.localRender
         fprintf('Done (%4.2f sec)\n', toc(putData))
     end
     if rStatus ~= 0, error(rResult); end
-    
+
+    % We currently only offer optix for the remote case
+    if denoiseFlag
+        % this pathing is sort of ugly, but needed
+        % since pbrt is on Linux and we might be on Windows
+        renderOutFile = ['renderings/' sceneDir '.exr'];
+        noiseOutFile = ['renderings/' sceneDir '-denoise.exr'];
+        denoiseCommand = sprintf(' imgtool denoise-optix --outfile %s %s', ...
+            noiseOutFile, renderOutFile);
+    end
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath, sceneDir));
 
+    % Moving forward, we will start assuming that needed resource files are
+    % available to our docker container on the rendering server via a
+    % volume mounted as /ISETResources.
+
+
     % need to cd to our scene, and remove all old renders
     % some leftover files can start with "." so need to get them also
-    containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  && %s"',...
-        useContext, flags, useContainer, shortOut, renderCommand);
+
+    if ~isempty(denoiseCommand)
+        % Use the optix denoiser if asked
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*}  %s && %s && %s"',...
+            useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand, denoiseCommand);
+    else
+        containerCommand = sprintf('docker --context %s exec %s %s sh -c "cd %s && rm -rf renderings/{*}  %s && %s "',...
+            useContext, flags, useContainer, shortOut, symLinkCommand, renderCommand);
+    end
     if verbose > 0
-        fprintf('Command: %s\n', containerCommand);
+        cprintf('*Blue', 'USE Docker: %s\n', containerCommand);
     end
 
     if verbose > 1
@@ -126,7 +180,7 @@ if ~obj.localRender
         if status == 0
             fprintf('Rendered remotely in: %4.2f sec\n', toc(renderStart))
         else
-            fprintf("Error Rendering: %s", result);
+            cprintf('*Red', "Error Rendering: %s", result);
         end
     else
         [status, result] = system(containerCommand);
@@ -152,10 +206,18 @@ if ~obj.localRender
         end
     end
 else
-    % Running locally.        
+    % Running locally.
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath,sceneDir));
-    containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);    
-    
+
+    % Add support for 'remoteResources' even in local case
+    if obj.remoteResources
+        symLinkCommand = ['&&' getSymLinks()];
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s "',...
+            flags, useContainer, shortOut, symLinkCommand, renderCommand);
+    else
+        containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && %s"', flags, useContainer, shortOut, renderCommand);
+    end
+
     tic;
     [status, result] = system(containerCommand);
     if verbose > 0
@@ -165,11 +227,23 @@ end
 
 %% For debugging.  Will write a method to just return these before long (BW).
 
-fprintf('\n------------------\n');
-fprintf('Container command: %s\n',containerCommand);
-fprintf('PBRT command: %s\n',renderCommand);
-fprintf('\n------------------\n');
-
+%fprintf('\n------------------\n');
+%cprintf('Blue', 'USE Docker: %s\n',containerCommand);
+%cprintf('Blue', 'PBRT command: %s\n',renderCommand);
+%fprintf('\n------------------\n');
 
 end
+
+function getLinks = getSymLinks()
+geoCommand =  'cp -n -r geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry';
+texCommand =  'cp -n -r textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures';
+spdCommand =  'cp -n -r spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds';
+lgtCommand =  'cp -n -r lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights';
+skyCommand =  'cp -n -r skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps';
+lensCommand = 'cp -n -r lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens';
+getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
+    geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
+end
+
+
 

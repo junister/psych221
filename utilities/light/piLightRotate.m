@@ -1,6 +1,8 @@
 function lght = piLightRotate(lght, varargin)
 % Rotate the direction of a light source
 %
+% SOMETHING IS WRONG HERE. DOC DOESN"T MATCH CODE
+%
 % Synopsis
 %   thisR = piLightRotate(thisR, idx,varargin)
 %
@@ -22,7 +24,7 @@ function lght = piLightRotate(lght, varargin)
 %{
     ieInit;
     thisR = piRecipeDefault;
-    thisR = piLightDelete(thisR, 'all');
+    thisR.set('lights','all','delete');
     spotLight = piLightCreate('new spot', 'type', 'spot',...
                 'cameracoordinate', true,...
                 'spd val', 'D50',...
@@ -41,7 +43,7 @@ function lght = piLightRotate(lght, varargin)
     % Another way of setting rotation
     ieInit;
     thisR = piRecipeDefault;
-    thisR = piLightDelete(thisR, 'all');
+    thisR.set('lights','all','delete');
     spotLight = piLightCreate('new spot', 'type', 'spot',...
                 'cameracoordinate', true,...
                 'spd val', 'D50',...
@@ -127,5 +129,3 @@ switch lght.type
         end
 end
 end
-
-% lightSource = thisR.lights{end};

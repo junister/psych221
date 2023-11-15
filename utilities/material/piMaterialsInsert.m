@@ -67,17 +67,34 @@ p.addParameter('verbose',false,@islogical);
 p.parse(thisR,varargin{:});
 
 % Decides which class of materials to insert
-mType = p.Results.groups;
+mType  = p.Results.groups;
 mNames = p.Results.names;
 
 % Make a char into a single entry cell
 if ischar(mType), mType = {mType}; end
 if ischar(mNames), mNames = {mNames}; end
 
+
+
 %% We should have either material type (mType) or material names (mNames)
 
 % Individually named materials
 if ~isempty(mNames{1})
+
+    % Remove the mNames entries that are already present, informing the
+    % user.
+    Names = thisR.get('material', 'names');
+
+    % A 1 entry in lst means the name is already present in the recipe.
+    % contains unfortunately seems to match on a 0 cell
+    lst = matches(mNames,Names);
+    if sum(lst) > 0
+        fprintf('Materials already in the recipe\n  %s  \n',mNames{lst});
+    end
+
+    % Preserve the names that are NOT in the recipe.
+    mNames = mNames(~lst);
+
     for ii=1:numel(mNames)
         
         newMat = piMaterialPresets(mNames{ii},mNames{ii});
@@ -99,8 +116,8 @@ end
 % Material types, not individual materials.
 if ~isempty(mType{1})
     for ii=1:numel(mType)
-
-        if ismember(mType{ii},{'all','glass'})
+        thisGroup = ieParamFormat(mType{ii});
+        if ismember(thisGroup,{'all','glass'})
             glass = piMaterialPresets('glass list');
             for gg = 1:numel(glass)
                 newMat = piMaterialPresets(glass{gg},glass{gg});
@@ -108,7 +125,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','metal'})
+        if ismember(thisGroup,{'all','metal'})
             metals = piMaterialPresets('metal list');
             for me = 1:numel(metals)
                 newMat = piMaterialPresets(metals{me},metals{me});
@@ -116,16 +133,7 @@ if ~isempty(mType{1})
             end
         end
 
-        % There is no type 'mirror list' any more
-        % if ismember(mType{ii},{'all','mirror'})
-        %    mirrors = piMaterialPresets('mirror list');
-        %    for mm = 1:numel(mirrors)
-        %        newMat = piMaterialPresets(mirrors{mm},mirrors{mm});
-        %        thisR.set('material', 'add', newMat);
-        %    end
-        %end
-
-        if ismember(mType{ii},{'all','diffuse'})
+        if ismember(thisGroup,{'all','diffuse'})
             diffuse = piMaterialPresets('diffuse list'); 
             for dd = 1:numel(diffuse)
                 newMat = piMaterialPresets(diffuse{dd},diffuse{dd});
@@ -133,7 +141,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','glossy'})
+        if ismember(thisGroup,{'all','glossy'})
             glossy = piMaterialPresets('glossy list');
             for gl = 1:numel(glossy)
                 newMat = piMaterialPresets(glossy{gl},glossy{gl});
@@ -141,7 +149,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','wood'})
+        if ismember(thisGroup,{'all','wood'})
             woods = piMaterialPresets('wood list');
             for ww = 1:numel(woods)
                 newMat = piMaterialPresets(woods{ww},woods{ww});
@@ -149,7 +157,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','brick'})
+        if ismember(thisGroup,{'all','brick'})
             bricks = piMaterialPresets('brick list');
             for bb = 1:numel(bricks)
                 newMat = piMaterialPresets(bricks{bb},bricks{bb});
@@ -157,7 +165,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'all','marble'})
+        if ismember(thisGroup,{'all','marble'})
             marbles = piMaterialPresets('marble list');
             for mm = 1:numel(marbles)
                 newMat = piMaterialPresets(marbles{mm},marbles{mm});
@@ -165,7 +173,7 @@ if ~isempty(mType{1})
             end
         end
 
-        if ismember(mType{ii},{'testpatterns'})
+        if ismember(thisGroup,{'all','testpatterns'})
             testpatterns = piMaterialPresets('testpatterns list');
             for tp = 1:numel(testpatterns)
                 newMat = piMaterialPresets(testpatterns{tp},testpatterns{tp});

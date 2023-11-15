@@ -17,7 +17,13 @@ function val = piTextureText(texture, thisR, varargin)
 p = inputParser;
 p.addRequired('texture', @isstruct);
 p.addRequired('thisR', @(x)(isa(x,'recipe')));
+
+% remote should be passed in to us if needed
+p.addParameter('remoteresources', false);
+
 p.parse(texture, thisR, varargin{:});
+
+remoteResources = p.Results.remoteresources;
 
 %% String starts with Texture name
 
@@ -109,26 +115,13 @@ for ii=1:numel(textureParams)
                 % a hack, but probably I should fix the original scene
                 % directories. I am worried how often this happens. (BW)
 
-                % Check whether we have it in
-                % the imageTextures directory.
-                if exist(fullfile(piDirGet('textures'),thisVal),'file')
-                    % Found it!  We will need to copy it later.
-                    imgFile = fullfile(piDirGet('textures'),thisVal);
+                % Check whether we have it a texture file
+                if remoteResources
+                    % We trust that the texture will be there on the server
+                    imgFile = ['textures/' thisVal];
                 else
-                    % Not in materials/textures, look elsewhere.
-                    imgFile = which(thisVal);
-                    if ~isempty(imgFile)
-                        % See if it is in a subdirectory of the material
-                        % directory or in the scenes directory.  Both are
-                        % OK.  If not, then warn the user where it was
-                        % found.
-                        p = fileparts(imgFile);
-                        if ~contains(p,piDirGet('material')) && ~contains(p,piDirGet('scenes'))
-                            warning('Texture file found in %s.\n',p);
-                        end
-                    end
+                    imgFile = piResourceFind('texture',thisVal);
                 end
-
                 % At this point, either we have imgFile or it is empty.
                 if isempty(imgFile) 
                     thisText = '';
@@ -140,13 +133,17 @@ for ii=1:numel(textureParams)
                         imgFile = dockerWrapper.pathToLinux(imgFile);
                     end
 
-                    if isempty(texturePath)
-                        thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
+                    if isempty(texturePath) || isequal('/',texturePath(1))
+                        % Replaced this text Jan 4 2023 (BW)
+                        % thisText = strrep(thisText, thisVal, ['textures/',thisVal]);
+                        thisText = strrep(thisText, imgFile, ['textures/',thisVal]);
                     end
 
-                    texturesDir = [thisR.get('output dir'),'/textures'];
-                    if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
-                    copyfile(imgFile,texturesDir);
+                    if ~remoteResources
+                        texturesDir = [thisR.get('output dir'),'/textures'];
+                        if ~exist(texturesDir,'dir'), mkdir(texturesDir); end
+                        copyfile(imgFile,texturesDir);
+                    end
                 end
             end
         end

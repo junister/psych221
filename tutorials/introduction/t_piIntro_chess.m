@@ -50,7 +50,7 @@ scenePlot(scene,'depth map');
 
 %% Add a bright point light near the front where the camera is
 
-thisR.get('light print');
+thisR.show('lights');
 thisR.set('light','all','delete');
 
 % First create the light
@@ -61,16 +61,13 @@ pointLight = piLightCreate('point',...
 % Then add it to our scene
 thisR.set('light',pointLight,'add');
 
-% For now only radiance. Because we can.
-thisR.set('render type',{'radiance'});
-
 piWRS(thisR,'name','Point light');
 
 %% Add a skymap
 
 [~, skyMap] = thisR.set('skymap','room.exr');
 
-thisR.get('light print');
+thisR.show('lights');
 
 piWRS(thisR, 'name', 'Point light and skymap');
 

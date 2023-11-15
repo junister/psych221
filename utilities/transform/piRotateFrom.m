@@ -3,7 +3,8 @@ function [pts, radius] = piRotateFrom(thisR,direction,varargin)
 %
 % Brief
 %  Sample points in a circle around a direction vector centered at the
-%  'from' location
+%  'from' location.  The first and last point are the same.  Maybe
+%  there should be an option to change this.
 %
 % Synopsis
 %    pts = = piRotateFrom(thisR,direction,varargin)

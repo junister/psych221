@@ -5,7 +5,8 @@ function asset = piAssetLoad(fname,varargin)
 %   asset = piAssetLoad(fname,varargin)
 %
 % Input
-%   fname - filename of the asset mat-file
+%   fname - filename of the asset mat-file, or 'help' or 'list' to see the
+%           assets in piDirGet('assets') (but not character-assets).
 %
 % Output
 %  asset - a struct containing the recipe and the mergeNode
@@ -24,15 +25,34 @@ function asset = piAssetLoad(fname,varargin)
 %   merging. 
 %
 % See also
-%   piRecipeMerge, piDirGet('assets'), piRootPath/data/assets
+%   piRecipeMerge, piDirGet('assets'), dir(piDirGet('assets'))
 %
 
 % Examples:
 %{
- piAssetLoad('
+ thisR = piRecipeCreate('flat surface');
+ piMaterialsInsert(thisR,'groups','test patterns');
+ idx = piAssetSearch(thisR,'object name','Cube');
+ thisR.set('asset',idx,'Material name','macbethchart');
+ thisR.set('asset',idx,'scale',[.3 0.2 .2]*0.9);
+ piWRS(thisR);
 %}
 
 %% Parse 
+
+if ismember(ieParamFormat(fname),{'list','help'})
+    tmp = dir(fullfile(piDirGet('assets'),'*.mat'));
+    fprintf('\n\nAsset files (not character-assets)\n----------\n\n');
+    for ii=1:numel(tmp)
+        fprintf('%03d\t%s\n',ii,tmp(ii).name');
+    end
+    return;
+end
+
+% Check the extension, make sure it is mat
+[p,n,e] = fileparts(fname);
+if isempty(e), e = '.mat'; end
+fname = fullfile(p,[n,e]);
 
 varargin = ieParamFormat(varargin);
 p = inputParser;
@@ -46,10 +66,7 @@ assetType = p.Results.assettype;
 
 %% We need a mat-file, preferably from the data/assets directory
 
-% Check the extension, make sure it is mat
-[p,n,e] = fileparts(fname);
-if isempty(e), e = '.mat'; end
-fname = fullfile(p,[n,e]);
+
 
 if isempty(p)
     % If the user specified a name, but not a path, look in the data/assets
@@ -114,9 +131,10 @@ end
 
 %% Adjust the input slot in the recipe for the local user
 
-%{
-% One theory is we just empty the outputfile.  This is an asset that will
-% be inserted into another recipe.
+% { 
+% One theory is we just empty the outputfile (see below).  This is an
+% asset that will be inserted into another recipe. Another theory is we set
+% it so that we could run piWRS(asset.thisR)
 [thePath,n,e] = fileparts(asset.thisR.get('output file'));
 
 % Find the last element of the path
@@ -128,6 +146,8 @@ outFile=fullfile(piRootPath,'local',theDir,[n,e]);
 
 asset.thisR.set('output file',outFile);
 %}
-asset.thisR.set('output file','');
+
+% If you comment above, then uncomment this
+% asset.thisR.set('output file','');
 
 end

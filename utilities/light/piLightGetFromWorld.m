@@ -22,7 +22,7 @@ function lightSources = piLightGetFromWorld(thisR, varargin)
 %{
   thisR = piRecipeDefault;
   lightSources = piLightGet(thisR);
-  thisR = piLightDelete(thisR, 1);
+  thisR.set('lights','all','delete');
   thisR = piLightAdd(thisR, 'type', 'point');
   thisR = piLightAdd(thisR, 'type', 'point', 'camera coordinate', true);
   piLightGet(thisR);
@@ -156,8 +156,8 @@ for ii = 1:nLights
             end
         else
             % Two parameters acceptable by infinite light
-            mapname = find(piContains(thisLineStr, 'string mapname'));
-            if mapname, lightSources{ii}.mapname = thisLineStr{mapname+1};
+            mapname = find(piContains(thisLineStr, 'string filename'));
+            if mapname, lightSources{ii}.filename = thisLineStr{mapname+1};
             end
             
             int = find(piContains(thisLineStr, 'integer nsamples'));

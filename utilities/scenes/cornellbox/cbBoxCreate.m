@@ -25,7 +25,8 @@ thisR = piRecipeDefault('scene name', 'cornell box reference');
 thisR.set('from', from);
 thisR.set('to', to);
 %% Remove current existing lights
-piLightDelete(thisR, 'all');
+thisR.set('lights','all','delete');
+
 %% Turn the object to area light
 
 areaLight = piLightCreate('lamp', 'type', 'area');

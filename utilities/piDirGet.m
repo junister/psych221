@@ -7,7 +7,7 @@ function resourceDir = piDirGet(resourceType)
 % Input
 %   resourceType - One of
 %     {'data','assets', 'lights', 'imageTextures', 
-%     'lens', 'scenes','local',
+%     'lens', 'scenes','local', 'resources',
 %     'server local', 'character-assets', 'character-recipes'}
 %
 % Output
@@ -30,11 +30,10 @@ function resourceDir = piDirGet(resourceType)
 %}
 
 %% Parse
-% Planning on deprecating imageTextures.
 valid = {'data','assets', 'asset','lights', 'imageTextures', ...
     'textures','texture','materials','material','lens', 'lenses', ...
     'scenes','scene','local','server local', 'character-assets', ...
-    'character-recipes'};
+    'character-recipes','skymaps','resources'};
 
 if isequal(resourceType,'help')
     disp(valid);
@@ -63,14 +62,24 @@ switch (resourceType)
     case {'materials','material'}
         resourceDir = fullfile(ourData,'materials');
     case {'imageTextures','textures','texture'}
-        % imageTextures is legacy and should be deprecated
+        % imageTextures is legacy and will be deprecated
         % Moved textures inside of materials Aug 1, 2022. (BW).
         resourceDir = fullfile(ourData,'materials','textures');
     case {'lens', 'lenses'}
         % Changed July 30, 2020 - now in isetcam
-        resourceDir = fullfile(isetRootPath,'data','lens');
+        if piCamBio
+            resourceDir = fullfile(isetRootPath,'data','lens');
+        else
+            % May 2023.  Put lenses in isetbio/isettools/data/lens
+            % I now prefer a strategy where use all of ISETCam for scene
+            % and optics.
+            resourceDir = fullfile(isetRootPath,'data','lens');
+        end
+
     case {'scenes','scene'}
         resourceDir = fullfile(ourData,'scenes');
+    case {'skymaps'}
+        resourceDir = fullfile(ourData,'skymaps');
     case 'local'
         resourceDir = fullfile(ourRoot,'local');
     case 'character-assets'
@@ -82,6 +91,9 @@ switch (resourceType)
     case 'server local'
         % should really be someplace else!
         resourceDir = '/iset/iset3d-v4/local'; % default
+    case 'resources'
+        % default for Vistalab, other sites need to change
+        resourceDir =  getpref('docker','resourceLocation','/acorn/data/iset/Resources');
 end
 
 

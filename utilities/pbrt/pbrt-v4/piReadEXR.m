@@ -44,23 +44,26 @@ switch dataType
         output = piEXR2Mat(filename, 'Radiance');
     case "zdepth"
         output = piEXR2Mat(filename, 'Pz');
+    case "alldepth"
+          allDepthMap = piEXR2Mat(filename, ['Px', 'Py', 'Pz']);
+          output = sqrt(allDepthMap.^2);
     case "depth"
         % We only want to sum the depths that we have, so we need to 
         % look for errors when we retrieve each one
         try
             XDepthMap = piEXR2Mat(filename, 'Px');
         catch
-            XDepthMap = [0];
+            XDepthMap = 0;
         end
         try
             YDepthMap = piEXR2Mat(filename, 'Py');
         catch
-            YDepthMap = [0];
+            YDepthMap = 0;
         end
         try
             ZDepthMap = piEXR2Mat(filename, 'Pz');
         catch
-            ZDepthMap = [0];
+            ZDepthMap = 0;
         end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
@@ -79,11 +82,14 @@ switch dataType
         output(:,:,2) = piEXR2Mat(filename, 'Ny');
         output(:,:,3) = piEXR2Mat(filename, 'Nz');
     case "albedo"
-        % to add; only support rgb for now, spectral albdeo needs to add;
+        % albedo contains three "sub-channels" that are B, G, R in order
+        output(:,:,1) = piEXR2Mat(filename, 'Albedo.R');
+        output(:,:,2) = piEXR2Mat(filename, 'Albedo.G');
+        output(:,:,3) = piEXR2Mat(filename, 'Albedo.B');
     case "instanceId" % single channel
         output = piEXR2Mat(filename, 'InstanceId');
     otherwise
-        error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal";')
+        error('Datatype not supported. \n%s', 'Supported datatypes are: "radiance", "zdepth", "3dcoordinates", "material", "normal", "albedo"');
 end
 
 

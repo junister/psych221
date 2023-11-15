@@ -1,7 +1,16 @@
 %% s_makeSimpleScene
 %
+% DEPRECATED
+%
 
-thisR = piRecipeDefault('scene name','simple scene');
+% Not up to date ... either fix or deprecate
+% We use the simple scene in various t_piIntro examples now
+% The methods here are out of date.
+%
+thisR = piRecipeCreate('simple scene');
+piWRS(thisR);
+
+%%
 thisR.set('assets','Camera_B','delete');
 thisR.set('assets','001_mirror_O','delete');
 thisR.set('lights','delete','#1_Light_type:infinite');
@@ -11,7 +20,7 @@ piLightProperties('spot');
 fileName = 'room.exr';
 lgt = piLightCreate('outdoors light', ...
     'type', 'infinite',...
-    'mapname', fileName);
+    'filename', fileName);
 
 % The image in the light exr file needs to be rotated around so the camera
 % sees good stuff 

@@ -1,18 +1,13 @@
- %% Explore light creation with new area light parameters
+%% Explore light creation with new area light parameters
 %
-% The area lights were implemented by Zhenyi to help us accurately simulate
-% the headlights in night time driving scenes.
+% The shape of the area light is specified as a trianglemesh in
+% the recipe.  It is a flat surface in this example.
 %
-% The definitions of the shape of the area light are in the
-% arealight_geometry.pbrt file.  Looking at the text there should give
-% us some ideas about how to create more area lights with different
-% properties.
-%
-% This script should explore setting the SPD of the lights and perhaps
-% making different shapes and intensities.
+% This script explores setting the SPD of the lights and rotating the
+% direction of the light.
 %
 % See also
-%   s_arealight
+%   t_arealight2.m, s_arealight
 
 %%
 ieInit;
@@ -21,7 +16,11 @@ if ~piDockerExists, piDockerConfig; end
 %% 
 fileName = fullfile(piRootPath, 'data','scenes','arealight','arealight.pbrt');
 thisR    = piRead(fileName);
-thisR.get('print lights')
+thisR.simplify;
+
+thisR.set('render type',{'radiance','depth'});
+thisR.show('lights');
+thisR.show('objects');
 
 % The no number is the blue one
 % The 002 light is the green one.
@@ -39,7 +38,7 @@ thisR.set('light','AreaLightRectangle.002_L','name','Area_Green_L');
 thisR.set('light','AreaLightRectangle.003_L','name','Area_Yellow_L');
 thisR.show('lights');
 
-scene = piWRS(thisR,'render flag','hdr');
+scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
 
 %% Plot the luminance across a line
 
@@ -49,10 +48,27 @@ scenePlot(scene,'luminance hline',roiLocs);
 ieROIDraw(scene,'shape','line','shape data',[1 sz(2) roiLocs(2) roiLocs(2)]);
 
 %% The green light is bright.  Let's reduce its intensity.
-gScale = thisR.get('light','Area_Green_L','specscale');
+gScale = thisR.get('light','Area_Yellow_L','specscale');
 
-thisR.set('light','Area_Green_L','specscale',gScale/4);
-scene = piWRS(thisR,'render flag','hdr');
+%% The intensity seems to be scaling with the square of the value
+% So to reduce it by a factor of 2, we scale by sqrt(2)
+% It may be that this factor depends on the shape of the area light.
+% These are roughly square.  If they are linear, maybe the scaling does
+% something else? (BW/DJC)
+
+thisR.set('light','Area_Yellow_L','specscale',gScale/sqrt(2));
+scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
+uData2 = scenePlot(scene,'luminance hline',roiLocs);
+
+%% Can we scale it back?
+
+thisR.set('light','Area_Yellow_L','specscale',gScale);
+scene = piWRS(thisR,'render flag','hdr','mean luminance',-1);
+uData1 = scenePlot(scene,'luminance hline',roiLocs);
+
+%%
+ieNewGraphWin;
+plot(uData1.pos,uData1.data./uData2.data);
 
 %%
 roiLocs = [1 74];
@@ -90,7 +106,7 @@ thisR.set('asset', 'Area_Blue_L', 'rotate', [0, 0, -30]); % -5 degree around y a
 
 piWRS(thisR,'render flag','hdr');
 
-%% Change the SPD of the lights to halogen
+%% Change the SPD of the lights to potential headlamps
 
 lList = {'LED_3845','LED_4613','halogen_2913','CFL_5780'};
 
@@ -112,6 +128,10 @@ for ii=1:numel(lList)
     else, hold on; plot(wave,ledSPD);
     end
 end
+
+%% Show the chromaticities of the lights
+%
+% We should get the chromaticities from regions in the scene, too.
 
 for ii=1:numel(lList)
     [ledSPD,wave] = ieReadSpectra(lList{ii});

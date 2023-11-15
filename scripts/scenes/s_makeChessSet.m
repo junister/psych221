@@ -23,7 +23,7 @@ thisR.set('light', 'all', 'delete');
 fileName = 'sunlight.exr';
 dLight = piLightCreate('distant light', ...
     'type', 'infinite',...
-    'mapname', fileName);
+    'filename', fileName);
 
 % Rotating it this way brings the blue sky behind the chess set.
 dLight = piLightSet(dLight, 'rotation val', {[0 0 1 0], [-90 1 0 0]});

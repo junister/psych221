@@ -1,14 +1,19 @@
 function [val, txt] = piLightGet(lght, param, varargin)
 % Read a light source struct in the recipe
 %
+% TODO:  This routine should be called piLightText.  We also need a
+%   collection of routines that get the parameters from a light
+%   structure, say piLightGet/Set/Plot.
+%
+%   The routine appears in a lot of places, but I am quite suspicious
+%   of most uses.  For example in piLightAddToWorld and
+%   piLightGetFromText.  It seems necessary in piLightWrite.  But
+%   s_flatSurface?
+%
 % Description
-%    This is a warning.  piLightGet is not the same as other typical
-%    set/get functions.  It does not return the parameters, as say
-%    thisR.get('light',idx,param) would.  Rather it takes in the light
-%    struct and returns text that can be printed into the PBRT rendering
-%    file.  We should talk over the name of this function and we should see
-%    if we can have both of these functions. Maybe this function should be
-%    piLightGetText() to distinguish it from a conventional get? (BW)
+%   piLightGet takes in a light struct and returns a value (first) and
+%   the text that can be printed in the PBRT rendering file (usually
+%   the geometry file).
 %
 % Synopsis
 %    [val, txt] = piLightGet(lght, param, varargin)
@@ -21,7 +26,7 @@ function [val, txt] = piLightGet(lght, param, varargin)
 %   pbrttext - flag of whether parse text for light
 %
 % Returns:
-%   val - returned value specified by the param
+%   val - returns the value specified by the param
 %   txt - The light text for pbrt files.  Convenient for piWrite.
 %
 % ZLY, SCIEN, 2020
@@ -73,7 +78,7 @@ p.parse(lght, param, varargin{:});
 
 pbrtText = p.Results.pbrttext;
 
-%%
+%% How we return just the values
 val = [];
 
 if isfield(lght, pName)
@@ -88,14 +93,18 @@ if isfield(lght, pName)
     elseif isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val')
         val = lght.(pName).value;
     end
-elseif strcmpi(lght.type, 'infinite')
-    % do nothing
 else
-    warning('Parameter: %s does not exist in light type: %s',...
+    % We used to set a warning, but now we just print this.  Perhaps
+    % we should do better at checking.
+    fprintf('Parameter "%s" not present for light type "%s"\n',...
         param, lght.type);
+    val = NaN;
 end
 
-%% compose pbrt text
+% If the user didn't ask for text, we are done.
+if nargout == 1, return; end
+
+%% compose PBRT text that defines the light.
 txt = '';
 if pbrtText && ~isempty(val) &&...
         (isequal(pTypeVal, 'value') || isequal(pTypeVal, 'val') || isequal(pName, 'type')) ||...
@@ -108,19 +117,17 @@ if pbrtText && ~isempty(val) &&...
                 txt = sprintf('AreaLightSource "diffuse"');
             end
         case 'spd'
-            spectrumScale = lght.specscale.value;
+            if ~isempty(lght.specscale.value), spectrumScale = lght.specscale.value;
+            else, spectrumScale = 1;
+            end
             
-            % Maybe fix specscale earlier and more gnerally.
-            if isempty(spectrumScale), spectrumScale = 1; end
-            spectrumScale = 1; % tmp, we scale spd with a seperate paramter.
             if ischar(lght.spd.value)
                 [~, ~, ext] = fileparts(lght.spd.value);
                 if ~isequal(ext, '.spd')
-                    % If the extension is not .spd, it indicates the
-                    % spectrum is written out from isetcam, which is
-                    % supposed to be in spds/lights. Otherwise, the spd
-                    % file exists from the input folder already, it should
-                    % be copied in the target directory.
+                    % If the extension is not .spd, the spectrum is an
+                    % isetcam mat file. Otherwise, the spd file exists
+                    % from the input folder already, it should be
+                    % copied in the target directory.
                     
                     % use 'scale' to scale the radiance.
                     lightSpectrum = sprintf('"spds/lights/%s.spd"', ieParamFormat(lght.spd.value));
@@ -141,8 +148,28 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "point3 from" [%.4f %.4f %.4f]', val(1), val(2), val(3));
         case 'to'
             txt = sprintf(' "point3 to" [%.4f %.4f %.4f]', val(1), val(2), val(3));
-        case 'mapname' % in v4 this changes to filename
+        case 'mapname'
+            % We think we replaced calls to mapname with filename
+            warning('No mapname gets should be left.')
+        case 'filename' 
+            % Both the goniometric, projection, and skymaps have a
+            % filename. 
+            % 
+            % Point, distant, infant, area, spot do not.
+            %
+            % We for goniometric in v4 this changed to filename from mapname
+            % Below, mapname is for skymaps
             txt = sprintf(' "string filename" "%s"', val);
+
+            % Use skymaps only where they belong
+            % or in the instanced folder
+            if contains(val,'instanced/'),    prefix = '';
+            elseif ~contains(val,'skymaps/'), prefix = 'skymaps/';
+            else,                             prefix = '';
+            end
+
+            % in v4 this changed to filename from mapname
+            txt = sprintf(' "string filename" "%s%s"', prefix, val);
         case 'fov'
             txt = sprintf(' "float fov" [%.4f]', val);
         case 'nsamples'
@@ -153,12 +180,14 @@ if pbrtText && ~isempty(val) &&...
             txt = sprintf(' "float conedeltaangle" [%.4f]', val);
         case 'twosided'
             if val
-                txt = sprintf(' "bool twosided" "%s"', 'true');
+                txt = sprintf(' "bool twosided" %s', 'true');
             else
-                txt = sprintf(' "bool twosided" "%s"', 'false');
+                txt = sprintf(' "bool twosided" %s', 'false');
             end
         case 'shape'
             txt = piShape2Text(val);
+        case 'power'
+            txt = sprintf(' "float power" [%.4f]', val);
         case 'translation'
             txt = {}; % Change to cells
             % val can be a cell array
@@ -198,12 +227,12 @@ if pbrtText && ~isempty(val) &&...
             end
         case 'scale'
             % Or here.
+            % in pbrt-v4 scale appears to only take 1 parameter
             if ~iscell(val), val = {val}; end % BW
             for ii=1:numel(val)
-                txt{end + 1} = sprintf('Scale %.3f %.3f %.3f', val{ii}(1), val{ii}(2), val{ii}(3));
+                txt{end + 1} = sprintf('"float scale" %.3f', val{ii}(1));
             end
         case 'specscale'
-%             if ~iscell(val), val = {val};end
             txt = sprintf(' "float scale" [%.5f]',val);
             
         case 'spread'

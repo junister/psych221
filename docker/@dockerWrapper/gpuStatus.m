@@ -16,9 +16,8 @@ function [status, result] = gpuStatus(obj)
         % check the remote machine
         rUser = obj.remoteUser;
         if isempty(rUser)
-            warning('Docker user is not set up for a remote machine.')
-            status = -1;
-            return;
+            % if not set try our current username
+            rUser = obj.getUserName();
         end
         statusCmd = sprintf('ssh %s@%s nvidia-smi', rUser, obj.remoteMachine);
         [status, result] = system(statusCmd);

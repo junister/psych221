@@ -1,5 +1,11 @@
-function piMaterialWrite(thisR)
-%%
+function piMaterialWrite(thisR, varargin)
+% Write the contents of the _material file
+%
+% In addition to writing the material file, we should make sure the texture
+% files are present in the output directory. As of 8/19/23, BW can't see
+% where this is done any more!  Still checking.  We do this for lights, but
+% apparently not for textures?  Weird.
+%
 % Synopsis:
 %   piMaterialWrite(thisR)
 %
@@ -25,11 +31,10 @@ function piMaterialWrite(thisR)
 %%
 p = inputParser;
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
-p.parse(thisR);
+p.addParameter('remoteresources', false);
+p.parse(thisR, varargin{:});
 
 %% Create txtLines for texture struct array
-
-% Texture txt lines creation are moved into piTextureText function.
 
 if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     
@@ -49,7 +54,8 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
     TextureTex = [];
     textureTxt = [];
     for ii = 1:numel(textureKeys)
-        tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR);
+        tmpTxt = piTextureText(thisR.textures.list(textureKeys{ii}), thisR, ...
+            'remoteresources', p.Results.remoteresources);
         if piContains(tmpTxt,'texture tex')
             % This texture has a property defined by another texture
             TextureTex{tt} = tmpTxt;
@@ -59,6 +65,7 @@ if isfield(thisR.textures,'list') && ~isempty(thisR.textures.list)
             nn=nn+1;
         end
     end
+
     % ZLY: if special texture cases exist, append them to the end
     if numel(TextureTex) > 0
         textureTxt(nn:nn+numel(TextureTex)-1) = TextureTex;
@@ -68,7 +75,8 @@ else
 end
 
 
-%% Create txtLines for the material struct array
+%% Create text lines for the material struct array
+
 if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     materialTxt = cell(1, thisR.materials.list.Count);
     matTypeList = cell(1, thisR.materials.list.Count);
@@ -84,7 +92,7 @@ if isfield(thisR.materials, 'list') && ~isempty(thisR.materials.list)
     end
     for ii=1:length(materialTxt)
         % Converts the material struct to text
-        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR);
+        materialTxt{ii} = piMaterialText(thisR.materials.list(materialKeys{ii}), thisR, 'remoteresources', p.Results.remoteresources);
         matTypeList{ii} = thisR.materials.list(materialKeys{ii}).type;
     end
 else
@@ -99,7 +107,7 @@ nonMixMaterialText = materialTxt(~mixMatIndex);
 
 %% Write the texture and material information into scene_material.pbrt
 output = thisR.get('materials output file');
-fileID = fopen(output,'w');
+fileID = fopen(output,'W');
 fprintf(fileID,'# Exported by piMaterialWrite on %i/%i/%i %i:%i:%0.2f \n',clock);
 
 if ~isempty(textureTxt)
@@ -116,14 +124,6 @@ end
 % write out mix materials
 for row=1:length(mixMaterialText)
     fprintf(fileID,'%s\n',mixMaterialText{row});
-end
-
-%% Write media to xxx_materials.pbrt
-
-if ~isempty(thisR.media)
-    for m=1:length(thisR.media.list)
-        fprintf(fileID, piMediumText(thisR.media.list(m), thisR.get('working directory')));
-    end
 end
 
 fclose(fileID);

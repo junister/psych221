@@ -11,7 +11,7 @@ function val = piAssetSearch(thisR,srchtype,param,varargin)
 % Inputs
 %  thisR     - recipe
 %  srchType  - string that defines the search
-%      'object name', 'light name', 'material name'
+%              'object name', 'light name', 'material name', 'branch name'
 %  param     - value of the string
 %
 % Optional key/val
@@ -74,30 +74,35 @@ ignoreCase = p.Results.ignorecase;
 val = [];
 
 switch srchtype
-    case {'objectname','objectnames'}
+    case {'objectname','objectnames','object'}
         % Material name or distance or name contains str
         oNames = thisR.get('object names');
         for ii=1:numel(oNames)
             if contains(oNames{ii},param,'IgnoreCase',ignoreCase)
                 % This should be the Node index
-                val(end+1) = str2double(oNames{ii}(1:6)); 
+                % Some seem to only have 4 digits?
+                foundIndex = str2double(oNames{ii}(1:6));
+                if isequaln(foundIndex, NaN)
+                    foundIndex = str2double(oNames{ii}(1:4));
+                end    
+                val(end+1) = foundIndex; 
             end
         end
-    case {'lightname','lightnames'}
+    case {'lightname','lightnames','light'}
         lNames = thisR.get('light','names id');
         for ii=1:numel(lNames)
             if contains(lNames{ii},param,'IgnoreCase',ignoreCase)
                 val(end+1) = str2double(lNames{ii}(1:6)); 
             end
         end
-    case {'branchname','branchnames'}
+    case {'branchname','branchnames','branch'}
         bNames = thisR.get('branch names');
         for ii=1:numel(bNames)
             if contains(bNames{ii},param,'IgnoreCase',ignoreCase)
                 val(end+1) = str2double(bNames{ii}(1:6)); 
             end
         end
-    case {'materialname','materialnames'}
+    case {'materialname','materialnames','material'}
 
         % Find the full material name
         mNames = thisR.get('material','names');

@@ -78,6 +78,9 @@ otherData.materialID = [];
 otherData.coordinates = [];
 otherData.instanceID = [];
 
+normalImage = [];
+albedoImage = [];
+
 % we assume we can work through a cell array, but don't always get one
 if ~iscell(label), label = {label}; end
 
@@ -95,16 +98,25 @@ for ii = 1:numel(label)
             % For the 'label' case, we seem to go here and this is empty.
             % Not sure why.
             if isempty(energy)
-                break;
-            end
-            
-            if isempty(find(energy(:,:,17),1))
-                energy = energy(:,:,1:16);
-                data_wave = 400:20:700;
-            else
+                error('No energy term returned.');
+            elseif ismatrix(energy)
+                % For some cases we have only a single row, such as
+                % the film shape case.
                 data_wave = 400:10:700;
+                [space,w] = size(energy);
+                % Always return as a row
+                energy = reshape(energy,1,space,w);
+                photons  = Energy2Quanta(data_wave,energy);
+            else
+                if isempty(find(energy(:,:,17),1))
+                    % Chromatic aberration only goes up to 16 wavebands.
+                    energy = energy(:,:,1:16);
+                    data_wave = 400:20:700;
+                else
+                    data_wave = 400:10:700;
+                end
+                photons  = Energy2Quanta(data_wave,energy);
             end
-            photons  = Energy2Quanta(data_wave,energy);
 
         case {'depth', 'zdepth'}
             try
@@ -135,7 +147,7 @@ for ii = 1:numel(label)
                 warning('Can not find "Pz(?)" channel in %s, ignore reading depth', inputFile);
                 continue
             end
-
+            otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
         case 'coordinates'
             % Doesn't work on many scenes
             otherData.coordinates = piReadEXR(inputFile, 'data type','3dcoordinates');
@@ -145,11 +157,9 @@ for ii = 1:numel(label)
             otherData.materialID = piReadEXR(inputFile, 'data type','material');
 
         case 'normal'
-            % to add
-            disp('Normal NYI')
+            normalImage = piReadEXR(inputFile, 'data type','albedo');
         case 'albedo'
-            % to add; only support rgb for now, spectral albdeo needs to add;
-            disp('albedo NYI')
+            albedoImage = piReadEXR(inputFile, 'data type','normal');
         case 'instance'
             % Should the instanceID be ieObject?
             otherData = piReadEXR(inputFile, 'data type','instanceId');
@@ -316,6 +326,13 @@ end
 
 if exist('ieObject','var') && ~isempty(ieObject) && exist('depthImage','var') && numel(depthImage) > 1
     ieObject = sceneSet(ieObject,'depth map',depthImage);
+    % Not sure where we want to put these
+    if ~isempty(normalImage)
+        ieObject.normalImage = normalImage;
+    end
+    if ~isempty(albedoImage)
+        ieObject.albedoImage = albedoImage;
+    end
 end
 
 ieObject.metadata = otherData;

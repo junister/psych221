@@ -20,12 +20,6 @@ function [lightSources, lightTextRanges] = piLightGetFromText(intext, varargin)
 
 % Examples
 %{
-  thisR = piRecipeDefault;
-  lightSources = piLightGet(thisR);
-  thisR = piLightDelete(thisR, 1);
-  thisR = piLightAdd(thisR, 'type', 'point');
-  thisR = piLightAdd(thisR, 'type', 'point', 'camera coordinate', true);
-  piLightGet(thisR);
 %}
 
 %% Parse inputs
@@ -138,7 +132,7 @@ for ii = 1:nLights
 
                 % mapname -- in v4 seems to have changed to filename
                 mapname = piParameterGet(thisLine, 'string filename');
-                thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
+                thisLightSource = piLightSet(thisLightSource, 'filename val', mapname);
 
             case 'spot'
                 % Spectrum
@@ -191,8 +185,8 @@ for ii = 1:nLights
                 specscale = piParameterGet(thisLine, 'float scale');
                 thisLightSource = piLightSet(thisLightSource, 'specscale', specscale);
                 % mapname
-                mapname = piParameterGet(thisLine, 'string mapname');
-                thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
+                mapname = piParameterGet(thisLine, 'string filename');
+                thisLightSource = piLightSet(thisLightSource, 'filename val', mapname);
 
             case 'distant'
                 % Spectrum
@@ -224,8 +218,8 @@ for ii = 1:nLights
                 thisLightSource = piLightSet(thisLightSource, 'fov val', fov);
 
                 % mapname
-                mapname = piParameterGet(thisLine, 'string mapname');
-                thisLightSource = piLightSet(thisLightSource, 'mapname val', mapname);
+                mapname = piParameterGet(thisLine, 'string filename');
+                thisLightSource = piLightSet(thisLightSource, 'filename val', mapname);
         end
     end
 
