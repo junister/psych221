@@ -808,6 +808,8 @@ classdef dockerWrapper < handle
                             gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
                             switch gpuModels{1} % find the model of our GPU
+                                case {'nvidiageforcertx3050tilaptopgpu'} % ROG laptop
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';                                    
                                 case {'teslat4', 'quadrot2000'}
                                     useDockerImage = 'camerasimulation/pbrt-v4-gpu-t4';
                                 case {'geforcertx3070', 'nvidiageforcertx3070'}
