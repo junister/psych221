@@ -791,7 +791,7 @@ classdef dockerWrapper < handle
                             system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
                         try
                             ourGPU = gpuDevice();
-                            if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+                            if str2double(ourGPU.ComputeCapability) < 5.3 % minimum for PBRT on GPU
                                 GPUCheck = -1;
                             end
                         catch
