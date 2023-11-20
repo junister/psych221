@@ -250,4 +250,7 @@ set(gca,'xlim',boxRange(1,:), 'ylim',boxRange(2,:), 'zlim',boxRange(3,:));
 % Add the legend
 legend(legendtext);
 
+% Leave the window in the rotate mode
+rotate3d;
+
 end

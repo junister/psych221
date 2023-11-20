@@ -1,27 +1,35 @@
-function [pts, radius] = piRotateFrom(thisR,direction,varargin)
+function [pts, radius, pRA] = piRotateFrom(thisR,direction,varargin)
 % Return a set of points that sample around the from direction
 %
-% Brief
-%  Sample points in a circle around a direction vector centered at the
-%  'from' location.  The first and last point are the same.  Maybe
-%  there should be an option to change this.
-%
 % Synopsis
-%    pts = = piRotateFrom(thisR,direction,varargin)
+%    [pts, radius, pRA] = = piRotateFrom(thisR,direction,varargin)
+%
+% Brief description
+%  Sample points with respect to a direction vector whose endpoint is at
+%  the recipe 'from' location. The first and last point are the same, so
+%  nsamples 4 returns a triangle. The sample points can be either on a
+%  circle around the direction vector or on a planar grid perpendicular to
+%  the direction vector.
+%
+%  (Maybe there should be an option to not duplicate first and last).
 %
 % Inputs
 %   thisR     - Recipe
-%   direction - vector direction we want to rotate around
+%   direction - vector direction to rotate around
 %
 % Optional key/val
-%   n samples - Number of points around the circle
+%   n samples - Number of points.  For circle first=last.  For grid, nxn
+%               samples
 %   show      - Plot the 3D graph showing the sampled 'from' points
-%   radius    - Circle radius of the sample points
-%   degrees   - Circle radius specified in degs of the 'from' and 'to' line
-%   method    - 'circle' or 'grid'.  Two ways to sample the plane.
+%   radius    - Circle radius of the sample points, or if grid this
+%               overloaded to be the width of the grid.  We should change.
+%   degrees   - Circle radius specified in degs from the 'from-to' line
+%   method    - 'circle' or 'grid'.  
 %
 % Output
 %   pts - Sample points in 3-space
+%   radius -
+%   pRA - vectors defining the plane perpendicular to the direction
 %
 % Description
 %   More words needed for sampling method, radius and degree parameters.  n
@@ -29,7 +37,7 @@ function [pts, radius] = piRotateFrom(thisR,direction,varargin)
 %   centered on the 'from'.
 %   
 % See also
-%
+%   oiLights (oraleye), t_arealightArray
 
 % Examples:
 %{
@@ -37,6 +45,11 @@ thisR = piRecipeDefault('scene name','chessset');
 direction = thisR.get('fromto');
 n = 20;
 [pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
+thisR.set('from',[0 0.2 0.2]);
+
+% The plane is no longer perpendicular to the direction.  Why?
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
+
 %}
 %{
 thisR = piRecipeDefault('scene name','chessset');
@@ -140,21 +153,32 @@ axis equal; grid on;
 pts = Caround + thisR.get('from')';
 
 if show
-    % Must be perpendicular to blue (the direction)
+    % The from (black), to (green) connected by a black line
+    % The pts (red)
+    % The direction line (blue)
     ieNewGraphWin;
     plot3(pts(1,:),pts(2,:),pts(3,:),'o');  % The points 
     hold on;
     
-    % The direction line
-    line([0 direction(1)],[0 direction(2)],[0 direction(3)],'Color','b');
-    hold on;
-    
-    % The from-to direction
     from = thisR.get('from');
-    to = thisR.get('to');
-    line([from(1),to(1)],[from(2),to(2)],[from(3),to(3)],'Color','k');
 
-    axis equal; grid on;
+    % {
+    % The direction line.  Often equal to the fromto line
+    tmp = from + direction;
+    line([from(1) tmp(1) ],[from(2) tmp(2)],[from(3) tmp(3)],...
+        'Color','b', ...
+        'LineStyle',':');
+    hold on;
+    %}
+
+    % The from-to direction - often the same as the direction line
+    plot3(from(1),from(2),from(3),'bo');
+    to = thisR.get('to');
+    plot3(to(1),to(2),to(3),'go');
+
+    line([from(1),to(1)],[from(2),to(2)],[from(3),to(3)],'Color','k','LineStyle','--');
+
+    axis equal; grid on; rotate3d;
 end
 
 end
