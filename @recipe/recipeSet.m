@@ -3,16 +3,27 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 % Syntax
 %   [thisR, out] = recipeSet(thisR, param, val, varargin)
-%     Returns us (thisR) as the primary result, which should be un-needed because
-%     we are a by-reference (handle) class. Second result is an optional
-%     error code or other return value.
+%
+% Brief description
+%  Modify the recipe, thisR, as specified by a complex set of possible
+%  parameters, values, and varargin.  See below for examples.
+%
+% Input
+%    thisR - recipe
+%    param - main parameter
+%    val   - value to set the parameter
+%
+% Output
+%   thisR - Not needed, really, because we are a by-reference (handle) class.
+%   out   - An optional error code or other return value.
 %
 % Description:
-%   The recipe class manages the PBRT rendering parameters.  The class
-%   has many fields specifying camera and rendering parameters. This
-%   method is only capable of setting one parameter at a time.
+%  The recipe class manages the PBRT rendering parameters.  The class
+%  has many fields specifying camera and rendering parameters. This
+%  method is capable of setting only one parameter at a time.
 %
-% Parameter list (in progress, many more to be added)
+% This is mainly an example of the parameters.  There are many more
+% examples in the code.  Usually commented.
 %
 %   Metadata:
 %    'name'
@@ -95,11 +106,11 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %    'autofocus'
 %
 %  Assets
-%    TODO
+%    Big set of options.  
+%
+%  Lights
 %
 %  Materials
-%    TODO
-% ---
 %    'materials'
 %    'materials output file'
 %    'fluorophore concentration'
@@ -108,20 +119,18 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 %  Programming related
 %    'verbose'
-% ---
-
+%
 %  ISETAuto special:
 %    'traffic flow density'%
 %    'traffic time stamp'
 %
 % BW ISETBIO Team, 2017
 %
-% PBRT information that explains man
-% Generally
-% https://www.pbrt.org/fileformat-v3.html#overview
+% PBRT information that explains many of the options
+%    https://www.pbrt.org/fileformat-v3.html#overview
 %
 % Specifically
-% https://www.pbrt.org/fileformat-v3.html#cameras
+%    https://www.pbrt.org/fileformat-v3.html#cameras
 %
 % See also
 %    @recipe, recipeGet
@@ -1269,6 +1278,9 @@ switch param
                 % area light.
                 thisR.set('asset', lghtName, 'world translation', val);
                 return;
+            case {'worldposition'}
+                thisR.set('asset', lghtName, 'world position', val);
+                return;   
             case {'worldorientation'}
                 thisR.set('asset', lghtName, 'world orientation', val);
                 return;
@@ -1516,14 +1528,13 @@ switch param
                 thisR.set('asset', assetName, 'world rotation', val(:)');
             case {'worldposition'}
                 % thisR.set('asset', assetName, 'world position', [1 2 3]);
-                % First get the position
+
+                % Find the translation value, which is the difference
+                % between the current position and the desired
+                % position.
                 pos = thisR.get('asset', assetName, 'world position');
-
-                % Set a translation to (1) cancel the current translation
-                % and (2) move the object to the target position
-                newTrans = -pos + varargin{2}(:)';
-
-                [~, out] = thisR.set('asset', assetName, 'world translation', newTrans);
+                translation = -pos + varargin{2}(:)';
+                [~, out] = thisR.set('asset', assetName, 'translation', translation);
             case {'scale'}
                 out = piAssetScale(thisR,assetName,val);
             case {'move', 'motion'}
