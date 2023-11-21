@@ -44,12 +44,12 @@ function [pts, radius, pRA] = piRotateFrom(thisR,direction,varargin)
 thisR = piRecipeDefault('scene name','chessset');
 direction = thisR.get('fromto');
 n = 20;
-[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
-thisR.set('from',[0 0.2 0.2]);
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);'
 
 % The plane is no longer perpendicular to the direction.  Why?
+thisR.set('from',[0 0.2 0.2]);
+direction = thisR.get('fromto');
 [pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
-
 %}
 %{
 thisR = piRecipeDefault('scene name','chessset');
