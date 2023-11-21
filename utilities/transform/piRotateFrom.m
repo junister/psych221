@@ -18,64 +18,64 @@ function [pts, radius, pRA] = piRotateFrom(thisR,direction,varargin)
 %   direction - vector direction to rotate around
 %
 % Optional key/val
-%   n samples - Number of points.  For circle first=last.  For grid, nxn
+%   n samples - Number of points.  For circle first=last.  For grid, n x n
 %               samples
-%   show      - Plot the 3D graph showing the sampled 'from' points
-%   radius    - Circle radius of the sample points, or if grid this
-%               overloaded to be the width of the grid.  We should change.
+%   show      - Plot the 3D graph showing the sampled  points and the
+%               'from' and 'to'
+%   radius    - If circle radius of the sample points; if grid 
+%               the width of the grid.  (We should change parameter
+%               name).
 %   degrees   - Circle radius specified in degs from the 'from-to' line
-%   method    - 'circle' or 'grid'.  
+%   translate - An (x,y) vector specifying an amount to translate the
+%               circle or grid on the plane perpendicular to the
+%               direction vector and passing through the 'from'
+%   method    - 'circle' or 'grid' samples. 
 %
 % Output
-%   pts - Sample points in 3-space
-%   radius -
+%   pts - The columns are sample points in 3-space
+%   radius - When a circle, the radius.  When a grid, an edge.
 %   pRA - vectors defining the plane perpendicular to the direction
 %
 % Description
-%   More words needed for sampling method, radius and degree parameters.  n
-%   samples is the number of samples on the circle or an n x n grid
+%   More words needed for sampling method, radius and degree parameters.  
+%   n samples is the number of samples on the circle or an n x n grid
 %   centered on the 'from'.
+%
+%   How to translate the circle or grid on the perpendicular plane:
 %   
 % See also
-%   oiLights (oraleye), t_arealightArray
+%   s_piLightArray, t_arealightArray
+%   oeLights (oraleye), 
 
 % Examples:
 %{
 thisR = piRecipeDefault('scene name','chessset');
 direction = thisR.get('fromto');
 n = 20;
-[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);'
-
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
+%}
+%{
 % The plane is no longer perpendicular to the direction.  Why?
+thisR = piRecipeDefault('scene name','chessset');
 thisR.set('from',[0 0.2 0.2]);
 direction = thisR.get('fromto');
 [pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
 %}
 %{
 thisR = piRecipeDefault('scene name','chessset');
+thisR.set('from',[0 0.2 0.2]);
+direction = thisR.get('fromto');
+n = 20; translate = [0.2 0];
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'translate',translate,'show',true);
+%}
+%{
+thisR = piRecipeDefault('scene name','chessset');
+thisR.set('from',[0 0.2 0.2]);
 direction = thisR.get('fromto');
 n = 4;
 [pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'method','grid','show',true);
 %}
-%{
-direction = thisR.get('up');
-n = 35;
-pts = piRotateFrom(thisR, direction,'n samples',n, 'show',true);
-%}
-%{
-direction = [0 0 1]
-n = 4;
-pts = piRotateFrom(thisR, direction,'n samples',n, 'radius',1,'show',true);
-%}
-%{
-n = 5;
-direction = thisR.get('up');
-pts = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'method','grid','show',true);
-%}
-%{
-n = 10;
-pts = piRotateFrom(thisR, direction,'n samples',n);
-%}
+
 %% Parse parameters
 
 varargin = ieParamFormat(varargin);
@@ -86,6 +86,7 @@ p.addRequired('direction',@isvector);
 p.addParameter('nsamples',5,@isnumeric);
 p.addParameter('radius',[],@isnumeric);      % derived from deg or spec'd
 p.addParameter('degrees',5,@isnumeric);      % 5 degree radius if a circ
+p.addParameter('translate',[0,0],@isnumeric);% Translate in the plane
 p.addParameter('show',false,@islogical);
 p.addParameter('method','circle',@(x)(ismember(x,{'circle','grid'})));
 
@@ -94,6 +95,7 @@ nSamples = p.Results.nsamples;
 show     = p.Results.show;
 radius   = p.Results.radius;
 degrees  = p.Results.degrees;
+translate= p.Results.translate;
 method   = p.Results.method;
 
 % The radius is part of the triangle tan(theta) = opposite/adjacent
@@ -107,15 +109,24 @@ end
 %% Circle in the z=0 plane
 switch method
     case 'circle'
+        % Circle of specified radius around the origin
         [x,y] = ieCirclePoints(2*pi/(nSamples-1));
         z = zeros(numel(x),1)';
         C = radius * [x(:),y(:),z(:)]';
+
+        % Shift the circle in the (x,y) plane
+        C(1,:) = C(1,:) + translate(1);
+        C(2,:) = C(2,:) + translate(2);
     case 'grid'
         % nSample^2 points, centered on lookat
         [x,y] = meshgrid(1:nSamples,1:nSamples);
         x = x - mean(x(:)); y = y - mean(y(:));
         z = zeros(numel(x),1)';
-        C = radius*[x(:),y(:),z(:)]';        
+        C = radius*[x(:),y(:),z(:)]';
+
+        % Shift the circle in the (x,y) plane
+        C(1,:) = C(1,:) + translate(1);
+        C(2,:) = C(2,:) + translate(2);
     otherwise
         error('Unknown sampling method %s.',method);
 end
