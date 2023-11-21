@@ -15,7 +15,7 @@ thisR = piRecipeDefault('scene name','chessset');
 %%
 direction = thisR.get('fromto');
 n = 20;
-[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true);
+[pts, radius] = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'show',true); %#ok<*ASGLU>
 drawnow;
 
 %%
@@ -54,7 +54,7 @@ pts = piRotateFrom(thisR, direction,'n samples',n, 'show',true);
 drawnow;
 
 %%
-direction = [0 0 1]
+direction = [0 0 1];
 n = 4;
 pts = piRotateFrom(thisR, direction,'n samples',n, 'radius',1,'show',true);
 drawnow;
@@ -66,8 +66,22 @@ pts = piRotateFrom(thisR, direction,'n samples',n, 'degrees',10,'method','grid',
 drawnow;
 
 %%
+thisR.set('from',[0,.3,0]);
 n = 10;
 pts = piRotateFrom(thisR, direction,'n samples',n);
+drawnow;
+
+%% Make a single light in the plane at the from, and then shifted
+
+n = 1;
+direction = thisR.get('fromto');
+pts = piRotateFrom(thisR, direction,'n samples',n,'radius',0,'show',true);
+drawnow;
+
+%%
+n = 1;
+direction = thisR.get('fromto');
+pts = piRotateFrom(thisR, direction,'n samples',n,'radius',0,'translate',[0.5,0],'show',true);
 drawnow;
 
 %% END

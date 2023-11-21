@@ -1254,12 +1254,17 @@ switch param
             case 'replace'
                 % thisR.set('light', lightName, 'replace', newLight);
                 % 
-                % Confused about this.
+                % The light asset has a type, name and struct called
+                % lght{1}.
+                %
+                % BW:  Concerned whether this runs properly!!!
                 thisLgtAsset = thisR.get('light', lghtName);
+
                 % Sometimes newLight is the light asset with the
                 % subfield lght.  Sometimes it is just the subfield
                 % lght.
                 if ~isfield(val,'lght')
+                    % newLight is just the subfield
                     thisLgtAsset.lght{1} = val;
                     % Make sure the name has the _L
                     thisLgtAsset.lght{1}.name = piLightNameFormat(val.name);
@@ -1381,7 +1386,7 @@ switch param
                 thisR.set('asset', lghtName, 'lght', lght);
                 return;
             otherwise
-                % Probably the light name.
+                % Probably the light name. Just get the light.
                 thisLightAsset = thisR.get('light', lghtName);
                 thisLight = thisLightAsset.lght{1};
         end
@@ -1399,7 +1404,7 @@ switch param
             % A light name and property was sent in.  We set the
             % property and then update the material in the list.
             thisLight = piLightSet(thisLight, param, val);
-            thisR.set('asset', lghtName, 'lght', thisLight);
+            thisR.set('light', lghtName, 'replace', thisLight);
             if isequal(param,'name')
                 % There are two places where light names are stored.
                 % We keep them the same, which is goofy.  But there is

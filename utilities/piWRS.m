@@ -71,6 +71,7 @@ p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 p.addParameter('meanluminance',-1,@isscalar);
+p.addParameter('replace',false,@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -79,6 +80,8 @@ p.parse(thisR,varargin{:});
 
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
+replace    = p.Results.replace;
+
 % meanLuminance = p.Results.meanluminance;
 
 % Determine whether we over-ride or not
@@ -133,17 +136,24 @@ switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
         if show
-            sceneWindow(obj);
-            if ~isempty(g), sceneSet(obj,'gamma',g); end
-            if ~isempty(renderFlag) 
-                % Removed test for ISETBio. Aug 2023.
-                sceneSet(obj,'render flag',renderFlag);                 
+            if replace, ieReplaceObject(obj); sceneWindow;
+            else,       sceneWindow(obj);
             end
+
+            if ~isempty(g), sceneSet(obj,'gamma',g); end
+            if ~isempty(renderFlag)
+                % Removed test for ISETBio. Aug 2023.
+                sceneSet(obj,'render flag',renderFlag);
+            end
+            
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show
-            oiWindow(obj); 
+            if replace, ieReplaceObject(obj); oiWindow;
+            else,       oiWindow(obj);
+            end
+            
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
                 % Removed test for ISETBio. Aug 2023
