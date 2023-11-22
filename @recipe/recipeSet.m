@@ -1256,25 +1256,26 @@ switch param
                 % 
                 % The light asset has a type, name and struct called
                 % lght{1}.
-                %
-                % BW:  Concerned whether this runs properly!!!
-                thisLgtAsset = thisR.get('light', lghtName);
+                oldLight = thisR.get('light', lghtName);
 
                 % Sometimes newLight is the light asset with the
                 % subfield lght.  Sometimes it is just the subfield
                 % lght.
                 if ~isfield(val,'lght')
+                    newLight = oldLight;
                     % newLight is just the subfield
-                    thisLgtAsset.lght{1} = val;
+                    newLight.lght{1} = val;
                     % Make sure the name has the _L
-                    thisLgtAsset.lght{1}.name = piLightNameFormat(val.name);
+                    newLight.lght{1}.name = piLightNameFormat(val.name);
                 else
-                    % Assign but make sure the ID (names) are OK.
-                    thisR.set('asset', lghtName, val);
-                    thisR.assets.uniqueNames;
+                    newLight = val;
                 end
 
+                % Assign but make sure the ID (names) are OK.
+                thisR.set('asset', lghtName, newLight);
+                thisR.assets.uniqueNames;
                 return;
+                
             case {'worldrotation', 'worldrotate'}
                 thisR.set('asset', lghtName, 'world rotation', val);
                 return;
