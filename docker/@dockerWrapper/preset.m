@@ -123,7 +123,7 @@ switch presetName
         switch presetName
             case {'remotemux', 'remotemux-alt'}
                 thisD.renderContext = 'remote-mux';
-                thisD.remoteMachine = 'muxreconrt.stanford.edu';
+                thisD.remoteMachine = 'mux.stanford.edu';
                 thisD.remoteRoot = ['/home/' userName];
             case {'remoteorange', 'remoteorange-alt'}
                 thisD.renderContext =  'remote-orange';

@@ -23,7 +23,7 @@ function  setPrefs(varargin)
 %   whichGPU  - When multiple GPUs are present, selects
 %   gpuRendering - True/False
 %
-%   remoteMachine - machine (e.g., muxreconrt.stanford.edu)
+%   remoteMachine - machine (e.g., mux.stanford.edu)
 %   remoteUser    - User name on remote machine
 %   remoteRoot    - User root directory on remote machine
 %   remoteImage   - Docker image to be used, otherwise default from

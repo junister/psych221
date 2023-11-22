@@ -354,7 +354,7 @@ classdef dockerWrapper < handle
         
         %% Default servers
         function useServer = vistalabDefaultServer()
-            useServer = 'muxreconrt.stanford.edu';
+            useServer = 'mux.stanford.edu';
         end
         % WSL sometimes has DNS issues, so we can also use the IP
         function useServer = vistalabDefaultServerIP()
@@ -880,7 +880,7 @@ classdef dockerWrapper < handle
             %
             %  VISTALAB GPU Information
             %
-            %   The default uses the 3070 on muxreconrt.stanford.edu.
+            %   The default uses the 3070 on mux.stanford.edu.
             %   This approach requires having an ssh-key based user
             %   login as described on the wiki page. Specifically,
             %   your username & homedir need to be the same on both
@@ -888,7 +888,7 @@ classdef dockerWrapper < handle
             %
             % Current GPU Options at vistalab:
             %
-            %   muxreconrt:
+            %   mux:
             %     GPU 0: Nvidia 3070 -- -ampere --
             %     dockerWrapper.setPref('whichGPU',0);
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
@@ -929,7 +929,7 @@ classdef dockerWrapper < handle
                     % default. The user may have multiple opportunities
                     % for this.  For now we default to the
                     % vistalabDefaultServer, which is
-                    % muxreconrt.stanford.edu
+                    % mux.stanford.edu
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 
