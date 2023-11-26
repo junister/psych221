@@ -18,9 +18,9 @@ function [ieObject, otherData] = piEXR2ISET(inputFile, varargin)
 %   mean luminance   -  Set the mean illuminance, if -1 do not scale values
 %                       returned by the renderer.
 %   mean illuminance - Set the mean illuminance.  This value is either
-%   interpreted as the mean illuminance, or if scalePupilArea is set
-%   to true, then the value is interpreted as mean illuminance for a 1
-%   mm2 pupil.
+%      interpreted as the mean illuminance, or if scalePupilArea is set
+%      to true, then the value is interpreted as mean illuminance for a 1
+%      mm2 pupil.
 %
 %   scalePupilArea -  if true, we scale the mean illuminance by the pupil
 %                     area.
@@ -227,11 +227,11 @@ switch lower(cameraType)
                 end
 
             otherwise
-                % Try to find the optics parameters from the lensfile in the
-                % PBRT recipe.  The function looks for metadata, if it cannot
-                % find that slot it tries to decode the file name.  The file
-                % name part should go away before too long because we can just
-                % create the metadata once from the file name.
+                % Try to find the optics parameters from the lensfile in
+                % the PBRT recipe.  The function looks for metadata, if it
+                % cannot find that slot it tries to decode the file name.
+                % The file name part should go away before too long because
+                % we can just create the metadata once from the file name.
                 [focalLength, fNumber] = piRecipeFindOpticsParams(thisR);
         end
 

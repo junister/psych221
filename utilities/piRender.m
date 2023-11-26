@@ -45,7 +45,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               ** These assume the recipe asks for them and the camera
 %               type supports them.
 %
-% wave      -   Adjust the wavelength sampling of the returned ieObject
+%  wave      -   Adjust the wavelength sampling of the returned ieObject
 %
 % Output:
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -59,11 +59,6 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %              
 % See also
 %   s_piReadRender*.m, piRenderResult, dockerWrapper
-
-% NOTE:  Eeek.  Is this true (BW?)
-%   The parameters are not yet all correctly handled, including
-% meanluminance and scalepupilarea.  These are important for ISETBio.
-%
 
 % Examples:
 %{
