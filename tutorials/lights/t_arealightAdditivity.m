@@ -9,11 +9,13 @@
 % See also
 %  t_arealight*
 
-% Set up the scene before here
-
 %%
-% Make the lights.  They will be in a circle around the camera.
-% The camera is pointed in this direction.
+ieInit;
+if ~piDockerExists, piDockerConfig; end
+
+%% Make the lights.  
+% They will be in a circle around the camera. The camera is pointed in
+% this direction.
 nLights = 4;
 thisL = cell(nLights,1);
 
