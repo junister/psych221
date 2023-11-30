@@ -18,38 +18,9 @@ sceneShowImage(macbethScene);
 
 %% Create sea water medium
 
-%% Here is the code to set Docker up to run on a local GPU
-%  My laptop doesn't have an Nvidia GPU, so I can't completely
-%  test it, so let me know if it works!
 
-try
-    ourGPU = gpuDevice();
-    if str2double(ourGPU.ComputeCapability) >= 5.3 % minimum for PBRT on GPU
-        [status,result] = system('docker pull digitalprodev/pbrt-v4-gpu-ampere-mux');    
-        dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu-ampere-mux',...
-            'localImage', 'digitalprodev/pbrt-v4-gpu-ampere-mux', ...
-            'localRender',true,...
-            'gpuRendering',true,...
-            'remoteResources',false);
-        haveGPU = true;
-    else
-        fprintf('GPU Compute is: %d\n',ourGPU.computeCapability);
-        haveGPU = false;
-    end
-catch
-    haveGPU = false;
-end
 
-if ~haveGPU
-    [status,result] = system('docker pull digitalprodev/pbrt-v4-cpu');
-    dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-cpu',...
-        'localRender',true,...
-        'gpuRendering',false,...
-        'remoteImage','digitalprodev/pbrt-v4-cpu',...
-        'remoteResources',false);
-end
-
-macbethScene = piWRS(macbeth, 'dockerwrapper', dw, 'meanluminance', -1);
+macbethScene = piWRS(macbeth, 'meanluminance', -1);
 
 %%
 % HB created a full representation model of scattering that has a number of
