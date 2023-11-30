@@ -1916,9 +1916,9 @@ switch ieParamFormat(param)  % lower case, no spaces
                             warning('Object %d has no shape.',id);
                         elseif ~isempty(theShape.point3p)
                             pts = theShape.point3p;
-                            val(1) = range(pts(1:3:end))*thisScale(1);
-                            val(2) = range(pts(2:3:end))*thisScale(2);
-                            val(3) = range(pts(3:3:end))*thisScale(3);
+                            val(1) = max(pts(1:3:end))-min(pts(1:3:end))*thisScale(1);
+                            val(2) = max(pts(2:3:end))-min(pts(2:3:end))*thisScale(2);
+                            val(3) = max(pts(3:3:end))-min(pts(3:3:end))*thisScale(3);
                         elseif ~isempty(theShape.filename)
                             % Read a shape file.  The shape file needs to
                             % be in the output directory. (BW).
