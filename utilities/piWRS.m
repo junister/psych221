@@ -39,7 +39,7 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %             main PBRT file will be able to reference them without copying
 %             from the local computer.  (Better comment needed)
 %    'denoise' - Run the piAIdenoise prior to returning
-%
+%    'main file only' - piWrite flag
 %
 % Returns
 %   obj     - a scene or oi
@@ -72,6 +72,8 @@ p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 p.addParameter('meanluminance',-1,@isscalar);
 p.addParameter('replace',false,@islogical);
+p.addParameter('mainfileonly',false,@islogical);
+p.addParameter('pushresources',false,@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -126,7 +128,10 @@ thisR.set('render type',renderType);
 
 % Write the local/pbrt directory being aware about whether the resources
 % are expected to be present remotely.
-piWrite(thisR, 'remoteResources', thisD.remoteResources);
+piWrite(thisR, ...
+    'remoteResources', thisD.remoteResources,...
+    'push resources', p.Results.pushresources, ...
+    'main file only', p.Results.mainfileonly);
 
 [obj, results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
 

@@ -2,7 +2,16 @@
 %
 % Worked with cardinal download on July 11, 2022
 %
+% In most recent work, I had to copy the 'models' directory to the 'local'
+% directory by hand.  And then it rendered.
 %
+% Rerunning piWRS() wipes out the models directory.  Bummer.
+%
+% On cardinal, I put both kitchen.zip and kitchen.save.zip
+% The original (kitchen.save.zip) has the mesh files inside of models.  The
+% kitchen.zip is edited so that the mesh files are in the geometry folder.
+%
+% 
 
 %%
 ieInit;
@@ -20,7 +29,29 @@ thisR.set('render type',{'radiance','depth'});
 
 %% This renders the scene
 
-scene = piWRS(thisR);
+% I have been copying the geometry files into the local/kitchen directory
+% and then running piRender by hand.  Sometimes for increased resolution.
+%{
+ resolution = [320 320]*2;
+ thisR.set('film resolution',resolution);
+ piWrite(thisR,'overwrite resources',false);
+ scene = piRender(thisR);  sceneWindow(scene);%
+ scene = piAIdenoise(scene);
+ ieReplaceObject(scene); sceneWindow;
+%}
+% I need to ask Dave or Zhenyi how to make sure the ply files are
+% uploaded and in the proper place on acorn.  I also wonder what we are
+% doing about resource file names.
+%  
+% Finally, I edited the wiki page about remote rendering considerably, and
+% Dave should read it to check.
+%
+
+scene = piWRS(thisR,'push resources',true);
+%{
+ scene = piAIdenoise(scene);
+ ieReplaceObject(scene); sceneWindow;
+%}
 % dRange = sceneGet(scene,'depth range');
 
 %% Samples the scene from a few new directions around the current from
@@ -35,7 +66,7 @@ frompts = piRotateFrom(thisR,direction,'nsamples',nsamples,'degrees',5,'method',
 for ii=1:size(frompts,2)
     fprintf('Point %d ... of %d\n',ii,size(frompts,2));
     thisR.set('from',frompts(:,ii));
-    piWRS(thisR,'render flag','hdr');
+    piWRS(thisR,'render flag','hdr','push resources',true);
     fprintf('\n');
 end
 
