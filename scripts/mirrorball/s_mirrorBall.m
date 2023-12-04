@@ -4,6 +4,8 @@
 % beginning.  Change names.
 %
 % Puts a mirror ball (sphere) into the scene.  Testing the lighting.
+%
+% See some necessary debugging below.
 
 %%
 ieInit;
@@ -47,7 +49,6 @@ mergedR.set('to distance',1.5);
 to = mergedR.get('to');
 mergedR.set('asset','Sphere_O','world position',to);
 
-
 %% The positions in kitchen seem to be based on the mean values of the mesh
 % that is a guess for me now.
 %{
@@ -57,22 +58,43 @@ mergedR.set('asset','Sphere_O','world position',pos);
 %}
 
 %%
-scene = piWRS(mergedR);
+scene = piWRS(mergedR,'render flag','hdr');
 
 %% Flip from and to.  Move the Sphere also
 %
 % The kitchen scene has nothing back there.  You can see the sphere, but
 % everything else seems black.
 %
-
 % A good routine would be
 %
 %   mergedR.flipfromto;
 %
+
+%{
 from = mergedR.get('from');
 to   = mergedR.get('to');
 mergedR.set('to',from);
 mergedR.set('from',to);
+% This should move the sphere out of the way.  But ...
 mergedR.set('asset','Sphere_O','world position',mergedR.get('to'));
 piWRS(thisR);
+%}
 
+%% Add in a cube light
+%
+% Keep the existing lights.  Make the cube a little bigger than default.
+piLightCube(mergedR,'keep',true);
+
+mergedR.show('lights');
+piWRS(thisR);
+
+%%  Things to fix.
+
+% Not understanding the 'translate'. This translate blocks the image. The
+% names are also duplicated, which is bad.  The translate doesn't show up
+% right.
+piLightCube(mergedR,'keep',true,'translate',[1 1 0]);
+mergedR.show('lights');
+piWRS(thisR);
+
+%%

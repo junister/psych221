@@ -37,6 +37,9 @@ function params = piLightCube(thisR,varargin)
 %   oraleye:  oeLight
 %   iset3d:   t_arealight*, t_lightCube
 
+% TODO:  Check for duplicate light names.  We want to be able to run this
+% routine twice on the same recipe with different translations.
+
 % Examples:
 %{
 thisR = piRecipeCreate('flat surface');

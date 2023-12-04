@@ -17,7 +17,7 @@ thisR = piRecipeDefault('scene name','bistro');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
 
-scene = piWRS(thisR);
+scene = piWRS(thisR,'push resources',true);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;
 
 %%
