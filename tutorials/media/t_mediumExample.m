@@ -4,7 +4,35 @@
 % Henryk Blasinski, 2023
 
 %%
-ieInit
+
+%% Here are the docker prefs that work for DJC rendering 
+%  from a Windows machine to mux.stanford.edu:
+
+%{
+>> getpref('docker')
+          localRoot: '/mnt/c'
+       gpuRendering: 1
+         localImage: ''
+           whichGPU: 0
+      remoteMachine: 'mux.stanford.edu'
+         remoteUser: '<username_on_mux'
+        remoteImage: 'digitalprodev/pbrt-v4-gpu-ampere-mux'
+         remoteRoot: '<home_folder_on mux>'
+    localVolumePath: <path to iset3d\local> for example:'c:\iset\iset3d\local'
+      renderContext: 'remote-mux'
+        localRender: 0
+     remoteCPUImage: 'digitalprodev/pbrt-v4-cpu'
+     remoteImageTag: 'latest'
+      localImageTag: 'latest'
+          verbosity: 1
+
+make sure that ssh <your_mux_username>@mux.stanford.edu
+    succeeds without a password
+make sure that the terminal command "docker context list"
+    shows a remote-mux context
+%}
+      
+      ieInit
 piDockerConfig();
 
 %% Create a scene with a Macbeth Chart.
@@ -12,6 +40,8 @@ macbeth = piRecipeCreate('macbeth checker');
 macbeth.show('objects');
 
 macbeth.set('pixel samples', 128);
+dockerWrapper.reset; % get a clean docker, just in case
+
 macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
 macbeth.show('objects');
 sceneShowImage(macbethScene);
