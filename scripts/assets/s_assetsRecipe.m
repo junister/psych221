@@ -116,10 +116,10 @@ thisR.show('materials');
 sceneName = 'sphere';
 thisR = piRecipeCreate(sceneName);
 thisR.set('lights','all','delete');
-mergeNode = 'Sphere_B';
 % piAssetShow(thisR);
 
 oFile = thisR.save(fullfile(assetDir,[sceneName,'.mat']));
+mergeNode = 'Sphere_B';
 save(oFile,'mergeNode','-append');
 
 %% Test charts

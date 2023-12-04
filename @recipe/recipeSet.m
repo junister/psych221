@@ -199,9 +199,8 @@ switch param
 
         % Scene parameters
     case {'fromtodistance','objectdistance'}
-        % thisR.set('object distance');
-        % TODO:  thisR.set('object distance','m');
-        %
+        % thisR.set('object distance',val);
+        % 
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.
@@ -214,12 +213,12 @@ switch param
         %
         % What is the relationship to the focal distance?  If we move
         % the camera, the focal distance is always with respect to the
-
         % camera, right?  Or is it always at the 'to' distance???  You can
         % force it to be the 'to' by using
         %
         % thisR.set('focal distance',thisR.get('object distance'))
         %
+        % See recipeSet 'todistance'
 
         assert(val > 0);  % We do not change which side of 'to' this way.
 
@@ -235,6 +234,17 @@ switch param
 
         % Test: If we set val to 0, the new from should be at 'to',
         thisR.lookAt.from = thisR.lookAt.from + objDirection*delta;
+
+    case {'todistance'}
+        % thisR.set('to distance',val) % Meters
+        %
+        % Adjusts the 'to' position along the 'from to' line.  Leaves the
+        % camera position (from) unchanged
+        %
+        %  to = from + fromto
+        from = thisR.get('from');
+        fromto = thisR.get('fromto');        
+        thisR.set('to',from + fromto*val);
 
     case {'accommodation'}
         % We allow specifying accommodation rather than focal distance.

@@ -7,11 +7,12 @@
 %
 % Rerunning piWRS() wipes out the models directory.  Bummer.
 %
-% On cardinal, I put both kitchen.zip and kitchen.save.zip
-% The original (kitchen.save.zip) has the mesh files inside of models.  The
+% On cardinal.stanford.edu, I put both kitchen.zip and kitchen.save.zip The
+% original (kitchen.save.zip) has the mesh files inside of models.  The
 % kitchen.zip is edited so that the mesh files are in the geometry folder.
 %
-% 
+% It seems that running kitchen once with 'push resources' enabled me to
+% start running again.
 
 %%
 ieInit;
@@ -47,7 +48,10 @@ thisR.set('render type',{'radiance','depth'});
 % Dave should read it to check.
 %
 
-scene = piWRS(thisR,'push resources',true);
+% After running this once, I was able to run just piWRS(thisR);
+%
+% scene = piWRS(thisR,'push resources',true);
+scene = piWRS(thisR);
 %{
  scene = piAIdenoise(scene);
  ieReplaceObject(scene); sceneWindow;
@@ -66,7 +70,7 @@ frompts = piRotateFrom(thisR,direction,'nsamples',nsamples,'degrees',5,'method',
 for ii=1:size(frompts,2)
     fprintf('Point %d ... of %d\n',ii,size(frompts,2));
     thisR.set('from',frompts(:,ii));
-    piWRS(thisR,'render flag','hdr','push resources',true);
+    piWRS(thisR,'render flag','hdr');
     fprintf('\n');
 end
 
@@ -85,8 +89,8 @@ thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 thisR.set('film diagonal',5);    % 3 mm is small
 thisR.set('object distance',2);  % Move closer. The distance scaling is weird.
-[~,results] = piWRS(thisR,'name','DG');
-
+oi = piWRS(thisR,'name','DG');
+oi = piAIdenoise(oi); ieReplaceObject(oi); oiWindow;
 %% Fisheye
 
 lensfile = 'fisheye.87deg.3.0mm.json';
@@ -94,8 +98,7 @@ thisR.set('film diagonal',7);  %% 3 mm is small
 
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 oi = piWRS(thisR,'name','fisheye');
-oi = piAIdenoise(oi);
-oiWindow(oi);
+oi = piAIdenoise(oi); ieReplaceObject(oi); oiWindow;
 
 %% END
 
