@@ -17,7 +17,7 @@ thisR = piRecipeDefault('scene name','bistro');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
 
-scene = piWRS(thisR,'push resources',true);
+scene = piWRS(thisR,'resources remote',false);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;
 
 %%
@@ -25,7 +25,7 @@ thisR = piRecipeDefault('scene name','bistro','file','bistro_boulangerie.pbrt');
 thisR.set('rays per pixel',256);
 thisR.set('film resolution',resolution);
 
-scene = piWRS(thisR);
+scene = piWRS(thisR,'resources remote',false);
 ieReplaceObject(piAIdenoise(scene)); sceneWindow;
 
 %%
