@@ -1378,6 +1378,40 @@ switch ieParamFormat(param)  % lower case, no spaces
                 val = [val,ii]; %#ok<AGROW>
             end
         end
+    case 'objectmesh'
+        % thisR.get('object mesh',idxOrName) 
+        % 
+        % Returns the whole mesh struct, including vertices, faces, normals
+        % and colors when there is a file.  Otherwise, it returns the whole
+        % shape struct
+        node = thisR.get('asset',varargin{1});
+        theShape = node.shape;
+        if isfield(theShape,'filename')
+            val = readSurfaceMesh(theShape.filename);
+        elseif ~isempty(theShape.point3p)
+            val = theShape;
+        else
+            val = [];
+            warning('No file or mesh data found for node %d',varargin{1});
+        end
+    case 'objectvertices'
+        % v = thisR.get('object mesh',name/id);
+        %
+        % Returns the vertices of the object mesh.
+        % mean(v) is the average position of the mesh vertices
+        %
+        msh = thisR.get('object mesh',varargin{1});
+        if isa(msh,'surfaceMesh')
+            % When there is a file
+            val = msh.Vertices;
+        elseif isstruct(msh) && isfield(msh,'point3p')
+            % When the theShape has the point3p slot
+            val = msh.point3p;
+        else
+            val = [];
+            warning('No vertices found for node %d',varargin{1});
+        end
+
     case {'nobjects'}
         % Count the number of objects
         val = numel(thisR.get('objects'));
