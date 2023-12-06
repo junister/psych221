@@ -1,6 +1,7 @@
 %% s_car
 %
 % This one PARSED up without any editing.
+% It is a lousy object, though.
 %
 % See also
 %
