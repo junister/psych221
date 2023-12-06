@@ -58,7 +58,31 @@ mergedR.set('asset','Sphere_O','world position',pos);
 %}
 
 %%
-scene = piWRS(mergedR,'render flag','hdr');
+piWRS(mergedR,'render flag','hdr');
+
+%% Move the ball
+mergedR.set('asset','Sphere_O','translate',[0.3 0 0]);
+piWRS(mergedR,'render flag','hdr');
+
+%% Move the camera
+fromOrig = mergedR.get('from');
+mergedR.set('from',fromOrig + [-0.3 0 0]);
+piWRS(mergedR,'render flag','hdr');
+
+%% Denoise all three
+for ii=1:3
+    scene = ieGetObject('scene',ii);
+    scene = piAIdenoise(scene); ieReplaceObject(scene,ii);
+end
+sceneWindow;
+
+%%  Look at the sphere from near the Kettle
+sphereP = mergedR.get('asset','Sphere_O','world position');
+toNew   =sphereP;
+fromNew = [0.5 1.7 1.5 ];
+mergedR.set('from',fromNew);
+mergedR.set('to',toNew);
+piWRS(mergedR,'render flag','hdr');
 
 %% Flip from and to.  Move the Sphere also
 %
