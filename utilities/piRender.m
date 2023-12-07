@@ -130,7 +130,7 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
-dockerWrapper    = p.Results.dockerwrapper;
+dWrapper    = p.Results.dockerwrapper;
 scalePupilArea   = p.Results.scalepupilarea;    % Fix this
 meanLuminance    = p.Results.meanluminance;     % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
@@ -141,10 +141,10 @@ wave             = p.Results.wave;
 
 % If the user has sent in a dockerWrapper or an ourDocker we use it.
 % We object if both are sent in.
-if ~isempty(ourDocker) && ~isempty(dockerWrapper)
+if ~isempty(ourDocker) && ~isempty(dWrapper)
     error('Bad docker arguments to piRender.  Specify only one.');
-elseif ~isempty(ourDocker) && isempty(dockerWrapper), renderDocker = ourDocker;
-elseif ~isempty(dockerWrapper) && isempty(ourDocker), renderDocker = dockerWrapper;
+elseif ~isempty(ourDocker) && isempty(dWrapper), renderDocker = ourDocker;
+elseif ~isempty(dWrapper) && isempty(ourDocker), renderDocker = dWrapper;
 else, renderDocker = dockerWrapper();
 end
 
