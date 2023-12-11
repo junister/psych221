@@ -70,6 +70,7 @@ oiWindow();
 
 % create a camera sensor
 sensor = sensorCreate;
+sensor = sensorSet(sensor,'integrationTime',8.5774e-04);
 sensor = sensorSet(sensor, 'noise flag', -1);
 sensor = sensorSet(sensor, 'cols', recipeGet(macbeth,'film x resolution'));
 sensor = sensorSet(sensor, 'rows', recipeGet(macbeth,'film y resolution'));
@@ -81,7 +82,7 @@ sensorWindow();
 % [cornerPoints, obj, rect] = chartCornerpoints(sensor);
 cornerPoints = [1 458;637 458;638 22;4 21];
 [rects, mLocs, pSize] = chartRectangles(cornerPoints,4,6);
-pixelValues = chartRectsData(sensor, mLocs, 5, false, 'volts');
+pixelValuesOrg = chartRectsData(sensor, mLocs, 5, false, 'volts');
 
 
 % Build a linear image formation model
@@ -95,7 +96,7 @@ illuminant = ones(size(sensorGet(sensor,'wave')));
 illuminant = Energy2Quanta(sceneGet(sensor,'wave'),illuminant);
 illuminant = illuminant / max(illuminant(:));
 
-pixelEstimates = reflectance'*diag(illuminant)*responseFunction;
+pixelEstimatesOrg = reflectance'*diag(illuminant)*responseFunction;
 
 % 'pixelEstimates' from the linear image formation model should be the same
 % (up to a single scale factor) as the 'pixelValues' from camera
@@ -104,7 +105,7 @@ pixelEstimates = reflectance'*diag(illuminant)*responseFunction;
 
 figure;
 hold on; grid on; box on;
-plot(pixelValues, pixelEstimates,'.');
+plot(pixelValuesOrg, pixelEstimatesOrg,'.');
 xlabel('From Simulation');
 ylabel('From linear system');
 title('Pixel values');
@@ -144,4 +145,51 @@ underwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','UnderwaterMacbet
 underwaterMacbeth = sceneSet(underwaterMacbeth,'name', 'baselineWater');
 
 underwaterScene = piWRS(underwaterMacbeth, 'meanluminance', -1);
+
+% Create an optical image
+oi = oiCreate;
+oi = oiCompute(oi, underwaterScene);
+ieAddObject(oi);
+oiWindow();
+
+% create a camera sensor
+sensor = sensorCreate;
+sensor = sensorSet(sensor,'integrationTime',8.5774e-04);
+sensor = sensorSet(sensor, 'noise flag', -1);
+sensor = sensorSet(sensor, 'cols', recipeGet(macbeth,'film x resolution'));
+sensor = sensorSet(sensor, 'rows', recipeGet(macbeth,'film y resolution'));
+sensor = sensorCompute(sensor, oi);
+ieAddObject(sensor);
+sensorWindow();
+
+% Sample RGB data from the sensor for each Macbeth patch.
+% [cornerPoints, obj, rect] = chartCornerpoints(sensor);
+cornerPoints = [1 458;637 458;638 22;4 21];
+[rects, mLocs, pSize] = chartRectangles(cornerPoints,4,6);
+pixelValues = chartRectsData(sensor, mLocs, 5, false, 'volts');
+
+% Build a linear image formation model
+responseFunction = sensorGet(sensor, 'spectral QE');
+reflectance = macbethReadReflectance(sensorGet(sensor,'wave'));
+illuminant = ones(size(sensorGet(sensor,'wave')));
+
+% PBRT specifies spectral units in terms of energy, but sensor response is
+% proportional to the number of quanta. We care about relative values,
+% hence we normalize by the maximum.
+illuminant = Energy2Quanta(sceneGet(sensor,'wave'),illuminant);
+illuminant = illuminant / max(illuminant(:));
+
+pixelEstimates = reflectance'*diag(illuminant)*responseFunction;
+
+% 'pixelEstimates' from the linear image formation model should be the same
+% (up to a single scale factor) as the 'pixelValues' from camera
+% simulation. If this is the case the scatter plot of one vs. the other
+% should fall on a line.
+
+figure;
+hold on; grid on; box on;
+plot(pixelValues, pixelEstimates,'.');
+xlabel('From Simulation');
+ylabel('From linear system');
+title('Pixel values');
 
