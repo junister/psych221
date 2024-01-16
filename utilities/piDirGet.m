@@ -66,15 +66,7 @@ switch (resourceType)
         % Moved textures inside of materials Aug 1, 2022. (BW).
         resourceDir = fullfile(ourData,'materials','textures');
     case {'lens', 'lenses'}
-        % Changed July 30, 2020 - now in isetcam
-        if piCamBio
-            resourceDir = fullfile(isetRootPath,'data','lens');
-        else
-            % May 2023.  Put lenses in isetbio/isettools/data/lens
-            % I now prefer a strategy where use all of ISETCam for scene
-            % and optics.
-            resourceDir = fullfile(isetRootPath,'data','lens');
-        end
+        resourceDir = fullfile(isetRootPath,'data','lens');
 
     case {'scenes','scene'}
         resourceDir = fullfile(ourData,'scenes');
