@@ -34,7 +34,7 @@ p.addRequired('radiance',@isstruct);
 % p.addRequired('st',@(x)(isa(x,'scitran')));
 
 p.addParameter('sensor','',@ischar);   % A file name
-% p.addParameter('pixelsize',2,@isscalar);
+p.addParameter('pixelsize',2,@isscalar); % um
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
 p.addParameter('etime',1/100,@isscalar); % 
 p.addParameter('noisefree',0,@islogical);
@@ -43,7 +43,7 @@ p.addParameter('analoggain',1);
 p.parse(radiance,varargin{:});
 radiance     = p.Results.radiance;
 sensorName   = p.Results.sensor;
-% pixelSize    = p.Results.pixelsize;
+pixelSize    = p.Results.pixelsize;
 filmDiagonal = p.Results.filmdiagonal;
 eTime        = p.Results.etime;
 noiseFree    = p.Results.noisefree;
@@ -51,21 +51,15 @@ analoggain   = p.Results.analoggain;
 %% scene to optical image
 
 if strcmp(radiance.type,'scene')
-    oi = oiCreate();
-    oi = oiCompute(radiance, oi);
-
-    scene_size = sceneGet(radiance,'size');
-    oi_size = oiGet(oi,'size');
-
-    % crop oi to remove extra edge
-    oi = oiCrop(oi, [(oi_size(2)-scene_size(2))/2,(oi_size(1)-scene_size(1))/2, ...
-        scene_size(2)-1, scene_size(1)-1]);
+    oi = piOICreate(radiance.data.photons);
 elseif ~strcmp(radiance.type,'opticalimage')
     error('Input should be a scene or optical image');
 else
     oi = radiance;
 end
-pixelSize = oiGet(oi,'width spatial resolution','microns');
+if isempty(pixelSize)
+    pixelSize = oiGet(oi,'width spatial resolution','microns');
+end
 
 %% oi to sensor
 if isempty(sensorName)
@@ -95,8 +89,9 @@ if ~isempty(pixelSize)
 end
 
 
-oiSize = oiGet(oi,'size');
-sensor = sensorSet(sensor, 'size', oiSize);
+% oiSize = oiGet(oi,'size');
+% sensor = sensorSet(sensor, 'size', oiSize);
+sensor = sensorSetSizeToFOV(sensor, oi.wAngular, oi);
 
 %% Compute
 
