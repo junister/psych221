@@ -43,44 +43,44 @@ switch dataType
     case "radiance"
         output = piEXR2Mat(filename, 'Radiance');
     case "zdepth"
-        output = piEXR2Mat(filename, 'Pz');
+        output = piEXR2Mat(filename, 'P.Z');
     case "alldepth"
-          allDepthMap = piEXR2Mat(filename, ['Px', 'Py', 'Pz']);
+          allDepthMap = piEXR2Mat(filename, ['P.X', 'P.Y', 'P.Z']);
           output = sqrt(allDepthMap.^2);
     case "depth"
         % We only want to sum the depths that we have, so we need to 
         % look for errors when we retrieve each one
         try
-            XDepthMap = piEXR2Mat(filename, 'Px');
+            XDepthMap = piEXR2Mat(filename, 'P.X');
         catch
             XDepthMap = 0;
         end
         try
-            YDepthMap = piEXR2Mat(filename, 'Py');
+            YDepthMap = piEXR2Mat(filename, 'P.Y');
         catch
             YDepthMap = 0;
         end
         try
-            ZDepthMap = piEXR2Mat(filename, 'Pz');
+            ZDepthMap = piEXR2Mat(filename, 'P.Z');
         catch
             ZDepthMap = 0;
         end
         output = sqrt(XDepthMap.^2+YDepthMap.^2+ZDepthMap.^2);
     case "3dcoordinates"
         try
-            output(:,:,1) = piEXR2Mat(filename, 'Px');
-            output(:,:,2) = piEXR2Mat(filename, 'Py');
+            output(:,:,1) = piEXR2Mat(filename, 'P.X');
+            output(:,:,2) = piEXR2Mat(filename, 'P.Y');
         catch
             warning('Missing a Px or Py depth channel');
         end
-        output(:,:,3) = piEXR2Mat(filename, 'Pz');
+        output(:,:,3) = piEXR2Mat(filename, 'P.Z');
 
     case "material" % single channel
         output = piEXR2Mat(filename, 'MaterialId');
     case "normal"
-        output(:,:,1) = piEXR2Mat(filename, 'Nx');
-        output(:,:,2) = piEXR2Mat(filename, 'Ny');
-        output(:,:,3) = piEXR2Mat(filename, 'Nz');
+        output(:,:,1) = piEXR2Mat(filename, 'N.X');
+        output(:,:,2) = piEXR2Mat(filename, 'N.Y');
+        output(:,:,3) = piEXR2Mat(filename, 'N.Z');
     case "albedo"
         % albedo contains three "sub-channels" that are B, G, R in order
         output(:,:,1) = piEXR2Mat(filename, 'Albedo.R');

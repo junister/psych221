@@ -34,7 +34,7 @@ p.addRequired('radiance',@isstruct);
 % p.addRequired('st',@(x)(isa(x,'scitran')));
 
 p.addParameter('sensor','',@ischar);   % A file name
-p.addParameter('pixelsize',2,@isscalar); % um
+p.addParameter('pixelsize',[],@isscalar); % um
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
 p.addParameter('etime',1/100,@isscalar); % 
 p.addParameter('noisefree',0,@islogical);
