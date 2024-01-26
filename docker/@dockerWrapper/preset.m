@@ -23,10 +23,10 @@ function preset(thisD, presetName,varargin)
 %  presetName (ignores case and removes spaces)
 %   The current preset names are:
 %
-%    'remoteMux','remoteMux-alt'      - Run on MUX either GPU 0 or GPU 1
-%    'remoteOrange','remoteOrange-alt - Run on orange on GPU 0 or GPU 1
-%    'localGPU', 'localGPU-alt;       - your local machine (host) and
-%                                       configure for GPU 0 or 1 (-alt)
+%    'remotemux','remotemux-alt'        - Run on MUX either GPU 0 or GPU 1
+%    'remote orange','remote orange-alt - Run on orange on GPU 0 or GPU 1
+%    'local GPU', 'local GPU-alt;       - your local machine (host) and
+%                                         configure for GPU 0 or 1 (-alt)
 %    'humaneye'
 %
 % See also
