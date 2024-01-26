@@ -560,9 +560,11 @@ classdef dockerWrapper < handle
             % (Hard-Coded so far) Directory now
 
             isetResourceFolder = '/acorn/data/iset/Resources';
-            volumeMap = sprintf("-v %s:%s -v %s:%s ", ...
+            isetDataFolder = '/acorn/data/iset';
+            volumeMap = sprintf("-v %s:%s -v %s:%s -v %s:%s", ...
                 hostLocalPath, containerLocalPath, ...
-                isetResourceFolder, '/ISETResources');
+                isetResourceFolder, '/ISETResources', ...
+                isetDataFolder, isetDataFolder);
             placeholderCommand = 'bash';
 
             % Start adding functionality for shared ISET Resources on

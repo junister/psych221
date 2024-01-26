@@ -47,6 +47,8 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %
 %  wave      -   Adjust the wavelength sampling of the returned ieObject
 %
+%  remotescene -- look for scene elements on remote server, per idb()
+%
 % Output:
 %   ieObject - an ISET scene, oi, or a metadata image
 %   result   - PBRT terminal output. The result is very useful for
@@ -124,6 +126,9 @@ p.addParameter('localrender',false,@islogical);
 
 % Optional denoising -- OIDN-based for now
 p.addParameter('do_denoise','none',@ischar);
+
+% If we want load the scene from the db location
+p.addParameter('remotescene',false);
 
 % Allow passthrough of arguments
 p.KeepUnmatched = true;

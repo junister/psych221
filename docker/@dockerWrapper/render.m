@@ -9,6 +9,8 @@ function [status, result] = render(obj, renderCommand, outputFolder, varargin)
 %  renderCommand - the PBRT command for rendering
 %  outputFolder  - the output for the rendered data
 %
+%  remotescene - Flag for using scene elements from database
+%
 % Outputs
 %  status - 0 means it worked well
 %  result - Stdout text returned here
@@ -26,6 +28,9 @@ p = inputParser();
 addParameter(p, 'denoiseflag', false, @islogical);
 addParameter(p, 'rendertype',[]);
 
+% Scene is contained on remote server
+addParameter(p, 'remotescene',false);
+
 % Okay to get params we don't understand
 p.KeepUnmatched = true;
 
@@ -33,6 +38,7 @@ p.parse(varargin{:});
 
 denoiseFlag = p.Results.denoiseflag;
 renderType  = p.Results.rendertype;
+remoteScene = p.Results.remotescene;
 
 %% Build up the render command
 
@@ -74,7 +80,7 @@ denoiseCommand = ''; %default
 % over so that we can replace them with symbolic links to the shared
 % versions.
 if obj.remoteResources
-    symLinkCommand = ['&&' getSymLinks()];
+    symLinkCommand = ['&&' getSymLinks(remoteScene , sceneDir)];
 else
     symLinkCommand = ''; %Use whatever we have locally
 end
@@ -149,6 +155,8 @@ if ~obj.localRender
     renderStart = tic;
     % our output folder path starts from root, not from where the volume is
     % mounted
+    % NOTE: How does this work if we get back /iset??
+    % does it assume we always start at our home dir?
     shortOut = dockerWrapper.pathToLinux(fullfile(obj.relativeScenePath, sceneDir));
 
     % Moving forward, we will start assuming that needed resource files are
@@ -211,7 +219,7 @@ else
 
     % Add support for 'remoteResources' even in local case
     if obj.remoteResources
-        symLinkCommand = ['&&' getSymLinks()];
+        symLinkCommand = ['&&' getSymLinks(false, '')]; % I don't think we want a remote scene
         containerCommand = sprintf('docker --context default exec %s %s sh -c "cd %s && rm -rf renderings/{*,.*}  %s && %s "',...
             flags, useContainer, shortOut, symLinkCommand, renderCommand);
     else
@@ -234,19 +242,49 @@ end
 
 end
 
-function getLinks = getSymLinks()
+function getLinks = getSymLinks(remoteScene, sceneFile)
+
+% In the case where we want to use an entire remote scene, we need
+% to modify how we access the pieces
+
 cpCommand = 'cp -n -r 2>/dev/null ';
 
-geoCommand =  [cpCommand 'geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry'];
-texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
-spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
-lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
-skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
-lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+if remoteScene
 
-getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
-    geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
+   ourDB = idb();
+   dbTable = 'ISETScenesPBRT';
+   % scene names should be unique
+   queryString = sprintf("{""sceneID"": ""%s""}", sceneFile);
 
+   % Now we can query the db to get our path
+   ourScene = ourDB.docFind(dbTable, queryString);
+   [remotePath, n, e] = fileparts(ourScene.recipeFile);
+
+   % Try just doing geometry first
+   geoPath = dockerWrapper.pathToLinux(fullfile(remotePath,'geometry'));
+    geoCommand =  [' rm -rf geometry; ln -s ' geoPath ' geometry'];
+    texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
+    spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
+    lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
+    skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
+    lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+
+    getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
+        geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
+
+else
+
+    geoCommand =  [cpCommand 'geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry'];
+    texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
+    spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
+    lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
+    skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
+    lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+
+    getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
+        geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
+
+end
 end
 
 
