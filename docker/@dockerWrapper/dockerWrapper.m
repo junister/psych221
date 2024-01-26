@@ -261,11 +261,19 @@ classdef dockerWrapper < handle
                 aDocker.dockerFlags = '-ti --rm';
             end
 
-            % I don't think we should fail in a pure default case?
             % Also allow renderString pref for backward compatibility
             if ~isempty(varargin)
-                for ii=1:2:numel(varargin)
-                    aDocker.(varargin{ii}) = varargin{ii+1};
+                if ~mod(numel(varargin),2)
+                    for ii=1:2:numel(varargin)
+                        switch ieParamFormat(varargin{ii})
+                            case 'preset'
+                                aDocker.preset(varargin{ii+1});
+                            otherwise
+                                aDocker.(varargin{ii}) = varargin{ii+1};
+                        end
+                    end
+                else
+                    error('Inputs must be key/val pairs.')
                 end
             end
 
