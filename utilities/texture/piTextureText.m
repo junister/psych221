@@ -152,19 +152,3 @@ for ii=1:numel(textureParams)
 end
 
 end
-
-%                     end
-%
-%                 % If the texture file is in the imageTextures
-%                 % directory, we are good.  If it is not, then we do
-%                 % this.
-%                     % Do we have the file in textures?
-%                     thisVal = fullfile(thisR.get('output dir'),'textures',[n,e]);
-%                     if exist(thisVal,'file')
-%                         imgFile = thisVal;
-%                         warning('Texture file found, but not in specified directory.');
-%                     else
-%                         % impatient "fix" by DJC
-%                         imgFile = which([n e]);
-%                         % force it
-%                     end
