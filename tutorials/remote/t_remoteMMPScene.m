@@ -25,6 +25,12 @@ origFrom = thisR.get('from');
 thisR.set('from',[8 3.9 -30]);
 piWRS(thisR,'remote scene',true);
 
+% Something more complex
+thisR = piRecipeDefault('scene name','landscape');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
 %% Not finding relative paths
 
 % Something more complex

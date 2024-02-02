@@ -258,29 +258,42 @@ cpCommand = 'cp -n -r 2>/dev/null ';
 
 if remoteScene
 
+   % The whole scene is remote in the isetonline database.  We find
+   % it and its path to set up the links for rendering.
    ourDB = idb();
    dbTable = 'ISETScenesPBRT';
+   
    % scene names should be unique
    queryString = sprintf("{""sceneID"": ""%s""}", sceneFile);
 
-   % Now we can query the db to get our path
+   % Query the db to get the path to the scene data within the
+   % database
    ourScene = ourDB.docFind(dbTable, queryString);
-   [remotePath, n, e] = fileparts(ourScene.recipeFile);
+   remotePath = fileparts(ourScene.recipeFile);
 
-   % Try just doing geometry first
+   % Format conversions.  We are using the geometry and texture files
+   % that are in the database.  If we add something, like a bunny, we
+   % need new code.
    geoPath = dockerWrapper.pathToLinux(fullfile(remotePath,'geometry'));
-    geoCommand =  [' rm -rf geometry; ln -s ' geoPath ' geometry'];
-    texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
-    spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
-    lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
-    skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
-    lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+   geoCommand =  [' rm -rf geometry; ln -s ' geoPath ' geometry'];
 
-    getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
+   texPath = dockerWrapper.pathToLinux(fullfile(remotePath,'textures'));
+   texCommand =  [' rm -rf textures; ln -s ' texPath ' textures'];
+   
+   % texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
+
+   % This makes these resources available.
+   spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];
+   lgtCommand =  [cpCommand 'lights/* /ISETResources/lights ; rm -rf lights ; ln -s /ISETResources/lights lights'];
+   skyCommand =  [cpCommand 'skymaps/* /ISETResources/skymaps ; rm -rf skymaps ; ln -s /ISETResources/skymaps skymaps'];
+   lensCommand = [cpCommand 'lens/* /ISETResources/lens ; rm -rf lens ; ln -s /ISETResources/lens lens'];
+
+   getLinks =  sprintf(' %s ;  %s ; %s ; %s ; %s ; %s', ...
         geoCommand, texCommand, spdCommand, lgtCommand, skyCommand, lensCommand);
 
 else
 
+    % Using the remote resources, but not the full remote scenes.
     geoCommand =  [cpCommand 'geometry/* /ISETResources/geometry ; rm -rf geometry ; ln -s /ISETResources/geometry geometry'];
     texCommand =  [cpCommand 'textures/* /ISETResources/textures ; rm -rf textures ; ln -s /ISETResources/textures textures'];
     spdCommand =  [cpCommand 'spds/* /ISETResources/spds ; rm -rf spds ; ln -s /ISETResources/spds spds'];

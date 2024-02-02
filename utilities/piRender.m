@@ -47,7 +47,8 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %
 %  wave      -   Adjust the wavelength sampling of the returned ieObject
 %
-%  remotescene -- look for scene elements on remote server, per idb()
+% remote scene - Render a scene on a remote server, using idb
+%                and isetonline
 %
 % Output:
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -135,11 +136,10 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
-dWrapper    = p.Results.dockerwrapper;
+dWrapper         = p.Results.dockerwrapper;
 scalePupilArea   = p.Results.scalepupilarea;    % Fix this
 meanLuminance    = p.Results.meanluminance;     % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
-
 wave             = p.Results.wave;
 
 %% Set up the dockerWrapper

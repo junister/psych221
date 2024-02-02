@@ -251,7 +251,7 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
 
-        % ************* Start Benedikt V4
+        % ************* Start Benedikt V4   
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
@@ -267,8 +267,8 @@ switch ieParamFormat(sceneDir)
         if isempty(sceneFile)
             sceneFile = 'view-0.pbrt';
         end
-        % exporter = 'Copy';
-        exporter = 'PARSE';
+        exporter = 'Copy';
+        % exporter = 'PARSE';
     case {'bistro'}
         % Downloaded from the computer, cardinal, put in data/scenes/web
         % Other versions of this scene are
@@ -276,7 +276,6 @@ switch ieParamFormat(sceneDir)
         %
         % April 12, 2023.  Failing with dev-kitchen piRead branch with PARSE. 
         % Also getting a non-square error on sky.exr even with Copy.
-        warning('Bistro not yet working.');
         sceneDir = 'bistro';
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
@@ -400,8 +399,8 @@ end
 switch exporter
     case {'PARSE','Copy'}
         thisR = piRead(fname, 'exporter', exporter);
-    case 'Blender'
-        thisR = piRead_Blender(fname,'exporter',exporter);
+    % case 'Blender'
+    %     thisR = piRead_Blender(fname,'exporter',exporter);
     otherwise
         error('Unknown export type %s\n',exporter);
 end
