@@ -284,6 +284,7 @@ switch ieParamFormat(lght.type)
             lght.to.value = to;
         end
 
+        % This is full width half max, I think.
         lght.coneangle.type = 'float';
         lght.coneangle.value = [];
 
