@@ -31,6 +31,9 @@ addParameter(p, 'rendertype',[]);
 % Scene is contained on remote server
 addParameter(p, 'remotescene',false);
 
+% Sometimes the pbrt file isn't the same as the scene dir
+addParameter(p, 'pbrtname','');
+
 % Okay to get params we don't understand
 p.KeepUnmatched = true;
 
@@ -39,6 +42,7 @@ p.parse(varargin{:});
 denoiseFlag = p.Results.denoiseflag;
 renderType  = p.Results.rendertype;
 remoteScene = p.Results.remotescene;
+pbrtFilename = p.Results.pbrtname;
 
 %% Build up the render command
 
@@ -82,7 +86,8 @@ denoiseCommand = ''; %default
 % over so that we can replace them with symbolic links to the shared
 % versions.
 if obj.remoteResources
-    symLinkCommand = ['&&' getSymLinks(remoteScene , sceneDir)];
+    [p, pbrtFile, e] = fileparts(pbrtFilename);
+    symLinkCommand = ['&&' getSymLinks(remoteScene , sceneDir, pbrtFile)];
 else
     symLinkCommand = ''; %Use whatever we have locally
 end
@@ -244,7 +249,7 @@ end
 
 end
 
-function getLinks = getSymLinks(remoteScene, sceneFile)
+function getLinks = getSymLinks(remoteScene, sceneFolder, sceneFile)
 
 % In the case where we want to use an entire remote scene, we need
 % to modify how we access the pieces
