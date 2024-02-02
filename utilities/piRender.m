@@ -174,9 +174,9 @@ pbrtFile = thisR.outputFile;
 [~,currName,~] = fileparts(pbrtFile);
 
 outFile = fullfile(outputFolder,'renderings',[currName,'.exr']);
+currFile = pbrtFile; % in v3 we could process several files, not sure about v4
 
 if ispc  % Windows
-    currFile = pbrtFile; % in v3 we could process several files, not sure about v4
 
     % Hack to reverse \ to / for _depth files, for compatibility
     % with Linux-based Docker pbrt container
