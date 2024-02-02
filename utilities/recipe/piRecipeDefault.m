@@ -281,7 +281,10 @@ switch ieParamFormat(sceneDir)
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
         end
+
         exporter = 'Copy';  % How I found it
+        % We can parse, but the file names are not unique and this
+        % causes problems for reading and rendering and showing.
         % exporter = 'PARSE';
    case {'head'}
         sceneDir = 'head';
