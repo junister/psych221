@@ -74,11 +74,11 @@ doBatch = p.Results.batch;
 
 if ~p.Results.useNvidia
     if ismac
-        oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
+        oidn_pth  = fullfile(piRootPath, 'external', 'oidn-2.1.0.x86_64.macos', 'bin');
     elseif isunix
         oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.1.0.x86_64.linux', 'bin');
     elseif ispc
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
+        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.1.0.x64.windows', 'bin');
     else
         warning("No denoise binary found.\n")
     end
@@ -155,7 +155,11 @@ if ~doBatch
             writePFM(img_sp, outputTmp);
 
             % construct the denoise command, can also use -d and -q if desired
-            cmd  = fullfile(oidn_pth, ['oidnDenoise --hdr ',outputTmp,' -o ',DNImg_pth]);
+            if contains(oidn_pth, 'linux')
+                cmd  = fullfile(oidn_pth, ['oidnDenoise -d cuda --hdr ',outputTmp,' -o ',DNImg_pth]);
+            else
+                cmd  = fullfile(oidn_pth, ['oidnDenoise --hdr ',outputTmp,' -o ',DNImg_pth]);
+            end
         end
 
         % Run the executable.
