@@ -37,10 +37,15 @@ piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
 
-%% Not finding relative paths
 
 % Something more complex
 thisR = piRecipeDefault('scene name','sanmiguel');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
+% Something more complex
+thisR = piRecipeDefault('scene name','contemporary-bathroom');
 piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
