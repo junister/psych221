@@ -31,10 +31,16 @@ piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
 
+% Something more complex
+thisR = piRead('book.pbrt');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
 %% Not finding relative paths
 
 % Something more complex
-thisR = piRecipeDefault('scene name','sanmiguel','file','sanmiguel-balcony-plants.pbrt');
+thisR = piRead('sanmiguel-balcony-plants.pbrt');
 piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
