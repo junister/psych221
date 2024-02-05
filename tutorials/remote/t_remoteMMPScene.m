@@ -40,7 +40,7 @@ sceneWindow(scene);
 %% Not finding relative paths
 
 % Something more complex
-thisR = piRead('sanmiguel-balcony-plants.pbrt');
+thisR = piRecipeDefault('scene name','sanmiguel');
 piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);

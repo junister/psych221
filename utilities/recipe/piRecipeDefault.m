@@ -5,7 +5,7 @@ function thisR = piRecipeDefault(varargin)
 %   thisR = piRecipeDefault(varargin)
 %
 % Description:
-%  piRecipeDefault reads in PBRT scene text files in the data/V3
+%  piRecipeDefault reads in PBRT scene text files in the data
 %  repository.  It can also call ieWebGet to retrieve pbrt scenes,
 %  from the web and install them locally.
 %
@@ -334,7 +334,8 @@ switch ieParamFormat(sceneDir)
     case 'sanmiguel'
         sceneDir = 'sanmiguel';
         if isempty(sceneFile)
-            sceneFile = 'scene.pbrt';
+            % pick one of them
+            sceneFile = 'sanmiguel-balcony-plants.pbrt';
         end
         exporter = 'Copy';
     case 'teapotfull'
@@ -379,9 +380,13 @@ end
 if isequal(sceneDir,'BlenderScene')
     FilePath = fullfile(piRootPath,'data','blender','BlenderScene');
 else
-    FilePath = fullfile(piRootPath,'data','scenes',sceneDir);
+    FilePath = fullfile(piDirGet('scenes'),sceneDir);
     if ~isfolder(FilePath)
-        FilePath = fullfile(piRootPath,'data','scenes','web',sceneDir);
+        % Look in our pbrt v4 collection if there is one
+        FilePath = fullfile(piDirGet('data'),'pbrt-v4-scenes',sceneDir);
+        if ~isfolder(FilePath)
+            FilePath = fullfile(piDirGet('scenes'),'web',sceneDir);
+        end
     end
 end
 
