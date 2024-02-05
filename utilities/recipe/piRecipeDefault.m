@@ -201,6 +201,10 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'bunny';
         sceneFile = ['bunny','.pbrt'];
         exporter = 'PARSE';
+    case 'bunny-cloud'
+        sceneDir = 'bunny-cloud';
+        sceneFile = ['bunny-cloud','.pbrt'];
+        exporter = 'Copy';
     case 'coordinate'
         sceneDir = 'coordinate';
         sceneFile = ['coordinate','.pbrt'];
@@ -251,7 +255,17 @@ switch ieParamFormat(sceneDir)
         sceneFile = [sceneDir,'.pbrt'];
         exporter = 'PARSE';
 
-        % ************* Start Benedikt V4   
+        % ************* Start Scenes from the pbrt-v4-scenes repo 
+    case 'ganesha'
+        sceneDir = 'ganesha';
+        sceneFile = 'ganesha.pbrt';
+        exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
+    case 'clouds'
+        sceneDir = 'clouds';
+        sceneFile = 'clouds.pbrt';
+        exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
     case 'contemporary-bathroom'
         sceneDir = 'contemporary-bathroom';
         sceneFile = 'contemporary-bathroom.pbrt';
