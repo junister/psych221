@@ -34,7 +34,7 @@ p.addRequired('radiance',@isstruct);
 % p.addRequired('st',@(x)(isa(x,'scitran')));
 
 p.addParameter('sensor','',@ischar);   % A file name
-p.addParameter('pixelsize',2,@isscalar); % um
+p.addParameter('pixelsize',[],@isscalar); % um
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
 p.addParameter('etime',1/100,@isscalar); % 
 p.addParameter('noisefree',0,@islogical);
@@ -92,7 +92,11 @@ end
 % oiSize = oiGet(oi,'size');
 % sensor = sensorSet(sensor, 'size', oiSize);
 sensor = sensorSetSizeToFOV(sensor, oi.wAngular, oi);
+senSize = sensorGet(sensor,'size');
+oiSize = oiGet(oi,'size');
 
+senHight = ceil(senSize(2)/(oiSize(2)/oiSize(1)));
+sensor = sensorSet(sensor, 'size', [senHight, senSize(2)]);
 %% Compute
 
 % eTime  = autoExposure(oi,sensor,0.90,'weighted','center rect',rect);
