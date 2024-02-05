@@ -2,7 +2,7 @@ function preset(thisD, presetName,varargin)
 %PRESET - Set dockerWrapper prefs from a list of preset computer/GPUs
 %
 % Synopsis
-%   dockerWrapper.preset(name,'save',[false])
+%   dockerWrapper.preset(name,'save',[false],'gpu',val)
 %
 % Brief
 %   We support a number of vistalab rendering configurations. This
@@ -23,10 +23,10 @@ function preset(thisD, presetName,varargin)
 %  presetName (ignores case and removes spaces)
 %   The current preset names are:
 %
-%    'remoteMux','remoteMux-alt'      - Run on MUX either GPU 0 or GPU 1
-%    'remoteOrange','remoteOrange-alt - Run on orange on GPU 0 or GPU 1
-%    'localGPU', 'localGPU-alt;       - your local machine (host) and
-%                                       configure for GPU 0 or 1 (-alt)
+%    'remotemux','remotemux-alt'        - Run on MUX either GPU 0 or GPU 1
+%    'remote orange','remote orange-alt - Run on orange on GPU 0 or GPU 1
+%    'local GPU', 'local GPU-alt;       - your local machine (host) and
+%                                         configure for GPU 0 or 1 (-alt)
 %    'humaneye'
 %
 % See also
@@ -57,7 +57,7 @@ thisD.prefload
 %}
 presetName = ieParamFormat(presetName);
 
-validNames = {'localgpu','localgpu-alt','remotemux','remotemux-alt','remoteorange','remoteorange-alt','humaneye'}; 
+validNames = {'localgpu','localgpu-alt','remotemux','remotemux-0','remotemux-1','remoteorange','remoteorange-0','remoteorange-1','humaneye'}; 
 if ~ismember(presetName,validNames)
     disp('Valid Names (allowing for ieParamFormat): ')
     disp(validNames);
@@ -105,7 +105,7 @@ switch presetName
             otherwise
                 thisD.whichGPU=0;
         end
-    case {'remotemux', 'remoteorange', 'remoteorange-alt', 'remotemux-alt'}
+    case {'remotemux', 'remoteorange', 'remoteorange-0', 'remoteorange-1','remotemux-0','remotemux-1'}
         % Render remotely on GPU
         thisD.gpuRendering = true;
         thisD.localRender = false;
@@ -121,11 +121,11 @@ switch presetName
 
         % pick the correct context
         switch presetName
-            case {'remotemux', 'remotemux-alt'}
+            case {'remotemux', 'remotemux-0','remotemux-1'}
                 thisD.renderContext = 'remote-mux';
                 thisD.remoteMachine = 'mux.stanford.edu';
                 thisD.remoteRoot = ['/home/' userName];
-            case {'remoteorange', 'remoteorange-alt'}
+            case {'remoteorange', 'remoteorange-0','remoteorange-1'}
                 thisD.renderContext =  'remote-orange';
                 thisD.remoteMachine = 'orange.stanford.edu';                
                 thisD.remoteRoot = ['/home/' userName];
@@ -133,16 +133,16 @@ switch presetName
 
         % also pick GPU and docker image
         switch presetName
-            case 'remotemux'
+            case {'remotemux','remotemux-0'}
                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';
                 thisD.whichGPU = 0;
-            case 'remotemux-alt'
+            case 'remotemux-1'
                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-volta-mux';
                 thisD.whichGPU = 1;
-            case 'remoteorange'
+            case {'remoteorange','remoteorange-1'}
                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-ti';
-                thisD.whichGPU =1;
-            case 'remoteorange-alt'
+                thisD.whichGPU = 1;
+            case 'remoteorange-0'
                 thisD.remoteImage = 'digitalprodev/pbrt-v4-gpu-ampere-ti';
                 thisD.whichGPU = 0;
         end

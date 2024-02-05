@@ -100,6 +100,9 @@ end
 
 if ~isempty(p.Results.dockerwrapper)
     thisD = p.Results.dockerwrapper;
+    % Eliminate dockerwrapper from varargin
+    [~,idx] = find(strcmp('dockerwrapper',varargin));
+    varargin = cellDelete(varargin,[idx,idx+1]);
 else
     thisD = dockerWrapper();
 end

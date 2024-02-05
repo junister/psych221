@@ -37,7 +37,7 @@ p.addParameter('sensor','',@ischar);   % A file name
 p.addParameter('pixelsize',[],@isscalar); % um
 p.addParameter('filmdiagonal',5,@isscalar); % [mm]
 p.addParameter('etime',1/100,@isscalar); % 
-p.addParameter('noisefree',0,@islogical);
+p.addParameter('noiseflag',2,@isscalar);
 p.addParameter('analoggain',1);
 
 p.parse(radiance,varargin{:});
@@ -46,7 +46,7 @@ sensorName   = p.Results.sensor;
 pixelSize    = p.Results.pixelsize;
 filmDiagonal = p.Results.filmdiagonal;
 eTime        = p.Results.etime;
-noiseFree    = p.Results.noisefree;
+noiseFlag    = p.Results.noiseflag;
 analoggain   = p.Results.analoggain;
 %% scene to optical image
 
@@ -101,9 +101,8 @@ sensor = sensorSet(sensor, 'size', [senHight, senSize(2)]);
 
 % eTime  = autoExposure(oi,sensor,0.90,'weighted','center rect',rect);
 sensor = sensorSet(sensor,'exp time',eTime);
-if noiseFree
-    sensor = sensorSet(sensor,'noise flag',0); % noise free
-end
+sensor = sensorSet(sensor,'noise flag',noiseFlag); % see sensorSet for more detail
+
 sensor = sensorCompute(sensor,oi);
 fprintf('eT: %f ms \n',eTime*1e3);
 
