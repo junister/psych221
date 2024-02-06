@@ -205,6 +205,12 @@ switch ieParamFormat(sceneDir)
         sceneDir = 'bunny-cloud';
         sceneFile = ['bunny-cloud','.pbrt'];
         exporter = 'Copy';
+
+    case 'bunny-fur'
+        sceneDir = 'bunny-fur';
+        sceneFile = ['bunny-fur','.pbrt'];
+        exporter = 'Copy';
+
     case 'coordinate'
         sceneDir = 'coordinate';
         sceneFile = ['coordinate','.pbrt'];
@@ -214,6 +220,10 @@ switch ieParamFormat(sceneDir)
         sceneFile = ['cornell_box','.pbrt'];
         exporter = 'PARSE';
 
+    case 'disney-cloud'
+        sceneDir = 'disney-cloud';
+        sceneFile = ['disney-cloud','.pbrt'];
+        exporter = 'Copy';
 
     case {'materialball'}
         sceneDir = 'materialball';
@@ -264,6 +274,16 @@ switch ieParamFormat(sceneDir)
     case 'clouds'
         sceneDir = 'clouds';
         sceneFile = 'clouds.pbrt';
+        exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
+    case 'crown'
+        sceneDir = 'crown';
+        sceneFile = 'crown.pbrt';
+        exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
+    case 'dambreak'
+        sceneDir = 'dambreak';
+        sceneFile = 'dambreak0.pbrt';
         exporter = 'Copy';  % Mostly OK.  Not sure all OK.
         %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
     case 'contemporary-bathroom'

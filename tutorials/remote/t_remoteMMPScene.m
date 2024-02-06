@@ -38,6 +38,39 @@ piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
 
+% piRead fails, even when set to Copy
+thisR = piRecipeDefault('scene name', 'bunny-fur');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
+% Crown has a 2-tiered folder structure under
+% textures, which piRead() doesn't seem to like
+thisR = piRecipeDefault('scene name', 'crown');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
+% dambreak0 renders, but looks weird -- not sure if it correct
+% dambreak1 seems just like dambreak0
+thisR = piRecipeDefault('scene name', 'dambreak',...
+    'file','dambreak1.pbrt');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
+% Another scene that requires a .nvdb file...
+thisR = piRecipeDefault('scene name', 'disney-cloud');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
+% Something renders, but it doesn't look like an explosion
+thisR = piRead('explosion.pbrt');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
 % Ganesha works
 thisR = piRecipeDefault('scene name', 'ganesha');
 piWrite(thisR);
