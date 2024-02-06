@@ -271,7 +271,12 @@ switch ieParamFormat(sceneDir)
         sceneFile = 'ganesha.pbrt';
         exporter = 'Copy';  % Mostly OK.  Not sure all OK.
         %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
-    case 'clouds'
+    case 'pbrt-book'
+        sceneDir = 'pbrt-book';
+        sceneFile = 'book.pbrt';
+        exporter = 'Copy';  % Mostly OK.  Not sure all OK.
+        %exporter = 'PARSE';   % Mostly OK.  Not sure all OK.
+        case 'clouds'
         sceneDir = 'clouds';
         sceneFile = 'clouds.pbrt';
         exporter = 'Copy';  % Mostly OK.  Not sure all OK.

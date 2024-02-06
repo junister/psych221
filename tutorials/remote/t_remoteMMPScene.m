@@ -20,6 +20,13 @@ piWrite(thisR);
 scene = piRender(thisR,'remotescene',true);
 sceneWindow(scene);
 
+% piRead doesn't work, complains about uneven_bump.png,
+% even though it seems to be there?
+thisR = piRecipeDefault('scene name','pbrt-book');
+piWrite(thisR);
+scene = piRender(thisR,'remotescene',true);
+sceneWindow(scene);
+
 %% Move the camera
 origFrom = thisR.get('from');
 thisR.set('from',[8 3.9 -30]);
