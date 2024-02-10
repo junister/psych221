@@ -92,8 +92,8 @@ p = inputParser;
 
 p.addRequired('thisR',@(x)isequal(class(x),'recipe'));
 p.addParameter('verbose', 0, @isnumeric);
-p.addParameter('remoteresources', getpref('docker','remoteResources',false));
-p.addParameter('pushresources', getpref('docker','pushResources',false));
+p.addParameter('remoteresources', getpref('docker','remoteResources'));
+p.addParameter('pushresources', getpref('docker','pushResources'));
 p.addParameter('mainfileonly',false, @islogical);
 p.addParameter('overwriteresources', true, @islogical);
 p.addParameter('overwritematerials', true, @islogical);

@@ -71,17 +71,16 @@ keepHDR = p.Results.keepHDR;
 doBatch = p.Results.batch;
 
 %% Set up the denoiser path information and check
+% get the latest release for oidn denoiser
+% pyenv(ExecutionMode="InProcess");
+% % the function returns the folder name for different platform
+% 
+% insert(py.sys.path,int32(0),fullfile(piRootPath,'external/oidn_fetch.py'));
+% oidn_dir = py.oidn_fetch.main();
+oidn_dir = oidn_fetch('OpenImageDenoise', 'oidn');
 
 if ~p.Results.useNvidia
-    if ismac
-        oidn_pth  = fullfile(piRootPath, 'external', 'oidn-1.4.3.x86_64.macos', 'bin');
-    elseif isunix
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.1.0.x86_64.linux', 'bin');
-    elseif ispc
-        oidn_pth = fullfile(piRootPath, 'external', 'oidn-2.0.1.x64.windows', 'bin');
-    else
-        warning("No denoise binary found.\n")
-    end
+    oidn_pth  = fullfile(piRootPath, 'external', string(oidn_dir), 'bin');
 else
     if ispc
         oidn_pth = fullfile(piRootPath, 'external', 'nvidia_denoiser.windows');
