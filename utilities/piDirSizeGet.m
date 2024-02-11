@@ -1,4 +1,4 @@
-function totalSize = piDirSizeGet(remoteServer, dirPath)
+function totalSize = piDirSizeGet(dirPath,remoteServer)
     % Calculate the total size of a directory in bytes
     % Inputs:
     %   dirPath - A string or character vector specifying the directory path
@@ -9,7 +9,7 @@ function totalSize = piDirSizeGet(remoteServer, dirPath)
     totalSize = 0;
 
     if exist('remoteServer','var')
-        items = dir(remoteServer,dirPath);
+        items = dir(remoteServer, dirPath);
     else
         items = dir(dirPath);
     end
@@ -26,7 +26,7 @@ function totalSize = piDirSizeGet(remoteServer, dirPath)
         if items(i).isdir
             % If the item is a directory, recursively calculate its size
             if exist('remoteServer','var')
-                totalSize = totalSize + piDirSizeGet(remoteServer, currentItem);
+                totalSize = totalSize + piDirSizeGet(currentItem,remoteServer);
             else
                 totalSize = totalSize + piDirSizeGet(currentItem);
             end

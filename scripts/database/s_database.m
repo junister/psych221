@@ -8,31 +8,11 @@ ieInit; clear ISETdb
 % 
 setpref('db','port',49153);
 ourDB = idb.ISETdb();
-
+remoteHost = 'orange.stanford.edu';
+remoteUser = 'zhenyiliu';
+remoteServer = sftp('orange.stanford.edu','zhenyiliu');
 if ~isopen(ourDB.connection),error('No connection to database.');end
-%% Database description
-% assets: Contains reusable components like models, textures, or animations
-%         that can be used across various scenes or projects.
-%
-% scenes: Contains individual scene files which may include all
-%         the necessary data (like assets, lighting, and camera information) 
-%         to render a complete environment or image. 
-
-% bsdfs: Stands for Bidirectional Scattering Distribution Functions; likely
-%        contains data or scripts related to the way light interacts with 
-%        surfaces within a scene. 
-% 
-% lens: Could contain data related to camera lens
-%       configurations or simulations, affecting how scenes are viewed or
-%       rendered. 
-% 
-% lights: Likely holds information or configurations for various
-%         lighting setups, which are essential in 3D rendering for realism 
-%         and atmosphere. 
-% 
-% skymaps: Usually refers to
-%          panoramic textures representing the sky, often used in rendering 
-%          to create backgrounds or to simulate environmental lighting.
+collectionName = 'PBRTResources'; % ourDB.collectionCreate(colName);
 %% Render local scene with remote PBRT
 % Make sure you have configured your computer according to this:
 %       https://github.com/ISET/iset3d/wiki/Remote-Rendering-with-PBRT-v4
@@ -44,51 +24,42 @@ if ~isopen(ourDB.connection),error('No connection to database.');end
 %     remoteUser;
 %     renderContext;
 
-sceneFolder = '/Users/zhenyi/git_repo/dev/iset3d/data/V4/low-poly-taxi';
+localFolder = '/Users/zhenyi/git_repo/dev/iset3d/data/V4/low-poly-taxi';
 
 pbrtFile = fullfile(sceneFolder, 'low-poly-taxi.pbrt');
 
-% we might want to decide, wheather we would like to add this scene to our
-% database.
-% Create a new collection for test
-colName = 'PBRTResources';
-
-ourDB.collectionCreate(colName);
-
 % list the data in a collection
-% thisCollection = ourDB.docList(colName);
+% thisCollection = ourDB.docList(collectionName);
 
 % Add the scene to the database
 % if we need to add a local scene to the database, a directory is
 % needed.
 
-dstDir = 'zhenyiliu@orange:/acorn/data/iset/PBRTResources';
+remoteDir = '/acorn/data/iset/PBRTResources/scenes/low-poly-taxi';
 % or some local directory 
 % dstDir = 'your/local/path/to/scenes'
+ 
+% upload the file to remote server
+filesSyncRemote(localFolder, remoteHost, remoteUser, remoteDir)
 
-% this local scene will be copied to the remote directory and add to the
-% given collection.
+% add this scene to our database
 
-[thisID, contentStruct] = ourDB.contentCreate('collection Name',colName, ...
+[thisID, contentStruct] = ourDB.contentCreate('collection Name',collectionName, ...
     'type','scene', ...
+    'filepath',remoteDir,...
     'name','low-poly-taxi',...
     'category','iset3d',...
     'mainfile','low-poly-taxi.pbrt',...
     'source','blender',...
     'tags','test',...
-    'size',piDirSizeGet(sceneFolder)/1024^2,... % MB
+    'size',piDirSizeGet(sceneFolder,remoteServer)/1024^2,... % MB
     'format','pbrt'); 
+queryStruct.hash = thisID;
+thisScene = ourDB.contentFind(collectionName, queryStruct);
 
-
-queryString = sprintf("{""hash"": ""%s""}", thisID);
-% find the document with hash query
-doc = find(ourDB.connection, colName, Query = queryString);
-
-ourDB.upload(sceneFolder, dstDir) % source and destinated directory
 % remove the document with hash query
-n = remove(ourDB.connection, colName, queryString);
+ourDB.contentRemove(collectionName, queryStruct);
 
-% Delete the scene in the database
 
 
 
@@ -98,3 +69,7 @@ n = remove(ourDB.connection, colName, queryString);
 
 
 %% Render local scene with local PBRT
+
+
+
+
