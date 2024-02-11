@@ -3,7 +3,8 @@ function hash = hashStruct(inputS)
         inputS = rmfield(inputS,'hash');
     end
     if isfield(inputS,'createdat')
-        inputS = rmfield(inputS,{'createdat','updatedat'});
+        inputS = rmfield(inputS,{'createdat','updatedat','size', ...
+            'filepath','description','createdby','updatedby'});
     end
     % Convert the struct to a JSON string
     jsonString = jsonencode(inputS);

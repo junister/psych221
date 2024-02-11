@@ -33,42 +33,60 @@ if ~isopen(ourDB.connection),error('No connection to database.');end
 % skymaps: Usually refers to
 %          panoramic textures representing the sky, often used in rendering 
 %          to create backgrounds or to simulate environmental lighting.
-%% Render local scene with remote PBRT
-% Make sure you have configured your computer according to this:
-%       https://github.com/ISET/iset3d/wiki/Remote-Rendering-with-PBRT-v4
-% See /iset3d/tutorials/remote/s_remoteSet.m for remote server
-% configuration
-
-% getpref('docker')
-% Things to check:
-%     remoteUser;
-%     renderContext;
-
-sceneFolder = '/Users/zhenyi/git_repo/dev/iset3d/data/V4/low-poly-taxi';
-
-pbrtFile = fullfile(sceneFolder, 'low-poly-taxi.pbrt');
 
 % we might want to decide, wheather we would like to add this scene to our
 % database.
 % Create a new collection for test
 colName = 'PBRTResources';
 
-ourDB.collectionCreate(colName);
+remoteHost = 'orange.stanford.edu';
+remoteUser = 'zhenyiliu';
+remoteServer = sftp('orange.stanford.edu','zhenyiliu');
+remoteDir = '/acorn/data/iset/PBRTResources';
 
-% list the data in a collection
-% thisCollection = ourDB.docList(colName);
+folders = dir(remoteServer,"/acorn/data/iset/PBRTResources");
 
-% Add the scene to the database
-% if we need to add a local scene to the database, a directory is
-% needed.
+ResourcesTypes = {'assets','scenes','bsdfs','skymaps','spds','lenses','textures'};
 
-dstDir = 'zhenyiliu@orange:/acorn/data/iset/PBRTResources';
-% or some local directory 
-% dstDir = 'your/local/path/to/scenes'
+%% assets
+assetDir = fullfile(remoteDir,'assets');
+categories = dir(remoteServer, assetDir);
 
-% this local scene will be copied to the remote directory and add to the
-% given collection.
+for ii = 1:numel(categories) % first one is '@eaDir'
+    if strcmp(categories(ii).name, '@eaDir')
+        continue
+    end
 
+    thisCat = fullfile(categories(ii).folder, categories(ii).name);
+
+    assets = dir(remoteServer, thisCat);
+    for jj = 1:numel(assets)
+        if strcmp(assets(jj).name, '@eaDir')
+            continue
+        end
+        thisAsset = fullfile(assets(jj).folder, assets(jj).name);
+        if assets(jj).isdir
+            ourDB.contentCreate('collection Name',colName, ...
+                'type','asset', ...
+                'filepath',thisAsset,...
+                'name',assets(jj).name,...
+                'category',categories(ii).name,...
+                'mainfile',[assets(jj).name, '.pbrt'],...
+                'source','blender',...
+                'tags','auto',...
+                'size',piDirSizeGet(remoteServer, thisAsset)/1024^2,... % MB
+                'format','pbrt');
+        end
+    end
+    fprintf('[INFO]: %s is added.\n',categories(ii).name);
+end
+
+% find all bus
+queryStruct.category = 'bus';
+assets = ourDB.contentFind(colName, queryStruct);
+
+
+%% scenes
 [thisID, contentStruct] = ourDB.contentCreate('collection Name',colName, ...
     'type','scene', ...
     'name','low-poly-taxi',...
@@ -79,6 +97,21 @@ dstDir = 'zhenyiliu@orange:/acorn/data/iset/PBRTResources';
     'size',piDirSizeGet(sceneFolder)/1024^2,... % MB
     'format','pbrt'); 
 
+
+%% scenes
+
+
+
+
+[thisID, contentStruct] = ourDB.contentCreate('collection Name',colName, ...
+    'type','scene', ...
+    'name','low-poly-taxi',...
+    'category','iset3d',...
+    'mainfile','low-poly-taxi.pbrt',...
+    'source','blender',...
+    'tags','test',...
+    'size',piDirSizeGet(sceneFolder)/1024^2,... % MB
+    'format','pbrt'); 
 
 queryString = sprintf("{""hash"": ""%s""}", thisID);
 % find the document with hash query
