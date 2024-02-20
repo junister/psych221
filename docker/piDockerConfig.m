@@ -24,7 +24,7 @@ function status = piDockerConfig(varargin)
 % Notes:
 %  Initializing for remote GPU rendering requires specifying the docker
 %  image on the remote site, and also which GPU on that site.  These
-%  combinations work on muxreconrt:
+%  combinations work on mux:
 %
 %{
 %  These docker files are no longer accurate - BW
@@ -54,7 +54,7 @@ function status = piDockerConfig(varargin)
 %   For the GPU on V4, we might be able to config the docker context
 %   for people.  That command is:
 %
-%       docker context create --docker host=ssh://wandell@muxreconrt.stanford.edu wandell-v4
+%       docker context create --docker host=ssh://wandell@mux.stanford.edu wandell-v4
 %
 %   renderString = getpref('docker','renderString');
 %

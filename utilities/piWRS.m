@@ -39,7 +39,7 @@ function [obj, results, thisD] = piWRS(thisR,varargin)
 %             main PBRT file will be able to reference them without copying
 %             from the local computer.  (Better comment needed)
 %    'denoise' - Run the piAIdenoise prior to returning
-%
+%    'main file only' - piWrite flag
 %
 % Returns
 %   obj     - a scene or oi
@@ -71,6 +71,9 @@ p.addParameter('denoise',false,@islogical);
 p.addParameter('renderflag','',@ischar);
 p.addParameter('speed',1,@isscalar);     % Spatial resolution divide
 p.addParameter('meanluminance',-1,@isscalar);
+p.addParameter('replace',false,@islogical);
+p.addParameter('mainfileonly',false,@islogical);
+p.addParameter('pushresources',false,@islogical);
 
 % allow parameter passthrough
 p.KeepUnmatched = true;
@@ -79,6 +82,8 @@ p.parse(thisR,varargin{:});
 
 g          = p.Results.gamma;
 renderFlag = p.Results.renderflag;
+replace    = p.Results.replace;
+
 % meanLuminance = p.Results.meanluminance;
 
 % Determine whether we over-ride or not
@@ -95,6 +100,9 @@ end
 
 if ~isempty(p.Results.dockerwrapper)
     thisD = p.Results.dockerwrapper;
+    % Eliminate dockerwrapper from varargin
+    [~,idx] = find(strcmp('dockerwrapper',varargin));
+    varargin = cellDelete(varargin,[idx,idx+1]);
 else
     thisD = dockerWrapper();
 end
@@ -123,7 +131,10 @@ thisR.set('render type',renderType);
 
 % Write the local/pbrt directory being aware about whether the resources
 % are expected to be present remotely.
-piWrite(thisR, 'remoteResources', thisD.remoteResources);
+piWrite(thisR, ...
+    'remoteResources', thisD.remoteResources,...
+    'push resources', p.Results.pushresources, ...
+    'main file only', p.Results.mainfileonly);
 
 [obj, results, thisD] = piRender(thisR, 'ourdocker', thisD, varargin{:});
 
@@ -133,17 +144,24 @@ switch obj.type
     case 'scene'
         if ~isempty(name), obj = sceneSet(obj,'name',name); end
         if show
-            sceneWindow(obj);
-            if ~isempty(g), sceneSet(obj,'gamma',g); end
-            if ~isempty(renderFlag) 
-                % Removed test for ISETBio. Aug 2023.
-                sceneSet(obj,'render flag',renderFlag);                 
+            if replace, ieReplaceObject(obj); sceneWindow;
+            else,       sceneWindow(obj);
             end
+
+            if ~isempty(g), sceneSet(obj,'gamma',g); end
+            if ~isempty(renderFlag)
+                % Removed test for ISETBio. Aug 2023.
+                sceneSet(obj,'render flag',renderFlag);
+            end
+            
         end
     case 'opticalimage'
         if ~isempty(name), obj = oiSet(obj,'name',name); end
         if show
-            oiWindow(obj); 
+            if replace, ieReplaceObject(obj); oiWindow;
+            else,       oiWindow(obj);
+            end
+            
             if ~isempty(g), oiSet(obj,'gamma',g); end
             if ~isempty(renderFlag) 
                 % Removed test for ISETBio. Aug 2023

@@ -45,7 +45,7 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %               ** These assume the recipe asks for them and the camera
 %               type supports them.
 %
-% wave      -   Adjust the wavelength sampling of the returned ieObject
+%  wave      -   Adjust the wavelength sampling of the returned ieObject
 %
 % Output:
 %   ieObject - an ISET scene, oi, or a metadata image
@@ -59,11 +59,6 @@ function [ieObject, result, thisD] = piRender(thisR,varargin)
 %              
 % See also
 %   s_piReadRender*.m, piRenderResult, dockerWrapper
-
-% NOTE:  Eeek.  Is this true (BW?)
-%   The parameters are not yet all correctly handled, including
-% meanluminance and scalepupilarea.  These are important for ISETBio.
-%
 
 % Examples:
 %{
@@ -113,7 +108,10 @@ p.addParameter('meanilluminance',10,@isnumeric);   % Lux
 % p.addParameter('meanilluminanceperm2',[],@isnumeric);
 p.addParameter('scalepupilarea',true,@islogical);
 p.addParameter('reuse',false,@islogical);
+
+% Only one of these should be sent in.
 p.addParameter('ourdocker','',@(x)(isa(x,'dockerWrapper')) || isempty(x));    % to specify a docker image
+p.addParameter('dockerwrapper','',@(x)(isa(x,'dockerWrapper')) || isempty(x));    % to specify a docker image
 
 % This passed to piDat2ISET, which is where we do the construction.
 p.addParameter('wave', 400:10:700, @isnumeric); 
@@ -132,6 +130,7 @@ p.KeepUnmatched = true;
 
 p.parse(thisR,varargin{:});
 ourDocker        = p.Results.ourdocker;
+dWrapper    = p.Results.dockerwrapper;
 scalePupilArea   = p.Results.scalepupilarea;    % Fix this
 meanLuminance    = p.Results.meanluminance;     % And this
 meanIlluminance  = p.Results.meanilluminance;   % And this
@@ -140,8 +139,12 @@ wave             = p.Results.wave;
 
 %% Set up the dockerWrapper
 
-% If the user has sent in a dockerWrapper (ourDocker) we use it
-if ~isempty(ourDocker),   renderDocker = ourDocker;
+% If the user has sent in a dockerWrapper or an ourDocker we use it.
+% We object if both are sent in.
+if ~isempty(ourDocker) && ~isempty(dWrapper)
+    error('Bad docker arguments to piRender.  Specify only one.');
+elseif ~isempty(ourDocker) && isempty(dWrapper), renderDocker = ourDocker;
+elseif ~isempty(dWrapper) && isempty(ourDocker), renderDocker = dWrapper;
 else, renderDocker = dockerWrapper();
 end
 

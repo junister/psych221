@@ -25,15 +25,10 @@ thisR.set('name','Headlamp');  % Name of the recipe
 
 %thisR.show('lights');
 
-% for flat surface
-%thisR.lookAt.from = [0 290 0];
-%thisR.lookAt.to = [0 50 0];
-
 % Headlights have a much wider horizontal field
 thisR.film.xresolution.value = 640;
 thisR.film.yresolution.value = 320;
 
-%thisR.camera.
 thisR.camera.fov.type = 'float';
 thisR.camera.fov.value = 45.0;
 
@@ -51,19 +46,19 @@ piMaterialsInsert(thisR,'name',targetMaterial);
 cube = piAssetSearch(thisR,'object name','Cube');
 thisR.set('asset', cube, 'material name', targetMaterial);
 
-% In FlatSurface x is L/R, Y if near/far, Z is down/up
-% This is _NOT_ the same as in our auto scenes, unfortunately
-
-% Move it farther away
+% Move it farther away and scale it into a 'wall'
 thisR.set('asset', cube, 'translation', [0 0 5]);
-thisR.set('asset', cube, 'scale', [8 1 4]);
+% for 'scale' x is width, y is height
+thisR.set('asset', cube, 'scale', [20 8 1]);
 
 %% Add Headlamp
 
 % Use level beam, basically horizon cutoff
+% Other option is 'high beam'
 usePreset = 'level beam';
-% Or experiment with Area light
-usePreset = 'area';
+
+% EARLY experiment with Area light
+%usePreset = 'area';
 
 headlight = headlamp('preset',usePreset,'name', 'headlightLight',...
     'recipe', thisR);
@@ -93,8 +88,8 @@ pLight_Left = piAssetSearch(thisR,'light name', headlightLight.name);
 thisR.set('asset',pLight_Left,'translation', ...
     thisR.lookAt.from + [0 .05 0]); % move to camera for now
 
-% try two-sided for debugging
-%thisR.set('asset',pLight_Left,'twosided',true);
+% Sample night sky (don't use when making pure measurements!)
+thisR.set('skymap', 'night.exr');
 
 thisR.show('lights');
 

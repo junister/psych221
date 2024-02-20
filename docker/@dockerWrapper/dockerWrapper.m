@@ -261,11 +261,19 @@ classdef dockerWrapper < handle
                 aDocker.dockerFlags = '-ti --rm';
             end
 
-            % I don't think we should fail in a pure default case?
             % Also allow renderString pref for backward compatibility
             if ~isempty(varargin)
-                for ii=1:2:numel(varargin)
-                    aDocker.(varargin{ii}) = varargin{ii+1};
+                if ~mod(numel(varargin),2)
+                    for ii=1:2:numel(varargin)
+                        switch ieParamFormat(varargin{ii})
+                            case 'preset'
+                                aDocker.preset(varargin{ii+1});
+                            otherwise
+                                aDocker.(varargin{ii}) = varargin{ii+1};
+                        end
+                    end
+                else
+                    error('Inputs must be key/val pairs.')
                 end
             end
 
@@ -354,7 +362,7 @@ classdef dockerWrapper < handle
         
         %% Default servers
         function useServer = vistalabDefaultServer()
-            useServer = 'muxreconrt.stanford.edu';
+            useServer = 'mux.stanford.edu';
         end
         % WSL sometimes has DNS issues, so we can also use the IP
         function useServer = vistalabDefaultServerIP()
@@ -791,7 +799,7 @@ classdef dockerWrapper < handle
                             system(sprintf('nvidia-smi --query-gpu=name --format=csv,noheader -i %d',obj.whichGPU));
                         try
                             ourGPU = gpuDevice();
-                            if ourGPU.ComputeCapability < 5.3 % minimum for PBRT on GPU
+                            if str2double(ourGPU.ComputeCapability) < 5.3 % minimum for PBRT on GPU
                                 GPUCheck = -1;
                             end
                         catch
@@ -808,6 +816,8 @@ classdef dockerWrapper < handle
                             gpuModels = strsplit(ieParamFormat(strtrim(GPUModel)));
 
                             switch gpuModels{1} % find the model of our GPU
+                                case {'nvidiageforcertx3050tilaptopgpu'} % ROG laptop
+                                    useDockerImage = 'digitalprodev/pbrt-v4-gpu-ampere-mux';                                    
                                 case {'teslat4', 'quadrot2000'}
                                     useDockerImage = 'camerasimulation/pbrt-v4-gpu-t4';
                                 case {'geforcertx3070', 'nvidiageforcertx3070'}
@@ -878,7 +888,7 @@ classdef dockerWrapper < handle
             %
             %  VISTALAB GPU Information
             %
-            %   The default uses the 3070 on muxreconrt.stanford.edu.
+            %   The default uses the 3070 on mux.stanford.edu.
             %   This approach requires having an ssh-key based user
             %   login as described on the wiki page. Specifically,
             %   your username & homedir need to be the same on both
@@ -886,7 +896,7 @@ classdef dockerWrapper < handle
             %
             % Current GPU Options at vistalab:
             %
-            %   muxreconrt:
+            %   mux:
             %     GPU 0: Nvidia 3070 -- -ampere --
             %     dockerWrapper.setPref('whichGPU',0);
             %     GPU 1: Nvidia 2080 Ti -- -volta -- setpref('docker','whichGPU', 1);
@@ -927,7 +937,7 @@ classdef dockerWrapper < handle
                     % default. The user may have multiple opportunities
                     % for this.  For now we default to the
                     % vistalabDefaultServer, which is
-                    % muxreconrt.stanford.edu
+                    % mux.stanford.edu
                     thisD.remoteMachine = thisD.vistalabDefaultServer;
                 end
 

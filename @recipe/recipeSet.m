@@ -3,16 +3,27 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 % Syntax
 %   [thisR, out] = recipeSet(thisR, param, val, varargin)
-%     Returns us (thisR) as the primary result, which should be un-needed because
-%     we are a by-reference (handle) class. Second result is an optional
-%     error code or other return value.
+%
+% Brief description
+%  Modify the recipe, thisR, as specified by a complex set of possible
+%  parameters, values, and varargin.  See below for examples.
+%
+% Input
+%    thisR - recipe
+%    param - main parameter
+%    val   - value to set the parameter
+%
+% Output
+%   thisR - Not needed, really, because we are a by-reference (handle) class.
+%   out   - An optional error code or other return value.
 %
 % Description:
-%   The recipe class manages the PBRT rendering parameters.  The class
-%   has many fields specifying camera and rendering parameters. This
-%   method is only capable of setting one parameter at a time.
+%  The recipe class manages the PBRT rendering parameters.  The class
+%  has many fields specifying camera and rendering parameters. This
+%  method is capable of setting only one parameter at a time.
 %
-% Parameter list (in progress, many more to be added)
+% This is mainly an example of the parameters.  There are many more
+% examples in the code.  Usually commented.
 %
 %   Metadata:
 %    'name'
@@ -95,11 +106,11 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %    'autofocus'
 %
 %  Assets
-%    TODO
+%    Big set of options.  
+%
+%  Lights
 %
 %  Materials
-%    TODO
-% ---
 %    'materials'
 %    'materials output file'
 %    'fluorophore concentration'
@@ -108,20 +119,18 @@ function [thisR, out] = recipeSet(thisR, param, val, varargin)
 %
 %  Programming related
 %    'verbose'
-% ---
-
+%
 %  ISETAuto special:
 %    'traffic flow density'%
 %    'traffic time stamp'
 %
 % BW ISETBIO Team, 2017
 %
-% PBRT information that explains man
-% Generally
-% https://www.pbrt.org/fileformat-v3.html#overview
+% PBRT information that explains many of the options
+%    https://www.pbrt.org/fileformat-v3.html#overview
 %
 % Specifically
-% https://www.pbrt.org/fileformat-v3.html#cameras
+%    https://www.pbrt.org/fileformat-v3.html#cameras
 %
 % See also
 %    @recipe, recipeGet
@@ -190,9 +199,8 @@ switch param
 
         % Scene parameters
     case {'fromtodistance','objectdistance'}
-        % thisR.set('object distance');
-        % TODO:  thisR.set('object distance','m');
-        %
+        % thisR.set('object distance',val);
+        % 
         % The 'from' spot, is the camera location.  The 'to' spot is
         % the point the camera is looking at.  Both are specified in
         % meters.
@@ -205,12 +213,12 @@ switch param
         %
         % What is the relationship to the focal distance?  If we move
         % the camera, the focal distance is always with respect to the
-
         % camera, right?  Or is it always at the 'to' distance???  You can
         % force it to be the 'to' by using
         %
         % thisR.set('focal distance',thisR.get('object distance'))
         %
+        % See recipeSet 'todistance'
 
         assert(val > 0);  % We do not change which side of 'to' this way.
 
@@ -226,6 +234,17 @@ switch param
 
         % Test: If we set val to 0, the new from should be at 'to',
         thisR.lookAt.from = thisR.lookAt.from + objDirection*delta;
+
+    case {'todistance'}
+        % thisR.set('to distance',val) % Meters
+        %
+        % Adjusts the 'to' position along the 'from to' line.  Leaves the
+        % camera position (from) unchanged
+        %
+        %  to = from + fromto
+        from = thisR.get('from');
+        fromto = thisR.get('fromto');        
+        thisR.set('to',from + fromto*val);
 
     case {'accommodation'}
         % We allow specifying accommodation rather than focal distance.
@@ -1245,22 +1264,28 @@ switch param
             case 'replace'
                 % thisR.set('light', lightName, 'replace', newLight);
                 % 
-                % Confused about this.
-                thisLgtAsset = thisR.get('light', lghtName);
+                % The light asset has a type, name and struct called
+                % lght{1}.
+                oldLight = thisR.get('light', lghtName);
+
                 % Sometimes newLight is the light asset with the
                 % subfield lght.  Sometimes it is just the subfield
                 % lght.
                 if ~isfield(val,'lght')
-                    thisLgtAsset.lght{1} = val;
+                    newLight = oldLight;
+                    % newLight is just the subfield
+                    newLight.lght{1} = val;
                     % Make sure the name has the _L
-                    thisLgtAsset.lght{1}.name = piLightNameFormat(val.name);
+                    newLight.lght{1}.name = piLightNameFormat(val.name);
                 else
-                    % Assign but make sure the ID (names) are OK.
-                    thisR.set('asset', lghtName, val);
-                    thisR.assets.uniqueNames;
+                    newLight = val;
                 end
 
+                % Assign but make sure the ID (names) are OK.
+                thisR.set('asset', lghtName, newLight);
+                thisR.assets.uniqueNames;
                 return;
+                
             case {'worldrotation', 'worldrotate'}
                 thisR.set('asset', lghtName, 'world rotation', val);
                 return;
@@ -1269,6 +1294,9 @@ switch param
                 % area light.
                 thisR.set('asset', lghtName, 'world translation', val);
                 return;
+            case {'worldposition'}
+                thisR.set('asset', lghtName, 'world position', val);
+                return;   
             case {'worldorientation'}
                 thisR.set('asset', lghtName, 'world orientation', val);
                 return;
@@ -1369,7 +1397,7 @@ switch param
                 thisR.set('asset', lghtName, 'lght', lght);
                 return;
             otherwise
-                % Probably the light name.
+                % Probably the light name. Just get the light.
                 thisLightAsset = thisR.get('light', lghtName);
                 thisLight = thisLightAsset.lght{1};
         end
@@ -1387,7 +1415,7 @@ switch param
             % A light name and property was sent in.  We set the
             % property and then update the material in the list.
             thisLight = piLightSet(thisLight, param, val);
-            thisR.set('asset', lghtName, 'lght', thisLight);
+            thisR.set('light', lghtName, 'replace', thisLight);
             if isequal(param,'name')
                 % There are two places where light names are stored.
                 % We keep them the same, which is goofy.  But there is
@@ -1516,14 +1544,13 @@ switch param
                 thisR.set('asset', assetName, 'world rotation', val(:)');
             case {'worldposition'}
                 % thisR.set('asset', assetName, 'world position', [1 2 3]);
-                % First get the position
+
+                % Find the translation value, which is the difference
+                % between the current position and the desired
+                % position.
                 pos = thisR.get('asset', assetName, 'world position');
-
-                % Set a translation to (1) cancel the current translation
-                % and (2) move the object to the target position
-                newTrans = -pos + varargin{2}(:)';
-
-                [~, out] = thisR.set('asset', assetName, 'world translation', newTrans);
+                translation = -pos + varargin{2}(:)';
+                [~, out] = thisR.set('asset', assetName, 'translation', translation);
             case {'scale'}
                 out = piAssetScale(thisR,assetName,val);
             case {'move', 'motion'}

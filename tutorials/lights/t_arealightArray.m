@@ -1,11 +1,15 @@
 %% t_arealightArray.m
 %
+% Exposes the code used in oeLights and cubeLights for how to create
+% an array of area lights
+%
 %  * Create a triangular array of area lights
 %  * Move the surface closer to the lights to see them
 %  * Create a circular array of lights
 %
 % See also
 %  t_arealight*
+%  oraleye:  oeLights, cubeLights
 
 
 %%

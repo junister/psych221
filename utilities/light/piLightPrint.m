@@ -85,7 +85,7 @@ for ii =1:numel(lightNames)
     % We have mapnames stored in spd or filenames in different cases
     % (e.g., default chess set light) 
     if ~isfield(thisLight,'filename') || isempty(thisLight.filename.value)
-        spdT{ii} = num2str(thisLight.spd.value);
+        spdT{ii} = num2str(thisLight.spd.value(:)');
     else
         spdT{ii} = thisLight.filename.value;
     end

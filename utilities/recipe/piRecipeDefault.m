@@ -281,7 +281,8 @@ switch ieParamFormat(sceneDir)
         if isempty(sceneFile)
             sceneFile = 'bistro_vespa.pbrt';
         end
-        exporter = 'Copy';
+        exporter = 'Copy';  % How I found it
+        % exporter = 'PARSE';
    case {'head'}
         sceneDir = 'head';
         sceneFile = ['head','.pbrt'];

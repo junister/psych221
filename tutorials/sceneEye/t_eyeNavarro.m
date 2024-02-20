@@ -57,8 +57,8 @@ thisSE.set('to',toB); distB = thisSE.get('object distance');
 thisSE.set('to',toC); distC = thisSE.get('object distance');
 thisSE.set('to',toB);
 
-thisSE.set('film diagonal',5);
-thisSE.set('fov',10);
+% To just see the 'B' at higher resolution use a small FOV
+thisSE.set('fov',40);
 
 % Render the scene
 thisSE.set('render type', {'radiance','depth'});
@@ -103,11 +103,12 @@ thisSE.set('spatial samples',384);
 thisSE.set('n bounces',3);
 
 % We want the scene to be around 5-10 deg so we do not need a lot of
-% samples to resolve the blur.
+% samples to resolve the blur.  This renders only the region around
+% the 'B'.
 thisSE.set('fov',7);             % Degrees
 
 thisSE.get('sample spacing')
-%% This takes longer than the pinhole rendering
+%% Change the accommodation.  But look at 'B'.
 
 % Focus on the A
 thisSE.set('accommodation',1/distA);  
@@ -123,6 +124,24 @@ thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
 oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
 ieReplaceObject(oi); oiWindow(oi);
 %}
+
+%% Change the accommodation.  But look at 'B'.
+
+% Focus on the A
+thisSE.set('accommodation',1/distB);  
+
+% Summarize
+thisSE.summary;
+
+% Runs on the CPU on mux for humaneye case.  Make it explicit in this case.
+thisDocker = dockerWrapper.humanEyeDocker;
+thisSE.piWRS('docker wrapper',thisDocker,'name','navarro-A');
+
+%{
+oi = ieGetObject('oi'); oi = piAIdenoise(oi); 
+ieReplaceObject(oi); oiWindow(oi);
+%}
+
 
 %% Set accommodation to a different distance.
 

@@ -2,7 +2,17 @@
 %
 % Worked with cardinal download on July 11, 2022
 %
+% In most recent work, I had to copy the 'models' directory to the 'local'
+% directory by hand.  And then it rendered.
 %
+% Rerunning piWRS() wipes out the models directory.  Bummer.
+%
+% On cardinal.stanford.edu, I put both kitchen.zip and kitchen.save.zip The
+% original (kitchen.save.zip) has the mesh files inside of models.  The
+% kitchen.zip is edited so that the mesh files are in the geometry folder.
+%
+% It seems that running kitchen once with 'push resources' enabled me to
+% start running again.
 
 %%
 ieInit;
@@ -20,7 +30,32 @@ thisR.set('render type',{'radiance','depth'});
 
 %% This renders the scene
 
+% I have been copying the geometry files into the local/kitchen directory
+% and then running piRender by hand.  Sometimes for increased resolution.
+%{
+ resolution = [320 320]*2;
+ thisR.set('film resolution',resolution);
+ piWrite(thisR,'overwrite resources',false);
+ scene = piRender(thisR);  sceneWindow(scene);%
+ scene = piAIdenoise(scene);
+ ieReplaceObject(scene); sceneWindow;
+%}
+% I need to ask Dave or Zhenyi how to make sure the ply files are
+% uploaded and in the proper place on acorn.  I also wonder what we are
+% doing about resource file names.
+%  
+% Finally, I edited the wiki page about remote rendering considerably, and
+% Dave should read it to check.
+%
+
+% After running this once, I was able to run just piWRS(thisR);
+%
+% scene = piWRS(thisR,'push resources',true);
 scene = piWRS(thisR);
+%{
+ scene = piAIdenoise(scene);
+ ieReplaceObject(scene); sceneWindow;
+%}
 % dRange = sceneGet(scene,'depth range');
 
 %% Samples the scene from a few new directions around the current from
@@ -54,8 +89,8 @@ thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 
 thisR.set('film diagonal',5);    % 3 mm is small
 thisR.set('object distance',2);  % Move closer. The distance scaling is weird.
-[~,results] = piWRS(thisR,'name','DG');
-
+oi = piWRS(thisR,'name','DG');
+oi = piAIdenoise(oi); ieReplaceObject(oi); oiWindow;
 %% Fisheye
 
 lensfile = 'fisheye.87deg.3.0mm.json';
@@ -63,8 +98,7 @@ thisR.set('film diagonal',7);  %% 3 mm is small
 
 thisR.camera = piCameraCreate('omni','lensFile',lensfile);
 oi = piWRS(thisR,'name','fisheye');
-oi = piAIdenoise(oi);
-oiWindow(oi);
+oi = piAIdenoise(oi); ieReplaceObject(oi); oiWindow;
 
 %% END
 

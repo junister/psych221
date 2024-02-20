@@ -331,7 +331,6 @@ outputDir  = thisR.get('output dir');
 
 % We check for the overwrite here and we make sure there is also an input
 % directory to copy from.
-%if overwriteresources && ~isempty(inputDir)
 if ~isempty(inputDir)
     sources = dir(inputDir);
     status  = true;
