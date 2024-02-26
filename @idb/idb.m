@@ -1,6 +1,7 @@
 classdef idb < handle
-    %DB Store and retrieve ISET objects from a db
-    %   currently only mongoDB
+    % Initialize an ISET database object.  This is used to interact
+    % with the MongoDB that we maintain with scenes, assets and such.
+    % At Stanford these are stored on acorn.
 
     % For reference:
     % docker run --name mongodb -d -v YOUR_LOCAL_DIR:/data/db mongo
@@ -11,6 +12,10 @@ classdef idb < handle
     % setpref('db','port',....)
     % Typically we only connect to a single db instance, where our 
     % ISET data is kept. So make this the default
+
+    % Suggestions:
+    %   Rename as isetdb
+    %   
     methods (Static)
         function defaultDB = ISETdb()
             persistent ISETdb;
@@ -55,13 +60,17 @@ classdef idb < handle
         % default is a local Docker container, but we also want
         % to support storing remotely to a running instance
         function obj = idb(options)
+            % Create method.
 
             arguments
                 options.dbServer = getpref('db','server','localhost');
+
+                % Generic port.  But at Stanford we use a different
+                % one.
                 options.dbPort = getpref('db','port',27017);
             end
             obj.dbServer = options.dbServer;
-            obj.dbPort = options.dbPort;
+            obj.dbPort   = options.dbPort;
 
             %DB Connect to db instance
             %   or start it if needed
