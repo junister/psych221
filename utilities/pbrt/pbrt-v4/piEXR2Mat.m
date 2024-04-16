@@ -45,7 +45,12 @@ if exist('isMATLABReleaseOlderThan') > 0 && ~isMATLABReleaseOlderThan('R2022b')
         %}
     end
 
-    data = exrread(inputFile, Channels = channels);
+    % if we can't find the channel
+    try
+        data = exrread(inputFile, Channels = channels);
+    catch
+        data = [];
+    end
     return;
 
 elseif isfile(fullfile(isetRootPath,'imgproc','openexr','exrread.m'))
