@@ -32,9 +32,11 @@ classdef idb < handle
     end
 
     properties
-        dbDataFolder = fullfile(onlineRootPath,'data','db'); % database volume to mount
-        dbContainerFolder = '/data/db'; % where mongo db is in container
-        dbContainerName = 'mongodb';
+        % These are for starting & running the database from code
+        % In our current use case, it is always running on a server already
+        %dbDataFolder = fullfile(ieRootPath,'data','db'); % database volume to mount
+        %dbContainerFolder = '/data/db'; % where mongo db is in container
+        %dbContainerName = 'mongodb';
 
         % Read this from prefs or just use a local instance
         dbServer  = getpref('db','server','localhost');
