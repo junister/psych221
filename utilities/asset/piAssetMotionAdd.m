@@ -35,7 +35,7 @@ thisR.set('asset', branchName, 'motion', 'rotation', [0 0 45],...
 thisR.assets.show;
 
 % Add to light node
-objName = 'Moon Light_L';
+objName = 'Moon_B';
 thisR.set('asset', objName, 'motion', 'rotation', [0 0 45],...
                     'translation', [0.5 0 0]);
 thisR.assets.show;
@@ -46,6 +46,9 @@ thisR.set('asset', objName, ...
             'translation', [0.5 0 0]);
 
 thisR.assets.show;
+piWrite(thisR);
+scene = piRender(thisR);
+sceneWindow(scene);
 %}
 
 %% Parse
