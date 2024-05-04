@@ -22,7 +22,7 @@ thisR.set('fov',45);
 thisR.set('nbounces',5); 
 
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR, 'render type', {'radiance', 'depth'});
 sceneWindow(scene);
 sceneSet(scene,'render flag','hdr');
 drawnow;
@@ -58,11 +58,10 @@ sceneSet(scene,'render flag','hdr');
 
 %% Delete the motion translation
 
-% We illustrate the change in the asset three before and after deleting the
+% We illustrate the change in the asset tree before and after deleting the
 % branch
 thisR.assets.show;
 thisR.set('asset',T1.name, 'clear motion');
-
 
 % This illustrates that we have deleted the translation correctly.
 piWrite(thisR);
@@ -77,7 +76,7 @@ sceneSet(scene,'render flag','hdr');
 
 % Show that it worked
 piWrite(thisR);
-scene = piRender(thisR, 'render type', 'radiance');
+scene = piRender(thisR, 'render type', {'radiance', 'depth'});
 scene = sceneSet(scene,'name','motionblur: Rotation');
 sceneWindow(scene);
 sceneSet(scene,'render flag','hdr');

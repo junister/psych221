@@ -72,7 +72,8 @@ thisR.set('camera motion rotate start',piRotationMatrix);
 
 % Move in the direction camera is looking, but just a small amount.
 fromto = thisR.get('from to');
-endPos = -0.5*fromto(:) + thisR.lookAt.from(:);
+%endPos = -0.5*fromto(:) + thisR.lookAt.from(:);
+endPos = thisR.lookAt.from(:) + [2 0 0];
 
 % Set camera motion end parameters, no change in rotation yet.
 thisR.set('camera motion translate end',endPos);
@@ -90,8 +91,8 @@ sceneWindow(scene);
 endPos = thisR.lookAt.from(:);
 
 % The angle specification is piRotationMatrix.  Here the angle is changed
-% by 5 degrees around the z-axis.
-endRotation = piRotationMatrix('zrot',5);
+% by 15 degrees around the z-axis.
+endRotation = piRotationMatrix('zrot',15);
 
 % Set camera motion end parameters.
 thisR.set('camera motion translate end',endPos);
