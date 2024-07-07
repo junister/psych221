@@ -326,12 +326,11 @@ for ii = 1:numel(children)
         end
 
         % If a motion exists in the current object, prepare to write it out by
-        % having an additional line below.  For now, this is not
-        % functional.
+        % having an additional line below.  
         if ~isempty(thisNode.motion)
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform StartTime \n'));
-            % thisR.hasActiveTransform = true;
+            thisR.hasActiveTransform = true;
         end
 
         % Transformation section
@@ -359,40 +358,46 @@ for ii = 1:numel(children)
             %                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         end
 
-        % Motion section
+        % Write standard translations
+        for jj = 1:size(thisNode.translation, 2)
+
+
+            % First write out the same translation and rotation
+
+        end
+
+        % Write motion
         if ~isempty(thisNode.motion)
+            % We close out the "standard" active transform
+            % So that we can add our motion lines
             fprintf(fid, strcat(spacing, indentSpacing,...
                 'ActiveTransform EndTime \n'));
-            for jj = 1:size(thisNode.translation, 2)
 
-
-                % First write out the same translation and rotation
-                piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
-
-                if isfield(thisNode.motion, 'translation')
-                    if isempty(thisNode.motion.translation(jj, :))
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            'Translate 0 0 0\n'));
-                    else
-                        pos = thisNode.motion.translation(jj,:);
-                        fprintf(fid, strcat(spacing, indentSpacing,...
-                            sprintf('Translate %f %f %f', pos(1),...
-                            pos(2),...
-                            pos(3)), '\n'));
-                    end
+            if isfield(thisNode.motion, 'translation')
+                % Motions don't seem to stack, so I think we only get
+                % one
+                if isempty(thisNode.motion.translation)
+                    fprintf(fid, strcat(spacing, indentSpacing,...
+                        'Translate 0 0 0\n'));
+                else
+                    pos = thisNode.motion.translation;
+                    fprintf(fid, strcat(spacing, indentSpacing,...
+                        sprintf('Translate %f %f %f', pos(1),...
+                        pos(2),...
+                        pos(3)), '\n'));
                 end
+            end
 
-                if isfield(thisNode.motion, 'rotation') &&...
-                        ~isempty(thisNode.motion.rotation)
-                    rot = thisNode.motion.rotation;
-                    % Write out rotation
-                    fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,3-2)), '\n')); % Z
-                    fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,3-1)),'\n')); % Y
-                    fprintf(fid, strcat(spacing, indentSpacing,...
-                        sprintf('Rotate %f %f %f %f',rot(:,3)), '\n'));   % X
-                end
+            if isfield(thisNode.motion, 'rotation') &&...
+                    ~isempty(thisNode.motion.rotation)
+                rot = thisNode.motion.rotation;
+                % Write out rotation
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %f %f %f %f',rot(:,3-2)), '\n')); % Z
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %f %f %f %f',rot(:,3-1)),'\n')); % Y
+                fprintf(fid, strcat(spacing, indentSpacing,...
+                    sprintf('Rotate %f %f %f %f',rot(:,3)), '\n'));   % X
             end
         end
 
