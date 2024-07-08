@@ -333,34 +333,14 @@ for ii = 1:numel(children)
             thisR.hasActiveTransform = true;
         end
 
-        % Transformation section
-
-        % If this branch has a single child that is a light, then we
-        % should figure out if the light has cameracoordinate true.
-        % If it does, we should write that into the file prior to to
-        % the concat transform in
+        %% "Static" Transformation section
         %s
-        if ~isempty(thisNode.rotation)
-            % Zheng: I think it is always this case, but maybe it is rarely
-            % the case below. Have no clue.
-            % If this way, we would write the translation, rotation and
-            % scale line by line based on the order of
-            % thisNode.transorder.
+        if ~isempty(thisNode.rotation) || ~isempty(thisNode.translation) || ~isempty(thisNode.scale)
             piGeometryTransformWrite(fid, thisNode, spacing, indentSpacing);
-            %         else
-            %             % We think we never get here
-            %             warning('Surprised to be here.');
-            %             thisNode.concattransform(13:15) = thisNode.translation(:);
-            %             fprintf(fid, strcat(spacing, indentSpacing,...
-            %                 sprintf('ConcatTransform [%.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f]', thisNode.concattransform(:)), '\n'));
-            %             % Scale
-            %             fprintf(fid, strcat(spacing, indentSpacing,...
-            %                 sprintf('Scale %.10f %.10f %.10f', thisNode.scale), '\n'));
         end
 
         % Write standard translations
         for jj = 1:size(thisNode.translation, 2)
-
 
             % First write out the same translation and rotation
 
