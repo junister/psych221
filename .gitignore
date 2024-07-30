@@ -17,4 +17,5 @@ data/.DS_Store
 */.DS_Store
 data/.DS_Store
 data/scenes/testplane/dgauss.22deg.3.0mm+microlens.json
-data/pbrt-v4-scenes/
+docker/build/dave/build_ampere_ti.sh
+docker/build/dave/Dockerfile_ampere_ti

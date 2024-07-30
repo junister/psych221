@@ -92,7 +92,11 @@ end
 % oiSize = oiGet(oi,'size');
 % sensor = sensorSet(sensor, 'size', oiSize);
 sensor = sensorSetSizeToFOV(sensor, oi.wAngular, oi);
+senSize = sensorGet(sensor,'size');
+oiSize = oiGet(oi,'size');
 
+senHight = ceil(senSize(2)/(oiSize(2)/oiSize(1)));
+sensor = sensorSet(sensor, 'size', [senHight, senSize(2)]);
 %% Compute
 
 % eTime  = autoExposure(oi,sensor,0.90,'weighted','center rect',rect);

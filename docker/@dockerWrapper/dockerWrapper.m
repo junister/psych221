@@ -598,7 +598,11 @@ classdef dockerWrapper < handle
 
             if isequal(processorType, 'GPU')
                 % want: --gpus '"device=#"'
-                gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
+                if (obj.whichGPU == -1)
+                    gpuString = (' --gpus all ');
+                else
+                    gpuString = sprintf(' --gpus device=%s ',num2str(obj.whichGPU));
+                end
                 dCommand = sprintf('docker %s run -d -it %s --name %s  %s', contextFlag, gpuString, ourContainer, volumeMap);
                 cmd = sprintf('%s %s %s %s', dCommand, cudalib, useImage, placeholderCommand);
             else
