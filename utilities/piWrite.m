@@ -149,8 +149,8 @@ exporter = thisR.get('exporter');
 % from the recipe alone.  Unless we need to copy something.
 inputDir   = thisR.get('input dir');
 
-if ~exist(inputDir,'dir') && ~getpref('docker','remoteResources')
-    warning('Could not find local inputDir: %s\n',inputDir);
+if ~exist(inputDir,'dir') && ~getpref('docker','remoteResources') && ~isempty(inputDir)
+    warning('Could not find local inputDir: "%s"\n',inputDir);
 end
 
 

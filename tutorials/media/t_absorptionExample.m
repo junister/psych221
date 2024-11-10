@@ -14,7 +14,7 @@ piDockerConfig();
 
 cameraDistance = 5;
 targetThickness = 1;
-waterThickness = 3;
+waterThickness = 4;
 resolution = [320 240];
 
 
@@ -22,18 +22,19 @@ testChart = piCreateUniformChart('cameraDistance', cameraDistance, ...
     'depth',targetThickness, ...
     'resolution', resolution,...
     'width',0.1,'height',0.1);
-testChart.set('pixel samples', 32);
+testChart.set('pixel samples', 1024);
 
 
 % Define rendering parameters
-dw = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
-    'localRender',true,...
-    'gpuRendering',false,...
-    'remoteMachine','mux.stanford.edu',...
-    'remoteUser','henryk',...
-    'remoteRoot','/home/henryk',...
-    'remoteImage','digitalprodev/pbrt-v4-cpu',...
-    'relativeScenePath','/iset3d/');
+dw = dockerWrapper('dockerContainerName', 'digitalprodev/pbrt-v4-cpu-arm',...
+    'localRender', true,...
+    'gpuRendering', false,...
+    'remoteMachine', 'mux.stanford.edu',...
+    'remoteUser', 'henryk',...
+    'remoteRoot', '/home/henryk',...
+    'remoteImage', 'digitalprodev/pbrt-v4-cpu-arm',...
+    'localImageName', 'digitalprodev/pbrt-v4-cpu-arm',...
+    'relativeScenePath', '/iset3d/');
 
 referenceScene = piWRS(testChart, 'ourDocker', dw, 'meanluminance', -1);
 
@@ -49,7 +50,7 @@ inAirPhotons = reshape(inAirPhotons, [size(inAirPhotons,1) * size(inAirPhotons,2
 
 % Create a water medium with absorption properties only. Scattering is
 % disabled.
-[water, waterProp] = piWaterMediumCreate('seawater', 'waterSct', 0);
+[water, waterProp] = piWaterMediumCreate('seawater', 'cPlankton', 10,  'waterSct', false);
 
 underwaterTestChart = piSceneSubmerge(testChart, water, 'sizeX', 0.1, 'sizeY', 0.1, 'sizeZ', waterThickness, 'offsetX', 0.05);
 underwaterTestChart.set('outputfile',fullfile(piRootPath,'local','UnderwaterUniform','UnderwaterUniform.pbrt'));
@@ -65,37 +66,26 @@ photons = sceneGet(underwaterScene,'energy');
 inWaterPhotons = photons(patchY,patchX,:);
 inWaterPhotons = reshape(inWaterPhotons, [size(inWaterPhotons,1) * size(inWaterPhotons,2), size(inWaterPhotons,3)])';
 
-patchX = resolution(1)*3/4-delta:resolution(1)*3/4+delta;
-patchY = resolution(2)/2-delta:resolution(2)/2+delta;
-inAirPhotons = photons(patchY,patchX,:);
-inAirPhotons = reshape(inAirPhotons, [size(inAirPhotons,1) * size(inAirPhotons,2), size(inAirPhotons,3)])';
-
-
 % Plot the radiance
-% Note, the in water radiance is higher than in air radiance for some
-% wavelengths. This means there is some scaling somewhere that is not being
-% accounted for !
 figure;
 hold on; grid on; box on;
 plot(wave, mean(inAirPhotons, 2));
 plot(wave, mean(inWaterPhotons, 2));
-xlabel('wavelength, nm');
+xlabel('Wavelength, nm');
 ylabel('Radiance, photons');
 legend('Air','Water');
 
 absorptionTrue = interp1(waterProp.wave, waterProp.absorption, wave);
-[val, ind] = max(absorptionTrue);
-absorptionTrue = absorptionTrue / val;
 
 waterDistance = (min(cameraDistance, waterThickness/2) - targetThickness / 2) * 2;
 absorptionEst = log(mean(inWaterPhotons, 2) ./ mean(inAirPhotons, 2)) / -waterDistance;
-absorptionEst = absorptionEst / max(absorptionEst);
+
 
 figure;
 hold on; grid on; box on;
-plot(wave,  absorptionEst);
+plot(wave,  absorptionEst, 'x');
 plot(wave, absorptionTrue);
-xlabel('wavelength, nm');
+xlabel('Wavelength, nm');
 ylabel('Absorption');
 legend('Estimated','True');
 
@@ -211,10 +201,8 @@ targetRecipe.set('material','add',currentMaterial);
 val.value = piSPDCreate(wave, spd);
 val.type  = 'spectrum';
 
-light = piLightCreate('light','type','distant');
 light = piLightCreate('light','type','point');
 light = piLightSet(light,'from',cameraFrom);
-% light = piLightSet(light,'to',cameraTo);
 light = piLightSet(light,'spd',val);
 light = piLightSet(light,'cameracoordinate',0);
 light = piLightSet(light,'specscale',inputs.lightIntensity);

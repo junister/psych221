@@ -49,8 +49,8 @@ inputs = p.Results;
 
 medium = piMediumCreate(name, 'type', 'homogeneous');
 
-%wave = 395:5:705;
-wave = 400:10:700;
+% These wavelengths are hard coded in PBRT do not change!
+wave = 395:5:705;
 
 % Light and water page 90
 % waterAbsWave = 200:10:800;
