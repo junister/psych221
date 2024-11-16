@@ -100,7 +100,7 @@ p.addParameter('overwritematerials', true, @islogical);
 p.addParameter('overwritegeometry', true, @islogical);
 
 % Human eye writes its own, so we do not generally want to overwrite.
-p.addParameter('overwritelensfile', false, @islogical);
+p.addParameter('overwritelensfile', true, @islogical);
 
 p.parse(thisR,varargin{:});
 

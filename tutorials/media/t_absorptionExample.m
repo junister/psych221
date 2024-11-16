@@ -26,51 +26,44 @@ testChart.set('pixel samples', 1024);
 
 
 % Define rendering parameters
-dw = dockerWrapper('dockerContainerName', 'digitalprodev/pbrt-v4-cpu-arm',...
+dw = dockerWrapper('dockerContainerName', 'vistalab/pbrt-v4-cpu-arm',...
     'localRender', true,...
     'gpuRendering', false,...
     'remoteMachine', 'mux.stanford.edu',...
     'remoteUser', 'henryk',...
     'remoteRoot', '/home/henryk',...
-    'remoteImage', 'digitalprodev/pbrt-v4-cpu-arm',...
-    'localImageName', 'digitalprodev/pbrt-v4-cpu-arm',...
+    'remoteImage', 'vistalab/pbrt-v4-cpu-arm',...
+    'localImageName', 'vistalab/pbrt-v4-cpu-arm',...
     'relativeScenePath', '/iset3d/');
 
 referenceScene = piWRS(testChart, 'ourDocker', dw, 'meanluminance', -1);
 
 % Extract the 'in air' radiance for a particular patch.
 delta = 5;
-patchX = resolution(1)/2-delta:resolution(1)/2+delta;
-patchY = resolution(2)/2-delta:resolution(2)/2+delta;
+roi = [resolution(1)/2 - delta resolution(2)/2 - delta 2*delta 2*delta];
 
 wave = sceneGet(referenceScene, 'wave');
-inAirPhotons = sceneGet(referenceScene,'energy');
-inAirPhotons = inAirPhotons(patchY,patchX,:);
-inAirPhotons = reshape(inAirPhotons, [size(inAirPhotons,1) * size(inAirPhotons,2), size(inAirPhotons,3)])';
+inAirPhotons = sceneGet(referenceScene,'roi mean energy', roi);
 
 % Create a water medium with absorption properties only. Scattering is
 % disabled.
 [water, waterProp] = piWaterMediumCreate('seawater', 'cPlankton', 10,  'waterSct', false);
 
-underwaterTestChart = piSceneSubmerge(testChart, water, 'sizeX', 0.1, 'sizeY', 0.1, 'sizeZ', waterThickness, 'offsetX', 0.05);
+underwaterTestChart = piSceneSubmerge(testChart, water, 'sizeX', 0.1, 'sizeY', 0.1, 'sizeZ', waterThickness);
 underwaterTestChart.set('outputfile',fullfile(piRootPath,'local','UnderwaterUniform','UnderwaterUniform.pbrt'));
 underwaterTestChart = sceneSet(underwaterTestChart,'name', 'Underwater');
 
 underwaterScene = piWRS(underwaterTestChart, 'ourDocker', dw, 'meanluminance', -1);
 
-patchX = resolution(1)*1/4-delta:resolution(1)*1/4+delta;
-patchY = resolution(2)/2-delta:resolution(2)/2+delta;
-
 % Extract the 'in water radiance for a particular patch
-photons = sceneGet(underwaterScene,'energy');
-inWaterPhotons = photons(patchY,patchX,:);
-inWaterPhotons = reshape(inWaterPhotons, [size(inWaterPhotons,1) * size(inWaterPhotons,2), size(inWaterPhotons,3)])';
+inWaterPhotons = sceneGet(underwaterScene,'roi mean energy', roi);
+
 
 % Plot the radiance
 figure;
 hold on; grid on; box on;
-plot(wave, mean(inAirPhotons, 2));
-plot(wave, mean(inWaterPhotons, 2));
+plot(wave, inAirPhotons);
+plot(wave, inWaterPhotons);
 xlabel('Wavelength, nm');
 ylabel('Radiance, photons');
 legend('Air','Water');
@@ -78,12 +71,12 @@ legend('Air','Water');
 absorptionTrue = interp1(waterProp.wave, waterProp.absorption, wave);
 
 waterDistance = (min(cameraDistance, waterThickness/2) - targetThickness / 2) * 2;
-absorptionEst = log(mean(inWaterPhotons, 2) ./ mean(inAirPhotons, 2)) / -waterDistance;
+absorptionEst = log(inWaterPhotons ./ inAirPhotons) / -waterDistance;
 
 
 figure;
 hold on; grid on; box on;
-plot(wave,  absorptionEst, 'x');
+plot(wave, absorptionEst, 'x');
 plot(wave, absorptionTrue);
 xlabel('Wavelength, nm');
 ylabel('Absorption');
