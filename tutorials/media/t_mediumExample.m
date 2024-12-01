@@ -6,21 +6,23 @@
 ieInit();
 piDockerConfig();
 
-dockerWrapper = dockerWrapper('dockerContainerName','digitalprodev/pbrt-v4-gpu',...
+dockerWrapper = dockerWrapper('dockerContainerName','vistalab/pbrt-v4-cpu-arm',...
     'localRender',true,...
     'gpuRendering',false,...
     'remoteMachine','mux.stanford.edu',...
     'remoteUser','henryk',...
     'remoteRoot','/home/henryk',...
-    'remoteImage','digitalprodev/pbrt-v4-cpu',...
+    'remoteImage','vistalab/pbrt-v4-cpu-arm',...
+    'localImageName', 'vistalab/pbrt-v4-cpu-arm',...
     'relativeScenePath','/iset3d/',...
     'remoteResources',false);
 
 
 %% Create a scene with a Macbeth Chart.
 macbeth = piCreateMacbethChart();
+macbeth.set('from', [10 10 10]);
 
-macbeth.set('pixel samples', 128);
+macbeth.set('pixel samples', 1024);
 dockerWrapper.reset;
 
 macbethScene = piWRS(macbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
@@ -28,18 +30,22 @@ sceneShowImage(macbethScene);
 
 %% Create sea water medium
 
-mediumScatter = false;
+mediumScatter = true;
+cSmall = 10;
+cLarge = 10;
 
-[seawater, seawaterProp] = piWaterMediumCreate('seawater', 'waterSct', mediumScatter);
-seawaterMacbeth = piSceneSubmerge(macbeth, seawater, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
+[seawater, seawaterProp] = piWaterMediumCreate('seawater', 'waterSct', mediumScatter, 'cSmall', 0.1, 'cLarge', 0.1);
+seawaterMacbeth = piSceneSubmerge(macbeth, seawater, 'sizeX', 8, 'sizeY', 8, 'sizeZ', 8);
 seawaterMacbeth.set('outputfile',fullfile(piRootPath,'local','SeawaterMacbeth','SeawaterMacbeth.pbrt'));
 
 seawaterMacbethScene = piWRS(seawaterMacbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
 sceneShowImage(seawaterMacbethScene);
 
 
-[freshwater, freshwaterProp] = piWaterMediumCreate('freshwater', 'cPlankton', 10, 'waterSct', mediumScatter);
-freshwaterMacbeth = piSceneSubmerge(macbeth, freshwater, 'sizeX', 50, 'sizeY', 50, 'sizeZ', 5);
+[freshwater, freshwaterProp] = piWaterMediumCreate('freshwater', 'cPlankton', 10, ...
+    'waterSct', mediumScatter,...
+    'cSmall', 0.1, 'cLarge', 0.1);
+freshwaterMacbeth = piSceneSubmerge(macbeth, freshwater, 'sizeX', 8, 'sizeY', 8, 'sizeZ', 8);
 freshwaterMacbeth.set('outputfile',fullfile(piRootPath,'local','FreshwaterMacbeth','FreshwaterMacbeth.pbrt'));
 
 freshwaterMacbethScene = piWRS(freshwaterMacbeth, 'ourDocker', dockerWrapper, 'show', false, 'meanluminance', -1);
