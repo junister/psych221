@@ -6,6 +6,8 @@
 ieInit();
 piDockerConfig();
 
+% Henryk's settings are Mac specific
+if ismac
 dockerWrapper = dockerWrapper('dockerContainerName','vistalab/pbrt-v4-cpu-arm',...
     'localRender',true,...
     'gpuRendering',false,...
@@ -16,7 +18,10 @@ dockerWrapper = dockerWrapper('dockerContainerName','vistalab/pbrt-v4-cpu-arm',.
     'localImageName', 'vistalab/pbrt-v4-cpu-arm',...
     'relativeScenePath','/iset3d/',...
     'remoteResources',false);
-
+else
+    % Use the current user prefs
+    dockerWrapper = dockerWrapper();
+end
 
 %% Create a scene with a Macbeth Chart.
 macbeth = piCreateMacbethChart();
